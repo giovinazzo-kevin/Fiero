@@ -1,0 +1,17 @@
+﻿{
+  "Menu": {
+    "NewGame": "New Run",
+    "QuitGame": "Quit Game",
+    "Settings": "Settings",
+    "About": "About"
+  },
+  "Action": {
+    "YouOpenTheDoor": "You open the door",
+    "YouAttack": "You attack",
+    "YouKill": "You kill",
+    "AttacksYou": "attacks you",
+    "YouBumpIntoTheWall": "You bump into the wall",
+    "YouPickUpA": "You pick up a",
+    "KillsYou": "kills you"
+  }
+}

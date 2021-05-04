@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+
+namespace Fiero.Business
+{
+    public class DialogueNode
+    {
+        public readonly string Id;
+        public readonly string Face;
+        public readonly string[] Lines;
+        public readonly IDictionary<string, DialogueNode> Choices;
+        public DialogueNode Next { get; set; }
+
+        public event Action<IDialogueTrigger, DialogueTriggeredEventArgs> Triggered;
+
+        public void Trigger(IDialogueTrigger trigger, Drawable speaker, params Drawable[] listeners)
+        {
+            Triggered?.Invoke(trigger, new(this, speaker, listeners));
+        }
+
+        public DialogueNode(string id, string face, string[] lines, DialogueNode next = null, IDictionary<string, DialogueNode> choices = null)
+        {
+            Id = id;
+            Face = face;
+            Lines = lines;
+            Next = next;
+            Choices = choices ?? new Dictionary<string, DialogueNode>();
+        }
+    }
+}

@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31004.235
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{CE67812D-CA4A-41AC-B4FD-1EC1BB884567}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Core", "Fiero.Core\Fiero.Core\Fiero.Core.csproj", "{6DD4AF5D-8DA8-457F-8208-243E0C80392A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Business", "Fiero.Business\Fiero.Business\Fiero.Business.csproj", "{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6DD4AF5D-8DA8-457F-8208-243E0C80392A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DD4AF5D-8DA8-457F-8208-243E0C80392A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DD4AF5D-8DA8-457F-8208-243E0C80392A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DD4AF5D-8DA8-457F-8208-243E0C80392A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0} = {CE67812D-CA4A-41AC-B4FD-1EC1BB884567}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {02158A3C-B34C-402B-89CC-FE2356D9D8B7}
+	EndGlobalSection
+EndGlobal

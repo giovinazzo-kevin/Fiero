@@ -58,8 +58,12 @@ namespace Fiero.Core
         public static implicit operator Vector2i(Vec v) => new((int)v.X, (int)v.Y);
         public static implicit operator Vector2u(Vec v) => new((uint)v.X, (uint)v.Y);
         public static implicit operator Point(Vec v) => new((int)v.X, (int)v.Y);
-        public Vec Clamp(float min = float.MinValue, float max = float.MaxValue) => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
-        public Vec Round(int places = 0) => new((float)Math.Round(X, places), (float)Math.Round(Y, places));
+        public Vec Clamp(float min = float.MinValue, float max = float.MaxValue)
+            => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
+        public Vec Clamp(float minX = float.MinValue, float maxX = float.MaxValue, float minY = float.MinValue, float maxY = float.MaxValue)
+            => new(Math.Clamp(X, minX, maxX), Math.Clamp(Y, minY, maxY));
+        public Vec Round(int places = 0) 
+            => new((float)Math.Round(X, places), (float)Math.Round(Y, places));
 
 
         public override int GetHashCode()

@@ -14,7 +14,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<int> MaxLines = new(nameof(MaxLines), 16);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
-        public readonly UIControlProperty<bool> CenterContent = new(nameof(CenterContent), true);
+        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
+        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
 
         public Paragraph(GameInput input, Func<string, int, Text> getText) : base(input)
         {
@@ -44,7 +45,8 @@ namespace Fiero.Core
                 label.MaxLength.V = MaxLength.V;
                 label.Foreground.V = Foreground.V;
                 label.ContentAwareScale.V = ContentAwareScale.V;
-                label.CenterContent.V = CenterContent.V;
+                label.CenterContentH.V = CenterContentH.V;
+                label.CenterContentV.V = CenterContentV.V;
                 label.Text.V = line;
                 label.FontSize.V = FontSize.V;
                 label.Size.V = new(Size.V.X, (Size.V.Y / lines));

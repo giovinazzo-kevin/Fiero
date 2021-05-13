@@ -40,6 +40,12 @@
           {
             "Line": "I'm a friend of the Rats",
             "Next": "JustMet_Friend"
+          },
+          {
+            "Line": "I'm a nobody"
+          },
+          {
+            "Line": "I'm a developer"
           }
         ],
         "Next": ""

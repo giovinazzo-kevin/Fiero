@@ -16,7 +16,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
-        public readonly UIControlProperty<bool> CenterContent = new(nameof(CenterContent), true);
+        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), true);
+        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
 
         public string DisplayText => String.Join(String.Empty, (Text ?? String.Empty).Take(MaxLength));
 
@@ -72,13 +73,16 @@ namespace Fiero.Core
             base.Draw(target, states);
             if (_drawable != null) {
                 _drawable.Position = Position.V;
-                if(CenterContent) {
-                    var drawableBounds = _drawable.GetGlobalBounds();
-                    var drawablePos = drawableBounds.Position();
-                    var drawableSize = drawableBounds.Size();
-                    _drawable.Position += (Position.V - drawablePos) - drawableSize / 2 + Size.V / 2;
+                var drawableBounds = _drawable.GetGlobalBounds();
+                var drawablePos = drawableBounds.Position();
+                var drawableSize = drawableBounds.Size();
+                var delta = (Position.V - drawablePos) - drawableSize / 2 + Size.V / 2;
+                if (CenterContentH) {
+                    _drawable.Position += delta * new Vec(1, 0);
                 }
-                //_drawable.Position = _drawable.Position.ToCoord().Align(Align.X, Align.Y).ToVector2f();
+                if (CenterContentV) {
+                    _drawable.Position += delta * new Vec(0, 1);
+                }
                 _drawable.FillColor = Foreground;
                 target.Draw(_drawable, states);
             }

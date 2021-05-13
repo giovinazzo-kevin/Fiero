@@ -49,7 +49,7 @@ namespace Fiero.Business
                     .Style<Label>(l => {
                         l.Background.V = Color.Black;
                         l.FontSize.V = 24;
-                        l.CenterContent.V = false;
+                        l.CenterContentH.V = false;
                     })
                     .Style<Paragraph>(l => {
                         l.Background.V = Color.Black;

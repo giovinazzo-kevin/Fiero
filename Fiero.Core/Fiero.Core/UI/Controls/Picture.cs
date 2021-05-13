@@ -11,6 +11,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<TTexture> TextureName = new(nameof(TextureName));
         public readonly UIControlProperty<string> SpriteName = new(nameof(SpriteName));
         public readonly UIControlProperty<bool> Center = new(nameof(Center), true);
+        public readonly UIControlProperty<bool> LockAspectRatio = new(nameof(LockAspectRatio), true);
         public Sprite Sprite { get; private set; }
 
         public Picture(GameInput input, Func<TTexture, string, Sprite> getSprite)
@@ -36,9 +37,22 @@ namespace Fiero.Core
         {
             if (Sprite is null)
                 return;
-            Sprite.Scale = Size.V.ToVec() / new Vec(Sprite.TextureRect.Width, Sprite.TextureRect.Height) * Scale;
-            if(Center.V) {
-                var spriteSize = new Vec(Sprite.TextureRect.Width, Sprite.TextureRect.Height) * Sprite.Scale.ToVec();
+            var recSize = new Vec(Sprite.TextureRect.Width, Sprite.TextureRect.Height);
+            var aspectRatio = Sprite.TextureRect.Height / (float)Sprite.TextureRect.Width;
+            var spriteSize = Size.V.ToVec() * Scale;
+            if (LockAspectRatio.V) {
+                var newY = spriteSize.X * aspectRatio;
+                spriteSize = new Vec(spriteSize.X, newY);
+            }
+
+            var sizeRatio = spriteSize / Size.V;
+            while(sizeRatio.X > 1 || sizeRatio.Y > 1) {
+                spriteSize *= 0.9f;
+                sizeRatio = spriteSize / Size.V;
+            }
+
+            Sprite.Scale = spriteSize / recSize;
+            if (Center.V) {
                 Sprite.Position = Position.V + (Size.V / 2 - spriteSize / 2);
             }
             target.Draw(Sprite, states);

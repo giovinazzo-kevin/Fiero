@@ -55,7 +55,7 @@ namespace Fiero.Business
                     .End());
             UIDialogue.Node.ValueChanged += (owner, old) => UIDialogue.Node.V?.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
             Data.UI.WindowSize.ValueChanged += e => {
-                UILayout.Size.V = new Coord(e.NewValue.X, (int)(e.NewValue.Y * 0.15f));
+                UILayout.Size.V = new Coord(e.NewValue.X, (int)(e.NewValue.Y * 0.3f));
             };
         }
 

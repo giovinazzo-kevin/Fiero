@@ -15,6 +15,7 @@ namespace Fiero.Core
             "tl", "tm", "tr", "l", "m", "r", "bl", "bm", "br"
         };
 
+        protected GameUI UI;
         protected GameInput Input;
         protected GameDataStore Store;
         protected GameFonts<TFonts> Fonts;
@@ -23,6 +24,7 @@ namespace Fiero.Core
         protected GameLocalizations<TLocales> Localizations;
 
         public UIControlResolverBase(
+            GameUI ui,
             GameInput input,
             GameDataStore store,
             GameFonts<TFonts> fonts,
@@ -30,6 +32,7 @@ namespace Fiero.Core
             GameSprites<TTextures> sprites,
             GameLocalizations<TLocales> localizations
         ) {
+            UI = ui;
             Input = input;
             Store = store;
             Fonts = fonts;

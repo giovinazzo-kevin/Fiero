@@ -4,8 +4,8 @@ namespace Fiero.Business
 {
     public class ButtonResolver : UIControlResolver<Button>
     {
-        public ButtonResolver(GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(input, store, fonts, sounds, sprites, localizations)
+        public ButtonResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, sprites, localizations)
         {
         }
 

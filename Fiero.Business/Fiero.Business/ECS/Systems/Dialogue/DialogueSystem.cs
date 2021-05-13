@@ -24,7 +24,7 @@ namespace Fiero.Business
 
 
         protected Layout UILayout { get; private set; }
-        protected ActorDialogue UIDialogue { get; private set; }
+        protected BetterActorDialogue UIDialogue { get; private set; }
 
 
         public DialogueSystem(
@@ -51,9 +51,9 @@ namespace Fiero.Business
             UILayout = UI.CreateLayout()
                 .Build(new(), grid => grid
                     .Row()
-                        .Cell<ActorDialogue>(d => UIDialogue = d)
+                        .Cell<BetterActorDialogue>(d => UIDialogue = d)
                     .End());
-            UIDialogue.NodeChanged += node => node.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
+            UIDialogue.Node.ValueChanged += (owner, old) => UIDialogue.Node.V?.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
             Data.UI.WindowSize.ValueChanged += e => {
                 UILayout.Size.V = new Coord(e.NewValue.X, (int)(e.NewValue.Y * 0.15f));
             };
@@ -102,7 +102,7 @@ namespace Fiero.Business
                         CurrentTrigger = trigger;
                         CurrentSpeaker = speaker;
                         CurrentListeners = listeners.ToArray();
-                        UIDialogue.Node = node; // triggers the dialogue handlers!
+                        UIDialogue.Node.V = node; // triggers the dialogue handlers!
                         if (!trigger.Repeatable) {
                             comp.Triggers.Remove(trigger);
                         }

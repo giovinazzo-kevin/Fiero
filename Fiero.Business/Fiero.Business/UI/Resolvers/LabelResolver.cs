@@ -6,8 +6,8 @@ namespace Fiero.Business
 {
     public class LabelResolver : UIControlResolver<Label>
     {
-        public LabelResolver(GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(input, store, fonts, sounds, sprites, localizations)
+        public LabelResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, sprites, localizations)
         {
         }
 

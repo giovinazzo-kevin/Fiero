@@ -5,16 +5,16 @@ namespace Fiero.Business
 {
     public class ProgressBarResolver : UIControlResolver<ProgressBar>
     {
-        public ProgressBarResolver(GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(input, store, fonts, sounds, sprites, localizations)
+        public ProgressBarResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, sprites, localizations)
         {
         }
         public override ProgressBar Resolve(Coord position, Coord size)
         {
             var x = new ProgressBar(Input, TileSize,
-                GetSprite("bar_empty-l"), GetSprite("bar_empty-m"), GetSprite("bar_empty-r"),
-                GetSprite("bar_half-l"), GetSprite("bar_half-m"), GetSprite("bar_half-r"),
-                GetSprite("bar_full-l"), GetSprite("bar_full-m"), GetSprite("bar_full-r"));
+                GetUISprite("bar_empty-l"), GetUISprite("bar_empty-m"), GetUISprite("bar_empty-r"),
+                GetUISprite("bar_half-l"), GetUISprite("bar_half-m"), GetUISprite("bar_half-r"),
+                GetUISprite("bar_full-l"), GetUISprite("bar_full-m"), GetUISprite("bar_full-r"));
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.Position.V = position;

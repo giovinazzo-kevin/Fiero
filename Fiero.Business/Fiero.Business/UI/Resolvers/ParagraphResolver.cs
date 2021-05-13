@@ -5,8 +5,8 @@ namespace Fiero.Business
 {
     public class ParagraphResolver : UIControlResolver<Paragraph>
     {
-        public ParagraphResolver(GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(input, store, fonts, sounds, sprites, localizations)
+        public ParagraphResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, sprites, localizations)
         {
         }
 

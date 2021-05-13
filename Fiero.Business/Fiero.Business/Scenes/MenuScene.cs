@@ -50,22 +50,21 @@ namespace Fiero.Business.Scenes
             base.Initialize();
             UI_Layout = UI.CreateLayout()
                 .Build(new(800, 800), grid => grid
-                    .Rule<Label>(l => {
-                        l.FontSize.V = 32;
-                        l.MouseEntered += (_, __) => {
-                        };
-                    })
+                    .Style<Label>(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }, 
+                        match: g => g.Class == "ng")
+                    .Style<Label>(l => { l.FontSize.V = 24; }, 
+                        match: g => g.Class != "ng")
                     .Col()
-                        .Row()
+                        .Row(h: 2, @class: "ng")
                             .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
                         .End()
-                        .Row()
+                        .Row(h: 0.66f)
                             .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
                         .End()
-                        .Row()
+                        .Row(h: 0.66f)
                             .Cell(MakeMenuButton(MenuOptions.About, SceneState.Exit_QuitGame))
                         .End()
-                        .Row()
+                        .Row(h: 0.66f)
                             .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
                         .End()
                     .End()

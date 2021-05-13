@@ -12,7 +12,7 @@ namespace Fiero.Core
 
         protected readonly Func<string, int, Text> GetText;
 
-        public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
+        public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8) { Propagate = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);

@@ -7,18 +7,16 @@ namespace Fiero.Business
     public abstract class UIControlResolver<T> : UIControlResolverBase<T, FontName, TextureName, LocaleName, SoundName, ColorName>
         where T : UIControl
     {
-        protected readonly Color ActiveForeground;
-        protected readonly Color InactiveForeground;
-        protected readonly Color ActiveBackground;
-        protected readonly Color InactiveBackground;
+        protected readonly Color Foreground;
+        protected readonly Color Background;
+        protected readonly Color Accent;
         protected readonly int TileSize;
 
         protected UIControlResolver(GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations) : base(input, store, fonts, sounds, sprites, localizations)
         {
-            ActiveForeground = store.Get(Data.UI.DefaultActiveForeground);
-            InactiveForeground = store.Get(Data.UI.DefaultInactiveForeground);
-            ActiveBackground = store.Get(Data.UI.DefaultActiveBackground);
-            InactiveBackground = store.Get(Data.UI.DefaultInactiveBackground);
+            Foreground = store.Get(Data.UI.DefaultForeground);
+            Background = store.Get(Data.UI.DefaultBackground);
+            Accent = store.Get(Data.UI.DefaultAccent);
             TileSize = store.Get(Data.UI.TileSize);
         }
 

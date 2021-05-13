@@ -15,8 +15,8 @@ namespace Fiero.Business
                 GetSprite("bar_empty-l"), GetSprite("bar_empty-m"), GetSprite("bar_empty-r"),
                 GetSprite("bar_half-l"), GetSprite("bar_half-m"), GetSprite("bar_half-r"),
                 GetSprite("bar_full-l"), GetSprite("bar_full-m"), GetSprite("bar_full-r"));
-            x.Foreground.V = ActiveForeground;
-            x.Background.V = ActiveBackground;
+            x.Foreground.V = Foreground;
+            x.Background.V = Color.Transparent;
             x.Position.V = position;
             x.Size.V = size;
             return x;

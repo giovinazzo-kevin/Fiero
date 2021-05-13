@@ -57,10 +57,9 @@ namespace Fiero.Business
         {
             Store.SetValue(Data.UI.TileSize, 8);
             Store.SetValue(Data.UI.WindowSize, new(640, 480));
-            Store.SetValue(Data.UI.DefaultActiveForeground, Colors.Get(ColorName.UIPrimary));
-            Store.SetValue(Data.UI.DefaultInactiveForeground, Colors.Get(ColorName.UISecondary));
-            Store.SetValue(Data.UI.DefaultActiveBackground, Colors.Get(ColorName.UIBackground));
-            Store.SetValue(Data.UI.DefaultInactiveBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
+            Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
         }
 
         public override async Task InitializeAsync()
@@ -73,8 +72,9 @@ namespace Fiero.Business
 
             Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/UIBlip.ogg"));
             Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/UIOk.ogg"));
-            Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Oof.ogg"));
-            Sounds.Add(SoundName.PlayerMove, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
+            Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Shutdown.ogg"));
+            Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
+            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/Alarm Mid.ogg"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");

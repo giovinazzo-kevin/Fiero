@@ -184,9 +184,6 @@ namespace Fiero.Business
                         if (!actorsHere.Any()) {
                             if (!featuresHere.Any(f => f.Properties.BlocksMovement)) {
                                 actor.Physics.Position = newPos;
-                                if (actor.Properties.Type == ActorName.Player) {
-                                    _sounds.Get(SoundName.PlayerMove).Play();
-                                }
                             }
                             else {
                                 var feature = featuresHere.Single();
@@ -207,6 +204,9 @@ namespace Fiero.Business
                     }
                     else {
                         actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
+                        if (actor.Properties.Type == ActorName.Player) {
+                            _sounds.Get(SoundName.WallBump).Play();
+                        }
                     }
                 }
                 return false;

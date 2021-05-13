@@ -58,6 +58,7 @@ namespace Fiero.Core
                         }
                     }
                 }
+
                 var enumerator = grid.GetEnumerator();
                 for (int i = 0; i < grid.Cols + 1; i++) {
                     for (int j = 0; j < grid.Rows + 1; j++) {
@@ -80,17 +81,23 @@ namespace Fiero.Core
             {
                 var v = size.ToVec();
                 var cS = s / grid.Size.Clamp(min: 1);
+                var childrenTotalSize = grid.Aggregate(new Vec(), (a, b) => a + new Vec(b.Width, b.Height));
+                var childrenAverageSize = childrenTotalSize / grid.Count();
                 var enumerator = grid.GetEnumerator();
+                var offset = new Vec();
                 for (int i = 0; i < grid.Cols + 1; i++) {
                     for (int j = 0; j < grid.Rows + 1; j++) {
                         if (!enumerator.MoveNext()) {
                             return;
                         }
                         var child = enumerator.Current;
-                        var cP = p + cS * new Vec(i, j);
+                        // How much larger or smaller should this cell be compared to its siblings?
+                        var cR = new Vec(child.Width, child.Height);
+                        var cP = p + cS * new Vec(i, j) - offset;
+                        offset += cS - cR * cS;
                         if(child.IsCell && child.ControlInstance != null) {
                             child.ControlInstance.Position.V = layout.Position + (cP * v).ToCoord();
-                            child.ControlInstance.Size.V = (cS * v).ToCoord();
+                            child.ControlInstance.Size.V = (cR * cS * v).ToCoord();
                         }
                         ResizeRecursive(size, child, cP, cS);
                     }

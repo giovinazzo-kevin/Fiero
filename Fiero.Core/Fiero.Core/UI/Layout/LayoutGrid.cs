@@ -13,6 +13,9 @@ namespace Fiero.Core
         protected readonly List<LayoutGrid> Children = new();
 
         public int Cols = 0, Rows = 0;
+        public readonly float Width = 1, Height = 1;
+
+        public string Class { get; set; }
         public Coord Size => new(Cols, Rows);
         public bool IsCell => Cols == 0 && Rows == 0;
         public Type ControlType { get; protected set; } = typeof(Layout);
@@ -26,10 +29,25 @@ namespace Fiero.Core
             var myStyles = Styles
                 .Where(x => x.ControlType.IsAssignableFrom(typeof(T)))
                 .OrderByDescending(x => x.Priority)
-                .Select(s => s.Apply)
+                .Select<LayoutRule, Action<UIControl>>(s => control => {
+                    if(FindChild(this, c => c.ControlInstance == control) is { } c && s.Match(c)) {
+                        s.Apply(control);
+                    }
+                })
                 .ToList();
             var parentStyles = Parent?.GetStyles<T>() ?? Enumerable.Empty<Action<T>>();
             return myStyles.Concat(parentStyles);
+
+            LayoutGrid FindChild(LayoutGrid g, Func<LayoutGrid, bool> pred)
+            {
+                if (pred(g))
+                    return g;
+                foreach (var c in g.Children) {
+                    if (FindChild(c, pred) is { } f)
+                        return f;
+                }
+                return null;
+            }
         }
 
         public IEnumerable<Action<UIControl>> GetStyles(Type controlType)
@@ -40,15 +58,17 @@ namespace Fiero.Core
                 .Cast<Action<UIControl>>();
         }
 
-        public LayoutGrid(LayoutGrid parent = null)
+        public LayoutGrid(LayoutGrid parent = null, float w = 1, float h = 1)
         {
             Parent = parent;
             Styles = new List<LayoutRule>();
+            Width = w;
+            Height = h;
         }
-        public LayoutGrid Rule<T>(Action<T> configure, int priority = 0)
+        public LayoutGrid Style<T>(Action<T> configure, int priority = 0, Func<LayoutGrid, bool> match = null)
             where T : UIControl
         {
-            Styles.Add(new LayoutRule(typeof(T), t => configure((T)t), priority));
+            Styles.Add(new LayoutRule(typeof(T), match ?? (g => true), t => configure((T)t), priority));
             return this;
         }
         public LayoutGrid Top()
@@ -62,31 +82,19 @@ namespace Fiero.Core
             return top;
         }
         public LayoutGrid End() => Parent ?? this;
-        public LayoutGrid Col()
+        public LayoutGrid Col(float w = 1, float h = 1, string @class = null)
         {
             Cols++;
-            var ret = new LayoutGrid(this);
+            var ret = new LayoutGrid(this, w, h);
+            ret.Class = @class ?? Class;
             Children.Add(ret);
             return ret;
         }
-        public LayoutGrid Col(Func<LayoutGrid, LayoutGrid> configure)
-        {
-            Cols++;
-            var child = configure(new LayoutGrid(this));
-            Children.Add(child);
-            return child;
-        }
-        public LayoutGrid Row()
+        public LayoutGrid Row(float w = 1, float h = 1, string @class = null)
         {
             Rows++;
-            var ret = new LayoutGrid(this);
-            Children.Add(ret);
-            return ret;
-        }
-        public LayoutGrid Row(Func<LayoutGrid, LayoutGrid> configure)
-        {
-            Rows++;
-            var ret = configure(new LayoutGrid(this));
+            var ret = new LayoutGrid(this, w, h);
+            ret.Class = @class ?? Class;
             Children.Add(ret);
             return ret;
         }

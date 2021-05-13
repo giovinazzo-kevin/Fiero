@@ -4,7 +4,8 @@
     {
         UIBlip,
         UIOk,
-        PlayerMove,
+        WallBump,
         PlayerDeath,
+        BossSpotted,
     }
 }

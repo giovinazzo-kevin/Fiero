@@ -29,6 +29,7 @@ namespace Fiero.Business.Scenes
         protected readonly DialogueSystem DialogueSystem;
         protected readonly GameDialogues Dialogues;
         protected readonly GameUI UI;
+        protected readonly GameSounds<SoundName> Sounds;
 
         public GameplayScene(
             GameInput input,
@@ -40,7 +41,8 @@ namespace Fiero.Business.Scenes
             DialogueSystem dialogueSystem,
             FactionSystem factionSystem,
             ActionSystem actionSystem,
-            GameUI ui)
+            GameUI ui,
+            GameSounds<SoundName> sounds)
         {
             Input = input;
             Store = store;
@@ -52,7 +54,7 @@ namespace Fiero.Business.Scenes
             DialogueSystem = dialogueSystem;
             Dialogues = dialogues;
             UI = ui;
-
+            Sounds = sounds;
             ActionSystem.PlayerTurnStarted += _ => DialogueSystem.OnPlayerTurnStarted();
         }
 
@@ -77,6 +79,10 @@ namespace Fiero.Business.Scenes
 
         protected void SubscribeDialogueHandlers()
         {
+            Dialogues.GetDialogue(ActorName.GreatKingRat, GKRDialogueName.JustMet)
+                .Triggered += (t, eh) => {
+                    Sounds.Get(SoundName.BossSpotted).Play();
+                };
             Dialogues.GetDialogue(ActorName.GreatKingRat, GKRDialogueName.JustMet_Friend)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {

@@ -43,15 +43,15 @@ namespace Fiero.Business
             LayoutGrid ApplyStyles(LayoutGrid grid)
             {
                 return grid
-                    .Rule<UIControl>(l => {
+                    .Style<UIControl>(l => {
                         l.Background.V = Color.Transparent;
                     })
-                    .Rule<Label>(l => {
+                    .Style<Label>(l => {
                         l.Background.V = Color.Black;
                         l.FontSize.V = 24;
                         l.CenterContent.V = false;
                     })
-                    .Rule<Paragraph>(l => {
+                    .Style<Paragraph>(l => {
                         l.Background.V = Color.Black;
                         l.FontSize.V = 12;
                         l.MaxLines.V = 10;

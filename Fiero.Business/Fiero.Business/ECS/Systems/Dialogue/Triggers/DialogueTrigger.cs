@@ -12,6 +12,8 @@ namespace Fiero.Business
         string IDialogueTrigger.DialogueNode => DialogueNode.ToString();
         public bool Repeatable { get; protected set; }
 
+        public event Action<DialogueTrigger<TDialogue>> Triggered;
+
         public DialogueTrigger(TDialogue node, bool repeatable)
         {
             DialogueNode = node;
@@ -19,5 +21,9 @@ namespace Fiero.Business
         }
 
         public abstract bool TryTrigger(Floor floor, Drawable speaker, out IEnumerable<Drawable> listeners);
+        public virtual void OnTrigger()
+        {
+            Triggered?.Invoke(this);
+        }
     }
 }

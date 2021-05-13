@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using System;
 
 namespace Fiero.Business
@@ -13,8 +14,8 @@ namespace Fiero.Business
         public override Label Resolve(Coord position, Coord size)
         {
             var x = new Label(Input, GetText);
-            x.Foreground.V = ActiveForeground;
-            x.Background.V = ActiveBackground;
+            x.Foreground.V = Foreground;
+            x.Background.V = Color.Transparent;
             x.Position.V = position;
             x.Size.V = size;
             x.ContentAwareScale.V = false;

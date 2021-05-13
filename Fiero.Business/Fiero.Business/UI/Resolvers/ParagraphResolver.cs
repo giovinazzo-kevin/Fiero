@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 
 namespace Fiero.Business
 {
@@ -12,13 +13,13 @@ namespace Fiero.Business
         public override Paragraph Resolve(Coord position, Coord size)
         {
             var x = new Paragraph(Input, GetText);
-            x.Foreground.V = ActiveForeground;
-            x.Background.V = ActiveBackground;
+            x.Foreground.V = Foreground;
+            x.Background.V = Color.Transparent;
             x.Position.V = position;
             x.Size.V = size;
             x.ContentAwareScale.V = false;
             x.CenterContent.V = false;
-            x.FontSize.V = 24;
+            x.FontSize.V = 16;
             return x;
         }
     }

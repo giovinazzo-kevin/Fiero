@@ -110,7 +110,7 @@ namespace Fiero.Core
         {
             var rect = new RectangleShape(Size.V.ToVector2f()) {
                 Position = Position.V.ToVector2f(),
-                FillColor = IsMouseOver ? Accent : Background
+                FillColor = Background
             };
             target.Draw(rect, states);
         }

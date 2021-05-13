@@ -12,8 +12,8 @@ namespace Fiero.Business
         public override Button Resolve(Coord position, Coord size)
         {
             var x = new Button(Input, GetText);
-            x.Foreground.V = ActiveForeground;
-            x.Background.V = ActiveBackground;
+            x.Foreground.V = Foreground;
+            x.Background.V = Background;
             x.Position.V = position;
             x.Size.V = size;
             x.ContentAwareScale.V = false;

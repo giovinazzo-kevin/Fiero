@@ -7,6 +7,14 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+    public class BetterActorDialogue : Layout
+    {
+        public BetterActorDialogue(GameInput input, GameUI ui)
+            : base(input)
+        {
+        }
+    }
+
     public class ActorDialogue : Paragraph
     {
         protected readonly int TileSize;

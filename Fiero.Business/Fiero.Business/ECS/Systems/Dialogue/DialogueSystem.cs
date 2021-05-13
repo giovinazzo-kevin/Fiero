@@ -106,6 +106,7 @@ namespace Fiero.Business
                         if (!trigger.Repeatable) {
                             comp.Triggers.Remove(trigger);
                         }
+                        trigger.OnTrigger();
                         return;
                     }
                 }

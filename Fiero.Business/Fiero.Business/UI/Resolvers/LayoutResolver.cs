@@ -12,8 +12,8 @@ namespace Fiero.Business
         public override Layout Resolve(Coord position, Coord size)
         {
             var x = new Layout(Input);
-            x.Foreground.V = ActiveForeground;
-            x.Background.V = ActiveBackground;
+            x.Foreground.V = Foreground;
+            x.Background.V = Background;
             x.Position.V = position;
             x.Size.V = size;
             return x;

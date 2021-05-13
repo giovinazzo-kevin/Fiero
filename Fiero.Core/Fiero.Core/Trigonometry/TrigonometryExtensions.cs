@@ -29,6 +29,10 @@ namespace Fiero.Core
         public static Vector2u ToVector2u(this Coord v) => new((uint)v.X, (uint)v.Y);
         public static Point ToPoint(this Coord v) => new(v.X, v.Y);
         public static Coord Size(this IntRect rect) => new(rect.Width, rect.Height);
+        public static Coord Position(this IntRect rect) => new(rect.Left, rect.Top);
+        public static Vec Size(this FloatRect rect) => new(rect.Width, rect.Height);
+        public static Vec Position(this FloatRect rect) => new(rect.Left, rect.Top);
+        public static Coord Align(this Coord c, int x, int y) => new(c.X - (c.X % x), c.Y - (c.Y % y));
 
     }
 }

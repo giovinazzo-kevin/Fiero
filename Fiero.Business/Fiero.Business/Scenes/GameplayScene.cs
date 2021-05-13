@@ -28,7 +28,7 @@ namespace Fiero.Business.Scenes
         protected readonly RenderSystem RenderSystem;
         protected readonly DialogueSystem DialogueSystem;
         protected readonly GameDialogues Dialogues;
-        protected readonly GameUI<FontName, TextureName, SoundName> UI;
+        protected readonly GameUI UI;
 
         public GameplayScene(
             GameInput input,
@@ -40,7 +40,7 @@ namespace Fiero.Business.Scenes
             DialogueSystem dialogueSystem,
             FactionSystem factionSystem,
             ActionSystem actionSystem,
-            GameUI<FontName, TextureName, SoundName> ui)
+            GameUI ui)
         {
             Input = input;
             Store = store;

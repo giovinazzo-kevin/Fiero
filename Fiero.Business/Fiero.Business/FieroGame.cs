@@ -20,6 +20,7 @@ namespace Fiero.Business
         protected readonly GameDialogues Dialogues;
 
         public FieroGame(
+            OffButton off,
             GameLoop loop,
             GameInput input, 
             GameTextures<TextureName> textures,
@@ -33,7 +34,7 @@ namespace Fiero.Business
             GameDataStore store,
             GameLocalizations<LocaleName> localization,
             IEnumerable<IGameScene> gameScenes)
-            : base(loop, input, textures, sprites, fonts, sounds, colors, director, localization)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, director, localization)
         {
             Dialogues = dialogues;
             Glossary = glossary;
@@ -45,17 +46,21 @@ namespace Fiero.Business
         protected override void InitializeWindow(RenderWindow win)
         {
             base.InitializeWindow(win);
-            Data.UI.WindowSize.ValueChanged += e => {
-                win.Size = new((uint)e.NewValue.X, (uint)e.NewValue.Y);
+            win.Resized += (s, e) => {
+                var newSize = new Coord((int)e.Width, (int)e.Height);
+                Store.SetValue(Data.UI.WindowSize, newSize);
             };
+            Store.SetValue(Data.UI.WindowSize, win.Size.ToCoord());
+        }
 
-            var cfgCheck = Store.TrySetValue(Data.UI.TileSize, default, 8)
-                        && Store.TrySetValue(Data.UI.WindowSize, default, new(640, 480))
-                        && Store.TrySetValue(Data.UI.DefaultActiveColor, default, new(255, 255, 255, 255))
-                        && Store.TrySetValue(Data.UI.DefaultInactiveColor, default, new(128, 128, 128, 255));
-            if (!cfgCheck) {
-                throw new InvalidOperationException();
-            }
+        protected virtual void InitializeStore()
+        {
+            Store.SetValue(Data.UI.TileSize, 8);
+            Store.SetValue(Data.UI.WindowSize, new(640, 480));
+            Store.SetValue(Data.UI.DefaultActiveForeground, Colors.Get(ColorName.UIPrimary));
+            Store.SetValue(Data.UI.DefaultInactiveForeground, Colors.Get(ColorName.UISecondary));
+            Store.SetValue(Data.UI.DefaultActiveBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(Data.UI.DefaultInactiveBackground, Colors.Get(ColorName.UIBackground));
         }
 
         public override async Task InitializeAsync()
@@ -68,7 +73,8 @@ namespace Fiero.Business
 
             Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/UIBlip.ogg"));
             Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/UIOk.ogg"));
-            Sounds.Add(SoundName.Oof, new SoundBuffer("Resources/Sounds/Oof.ogg"));
+            Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Oof.ogg"));
+            Sounds.Add(SoundName.PlayerMove, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
@@ -87,19 +93,11 @@ namespace Fiero.Business
             Dialogues.LoadActorDialogues(ActorName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
+            InitializeStore();
+
             Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
-        }
-
-        public override void Update(RenderWindow win, float t, float dt)
-        {
-            base.Update(win, t, dt);
-        }
-
-        public override void Draw(RenderWindow win, float t, float dt)
-        {
-            base.Draw(win, t, dt);
         }
     }
 }

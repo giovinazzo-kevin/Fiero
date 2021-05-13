@@ -88,5 +88,7 @@ namespace Fiero.Core
             sprite = makeSprite();
             return true;
         }
+
+        public Sprite Get(TTextures texture, string key) => TryGet(texture, key, out var s) ? s : null; 
     }
 }

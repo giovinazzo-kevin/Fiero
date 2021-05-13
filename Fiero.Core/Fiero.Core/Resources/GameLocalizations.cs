@@ -19,9 +19,9 @@ namespace Fiero.Core
         public readonly TLocales DefaultCulture;
         public TLocales CurrentCulture { get; set; }
 
-        public GameLocalizations(TLocales defaultCulture)
+        public GameLocalizations()
         {
-            CurrentCulture = DefaultCulture = defaultCulture;
+            CurrentCulture = DefaultCulture = default;
             _translations = new Dictionary<TLocales, JsonElement>();
         }
 
@@ -69,7 +69,7 @@ namespace Fiero.Core
             object GetInner(JsonElement outer, string key, params string[] rest)
             {
                 if (TryGetIndex(key, out var index)) {
-                    return GetInner(outer, Regex.Replace(key, @"\[(\d+)\]", ""), rest.Prepend($"[{index}]").ToArray());
+                    return GetInner(outer, Regex.Replace(key, @"\[(\d+)\]", String.Empty), rest.Prepend($"[{index}]").ToArray());
                 }
                 if (outer.TryGetProperty(key, out var inner)) {
                     return Switch(inner, rest);
@@ -108,7 +108,7 @@ namespace Fiero.Core
             bool TryGetIndex(string key, out int index)
             {
                 if (Regex.Match(key, @".*?\[(\d+)\]") is { Groups: var groups, Success: true }) {
-                    index = int.Parse(groups[1].Value);
+                    index = Int32.Parse(groups[1].Value);
                     return true;
                 }
                 index = -1;

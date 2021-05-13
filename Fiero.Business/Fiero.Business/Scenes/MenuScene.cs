@@ -27,17 +27,17 @@ namespace Fiero.Business.Scenes
             
         }
 
-        protected readonly GameUI<FontName, TextureName, SoundName> UI;
+        protected readonly GameUI UI;
         protected readonly GameLocalizations<LocaleName> Localizations;
         protected readonly GameDataStore Store;
         protected readonly OffButton OffButton;
 
-        protected Layout UI_Layout { get; private set; }
+        protected UIControl UI_Layout { get; private set; }
         protected Label UI_PlayerName { get; private set; }
 
         protected static MenuOptions[] AllOptions => Enum.GetValues<MenuOptions>();
 
-        public MenuScene(GameDataStore store, GameUI<FontName, TextureName, SoundName> ui, GameLocalizations<LocaleName> locals, OffButton off)
+        public MenuScene(GameDataStore store, GameUI ui, GameLocalizations<LocaleName> locals, OffButton off)
         {
             UI = ui;
             Localizations = locals;
@@ -48,26 +48,37 @@ namespace Fiero.Business.Scenes
         public override void Initialize()
         {
             base.Initialize();
-            var layoutBuilder = UI.CreateLayout()
-                .WithFont(FontName.UI)
-                .WithTexture(TextureName.UI)
-                .WithTileSize(Store.GetOrDefault(Data.UI.TileSize, 8));
+            UI_Layout = UI.CreateLayout()
+                .Build(new(800, 800), grid => grid
+                    .Rule<Label>(l => {
+                        l.FontSize.V = 32;
+                        l.MouseEntered += (_, __) => {
+                        };
+                    })
+                    .Col()
+                        .Row()
+                            .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
+                        .End()
+                        .Row()
+                            .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
+                        .End()
+                        .Row()
+                            .Cell(MakeMenuButton(MenuOptions.About, SceneState.Exit_QuitGame))
+                        .End()
+                        .Row()
+                            .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
+                        .End()
+                    .End()
+                );
+            Data.UI.WindowSize.ValueChanged += e => {
+                UI_Layout.Position.V = e.NewValue / 4;
+                UI_Layout.Size.V = e.NewValue / 2;
+            };
 
-            layoutBuilder.Textbox(new(1, 1), 16, defaultText: "Player", 
-                initialize: c => UI_PlayerName = c);
-            layoutBuilder.Combobox<int>(new(18, 1), 16, initialize: control => control
-                .AddOption("Warrior", 1)
-                .AddOption("Rogue", 2)
-                .AddOption("Wizard", 3));
-            layoutBuilder.Button(new(1, 3), 16, Localizations.Get($"Menu.{MenuOptions.NewGame}"),
-                initialize: control => control.Clicked += (_, __) => TrySetState(SceneState.Exit_NewGame));
-            layoutBuilder.Button(new(1, 5), 16, Localizations.Get($"Menu.{MenuOptions.Settings}"));
-            layoutBuilder.Button(new(1, 7), 16, Localizations.Get($"Menu.{MenuOptions.About}"));
-            layoutBuilder.Button(new(1, 9), 16, Localizations.Get($"Menu.{MenuOptions.QuitGame}"), 
-                initialize: control => control.Clicked += (_, __) => TrySetState(SceneState.Exit_QuitGame));
-            layoutBuilder.ProgressBar(new(1, 16), 32, .55f);
-
-            UI_Layout = layoutBuilder.Build();
+            Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
+                l.Text.V = Localizations.Get($"Menu.{option}");
+                l.Clicked += (_, __) => TrySetState(state);
+            };
         }
 
         public override void Update(RenderWindow win, float t, float dt)
@@ -77,7 +88,7 @@ namespace Fiero.Business.Scenes
 
         public override void Draw(RenderWindow win, float t, float dt)
         {
-            win.Clear();
+            win.Clear(Color.Black);
             win.Draw(UI_Layout);
         }
 
@@ -90,7 +101,7 @@ namespace Fiero.Business.Scenes
                     break;
                 // New game
                 case SceneState.Exit_NewGame:
-                    Store.TrySetValue(Data.Player.Name, "Player", UI_PlayerName.Text);
+                    Store.TrySetValue(Data.Player.Name, "Player", "Player");
                     break;
                 // Quit game
                 case SceneState.Exit_QuitGame:

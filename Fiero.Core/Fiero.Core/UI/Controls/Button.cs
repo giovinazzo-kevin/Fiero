@@ -5,10 +5,9 @@ namespace Fiero.Core
 {
     public class Button : Label
     {
-        public Button(GameInput input, Frame frame, int maxLength, Func<string, Text> getText) : base(input, maxLength, getText)
+        public Button(GameInput input, Func<string, int, Text> getText) : base(input, getText)
         {
-            Clickable = true;
-            Children.Add(frame);
+            Clickable.V = true;
         }
     }
 }

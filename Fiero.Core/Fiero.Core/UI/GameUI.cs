@@ -1,28 +1,20 @@
-﻿using SFML.Graphics;
+﻿using LightInject;
+using Microsoft.Extensions.DependencyInjection;
+using SFML.Graphics;
 using System;
 
 namespace Fiero.Core
 {
 
-    public class GameUI<TFonts, TTextures, TSounds>
-        where TFonts : struct, Enum
-        where TTextures : struct, Enum
-        where TSounds : struct, Enum
+    public class GameUI
     {
-        protected readonly GameSprites<TTextures> Sprites;
-        protected readonly GameFonts<TFonts> Fonts;
-        protected readonly GameSounds<TSounds> Sounds;
-        protected readonly GameInput Input;
+        protected readonly IServiceFactory ServiceProvider;
 
-        public GameUI(GameInput input, GameFonts<TFonts> fonts, GameSprites<TTextures> sprites, GameSounds<TSounds> sounds)
+        public GameUI(IServiceFactory sp)
         {
-            Sprites = sprites;
-            Fonts = fonts;
-            Sounds = sounds;
-            Input = input;
+            ServiceProvider = sp;
         }
 
-        public LayoutBuilder<TFonts, TTextures, TSounds> CreateLayout() 
-            => new(Input, Fonts, Sprites, Sounds);
+        public LayoutBuilder CreateLayout() => new(ServiceProvider);
     }
 }

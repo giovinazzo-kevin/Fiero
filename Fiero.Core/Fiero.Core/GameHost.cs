@@ -22,6 +22,7 @@ namespace Fiero.Core
             where TColors : struct, Enum
         {
             _ioc.Register<IServiceFactory>(_ => _ioc.BeginScope());
+            _ioc.Register<OffButton>(new PerContainerLifetime());
             _ioc.Register<GameLoop>(new PerContainerLifetime());
             _ioc.Register<GameInput>(new PerContainerLifetime());
             _ioc.Register<GameFonts<TFonts>>(new PerContainerLifetime());
@@ -30,10 +31,10 @@ namespace Fiero.Core
             _ioc.Register<GameSounds<TSounds>>(new PerContainerLifetime());
             _ioc.Register<GameSprites<TTextures>>(new PerContainerLifetime());
             _ioc.Register<GameDataStore>(new PerContainerLifetime());
-            _ioc.Register<GameUI<TFonts, TTextures, TSounds>>(new PerContainerLifetime());
             _ioc.Register<GameDirector>(new PerContainerLifetime());
             _ioc.Register<GameEntities>(new PerContainerLifetime());
-            _ioc.Register(_ => new GameLocalizations<TLocales>(default), new PerContainerLifetime());
+            _ioc.Register<GameLocalizations<TLocales>>(new PerContainerLifetime());
+            _ioc.Register<GameUI>(new PerContainerLifetime());
             _ioc.Register<TGame>(new PerContainerLifetime());
             configureServices?.Invoke(_ioc);
             _ioc.Compile();

@@ -15,6 +15,7 @@ namespace Fiero.Core
         where TSounds : struct, Enum
         where TColors : struct, Enum
     {
+        public readonly OffButton OffButton;
         public readonly GameLoop Loop;
         public readonly GameInput Input;
         public readonly GameTextures<TTextures> Textures;
@@ -25,8 +26,9 @@ namespace Fiero.Core
         public readonly GameDirector Director;
         public readonly GameLocalizations<TLocales> Localization;
 
-        public Game(GameLoop loop, GameInput input, GameTextures<TTextures> resources, GameSprites<TTextures> sprites, GameFonts<TFonts> fonts, GameSounds<TSounds> sounds, GameColors<TColors> colors, GameDirector director, GameLocalizations<TLocales> localization)
+        public Game(OffButton off, GameLoop loop, GameInput input, GameTextures<TTextures> resources, GameSprites<TTextures> sprites, GameFonts<TFonts> fonts, GameSounds<TSounds> sounds, GameColors<TColors> colors, GameDirector director, GameLocalizations<TLocales> localization)
         {
+            OffButton = off;
             Loop = loop;
             Input = input;
             Colors = colors;
@@ -38,20 +40,25 @@ namespace Fiero.Core
             Localization = localization;
         }
 
-        public virtual Task InitializeAsync() => Task.CompletedTask;
+        public virtual Task InitializeAsync()
+        {
+            Sounds.Initialize();
+            return Task.CompletedTask;
+        }
 
         protected virtual void InitializeWindow(RenderWindow win)
         {
             win.SetKeyRepeatEnabled(true);
             win.SetActive(true);
             win.Resized += (e, eh) => {
+                win.GetView()?.Dispose();
                 win.SetView(new(new FloatRect(0, 0, eh.Width, eh.Height)));
             };
         }
 
         public void Run(CancellationToken token = default)
         {
-            using var win = new RenderWindow(new VideoMode(800, 800), "");
+            using var win = new RenderWindow(new VideoMode(800, 800), String.Empty);
             InitializeWindow(win);
             Loop.Tick += (t, dt) => {
                 win.DispatchEvents();
@@ -68,7 +75,9 @@ namespace Fiero.Core
 
         public virtual void Update(RenderWindow win, float t, float dt)
         {
-            Input.Update(Mouse.GetPosition(win));
+            if(win.HasFocus()) {
+                Input.Update(Mouse.GetPosition(win));
+            }
             Director.Update(win, t, dt);
         }
 

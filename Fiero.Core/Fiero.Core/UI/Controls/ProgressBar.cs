@@ -4,42 +4,34 @@ using System;
 
 namespace Fiero.Core
 {
-
     public class ProgressBar : UIControl
     {
-        public readonly int Length, TileSize;
-
-        private float _progress;
-        public event Action<ProgressBar, float> ProgressChanged;
-        public float Progress {
-            get => _progress;
-            set {
-                var oldValue = _progress;
-                if(_progress != value) {
-                    _progress = value;
-                    ProgressChanged?.Invoke(this, oldValue);
-                }
-            }
-        }
-
-        public bool Center { get; set; }
-
         protected readonly Sprite LeftEmpty, MiddleEmpty, RightEmpty;
         protected readonly Sprite LeftHalf, MiddleHalf, RightHalf;
         protected readonly Sprite LeftFull, MiddleFull, RightFull;
+        public readonly int TileSize;
 
+        public int Length {
+            get => Size.V.X / TileSize;
+            set {
+                Size.V = new(value * TileSize, TileSize);
+            }
+        }
 
-        public ProgressBar(GameInput input, int tileSize, int length,
+        public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
+        public readonly UIControlProperty<bool> Center = new(nameof(Center), false);
+
+        public ProgressBar(GameInput input, int tileSize,
             Sprite le, Sprite me, Sprite re,
             Sprite lh, Sprite mh, Sprite rh,
             Sprite lf, Sprite mf, Sprite rf)
             : base(input)
         {
-            Length = length;
             TileSize = tileSize;
             LeftEmpty = le; MiddleEmpty = me; RightEmpty = re;
             LeftHalf = lh; MiddleHalf = mh; RightHalf = rh;
             LeftFull = lf; MiddleFull = mf; RightFull = rf;
+            Length = 3;
         }
 
         public override void Draw(RenderTarget target, RenderStates states)
@@ -57,14 +49,11 @@ namespace Fiero.Core
                 else if (i == Length - 1) {
                     piece = full ? half ? RightHalf : RightFull : RightEmpty;
                 }
-                piece.Color = IsActive ? ActiveColor : InactiveColor;
-                piece.Scale = new(Scale.X, Scale.Y);
-                if(Center) {
-                    piece.Position = new(Position.X * Scale.X + i * TileSize * Scale.X - (Length / 4 * TileSize * Scale.X), Position.Y * Scale.Y);
-                }
-                else {
-                    piece.Position = new(Position.X * Scale.X + i * TileSize * Scale.X, Position.Y * Scale.Y);
-                }
+                piece.Color = Foreground;
+                piece.Scale = Scale.V;
+                piece.Position = Center
+                    ? (new(Position.V.X * Scale.V.X + i * TileSize * Scale.V.X - (Length / 4 * TileSize * Scale.V.X), Position.V.Y * Scale.V.Y))
+                    : (new(Position.V.X * Scale.V.X + i * TileSize * Scale.V.X, Position.V.Y * Scale.V.Y));
                 piece.Origin = new(TileSize / 2, 0);
                 target.Draw(piece, states);
             }

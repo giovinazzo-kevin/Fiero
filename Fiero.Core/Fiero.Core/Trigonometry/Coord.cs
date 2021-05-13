@@ -66,6 +66,8 @@ namespace Fiero.Core
         public static implicit operator Vector2i(Coord v) => new(v.X, v.Y);
         public static implicit operator Vector2u(Coord v) => new((uint)v.X, (uint)v.Y);
         public static implicit operator Point(Coord v) => new(v.X, v.Y);
+        
+        public Coord Clamp(int min = int.MinValue, int max = int.MaxValue) => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
 
         public override int GetHashCode()
         {

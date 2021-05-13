@@ -4,6 +4,7 @@
     {
         UIBlip,
         UIOk,
-        Oof
+        PlayerMove,
+        PlayerDeath,
     }
 }

@@ -17,6 +17,9 @@ namespace Fiero.Core
         {
             Colors = new Dictionary<TColors, Color>();
         }
+
+        public Color Get(TColors col) => Colors[col];
+
         public async Task LoadJsonAsync(string fileName)
         {
             if (!File.Exists(fileName)) {

@@ -11,7 +11,6 @@ namespace Fiero.Business
     {
         protected readonly int TileSize;
         protected readonly Func<string, Sprite> GetSprite;
-        protected readonly Func<Coord, Frame> BuildFrame;
         protected readonly Func<SoundName, Sound> GetSound;
 
 
@@ -27,39 +26,39 @@ namespace Fiero.Business
                 _node = value;
                 _selectedChoiceIndex = 0;
                 Children.RemoveAll(x => x is Paragraph);
-                if(_node != null) {
+                if (_node != null) {
                     SelectedChoice = _node.Choices.Keys.FirstOrDefault();
-                    Text = String.Join('\n', _node.Lines);
+                    Text.V = String.Join('\n', _node.Lines);
                     foreach (var label in Children.OfType<Label>()) {
-                        label.Position = new(label.Position.X + TileSize * 5, label.Position.Y);
-                        label.Scale = new(2, 2);
+                        label.Position.V = new(label.Position.V.X + TileSize * 5, label.Position.V.Y);
+                        label.Scale.V = new(2, 2);
                     }
                     if (_node.Choices.Any()) {
                         var length = _node.Choices.Keys.Max(x => x.Length) * 2 + 2;
-                        var frame = BuildFrame(new((length + 1) * TileSize, _node.Choices.Count * TileSize * 2 + 1 * TileSize));
-                        var p = new Paragraph(Input, frame, length - 2, _node.Choices.Count, GetText) {
-                            Scale = Scale,
-                            Position = new(
-                                Position.X + (MaxLength - length) * TileSize - TileSize,
-                                Position.Y + MaxLines * TileSize + 3 * TileSize
-                            ),
-                            ActiveColor = ActiveColor,
-                            InactiveColor = InactiveColor,
-                            Size = new(length * TileSize, _node.Choices.Count * TileSize + 2 * TileSize),
-                        };
-                        p.Text = String.Join('\n', _node.Choices.Keys.Select(k => k.PadLeft(k.Length + 1)));
+                        // var frame = BuildFrame(new((length + 1) * TileSize, _node.Choices.Count * TileSize * 2 + 1 * TileSize));
+                        var p = new Paragraph(Input, GetText);
+                        p.Scale.V = Scale.V;
+                        p.Position.V = new(
+                            Position.V.X + (MaxLength - length) * TileSize - TileSize,
+                            Position.V.Y + MaxLines * TileSize + 3 * TileSize
+                        );
+                        p.Foreground.V = Foreground.V;
+                        p.MaxLength.V = length - 2;
+                        p.MaxLines.V = _node.Choices.Count;
+                        p.Size.V = new(length * TileSize, _node.Choices.Count * TileSize + 2 * TileSize);
+                        p.Text.V = String.Join('\n', _node.Choices.Keys.Select(k => k.PadLeft(k.Length + 1)));
                         Children.Add(p);
                     }
                     Face = GetSprite($"face-{_node.Face}");
-                    if(Face != null) {
+                    if (Face != null) {
                         Face.Scale = new(4, 4);
-                        Face.Position = new(Position.X + TileSize, Position.Y + TileSize);
+                        Face.Position = new(Position.V.X + TileSize, Position.V.Y + TileSize);
                     }
                     NodeChanged?.Invoke(_node);
                 }
                 else {
                     SelectedChoice = null;
-                    Text = String.Empty;
+                    Text.V = String.Empty;
                     Face = null;
                 }
             }
@@ -71,13 +70,12 @@ namespace Fiero.Business
         protected void PlayBlip() => new Sound(GetSound(SoundName.UIBlip)).Play();
         protected void PlayOk() => new Sound(GetSound(SoundName.UIOk)).Play();
 
-        public ActorDialogue(GameInput input, Func<SoundName, Sound> getSound, Frame frame, Func<Coord, Frame> buildFrame, int maxLength, int maxLines, int tileSize, Func<string, Text> getText, Func<string, Sprite> getSprite) 
-            : base(input, frame, maxLength, maxLines, getText)
+        public ActorDialogue(GameInput input, int tileSize, Func<SoundName, Sound> getSound, Func<string, int, Text> getText, Func<string, Sprite> getSprite)
+            : base(input, getText)
         {
             GetSound = getSound;
             GetSprite = getSprite;
             TileSize = tileSize;
-            BuildFrame = buildFrame;
             Cursor = GetSprite("hand-l");
         }
 
@@ -86,7 +84,7 @@ namespace Fiero.Business
             base.Update(t, dt);
             if (Node == null)
                 return;
-            if(Node.Choices.Count > 0) {
+            if (Node.Choices.Count > 0) {
                 if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad2)) {
                     _selectedChoiceIndex = (++_selectedChoiceIndex % Node.Choices.Count);
                     SelectedChoice = Node.Choices.Keys.ElementAtOrDefault(_selectedChoiceIndex);
@@ -106,9 +104,9 @@ namespace Fiero.Business
             if (SelectedChoice != null) {
                 var p = Children.OfType<Paragraph>().Single();
                 var lPos = p.Children.OfType<Label>()
-                    .Single(l => l.Text.Trim().Equals(SelectedChoice, StringComparison.OrdinalIgnoreCase))
+                    .Single(l => l.Text.V.Trim().Equals(SelectedChoice, StringComparison.OrdinalIgnoreCase))
                     .Position;
-                Cursor.Position = new(lPos.X, lPos.Y);
+                Cursor.Position = new(lPos.V.X, lPos.V.Y);
                 Cursor.Scale = new(2, 2);
             }
         }
@@ -116,10 +114,10 @@ namespace Fiero.Business
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if(Face != null) {
+            if (Face != null) {
                 Face.Draw(target, states);
             }
-            if(SelectedChoice != null) {
+            if (SelectedChoice != null) {
                 Cursor.Draw(target, states);
             }
         }

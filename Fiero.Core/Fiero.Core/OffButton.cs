@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace Fiero.Business
+namespace Fiero.Core
 {
 
     public sealed class OffButton

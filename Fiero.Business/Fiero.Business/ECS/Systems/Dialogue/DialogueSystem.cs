@@ -13,7 +13,7 @@ namespace Fiero.Business
         protected readonly GameGlossaries Glossaries;
         protected readonly GameDialogues Dialogues;
         protected readonly GameDataStore Store;
-        protected readonly GameUI<FontName, TextureName, SoundName> UI;
+        protected readonly GameUI UI;
         protected readonly GameSprites<TextureName> Sprites;
 
         public DialogueNode CurrentDialogue => UIDialogue.Node;
@@ -33,7 +33,7 @@ namespace Fiero.Business
             GameDialogues dialogues,
             GameEntities entities,
             GameDataStore store,
-            GameUI<FontName, TextureName, SoundName> ui,
+            GameUI ui,
             GameSprites<TextureName> sprites)
         {
             FloorSystem = floorSystem;
@@ -49,13 +49,14 @@ namespace Fiero.Business
         {
             var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
             UILayout = UI.CreateLayout()
-                .WithFont(FontName.UI)
-                .WithTexture(TextureName.UI)
-                .WithTileSize(tileSize)
-                .ActorDialogue(new(1, 1), new(98, 10), initialize: x => UIDialogue = x)
-                .Build();
+                .Build(new(), grid => grid
+                    .Row()
+                        .Cell<ActorDialogue>(d => UIDialogue = d)
+                    .End());
             UIDialogue.NodeChanged += node => node.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
-
+            Data.UI.WindowSize.ValueChanged += e => {
+                UILayout.Size.V = new Coord(e.NewValue.X, (int)(e.NewValue.Y * 0.15f));
+            };
         }
 
         public void Update(float t, float dt)

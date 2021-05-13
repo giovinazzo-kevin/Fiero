@@ -30,20 +30,19 @@ namespace Fiero.Core
         private void Control_Clicked(UIControl option, Coord mousePos)
         {
             SelectedOption = Options.FirstOrDefault(o => o.Control == option);
-            Text = SelectedOption.Label;
+            Text.V = SelectedOption.Label;
         }
 
         public Combobox<TValue> AddOption(string label, TValue value)
         {
-            Clickable = true;
+            Clickable.V = true;
             var control = BuildItem();
             Children.Add(control);
             Options.Add(new Option(label, value, control));
-            control.ActiveColor = ActiveColor;
-            control.InactiveColor = InactiveColor;
-            control.Text = label;
-            control.IsHidden = true;
-            control.Position = new(Position.X, Position.Y + Options.Count * (Size.Y + 4));
+            control.Foreground.V = Foreground;
+            control.Text.V = label;
+            control.IsHidden.V = true;
+            control.Position.V = new(Position.V.X, Position.V.Y + Options.Count * (Size.V.Y + 4));
             control.Size = Size;
             control.Clicked += Control_Clicked;
             Control_Clicked(control, new());
@@ -61,31 +60,29 @@ namespace Fiero.Core
             }
             // Recalculate positons
             var i = 0; foreach (var option in Options) { 
-                option.Control.Position = new(Position.X, Position.Y + ++i * (Size.Y + 4));
+                option.Control.Position.V = new(Position.V.X, Position.V.Y + ++i * (Size.V.Y + 4));
             }
             return this;
         }
 
-        protected override void OnActiveChanged(bool oldActive)
-        {
-            if(IsActive) {
-                foreach (var option in Options) {
-                    option.Control.IsHidden = false;
-                    option.Control.IsActive = false;
-                }
-            }
-            else {
-                foreach (var option in Options) {
-                    option.Control.IsHidden = true;
-                }
-            }
-        }
-
-        public Combobox(GameInput input, Frame frame, int maxLength, Func<string, Text> getText, Func<ComboItem> buildItem) : base(input, maxLength, getText)
+        public Combobox(GameInput input, Func<string, int, Text> getText, Func<ComboItem> buildItem) : base(input, getText)
         {
             BuildItem = buildItem;
             Options = new HashSet<Option>();
-            Children.Add(frame);
+
+            IsActive.ValueChanged += (owner, old) => {
+                if (IsActive.V) {
+                    foreach (var option in Options) {
+                        option.Control.IsHidden.V = false;
+                        option.Control.IsActive.V = false;
+                    }
+                }
+                else {
+                    foreach (var option in Options) {
+                        option.Control.IsHidden.V = true;
+                    }
+                }
+            };
         }
     }
 }

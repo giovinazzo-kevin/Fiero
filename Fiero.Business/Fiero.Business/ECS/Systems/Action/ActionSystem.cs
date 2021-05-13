@@ -86,7 +86,7 @@ namespace Fiero.Business
                 if (!(actor.Action.Direction is { } direction)) {
                     return true;
                 }
-                var usePos = new Coord(actor.Physics.Position.X + direction.X, actor.Physics.Position.Y + direction.Y);
+                var usePos = actor.Physics.Position + direction;
                 var itemsHere = _floorSystem.ItemsAt(usePos);
                 var featuresHere = _floorSystem.FeaturesAt(usePos);
                 if(itemsHere.Any()) {
@@ -119,7 +119,7 @@ namespace Fiero.Business
                     if (!(actor.Action.Direction is { } direction)) {
                         return true;
                     }
-                    var newPos = new Coord(actor.Physics.Position.X + direction.X, actor.Physics.Position.Y + direction.Y);
+                    var newPos = actor.Physics.Position + direction;
                     var actorsHere = _floorSystem.ActorsAt(newPos);
                     if (!actorsHere.Any(a => actor.Faction.Standings.Get(a.Faction.Type).MayAttack())) {
                         return true;
@@ -145,7 +145,7 @@ namespace Fiero.Business
                         actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.KillsYou$.");
                         actor.Log?.Write($"$Action.YouKill$ {actor.Action.Target.Info.Name}.");
                         if(actor.Action.Target.Properties.Type == ActorName.Player) {
-                            _sounds.Get(SoundName.Oof).Play();
+                            _sounds.Get(SoundName.PlayerDeath).Play();
                             _store.SetValue(Data.Player.KilledBy, actor);
                         }
                         RemoveActor(actor.Action.Target.Id);
@@ -182,8 +182,11 @@ namespace Fiero.Business
                         var actorsHere = _floorSystem.ActorsAt(newPos);
                         var featuresHere = _floorSystem.FeaturesAt(newPos);
                         if (!actorsHere.Any()) {
-                            if(!featuresHere.Any(f => f.Properties.BlocksMovement)) {
+                            if (!featuresHere.Any(f => f.Properties.BlocksMovement)) {
                                 actor.Physics.Position = newPos;
+                                if (actor.Properties.Type == ActorName.Player) {
+                                    _sounds.Get(SoundName.PlayerMove).Play();
+                                }
                             }
                             else {
                                 var feature = featuresHere.Single();

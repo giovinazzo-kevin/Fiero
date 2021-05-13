@@ -9,7 +9,7 @@ namespace Fiero.Business
 {
     public class RenderSystem
     {
-        protected readonly GameUI<FontName, TextureName, SoundName> UI;
+        protected readonly GameUI UI;
         protected readonly GameSprites<TextureName> Sprites;
         protected readonly GameEntities Entities;
         protected readonly GameDataStore Store;
@@ -20,7 +20,7 @@ namespace Fiero.Business
         public HealthbarDisplayView HealthbarDisplay { get; private set; }
 
         public RenderSystem(
-            GameUI<FontName, TextureName, SoundName> ui,
+            GameUI ui,
             GameSprites<TextureName> sprites,
             GameEntities entities,
             GameDataStore store,
@@ -38,15 +38,8 @@ namespace Fiero.Business
         public void Initialize()
         {
             var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
-            SelectedActor = new SelectedActorView(CreateLayout());
-            HealthbarDisplay = new HealthbarDisplayView(CreateLayout());
-            LayoutBuilder<FontName, TextureName, SoundName> CreateLayout()
-            {
-                return UI.CreateLayout()
-                    .WithFont(FontName.UI)
-                    .WithTexture(TextureName.UI)
-                    .WithTileSize(tileSize);
-            }
+            SelectedActor = new SelectedActorView(UI.CreateLayout());
+            HealthbarDisplay = new HealthbarDisplayView(UI.CreateLayout());
         }
 
         public void Update(RenderWindow win, float t, float dt)

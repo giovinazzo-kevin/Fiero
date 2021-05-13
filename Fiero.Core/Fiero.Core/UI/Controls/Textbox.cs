@@ -8,10 +8,9 @@ namespace Fiero.Core
 {
     public class Textbox : Label
     {
-        public Textbox(GameInput input, Frame frame, int maxLength, Func<string, Text> getText) : base(input, maxLength, getText)
+        public Textbox(GameInput input, Func<string, int, Text> getText) : base(input, getText)
         {
-            Clickable = true;
-            Children.Add(frame);
+            Clickable.V = true;
         }
 
         protected bool IsPrintable(Keyboard.Key k, out char representation)
@@ -79,7 +78,7 @@ namespace Fiero.Core
                     }
                 }
             }
-            Text = text.ToString();
+            Text.V = text.ToString();
         }
     }
 }

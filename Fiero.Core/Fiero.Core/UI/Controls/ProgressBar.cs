@@ -52,8 +52,8 @@ namespace Fiero.Core
                 piece.Color = Foreground;
                 piece.Scale = Scale.V;
                 piece.Position = Center
-                    ? (new(Position.V.X * Scale.V.X + i * TileSize * Scale.V.X - (Length / 4 * TileSize * Scale.V.X), Position.V.Y * Scale.V.Y))
-                    : (new(Position.V.X * Scale.V.X + i * TileSize * Scale.V.X, Position.V.Y * Scale.V.Y));
+                    ? (new(ContentRenderPos.X * Scale.V.X + i * TileSize * Scale.V.X - (Length / 4 * TileSize * Scale.V.X), ContentRenderPos.Y * Scale.V.Y))
+                    : (new(ContentRenderPos.X * Scale.V.X + i * TileSize * Scale.V.X, ContentRenderPos.Y * Scale.V.Y));
                 piece.Origin = new(TileSize / 2, 0);
                 target.Draw(piece, states);
             }

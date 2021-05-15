@@ -5,11 +5,19 @@ namespace Fiero.Business
 {
     public class ProgressBarResolver : UIControlResolver<ProgressBar>
     {
-        public ProgressBarResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(ui, input, store, fonts, sounds, sprites, localizations)
+        public ProgressBarResolver(
+            GameUI ui, 
+            GameInput input, 
+            GameDataStore store, 
+            GameFonts<FontName> fonts,
+            GameSounds<SoundName> sounds,
+            GameColors<ColorName> colors,
+            GameSprites<TextureName> sprites,
+            GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, colors, sprites, localizations)
         {
         }
-        public override ProgressBar Resolve(Coord position, Coord size)
+        public override ProgressBar Resolve(LayoutGrid dom, Coord position, Coord size)
         {
             var x = new ProgressBar(Input, TileSize,
                 GetUISprite("bar_empty-l"), GetUISprite("bar_empty-m"), GetUISprite("bar_empty-r"),

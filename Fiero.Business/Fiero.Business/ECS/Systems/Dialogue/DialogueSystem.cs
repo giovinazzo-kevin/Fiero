@@ -24,7 +24,7 @@ namespace Fiero.Business
 
 
         protected Layout UILayout { get; private set; }
-        protected BetterActorDialogue UIDialogue { get; private set; }
+        protected ActorDialogue UIDialogue { get; private set; }
 
 
         public DialogueSystem(
@@ -50,12 +50,13 @@ namespace Fiero.Business
             var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
             UILayout = UI.CreateLayout()
                 .Build(new(), grid => grid
-                    .Row()
-                        .Cell<BetterActorDialogue>(d => UIDialogue = d)
+                    .Row(h: 0.25f)
+                        .Cell<ActorDialogue>(d => UIDialogue = d)
                     .End());
             UIDialogue.Node.ValueChanged += (owner, old) => UIDialogue.Node.V?.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
             Data.UI.WindowSize.ValueChanged += e => {
-                UILayout.Size.V = new Coord(e.NewValue.X, (int)(e.NewValue.Y * 0.3f));
+                UILayout.Size.V = e.NewValue.Clamp(0, 800, 0, 800);
+                UILayout.Position.V = new(e.NewValue.X / 2 - UILayout.Size.V.X / 2, 0);
             };
         }
 

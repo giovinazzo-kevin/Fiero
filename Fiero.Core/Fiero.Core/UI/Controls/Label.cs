@@ -12,6 +12,7 @@ namespace Fiero.Core
 
         protected readonly Func<string, int, Text> GetText;
 
+        public readonly UIControlProperty<Action<Text>> ConfigureText = new(nameof(ConfigureText), null);
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8) { Propagate = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
@@ -35,7 +36,7 @@ namespace Fiero.Core
                     _drawable.CharacterSize = testFontSize;
                     _knownTextSize = _drawable.GetLocalBounds().Size().Magnitude();
                 }
-                FontSize.V = (uint)(Size.V.ToVec().Magnitude() * testFontSize / _knownTextSize);
+                FontSize.V = (uint)(ContentRenderSize.ToVec().Magnitude() * testFontSize / _knownTextSize);
                 FontSize.V -= FontSize.V % 4;
                 if(FontSize.V <= 4) {
                     FontSize.V = 4;
@@ -43,7 +44,7 @@ namespace Fiero.Core
                 // TODO: Figure out why this line causes a memory leak
                 _drawable.CharacterSize = FontSize.V;
                 // Correct for error and warp to fit by rescaling
-                _drawable.Scale = Scale * Size.V.ToVec() / _drawable.GetLocalBounds().Size();
+                _drawable.Scale = Scale * ContentRenderSize.ToVec() / _drawable.GetLocalBounds().Size();
             }
             else {
                 _drawable.CharacterSize = FontSize.V;
@@ -54,7 +55,11 @@ namespace Fiero.Core
 
         public Label(GameInput input, Func<string, int, Text> getText) : base(input)
         {
-            GetText = getText;
+            GetText = (s, i) => {
+                var text = getText(s, i);
+                ConfigureText.V?.Invoke(text);
+                return text;
+            };
             Text.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };
@@ -72,11 +77,11 @@ namespace Fiero.Core
                 return;
             base.Draw(target, states);
             if (_drawable != null) {
-                _drawable.Position = Position.V;
+                _drawable.Position = ContentRenderPos;
                 var drawableBounds = _drawable.GetGlobalBounds();
                 var drawablePos = drawableBounds.Position();
                 var drawableSize = drawableBounds.Size();
-                var delta = (Position.V - drawablePos) - drawableSize / 2 + Size.V / 2;
+                var delta = ContentRenderPos - drawablePos - drawableSize / 2 + ContentRenderSize / 2;
                 if (CenterContentH) {
                     _drawable.Position += delta * new Vec(1, 0);
                 }

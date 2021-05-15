@@ -1,83 +1,114 @@
 ﻿using Fiero.Core;
 using SFML.Audio;
 using SFML.Graphics;
-using SFML.System;
 using System;
 using System.Linq;
 
 namespace Fiero.Business
 {
-
-    public class ActorDialogue : Paragraph
+    public class ActorDialogue : Layout
     {
-        protected readonly int TileSize;
-        protected readonly Func<string, Sprite> GetSprite;
-        protected readonly Func<SoundName, Sound> GetSound;
-
-
-        public Sprite Face { get; set; }
-        protected readonly Sprite Cursor;
-
-
-        public event Action<DialogueNode> NodeChanged;
-        private DialogueNode _node;
-        public DialogueNode Node {
-            get => _node;
-            set {
-                _node = value;
-                _selectedChoiceIndex = 0;
-                Children.RemoveAll(x => x is Paragraph);
-                if (_node != null) {
-                    SelectedChoice = _node.Choices.Keys.FirstOrDefault();
-                    Text.V = String.Join('\n', _node.Lines);
-                    foreach (var label in Children.OfType<Label>()) {
-                        label.Position.V = new(label.Position.V.X + TileSize * 5, label.Position.V.Y);
-                        label.Scale.V = new(2, 2);
-                    }
-                    if (_node.Choices.Any()) {
-                        var length = _node.Choices.Keys.Max(x => x.Length) * 2 + 2;
-                        // var frame = BuildFrame(new((length + 1) * TileSize, _node.Choices.Count * TileSize * 2 + 1 * TileSize));
-                        var p = new Paragraph(Input, GetText);
-                        p.Scale.V = Scale.V;
-                        p.Position.V = new(
-                            Position.V.X + (MaxLength - length) * TileSize - TileSize,
-                            Position.V.Y + MaxLines * TileSize + 3 * TileSize
-                        );
-                        p.Foreground.V = Foreground.V;
-                        p.MaxLength.V = length - 2;
-                        p.MaxLines.V = _node.Choices.Count;
-                        p.Size.V = new(length * TileSize, _node.Choices.Count * TileSize + 2 * TileSize);
-                        p.Text.V = String.Join('\n', _node.Choices.Keys.Select(k => k.PadLeft(k.Length + 1)));
-                        Children.Add(p);
-                    }
-                    Face = GetSprite($"face-{_node.Face}");
-                    if (Face != null) {
-                        Face.Scale = new(4, 4);
-                        Face.Position = new(Position.V.X + TileSize, Position.V.Y + TileSize);
-                    }
-                    NodeChanged?.Invoke(_node);
-                }
-                else {
-                    SelectedChoice = null;
-                    Text.V = String.Empty;
-                    Face = null;
-                }
-            }
-        }
-
+        private Picture<TextureName> _picture;
+        private Paragraph _paragraph, _choices;
         private int _selectedChoiceIndex;
-        public string SelectedChoice { get; private set; }
 
-        protected void PlayBlip() => new Sound(GetSound(SoundName.UIBlip)).Play();
-        protected void PlayOk() => new Sound(GetSound(SoundName.UIOk)).Play();
+        protected readonly Func<SoundName, Sound> GetSound;
+        protected readonly Func<ColorName, Color> GetColor;
+        protected readonly GameDataStore Store;
 
-        public ActorDialogue(GameInput input, int tileSize, Func<SoundName, Sound> getSound, Func<string, int, Text> getText, Func<string, Sprite> getSprite)
-            : base(input, getText)
+        public readonly UIControlProperty<DialogueNode> Node = new(nameof(Node));
+        public readonly UIControlProperty<string> SelectedChoice = new(nameof(SelectedChoice));
+
+        public ActorDialogue(
+            LayoutGrid dom,
+            GameInput input, 
+            GameDataStore store,
+            GameUI ui, 
+            Func<SoundName, Sound> getSound, 
+            Func<ColorName, Color> getColor
+        ) : base(dom, input)
         {
+            Store = store;
             GetSound = getSound;
-            GetSprite = getSprite;
-            TileSize = tileSize;
-            Cursor = GetSprite("hand-l");
+            GetColor = getColor;
+            var dialogue = ui.CreateLayout()
+                .Build(Size, grid => grid
+                    .Row()
+                        .Style<Paragraph>(p => {
+                            p.MaxLines.V = 4;
+                            p.FontSize.V = 16;
+                            p.CenterContentH.V = true;
+                            p.Padding.V = new(8, 8);
+                            p.Background.V = GetColor(ColorName.UIBackground);
+                        })
+                        .Style<Picture<TextureName>>(p => {
+                            p.CenterContent.V = true;
+                            p.Background.V = GetColor(ColorName.UIAccent);
+                            p.TextureName.V = TextureName.UI; // Actor faces are found here
+                            p.Scale.V = new(0.8f, 0.8f); // Leave some margin around the edges
+                        })
+                        .Col(w: 0.25f)
+                            .Cell<Picture<TextureName>>(p => _picture = p)
+                        .End()
+                        .Col(w: 1.75f)
+                            .Cell<Paragraph>(p => _paragraph = p)
+                        .End()
+                    .End()
+                    .Row(h: 1.5f)
+                        .Style<Paragraph>(p => {
+                            p.FontSize.V = 16;
+                            p.Foreground.V = GetColor(ColorName.UIPrimary);
+                            p.Background.V = Color.Transparent;
+                            p.Padding.V = new(32, 32);
+                            p.ConfigureText.V = t => {
+                                t.OutlineColor = GetColor(ColorName.UIBackground);
+                                t.OutlineThickness = 2f;
+                            };
+                        })
+                        .Col()
+                            .Cell<Paragraph>(p => _choices = p)
+                        .End()
+                    .End());
+
+            Children.Add(dialogue);
+
+            Size.ValueChanged += (owner, old) => {
+                dialogue.Size.V = Size.V;
+            };
+            Position.ValueChanged += (owner, old) => {
+                dialogue.Position.V = Position.V;
+            };
+
+            Node.ValueChanged += (owner, old) => {
+                if (Node.V == null) {
+                    return;
+                }
+
+                _picture.SpriteName.V = $"face-{Node.V.Face}";
+                _paragraph.Text.V = String.Join("\n", Node.V.Lines);
+                _selectedChoiceIndex = 0;
+                _choices.MaxLines.V = 1;
+                SelectedChoice.V = Node.V.Choices.Count > 0 ? Node.V.Choices.Keys.First() : null;
+                UpdateCursor();
+            };
+        }
+        protected void PlayBlip() => GetSound(SoundName.UIBlip).Play();
+        protected void PlayOk() => GetSound(SoundName.UIOk).Play();
+
+        protected void UpdateCursor()
+        {
+            if (Node.V == null || Node.V.Choices.Count == 0)
+                return;
+
+            _choices.MaxLines.V = Node.V.Choices.Count;
+            _choices.Text.V = String.Join("\n", Node.V.Choices.Keys);
+
+            var choices = _choices.Children.OfType<Label>().ToList();
+            for (int i = 0; i < choices.Count; i++) {
+                choices[i].Foreground.V = i == _selectedChoiceIndex
+                    ? GetColor(ColorName.UIAccent)
+                    : GetColor(ColorName.UIPrimary);
+            }
         }
 
         public override void Update(float t, float dt)
@@ -85,41 +116,35 @@ namespace Fiero.Business
             base.Update(t, dt);
             if (Node == null)
                 return;
-            if (Node.Choices.Count > 0) {
+            if (Node.V.Choices.Count > 0) {
                 if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad2)) {
-                    _selectedChoiceIndex = (++_selectedChoiceIndex % Node.Choices.Count);
-                    SelectedChoice = Node.Choices.Keys.ElementAtOrDefault(_selectedChoiceIndex);
-                    PlayBlip();
+                    _selectedChoiceIndex = (++_selectedChoiceIndex % Node.V.Choices.Count);
+                    UpdateChoice();
                 }
                 else if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad8)) {
-                    _selectedChoiceIndex = ((--_selectedChoiceIndex % Node.Choices.Count + Node.Choices.Count) % Node.Choices.Count);
-                    SelectedChoice = Node.Choices.Keys.ElementAtOrDefault(_selectedChoiceIndex);
-                    PlayBlip();
+                    _selectedChoiceIndex = ((--_selectedChoiceIndex % Node.V.Choices.Count + Node.V.Choices.Count) % Node.V.Choices.Count);
+                    UpdateChoice();
                 }
             }
             if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Enter)) {
-                Node = SelectedChoice == null ? Node.Next : Node.Choices[SelectedChoice];
+                _picture.SpriteName.V = String.Empty;
+                _paragraph.Text.V = String.Empty;
+                _choices.Text.V = String.Empty;
+                if (Node.V.Choices.Count == 0) {
+                    Node.V = Node.V.Next;
+                }
+                else {
+                    Node.V = Node.V.Choices[SelectedChoice];
+                }
+                _selectedChoiceIndex = 0;
+                SelectedChoice.V = null;
                 PlayOk();
             }
-
-            if (SelectedChoice != null) {
-                var p = Children.OfType<Paragraph>().Single();
-                var lPos = p.Children.OfType<Label>()
-                    .Single(l => l.Text.V.Trim().Equals(SelectedChoice, StringComparison.OrdinalIgnoreCase))
-                    .Position;
-                Cursor.Position = new(lPos.V.X, lPos.V.Y);
-                Cursor.Scale = new(2, 2);
-            }
-        }
-
-        public override void Draw(RenderTarget target, RenderStates states)
-        {
-            base.Draw(target, states);
-            if (Face != null) {
-                Face.Draw(target, states);
-            }
-            if (SelectedChoice != null) {
-                Cursor.Draw(target, states);
+            void UpdateChoice()
+            {
+                SelectedChoice.V = Node.V.Choices.Keys.ElementAtOrDefault(_selectedChoiceIndex);
+                PlayBlip();
+                UpdateCursor();
             }
         }
     }

@@ -1,13 +1,35 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Fiero.Core
 {
     public class Layout : UIControl
     {
-        public Layout(GameInput input, params UIControl[] controls) : base(input)
+        public readonly LayoutGrid Dom;
+
+        public bool MediaQuery(Func<Coord, bool> match)
         {
+            return match(Size.V);
+        }
+
+        public IEnumerable<UIControl> Query(Func<Layout, bool> match, Func<LayoutGrid, bool> select)
+        {
+            if (!match(this))
+                return Enumerable.Empty<UIControl>();
+            return Dom.Query(select).Select(x => x.ControlInstance);
+        }
+
+        public IEnumerable<T> Query<T>(Func<Layout, bool> match, Func<LayoutGrid, bool> select = null)
+            where T : UIControl
+            => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).Cast<T>();
+
+        public Layout(LayoutGrid dom, GameInput input, params UIControl[] controls) : base(input)
+        {
+            Dom = dom;
             Children.AddRange(controls);
         }
     }

@@ -9,6 +9,7 @@ namespace Fiero.Core
         protected readonly Func<string, int, Text> GetText;
 
 
+        public readonly UIControlProperty<Action<Text>> ConfigureText = new(nameof(ConfigureText), null);
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
@@ -19,7 +20,11 @@ namespace Fiero.Core
 
         public Paragraph(GameInput input, Func<string, int, Text> getText) : base(input)
         {
-            GetText = getText;
+            GetText = (s, i) => {
+                var text = getText(s, i);
+                ConfigureText.V?.Invoke(text);
+                return text;
+            };
             Size.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };
@@ -40,16 +45,11 @@ namespace Fiero.Core
             Children.RemoveAll(x => x is Label);
             foreach (var line in text.Split('\n')) {
                 var label = new Label(Input, GetText);
-                label.Scale.V = Scale.V;
-                label.Position.V = new(Position.V.X, Position.V.Y + (int)(Children.Count * Size.V.Y / lines));
-                label.MaxLength.V = MaxLength.V;
-                label.Foreground.V = Foreground.V;
-                label.ContentAwareScale.V = ContentAwareScale.V;
-                label.CenterContentH.V = CenterContentH.V;
-                label.CenterContentV.V = CenterContentV.V;
+                label.CopyProperties(this);
+                label.Background.V = Color.Transparent;
+                label.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + Children.Count * ContentRenderSize.Y / lines);
                 label.Text.V = line;
-                label.FontSize.V = FontSize.V;
-                label.Size.V = new(Size.V.X, (Size.V.Y / lines));
+                label.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / lines);
                 Children.Add(label);
                 if (Children.Count > MaxLines) {
                     break;

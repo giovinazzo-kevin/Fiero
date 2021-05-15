@@ -5,12 +5,20 @@ namespace Fiero.Business
 {
     public class ParagraphResolver : UIControlResolver<Paragraph>
     {
-        public ParagraphResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(ui, input, store, fonts, sounds, sprites, localizations)
+        public ParagraphResolver(
+            GameUI ui, 
+            GameInput input, 
+            GameDataStore store, 
+            GameFonts<FontName> fonts, 
+            GameSounds<SoundName> sounds, 
+            GameColors<ColorName> colors,
+            GameSprites<TextureName> sprites,
+            GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, colors, sprites, localizations)
         {
         }
 
-        public override Paragraph Resolve(Coord position, Coord size)
+        public override Paragraph Resolve(LayoutGrid dom, Coord position, Coord size)
         {
             var x = new Paragraph(Input, GetText);
             x.Foreground.V = Foreground;

@@ -21,6 +21,7 @@ namespace Fiero.Core
         protected GameFonts<TFonts> Fonts;
         protected GameSounds<TSounds> Sounds;
         protected GameSprites<TTextures> Sprites;
+        protected GameColors<TColors> Colors;
         protected GameLocalizations<TLocales> Localizations;
 
         public UIControlResolverBase(
@@ -29,6 +30,7 @@ namespace Fiero.Core
             GameDataStore store,
             GameFonts<TFonts> fonts,
             GameSounds<TSounds> sounds,
+            GameColors<TColors> colors,
             GameSprites<TTextures> sprites,
             GameLocalizations<TLocales> localizations
         ) {
@@ -37,11 +39,12 @@ namespace Fiero.Core
             Store = store;
             Fonts = fonts;
             Sounds = sounds;
+            Colors = colors;
             Sprites = sprites;
             Localizations = localizations;
         }
 
-        public abstract T Resolve(Coord position, Coord size);
+        public abstract T Resolve(LayoutGrid dom, Coord position, Coord size);
 
         //protected virtual Frame CreateFrame(TTextures texture, string sprite, Coord size, int tileSize)
         //{

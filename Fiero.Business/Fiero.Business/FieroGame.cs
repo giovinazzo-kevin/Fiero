@@ -47,8 +47,13 @@ namespace Fiero.Business
         {
             base.InitializeWindow(win);
             win.Resized += (s, e) => {
-                var newSize = new Coord((int)e.Width, (int)e.Height);
-                Store.SetValue(Data.UI.WindowSize, newSize);
+                var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(min: 800);
+                if (newSize != new Coord((int)e.Width, (int)e.Height)) {
+                    win.Size = newSize;
+                }
+                else {
+                    Store.SetValue(Data.UI.WindowSize, newSize);
+                }
             };
             Store.SetValue(Data.UI.WindowSize, win.Size.ToCoord());
         }

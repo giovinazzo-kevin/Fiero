@@ -12,8 +12,16 @@ namespace Fiero.Business
         protected readonly Color Accent;
         protected readonly int TileSize;
 
-        protected UIControlResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations) 
-            : base(ui, input, store, fonts, sounds, sprites, localizations)
+        protected UIControlResolver(
+            GameUI ui, 
+            GameInput input, 
+            GameDataStore store, 
+            GameFonts<FontName> fonts, 
+            GameSounds<SoundName> sounds, 
+            GameColors<ColorName> colors,
+            GameSprites<TextureName> sprites, 
+            GameLocalizations<LocaleName> localizations) 
+            : base(ui, input, store, fonts, sounds, colors, sprites, localizations)
         {
             Foreground = store.Get(Data.UI.DefaultForeground);
             Background = store.Get(Data.UI.DefaultBackground);
@@ -41,6 +49,11 @@ namespace Fiero.Business
         protected virtual Sound GetSound(SoundName sound)
         {
             return Sounds.Get(sound);
+        }
+
+        protected virtual Color GetColor(ColorName color)
+        {
+            return Colors.Get(color);
         }
     }
 }

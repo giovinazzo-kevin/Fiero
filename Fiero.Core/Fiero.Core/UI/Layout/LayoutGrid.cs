@@ -24,6 +24,7 @@ namespace Fiero.Core
         internal Action<UIControl> InitializeControl { get; private set; } = null;
         protected List<LayoutRule> Styles { get; private set; }
 
+        public bool Is<T>() => IsCell && ControlType.IsAssignableFrom(typeof(T));
         public bool HasClass(string cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(cls);
         public bool HasAnyClass(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Any();
         public bool HasAllClasses(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Count() == cls.Length;
@@ -90,18 +91,20 @@ namespace Fiero.Core
         public LayoutGrid Col(float w = 1, float h = 1, string @class = null, string @id = null)
         {
             Cols++;
-            var ret = new LayoutGrid(this, w, h);
-            ret.Class = @class ?? Class;
-            ret.Id = id;
+            var ret = new LayoutGrid(this, Width * w, Height * h) {
+                Class = @class ?? Class,
+                Id = id
+            };
             Children.Add(ret);
             return ret;
         }
         public LayoutGrid Row(float w = 1, float h = 1, string @class = null, string @id = null)
         {
             Rows++;
-            var ret = new LayoutGrid(this, w, h);
-            ret.Class = @class ?? Class;
-            ret.Id = id;
+            var ret = new LayoutGrid(this, Width * w, Height * h) {
+                Class = @class ?? Class,
+                Id = id
+            };
             Children.Add(ret);
             return ret;
         }

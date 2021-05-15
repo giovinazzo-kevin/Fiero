@@ -32,7 +32,7 @@ namespace Fiero.Core
         public static Coord Position(this IntRect rect) => new(rect.Left, rect.Top);
         public static Vec Size(this FloatRect rect) => new(rect.Width, rect.Height);
         public static Vec Position(this FloatRect rect) => new(rect.Left, rect.Top);
-        public static Coord Align(this Coord c, int x, int y) => new(c.X - (c.X % x), c.Y - (c.Y % y));
+        public static Coord Align(this Coord c, Coord to) => new(c.X - (c.X % to.X), c.Y - (c.Y % to.Y));
 
     }
 }

@@ -43,7 +43,7 @@ namespace Fiero.Core
             control.Text.V = label;
             control.IsHidden.V = true;
             control.Position.V = new(Position.V.X, Position.V.Y + Options.Count * (Size.V.Y + 4));
-            control.Size = Size;
+            control.Size.V = Size;
             control.Clicked += Control_Clicked;
             Control_Clicked(control, new());
             return this;

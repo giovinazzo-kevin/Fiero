@@ -25,7 +25,7 @@ namespace Fiero.Core
             var grid = build(new());
             var controls = CreateRecursive(grid, p, s)
                 .ToArray();
-            var layout = new Layout(Input, controls);
+            var layout = new Layout(grid, Input, controls);
             layout.Size.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
             layout.Position.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
             return layout;
@@ -36,7 +36,7 @@ namespace Fiero.Core
                 var resolver = ServiceProvider.GetInstance(resolverType);
                 var resolveMethod = resolver.GetType().GetMethod(nameof(IUIControlResolver<UIControl>.Resolve));
                 return (p, s) => {
-                    var control = resolveMethod.Invoke(resolver, new object[] { p, s });
+                    var control = resolveMethod.Invoke(resolver, new object[] { grid, p, s });
                     return (UIControl)control;
                 };
             }

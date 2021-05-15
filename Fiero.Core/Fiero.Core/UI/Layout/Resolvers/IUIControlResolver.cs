@@ -3,6 +3,6 @@
     public interface IUIControlResolver<T>
         where T : UIControl
     {
-        T Resolve(Coord position, Coord size);
+        T Resolve(LayoutGrid dom, Coord position, Coord size);
     }
 }

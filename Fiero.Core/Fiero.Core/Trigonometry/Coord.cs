@@ -69,6 +69,9 @@ namespace Fiero.Core
         
         public Coord Clamp(int min = int.MinValue, int max = int.MaxValue) => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
 
+        public Coord Clamp(int minX = int.MinValue, int maxX = int.MaxValue, int minY = int.MinValue, int maxY = int.MaxValue)
+            => new(Math.Clamp(X, minX, maxX), Math.Clamp(Y, minY, maxY));
+
         public override int GetHashCode()
         {
             var hash = new HashCode();

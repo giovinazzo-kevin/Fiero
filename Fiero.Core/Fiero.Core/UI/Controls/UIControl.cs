@@ -14,17 +14,40 @@ namespace Fiero.Core
         public readonly List<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
 
+        protected static Coord DeltaPropagate(UIControlProperty<Coord> prop, UIControlProperty<Coord> child, Coord value)
+        {
+            var delta = prop.V - value;
+            return child.V + delta;
+        }
+
         public readonly UIControlProperty<bool> Clickable = new(nameof(Clickable), false);
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
+        public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new());
+        public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new());
         public readonly UIControlProperty<Coord> Position = new(nameof(Position), new());
-        public UIControlProperty<Coord> Size = new(nameof(Size), new());
-        public UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1));
+        public readonly UIControlProperty<Coord> Size = new(nameof(Size), new());
+        public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1));
         public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255));
-        public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0));
+        public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0));
         public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0));
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagate = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagate = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
+
+        public Coord BorderRenderPos => (Position.V + Margin.V).Align(Snap);
+        public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
+        public Coord BorderRenderSize => (Size.V - Margin.V * 2).Align(Snap);
+        public Coord ContentRenderSize => (Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap);
+
+        public void CopyProperties(UIControl from)
+        {
+            foreach (var fromProp in from.Properties) {
+                if(Properties.SingleOrDefault(x => x.Name.Equals(fromProp.Name)) is { } myProp) {
+                    myProp.Value = fromProp.Value;
+                }
+            }
+        }
+
 
         public UIControl(GameInput input)
         {
@@ -50,10 +73,10 @@ namespace Fiero.Core
                     return true;
                 }
             }
-            if (point.X >= Position.V.X * Scale.V.X
-                && point.X <= Position.V.X * Scale.V.X + Size.V.X * Scale.V.X
-                && point.Y >= Position.V.Y * Scale.V.Y 
-                && point.Y <= Position.V.Y * Scale.V.Y + Size.V.Y * Scale.V.Y) {
+            if (point.X >= BorderRenderPos.X * Scale.V.X
+                && point.X <= BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
+                && point.Y >= BorderRenderPos.Y * Scale.V.Y 
+                && point.Y <= BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y) {
                 owner = this;
                 return true;
             }
@@ -108,8 +131,8 @@ namespace Fiero.Core
 
         protected virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
-            var rect = new RectangleShape(Size.V.ToVector2f()) {
-                Position = Position.V.ToVector2f(),
+            var rect = new RectangleShape(BorderRenderSize.ToVector2f()) {
+                Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background
             };
             target.Draw(rect, states);

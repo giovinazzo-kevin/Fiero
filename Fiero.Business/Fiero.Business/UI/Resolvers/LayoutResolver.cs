@@ -4,14 +4,22 @@ namespace Fiero.Business
 {
     public class LayoutResolver : UIControlResolver<Layout>
     {
-        public LayoutResolver(GameUI ui, GameInput input, GameDataStore store, GameFonts<FontName> fonts, GameSounds<SoundName> sounds, GameSprites<TextureName> sprites, GameLocalizations<LocaleName> localizations)
-            : base(ui, input, store, fonts, sounds, sprites, localizations)
+        public LayoutResolver(
+            GameUI ui, 
+            GameInput input, 
+            GameDataStore store, 
+            GameFonts<FontName> fonts, 
+            GameSounds<SoundName> sounds, 
+            GameColors<ColorName> colors,
+            GameSprites<TextureName> sprites,
+            GameLocalizations<LocaleName> localizations)
+            : base(ui, input, store, fonts, sounds, colors, sprites, localizations)
         {
         }
 
-        public override Layout Resolve(Coord position, Coord size)
+        public override Layout Resolve(LayoutGrid dom, Coord position, Coord size)
         {
-            var x = new Layout(Input);
+            var x = new Layout(dom, Input);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.Position.V = position;

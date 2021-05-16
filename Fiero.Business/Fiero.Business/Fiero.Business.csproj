@@ -44,6 +44,9 @@
     <None Update="Resources\Sounds\Alarm Loop.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Sounds\converted_Loop_Alarm.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\Oof.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -77,6 +80,10 @@
     <None Update="Resources\Textures\8x8_ui.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tracker\" />
   </ItemGroup>
 
 </Project>

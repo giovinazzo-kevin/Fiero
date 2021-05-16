@@ -15,6 +15,7 @@ namespace Fiero.Business.Scenes
         {
             Main,
             Exit_NewGame,
+            Exit_Tracker,
             Exit_QuitGame
         }
 
@@ -22,7 +23,7 @@ namespace Fiero.Business.Scenes
         {
             NewGame,
             Settings,
-            About,
+            Tracker,
             QuitGame,
             
         }
@@ -62,7 +63,7 @@ namespace Fiero.Business.Scenes
                             .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
                         .End()
                         .Row(h: 0.66f)
-                            .Cell(MakeMenuButton(MenuOptions.About, SceneState.Exit_QuitGame))
+                            .Cell(MakeMenuButton(MenuOptions.Tracker, SceneState.Exit_Tracker))
                         .End()
                         .Row(h: 0.66f)
                             .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))

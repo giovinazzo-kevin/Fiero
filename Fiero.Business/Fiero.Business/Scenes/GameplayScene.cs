@@ -1,11 +1,13 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
+using SFML.System;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Transactions;
+using static SFML.Window.Keyboard;
 
 namespace Fiero.Business.Scenes
 {
@@ -28,8 +30,8 @@ namespace Fiero.Business.Scenes
         protected readonly RenderSystem RenderSystem;
         protected readonly DialogueSystem DialogueSystem;
         protected readonly GameDialogues Dialogues;
-        protected readonly GameUI UI;
         protected readonly GameSounds<SoundName> Sounds;
+        protected readonly GameUI UI;
 
         public GameplayScene(
             GameInput input,
@@ -122,7 +124,7 @@ namespace Fiero.Business.Scenes
                 ActionSystem.Update();
                 Entities.RemoveFlaggedItems();
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.R)) {
+            if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);
             }
         }

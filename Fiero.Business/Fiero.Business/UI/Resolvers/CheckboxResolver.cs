@@ -2,9 +2,9 @@
 
 namespace Fiero.Business
 {
-    public class ButtonResolver : UIControlResolver<Button>
+    public class CheckboxResolver : UIControlResolver<Checkbox>
     {
-        public ButtonResolver(
+        public CheckboxResolver(
             GameUI ui,
             GameInput input,
             GameDataStore store,
@@ -17,13 +17,12 @@ namespace Fiero.Business
         {
         }
 
-        public override Button Resolve(LayoutGrid dom)
+        public override Checkbox Resolve(LayoutGrid dom)
         {
-            var x = new Button(Input, GetText);
+            var x = new Checkbox(Input);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
-            x.ContentAwareScale.V = false;
-            x.FontSize.V = 24;
+            x.Accent.V = Accent;
             return x;
         }
     }

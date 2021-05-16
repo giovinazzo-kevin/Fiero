@@ -12,12 +12,16 @@ namespace Fiero.Core
         protected readonly LayoutGrid Parent;
         protected readonly List<LayoutGrid> Children = new();
 
+        private float _c = 0, _r = 0;
         public int Cols = 0, Rows = 0;
+        public float X = 0, Y = 0;
         public readonly float Width = 1, Height = 1;
 
         public string Id { get; set; }
         public string Class { get; set; }
-        public Coord Size => new(Cols, Rows);
+        public Coord Subdivisions => new(Cols, Rows);
+        public Vec Size => new(Width, Height);
+        public Vec Position => new(X, Y);
         public bool IsCell => Cols == 0 && Rows == 0;
         public Type ControlType { get; protected set; } = typeof(Layout);
         public UIControl ControlInstance { get; internal set; } = null;
@@ -90,21 +94,27 @@ namespace Fiero.Core
         public LayoutGrid End() => Parent ?? this;
         public LayoutGrid Col(float w = 1, float h = 1, string @class = null, string @id = null)
         {
-            Cols++;
-            var ret = new LayoutGrid(this, Width * w, Height * h) {
+            var ret = new LayoutGrid(this, w, h) {
                 Class = @class ?? Class,
-                Id = id
+                Id = id,
+                X = _c,
+                Y = _r
             };
+            _c += w;
+            Cols++;
             Children.Add(ret);
             return ret;
         }
         public LayoutGrid Row(float w = 1, float h = 1, string @class = null, string @id = null)
         {
-            Rows++;
-            var ret = new LayoutGrid(this, Width * w, Height * h) {
+            var ret = new LayoutGrid(this, w, h) {
                 Class = @class ?? Class,
-                Id = id
+                Id = id,
+                X = _c,
+                Y = _r
             };
+            _r += h;
+            Rows++;
             Children.Add(ret);
             return ret;
         }

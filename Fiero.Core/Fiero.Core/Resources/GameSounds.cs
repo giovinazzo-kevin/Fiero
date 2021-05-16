@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
+
     public class GameSounds<TSounds>
         where TSounds : struct, Enum
     {

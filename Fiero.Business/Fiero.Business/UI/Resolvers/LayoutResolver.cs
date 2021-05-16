@@ -17,13 +17,11 @@ namespace Fiero.Business
         {
         }
 
-        public override Layout Resolve(LayoutGrid dom, Coord position, Coord size)
+        public override Layout Resolve(LayoutGrid dom)
         {
             var x = new Layout(dom, Input);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
-            x.Position.V = position;
-            x.Size.V = size;
             return x;
         }
     }

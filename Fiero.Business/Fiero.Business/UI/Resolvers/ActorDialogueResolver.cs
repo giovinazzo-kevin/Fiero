@@ -18,13 +18,11 @@ namespace Fiero.Business
         {
         }
 
-        public override ActorDialogue Resolve(LayoutGrid dom, Coord position, Coord size)
+        public override ActorDialogue Resolve(LayoutGrid dom)
         {
             var x = new ActorDialogue(dom, Input, Store, UI, GetSound, GetColor);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
-            x.Position.V = position;
-            x.Size.V = size;
             return x;
         }
     }

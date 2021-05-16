@@ -18,13 +18,11 @@ namespace Fiero.Business
         {
         }
 
-        public override Paragraph Resolve(LayoutGrid dom, Coord position, Coord size)
+        public override Paragraph Resolve(LayoutGrid dom)
         {
             var x = new Paragraph(Input, GetText);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
-            x.Position.V = position;
-            x.Size.V = size;
             x.ContentAwareScale.V = false;
             x.CenterContentH.V = false;
             x.FontSize.V = 16;

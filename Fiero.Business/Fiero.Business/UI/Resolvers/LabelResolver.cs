@@ -19,13 +19,11 @@ namespace Fiero.Business
         {
         }
 
-        public override Label Resolve(LayoutGrid dom, Coord position, Coord size)
+        public override Label Resolve(LayoutGrid dom)
         {
             var x = new Label(Input, GetText);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
-            x.Position.V = position;
-            x.Size.V = size;
             x.ContentAwareScale.V = false;
             x.FontSize.V = 24;
             return x;

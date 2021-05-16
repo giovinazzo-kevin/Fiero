@@ -18,13 +18,11 @@ namespace Fiero.Business
         {
         }
 
-        public override Picture<TextureName> Resolve(LayoutGrid dom, Coord position, Coord size)
+        public override Picture<TextureName> Resolve(LayoutGrid dom)
         {
             var x = new Picture<TextureName>(Input, GetSprite);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
-            x.Position.V = position;
-            x.Size.V = size;
             return x;
         }
     }

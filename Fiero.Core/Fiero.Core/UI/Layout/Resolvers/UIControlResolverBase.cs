@@ -44,7 +44,7 @@ namespace Fiero.Core
             Localizations = localizations;
         }
 
-        public abstract T Resolve(LayoutGrid dom, Coord position, Coord size);
+        public abstract T Resolve(LayoutGrid dom);
 
         //protected virtual Frame CreateFrame(TTextures texture, string sprite, Coord size, int tileSize)
         //{

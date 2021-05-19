@@ -94,18 +94,18 @@ namespace Fiero.Business
 
             int CreateBoss()
             {
-                return entities.CreateEnemy(ActorName.GreatKingRat, FactionName.Rats, new(obj.Position.X, obj.Position.Y));
+                return entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Rat, FactionName.Rats, NpcName.GreatKingRat);
             }
 
             int CreateEnemy()
             {
                 return Rng.Random.Next(0, 5) switch {
-                    0 => entities.CreateEnemy(ActorName.Rat, FactionName.Rats, new(obj.Position.X, obj.Position.Y)),
-                    1 => entities.CreateEnemy(ActorName.Snake, FactionName.Snakes, new(obj.Position.X, obj.Position.Y)),
-                    2 => entities.CreateEnemy(ActorName.Cat, FactionName.Cats, new(obj.Position.X, obj.Position.Y)),
-                    3 => entities.CreateEnemy(ActorName.Dog, FactionName.Dogs, new(obj.Position.X, obj.Position.Y)),
-                    4 => entities.CreateEnemy(ActorName.Boar, FactionName.Boars, new(obj.Position.X, obj.Position.Y)),
-                    _ => entities.CreateEnemy(ActorName.None, FactionName.Players, new(obj.Position.X, obj.Position.Y))
+                    0 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Rat, FactionName.Rats),
+                    1 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Snake, FactionName.Snakes),
+                    2 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Cat, FactionName.Cats),
+                    3 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Dog, FactionName.Dogs),
+                    4 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Boar, FactionName.Boars),
+                    _ => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.None, FactionName.Players)
                 };
 
             }

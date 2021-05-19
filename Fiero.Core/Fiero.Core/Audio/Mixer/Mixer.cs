@@ -3,6 +3,8 @@ using SFML.System;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
@@ -12,6 +14,8 @@ namespace Fiero.Core
     /// </summary>
     public class Mixer : SoundStream
     {
+        private ManualResetEvent BufferRefill = new(false);
+        private Time _lastGetDataCall;
         private readonly MixerTrack[] _tracks;
         public IReadOnlyList<MixerTrack> Tracks => _tracks;
         public readonly MixerTrack Master;
@@ -29,25 +33,50 @@ namespace Fiero.Core
                 Master.Attach(_tracks[i]);
             }
             Buffer = new(sampleRate);
-            Buffer.Duration = Time.FromMilliseconds(80);
+            Buffer.Duration = Time.FromMilliseconds(100);
+            for (int i = 0; i < Buffer.DurationInSamples; i++) {
+                Buffer.Store(0);
+            }
             Initialize(1, (uint)sampleRate);
+            Task.Run(FillBuffer);
+        }
+
+        protected void FillBuffer()
+        {
+            while(true) {
+                BufferRefill.WaitOne();
+                if(!Unbuffered) {
+                    while(!Buffer.Full) {
+                        var t = PlayingOffset.AsSeconds();
+                        var d = Buffer.Duration.AsSeconds() / Buffer.DurationInSamples;
+                        if (!Master.NextSample((int)SampleRate, t + Buffer.UsedDurationInSamples * d, out var sample)) {
+                            break;
+                        }
+                        if (!Buffer.Store(Sample.Denormalize(sample))) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         protected override bool OnGetData(out short[] samples)
         {
-            if(Unbuffered) {
-                return GetDataUnbuffered(out samples);
-            }
-            return GetDataBuffered(out samples);
+            var delta = PlayingOffset - _lastGetDataCall;
+            //Console.WriteLine(delta.AsMilliseconds());
+            var ret = Unbuffered ? GetDataUnbuffered(out samples) : GetDataBuffered(out samples);
+            _lastGetDataCall = PlayingOffset;
+            return ret;
 
             bool GetDataUnbuffered(out short[] samples)
             {
-                var requestSamples = (int)(SampleRate * 0.02f); // 20ms is sadly the lowest achievable delay
+                var freq = 0.02d;
+                var requestSamples = (int)(SampleRate * freq); // 20ms is unfortunately the lowest achievable delay
                 samples = new short[requestSamples];
                 var t = PlayingOffset.AsSeconds();
-                var w = 0.02f / requestSamples;
+                var w = freq / requestSamples;
                 for (int i = 0; i < requestSamples; i++) {
-                    if (!Master.NextSample((int)SampleRate, t + i * w, out var sample)) {
+                    if (!Master.NextSample((int)SampleRate, (float)(t + i * w), out var sample)) {
                         return false;
                     }
                     samples[i] = Sample.Denormalize(sample);
@@ -57,24 +86,10 @@ namespace Fiero.Core
 
             bool GetDataBuffered(out short[] samples)
             {
-                var requestSamples = Buffer.DurationInSamples / 4;
-                samples = new short[requestSamples];
-                var t = PlayingOffset.AsSeconds();
-                var w = Buffer.Duration.AsSeconds() / Buffer.DurationInSamples;
-                if (!Buffer.Full) {
-                    for (int i = 0; i < requestSamples; i++) {
-                        if (!Master.NextSample((int)SampleRate, t + Buffer.UsedDurationInSamples * w, out var sample)) {
-                            return false;
-                        }
-                        if (!Buffer.Store(Sample.Denormalize(sample))) {
-                            break;
-                        }
-                    }
-                }
-                if (Buffer.Full) {
-                    Buffer.Read(requestSamples, out samples);
-                }
-                return true;
+                var requestSamples = Buffer.DurationInSamples / 5;
+                var ret = Buffer.Read(requestSamples, out samples) == requestSamples;
+                BufferRefill.Set();
+                return ret;
             }
         }
 

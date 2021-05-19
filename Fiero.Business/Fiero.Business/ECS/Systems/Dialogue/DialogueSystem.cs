@@ -91,19 +91,16 @@ namespace Fiero.Business
                     speaker = featureSpeaker;
                 }
                 else {
-                    dialogueKey = actorSpeaker.Properties.Type.ToString();
+                    dialogueKey = actorSpeaker.Npc?.Type.ToString() ?? actorSpeaker.Properties.Type.ToString();
                     speaker = actorSpeaker;
                 }
                 foreach (var trigger in comp.Triggers) {
                     if (trigger.TryTrigger(FloorSystem.CurrentFloor, speaker, out var listeners)) {
                         var node = Dialogues.GetDialogue(dialogueKey, trigger.DialogueNode);
-                        if (node == null) {
-                            throw new ArgumentException(trigger.DialogueNode);
-                        }
                         CurrentTrigger = trigger;
                         CurrentSpeaker = speaker;
                         CurrentListeners = listeners.ToArray();
-                        UIDialogue.Node.V = node; // triggers the dialogue handlers!
+                        UIDialogue.Node.V = node ?? throw new ArgumentException(trigger.DialogueNode); // triggers the dialogue handlers!
                         if (!trigger.Repeatable) {
                             comp.Triggers.Remove(trigger);
                         }

@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Microsoft.VisualBasic;
+using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using System;
@@ -20,7 +21,7 @@ namespace Fiero.Core
             return child.V + delta;
         }
 
-        public readonly UIControlProperty<bool> Clickable = new(nameof(Clickable), false);
+        public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false);
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
         public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new());
         public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new());
@@ -33,6 +34,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagate = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagate = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
+        public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
 
         public Coord BorderRenderPos => (Position.V + Margin.V).Align(Snap);
         public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
@@ -68,62 +70,81 @@ namespace Fiero.Core
         public virtual bool Contains(Coord point, out UIControl owner)
         {
             owner = default;
-            foreach (var child in Children.Where(c => c.Clickable && !c.IsHidden)) {
-                if (child.Contains(point, out owner)) {
-                    return true;
-                }
-            }
             if (point.X >= BorderRenderPos.X * Scale.V.X
                 && point.X <= BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
                 && point.Y >= BorderRenderPos.Y * Scale.V.Y 
                 && point.Y <= BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y) {
+                foreach (var child in Children.Where(c => c.IsInteractive && !c.IsHidden)) {
+                    if (child.Contains(point, out owner)) {
+                        return true;
+                    }
+                }
                 owner = this;
                 return true;
             }
             return false;
         }
 
-        public void Click(Coord mousePos)
+        public bool Click(Coord mousePos, Mouse.Button button)
         {
-            if (Clickable) {
-                Clicked?.Invoke(this, mousePos);
-                OnClicked(mousePos);
-            }
+            var preventDefault = Clicked?.Invoke(this, mousePos, button) ?? false;
+            return preventDefault || OnClicked(mousePos, button);
         }
 
         private Coord _trackedMousePosition;
-        protected void TrackMouse(Coord mousePos)
+        protected bool TrackMouse(Coord mousePos, out UIControl clickedControl, out Mouse.Button clickedButton)
         {
+            clickedButton = default;
+            clickedControl = default;
             var wasInside = Contains(_trackedMousePosition, out _);
             var isInside = Contains(mousePos, out _);
+            var leftClick = Input.IsButtonPressed(Mouse.Button.Left);
+            var rightClick = Input.IsButtonPressed(Mouse.Button.Right);
+            var click = leftClick || rightClick;
+            var preventDefault = false;
             if (!wasInside && isInside) {
                 MouseEntered?.Invoke(this, mousePos);
                 OnMouseEntered(mousePos);
+                if (!click) {
+                    foreach (var child in Children) {
+                        child.TrackMouse(mousePos, out _, out _);
+                    }
+                }
             }
             else if (wasInside && !isInside) {
                 MouseLeft?.Invoke(this, mousePos);
                 OnMouseLeft(mousePos);
+                if (!click) {
+                    foreach (var child in Children) {
+                        child.TrackMouse(mousePos, out _, out _);
+                    }
+                }
             }
             else if (wasInside && isInside) {
                 MouseMoved?.Invoke(this, mousePos);
                 OnMouseMoved(mousePos);
+                if (!click) {
+                    foreach (var child in Children) {
+                        child.TrackMouse(mousePos, out _, out _);
+                    }
+                }
             }
-            if (isInside && Input.IsButtonPressed(Mouse.Button.Left)) {
-                var clickedControl = default(UIControl);
+            if (isInside && click) {
                 foreach (var child in Children) {
                     if (child.Contains(mousePos, out clickedControl)) {
                         break;
                     }
                 }
                 clickedControl ??= this;
-                clickedControl.Click(mousePos);
+                clickedButton = leftClick ? Mouse.Button.Left : Mouse.Button.Right;
+                preventDefault = clickedControl.Click(mousePos, clickedButton);
             }
             _trackedMousePosition = mousePos;
+            return preventDefault;
         }
 
         public virtual void Update(float t, float dt)
         {
-            TrackMouse(Input.GetMousePosition().ToCoord());
             foreach (var child in Children) {
                 child.Update(t, dt);
             }
@@ -133,7 +154,9 @@ namespace Fiero.Core
         {
             var rect = new RectangleShape(BorderRenderSize.ToVector2f()) {
                 Position = BorderRenderPos.ToVector2f(),
-                FillColor = Background
+                FillColor = Background,
+                OutlineThickness = IsActive ? 1f : 0f,
+                OutlineColor = IsInteractive ? Accent : Foreground
             };
             target.Draw(rect, states);
         }
@@ -143,7 +166,7 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             DrawBackground(target, states);
-            foreach (var child in Children) {
+            foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1)) {
                 child.Draw(target, states);
             }
         }

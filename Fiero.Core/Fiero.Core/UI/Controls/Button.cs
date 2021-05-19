@@ -7,7 +7,7 @@ namespace Fiero.Core
     {
         public Button(GameInput input, Func<string, int, Text> getText) : base(input, getText)
         {
-            Clickable.V = true;
+            IsInteractive.V = true;
         }
     }
 }

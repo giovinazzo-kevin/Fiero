@@ -25,9 +25,9 @@ namespace Fiero.Core
             var grid = build(new());
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
-            layout.Size.ValueChanged += (owner, old) => BetterResizeRecursive(layout.Size.V, grid, p, s);
-            layout.Position.ValueChanged += (owner, old) => BetterResizeRecursive(layout.Size.V, grid, p, s);
-            BetterResizeRecursive(size, grid, p, s);
+            layout.Size.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
+            layout.Position.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
+            ResizeRecursive(size, grid, p, s);
             return layout;
 
             Func<UIControl> GetResolver(Type controlType)
@@ -48,9 +48,6 @@ namespace Fiero.Core
                     var control = resolver();
                     if(control != null) {
                         grid.InitializeControl?.Invoke(grid.ControlInstance = control);
-                        foreach (var rule in grid.GetStyles(control.GetType())) {
-                            rule(control);
-                        }
                     }
                 }
 
@@ -71,7 +68,7 @@ namespace Fiero.Core
                 }
             }
 
-            void BetterResizeRecursive(Coord size, LayoutGrid grid, Vec p, Vec s)
+            void ResizeRecursive(Coord size, LayoutGrid grid, Vec p, Vec s)
             {
                 var sz = size.ToVec();
                 var gk = grid.Subdivisions.Clamp(min: 1);
@@ -81,33 +78,11 @@ namespace Fiero.Core
                     if(child.IsCell && child.ControlInstance != null) {
                         child.ControlInstance.Position.V = layout.Position + (cPos * sz).ToCoord();
                         child.ControlInstance.Size.V = (cSize * sz).ToCoord();
-                    }
-                    BetterResizeRecursive(size, child, cPos, cSize);
-                }
-            }
-
-            void ResizeRecursive(Coord size, LayoutGrid grid, Vec p, Vec s)
-            {
-                var v = size.ToVec();
-                var k = grid.Subdivisions.Clamp(min: 1);
-                var cS = s / k;
-                var enumerator = grid.GetEnumerator();
-                var offset = new Vec();
-                for (int i = 0; i < grid.Cols + 1; i++) {
-                    for (int j = 0; j < grid.Rows + 1; j++) {
-                        if (!enumerator.MoveNext()) {
-                            return;
+                        foreach (var rule in grid.GetStyles(child.ControlType)) {
+                            rule(child.ControlInstance);
                         }
-                        var child = enumerator.Current;
-                        var cR = new Vec(child.Width, child.Height);
-                        var cP = p + cS * new Vec(i, j) - offset;
-                        offset += cS - cR * cS;
-                        if(child.IsCell && child.ControlInstance != null) {
-                            child.ControlInstance.Position.V = layout.Position + (cP * v).ToCoord();
-                            child.ControlInstance.Size.V = (cR * cS * v).ToCoord();
-                        }
-                        ResizeRecursive(size, child, cP, cS);
                     }
+                    ResizeRecursive(size, child, cPos, cSize);
                 }
             }
         }

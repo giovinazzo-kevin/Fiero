@@ -6,11 +6,11 @@ namespace Fiero.Core
     public class Envelope : ISynthesizer
     {
         public readonly Knob<float> Delay   = new(0, 1, 0.0f);
-        public readonly Knob<float> Attack  = new(0, 1, 0.1f);
-        public readonly Knob<float> Hold    = new(0, 1, 0.0f);
-        public readonly Knob<float> Decay   = new(0, 1, 0.5f);
+        public readonly Knob<float> Attack  = new(0, 1, 0.02f);
+        public readonly Knob<float> Hold    = new(0, 1, 0.1f);
+        public readonly Knob<float> Decay   = new(0, 1, 0.8f);
         public readonly Knob<float> Sustain = new(0, 1, 0.5f);
-        public readonly Knob<float> Release = new(0, 1, 1.0f);
+        public readonly Knob<float> Release = new(0, 1, 0.4f);
 
         public readonly Knob<bool> Invert = new(false, true, false);
 

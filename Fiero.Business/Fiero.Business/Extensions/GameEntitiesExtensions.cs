@@ -31,10 +31,24 @@ namespace Fiero.Business
             return entity;
         }
 
-        public static int CreateEnemy(this GameEntities entities, ActorName type, FactionName faction, Coord position, string name = null, string sprite = null, Color? tint = null)
+        public static int CreateEnemy(
+           this GameEntities entities,
+           Coord position,
+           ActorName type,
+           FactionName faction,
+           NpcName? npc = null,
+           string name = null,
+           string sprite = null,
+           Color? tint = null
+       )
         {
             var factionSystem = (FactionSystem)entities.ServiceFactory.GetInstance(typeof(FactionSystem));
-            var entity = entities.CreateEntity(name ?? type.ToString(), sprite ?? type.ToString(), position, tint);
+            var entity = entities.CreateEntity(
+                name ?? npc?.ToString() ?? type.ToString(), 
+                sprite ?? npc?.ToString() ?? type.ToString(), 
+                position, 
+                tint
+            );
             entities.AddComponent<ActionComponent>(entity, c => {
                 (c.Path, c.Target, c.Direction) = (null, null, null);
                 c.ActionProvider = ActionProvider.EnemyAI();
@@ -47,18 +61,19 @@ namespace Fiero.Business
             });
             entities.AddComponent<ActorComponent>(entity, c => {
                 c.Type = type;
-                if(c.IsBoss) {
-                    c.Health = c.MaximumHealth = 30;
-                    entities.AddComponent<DialogueComponent>(entity, d => {
-                        DialogueTriggers.Set(type, d);
-                        return d;
-                    });
-                }
-                else {
-                    c.Health = c.MaximumHealth = 5;
-                }
+                c.Health = c.MaximumHealth = 5;
                 return c;
             });
+            if (npc.HasValue) {
+                entities.AddComponent<DialogueComponent>(entity, d => {
+                    DialogueTriggers.Set(npc.Value, d);
+                    return d;
+                });
+                entities.AddComponent<NpcComponent>(entity, c => {
+                    c.Type = npc.Value;
+                    return c;
+                });
+            }
             return entity;
         }
 

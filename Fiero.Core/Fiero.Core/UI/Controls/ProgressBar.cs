@@ -11,13 +11,7 @@ namespace Fiero.Core
         protected readonly Sprite LeftFull, MiddleFull, RightFull;
         public readonly int TileSize;
 
-        public int Length {
-            get => Size.V.X / TileSize;
-            set {
-                Size.V = new(value * TileSize, TileSize);
-            }
-        }
-
+        public readonly UIControlProperty<int> Length = new(nameof(Length), 3);
         public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
         public readonly UIControlProperty<bool> Center = new(nameof(Center), false);
 
@@ -31,13 +25,13 @@ namespace Fiero.Core
             LeftEmpty = le; MiddleEmpty = me; RightEmpty = re;
             LeftHalf = lh; MiddleHalf = mh; RightHalf = rh;
             LeftFull = lf; MiddleFull = mf; RightFull = rf;
-            Length = 3;
         }
 
         public override void Draw(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
+            Size.V = new(Length * TileSize, TileSize);
             base.Draw(target, states);
             for (var i = 0; i < Length; i++) {
                 var full = i < Length * Progress;

@@ -1,10 +1,13 @@
 ﻿using SFML.System;
 using System;
+using System.Threading;
 
 namespace Fiero.Core
 {
     public sealed class Buffer
     {
+        private readonly ReaderWriterLockSlim Lock = new();
+
         private short[] _buffer;
         private float _bufferLengthSeconds;
         private int _index;
@@ -34,7 +37,9 @@ namespace Fiero.Core
         {
             if (Full)
                 return false;
+            Lock.EnterWriteLock();
             _buffer[_index++] = sample;
+            Lock.ExitWriteLock();
             return !Full;
         }
 
@@ -42,12 +47,14 @@ namespace Fiero.Core
         {
             var toRead = Math.Clamp(n, 0, _buffer.Length);
             samples = new short[toRead];
+            Lock.EnterReadLock();
             for (int i = 0; i < toRead; i++) {
                 samples[i] = _buffer[i];
             }
             Array.ConstrainedCopy(_buffer, toRead, _buffer, 0, _buffer.Length - toRead);
-            _index -= toRead;
+            _index = Math.Max(0, _index - toRead);
+            Lock.ExitReadLock();
             return toRead;
-        } 
+        }
     }
 }

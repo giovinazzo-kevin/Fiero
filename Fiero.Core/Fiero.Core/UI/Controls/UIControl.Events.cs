@@ -1,16 +1,17 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 
 namespace Fiero.Core
 {
     public partial class UIControl
     {
-        public event Action<UIControl, Coord> Clicked;
-        protected virtual void OnClicked(Coord mousePos) { }
+        public event Func<UIControl, Coord, Mouse.Button, bool> Clicked;
+        protected virtual bool OnClicked(Coord mousePos, Mouse.Button button) { return false; }
         public event Action<UIControl, Coord> MouseEntered;
-        protected virtual void OnMouseEntered(Coord mousePos) { IsMouseOver.V = true; }
+        protected virtual bool OnMouseEntered(Coord mousePos) { IsMouseOver.V = true; return false; }
         public event Action<UIControl, Coord> MouseMoved;
-        protected virtual void OnMouseMoved(Coord mousePos) { }
+        protected virtual bool OnMouseMoved(Coord mousePos) { return false; }
         public event Action<UIControl, Coord> MouseLeft;
-        protected virtual void OnMouseLeft(Coord mousePos) { IsMouseOver.V = false; }
+        protected virtual bool OnMouseLeft(Coord mousePos) { IsMouseOver.V = false; return false; }
     }
 }

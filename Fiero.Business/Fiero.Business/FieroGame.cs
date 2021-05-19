@@ -95,7 +95,7 @@ namespace Fiero.Business
             Glossary.LoadFactionGlossary(FactionName.Dogs);
             Glossary.LoadFactionGlossary(FactionName.Boars);
 
-            Dialogues.LoadActorDialogues(ActorName.GreatKingRat);
+            Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
             InitializeStore();

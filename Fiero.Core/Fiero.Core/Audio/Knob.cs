@@ -38,5 +38,7 @@ namespace Fiero.Core
         }
 
         public static implicit operator T(Knob<T> k) => k.V;
+
+        public override string ToString() => $"{{ {V} }}";
     }
 }

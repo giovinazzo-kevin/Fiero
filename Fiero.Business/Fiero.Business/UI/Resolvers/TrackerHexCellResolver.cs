@@ -1,12 +1,11 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
-using System;
 
 namespace Fiero.Business
 {
-    public class LabelResolver : UIControlResolver<Label>
+    public class TrackerHexCellResolver : UIControlResolver<TrackerHexCell>
     {
-        public LabelResolver(
+        public TrackerHexCellResolver(
             GameUI ui,
             GameInput input,
             GameDataStore store,
@@ -19,13 +18,13 @@ namespace Fiero.Business
         {
         }
 
-        public override Label Resolve(LayoutGrid dom)
+        public override TrackerHexCell Resolve(LayoutGrid dom)
         {
-            var x = new Label(Input, GetText);
+            var x = new TrackerHexCell(Input, GetText);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;
-            x.FontSize.V = 24;
+            x.FontSize.V = 8;
             return x;
         }
     }

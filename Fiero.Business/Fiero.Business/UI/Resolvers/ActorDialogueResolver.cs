@@ -20,7 +20,7 @@ namespace Fiero.Business
 
         public override ActorDialogue Resolve(LayoutGrid dom)
         {
-            var x = new ActorDialogue(dom, Input, Store, UI, GetSound, GetColor);
+            var x = new ActorDialogue(Input, Store, UI, GetSound, GetColor);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             return x;

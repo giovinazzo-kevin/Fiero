@@ -6,7 +6,8 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public class ActorDialogue : Layout
+
+    public class ActorDialogue : UIControl
     {
         private Picture<TextureName> _picture;
         private Paragraph _paragraph, _choices;
@@ -20,13 +21,12 @@ namespace Fiero.Business
         public readonly UIControlProperty<string> SelectedChoice = new(nameof(SelectedChoice));
 
         public ActorDialogue(
-            LayoutGrid dom,
             GameInput input, 
             GameDataStore store,
             GameUI ui, 
             Func<SoundName, Sound> getSound, 
             Func<ColorName, Color> getColor
-        ) : base(dom, input)
+        ) : base(input)
         {
             Store = store;
             GetSound = getSound;

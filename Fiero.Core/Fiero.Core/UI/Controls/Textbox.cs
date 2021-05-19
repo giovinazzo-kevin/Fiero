@@ -10,7 +10,7 @@ namespace Fiero.Core
     {
         public Textbox(GameInput input, Func<string, int, Text> getText) : base(input, getText)
         {
-            Clickable.V = true;
+            IsInteractive.V = true;
         }
 
         protected bool IsPrintable(Keyboard.Key k, out char representation)

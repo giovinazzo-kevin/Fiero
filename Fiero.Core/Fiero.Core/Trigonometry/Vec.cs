@@ -73,5 +73,8 @@ namespace Fiero.Core
             hash.Add(Y);
             return hash.ToHashCode();
         }
+
+        public override string ToString() => $"{{ {X}; {Y} }}";
+
     }
 }

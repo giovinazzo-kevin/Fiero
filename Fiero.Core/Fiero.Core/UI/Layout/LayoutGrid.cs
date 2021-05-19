@@ -33,6 +33,17 @@ namespace Fiero.Core
         public bool HasAnyClass(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Any();
         public bool HasAllClasses(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Count() == cls.Length;
 
+        public IEnumerable<UIControl> GetAllControlInstances()
+        {
+            if (ControlInstance != null)
+                yield return ControlInstance;
+            foreach (var c in Children) {
+                foreach (var control in c.GetAllControlInstances()) {
+                    yield return control;
+                }
+            }
+        }
+
         public IEnumerable<Action<T>> GetStyles<T>()
             where T : UIControl
         {
@@ -128,6 +139,15 @@ namespace Fiero.Core
             ControlType = typeof(T);
             InitializeControl = x => initialize?.Invoke((T)x);
             return this;
+        }
+
+        public LayoutGrid Repeat(int count, Func<int, LayoutGrid, LayoutGrid> action)
+        {
+            var ret = this;
+            for (int i = 0; i < count; i++) {
+                ret = action(i, ret);
+            }
+            return ret;
         }
 
         public IEnumerator<LayoutGrid> GetEnumerator() => Children.GetEnumerator();

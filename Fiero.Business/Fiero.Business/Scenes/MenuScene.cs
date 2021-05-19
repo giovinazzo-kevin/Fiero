@@ -77,7 +77,7 @@ namespace Fiero.Business.Scenes
 
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
                 l.Text.V = Localizations.Get($"Menu.{option}");
-                l.Clicked += (_, __) => TrySetState(state);
+                l.Clicked += (_, __, ___) => TrySetState(state);
             };
         }
 

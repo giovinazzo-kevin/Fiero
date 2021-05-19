@@ -24,8 +24,7 @@ namespace Fiero.Business
             var resolvers = typeof(Program).Assembly.GetTypes()
                 .Where(t => !t.IsAbstract)
                 .Select(t => (Type: t, Interfaces: t.GetInterfaces()
-                        .Where(i => i.IsGenericType 
-                            && i.GetGenericTypeDefinition() == typeof(IUIControlResolver<>))))
+                        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUIControlResolver<>))))
                 .Where(t => t.Interfaces.Any());
             foreach (var (resolverType, interfaceTypes) in resolvers) {
                 foreach (var type in interfaceTypes) {

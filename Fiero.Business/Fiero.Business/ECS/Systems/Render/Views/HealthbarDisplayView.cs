@@ -31,14 +31,14 @@ namespace Fiero.Business
                     .Cell<ProgressBar>(x => {
                         EnemyBar = x;
                         x.Center.V = true;
-                        x.Length = 3;
+                        x.Length.V = 3;
                     })
                 .End()
                 .Row()
                     .Cell<ProgressBar>(x => {
                         BossBar = x;
                         x.Center.V = true;
-                        x.Length = 6;
+                        x.Length.V = 6;
                     })
                 .End()
             );
@@ -50,7 +50,7 @@ namespace Fiero.Business
                 return;
             if (Following.Properties.Health == Following.Properties.MaximumHealth)
                 return;
-            var bar = Following.Properties.IsBoss
+            var bar = (Following.Npc?.IsBoss ?? false)
                 ? BossBar : EnemyBar;
             bar.Position.V = Position;
             bar.Progress.V = Following.Properties.MaximumHealth > 0

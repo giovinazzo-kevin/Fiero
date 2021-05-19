@@ -8,8 +8,6 @@
         Snake,
         Dog,
         Cat,
-        Boar,
-        Miniboss,
-        GreatKingRat
+        Boar
     }
 }

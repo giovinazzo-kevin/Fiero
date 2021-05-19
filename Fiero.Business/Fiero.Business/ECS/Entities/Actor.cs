@@ -12,6 +12,7 @@ namespace Fiero.Business
         public ActorComponent Properties { get; private set; }
         [RequiredComponent]
         public FactionComponent Faction { get; private set; }
+        public NpcComponent Npc { get; private set; }
         public LogComponent Log { get; private set; }
     }
 }

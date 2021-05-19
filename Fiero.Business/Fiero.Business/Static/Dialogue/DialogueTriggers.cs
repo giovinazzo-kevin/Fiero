@@ -4,10 +4,10 @@ namespace Fiero.Business
 {
     public static class DialogueTriggers
     {
-        public static void Set(ActorName type, DialogueComponent component)
+        public static void Set(NpcName type, DialogueComponent component)
         {
             switch (type) {
-                case ActorName.GreatKingRat:
+                case NpcName.GreatKingRat:
                     foreach (var t in GreatKingRat()) component.Triggers.Add(t);
                     break;
             }

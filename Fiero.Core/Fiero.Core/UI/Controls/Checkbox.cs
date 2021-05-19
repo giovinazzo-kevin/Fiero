@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using SFML.Window;
 
 namespace Fiero.Core
 {
@@ -8,21 +9,33 @@ namespace Fiero.Core
 
         public Checkbox(GameInput input) : base(input)
         {
-            Clickable.V = true;
+            IsInteractive.V = true;
         }
 
-        protected override void OnClicked(Coord mousePos)
+        protected override bool OnClicked(Coord mousePos, Mouse.Button button)
         {
             Checked.V = !Checked.V;
+            return true;
         }
 
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if(Checked.V) {
+            if (Checked.V) {
                 var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2) {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
-                    FillColor = Accent
+                    FillColor = Accent,
+                    OutlineColor = Foreground,
+                    OutlineThickness = 2f
+                };
+                target.Draw(rect, states);
+            }
+            else {
+                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2) {
+                    Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
+                    FillColor = Background,
+                    OutlineColor = Foreground,
+                    OutlineThickness = 2f
                 };
                 target.Draw(rect, states);
             }

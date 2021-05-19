@@ -81,17 +81,17 @@ namespace Fiero.Business.Scenes
 
         protected void SubscribeDialogueHandlers()
         {
-            Dialogues.GetDialogue(ActorName.GreatKingRat, GKRDialogueName.JustMet)
+            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
                 .Triggered += (t, eh) => {
                     Sounds.Get(SoundName.BossSpotted).Play();
                 };
-            Dialogues.GetDialogue(ActorName.GreatKingRat, GKRDialogueName.JustMet_Friend)
+            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
                         FactionSystem.SetMutualStanding(FactionName.Rats, FactionName.Players, StandingName.Loved);
                     }
                 };
-            Dialogues.GetDialogue(ActorName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
+            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
                         FactionSystem.SetMutualStanding(FactionName.Rats, FactionName.Players, StandingName.Hated);
@@ -102,7 +102,7 @@ namespace Fiero.Business.Scenes
                     foreach (var player in eh.DialogueListeners.Players()) {
                         var friends = Enumerable.Range(0, 5)
                             .Select(i => FloorSystem.CurrentFloor.Entities
-                                .CreateEnemy(ActorName.Rat, FactionName.Players, player.Physics.Position));
+                                .CreateEnemy(player.Physics.Position, ActorName.Rat, FactionName.Players));
                         foreach (var f in friends) {
                             TrySpawn(f, out _);
                         }

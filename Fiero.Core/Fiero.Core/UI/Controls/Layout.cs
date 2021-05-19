@@ -27,6 +27,22 @@ namespace Fiero.Core
             where T : UIControl
             => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).Cast<T>();
 
+        public override void Update(float t, float dt)
+        {
+            var preventDefault = TrackMouse(Input.GetMousePosition().ToCoord(), out var clickedControl, out var clickedButton);
+            if(!preventDefault) {
+                if (clickedControl != null) {
+                    foreach (var c in Children) {
+                        c.IsActive.V = false;
+                    }
+                    if (clickedControl != this && clickedControl.IsInteractive) {
+                        clickedControl.IsActive.V = true;
+                    }
+                }
+            }
+            base.Update(t, dt);
+        }
+
         public Layout(LayoutGrid dom, GameInput input, params UIControl[] controls) : base(input)
         {
             Dom = dom;

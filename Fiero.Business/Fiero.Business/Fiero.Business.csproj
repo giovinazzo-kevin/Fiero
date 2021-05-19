@@ -82,8 +82,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Tracker\" />
-  </ItemGroup>
-
 </Project>

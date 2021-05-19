@@ -77,6 +77,14 @@ namespace Fiero.Business
                     HealthbarDisplay.Position = spritePosition - new Coord(0, tileSize);
                     HealthbarDisplay.Following = actor;
                     HealthbarDisplay.Draw(win, t, dt);
+                    if(actor.Npc != null) {
+                        if(actor.Npc.IsBoss) {
+                            //drawable.Render.Sprite.
+                        }
+                        else {
+
+                        }
+                    }
                 }
             }
             SelectedActor.Draw(win, t, dt);

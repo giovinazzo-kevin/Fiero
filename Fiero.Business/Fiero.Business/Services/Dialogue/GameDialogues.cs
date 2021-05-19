@@ -16,7 +16,7 @@ namespace Fiero.Business
         public DialogueNode GetDialogue(string owner, string id) => DialogueNodes.TryGetValue(owner, out var dict) 
             && dict.TryGetValue(id, out var node) ? node : null;
 
-        public DialogueNode GetDialogue<T>(ActorName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
+        public DialogueNode GetDialogue<T>(NpcName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
         public DialogueNode GetDialogue<T>(FeatureName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
 
         public GameDialogues(GameLocalizations<LocaleName> localizations)
@@ -79,7 +79,7 @@ namespace Fiero.Business
             DialogueNodes.Add(actor, nodes);
         }
 
-        public void LoadActorDialogues(ActorName actor)
+        public void LoadActorDialogues(NpcName actor)
         {
             LoadDialogues(actor.ToString());
         }

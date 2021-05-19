@@ -1,12 +1,10 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
-using System;
 
 namespace Fiero.Business
 {
-    public class LabelResolver : UIControlResolver<Label>
+    public class ComboboxResolver : UIControlResolver<Combobox>
     {
-        public LabelResolver(
+        public ComboboxResolver(
             GameUI ui,
             GameInput input,
             GameDataStore store,
@@ -19,13 +17,12 @@ namespace Fiero.Business
         {
         }
 
-        public override Label Resolve(LayoutGrid dom)
+        public override Combobox Resolve(LayoutGrid dom)
         {
-            var x = new Label(Input, GetText);
+            var x = new Combobox(Input, GetText, () => new(Input, GetText));
             x.Foreground.V = Foreground;
-            x.Background.V = Color.Transparent;
-            x.ContentAwareScale.V = false;
-            x.FontSize.V = 24;
+            x.Background.V = Background;
+            x.Accent.V = Accent;
             return x;
         }
     }

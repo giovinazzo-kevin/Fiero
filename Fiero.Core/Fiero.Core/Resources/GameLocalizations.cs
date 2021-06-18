@@ -40,6 +40,8 @@ namespace Fiero.Core
             _translations[culture] = value;
         }
 
+        public bool HasLocale(TLocales culture) => _translations.ContainsKey(culture);
+
         public string Get(string key)
         {
             if(TryGet<string>(key, out var value)) {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fiero.Business.Scenes
@@ -30,6 +31,7 @@ namespace Fiero.Business.Scenes
 
         protected readonly GameUI UI;
         protected readonly GameLocalizations<LocaleName> Localizations;
+        protected readonly GameShaders<ShaderName> Shaders;
         protected readonly GameDataStore Store;
         protected readonly OffButton OffButton;
 
@@ -38,10 +40,11 @@ namespace Fiero.Business.Scenes
 
         protected static MenuOptions[] AllOptions => Enum.GetValues<MenuOptions>();
 
-        public MenuScene(GameDataStore store, GameUI ui, GameLocalizations<LocaleName> locals, OffButton off)
+        public MenuScene(GameDataStore store, GameUI ui, GameLocalizations<LocaleName> locals, GameShaders<ShaderName> shaders, OffButton off)
         {
             UI = ui;
             Localizations = locals;
+            Shaders = shaders;
             Store = store;
             OffButton = off;
         }

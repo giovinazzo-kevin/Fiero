@@ -121,7 +121,7 @@ namespace Fiero.Business
                     }
                     var newPos = actor.Physics.Position + direction;
                     var actorsHere = _floorSystem.ActorsAt(newPos);
-                    if (!actorsHere.Any(a => actor.Faction.Standings.Get(a.Faction.Type).MayAttack())) {
+                    if (!actorsHere.Any(a => actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
                         return true;
                     }
                     actor.Action.Target = actorsHere.Single();
@@ -130,7 +130,7 @@ namespace Fiero.Business
                     // out of reach
                     return true;
                 }
-                if (actor.Faction.Standings.Get(actor.Action.Target.Faction.Type).MayAttack()) {
+                if (actor.Faction.Relationships.Get(actor.Action.Target.Faction.Type).MayAttack()) {
                     // attack!
                     actor.Log?.Write($"$Action.YouAttack$ {actor.Action.Target.Info.Name}.");
                     actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.AttacksYou$.");
@@ -139,7 +139,9 @@ namespace Fiero.Business
                         actor.Action.Target.Action.Target = actor;
                     }
                     // make sure that people hold a grudge regardless of factions
-                    actor.Action.Target.Properties.Standings.Set(actor, StandingName.Hated);
+                    actor.Action.Target.Properties.Relationships.TryUpdate(actor, x => x
+                        .With(StandingName.Hated)
+                    , out _);
 
                     if (--actor.Action.Target.Properties.Health <= 0) {
                         actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.KillsYou$.");

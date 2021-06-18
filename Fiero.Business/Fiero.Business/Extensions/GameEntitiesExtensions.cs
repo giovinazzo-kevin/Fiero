@@ -56,12 +56,13 @@ namespace Fiero.Business
             });
             entities.AddComponent<FactionComponent>(entity, c => {
                 c.Type = faction;
-                c.Standings = factionSystem.GetStandings(c.Type);
+                c.Relationships = factionSystem.GetRelationships(c.Type);
                 return c;
             });
             entities.AddComponent<ActorComponent>(entity, c => {
                 c.Type = type;
                 c.Health = c.MaximumHealth = 5;
+                c.Personality = Personality.RandomPersonality();
                 return c;
             });
             if (npc.HasValue) {
@@ -88,7 +89,7 @@ namespace Fiero.Business
             });
             entities.AddComponent<FactionComponent>(entity, c => {
                 c.Type = FactionName.Players;
-                c.Standings = factionSystem.GetStandings(c.Type);
+                c.Relationships = factionSystem.GetRelationships(c.Type);
                 return c;
             });
             entities.AddComponent<ActorComponent>(entity, c => {

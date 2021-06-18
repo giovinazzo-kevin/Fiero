@@ -10,7 +10,8 @@ namespace Fiero.Business
 
         public ActorName Type { get; set; }
         public Floor CurrentFloor { get; set; }
-        public ActorStandings Standings { get; set; } = new ActorStandings();
-        public List<Item> Inventory { get; set; } = new List<Item>();
+        public ActorRelationships Relationships { get; set; } = new();
+        public Personality Personality { get; set; } = new();
+        public List<Item> Inventory { get; set; } = new();
     }
 }

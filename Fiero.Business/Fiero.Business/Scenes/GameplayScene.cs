@@ -88,13 +88,31 @@ namespace Fiero.Business.Scenes
             Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
-                        FactionSystem.SetMutualStanding(FactionName.Rats, FactionName.Players, StandingName.Loved);
+                        FactionSystem.TryUpdateRelationship(FactionName.Rats, FactionName.Players, 
+                            x => x.With(StandingName.Loved), out _);
                     }
                 };
             Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
-                        FactionSystem.SetMutualStanding(FactionName.Rats, FactionName.Players, StandingName.Hated);
+                        FactionSystem.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
+                            x => x.With(StandingName.Hated), out _);
+                        FactionSystem.TryCreateConflict(
+                            FactionName.Rats, (r, i) => i < 3,
+                            FactionName.Players, (p, i) => i == 0,
+                            out _);
+                        FactionSystem.TryCreateConflict(
+                            FactionName.Rats, (r, i) => i < 3,
+                            FactionName.Players, (p, i) => i == 0,
+                            out _);
+                        FactionSystem.TryCreateConflict(
+                            FactionName.Rats, (r, i) => i < 3,
+                            FactionName.Players, (p, i) => i == 0,
+                            out _);
+                        FactionSystem.TryCreateConflict(
+                            FactionName.Rats, (r, i) => i < 3,
+                            FactionName.Players, (p, i) => i == 0,
+                            out _);
                     }
                 };
             Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)

@@ -13,13 +13,14 @@ namespace Fiero.Core
             _ioc = new ServiceContainer();
         }
 
-        public TGame BuildGame<TGame, TFonts, TTextures, TLocales, TSounds, TColors>(Action<ServiceContainer> configureServices = null)
-            where TGame : Game<TFonts, TTextures, TLocales, TSounds, TColors>
+        public TGame BuildGame<TGame, TFonts, TTextures, TLocales, TSounds, TColors, TShaders>(Action<ServiceContainer> configureServices = null)
+            where TGame : Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
             where TFonts : struct, Enum
             where TTextures : struct, Enum
             where TLocales : struct, Enum
             where TSounds : struct, Enum
             where TColors : struct, Enum
+            where TShaders : struct, Enum
         {
             _ioc.Register<IServiceFactory>(_ => _ioc.BeginScope());
             _ioc.Register<OffButton>(new PerContainerLifetime());
@@ -27,6 +28,7 @@ namespace Fiero.Core
             _ioc.Register<GameInput>(new PerContainerLifetime());
             _ioc.Register<GameFonts<TFonts>>(new PerContainerLifetime());
             _ioc.Register<GameTextures<TTextures>>(new PerContainerLifetime());
+            _ioc.Register<GameShaders<TShaders>>(new PerContainerLifetime());
             _ioc.Register<GameColors<TColors>>(new PerContainerLifetime());
             _ioc.Register<GameSounds<TSounds>>(new PerContainerLifetime());
             _ioc.Register<GameSprites<TTextures>>(new PerContainerLifetime());

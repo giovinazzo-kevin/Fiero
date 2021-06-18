@@ -19,6 +19,7 @@ namespace Fiero.Core
         }
 
         public Color Get(TColors col) => Colors[col];
+        public bool TryGet(TColors col, out Color value) => Colors.TryGetValue(col, out value);
 
         public async Task LoadJsonAsync(string fileName)
         {

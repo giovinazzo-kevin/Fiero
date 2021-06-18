@@ -2,24 +2,24 @@
 {
     public static class FactionExtensions
     {
-        public static bool MayAttack(this StandingName a)
+        public static bool MayAttack(this Relationship a)
         {
-            return (int)a <= (int)StandingName.Neutral;
+            return (int)a.Standing <= (int)StandingName.Tolerated;
         }
 
-        public static bool MayTarget(this StandingName a)
+        public static bool MayTarget(this Relationship a)
         {
-            return (int)a < (int)StandingName.Neutral;
+            return (int)a.Standing < (int)StandingName.Tolerated;
         }
 
-        public static bool MayFollow(this StandingName a)
+        public static bool MayFollow(this Relationship a)
         {
-            return (int)a > (int)StandingName.Liked;
+            return (int)a.Standing > (int)StandingName.Liked;
         }
 
-        public static bool MayHelp(this StandingName a)
+        public static bool MayHelp(this Relationship a)
         {
-            return (int)a > (int)StandingName.Neutral;
+            return (int)a.Standing > (int)StandingName.Tolerated;
         }
     }
 }

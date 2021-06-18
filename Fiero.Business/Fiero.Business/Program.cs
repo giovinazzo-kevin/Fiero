@@ -13,25 +13,20 @@ namespace Fiero.Business
         static async Task Main(string[] args)
         {
             using var host = new GameHost();
-            var game = host.BuildGame<FieroGame, FontName, TextureName, LocaleName, SoundName, ColorName>(Register);
-            await game.InitializeAsync();
-            game.Run(game.OffButton.Token);
+            var game = host.BuildGame<
+                FieroGame, 
+                FontName, 
+                TextureName, 
+                LocaleName, 
+                SoundName, 
+                ColorName, 
+                ShaderName
+            >(Register);
+            await game.RunAsync(game.OffButton.Token);
         }
 
         static void Register(ServiceContainer services)
         {
-            // Register UI resolvers by reflection
-            var resolvers = typeof(Program).Assembly.GetTypes()
-                .Where(t => !t.IsAbstract)
-                .Select(t => (Type: t, Interfaces: t.GetInterfaces()
-                        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUIControlResolver<>))))
-                .Where(t => t.Interfaces.Any());
-            foreach (var (resolverType, interfaceTypes) in resolvers) {
-                foreach (var type in interfaceTypes) {
-                    services.Register(type, resolverType);
-                }
-            }
-
             // Register services
             services.Register<GameGlossaries>(new PerContainerLifetime());
             services.Register<GameDialogues>(new PerContainerLifetime());
@@ -55,6 +50,24 @@ namespace Fiero.Business
             foreach (var sceneType in scenes) {
                 services.Register(sceneType, new PerContainerLifetime());
             }
+            // Register UI resolvers via reflection
+            var uiResolvers = typeof(Program).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract)
+                .Select(t => (Type: t, Interfaces: t.GetInterfaces()
+                        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUIControlResolver<>))))
+                .Where(t => t.Interfaces.Any());
+            foreach (var (resolverType, interfaceTypes) in uiResolvers) {
+                foreach (var type in interfaceTypes) {
+                    services.Register(type, resolverType);
+                }
+            }
+            // Register conflict resolvers via reflection
+            var conflictResolvers = typeof(Program).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract && t.GetInterface(nameof(IConflictResolver)) != null);
+            foreach (var resolverType in conflictResolvers) {
+                services.Register(typeof(IConflictResolver), resolverType);
+            }
+
         }
     }
 }

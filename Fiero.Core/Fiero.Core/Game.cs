@@ -2,18 +2,22 @@
 using SFML.System;
 using SFML.Window;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
-    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors>
+    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
         where TFonts : struct, Enum
         where TTextures : struct, Enum
         where TLocales : struct, Enum
         where TSounds : struct, Enum
         where TColors : struct, Enum
+        where TShaders : struct, Enum
     {
         public readonly OffButton OffButton;
         public readonly GameLoop Loop;
@@ -23,15 +27,28 @@ namespace Fiero.Core
         public readonly GameColors<TColors> Colors;
         public readonly GameFonts<TFonts> Fonts;
         public readonly GameSounds<TSounds> Sounds;
+        public readonly GameShaders<TShaders> Shaders;
         public readonly GameDirector Director;
         public readonly GameLocalizations<TLocales> Localization;
 
-        public Game(OffButton off, GameLoop loop, GameInput input, GameTextures<TTextures> resources, GameSprites<TTextures> sprites, GameFonts<TFonts> fonts, GameSounds<TSounds> sounds, GameColors<TColors> colors, GameDirector director, GameLocalizations<TLocales> localization)
+        public Game(
+            OffButton off, 
+            GameLoop loop, 
+            GameInput input, 
+            GameTextures<TTextures> resources, 
+            GameSprites<TTextures> sprites,
+            GameFonts<TFonts> fonts, 
+            GameSounds<TSounds> sounds, 
+            GameColors<TColors> colors,
+            GameShaders<TShaders> shaders,
+            GameLocalizations<TLocales> localization,
+            GameDirector director)
         {
             OffButton = off;
             Loop = loop;
             Input = input;
             Colors = colors;
+            Shaders = shaders;
             Textures = resources;
             Sprites = sprites;
             Sounds = sounds;
@@ -46,6 +63,35 @@ namespace Fiero.Core
             return Task.CompletedTask;
         }
 
+        protected bool ValidateResources<TEnum>(Func<TEnum, bool> validate, out IEnumerable<TEnum> failures)
+            where TEnum : struct, Enum
+        {
+            failures = Enum.GetValues<TEnum>().Where(x => !validate(x));
+            return !failures.Any();
+        }
+
+        protected virtual void ValidateResources()
+        {
+            if (!ValidateResources<TFonts>(f => Fonts.Get(f) != null, out var missingFonts)) {
+                throw new AggregateException(missingFonts.Select(x => new ResourceNotFoundException<TFonts>(x)));
+            }
+            if (!ValidateResources<TTextures>(f => Textures.Get(f) != null, out var missingTextures)) {
+                throw new AggregateException(missingTextures.Select(x => new ResourceNotFoundException<TTextures>(x)));
+            }
+            if (!ValidateResources<TColors>(f => Colors.TryGet(f, out _), out var missingColors)) {
+                throw new AggregateException(missingColors.Select(x => new ResourceNotFoundException<TColors>(x)));
+            }
+            if (!ValidateResources<TSounds>(f => Sounds.Get(f) != null, out var missingSounds)) {
+                throw new AggregateException(missingSounds.Select(x => new ResourceNotFoundException<TSounds>(x)));
+            }
+            if (!ValidateResources<TShaders>(f => Shaders.Get(f) != null, out var missingShaders)) {
+                throw new AggregateException(missingShaders.Select(x => new ResourceNotFoundException<TShaders>(x)));
+            }
+            if (!ValidateResources<TLocales>(f => Localization.HasLocale(f), out var missingLocales)) {
+                throw new AggregateException(missingLocales.Select(x => new ResourceNotFoundException<TLocales>(x)));
+            }
+        }
+
         protected virtual void InitializeWindow(RenderWindow win)
         {
             win.SetKeyRepeatEnabled(true);
@@ -56,8 +102,10 @@ namespace Fiero.Core
             };
         }
 
-        public void Run(CancellationToken token = default)
+        public async Task RunAsync(CancellationToken token = default)
         {
+            await InitializeAsync();
+            ValidateResources();
             using var win = new RenderWindow(new VideoMode(800, 800), String.Empty);
             InitializeWindow(win);
             Loop.Tick += (t, dt) => {

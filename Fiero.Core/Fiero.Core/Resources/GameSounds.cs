@@ -44,13 +44,16 @@ namespace Fiero.Core
         public void Add(TSounds key, SoundBuffer value) => Buffers[key] = value;
         public Sound Get(TSounds key, Coord? pos = null, bool relativeToListener = false)
         {
-            var sound = new Sound(Buffers.GetValueOrDefault(key));
-            if(pos is { } p) {
-                sound.Position = new(p.X, p.Y, 0);
+            if(Buffers.GetValueOrDefault(key) is { } buf) {
+                var sound = new Sound(buf);
+                if (pos is { } p) {
+                    sound.Position = new(p.X, p.Y, 0);
+                }
+                sound.RelativeToListener = relativeToListener;
+                Sounds.Add(sound);
+                return sound;
             }
-            sound.RelativeToListener = relativeToListener;
-            Sounds.Add(sound);
-            return sound;
+            return null;
         }
     } 
 }

@@ -32,6 +32,9 @@
     <None Update="Resources\Palettes\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Shaders\test.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\Alarm High.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

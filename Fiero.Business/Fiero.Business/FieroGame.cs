@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Fiero.Business
 {
 
-    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName>
+    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName>
     {
         protected readonly IEnumerable<IGameScene> Scenes;
 
@@ -28,13 +28,14 @@ namespace Fiero.Business
             GameFonts<FontName> fonts,
             GameSounds<SoundName> sounds,
             GameColors<ColorName> colors,
+            GameShaders<ShaderName> shaders,
+            GameLocalizations<LocaleName> localization,
             GameDirector director,
             GameGlossaries glossary,
             GameDialogues dialogues,
             GameDataStore store,
-            GameLocalizations<LocaleName> localization,
             IEnumerable<IGameScene> gameScenes)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, director, localization)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, director)
         {
             Dialogues = dialogues;
             Glossary = glossary;
@@ -58,22 +59,16 @@ namespace Fiero.Business
             Store.SetValue(Data.UI.WindowSize, win.Size.ToCoord());
         }
 
-        protected virtual void InitializeStore()
-        {
-            Store.SetValue(Data.UI.TileSize, 8);
-            Store.SetValue(Data.UI.WindowSize, new(640, 480));
-            Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
-            Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
-            Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
-        }
-
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
 
             Fonts.Add(FontName.UI, new Font("Resources/Fonts/PressStart2P.ttf"));
+
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
+
+            Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
             Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/UIBlip.ogg"));
             Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/UIOk.ogg"));
@@ -98,7 +93,11 @@ namespace Fiero.Business
             Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
-            InitializeStore();
+            Store.SetValue(Data.UI.TileSize, 8);
+            Store.SetValue(Data.UI.WindowSize, new(640, 480));
+            Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
+            Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
 
             Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);

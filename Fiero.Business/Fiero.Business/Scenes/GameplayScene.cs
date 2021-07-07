@@ -31,6 +31,7 @@ namespace Fiero.Business.Scenes
         protected readonly DialogueSystem DialogueSystem;
         protected readonly GameDialogues Dialogues;
         protected readonly GameSounds<SoundName> Sounds;
+        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly GameUI UI;
 
         public GameplayScene(
@@ -43,6 +44,7 @@ namespace Fiero.Business.Scenes
             DialogueSystem dialogueSystem,
             FactionSystem factionSystem,
             ActionSystem actionSystem,
+            GameEntityBuilders entityBuilders,
             GameUI ui,
             GameSounds<SoundName> sounds)
         {
@@ -55,6 +57,7 @@ namespace Fiero.Business.Scenes
             FactionSystem = factionSystem;
             DialogueSystem = dialogueSystem;
             Dialogues = dialogues;
+            EntityBuilders = entityBuilders;
             UI = ui;
             Sounds = sounds;
             ActionSystem.PlayerTurnStarted += _ => DialogueSystem.OnPlayerTurnStarted();
@@ -119,10 +122,13 @@ namespace Fiero.Business.Scenes
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
                         var friends = Enumerable.Range(0, 5)
-                            .Select(i => FloorSystem.CurrentFloor.Entities
-                                .CreateEnemy(player.Physics.Position, ActorName.Rat, FactionName.Players));
+                            .Select(i => EntityBuilders
+                                .Rat(MonsterTierName.Two)
+                                .WithFaction(FactionName.Players)
+                                .WithPosition(player.Physics.Position)
+                                .Build());
                         foreach (var f in friends) {
-                            TrySpawn(f, out _);
+                            TrySpawn(f.Id, out _);
                         }
                     }
                     // Remove trigger from the shrine
@@ -158,6 +164,8 @@ namespace Fiero.Business.Scenes
         protected override void OnStateChanged(SceneState oldState)
         {
             if(State == SceneState.Main) {
+                var newRngSeed = (int)DateTime.Now.ToBinary();
+                Store.SetValue(Data.Global.RngSeed, newRngSeed);
                 Entities.Clear();
                 FloorSystem.Clear();
                 ActionSystem.Clear();
@@ -166,7 +174,7 @@ namespace Fiero.Business.Scenes
                     floor.WithStep(ctx => {
                         var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
                             .Generate();
-                        ctx.DrawBox((0, 0), (ctx.Size.X, ctx.Size.Y), TileName.WallNormal);
+                        ctx.DrawBox((0, 0), (ctx.Size.X, ctx.Size.Y), TileName.Wall);
                         ctx.DrawDungeon(dungeon);
                     }));
                 // Track agents
@@ -176,9 +184,12 @@ namespace Fiero.Business.Scenes
                 // Create player on top of the starting stairs
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 var upstairs = FloorSystem.CurrentFloor.Tiles.Values
-                    .Single(t => t.Properties.Name == TileName.Upstairs)
+                    .Single(t => t.TileProperties.Name == TileName.Upstairs)
                     .Physics.Position;
-                var pid = FloorSystem.CurrentFloor.Entities.CreatePlayer(Input, playerName, "player", upstairs);
+                var pid = EntityBuilders.Player
+                    .WithPosition(upstairs)
+                    .WithName(playerName)
+                    .Build().Id;
                 if(!TrySpawn(pid, out var player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }

@@ -29,13 +29,13 @@ namespace Fiero.Business
                 }
             }
             // Other motives include personal grudges among individual members that can be raised on behalf of the whole group.
-            var relationships = ctx.A.Select(a => (a, ctx.B.TrySelect(b => (a.Properties.Relationships.TryGet(b, out var s), s))))
-                .Concat(ctx.B.Select(b => (b, ctx.A.TrySelect(a => (b.Properties.Relationships.TryGet(a, out var s), s)))))
+            var relationships = ctx.A.Select(a => (a, ctx.B.TrySelect(b => (a.ActorProperties.Relationships.TryGet(b, out var s), s))))
+                .Concat(ctx.B.Select(b => (b, ctx.A.TrySelect(a => (b.ActorProperties.Relationships.TryGet(a, out var s), s)))))
                 .SelectMany(t => t.Item2.Select(x => (Actor: t.Item1, Rel: x)));
             if (relationships.FirstOrDefault(r => r.Rel.Standing == StandingName.Hated && r.Rel.Trust < TrustName.Known) 
                 is { } hateMotive && hateMotive.Actor != null) /* I hate you and have no reason to trust you */ {
                 // The chance for this motive being chosen depends on the instigator's ego and the group's gregariousness
-                var ego = hateMotive.Actor.Properties.Personality.ToVector().X;
+                var ego = hateMotive.Actor.ActorProperties.Personality.ToVector().X;
                 if (new GaussianNumber(ego, averageSolitude * 4).CoinFlip()) {
                     conflict = new(
                         ConflictName.Assault,
@@ -48,7 +48,7 @@ namespace Fiero.Business
             if (relationships.FirstOrDefault(r => r.Rel.Trust == TrustName.Feared && r.Rel.Standing < StandingName.Tolerated) 
                 is { } trustMotive && trustMotive.Actor != null) /* I don't trust you and have no reason to like you */ {
                 // The chance for this motive being chosen depends on the instigator's gregariousness and the group's egotism
-                var greg = hateMotive.Actor.Properties.Personality.ToVector().Y;
+                var greg = hateMotive.Actor.ActorProperties.Personality.ToVector().Y;
                 if (new GaussianNumber(1 - greg, (1 - averageEgo) * 4).CoinFlip()) {
                     conflict = new(
                         ConflictName.Assault,

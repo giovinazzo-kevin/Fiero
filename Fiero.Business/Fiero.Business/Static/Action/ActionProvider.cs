@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Fiero.Business
 {
+
     public static class ActionProvider
     {
         public static Func<Actor, ActionName> EnemyAI() => a => {
@@ -17,7 +18,7 @@ namespace Fiero.Business
                 }
                 if (a.Action.Target == null) {
                     // Seek new target to attack
-                    var target = a.Properties.CurrentFloor.Actors
+                    var target = a.ActorProperties.CurrentFloor.Actors
                         .Where(b => a.IsHotileTowards(b))
                         .Select(b => (Actor: b, Dist: b.DistanceFrom(a)))
                         .Where(t => t.Dist < 10 && a.CanSee(t.Actor))
@@ -34,7 +35,7 @@ namespace Fiero.Business
                     }
                     if (a.CanSee(a.Action.Target)) {
                         // If we can see the target and it has moved, recalculate the path as to remember its last position
-                        a.Action.Path = a.Properties.CurrentFloor.Pathfinder.Search(a.Physics.Position, a.Action.Target.Physics.Position, default);
+                        a.Action.Path = a.ActorProperties.CurrentFloor.Pathfinder.Search(a.Physics.Position, a.Action.Target.Physics.Position, default);
                         a.Action.Path?.RemoveFirst();
                     }
                 }

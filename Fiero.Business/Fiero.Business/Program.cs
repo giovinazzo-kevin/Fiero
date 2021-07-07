@@ -30,6 +30,7 @@ namespace Fiero.Business
             // Register services
             services.Register<GameGlossaries>(new PerContainerLifetime());
             services.Register<GameDialogues>(new PerContainerLifetime());
+            services.Register<GameEntityBuilders>(new PerContainerLifetime());
 
             // Register ECS entities and systems
             services.Register<FloorSystem>(new PerContainerLifetime());
@@ -67,7 +68,6 @@ namespace Fiero.Business
             foreach (var resolverType in conflictResolvers) {
                 services.Register(typeof(IConflictResolver), resolverType);
             }
-
         }
     }
 }

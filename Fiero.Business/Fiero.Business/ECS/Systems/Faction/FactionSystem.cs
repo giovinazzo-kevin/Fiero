@@ -67,8 +67,8 @@ namespace Fiero.Business
             // The difference in group personalities is similar to dRel above, as it highlights the asymmetries in
             // group thought, and this can also be exploited to generate conflicts.
 
-            var aPersVec = aGroup.Select(a => a.Properties.Personality.ToVector()).Aggregate((a, b) => a + b) / aGroup.Length;
-            var bPersVec = bGroup.Select(b => b.Properties.Personality.ToVector()).Aggregate((a, b) => a + b) / bGroup.Length;
+            var aPersVec = aGroup.Select(a => a.ActorProperties.Personality.ToVector()).Aggregate((a, b) => a + b) / aGroup.Length;
+            var bPersVec = bGroup.Select(b => b.ActorProperties.Personality.ToVector()).Aggregate((a, b) => a + b) / bGroup.Length;
 
             var resolutionContext = new ConflictResolutionContext(aGroup, bGroup, aRelVec, bRelVec, aPersVec, bPersVec);
 

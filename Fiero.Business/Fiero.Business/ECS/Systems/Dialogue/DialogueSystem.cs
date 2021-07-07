@@ -91,7 +91,7 @@ namespace Fiero.Business
                     speaker = featureSpeaker;
                 }
                 else {
-                    dialogueKey = actorSpeaker.Npc?.Type.ToString() ?? actorSpeaker.Properties.Type.ToString();
+                    dialogueKey = actorSpeaker.Npc?.Type.ToString() ?? actorSpeaker.ActorProperties.Type.ToString();
                     speaker = actorSpeaker;
                 }
                 foreach (var trigger in comp.Triggers) {

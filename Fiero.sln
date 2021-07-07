@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Core", "Fiero.Core\Fi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Business", "Fiero.Business\Fiero.Business\Fiero.Business.csproj", "{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Spinoff", "Spinoff", "{4200728E-3593-488B-9EDE-15DE256EFD74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fiero.Bio", "Fiero.Bio\Fiero.Bio.csproj", "{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,12 +27,17 @@ Global
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0} = {CE67812D-CA4A-41AC-B4FD-1EC1BB884567}
+		{2BCD3A49-989A-4BD3-A91D-D9FB6EC8DFAF} = {4200728E-3593-488B-9EDE-15DE256EFD74}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {02158A3C-B34C-402B-89CC-FE2356D9D8B7}

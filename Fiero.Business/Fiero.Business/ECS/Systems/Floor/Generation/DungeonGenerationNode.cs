@@ -42,6 +42,7 @@ namespace Fiero.Business
                 DungeonNodeType.Shop => Allow(DungeonNodeType.Normal),
                 DungeonNodeType.Boss => NumFreeConnectors == 3 && Allow(DungeonNodeType.Boss) || Allow(DungeonNodeType.Normal),
                 DungeonNodeType.Secret => Allow(DungeonNodeType.Normal),
+                DungeonNodeType.Corridor => CorridorConnectors() && Allow(DungeonNodeType.Normal),
                 _ => true
             };
 
@@ -50,6 +51,13 @@ namespace Fiero.Business
                 (South == null || t.Contains(South.Type)) &&
                 (East == null || t.Contains(East.Type)) &&
                 (West == null || t.Contains(West.Type));
+
+            bool CorridorConnectors()
+            {
+                return NumUsedConnectors >= 3 
+                    || NumUsedConnectors == 2 
+                    && (North == null && South == null || East == null && West == null);
+            }
         }
 
         public int NumFreeConnectors =>

@@ -9,7 +9,7 @@ namespace Fiero.Business
     {
         public static bool IsHotileTowards(this Actor a, Actor b)
         {
-            if (a.Properties.Relationships.TryGet(b, out var standing)) {
+            if (a.ActorProperties.Relationships.TryGet(b, out var standing)) {
                 return standing.MayTarget();
             }
             return a.Faction.Relationships.Get(b.Faction.Type).MayTarget();
@@ -17,7 +17,7 @@ namespace Fiero.Business
 
         public static bool IsFriendlyTowards(this Actor a, Actor b)
         {
-            if (a.Properties.Relationships.TryGet(b, out var standing)) {
+            if (a.ActorProperties.Relationships.TryGet(b, out var standing)) {
                 return standing.MayHelp();
             }
             return a.Faction.Relationships.Get(b.Faction.Type).MayHelp();
@@ -84,10 +84,10 @@ namespace Fiero.Business
         {
             var aPos = a.Physics.Position;
             return Utils.Bresenham((aPos.X, aPos.Y), (bPos.X, bPos.Y), (x, y) => {
-                if (!a.Properties.CurrentFloor.Tiles.TryGetValue(new(x, y), out var tile)) {
+                if (!a.ActorProperties.CurrentFloor.Tiles.TryGetValue(new(x, y), out var tile)) {
                     return false;
                 }
-                if (tile.Properties.BlocksMovement) {
+                if (tile.TileProperties.BlocksMovement) {
                     return false;
                 }
                 return true;

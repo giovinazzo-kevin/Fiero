@@ -31,27 +31,44 @@ namespace Fiero.Business
             (int X, int Y) topLeft, 
             (int Width, int Height) size, 
             (bool L, bool R, bool U, bool D) doors,
-            TileName wall = TileName.WallNormal,
-            TileName door = TileName.Door)
+            TileName wall = TileName.Wall,
+            TileName door = TileName.Door,
+            bool isCorridor = false,
+            bool hasRoundedCorners = false)
         {
             for (var x = topLeft.X + 1; x < topLeft.X + size.Width - 1; x++) {
                 for (var y = topLeft.Y + 1; y < topLeft.Y + size.Height - 1; y++) {
-                    ctx.Set(x, y, TileName.Ground);
+                    ctx.Set(x, y, isCorridor ? TileName.Wall : TileName.Ground);
                 }
             }
 
             ctx.DrawBox(topLeft, size, wall);
+            var middle = (topLeft.X + size.Width / 2, topLeft.Y + size.Height / 2);
             if (doors.L) {
-                ctx.Set(topLeft.X, topLeft.Y + (size.Height - 1) / 2, door);
+                var p = (X: topLeft.X, Y: topLeft.Y + (size.Height - 1) / 2);
+                if(isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
+                ctx.Set(p.X, p.Y, door);
             }
             if (doors.R) {
-                ctx.Set(topLeft.X + size.Width - 1, topLeft.Y + (size.Height - 1) / 2, door);
+                var p = (X: topLeft.X + size.Width - 1, Y: topLeft.Y + (size.Height - 1) / 2);
+                if(isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
+                ctx.Set(p.X, p.Y, door);
             }
             if (doors.U) {
-                ctx.Set(topLeft.X + (size.Width - 1) / 2, topLeft.Y, door);
+                var p = (X: topLeft.X + (size.Width - 1) / 2, Y: topLeft.Y);
+                if (isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
+                ctx.Set(p.X, p.Y, door);
             }
             if (doors.D) {
-                ctx.Set(topLeft.X + (size.Width - 1) / 2, topLeft.Y + size.Height - 1, door);
+                var p = (X: topLeft.X + (size.Width - 1) / 2, Y: topLeft.Y + size.Height - 1);
+                if (isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
+                ctx.Set(p.X, p.Y, door);
+            }
+            if(hasRoundedCorners) {
+                ctx.Set(topLeft.X + 1, topLeft.Y + 1, wall);
+                ctx.Set(topLeft.X + size.Width - 3 + 1, topLeft.Y + 1, wall);
+                ctx.Set(topLeft.X + 1, topLeft.Y + size.Height - 3 + 1, wall);
+                ctx.Set(topLeft.X + size.Width - 3 + 1, topLeft.Y + size.Height - 3 + 1, wall);
             }
         }
 
@@ -152,26 +169,25 @@ namespace Fiero.Business
                     roomTopLeftRelativeToOrigin.X + origin.X + viewportOffset.X,
                     roomTopLeftRelativeToOrigin.Y + origin.Y + viewportOffset.Y
                 );
-                var wallTile = node.Type switch {
-                    DungeonNodeType.Item => TileName.WallItem,
-                    DungeonNodeType.Shop => TileName.WallShop,
-                    DungeonNodeType.Boss => TileName.WallBoss,
-                    DungeonNodeType.Secret => TileName.WallSecret,
-                    DungeonNodeType.Start => TileName.WallStart,
-                    DungeonNodeType.Enemies => TileName.WallEnemies,
-                    _ => TileName.WallNormal
-                };
+                var wallTile = TileName.Wall;
                 var doorTile = node.Type switch {
                     DungeonNodeType.Start => TileName.Door,
-                    DungeonNodeType.Item => TileName.DoorKey,
-                    DungeonNodeType.Shop => TileName.DoorKey,
+                    DungeonNodeType.Item => TileName.Door,
+                    DungeonNodeType.Shop => TileName.Door,
                     DungeonNodeType.Boss => TileName.Door,
-                    DungeonNodeType.Secret => TileName.WallSecret,
+                    DungeonNodeType.Secret => TileName.Wall,
+                    DungeonNodeType.Corridor => TileName.Ground,
                     _ => TileName.Ground
                 };
+                var isCorridor = node.Type == DungeonNodeType.Corridor;
+                var hasRoundedCorners = node.Type == DungeonNodeType.Boss || node.Type == DungeonNodeType.Shop
+                    || node.Type == DungeonNodeType.Item || node.Type == DungeonNodeType.Secret;
                 var doors = (node.West != null, node.East != null, node.North != null, node.South != null);
                 var openSet = new List<Coord>();
-                ctx.DrawRoom((roomTopLeft.X, roomTopLeft.Y), (roomSizeInTiles.X, roomSizeInTiles.Y), doors, wallTile, doorTile);
+                ctx.DrawRoom(
+                    (roomTopLeft.X, roomTopLeft.Y), 
+                    (roomSizeInTiles.X, roomSizeInTiles.Y), 
+                    doors, wallTile, doorTile, isCorridor, hasRoundedCorners);
                 for (var y = roomTopLeft.Y; y < roomTopLeft.Y + roomSizeInTiles.Y; y++) {
                     for (var x = roomTopLeft.X; x < roomTopLeft.X + roomSizeInTiles.X; x++) {
                         if(ctx.Get(x, y) == TileName.Ground) {

@@ -270,6 +270,10 @@ namespace Fiero.Business
             for (var i = 0; i < numInterconnect; i++) {
                 Interconnect();
             }
+            var numCorridor = (int)(Nodes.Count * Settings.CorridorChance);
+            for (var i = 0; i < numCorridor; i++) {
+                SpecializeRoom(DungeonNodeType.Corridor, (int)(maxDistance * 0.10));
+            }
             for (var i = 0; i < Settings.NumItemRooms; i++) {
                 SpecializeRoom(DungeonNodeType.Item, (int)(maxDistance * 0.50));
             }

@@ -45,7 +45,7 @@ namespace Fiero.Business
             if (!Entities.TryGetProxy<Actor>(entityId, out var actor)) {
                 throw new ArgumentException();
             }
-            actor.Properties.CurrentFloor = this;
+            actor.ActorProperties.CurrentFloor = this;
             _actors.Add(actor);
             return actor;
         }

@@ -8,7 +8,7 @@
         Item,
         Shop,
         Boss,
-        Secret
-
+        Secret,
+        Corridor
     }
 }

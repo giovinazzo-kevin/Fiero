@@ -10,6 +10,7 @@
 
         public double InterconnectWeight { get; set; }
         public double RoomMergeChance { get; set; }
+        public double CorridorChance { get; set; }
         public double PathRandomness { get; set; }
 
         public static readonly DungeonGenerationSettings Default = new() {
@@ -20,8 +21,9 @@
             NumBossRooms = 1,
 
             PathRandomness = 1,
-            InterconnectWeight = 0.5,
-            RoomMergeChance = 0.5
+            InterconnectWeight = 0.25,
+            RoomMergeChance = 0.5,
+            CorridorChance = 0.15
         };
     }
 }

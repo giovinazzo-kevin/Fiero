@@ -11,16 +11,23 @@ namespace Fiero.Core
             ONE_NINTH, ONE_NINTH, ONE_NINTH
         );
 
+        public static readonly Mat3 CardinalLaplacian = new(
+             0,  0.25f,  0,
+             0.25f, -1, 0.25f,
+             0, 0.25f,  0
+        );
+
+
         public static readonly Mat3 Laplacian = new(
-             0,  1,  0,
-             1, -4,  1,
-             0,  1,  0
+            .05f, .2f, .05f,
+            .2f, -1f, .2f,
+            .05f, .2f, .05f
         );
 
         public static readonly Mat3 Sharpen = new(
-             0, -1,  0,
-            -1,  5, -1,
-             0, -1,  0
+            -.05f, -.2f, -.05f,
+            -.2f, 1f, -.2f,
+            -.05f, -.2f, -.05f
         );
     }
 }

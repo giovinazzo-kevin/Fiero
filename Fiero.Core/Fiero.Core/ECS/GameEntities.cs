@@ -104,6 +104,20 @@ namespace Fiero.Core
             return entity;
         }
 
+        public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
+            where T: Entity
+        {
+            if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props)) {
+                ProxyablePropertyCache[typeof(T)] = props = typeof(T).GetProperties()
+                    .Where(p => p.PropertyType.IsAssignableTo(typeof(Component)))
+                    .Select(p => p.DeclaringType.GetProperty(p.Name))
+                    .ToHashSet();
+            }
+            return props;
+        }
+
+        public EntityBuilder<T> CreateBuilder<T>() where T : Entity => new(this);
+
         public bool TryGetProxy<T>(int entityId, out T entity)
             where T : Entity
         {
@@ -111,12 +125,7 @@ namespace Fiero.Core
             if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
                 throw new ArgumentOutOfRangeException($"An entity with id {entityId} is not being tracked");
             }
-            if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props)) {
-                ProxyablePropertyCache[typeof(T)] = props = typeof(T).GetProperties()
-                    .Where(p => p.PropertyType.IsAssignableTo(typeof(Component)))
-                    .Select(p => p.DeclaringType.GetProperty(p.Name))
-                    .ToHashSet();
-            }
+            var props = GetProxyableProperties<T>();
             entity = ServiceFactory.GetInstance<T>();
             entity._refresh = (entity, entityId) => {
                 entity.Id = entityId <= 0 ? 0 : entityId;

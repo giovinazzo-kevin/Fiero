@@ -65,7 +65,7 @@ namespace Fiero.Business
             BottomRow.Update(t, dt);
             if (Following != null && Following.Id != 0) {
                 ActorName.Text.V = Following.Info.Name;
-                ActorHealth.Text.V = $"HP: {Following.Properties.Health}/{Following.Properties.MaximumHealth}";
+                ActorHealth.Text.V = $"HP: {Following.ActorProperties.Health}/{Following.ActorProperties.MaximumHealth}";
                 ActorHealth.Foreground.V = Color.White;
                 if(Following.Log != null) {
                     Logs.Text.V = String.Join('\n', Following.Log.GetMessages().TakeLast(Logs.MaxLines));

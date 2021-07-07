@@ -4,6 +4,8 @@ namespace Fiero.Business
 {
     public class ItemComponent : Component
     {
-        public ItemName Type { get; set; }
+        public int Rarity { get; set; }
+        public bool Identified { get; set; }
+        public string UnidentifiedName { get; set; }
     }
 }

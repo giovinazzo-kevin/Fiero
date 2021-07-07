@@ -4,16 +4,9 @@
     {
         None,
         Ground,
-        WallNormal,
-        WallItem,
-        WallShop,
-        WallBoss,
-        WallSecret,
-        WallStart,
-        WallEnemies,
+        Wall,
         Upstairs,
         Downstairs,
-        DoorKey,
         Door,
     }
 }

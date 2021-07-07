@@ -12,5 +12,6 @@ namespace Fiero.Core
             return new Random(seed);
         });
         public static Random Random => _rng.Value;
+        public static Random Seeded(int seed) => new Random(seed);
     }
 }

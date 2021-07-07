@@ -71,6 +71,7 @@ namespace Fiero.Business
 
             int? GetCost(ActionName action)
             {
+
                 return action switch {
                     ActionName.None => default(int?),
                     ActionName.Use => 25,
@@ -89,11 +90,15 @@ namespace Fiero.Business
                 var usePos = actor.Physics.Position + direction;
                 var itemsHere = _floorSystem.ItemsAt(usePos);
                 var featuresHere = _floorSystem.FeaturesAt(usePos);
-                if(itemsHere.Any()) {
+                if(itemsHere.Any() && actor.Inventory != null) {
                     var item = itemsHere.Single();
-                    actor.Properties.Inventory.Add(item);
-                    actor.Properties.CurrentFloor.RemoveItem(item.Id);
-                    actor.Log?.Write($"$Action.YouPickUpA$ {item.Info.Name}.");
+                    if(actor.Inventory.TryPut(item)) {
+                        _floorSystem.CurrentFloor.RemoveItem(item.Id);
+                        actor.Log?.Write($"$Action.YouPickUpA$ {item.DisplayName}.");
+                    }
+                    else {
+                        actor.Log?.Write($"$Action.YourInventoryIsTooFullFor$ {item.DisplayName}.");
+                    }
                 }
                 else if(featuresHere.Any()) {
                     var feature = featuresHere.Single();
@@ -139,14 +144,14 @@ namespace Fiero.Business
                         actor.Action.Target.Action.Target = actor;
                     }
                     // make sure that people hold a grudge regardless of factions
-                    actor.Action.Target.Properties.Relationships.TryUpdate(actor, x => x
+                    actor.Action.Target.ActorProperties.Relationships.TryUpdate(actor, x => x
                         .With(StandingName.Hated)
                     , out _);
 
-                    if (--actor.Action.Target.Properties.Health <= 0) {
+                    if (--actor.Action.Target.ActorProperties.Health <= 0) {
                         actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.KillsYou$.");
                         actor.Log?.Write($"$Action.YouKill$ {actor.Action.Target.Info.Name}.");
-                        if(actor.Action.Target.Properties.Type == ActorName.Player) {
+                        if(actor.Action.Target.ActorProperties.Type == ActorName.Player) {
                             _sounds.Get(SoundName.PlayerDeath).Play();
                             _store.SetValue(Data.Player.KilledBy, actor);
                         }
@@ -172,15 +177,15 @@ namespace Fiero.Business
                         : new(Rng.Random.Next(-1, 2), Rng.Random.Next(-1, 2)));
                 var newPos = new Coord(actor.Physics.Position.X + direction.X, actor.Physics.Position.Y + direction.Y);
                 if (newPos == actor.Physics.Position) {
-                    actor.Properties.Health = Math.Min(actor.Properties.MaximumHealth, actor.Properties.Health + 1);
+                    actor.ActorProperties.Health = Math.Min(actor.ActorProperties.MaximumHealth, actor.ActorProperties.Health + 1);
                     return true; // waiting costs the same as moving
                 }
                 if (_floorSystem.TileAt(newPos, out var tile)) {
-                    if (tile.Properties.Name == TileName.Door || tile.Properties.Name == TileName.DoorKey) {
+                    if (tile.TileProperties.Name == TileName.Door) {
                         _floorSystem.UpdateTile(newPos, TileName.Ground);
                         actor.Log?.Write("$Action.YouOpenTheDoor$.");
                     }
-                    else if (!tile.Properties.BlocksMovement) {
+                    else if (!tile.TileProperties.BlocksMovement) {
                         var actorsHere = _floorSystem.ActorsAt(newPos);
                         var featuresHere = _floorSystem.FeaturesAt(newPos);
                         if (!actorsHere.Any()) {
@@ -206,7 +211,7 @@ namespace Fiero.Business
                     }
                     else {
                         actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
-                        if (actor.Properties.Type == ActorName.Player) {
+                        if (actor.ActorProperties.Type == ActorName.Player) {
                             _sounds.Get(SoundName.WallBump).Play();
                         }
                     }

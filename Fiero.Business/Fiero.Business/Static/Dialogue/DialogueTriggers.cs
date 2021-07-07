@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Fiero.Core;
+using System.Collections.Generic;
 
 namespace Fiero.Business
 {
@@ -27,8 +28,15 @@ namespace Fiero.Business
             }
             static IEnumerable<IDialogueTrigger> Shrine()
             {
-                yield return new BumpedByPlayerDialogueTrigger<ShrineDialogueName>(
-                    ShrineDialogueName.Smintheus, repeatable: true);
+                return Rng.Random.Choose(
+                    Smintheus()
+                );
+
+                IEnumerable<IDialogueTrigger> Smintheus()
+                {
+                    yield return new BumpedByPlayerDialogueTrigger<ShrineDialogueName>(
+                        ShrineDialogueName.Smintheus, repeatable: true);
+                }
             }
         }
     }

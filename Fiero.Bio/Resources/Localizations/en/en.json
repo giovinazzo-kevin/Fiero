@@ -1,0 +1,126 @@
+﻿{
+  "Menu": {
+    "NewGame": "New Run",
+    "QuitGame": "Quit Game",
+    "Settings": "Settings",
+    "About": "About"
+  },
+  "Dialogue": {
+    "Shrine": {
+      "Smintheus": {
+        "Face": "GreatKingRatDead",
+        "Lines": [ "You offer a prayer to Smintheus,", "god of rats and pestilence." ],
+        "Choices": [
+          {
+            "Line": "Follow Smintheus",
+            "Next": "Smintheus_Follow"
+          },
+          {
+            "Line": "Cancel",
+            "Next": ""
+          }
+        ],
+        "Next": ""
+      },
+      "Smintheus_Follow": {
+        "Face": "GreatKingRatDead",
+        "Lines": [ "Smintheus grants you... rats!" ],
+        "Next": ""
+      }
+    },
+    "GreatKingRat": {
+      "JustMet": {
+        "Face": "GreatKingRatCalm",
+        "Lines": [ "...?", "And who might you be?" ],
+        "Choices": [
+          {
+            "Line": "I'm an enemy of the Rats",
+            "Next": "JustMet_Enemy"
+          },
+          {
+            "Line": "I'm a friend of the Rats",
+            "Next": "JustMet_Friend"
+          },
+          {
+            "Line": "I'm a nobody"
+          },
+          {
+            "Line": "I'm a developer"
+          }
+        ],
+        "Next": ""
+      },
+      "JustMet_Enemy": {
+        "Face": "GreatKingRatSmirk",
+        "Lines": [ "Ha! A ***REMOVED*** such as yourself,", "declaring themselves enemy of the Rats?", "Very well. We'll see about that." ],
+        "Next": ""
+      },
+      "JustMet_Friend": {
+        "Face": "GreatKingRatCalm",
+        "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
+        "Next": ""
+      }
+    }
+  },
+  "Faction": {
+    "Rats": {
+      "Name": "Rats",
+      "MonsterNames": [
+        [ "tier 1 rat" ],
+        [ "tier 2 rat" ],
+        [ "tier 3 rat" ],
+        [ "tier 4 rat" ],
+        [ "tier 5 rat" ]
+      ]
+    },
+    "Snakes": {
+      "Name": "Snakes",
+      "MonsterNames": [
+        [ "tier 1 snake" ],
+        [ "tier 2 snake" ],
+        [ "tier 3 snake" ],
+        [ "tier 4 snake" ],
+        [ "tier 5 snake" ]
+      ]
+    },
+    "Dogs": {
+      "Name": "Dogs",
+      "MonsterNames": [
+        [ "tier 1 dog" ],
+        [ "tier 2 dog" ],
+        [ "tier 3 dog" ],
+        [ "tier 4 dog" ],
+        [ "tier 5 dog" ]
+      ]
+    },
+    "Cats": {
+      "Name": "Cats",
+      "MonsterNames": [
+        [ "tier 1 cat" ],
+        [ "tier 2 cat" ],
+        [ "tier 3 cat" ],
+        [ "tier 4 cat" ],
+        [ "tier 5 cat" ]
+      ]
+    },
+    "Boars": {
+      "Name": "Boars",
+      "MonsterNames": [
+        [ "tier 1 boar" ],
+        [ "tier 2 boar" ],
+        [ "tier 3 boar" ],
+        [ "tier 4 boar" ],
+        [ "tier 5 boar" ]
+      ]
+    }
+  },
+  "Action": {
+    "YouOpenTheDoor": "You open the door",
+    "YouAttack": "You attack",
+    "YouKill": "You kill",
+    "AttacksYou": "attacks you",
+    "YouBumpIntoTheWall": "You bump into the wall",
+    "YouPickUpA": "You pick up a",
+    "KillsYou": "kills you"
+  }
+}

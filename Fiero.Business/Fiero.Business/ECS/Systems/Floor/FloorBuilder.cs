@@ -28,9 +28,9 @@ namespace Fiero.Business
             return this;
         }
 
-        private static int CreateEntity(GameEntities entities, FloorGenerationContext.Object obj)
+        private static int CreateEntity(GameEntityBuilders entities, FloorGenerationContext.Object obj)
         {
-            return obj.Name switch {
+            var drawable = obj.Name switch {
                 DungeonObjectName.Chest => CreateChest(),
                 DungeonObjectName.Shrine => CreateShrine(),
                 DungeonObjectName.Trap => CreateTrap(),
@@ -40,85 +40,113 @@ namespace Fiero.Business
                 DungeonObjectName.ItemForSale => CreateItem(),
                 DungeonObjectName.Consumable => CreateConsumable(),
                 DungeonObjectName.ConsumableForSale => CreateConsumable(),
-                DungeonObjectName.Downstairs => entities.CreateTile(TileName.Downstairs, new(obj.Position.X, obj.Position.Y)),
-                DungeonObjectName.Upstairs => entities.CreateTile(TileName.Upstairs, new(obj.Position.X, obj.Position.Y)),
-                _ => entities.CreateEntity("???", "none", new(obj.Position.X, obj.Position.Y))
+                DungeonObjectName.Downstairs => entities.Tile(TileName.Downstairs).WithPosition(obj.Position).Build(),
+                DungeonObjectName.Upstairs => entities.Tile(TileName.Upstairs).WithPosition(obj.Position).Build(),
+                _ => throw new NotImplementedException()
             };
+            
+            return drawable.Id;
 
-            int CreateShrine()
+            Drawable CreateShrine()
             {
-                return Rng.Random.Next(0, 1) switch {
-                    0 => entities.CreateFeature(FeatureName.Shrine, new(obj.Position.X, obj.Position.Y)),
-                    _ => entities.CreateFeature(FeatureName.None, new(obj.Position.X, obj.Position.Y)),
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Shrine().WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateTrap()
+            Drawable CreateTrap()
             {
-                return Rng.Random.Next(0, 1) switch {
-                    0 => entities.CreateFeature(FeatureName.Trap, new(obj.Position.X, obj.Position.Y)),
-                    _ => entities.CreateFeature(FeatureName.None, new(obj.Position.X, obj.Position.Y)),
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Trap().WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateChest()
+            Drawable CreateChest()
             {
-                return Rng.Random.Next(0, 1) switch {
-                    0 => entities.CreateFeature(FeatureName.Chest, new(obj.Position.X, obj.Position.Y), tint: Color.SaddleBrown),
-                    _ => entities.CreateFeature(FeatureName.None, new(obj.Position.X, obj.Position.Y)),
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Chest().WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateConsumable()
+            Drawable CreateConsumable()
             {
-                return Rng.Random.Next(0, 3) switch {
-                    0 => entities.CreateItem(ItemName.Scroll, new(obj.Position.X, obj.Position.Y), tint: Color.SaddleBrown),
-                    1 => entities.CreateItem(ItemName.Potion, new(obj.Position.X, obj.Position.Y), tint: Color.Purple),
-                    2 => entities.CreateItem(ItemName.Coin, new(obj.Position.X, obj.Position.Y), tint: Color.Gold),
-                    _ => entities.CreateItem(ItemName.None, new(obj.Position.X, obj.Position.Y))
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                   () => entities.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Haste).WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateItem()
+            Drawable CreateWeapon()
             {
-                return Rng.Random.Next(0, 6) switch {
-                    0 => entities.CreateItem(ItemName.Bow, new(obj.Position.X, obj.Position.Y)),
-                    1 => entities.CreateItem(ItemName.Sword, new(obj.Position.X, obj.Position.Y)),
-                    2 => entities.CreateItem(ItemName.Wand, new(obj.Position.X, obj.Position.Y)),
-                    3 => entities.CreateItem(ItemName.Hat, new(obj.Position.X, obj.Position.Y)),
-                    4 => entities.CreateItem(ItemName.Cowl, new(obj.Position.X, obj.Position.Y)),
-                    5 => entities.CreateItem(ItemName.Helmet, new(obj.Position.X, obj.Position.Y)),
-                    _ => entities.CreateItem(ItemName.None, new(obj.Position.X, obj.Position.Y))
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Sword().WithPosition(obj.Position).Build(),
+                    () => entities.Bow().WithPosition(obj.Position).Build(),
+                    () => entities.Staff().WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateBoss()
+            Drawable CreateArmor()
             {
-                return entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Rat, FactionName.Rats, NpcName.GreatKingRat);
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Sword().WithPosition(obj.Position).Build()
+                )();
             }
 
-            int CreateEnemy()
+            Drawable CreateItem()
             {
-                return Rng.Random.Next(0, 5) switch {
-                    0 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Rat, FactionName.Rats),
-                    1 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Snake, FactionName.Snakes),
-                    2 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Cat, FactionName.Cats),
-                    3 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Dog, FactionName.Dogs),
-                    4 => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.Boar, FactionName.Boars),
-                    _ => entities.CreateEnemy(new(obj.Position.X, obj.Position.Y), ActorName.None, FactionName.Players)
-                };
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => CreateArmor(),
+                    () => CreateWeapon()
+                )();
+            }
 
+            Drawable CreateBoss()
+            {
+                return entities.NpcGreatKingRat().WithPosition(obj.Position).Build();
+            }
+
+            Drawable CreateEnemy()
+            {
+                var tier = Rng.Random.Choose(
+                    MonsterTierName.One,
+                    MonsterTierName.One,
+                    MonsterTierName.One,
+                    MonsterTierName.One,
+                    MonsterTierName.One,
+                    MonsterTierName.Two,
+                    MonsterTierName.Two,
+                    MonsterTierName.Two,
+                    MonsterTierName.Two,
+                    MonsterTierName.Three,
+                    MonsterTierName.Three,
+                    MonsterTierName.Three,
+                    MonsterTierName.Four,
+                    MonsterTierName.Four,
+                    MonsterTierName.Five
+                );
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => entities.Rat(tier).WithPosition(obj.Position).Build(),
+                    () => entities.Snake(tier).WithPosition(obj.Position).Build(),
+                    () => entities.Cat(tier).WithPosition(obj.Position).Build(),
+                    () => entities.Dog(tier).WithPosition(obj.Position).Build(),
+                    () => entities.Boar(tier).WithPosition(obj.Position).Build()
+                )();
             }
         }
 
-        public Floor Build(GameEntities entities)
+        public Floor Build(GameEntities entities, GameEntityBuilders builders)
         {
             var context = new FloorGenerationContext(Size.X, Size.Y);
+            for (int x = 0; x < Size.X; x++) {
+                for (int y = 0; y < Size.Y; y++) {
+                    context.Set(x, y, TileName.Wall);
+                }
+            }
             foreach (var step in _steps) {
                 step(context);
             }
             var floor = new Floor(entities, context);
-            var objects = context.GetObjects().Select(o => CreateEntity(entities, o))
+            var objects = context.GetObjects().Select(o => CreateEntity(builders, o))
                 .ToList();
             var tileObjects = objects.TrySelect(e => (entities.TryGetProxy<Tile>(e, out var t), t));
             var actorObjects = objects.TrySelect(e => (entities.TryGetProxy<Actor>(e, out var a), a));
@@ -128,7 +156,7 @@ namespace Fiero.Business
                 if (tileObjects.Any(t => t.Physics.Position == item.P))
                     return;
                 if (item.Tile != TileName.None) {
-                    floor.SetTile(entities.CreateTile(item.Tile, item.P));
+                    floor.SetTile(builders.Tile(item.Tile).WithPosition(item.P).Build().Id);
                 }
             });
             foreach (var tile in tileObjects) {

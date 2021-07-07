@@ -21,6 +21,16 @@ namespace Fiero.Core
 
         public byte[] Pixels { get; }
 
+        public HardwareGrid(HardwareGrid from)
+        {
+            _tex = new(from._tex.Size.X, from._tex.Size.Y);
+            _render = new(from._tex.Size.X, from._tex.Size.Y);
+            Pixels = new byte[from._tex.Size.X * from._tex.Size.Y * 4];
+            Array.Copy(from.Pixels, Pixels, Pixels.Length);
+            RecompileShader(String.Empty, String.Empty);
+            Update();
+        }
+
         public HardwareGrid(int w, int h)
         {
             _tex = new ((uint)w, (uint)h);
@@ -80,12 +90,20 @@ namespace Fiero.Core
             );
         }
 
-        public void SetPixels(Func<Coord, Color> setter)
+        public void SetPixels(Func<Coord, Color> setter, int maxDegreeOfParallelism = 1)
         {
-            Parallel.For(0, _tex.Size.X * _tex.Size.Y, xy => {
-                var coord = new Coord((int)(xy % _tex.Size.X), (int)(xy / _tex.Size.Y));
-                SetPixel(coord, setter(coord));
-            });
+            if(maxDegreeOfParallelism > 1) {
+                Parallel.For(0, _tex.Size.X * _tex.Size.Y, new() { MaxDegreeOfParallelism = maxDegreeOfParallelism }, xy => {
+                    var coord = new Coord((int)(xy % _tex.Size.X), (int)(xy / _tex.Size.Y));
+                    SetPixel(coord, setter(coord));
+                });
+            }
+            else {
+                for (int xy = 0; xy < _tex.Size.X * _tex.Size.Y; xy++) {
+                    var coord = new Coord((int)(xy % _tex.Size.X), (int)(xy / _tex.Size.Y));
+                    SetPixel(coord, setter(coord));
+                }
+            }
             Update();
         }
 
@@ -119,6 +137,61 @@ namespace Fiero.Core
             RecompileShader(String.Empty, String.Empty);
         }
 
+        public void Flow(float t, float dt, float amp)
+        {
+            RecompileShader($@"
+                uniform float t;
+
+                vec2 field(vec2 pos) {{
+	                return vec2(cos(t + pos.x), sin(t + pos.y));
+	                // Examples:
+                //	return 2.0 * texture(iChannel1, mod(pos, 2.0 * iChannelResolution[1].xy) * 0.5 / iChannelResolution[1].xy).xy - 1.0;
+                //	return 2.0 * texture(iChannel0, (pos + vec2(t * 100.0, 0.0)) / iChannelResolution[0].xy).xy - 1.0;
+                //	return vec2(0.0, 0.0);
+                //	return vec2(cos(pos.x * 0.017 + cos(pos.y * 0.004 + t * 0.1) * 6.28 * 4.0) * 3.0, cos(6.28 * cos(pos.y * 0.01 + pos.x * 0.007)));
+                }}
+            ", $@"
+                vec2 f = {amp:0.00} * field(gl_TexCoord[0].xy);
+                vec4 n = texture2D(texture, gl_TexCoord[0].xy + pixel_size * f);
+                frag = {1 - dt:0.00} * n5 + {dt:0.00} * n;
+            ");
+            _shader.SetUniform(nameof(t), t);
+            Update();
+            RecompileShader(String.Empty, String.Empty);
+        }
+
+        public void ReactionDiffusion(float DA, float DB, float f, float k, float dt)
+        {
+            RecompileShader($@"
+                uniform mat3 kernel;
+                uniform float DA;
+                uniform float DB;
+                uniform float f;
+                uniform float k;
+                uniform float dt;
+            ", $@"
+                vec4 L = 
+                    kernel[0][0] * n7 + kernel[0][1] * n8 + kernel[0][2] * n9 +
+                    kernel[1][0] * n4 + kernel[1][1] * n5 + kernel[1][2] * n6 +
+                    kernel[2][0] * n1 + kernel[2][1] * n2 + kernel[2][2] * n3 ;
+                float A = frag.r;
+                float B = frag.b;
+                float LA = L.r;
+                float LB = L.b;
+                float Aret = A + (DA * LA - A * B * B + f * (1 - A)) * dt;
+                float Bret = B + (DB * LB + A * B * B - (k + f) * B) * dt;
+                frag = vec4(Aret, 0, Bret, 1);
+            ");
+            _shader.SetUniform("kernel", Kernel.Laplacian);
+            _shader.SetUniform(nameof(DA), DA);
+            _shader.SetUniform(nameof(DB), DB);
+            _shader.SetUniform(nameof(f), f);
+            _shader.SetUniform(nameof(k), k);
+            _shader.SetUniform(nameof(dt), dt);
+            Update();
+            RecompileShader(String.Empty, String.Empty);
+        }
+
         public void Gabor(float lambda, float theta, float phi, float rho, float gamma)
         {
             var gammaSquared = gamma * gamma;
@@ -144,7 +217,7 @@ namespace Fiero.Core
             RecompileShader(String.Empty, String.Empty);
         }
 
-        private void Update()
+        public void Update()
         {
             _tex.Update(Pixels);
             using var sprite = new Sprite(_tex);

@@ -14,6 +14,6 @@ namespace Fiero.Business
         }
 
         public static IEnumerable<Actor> Players(this IEnumerable<Entity> entities)
-            => entities.OfType<Actor>().Where(a => a.Properties.Type == ActorName.Player);
+            => entities.OfType<Actor>().Where(a => a.ActorProperties.Type == ActorName.Player);
     }
 }

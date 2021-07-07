@@ -2,6 +2,7 @@
 {
     public enum FactionName
     {
+        None,
         Players,
         Rats,
         Snakes,

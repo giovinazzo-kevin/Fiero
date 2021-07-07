@@ -11,15 +11,17 @@ namespace Fiero.Business
     {
         protected readonly List<Floor> Map;
         protected readonly GameEntities Entities;
+        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly GameDataStore Store;
 
         public Floor CurrentFloor => Map.FirstOrDefault();
         public IEnumerable<Drawable> GetDrawables() => CurrentFloor.GetDrawables();
 
-        public FloorSystem(GameEntities entities, GameDataStore store)
+        public FloorSystem(GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store)
         {
             Entities = entities;
             Store = store;
+            EntityBuilders = entityBuilders;
             Map = new List<Floor>();
         }
 
@@ -52,7 +54,7 @@ namespace Fiero.Business
             if (--maxDistance <= 0)
                 return false;
             var neighbors = GetNeighbors(pos)
-                .Where(n => !n.Properties.BlocksMovement)
+                .Where(n => !n.TileProperties.BlocksMovement)
                 .OrderBy(n => Rng.Random.NextDouble())
                 .ToList();
             if(neighbors.All(n => n.DistanceFrom(pos) > maxDistance))
@@ -92,8 +94,10 @@ namespace Fiero.Business
             if(TileAt(pos, out var old)) {
                 CurrentFloor.Entities.FlagEntityForRemoval(old.Id);
             }
-            var id = CurrentFloor.Entities.CreateTile(tile, pos);
-            CurrentFloor.SetTile(id);
+            var entity = EntityBuilders.Tile(tile)
+                .WithPosition(pos)
+                .Build();
+            CurrentFloor.SetTile(entity.Id);
         }
 
 
@@ -101,7 +105,8 @@ namespace Fiero.Business
         {
             var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
 
-            Map.Add(configure(new FloorBuilder(size, new(tileSize, tileSize))).Build(Entities.CreateScope()));
+            Map.Add(configure(new FloorBuilder(size, new(tileSize, tileSize)))
+                .Build(Entities, EntityBuilders));
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Fiero.Business
         {
             listeners = default;
             if(speaker is Actor a) {
-                var healthPercentage = (a.Properties.Health / (float)a.Properties.MaximumHealth);
+                var healthPercentage = (a.ActorProperties.Health / (float)a.ActorProperties.MaximumHealth);
                 if (healthPercentage <= PercentageThreshold && base.TryTrigger(floor, speaker, out listeners)) {
                     return listeners.Any();
                 }

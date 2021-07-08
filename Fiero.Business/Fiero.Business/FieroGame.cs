@@ -34,8 +34,9 @@ namespace Fiero.Business
             GameGlossaries glossary,
             GameDialogues dialogues,
             GameDataStore store,
+            GameUI ui,
             IEnumerable<IGameScene> gameScenes)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, director)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, ui, director)
         {
             Dialogues = dialogues;
             Glossary = glossary;
@@ -63,7 +64,7 @@ namespace Fiero.Business
         {
             await base.InitializeAsync();
 
-            Fonts.Add(FontName.UI, new Font("Resources/Fonts/PressStart2P.ttf"));
+            Fonts.Add(FontName.UI, new Font("Resources/Fonts/Roboto-Medium.ttf"));
 
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
@@ -99,9 +100,12 @@ namespace Fiero.Business
             Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
             Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
 
+            Store.SetValue(Data.Hotkeys.Cancel, Keyboard.Key.Escape);
+            Store.SetValue(Data.Hotkeys.ToggleInventory, Keyboard.Key.I);
+
             Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
-            Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
+            // Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
         }
     }

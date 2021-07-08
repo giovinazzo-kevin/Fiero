@@ -5,6 +5,6 @@
         None,
         Move,
         Attack,
-        Use
+        PickUp
     }
 }

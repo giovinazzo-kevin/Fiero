@@ -6,6 +6,7 @@ using System.Drawing;
 
 namespace Fiero.Core
 {
+
     public static class TrigonometryExtensions
     {
         public static double Dist(this Coord p, Coord q) => Math.Sqrt(Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2));

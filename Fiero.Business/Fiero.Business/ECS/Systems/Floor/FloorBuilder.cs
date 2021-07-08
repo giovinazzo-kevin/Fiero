@@ -72,7 +72,13 @@ namespace Fiero.Business
             {
                 return Rng.Random.Choose<Func<Drawable>>(
                    () => entities.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
-                   () => entities.Scroll(EffectName.Haste).WithPosition(obj.Position).Build()
+                   () => entities.Scroll(EffectName.Haste).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Love).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Rage).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Test1).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Test2).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Test3).WithPosition(obj.Position).Build(),
+                   () => entities.Scroll(EffectName.Test4).WithPosition(obj.Position).Build()
                 )();
             }
 

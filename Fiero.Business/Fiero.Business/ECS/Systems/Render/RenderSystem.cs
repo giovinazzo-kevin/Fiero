@@ -56,13 +56,13 @@ namespace Fiero.Business
             var drawables = FloorSystem.CurrentFloor.GetDrawables()
                 ?? Enumerable.Empty<Drawable>();
             // If the player dies focus on the killer if one is available
-            if(SelectedActor.Following == null || SelectedActor.Following.Id == 0) {
+            if(SelectedActor.Following == null || SelectedActor.Following.V.Id == 0) {
                 if(Store.TryGetValue(Data.Player.KilledBy, out var killer) && killer != null && killer.Id != 0) {
-                    SelectedActor.Following = killer;
+                    SelectedActor.Following.V = killer;
                 }
             }
             // If no actor to follow is available focus on the geometric center of the map
-            var followPos = (SelectedActor.Following?.Physics?.Position ?? mapCenter).ToVec();
+            var followPos = (SelectedActor.Following.V?.Physics?.Position ?? mapCenter).ToVec();
             var origin = winSize / 4f + followPos * tileSize - winSize / 2f;
             foreach (var drawable in drawables) {
                 var spriteSize = drawable.Render.Sprite.TextureRect.Size().ToVec();

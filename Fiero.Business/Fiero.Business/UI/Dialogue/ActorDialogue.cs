@@ -34,19 +34,19 @@ namespace Fiero.Business
             var dialogue = ui.CreateLayout()
                 .Build(Size, grid => grid
                     .Row()
-                        .Style<Paragraph>(p => {
+                        .Style<Paragraph>(s => s.Apply(p => {
                             p.MaxLines.V = 4;
                             p.FontSize.V = 16;
                             p.CenterContentH.V = true;
                             p.Padding.V = new(8, 8);
                             p.Background.V = GetColor(ColorName.UIBackground);
-                        })
-                        .Style<Picture<TextureName>>(p => {
-                            p.CenterContent.V = true;
+                        }))
+                        .Style<Picture<TextureName>>(s => s.Apply(p => {
+                            p.HorizontalAlignment.V = HorizontalAlignment.Center;
                             p.Background.V = GetColor(ColorName.UIAccent);
                             p.TextureName.V = TextureName.UI; // Actor faces are found here
                             p.Scale.V = new(0.8f, 0.8f); // Leave some margin around the edges
-                        })
+                        }))
                         .Col(w: 0.25f)
                             .Cell<Picture<TextureName>>(p => _picture = p)
                         .End()
@@ -55,7 +55,7 @@ namespace Fiero.Business
                         .End()
                     .End()
                     .Row(h: 1.5f)
-                        .Style<Paragraph>(p => {
+                        .Style<Paragraph>(s => s.Apply(p => {
                             p.FontSize.V = 16;
                             p.Foreground.V = GetColor(ColorName.UIPrimary);
                             p.Background.V = Color.Transparent;
@@ -64,7 +64,7 @@ namespace Fiero.Business
                                 t.OutlineColor = GetColor(ColorName.UIBackground);
                                 t.OutlineThickness = 2f;
                             };
-                        })
+                        }))
                         .Col()
                             .Cell<Paragraph>(p => _choices = p)
                         .End()

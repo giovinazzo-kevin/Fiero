@@ -64,7 +64,7 @@ namespace Fiero.Business
             if(action == ActionName.Attack && HandleAttack()) {
                 return GetCost(action);
             }
-            if (action == ActionName.Use && HandleUse()) {
+            if (action == ActionName.PickUp && HandleUse()) {
                 return GetCost(action);
             }
             return GetCost(action);
@@ -74,7 +74,7 @@ namespace Fiero.Business
 
                 return action switch {
                     ActionName.None => default(int?),
-                    ActionName.Use => 25,
+                    ActionName.PickUp => 25,
                     ActionName.Attack => 100,
                     ActionName.Move => 100,
                     _ => 0
@@ -112,7 +112,7 @@ namespace Fiero.Business
                         actor.Log?.Write($"$Action.YouKneelAt$ {feature.Info.Name}.");
                     }
                     if (feature.Properties.Type == FeatureName.Chest) {
-                        actor.Log?.Write($"$Action.YouOpen$ {feature.Info.Name}.");
+                        actor.Log?.Write($"$Action.YouOpenThe$ {feature.Info.Name}.");
                     }
                     return false;
                 }
@@ -183,11 +183,12 @@ namespace Fiero.Business
                 if (_floorSystem.TileAt(newPos, out var tile)) {
                     if (tile.TileProperties.Name == TileName.Door) {
                         _floorSystem.UpdateTile(newPos, TileName.Ground);
-                        actor.Log?.Write("$Action.YouOpenTheDoor$.");
+                        actor.Log?.Write($"$Action.YouOpenThe$ {tile.TileProperties.Name}.");
                     }
                     else if (!tile.TileProperties.BlocksMovement) {
                         var actorsHere = _floorSystem.ActorsAt(newPos);
                         var featuresHere = _floorSystem.FeaturesAt(newPos);
+                        var itemsHere = _floorSystem.ItemsAt(newPos);
                         if (!actorsHere.Any()) {
                             if (!featuresHere.Any(f => f.Properties.BlocksMovement)) {
                                 actor.Physics.Position = newPos;
@@ -198,7 +199,7 @@ namespace Fiero.Business
                                     feature.Physics.Position.X - actor.Physics.Position.X,
                                     feature.Physics.Position.Y - actor.Physics.Position.Y
                                 );
-                                action = ActionName.Use; // you can bump shrines and chests to interact with them
+                                action = ActionName.PickUp; // you can bump shrines and chests to interact with them
                             }
                         }
                         else {
@@ -206,6 +207,16 @@ namespace Fiero.Business
                             if (actor.IsHotileTowards(target)) {
                                 actor.Action.Target = target;
                                 action = ActionName.Attack; // attack-bump is a free "combo"
+                            }
+                        }
+                        if(action == ActionName.Move) {
+                            if (itemsHere.Any() && actor.Inventory != null) {
+                                var item = itemsHere.Single();
+                                actor.Log?.Write($"$Action.YouStepOverA$ {item.DisplayName}.");
+                            }
+                            else if (featuresHere.Any()) {
+                                var feature = featuresHere.Single();
+                                actor.Log?.Write($"$Action.YouStepOverA$ {feature.Info.Name}.");
                             }
                         }
                     }

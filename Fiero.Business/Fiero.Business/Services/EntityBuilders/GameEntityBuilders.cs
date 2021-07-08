@@ -1,5 +1,7 @@
 ﻿using Fiero.Core;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -38,6 +40,7 @@ namespace Fiero.Business
             .WithPersonality(default)
             .WithPosition(Coord.Zero)
             .WithInventory(50)
+            .WithEquipment()
             ;
 
         public EntityBuilder<Actor> Enemy(MonsterTierName tier) 
@@ -51,6 +54,7 @@ namespace Fiero.Business
             .WithPersonality(Personality.RandomPersonality())
             .WithPosition(Coord.Zero)
             .WithInventory(5)
+            .WithEquipment()
             ;
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, WeaponHandednessName hands, int baseDamage, int swingDelay, int itemRarity)
@@ -121,15 +125,43 @@ namespace Fiero.Business
 
             string ScrollLabel()
             {
-                var syllables = new[] {
-                    "BAH", "DAT", "WAX",
-                    "VEL", "ZES", "TEM",
-                    "FIR", "NIX", "JIN",
-                    "ROS", "VOK", "KOR",
-                    "TUN", "QUD", "PUS"
-                };
-                syllables = syllables.Concat(syllables.Select(x => String.Join("", x.Reverse()))).ToArray();
-                return String.Join("", Enumerable.Range(0, 3).Select(x => rng.Choose(syllables)));
+                var Vowels = "AEIOU".ToCharArray();
+                var consonants = "BDFGKLMRSTVZ".ToCharArray();
+
+                var label = rng.Choose(consonants.Concat(Vowels).ToArray()).ToString();
+                while(label.Length < 6) {
+                    label += GetNextLetter(label);
+                }
+
+                return label;
+                char GetNextLetter(string previous)
+                {
+                    if(IsVowel(previous.Last())) {
+                        var precedingVowels = 0;
+                        foreach (var l in previous.Reverse()) {
+                            if (!IsVowel(l)) break;
+                            precedingVowels++;
+                        }
+                        var chanceOfAnotherVowel = Math.Pow(0.25 - previous.Length / 20d, precedingVowels + 1);
+                        if(rng.NextDouble() < chanceOfAnotherVowel) {
+                            return rng.Choose(Vowels);
+                        }
+                        return rng.Choose(consonants);
+                    }
+                    else {
+                        var precedingConsonants = 0;
+                        foreach (var l in previous.Reverse()) {
+                            if (IsVowel(l)) break;
+                            precedingConsonants++;
+                        }
+                        var chanceOfAnotherConsonant = Math.Pow(0.25 + previous.Length / 20d, precedingConsonants + 1);
+                        if (rng.NextDouble() < chanceOfAnotherConsonant) {
+                            return rng.Choose(consonants);
+                        }
+                        return rng.Choose(Vowels);
+                    }
+                    bool IsVowel(char c) => Vowels.Contains(c);
+                }
             }
         }
 

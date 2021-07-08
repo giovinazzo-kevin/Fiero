@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,9 +22,21 @@ namespace Fiero.Business
 
         public void Write(string message)
         {
+            var last = Messages.LastOrDefault();
             foreach (var match in Regex.Matches(message, "\\$(?<key>.*?)\\$").Cast<Match>()) {
                 var translated = Localizations.Get(match.Groups["key"].Value);
                 message = message.Replace(match.Value, translated);
+            }
+            if(last != null) {
+                var repeatMatch = Regex.Match(last, "x(\\d+)$");
+                var repeatCount = 1;
+                if (repeatMatch.Success) {
+                    repeatCount = int.Parse(repeatMatch.Groups[1].Value);
+                }
+                if(message.Equals(Regex.Replace(last, " x(\\d+)$", String.Empty))) {
+                    Messages.RemoveAt(Messages.Count - 1);
+                    message += $" x{repeatCount + 1}";
+                }
             }
             Messages.Add(message);
             if(Messages.Count >= 100) {

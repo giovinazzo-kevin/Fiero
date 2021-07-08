@@ -2,7 +2,6 @@
 {
     public enum WeaponHandednessName
     {
-        FreeHanded,
         OneHanded,
         TwoHanded
     }

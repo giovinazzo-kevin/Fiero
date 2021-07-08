@@ -29,6 +29,7 @@ namespace Fiero.Core
         public readonly GameSounds<TSounds> Sounds;
         public readonly GameShaders<TShaders> Shaders;
         public readonly GameDirector Director;
+        public readonly GameUI UI;
         public readonly GameLocalizations<TLocales> Localization;
 
         public Game(
@@ -42,6 +43,7 @@ namespace Fiero.Core
             GameColors<TColors> colors,
             GameShaders<TShaders> shaders,
             GameLocalizations<TLocales> localization,
+            GameUI ui,
             GameDirector director)
         {
             OffButton = off;
@@ -53,6 +55,7 @@ namespace Fiero.Core
             Sprites = sprites;
             Sounds = sounds;
             Fonts = fonts;
+            UI = ui;
             Director = director;
             Localization = localization;
         }
@@ -126,12 +129,20 @@ namespace Fiero.Core
             if(win.HasFocus()) {
                 Input.Update(Mouse.GetPosition(win));
             }
-            Director.Update(win, t, dt);
+            if (UI.GetOpenModals().LastOrDefault() is { } modal) {
+                modal.Update(win, t, dt);
+            }
+            else {
+                Director.Update(win, t, dt);
+            }
         }
 
         public virtual void Draw(RenderWindow win, float t, float dt)
         {
             Director.Draw(win, t, dt);
+            foreach (var modal in UI.GetOpenModals()) {
+                modal.Draw(win, t, dt);
+            }
             win.Display();
         }
     }

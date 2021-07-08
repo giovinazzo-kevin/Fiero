@@ -34,6 +34,8 @@ namespace Fiero.Business.Scenes
         protected readonly GameEntityBuilders EntityBuilders;
         protected readonly GameUI UI;
 
+        public Actor Player { get; private set; }
+
         public GameplayScene(
             GameInput input,
             GameDataStore store, 
@@ -151,6 +153,9 @@ namespace Fiero.Business.Scenes
             if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);
             }
+            if (Input.IsKeyPressed(Store.Get(Data.Hotkeys.ToggleInventory))) {
+                UI.ShowInventoryModal(Player.Inventory);
+            }
         }
 
         public override void Draw(RenderWindow win, float t, float dt)
@@ -193,7 +198,7 @@ namespace Fiero.Business.Scenes
                 if(!TrySpawn(pid, out var player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
-                RenderSystem.SelectedActor.Following = player;
+                RenderSystem.SelectedActor.Following.V = Player = player;
             }
         }
     }

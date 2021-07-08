@@ -3,6 +3,7 @@ using System;
 
 namespace Fiero.Core
 {
+
     public class Picture<TTexture> : UIControl
         where TTexture : struct, Enum
     {
@@ -10,7 +11,7 @@ namespace Fiero.Core
 
         public readonly UIControlProperty<TTexture> TextureName = new(nameof(TextureName));
         public readonly UIControlProperty<string> SpriteName = new(nameof(SpriteName));
-        public readonly UIControlProperty<bool> CenterContent = new(nameof(CenterContent), true);
+        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment));
         public readonly UIControlProperty<bool> LockAspectRatio = new(nameof(LockAspectRatio), true);
         public Sprite Sprite { get; private set; }
 
@@ -53,8 +54,14 @@ namespace Fiero.Core
             }
 
             Sprite.Scale = spriteSize / recSize;
-            if (CenterContent.V) {
+            if (HorizontalAlignment.V == Core.HorizontalAlignment.Center) {
                 Sprite.Position = ContentRenderPos + (ContentRenderSize / 2 - spriteSize / 2);
+            }
+            else if (HorizontalAlignment.V == Core.HorizontalAlignment.Right) {
+                Sprite.Position = ContentRenderPos + (ContentRenderSize - spriteSize);
+            }
+            else {
+                Sprite.Position = ContentRenderPos;
             }
             target.Draw(Sprite, states);
         }

@@ -38,6 +38,9 @@ namespace Fiero.Core
             set {
                 var old = _value;
                 _value = _set(value);
+                if(Equals(old, _value)) {
+                    return;
+                }
                 ValueChanged?.Invoke(this, old);
                 if (Propagate) {
                     foreach (var child in Owner.Children) {

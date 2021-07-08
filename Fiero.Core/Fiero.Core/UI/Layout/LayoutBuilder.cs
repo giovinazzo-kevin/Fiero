@@ -70,14 +70,14 @@ namespace Fiero.Core
 
             void ResizeRecursive(Coord size, LayoutGrid grid, Vec p, Vec s)
             {
-                var sz = size.ToVec();
-                var gk = grid.Subdivisions.Clamp(min: 1);
+                var screenSize = size.ToVec();
+                var divisions = grid.Subdivisions.Clamp(min: 1);
                 foreach (var child in grid) {
-                    var cPos = p + child.Position / gk;
-                    var cSize = child.Size * s / gk;
+                    var cPos = p + child.Position * s / divisions;
+                    var cSize = child.Size * s / divisions;
                     if(child.IsCell && child.ControlInstance != null) {
-                        child.ControlInstance.Position.V = layout.Position + (cPos * sz).ToCoord();
-                        child.ControlInstance.Size.V = (cSize * sz).ToCoord();
+                        child.ControlInstance.Position.V = layout.Position + (cPos * screenSize).ToCoord() - new Coord(1, 1);
+                        child.ControlInstance.Size.V = (cSize * screenSize).ToCoord() + new Coord(1, 1);
                         foreach (var rule in grid.GetStyles(child.ControlType)) {
                             rule(child.ControlInstance);
                         }

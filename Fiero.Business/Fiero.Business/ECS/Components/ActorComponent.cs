@@ -6,7 +6,7 @@ namespace Fiero.Business
     public class ActorComponent : Component
     {
         public int Health { get; set; } = 1;
-        public int MaximumHealth { get; set; } = 1;
+        public int MaximumHealth { get; set; } = 5;
 
         public ActorName Type { get; set; }
         public MonsterTierName Tier { get; set; }

@@ -105,7 +105,7 @@ namespace Fiero.Business
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.G)) {
                 a.Action.Direction = new(0, 0);
-                return ActionName.Use;
+                return ActionName.PickUp;
             }
             return ActionName.None;
         };

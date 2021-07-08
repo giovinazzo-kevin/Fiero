@@ -54,10 +54,12 @@ namespace Fiero.Business.Scenes
             base.Initialize();
             UI_Layout = UI.CreateLayout()
                 .Build(new(800, 800), grid => grid
-                    .Style<Label>(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }, 
-                        match: g => g.Class == "ng")
-                    .Style<Label>(l => { l.FontSize.V = 24; }, 
-                        match: g => g.Class != "ng")
+                    .Style<Label>(s => s
+                        .Match(x => x.HasClass("ng"))
+                        .Apply(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }))
+                    .Style<Label>(s => s
+                        .Match(x => !x.HasClass("ng"))
+                        .Apply(l => { l.FontSize.V = 24; }))
                     .Col()
                         .Row(h: 2, @class: "ng")
                             .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
@@ -74,8 +76,10 @@ namespace Fiero.Business.Scenes
                     .End()
                 );
             Data.UI.WindowSize.ValueChanged += e => {
-                UI_Layout.Position.V = e.NewValue / 4;
-                UI_Layout.Size.V = e.NewValue / 2;
+                if (State == SceneState.Main) {
+                    UI_Layout.Position.V = e.NewValue / 4;
+                    UI_Layout.Size.V = e.NewValue / 2;
+                }
             };
 
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {

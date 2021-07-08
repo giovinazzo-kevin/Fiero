@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public static class GameLinqExtensions
     {
         public static IEnumerable<U> TrySelect<T, U>(this IEnumerable<T> source, Func<T, (bool, U)> tryGet)

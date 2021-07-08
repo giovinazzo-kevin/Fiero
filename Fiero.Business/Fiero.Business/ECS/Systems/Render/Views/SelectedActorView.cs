@@ -8,7 +8,7 @@ namespace Fiero.Business
 
     public class SelectedActorView : View
     {
-        public Actor Following { get; set; }
+        public UIControlProperty<Actor> Following { get; private set; } = new(nameof(Following), null);
         protected Layout TopRow { get; private set; }
         protected Layout BottomRow { get; private set; }
         protected Label ActorName { get; private set; }
@@ -40,22 +40,35 @@ namespace Fiero.Business
                 BottomRow.Size.V = (e.NewValue * new Vec(1, 0.15f)).ToCoord();
                 BottomRow.Position.V = new Coord(0, e.NewValue.Y - BottomRow.Size.V.Y);
             };
+
+            Following.ValueChanged += (_, __) => {
+                if (Following.V != null && Following.V.Id != 0) {
+                    ActorName.Text.V = Following.V.Info.Name;
+                    ActorHealth.Foreground.V = Color.White;
+                }
+                else {
+                    ActorHealth.Text.V = $"(DEAD)";
+                    ActorHealth.Foreground.V = Color.Red;
+                    Logs.Text.V = String.Empty;
+                }
+            };
+
             LayoutGrid ApplyStyles(LayoutGrid grid)
             {
                 return grid
-                    .Style<UIControl>(l => {
+                    .Style<UIControl>(s => s.Apply(l => {
                         l.Background.V = Color.Transparent;
-                    })
-                    .Style<Label>(l => {
+                    }))
+                    .Style<Label>(s => s.Apply(l => {
                         l.Background.V = Color.Black;
                         l.FontSize.V = 24;
                         l.CenterContentH.V = false;
-                    })
-                    .Style<Paragraph>(l => {
+                    }))
+                    .Style<Paragraph>(s => s.Apply(l => {
                         l.Background.V = Color.Black;
                         l.FontSize.V = 12;
                         l.MaxLines.V = 10;
-                    });
+                    }));
             }
         }
 
@@ -63,18 +76,11 @@ namespace Fiero.Business
         {
             TopRow.Update(t, dt);
             BottomRow.Update(t, dt);
-            if (Following != null && Following.Id != 0) {
-                ActorName.Text.V = Following.Info.Name;
-                ActorHealth.Text.V = $"HP: {Following.ActorProperties.Health}/{Following.ActorProperties.MaximumHealth}";
-                ActorHealth.Foreground.V = Color.White;
-                if(Following.Log != null) {
-                    Logs.Text.V = String.Join('\n', Following.Log.GetMessages().TakeLast(Logs.MaxLines));
+            if (Following.V != null && Following.V.Id != 0) {
+                ActorHealth.Text.V = $"HP: {Following.V.ActorProperties.Health}/{Following.V.ActorProperties.MaximumHealth}";
+                if(Following.V.Log != null) {
+                    Logs.Text.V = String.Join('\n', Following.V.Log.GetMessages().TakeLast(Logs.MaxLines));
                 }
-            }
-            else {
-                ActorHealth.Text.V = $"(DEAD)";
-                ActorHealth.Foreground.V = Color.Red;
-                Logs.Text.V = String.Empty;
             }
         }
 

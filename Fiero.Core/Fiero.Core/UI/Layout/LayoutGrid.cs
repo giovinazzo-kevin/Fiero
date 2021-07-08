@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 
 namespace Fiero.Core
 {
-
     public class LayoutGrid : IEnumerable<LayoutGrid>
     {
         protected readonly LayoutGrid Parent;
@@ -28,7 +28,7 @@ namespace Fiero.Core
         internal Action<UIControl> InitializeControl { get; private set; } = null;
         protected List<LayoutRule> Styles { get; private set; }
 
-        public bool Is<T>() => IsCell && ControlType.IsAssignableFrom(typeof(T));
+        public bool Is<T>() => IsCell && typeof(T).IsAssignableTo(ControlType);
         public bool HasClass(string cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(cls);
         public bool HasAnyClass(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Any();
         public bool HasAllClasses(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Count() == cls.Length;
@@ -86,12 +86,21 @@ namespace Fiero.Core
             Width = w;
             Height = h;
         }
-        public LayoutGrid Style<T>(Action<T> configure, int priority = 0, Func<LayoutGrid, bool> match = null)
+
+        public LayoutGrid Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
             where T : UIControl
         {
-            Styles.Add(new LayoutRule(typeof(T), match ?? (g => true), t => configure((T)t), priority));
+            var builder = configure(new LayoutStyleBuilder<T>());
+            Styles.Add(builder.Build());
             return this;
         }
+
+        public LayoutGrid Style(LayoutRule rule)
+        {
+            Styles.Add(rule);
+            return this;
+        }
+
         public LayoutGrid Top()
         {
             if (Parent == null)
@@ -106,7 +115,7 @@ namespace Fiero.Core
         public LayoutGrid Col(float w = 1, float h = 1, string @class = null, string @id = null)
         {
             var ret = new LayoutGrid(this, w, h) {
-                Class = @class ?? Class,
+                Class = @class == null ? Class : @class + " " + (Class ?? ""),
                 Id = id,
                 X = _c,
                 Y = _r
@@ -119,7 +128,7 @@ namespace Fiero.Core
         public LayoutGrid Row(float w = 1, float h = 1, string @class = null, string @id = null)
         {
             var ret = new LayoutGrid(this, w, h) {
-                Class = @class ?? Class,
+                Class = @class == null ? Class : Class + " " + @class,
                 Id = id,
                 X = _c,
                 Y = _r
@@ -133,7 +142,7 @@ namespace Fiero.Core
         public LayoutGrid Cell<T>(Action<T> initialize = null)
             where T : UIControl
         {
-            if(!IsCell) {
+            if (!IsCell) {
                 throw new ArgumentException();
             }
             ControlType = typeof(T);

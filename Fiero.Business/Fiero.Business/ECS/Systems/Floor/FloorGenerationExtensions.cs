@@ -82,7 +82,7 @@ namespace Fiero.Business
                 dungeon.Nodes.Max(n => n.Position.Y) - dungeon.Nodes.Min(n => n.Position.Y) + 1
             );
             var roomSizeInTiles = new Coord(
-                9, 9 
+                11, 11 
             );
             var startNode = dungeon.Nodes.Single(n => n.Type == DungeonNodeType.Start);
             var geometricCenter = new Coord(

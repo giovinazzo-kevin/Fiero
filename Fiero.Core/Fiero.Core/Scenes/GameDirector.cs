@@ -1,6 +1,7 @@
 ﻿using SFML.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
@@ -21,6 +22,7 @@ namespace Fiero.Core
         }
 
         private readonly Dictionary<Type, CachedItem> _cache;
+        private readonly Queue<CachedItem> _transitions;
         private CachedItem _currentItem;
 
         public IGameScene CurrentScene => _currentItem?.Scene;
@@ -28,9 +30,10 @@ namespace Fiero.Core
         public GameDirector()
         {
             _cache = new Dictionary<Type, CachedItem>();
+            _transitions = new Queue<CachedItem>();
         }
 
-        public bool TrySetState<T>(T state)
+        public async Task<bool> TrySetStateAsync<T>(T state)
             where T : struct, Enum
         {
             var tState = typeof(T);
@@ -38,7 +41,7 @@ namespace Fiero.Core
                 throw new InvalidOperationException($"A scene with state {tState.Name} was not registered");
             }
             if(_currentItem != null) {
-                if(_currentItem.Scene.TrySetState(state)) {
+                if(await _currentItem.Scene.TrySetStateAsync(state)) {
                     return true;
                 }
                 return false;
@@ -47,7 +50,7 @@ namespace Fiero.Core
             return true;
         }
 
-        public void AddScene<T>(GameScene<T> scene)
+        public async Task AddScene<T>(GameScene<T> scene)
             where T : struct, Enum
         {
             var tState = typeof(T);
@@ -55,15 +58,15 @@ namespace Fiero.Core
                 throw new InvalidOperationException($"A scene with state {tState.Name} was already registered");
             }
             _cache[tState] = new CachedItem(tState, scene);
-            scene.Initialize();
+            await scene.InitializeAsync();
         }
 
-        public void AddScenes(IEnumerable<IGameScene> scenes)
+        public async Task AddScenes(IEnumerable<IGameScene> scenes)
         {
             var addSceneGeneric = typeof(GameDirector).GetMethod(nameof(AddScene));
             foreach (var scene in scenes) {
                 var addScene = addSceneGeneric.MakeGenericMethod(scene.State.GetType());
-                addScene.Invoke(this, new object[] { scene });
+                await (Task)addScene.Invoke(this, new object[] { scene });
             }
         }
 
@@ -86,14 +89,16 @@ namespace Fiero.Core
 
         public virtual void Update(RenderWindow win, float t, float dt)
         {
-            if(_currentItem != null) {
+            if (_currentItem != null) {
                 _currentItem.Scene.Update(win, t, dt);
-                if(_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState)) {
+                if (_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState)) {
                     var tNextState = nextState.GetType();
-                    if(!_cache.TryGetValue(tNextState, out var nextItem)) {
+                    if (!_cache.TryGetValue(tNextState, out var nextItem)) {
                         throw new InvalidOperationException($"Could not access cached item for transition from  state {_currentItem.Scene.State.GetType().Name} to state {tNextState.Name}");
                     }
-                    if(nextItem.Scene.TrySetState(nextState)) {
+                    var setState = nextItem.Scene.TrySetStateAsync(nextState);
+                    setState.Wait();
+                    if (setState.Result) {
                         _currentItem = nextItem;
                     }
                 }

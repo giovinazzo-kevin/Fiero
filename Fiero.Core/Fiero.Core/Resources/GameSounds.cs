@@ -20,10 +20,6 @@ namespace Fiero.Core
             Buffers = new Dictionary<TSounds, SoundBuffer>();
             Sounds = new List<Sound>();
             OffButton = off;
-        }
-
-        public void Initialize()
-        {
             _ = Task.Run(MonitorSounds);
         }
 

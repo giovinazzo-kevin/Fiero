@@ -41,7 +41,7 @@ namespace Fiero.Business
 
             // Register all ECS components by reflection
             var components = typeof(Program).Assembly.GetTypes()
-                .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(Component)) || t.IsSubclassOf(typeof(Entity))));
+                .Where(t => !t.IsAbstract && (t.IsSubclassOf(typeof(EcsComponent)) || t.IsSubclassOf(typeof(Entity))));
             foreach (var componentType in components) {
                 services.Register(componentType);
             }

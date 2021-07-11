@@ -29,7 +29,8 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
         public static EntityBuilder<T> WithEnemyAI<T>(this EntityBuilder<T> builder)
-            where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = ActionProvider.EnemyAI());
+            where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = ActionProvider.EnemyAI())
+                                      .AddOrTweak<AIComponent>();
         public static EntityBuilder<T> WithPlayerAI<T>(this EntityBuilder<T> builder, GameInput input)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = ActionProvider.PlayerInput(input));
         public static EntityBuilder<T> WithFaction<T>(this EntityBuilder<T> builder, FactionName faction)

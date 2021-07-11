@@ -9,28 +9,48 @@ namespace Fiero.Business
     public abstract class Modal : ModalWindow
     {
         protected readonly Dictionary<Hotkey, Action> Hotkeys;
-        
-        private void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            Layout.Size.V = obj.NewValue;
-        }
+        protected event Action Invalidated;
 
         protected Modal(GameUI ui) : base(ui)
         {
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButtons.None));
-            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButtons.ImplicitNo));
+            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButtons.ImplicitYes));
+            Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
         }
+        
+        protected virtual void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        {
+            Layout.Size.V = obj.NewValue;
+            Invalidate();
+        }
+
+        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
+            .AddRule<UIControl>(style => style
+                .Match(x => x.HasAnyClass("modal-title", "modal-controls", "modal-content"))
+                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground)))
+            .AddRule<UIControl>(style => style
+                .Match(x => x.HasClass("row-even"))
+                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
+            ;
+
+        protected void Invalidate() => Invalidated?.Invoke();
 
         public override void Open(string title, ModalWindowButtons buttons)
         {
             base.Open(title, buttons);
+            BeforePresentation();
+            Invalidate();
+        }
+
+        protected virtual void BeforePresentation()
+        {
             Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
         }
 
         public override void Close(ModalWindowButtons buttonPressed)
         {
-            Data.UI.WindowSize.ValueChanged -= WindowSize_ValueChanged;
+            Data.UI.WindowSize.ValueChanged -= OnWindowSizeChanged;
             base.Close(buttonPressed);
         }
 

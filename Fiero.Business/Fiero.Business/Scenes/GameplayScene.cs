@@ -2,11 +2,14 @@
 using SFML.Graphics;
 using SFML.System;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Transactions;
+using Unconcern.Common;
 using static SFML.Window.Keyboard;
 
 namespace Fiero.Business.Scenes
@@ -15,8 +18,11 @@ namespace Fiero.Business.Scenes
     {
         public enum SceneState
         {
+            [EntryState]
             Main,
+            [ExitState]
             Exit_GameOver,
+            [ExitState]
             Exit_SaveAndQuit
         }
 
@@ -32,13 +38,14 @@ namespace Fiero.Business.Scenes
         protected readonly GameDialogues Dialogues;
         protected readonly GameSounds<SoundName> Sounds;
         protected readonly GameEntityBuilders EntityBuilders;
+        protected readonly OffButton OffButton;
         protected readonly GameUI UI;
 
         public Actor Player { get; private set; }
 
         public GameplayScene(
             GameInput input,
-            GameDataStore store, 
+            GameDataStore store,
             GameEntities entities,
             GameDialogues dialogues,
             FloorSystem floorSystem,
@@ -48,6 +55,7 @@ namespace Fiero.Business.Scenes
             ActionSystem actionSystem,
             GameEntityBuilders entityBuilders,
             GameUI ui,
+            OffButton off,
             GameSounds<SoundName> sounds)
         {
             Input = input;
@@ -61,15 +69,21 @@ namespace Fiero.Business.Scenes
             Dialogues = dialogues;
             EntityBuilders = entityBuilders;
             UI = ui;
+            OffButton = off;
             Sounds = sounds;
-            ActionSystem.PlayerTurnStarted += _ => DialogueSystem.OnPlayerTurnStarted();
         }
 
-        public override void Initialize()
+        public override async Task InitializeAsync()
         {
             RenderSystem.Initialize();
             DialogueSystem.Initialize();
             SubscribeDialogueHandlers();
+            await base.InitializeAsync();
+        }
+
+        public override async IAsyncEnumerable<Subscription> RouteEventsAsync()
+        {
+            yield return await ActionSystem.PlayerTurnStarted.SubscribeHandler(DialogueSystem.CheckTriggers);
         }
 
         public bool TrySpawn(int entityId, out Actor actor, float maxDistance = 10)
@@ -83,6 +97,46 @@ namespace Fiero.Business.Scenes
             return true;
         }
 
+        public bool TryUseItem(Item item, Actor actor, out bool consumed)
+        {
+            var used = false;
+            consumed = false;
+            if (item.TryCast<Consumable>(out var consumable)) {
+                if(consumable.TryCast<Potion>(out var potion) 
+                && TryApply(potion.PotionProperties.Effect)) {
+                    used = TryConsume(out consumed);
+                }
+                if (consumable.TryCast<Scroll>(out var scroll)
+                && TryApply(scroll.ScrollProperties.Effect)) {
+                    used = TryConsume(out consumed);
+                }
+            }
+            if(consumed) {
+                // Assumes item was used from inventory
+                _ = actor.Inventory.TryTake(item);
+            }
+            return used;
+
+            bool TryConsume(out bool consumed)
+            {
+                consumed = false;
+                if (consumable.ConsumableProperties.RemainingUses <= 0) {
+                    return false;
+                }
+                if (--consumable.ConsumableProperties.RemainingUses <= 0
+                 && consumable.ConsumableProperties.ConsumedWhenEmpty) {
+                    consumed = true;
+                }
+                return true;
+            }
+
+            bool TryApply(EffectName effect)
+            {
+                switch (effect) {
+                    default: return true;
+                }
+            }
+        }
 
         protected void SubscribeDialogueHandlers()
         {
@@ -140,6 +194,51 @@ namespace Fiero.Business.Scenes
                 };
         }
 
+        protected void OnInventoryClosed(InventoryModal modal, Item item, InventoryActionName action)
+        {
+            switch (action) {
+                case InventoryActionName.Equip:
+                    if (modal.Actor.Equipment.TryEquip(item)) {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouEquip$ {item.DisplayName}.");
+                    }
+                    else {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouFailEquipping$ {item.DisplayName}.");
+                    }
+                    break;
+                case InventoryActionName.Unequip:
+                    if (modal.Actor.Equipment.TryUnequip(item)) {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouUnequip$ {item.DisplayName}.");
+                    }
+                    else {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouFailUnequipping$ {item.DisplayName}.");
+                    }
+                    break;
+                case InventoryActionName.Drop:
+                    _ = modal.Actor.Inventory.TryTake(item);
+                    if (FloorSystem.TryGetClosestFreeTile(modal.Actor.Physics.Position, out var tile)) {
+                        item.Physics.Position = tile.Physics.Position;
+                        FloorSystem.CurrentFloor.AddItem(item.Id);
+                        modal.Actor.Log?.Write($"$Instantaneous.YouDrop$ {item.DisplayName}.");
+                    }
+                    else {
+                        modal.Actor.Log?.Write($"$Instantaneous.NoSpaceToDrop$ {item.DisplayName}.");
+                    }
+                    break;
+                case InventoryActionName.Use:
+                    if (TryUseItem(item, modal.Actor, out var consumed)) {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouUse$ {item.DisplayName}.");
+                    }
+                    else {
+                        modal.Actor.Log?.Write($"$Instantaneous.YouFailUsing$ {item.DisplayName}.");
+                    }
+                    if(consumed) {
+                        modal.Actor.Log?.Write($"$Miscellaneous.AnItemIsConsumed$ {item.DisplayName}.");
+                    }
+                    break;
+                default: break;
+            }
+        }
+
         public override void Update(RenderWindow win, float t, float dt)
         {
             RenderSystem.Update(win, t, dt);
@@ -151,10 +250,11 @@ namespace Fiero.Business.Scenes
                 Entities.RemoveFlaggedItems();
             }
             if (Input.IsKeyPressed(Key.R)) {
-                TrySetState(SceneState.Main);
+                Task.Run(async () => await TrySetStateAsync(SceneState.Main));
             }
             if (Input.IsKeyPressed(Store.Get(Data.Hotkeys.ToggleInventory))) {
-                UI.ShowInventoryModal(Player.Inventory);
+                var modal = UI.Inventory(Player);
+                modal.ActionPerformed += (item, action) => OnInventoryClosed(modal, item, action);
             }
         }
 
@@ -165,8 +265,8 @@ namespace Fiero.Business.Scenes
             DialogueSystem.Draw(win, t, dt);
         }
 
-        protected override bool CanChangeState(SceneState newState) => true;
-        protected override void OnStateChanged(SceneState oldState)
+        protected override Task<bool> CanChangeStateAsync(SceneState newState) => Task.FromResult(true);
+        protected override async Task OnStateChangedAsync(SceneState oldState)
         {
             if(State == SceneState.Main) {
                 var newRngSeed = (int)DateTime.Now.ToBinary();
@@ -200,6 +300,7 @@ namespace Fiero.Business.Scenes
                 }
                 RenderSystem.SelectedActor.Following.V = Player = player;
             }
+            await base.OnStateChangedAsync(oldState);
         }
     }
 }

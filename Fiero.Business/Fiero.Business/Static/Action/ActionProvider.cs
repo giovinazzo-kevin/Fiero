@@ -9,14 +9,14 @@ namespace Fiero.Business
 
     public static class ActionProvider
     {
-        public static Func<Actor, ActionName> EnemyAI() => a => {
+        public static Func<Actor, IAction> EnemyAI() => a => {
             return Act(a);
-            static ActionName Act(Actor a)
+            static IAction Act(Actor a)
             {
-                if(a.Action.Target is { Id: 0 }) {
-                    a.Action.Target = null; // invalidation
+                if(a.AI.Target is { Id: 0 }) {
+                    a.AI.Target = null; // invalidation
                 }
-                if (a.Action.Target == null) {
+                if (a.AI.Target == null) {
                     // Seek new target to attack
                     var target = a.ActorProperties.CurrentFloor.Actors
                         .Where(b => a.IsHotileTowards(b))
@@ -26,88 +26,74 @@ namespace Fiero.Business
                         .Select(t => t.Actor)
                         .FirstOrDefault();
                     if (target != null) {
-                        a.Action.Target = target;
+                        a.AI.Target = target;
                     }
                 }
-                if(a.Action.Target != null) {
-                    if (a.Action.Target.DistanceFrom(a) < 2) {
-                        return ActionName.Attack;
+                if(a.AI.Target != null) {
+                    if (a.AI.Target.DistanceFrom(a) < 2) {
+                        return new AttackOtherAction(a.AI.Target);
                     }
-                    if (a.CanSee(a.Action.Target)) {
+                    if (a.CanSee(a.AI.Target)) {
                         // If we can see the target and it has moved, recalculate the path as to remember its last position
-                        a.Action.Path = a.ActorProperties.CurrentFloor.Pathfinder.Search(a.Physics.Position, a.Action.Target.Physics.Position, default);
-                        a.Action.Path?.RemoveFirst();
+                        a.AI.Path = a.ActorProperties.CurrentFloor.Pathfinder.Search(a.Physics.Position, a.AI.Target.Physics.Position, default);
+                        a.AI.Path?.RemoveFirst();
                     }
                 }
-                if (a.Action.Path != null) {
-                    if (a.Action.Path.First != null) {
-                        var pos = a.Action.Path.First.Value.Physics.Position;
+                if (a.AI.Path != null) {
+                    if (a.AI.Path.First != null) {
+                        var pos = a.AI.Path.First.Value.Physics.Position;
                         var dir = new Coord(pos.X - a.Physics.Position.X, pos.Y - a.Physics.Position.Y);
                         var diff = Math.Abs(dir.X) + Math.Abs(dir.Y);
-                        a.Action.Path.RemoveFirst();
+                        a.AI.Path.RemoveFirst();
                         if (diff > 0 && diff <= 2) {
                             // one tile ahead
-                            a.Action.Direction = dir;
-                            return ActionName.Move;
+                            return new MoveRelativeAction(dir);
                         }
                     }
                     else {
-                        a.Action.Path = null;
+                        a.AI.Path = null;
                         return Act(a);
                     }
                 }
-                a.Action.Direction = null;
-                return ActionName.Move;
+                return new MoveRandomlyAction();
             }
         };
 
-        public static Func<Actor, ActionName> PlayerInput(GameInput input) => a => {
+        public static Func<Actor, IAction> PlayerInput(GameInput input) => a => {
             var moveIntent = input.IsKeyDown(SFML.Window.Keyboard.Key.LControl)
                 ? ActionName.Attack
                 : ActionName.Move;
-            a.Action.Target = null;
-            a.Action.Direction = null;
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad7)) {
-                a.Action.Direction = new(-1, -1);
-                return moveIntent;
+                return new MoveRelativeAction(new(-1, -1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad8)) {
-                a.Action.Direction = new(0, -1);
-                return moveIntent;
+                return new MoveRelativeAction(new(0, -1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad9)) {
-                a.Action.Direction = new(1, -1);
-                return moveIntent;
+                return new MoveRelativeAction(new(1, -1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad4)) {
-                a.Action.Direction = new(-1, 0);
-                return moveIntent;
+                return new MoveRelativeAction(new(-1, 0));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad5)) {
-                a.Action.Direction = new(0, 0);
-                return moveIntent;
+                return new MoveRelativeAction(new(0, 0));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad6)) {
-                a.Action.Direction = new(1, 0);
-                return moveIntent;
+                return new MoveRelativeAction(new(1, 0));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad1)) {
-                a.Action.Direction = new(-1, 1);
-                return moveIntent;
+                return new MoveRelativeAction(new(-1, 1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad2)) {
-                a.Action.Direction = new(0, 1);
-                return moveIntent;
+                return new MoveRelativeAction(new(0, 1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad3)) {
-                a.Action.Direction = new(1, 1);
-                return moveIntent;
+                return new MoveRelativeAction(new(1, 1));
             }
             if (input.IsKeyPressed(SFML.Window.Keyboard.Key.G)) {
-                a.Action.Direction = new(0, 0);
-                return ActionName.PickUp;
+                return new InteractRelativeAction();
             }
-            return ActionName.None;
+            return new NoAction();
         };
     }
 }

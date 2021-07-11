@@ -10,6 +10,8 @@ namespace Fiero.Core
         Cancel = 2,
         Yes = 4,
         No = 8,
-        Close = 16
+        Close = 16,
+        ImplicitYes = 32,
+        ImplicitNo = 64
     }
 }

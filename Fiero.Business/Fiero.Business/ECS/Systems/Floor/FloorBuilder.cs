@@ -72,9 +72,9 @@ namespace Fiero.Business
             {
                 return Rng.Random.Choose<Func<Drawable>>(
                    () => entities.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
-                   () => entities.Scroll(EffectName.Haste).WithPosition(obj.Position).Build(),
-                   () => entities.Scroll(EffectName.Love).WithPosition(obj.Position).Build(),
-                   () => entities.Scroll(EffectName.Rage).WithPosition(obj.Position).Build(),
+                   () => entities.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
+                   () => entities.Potion(EffectName.Love).WithPosition(obj.Position).Build(),
+                   () => entities.Potion(EffectName.Rage).WithPosition(obj.Position).Build(),
                    () => entities.Scroll(EffectName.Test1).WithPosition(obj.Position).Build(),
                    () => entities.Scroll(EffectName.Test2).WithPosition(obj.Position).Build(),
                    () => entities.Scroll(EffectName.Test3).WithPosition(obj.Position).Build(),
@@ -94,7 +94,10 @@ namespace Fiero.Business
             Drawable CreateArmor()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => entities.Sword().WithPosition(obj.Position).Build()
+                    () => entities.LeatherArmor(ArmorSlotName.Head).WithPosition(obj.Position).Build(),
+                    () => entities.LeatherArmor(ArmorSlotName.Arms).WithPosition(obj.Position).Build(),
+                    () => entities.LeatherArmor(ArmorSlotName.Legs).WithPosition(obj.Position).Build(),
+                    () => entities.LeatherArmor(ArmorSlotName.Torso).WithPosition(obj.Position).Build()
                 )();
             }
 

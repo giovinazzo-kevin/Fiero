@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class InfoComponent : Component
+    public class InfoComponent : EcsComponent
     {
         public string Name { get; set; }
     }

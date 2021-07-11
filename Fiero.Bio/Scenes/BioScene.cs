@@ -39,8 +39,8 @@ namespace Fiero.Bio
             Main
         }
 
-        protected override bool CanChangeState(SceneState newState) => true;
-        protected override void OnStateChanged(SceneState oldState) { }
+        protected override bool CanChangeStateAsync(SceneState newState) => true;
+        protected override void OnStateChangedAsync(SceneState oldState) { }
 
 
         public readonly IReadOnlyList<Reaction> Reactions;

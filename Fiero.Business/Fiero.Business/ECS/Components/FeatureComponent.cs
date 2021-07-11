@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public class FeatureComponent : Component
+    public class FeatureComponent : EcsComponent
     {
         public FeatureName Type { get; set; }
         public bool BlocksMovement { get; set; }

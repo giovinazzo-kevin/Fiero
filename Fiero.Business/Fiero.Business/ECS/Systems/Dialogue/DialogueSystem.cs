@@ -74,7 +74,7 @@ namespace Fiero.Business
             win.Draw(UILayout);
         }
 
-        public void OnPlayerTurnStarted()
+        public void CheckTriggers()
         {
             if (CurrentDialogue != null) {
                 throw new InvalidOperationException("Why is the turn counter advancing during a dialogue??");

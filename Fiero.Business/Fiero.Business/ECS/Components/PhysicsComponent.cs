@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Fiero.Business
 {
-    public class PhysicsComponent : Component
+    public class PhysicsComponent : EcsComponent
     {
         public Coord Position { get; set; }
     }

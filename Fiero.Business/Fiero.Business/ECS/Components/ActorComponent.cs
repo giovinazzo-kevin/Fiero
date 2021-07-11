@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fiero.Business
 {
-    public class ActorComponent : Component
+    public class ActorComponent : EcsComponent
     {
         public int Health { get; set; } = 1;
         public int MaximumHealth { get; set; } = 5;

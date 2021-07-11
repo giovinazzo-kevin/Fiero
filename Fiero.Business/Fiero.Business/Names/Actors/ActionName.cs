@@ -3,8 +3,9 @@
     public enum ActionName
     {
         None,
+        Wait,
         Move,
         Attack,
-        PickUp
+        Interact,
     }
 }

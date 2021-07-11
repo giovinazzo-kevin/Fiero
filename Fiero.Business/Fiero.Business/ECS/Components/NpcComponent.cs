@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class NpcComponent : Component
+    public class NpcComponent : EcsComponent
     {
         public NpcName Type { get; set; }
 

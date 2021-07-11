@@ -60,9 +60,13 @@ namespace Fiero.Core
             Localization = localization;
         }
 
-        public virtual Task InitializeAsync()
+        protected virtual async Task InitializeAsync()
         {
-            Sounds.Initialize();
+            await RouteEventsAsync();
+        }
+
+        protected virtual Task RouteEventsAsync()
+        {
             return Task.CompletedTask;
         }
 

@@ -1,6 +1,7 @@
 ﻿using LightInject;
 using System;
 using System.Threading;
+using Unconcern.Common;
 
 namespace Fiero.Core
 {
@@ -38,6 +39,7 @@ namespace Fiero.Core
             _ioc.Register<GameLocalizations<TLocales>>(new PerContainerLifetime());
             _ioc.Register<GameUI>(new PerContainerLifetime());
             _ioc.Register<TGame>(new PerContainerLifetime());
+            _ioc.Register<EventBus>(new PerContainerLifetime());
             configureServices?.Invoke(_ioc);
             _ioc.Compile();
             return _ioc.GetInstance<TGame>();

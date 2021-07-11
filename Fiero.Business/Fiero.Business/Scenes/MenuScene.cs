@@ -14,9 +14,13 @@ namespace Fiero.Business.Scenes
     {
         public enum SceneState  
         {
+            [EntryState]
             Main,
+            [ExitState]
             Exit_NewGame,
+            [ExitState]
             Exit_Tracker,
+            [ExitState]
             Exit_QuitGame
         }
 
@@ -49,9 +53,9 @@ namespace Fiero.Business.Scenes
             OffButton = off;
         }
 
-        public override void Initialize()
+        public override async Task InitializeAsync()
         {
-            base.Initialize();
+            await base.InitializeAsync();
             UI_Layout = UI.CreateLayout()
                 .Build(new(800, 800), grid => grid
                     .Style<Label>(s => s
@@ -84,7 +88,10 @@ namespace Fiero.Business.Scenes
 
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
                 l.Text.V = Localizations.Get($"Menu.{option}");
-                l.Clicked += (_, __, ___) => TrySetState(state);
+                l.Clicked += (_, __, ___) => {
+                    Task.Run(async () => await TrySetStateAsync(state));
+                    return true;
+                };
             };
         }
 
@@ -99,10 +106,11 @@ namespace Fiero.Business.Scenes
             win.Draw(UI_Layout);
         }
 
-        protected override bool CanChangeState(SceneState newState) => true;
-        protected override void OnStateChanged(SceneState oldState)
+        protected override Task<bool> CanChangeStateAsync(SceneState newState) => Task.FromResult(true);
+        protected override async Task OnStateChangedAsync(SceneState oldState)
         {
-            switch(State) {
+            await base.OnStateChangedAsync(oldState);
+            switch (State) {
                 // Initialize
                 case SceneState.Main:
                     break;

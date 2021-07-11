@@ -5,22 +5,20 @@ using System.Drawing;
 
 namespace Fiero.Business
 {
-    public class ActionComponent : Component
+
+    public class ActionComponent : EcsComponent
     {
         private readonly GameEntities _entities;
 
         public ActionComponent(GameEntities entities)
         {
             _entities = entities;
-            ActionProvider = _ => ActionName.Move;
+            ActionProvider = _ => new MoveRelativeAction(new());
         }
 
-        public Coord? Direction { get; set; }
-        public Actor Target { get; set; }
-        public LinkedList<Tile> Path { get; set; }
-
-        public Func<Actor, ActionName> ActionProvider { get; set; }
-        public ActionName GetAction() => ActionProvider(_entities.GetProxy<Actor>(EntityId));
+        public IAction LastAction { get; set; }
+        public Func<Actor, IAction> ActionProvider { get; set; }
+        public IAction GetAction() => ActionProvider(_entities.GetProxy<Actor>(EntityId));
 
     }
 }

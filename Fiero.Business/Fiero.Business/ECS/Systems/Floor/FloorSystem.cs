@@ -48,6 +48,7 @@ namespace Fiero.Business
         {
             if (TileAt(pos, out closest)
                 && !ActorsAt(pos).Any() 
+                && !ItemsAt(pos).Any()
                 && !FeaturesAt(pos).Any(f => f.Properties.BlocksMovement)) {
                 return true;
             }

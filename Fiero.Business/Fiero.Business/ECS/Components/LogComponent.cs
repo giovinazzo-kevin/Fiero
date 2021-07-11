@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Fiero.Business
 {
-    public class LogComponent : Component
+    public class LogComponent : EcsComponent
     {
         protected readonly GameLocalizations<LocaleName> Localizations;
         protected readonly List<string> Messages;

@@ -241,7 +241,7 @@ namespace Fiero.Business
 
         #region WEAPONS
         public EntityBuilder<Weapon> Sword()
-            => Weapon("sword", WeaponName.Sword, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
+            => Weapon("sword", WeaponName.Sword, WeaponHandednessName.OneHanded, 10, 100, itemRarity: 10)
             ;
         public EntityBuilder<Weapon> Bow()
             => Weapon("bow", WeaponName.Bow, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
@@ -253,7 +253,7 @@ namespace Fiero.Business
 
         #region ARMORS
         public EntityBuilder<Armor> LeatherArmor(ArmorSlotName slot)
-            => Armor("leather armor", ArmorName.Light, slot, itemRarity: 10)
+            => Armor($"leather armor ({slot})", ArmorName.Light, slot, itemRarity: 10)
             ;
         #endregion
 

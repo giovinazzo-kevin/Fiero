@@ -7,28 +7,14 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
 
-    public sealed class ActionSystem
+
+    public partial class ActionSystem : EcsSystem
     {
-        internal readonly struct ActorTime
-        {
-            public readonly int ActorId;
-            public readonly int Time;
-            public readonly Func<int?> Act;
-
-            public ActorTime(int actorId, Func<int?> actionCost, int time = 0)
-            {
-                Time = time;
-                ActorId = actorId;
-                Act = actionCost;
-            }
-
-            public ActorTime WithTime(int newTime) => new(ActorId, Act, newTime);
-        }
-
         private const int TURN_ACTOR_ID = -1;
 
         private readonly List<ActorTime> _queue;
@@ -40,202 +26,61 @@ namespace Fiero.Business
         private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
 
-        public event Action<int> TurnStarted;
-        public event Action<int> PlayerTurnStarted;
+        public readonly SystemEvent<ActionSystem, TurnStartedEvent> TurnStarted;
+        public readonly SystemEvent<ActionSystem, PlayerTurnStartedEvent> PlayerTurnStarted;
 
-        public ActionSystem(GameEntities entities, FloorSystem floorSystem, GameDataStore store, GameSounds<SoundName> sounds)
-        {
+        public ActionSystem(
+            EventBus bus,
+            GameEntities entities, 
+            FloorSystem floorSystem,
+            GameDataStore store, 
+            GameSounds<SoundName> sounds
+        ) : base(bus) {
             _entities = entities;
             _floorSystem = floorSystem;
             _sounds = sounds;
             _store = store;
             _queue = new List<ActorTime>();
             Clear();
+
+            TurnStarted = new(this, nameof(TurnStarted));
+            PlayerTurnStarted = new(this, nameof(PlayerTurnStarted));
         }
 
-        private int? HandleAction(int actorId)
+        protected virtual int? GetCost(ActionName action)
         {
-            var actor = _entities.GetProxy<Actor>(actorId);
-            var action = actor.Action.GetAction();
-            
-            if (action == ActionName.Move && HandleMove()) {
-                return GetCost(action);
-            }
-            if(action == ActionName.Attack && HandleAttack()) {
-                return GetCost(action);
-            }
-            if (action == ActionName.PickUp && HandleUse()) {
-                return GetCost(action);
-            }
-            return GetCost(action);
 
-            int? GetCost(ActionName action)
-            {
+            return action switch {
+                ActionName.None => default(int?),
+                ActionName.Interact => 25,
+                ActionName.Attack => 100,
+                ActionName.Move => 100,
+                _ => 0
+            };
+        }
 
-                return action switch {
-                    ActionName.None => default(int?),
-                    ActionName.PickUp => 25,
-                    ActionName.Attack => 100,
-                    ActionName.Move => 100,
-                    _ => 0
-                };
-            }
-
-            bool HandleUse()
-            {
-                // Use handles both grabbing items from the ground and using dungeon features
-                if (!(actor.Action.Direction is { } direction)) {
-                    return true;
-                }
-                var usePos = actor.Physics.Position + direction;
-                var itemsHere = _floorSystem.ItemsAt(usePos);
-                var featuresHere = _floorSystem.FeaturesAt(usePos);
-                if(itemsHere.Any() && actor.Inventory != null) {
-                    var item = itemsHere.Single();
-                    if(actor.Inventory.TryPut(item)) {
-                        _floorSystem.CurrentFloor.RemoveItem(item.Id);
-                        actor.Log?.Write($"$Action.YouPickUpA$ {item.DisplayName}.");
-                    }
-                    else {
-                        actor.Log?.Write($"$Action.YourInventoryIsTooFullFor$ {item.DisplayName}.");
-                    }
-                }
-                else if(featuresHere.Any()) {
-                    var feature = featuresHere.Single();
-                    return HandleUseFeature(feature);
-                }
-                return false;
-
-                bool HandleUseFeature(Feature feature)
-                {
-                    if (feature.Properties.Type == FeatureName.Shrine) {
-                        actor.Log?.Write($"$Action.YouKneelAt$ {feature.Info.Name}.");
-                    }
-                    if (feature.Properties.Type == FeatureName.Chest) {
-                        actor.Log?.Write($"$Action.YouOpenThe$ {feature.Info.Name}.");
-                    }
-                    return false;
-                }
-            }
-
-            bool HandleAttack()
-            {
-                if (actor.Action.Target == null) {
-                    if (!(actor.Action.Direction is { } direction)) {
-                        return true;
-                    }
-                    var newPos = actor.Physics.Position + direction;
-                    var actorsHere = _floorSystem.ActorsAt(newPos);
-                    if (!actorsHere.Any(a => actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
-                        return true;
-                    }
-                    actor.Action.Target = actorsHere.Single();
-                }
-                if (actor.DistanceFrom(actor.Action.Target) >= 2) {
-                    // out of reach
-                    return true;
-                }
-                if (actor.Faction.Relationships.Get(actor.Action.Target.Faction.Type).MayAttack()) {
-                    // attack!
-                    actor.Log?.Write($"$Action.YouAttack$ {actor.Action.Target.Info.Name}.");
-                    actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.AttacksYou$.");
-                    // make sure that neutrals aggro the attacker
-                    if(actor.Action.Target.Action.Target == null) {
-                        actor.Action.Target.Action.Target = actor;
-                    }
-                    // make sure that people hold a grudge regardless of factions
-                    actor.Action.Target.ActorProperties.Relationships.TryUpdate(actor, x => x
-                        .With(StandingName.Hated)
-                    , out _);
-
-                    if (--actor.Action.Target.ActorProperties.Health <= 0) {
-                        actor.Action.Target.Log?.Write($"{actor.Info.Name} $Action.KillsYou$.");
-                        actor.Log?.Write($"$Action.YouKill$ {actor.Action.Target.Info.Name}.");
-                        if(actor.Action.Target.ActorProperties.Type == ActorName.Player) {
-                            _sounds.Get(SoundName.PlayerDeath).Play();
-                            _store.SetValue(Data.Player.KilledBy, actor);
-                        }
-                        RemoveActor(actor.Action.Target.Id);
-                        _floorSystem.CurrentFloor.RemoveActor(actor.Action.Target.Id);
-                        _floorSystem.CurrentFloor.Entities.FlagEntityForRemoval(actor.Action.Target.Id);
-                        actor.Action.Target.TryRefresh(0); // invalidate target proxy
-                    }
-                }
-                else {
-                    // friendly fire?
-                }
-
-                return false;
-            }
-
-            bool HandleMove()
-            {
-                var direction = actor.Action.Direction
-                    ?? (actor.Action.Target != null
-                        ? new(actor.Action.Target.Physics.Position.X - actor.Physics.Position.X,
-                              actor.Action.Target.Physics.Position.Y - actor.Physics.Position.Y)
-                        : new(Rng.Random.Next(-1, 2), Rng.Random.Next(-1, 2)));
-                var newPos = new Coord(actor.Physics.Position.X + direction.X, actor.Physics.Position.Y + direction.Y);
-                if (newPos == actor.Physics.Position) {
-                    actor.ActorProperties.Health = Math.Min(actor.ActorProperties.MaximumHealth, actor.ActorProperties.Health + 1);
-                    return true; // waiting costs the same as moving
-                }
-                if (_floorSystem.TileAt(newPos, out var tile)) {
-                    if (tile.TileProperties.Name == TileName.Door) {
-                        _floorSystem.UpdateTile(newPos, TileName.Ground);
-                        actor.Log?.Write($"$Action.YouOpenThe$ {tile.TileProperties.Name}.");
-                    }
-                    else if (!tile.TileProperties.BlocksMovement) {
-                        var actorsHere = _floorSystem.ActorsAt(newPos);
-                        var featuresHere = _floorSystem.FeaturesAt(newPos);
-                        var itemsHere = _floorSystem.ItemsAt(newPos);
-                        if (!actorsHere.Any()) {
-                            if (!featuresHere.Any(f => f.Properties.BlocksMovement)) {
-                                actor.Physics.Position = newPos;
-                            }
-                            else {
-                                var feature = featuresHere.Single();
-                                actor.Action.Direction = new(
-                                    feature.Physics.Position.X - actor.Physics.Position.X,
-                                    feature.Physics.Position.Y - actor.Physics.Position.Y
-                                );
-                                action = ActionName.PickUp; // you can bump shrines and chests to interact with them
-                            }
-                        }
-                        else {
-                            var target = actorsHere.Single();
-                            if (actor.IsHotileTowards(target)) {
-                                actor.Action.Target = target;
-                                action = ActionName.Attack; // attack-bump is a free "combo"
-                            }
-                        }
-                        if(action == ActionName.Move) {
-                            if (itemsHere.Any() && actor.Inventory != null) {
-                                var item = itemsHere.Single();
-                                actor.Log?.Write($"$Action.YouStepOverA$ {item.DisplayName}.");
-                            }
-                            else if (featuresHere.Any()) {
-                                var feature = featuresHere.Single();
-                                actor.Log?.Write($"$Action.YouStepOverA$ {feature.Info.Name}.");
-                            }
-                        }
-                    }
-                    else {
-                        actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
-                        if (actor.ActorProperties.Type == ActorName.Player) {
-                            _sounds.Get(SoundName.WallBump).Play();
-                        }
-                    }
-                }
-                return false;
-            }
+        protected virtual int? HandleAction(Actor actor, ref IAction action)
+        {
+            var cost = GetCost(action.Name);
+            cost = action.Name switch {
+                ActionName.Move     when(HandleMove  (actor, ref action, ref cost)) => cost,
+                ActionName.Attack   when(HandleAttack(actor, ref action, ref cost)) => cost,
+                ActionName.Interact when(HandleInteract   (actor, ref action, ref cost)) => cost,
+                _ => null
+            };
+            actor.Action.LastAction = action;
+            return cost;
         }
 
         public void AddActor(int actorId)
         {
             // Actors have their energy randomized when spawning, to distribute them better across turns
             var time = _queue.Single(x => x.ActorId == TURN_ACTOR_ID).Time;
-            _queue.Add(new ActorTime(actorId, () => HandleAction(actorId), time + Rng.Random.Next(0, 100)));
+            var proxy = _entities.GetProxy<Actor>(actorId);
+            _queue.Add(new ActorTime(actorId, () => {
+                var action = proxy.Action.GetAction();
+                return HandleAction(proxy, ref action);
+            }, time + Rng.Random.Next(0, 100)));
         }
 
         public void RemoveActor(int actorId)
@@ -257,7 +102,7 @@ namespace Fiero.Business
 
             if(next.ActorId != TURN_ACTOR_ID && _entities.TryGetFirstComponent<ActorComponent>(next.ActorId, out var comp) 
                 && comp.Type == ActorName.Player) {
-                PlayerTurnStarted?.Invoke(CurrentTurn);
+                PlayerTurnStarted.Raise(new(next.ActorId, CurrentTurn));
             }
 
             var cost = next.Act();
@@ -279,7 +124,7 @@ namespace Fiero.Business
             CurrentTime += cost.Value;
             if (next.ActorId == TURN_ACTOR_ID) {
                 CurrentTurn++;
-                TurnStarted?.Invoke(CurrentTurn);
+                TurnStarted.Raise(new(CurrentTurn));
             }
 
             return cost;

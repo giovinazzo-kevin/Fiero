@@ -8,6 +8,7 @@ namespace Fiero.Business
         public static class Hotkeys
         {
             public static readonly GameDatum<Keyboard.Key> Cancel = new(nameof(Hotkeys) + nameof(Cancel));
+            public static readonly GameDatum<Keyboard.Key> Confirm = new(nameof(Hotkeys) + nameof(Confirm));
             public static readonly GameDatum<Keyboard.Key> ToggleInventory = new(nameof(Hotkeys) + nameof(ToggleInventory));
         }
 

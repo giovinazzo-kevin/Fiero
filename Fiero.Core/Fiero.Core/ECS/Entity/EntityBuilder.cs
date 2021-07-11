@@ -23,7 +23,7 @@ namespace Fiero.Core
         }
 
         public EntityBuilder<TProxy> Add<T>(Action<T> configure = null)
-            where T : Component
+            where T : EcsComponent
         {
             if (_componentTypes.Contains(typeof(T))) {
                 throw new ArgumentException($"EntityBuilder for entity proxy of type {typeof(TProxy).Name} already has a component of type {typeof(T).Name}");
@@ -44,7 +44,7 @@ namespace Fiero.Core
         }
 
         public EntityBuilder<TProxy> Tweak<T>(Action<T> configure)
-            where T : Component
+            where T : EcsComponent
         {
             if (!_componentTypes.Contains(typeof(T))) {
                 throw new ArgumentException($"EntityBuilder for entity of type {typeof(TProxy).Name} has no component definition of type {typeof(T).Name}");
@@ -60,7 +60,7 @@ namespace Fiero.Core
         }
 
         public EntityBuilder<TProxy> AddOrTweak<T>(Action<T> configure = null)
-            where T : Component
+            where T : EcsComponent
         {
             if (!_componentTypes.Contains(typeof(T))) {
                 return Add(configure);

@@ -22,10 +22,13 @@ namespace Fiero.Core
             OpenModals = new List<ModalWindow>();
         }
 
-        public void ShowModal(ModalWindow wnd, string title, ModalWindowButtons buttons) {
+        public T ShowModal<T>(T wnd, string title, ModalWindowButtons buttons)
+            where T : ModalWindow
+        {
             OpenModals.Add(wnd);
             wnd.Closed += (_, __) => OpenModals.Remove(wnd);
             wnd.Open(title, buttons);
+            return wnd;
         }
 
         public LayoutBuilder CreateLayout() => new(ServiceProvider);

@@ -60,7 +60,7 @@ namespace Fiero.Business
             Store.SetValue(Data.UI.WindowSize, win.Size.ToCoord());
         }
 
-        public override async Task InitializeAsync()
+        protected override async Task InitializeAsync()
         {
             await base.InitializeAsync();
 
@@ -101,12 +101,13 @@ namespace Fiero.Business
             Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
 
             Store.SetValue(Data.Hotkeys.Cancel, Keyboard.Key.Escape);
+            Store.SetValue(Data.Hotkeys.Confirm, Keyboard.Key.Enter);
             Store.SetValue(Data.Hotkeys.ToggleInventory, Keyboard.Key.I);
 
-            Director.AddScenes(Scenes);
+            await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
             // Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
-            Director.TrySetState(MenuScene.SceneState.Main);
+            await Director.TrySetStateAsync(MenuScene.SceneState.Main);
         }
     }
 }

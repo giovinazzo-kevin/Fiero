@@ -12,6 +12,8 @@ namespace Fiero.Core
         public UIControlProperty<string> Title { get; private set; }
 
         public event Action<ModalWindow, ModalWindowButtons> Closed;
+        public event Action<ModalWindow, ModalWindowButtons> Confirmed;
+        public event Action<ModalWindow, ModalWindowButtons> Cancelled;
         public event Action<float, float> Updated;
 
 
@@ -80,6 +82,16 @@ namespace Fiero.Core
         public virtual void Close(ModalWindowButtons buttonPressed)
         {
             Closed?.Invoke(this, buttonPressed);
+            if (buttonPressed == ModalWindowButtons.Yes
+                || buttonPressed == ModalWindowButtons.ImplicitYes
+                || buttonPressed == ModalWindowButtons.Ok) {
+                Confirmed?.Invoke(this, buttonPressed);
+            }
+            if (buttonPressed == ModalWindowButtons.No
+                || buttonPressed == ModalWindowButtons.ImplicitNo
+                || buttonPressed == ModalWindowButtons.Cancel) {
+                Cancelled?.Invoke(this, buttonPressed);
+            }
         }
 
         public virtual void Update(RenderWindow win, float t, float dt)

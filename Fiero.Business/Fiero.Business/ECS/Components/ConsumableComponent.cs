@@ -2,10 +2,10 @@
 
 namespace Fiero.Business
 {
-    public class ConsumableComponent : Component
+    public class ConsumableComponent : EcsComponent
     {
-        public int RemainingUses { get; set; }
-        public int MaximumUses { get; set; }
-        public bool ConsumedWhenEmpty { get; set; }
+        public int RemainingUses { get; set; } = 1;
+        public int MaximumUses { get; set; } = 1;
+        public bool ConsumedWhenEmpty { get; set; } = true;
     }
 }

@@ -11,7 +11,7 @@ namespace Fiero.Business
 {
 
 
-    public class RenderComponent : Component
+    public class RenderComponent : EcsComponent
     {
         protected readonly GameSprites<TextureName> Sprites;
 

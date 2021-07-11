@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class ArmorComponent : Component
+    public class ArmorComponent : EcsComponent
     {
         public ArmorName Type { get; set; }
         public ArmorSlotName Slot { get; set; }

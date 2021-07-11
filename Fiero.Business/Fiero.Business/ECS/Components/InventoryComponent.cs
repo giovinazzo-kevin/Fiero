@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public class InventoryComponent : Component
+    public class InventoryComponent : EcsComponent
     {
         protected readonly List<Item> Items;
 

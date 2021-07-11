@@ -19,7 +19,7 @@ namespace Fiero.Business
         {
             if(base.TryTrigger(floor, speaker, out listeners)) {
                 listeners = listeners
-                    .Where(l => l is Actor a && a.Action.Direction == speaker.Physics.Position - l.Physics.Position);
+                    .Where(l => l is Actor a && a.Action.LastAction is InteractWithFeatureAction i && i.Feature == speaker);
                 return listeners.Any();
             }
             return false;

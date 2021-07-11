@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class WeaponComponent : Component
+    public class WeaponComponent : EcsComponent
     {
         public WeaponName Type { get; set; }
         public WeaponHandednessName Handedness { get; set; }

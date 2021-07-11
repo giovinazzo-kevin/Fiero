@@ -9,6 +9,7 @@ namespace Fiero.Core
 
     public static class TrigonometryExtensions
     {
+        public static int Mod(this int x, int m) => (x % m + m) % m;
         public static double Dist(this Coord p, Coord q) => Math.Sqrt(Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2));
         public static double DistSq(this Coord p, Coord q) => Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2);
         public static Vec ToVec(this Vector2u v) => new(v.X, v.Y);

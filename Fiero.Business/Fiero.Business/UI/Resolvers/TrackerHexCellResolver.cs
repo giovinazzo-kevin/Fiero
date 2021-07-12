@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<TrackerHexCell>))]
     public class TrackerHexCellResolver : UIControlResolver<TrackerHexCell>
     {
         public TrackerHexCellResolver(

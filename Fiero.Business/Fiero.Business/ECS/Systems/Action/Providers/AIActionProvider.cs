@@ -1,19 +1,17 @@
 ﻿using Fiero.Core;
 using System;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Fiero.Business
 {
-
-    public static class ActionProvider
+    public class AIActionProvider : ActionProvider
     {
-        public static Func<Actor, IAction> EnemyAI() => a => {
+        public override IAction GetIntent(Actor a)
+        {
             return Act(a);
             static IAction Act(Actor a)
             {
-                if(a.AI.Target is { Id: 0 }) {
+                if (a.AI.Target is { Id: 0 }) {
                     a.AI.Target = null; // invalidation
                 }
                 if (a.AI.Target == null) {
@@ -29,7 +27,7 @@ namespace Fiero.Business
                         a.AI.Target = target;
                     }
                 }
-                if(a.AI.Target != null) {
+                if (a.AI.Target != null) {
                     if (a.AI.Target.DistanceFrom(a) < 2) {
                         return new AttackOtherAction(a.AI.Target);
                     }
@@ -57,43 +55,6 @@ namespace Fiero.Business
                 }
                 return new MoveRandomlyAction();
             }
-        };
-
-        public static Func<Actor, IAction> PlayerInput(GameInput input) => a => {
-            var moveIntent = input.IsKeyDown(SFML.Window.Keyboard.Key.LControl)
-                ? ActionName.Attack
-                : ActionName.Move;
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad7)) {
-                return new MoveRelativeAction(new(-1, -1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad8)) {
-                return new MoveRelativeAction(new(0, -1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad9)) {
-                return new MoveRelativeAction(new(1, -1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad4)) {
-                return new MoveRelativeAction(new(-1, 0));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad5)) {
-                return new MoveRelativeAction(new(0, 0));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad6)) {
-                return new MoveRelativeAction(new(1, 0));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad1)) {
-                return new MoveRelativeAction(new(-1, 1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad2)) {
-                return new MoveRelativeAction(new(0, 1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad3)) {
-                return new MoveRelativeAction(new(1, 1));
-            }
-            if (input.IsKeyPressed(SFML.Window.Keyboard.Key.G)) {
-                return new InteractRelativeAction();
-            }
-            return new NoAction();
-        };
+        }
     }
 }

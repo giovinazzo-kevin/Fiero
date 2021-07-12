@@ -252,10 +252,6 @@ namespace Fiero.Business.Scenes
             if (Input.IsKeyPressed(Key.R)) {
                 Task.Run(async () => await TrySetStateAsync(SceneState.Main));
             }
-            if (Input.IsKeyPressed(Store.Get(Data.Hotkeys.ToggleInventory))) {
-                var modal = UI.Inventory(Player);
-                modal.ActionPerformed += (item, action) => OnInventoryClosed(modal, item, action);
-            }
         }
 
         public override void Draw(RenderWindow win, float t, float dt)

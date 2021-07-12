@@ -4,10 +4,11 @@ using SFML.System;
 using System;
 using System.Drawing;
 using System.Linq;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class RenderSystem
+    public class RenderSystem : EcsSystem
     {
         protected readonly GameUI UI;
         protected readonly GameSprites<TextureName> Sprites;
@@ -20,13 +21,14 @@ namespace Fiero.Business
         public HealthbarDisplayView HealthbarDisplay { get; private set; }
 
         public RenderSystem(
+            EventBus bus,
             GameUI ui,
             GameSprites<TextureName> sprites,
             GameEntities entities,
             GameDataStore store,
             FloorSystem floor,
             GameInput input
-        ) {
+        ) : base(bus) {
             UI = ui;
             Sprites = sprites;
             Entities = entities;

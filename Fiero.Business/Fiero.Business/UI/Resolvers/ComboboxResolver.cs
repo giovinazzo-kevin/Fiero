@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Combobox>))]
     public class ComboboxResolver : UIControlResolver<Combobox>
     {
         public ComboboxResolver(

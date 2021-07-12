@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<ProgressBar>))]
     public class ProgressBarResolver : UIControlResolver<ProgressBar>
     {
         public ProgressBarResolver(

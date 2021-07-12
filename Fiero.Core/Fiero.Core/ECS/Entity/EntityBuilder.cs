@@ -7,7 +7,7 @@ using System.Linq;
 namespace Fiero.Core
 {
     public sealed class EntityBuilder<TProxy>
-        where TProxy : Entity
+        where TProxy : EcsEntity
     {
         private readonly ImmutableHashSet<Type> _componentTypes;
         private Action<int> _configure;

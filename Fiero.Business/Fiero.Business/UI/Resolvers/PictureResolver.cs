@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Picture<TextureName>>))]
     public class PictureResolver : UIControlResolver<Picture<TextureName>>
     {
         public PictureResolver(

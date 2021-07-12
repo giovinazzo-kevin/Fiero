@@ -3,10 +3,11 @@ using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class DialogueSystem
+    public class DialogueSystem : EcsSystem
     {
         protected readonly FloorSystem FloorSystem;
         protected readonly GameEntities Entities;
@@ -28,6 +29,7 @@ namespace Fiero.Business
 
 
         public DialogueSystem(
+            EventBus bus,
             FloorSystem floorSystem,
             GameGlossaries glossaries,
             GameDialogues dialogues,
@@ -35,6 +37,7 @@ namespace Fiero.Business
             GameDataStore store,
             GameUI ui,
             GameSprites<TextureName> sprites)
+            : base(bus)
         {
             FloorSystem = floorSystem;
             Glossaries = glossaries;

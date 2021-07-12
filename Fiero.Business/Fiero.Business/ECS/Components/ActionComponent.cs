@@ -8,17 +8,12 @@ namespace Fiero.Business
 
     public class ActionComponent : EcsComponent
     {
-        private readonly GameEntities _entities;
-
-        public ActionComponent(GameEntities entities)
+        public ActionComponent()
         {
-            _entities = entities;
-            ActionProvider = _ => new MoveRelativeAction(new());
         }
 
         public IAction LastAction { get; set; }
-        public Func<Actor, IAction> ActionProvider { get; set; }
-        public IAction GetAction() => ActionProvider(_entities.GetProxy<Actor>(EntityId));
+        public ActionProvider ActionProvider { get; set; }
 
     }
 }

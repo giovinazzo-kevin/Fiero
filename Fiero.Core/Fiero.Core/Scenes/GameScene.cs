@@ -9,6 +9,7 @@ using Unconcern.Common;
 
 namespace Fiero.Core
 {
+    [SingletonDependency]
     public abstract class GameScene<TState> : IGameScene
         where TState : struct, Enum
     {

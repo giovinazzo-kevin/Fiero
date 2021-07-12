@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fiero.Business
 {
-    public class Entity : Core.Entity
+    public class Entity : Core.EcsEntity
     {
         [RequiredComponent]
         public InfoComponent Info { get; private set; }

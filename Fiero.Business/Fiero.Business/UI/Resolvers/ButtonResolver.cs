@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Button>))]
     public class ButtonResolver : UIControlResolver<Button>
     {
         public ButtonResolver(

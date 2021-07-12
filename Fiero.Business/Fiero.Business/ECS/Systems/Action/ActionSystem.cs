@@ -12,7 +12,6 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
 
-
     public partial class ActionSystem : EcsSystem
     {
         private const int TURN_ACTOR_ID = -1;
@@ -78,7 +77,7 @@ namespace Fiero.Business
             var time = _queue.Single(x => x.ActorId == TURN_ACTOR_ID).Time;
             var proxy = _entities.GetProxy<Actor>(actorId);
             _queue.Add(new ActorTime(actorId, () => {
-                var action = proxy.Action.GetAction();
+                var action = proxy.Action.ActionProvider.GetIntent(proxy);
                 return HandleAction(proxy, ref action);
             }, time + Rng.Random.Next(0, 100)));
         }

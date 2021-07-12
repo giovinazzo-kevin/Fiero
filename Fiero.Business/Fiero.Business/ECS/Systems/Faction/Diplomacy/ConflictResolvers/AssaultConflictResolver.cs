@@ -5,6 +5,7 @@ using System.Numerics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency]
     public class AssaultConflictResolver : IConflictResolver
     {
         public bool TryResolve(ConflictResolutionContext ctx, out Conflict conflict)

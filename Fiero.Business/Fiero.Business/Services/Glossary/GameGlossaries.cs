@@ -9,6 +9,7 @@ using Utf8Json;
 
 namespace Fiero.Business
 {
+    [SingletonDependency]
     public class GameGlossaries
     {
         protected readonly Dictionary<FactionName, FactionGlossary> FactionGlossaries;

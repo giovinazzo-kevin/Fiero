@@ -96,7 +96,7 @@ namespace Fiero.Core
         }
 
         public T GetProxy<T>(int entityId)
-            where T : Entity
+            where T : EcsEntity
         {
             if(!TryGetProxy<T>(entityId, out var entity)) {
                 throw new ArgumentException($"A proxy for type {typeof(T).Name} could not be created");
@@ -105,7 +105,7 @@ namespace Fiero.Core
         }
 
         public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
-            where T: Entity
+            where T: EcsEntity
         {
             if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props)) {
                 ProxyablePropertyCache[typeof(T)] = props = typeof(T).GetProperties()
@@ -116,10 +116,10 @@ namespace Fiero.Core
             return props;
         }
 
-        public EntityBuilder<T> CreateBuilder<T>() where T : Entity => new(this);
+        public EntityBuilder<T> CreateBuilder<T>() where T : EcsEntity => new(this);
 
         public bool TryGetProxy<T>(int entityId, out T entity)
-            where T : Entity
+            where T : EcsEntity
         {
             var equalEntity = new TrackedEntity(entityId);
             if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
@@ -154,7 +154,7 @@ namespace Fiero.Core
                 object[] args = new object[] { entity.Id, proxiedEntity };
                 var ret = (bool)tryGetProxy.Invoke(this, args);
                 if(ret) {
-                    return (Entity)args[1];
+                    return (EcsEntity)args[1];
                 }
                 return null;
             };

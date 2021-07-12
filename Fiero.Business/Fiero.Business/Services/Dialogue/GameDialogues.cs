@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fiero.Business
 {
+    [SingletonDependency]
     public class GameDialogues
     {
         protected GameLocalizations<LocaleName> Localizations;

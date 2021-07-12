@@ -4,6 +4,7 @@ using System;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Label>))]
     public class LabelResolver : UIControlResolver<Label>
     {
         public LabelResolver(

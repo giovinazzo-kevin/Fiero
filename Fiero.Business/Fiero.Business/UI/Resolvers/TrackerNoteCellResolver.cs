@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<TrackerNoteCell>))]
     public class TrackerNoteCellResolver : UIControlResolver<TrackerNoteCell>
     {
         public TrackerNoteCellResolver(

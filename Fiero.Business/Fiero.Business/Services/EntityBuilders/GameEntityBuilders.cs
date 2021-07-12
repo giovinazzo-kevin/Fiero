@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Fiero.Business
 {
+    [SingletonDependency]
     public class GameEntityBuilders
     {
         protected readonly GameEntities Entities;
@@ -32,7 +33,7 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
-            .WithPlayerAI(Input)
+            .WithPlayerAI(Input, Store)
             .WithName(nameof(Player))
             .WithSprite(nameof(Player))
             .WithActorInfo(ActorName.Player, MonsterTierName.One)

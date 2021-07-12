@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class FloorSystem
+    public class FloorSystem : EcsSystem
     {
         protected readonly List<Floor> Map;
         protected readonly GameEntities Entities;
@@ -17,7 +18,8 @@ namespace Fiero.Business
         public Floor CurrentFloor => Map.FirstOrDefault();
         public IEnumerable<Drawable> GetDrawables() => CurrentFloor.GetDrawables();
 
-        public FloorSystem(GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store)
+        public FloorSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store)
+            : base(bus)
         {
             Entities = entities;
             Store = store;

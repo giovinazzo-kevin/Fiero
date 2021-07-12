@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class FactionSystem
+    public class FactionSystem : EcsSystem
     {
         public readonly GameEntities Entities;
         protected readonly Dictionary<FactionName, FactionRelationships> Relationships;
@@ -86,7 +87,8 @@ namespace Fiero.Business
             return true;
         }
 
-        public FactionSystem(GameEntities entities, IEnumerable<IConflictResolver> conflictResolvers)
+        public FactionSystem(EventBus bus, GameEntities entities, IEnumerable<IConflictResolver> conflictResolvers)
+            : base(bus)
         {
             Entities = entities;
             Relationships = new Dictionary<FactionName, FactionRelationships>();

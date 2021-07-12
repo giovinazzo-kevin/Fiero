@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Layout>))]
     public class LayoutResolver : UIControlResolver<Layout>
     {
         public LayoutResolver(

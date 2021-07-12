@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Checkbox>))]
     public class CheckboxResolver : UIControlResolver<Checkbox>
     {
         public CheckboxResolver(

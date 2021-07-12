@@ -5,6 +5,7 @@ using Unconcern.Common;
 namespace Fiero.Core
 {
 
+    [SingletonDependency]
     public abstract class EcsSystem : IDisposable
     {
         public readonly EventBus EventBus;

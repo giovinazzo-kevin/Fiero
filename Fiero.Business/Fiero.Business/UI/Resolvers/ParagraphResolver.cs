@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+    [SingletonDependency(typeof(IUIControlResolver<Paragraph>))]
     public class ParagraphResolver : UIControlResolver<Paragraph>
     {
         public ParagraphResolver(

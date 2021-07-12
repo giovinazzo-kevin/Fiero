@@ -1,5 +1,8 @@
 ﻿using LightInject;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Unconcern.Common;
 
@@ -40,6 +43,30 @@ namespace Fiero.Core
             _ioc.Register<GameUI>(new PerContainerLifetime());
             _ioc.Register<TGame>(new PerContainerLifetime());
             _ioc.Register<EventBus>(new PerContainerLifetime());
+
+            var singletons = Assembly.GetEntryAssembly().GetTypes()
+                .Select(t => (Type: t, Attr: t.GetCustomAttribute<SingletonDependencyAttribute>()))
+                .Where(x => x.Attr != null && !x.Type.IsAbstract && x.Type.IsClass);
+            foreach (var (type, attr) in singletons) {
+                if(attr.InterfaceType != null) {
+                    _ioc.Register(attr.InterfaceType, type, new PerContainerLifetime());
+                }
+                else {
+                    _ioc.Register(type, new PerContainerLifetime());
+                }
+            }
+            var transients = Assembly.GetEntryAssembly().GetTypes()
+                .Select(t => (Type: t, Attr: t.GetCustomAttribute<TransientDependencyAttribute>()))
+                .Where(x => x.Attr != null && !x.Type.IsAbstract && x.Type.IsClass);
+            foreach (var (type, attr) in transients) {
+                if (attr.InterfaceType != null) {
+                    _ioc.Register(attr.InterfaceType, type);
+                }
+                else {
+                    _ioc.Register(type);
+                }
+            }
+
             configureServices?.Invoke(_ioc);
             _ioc.Compile();
             return _ioc.GetInstance<TGame>();

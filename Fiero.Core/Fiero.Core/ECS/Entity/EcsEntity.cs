@@ -4,10 +4,11 @@ using System.ComponentModel;
 
 namespace Fiero.Core
 {
-    public abstract class Entity
+    [TransientDependency]
+    public abstract class EcsEntity
     {
-        internal Func<Entity, int, bool> _refresh;
-        internal Func<Entity, Type, Entity> _cast;
+        internal Func<EcsEntity, int, bool> _refresh;
+        internal Func<EcsEntity, Type, EcsEntity> _cast;
 
         public int Id { get; internal set; }
 
@@ -17,7 +18,7 @@ namespace Fiero.Core
         }
 
         public bool TryCast<T>(out T newEntity)
-            where T : Entity
+            where T : EcsEntity
         {
             newEntity = (T)_cast(this, typeof(T));
             return newEntity != null;

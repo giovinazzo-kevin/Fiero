@@ -96,48 +96,7 @@ namespace Fiero.Business.Scenes
             ActionSystem.AddActor(entityId);
             return true;
         }
-
-        public bool TryUseItem(Item item, Actor actor, out bool consumed)
-        {
-            var used = false;
-            consumed = false;
-            if (item.TryCast<Consumable>(out var consumable)) {
-                if(consumable.TryCast<Potion>(out var potion) 
-                && TryApply(potion.PotionProperties.Effect)) {
-                    used = TryConsume(out consumed);
-                }
-                if (consumable.TryCast<Scroll>(out var scroll)
-                && TryApply(scroll.ScrollProperties.Effect)) {
-                    used = TryConsume(out consumed);
-                }
-            }
-            if(consumed) {
-                // Assumes item was used from inventory
-                _ = actor.Inventory.TryTake(item);
-            }
-            return used;
-
-            bool TryConsume(out bool consumed)
-            {
-                consumed = false;
-                if (consumable.ConsumableProperties.RemainingUses <= 0) {
-                    return false;
-                }
-                if (--consumable.ConsumableProperties.RemainingUses <= 0
-                 && consumable.ConsumableProperties.ConsumedWhenEmpty) {
-                    consumed = true;
-                }
-                return true;
-            }
-
-            bool TryApply(EffectName effect)
-            {
-                switch (effect) {
-                    default: return true;
-                }
-            }
-        }
-
+        
         protected void SubscribeDialogueHandlers()
         {
             Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
@@ -192,51 +151,6 @@ namespace Fiero.Business.Scenes
                         dialogue.Triggers.Remove(t);
                     }
                 };
-        }
-
-        protected void OnInventoryClosed(InventoryModal modal, Item item, InventoryActionName action)
-        {
-            switch (action) {
-                case InventoryActionName.Equip:
-                    if (modal.Actor.Equipment.TryEquip(item)) {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouEquip$ {item.DisplayName}.");
-                    }
-                    else {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouFailEquipping$ {item.DisplayName}.");
-                    }
-                    break;
-                case InventoryActionName.Unequip:
-                    if (modal.Actor.Equipment.TryUnequip(item)) {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouUnequip$ {item.DisplayName}.");
-                    }
-                    else {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouFailUnequipping$ {item.DisplayName}.");
-                    }
-                    break;
-                case InventoryActionName.Drop:
-                    _ = modal.Actor.Inventory.TryTake(item);
-                    if (FloorSystem.TryGetClosestFreeTile(modal.Actor.Physics.Position, out var tile)) {
-                        item.Physics.Position = tile.Physics.Position;
-                        FloorSystem.CurrentFloor.AddItem(item.Id);
-                        modal.Actor.Log?.Write($"$Instantaneous.YouDrop$ {item.DisplayName}.");
-                    }
-                    else {
-                        modal.Actor.Log?.Write($"$Instantaneous.NoSpaceToDrop$ {item.DisplayName}.");
-                    }
-                    break;
-                case InventoryActionName.Use:
-                    if (TryUseItem(item, modal.Actor, out var consumed)) {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouUse$ {item.DisplayName}.");
-                    }
-                    else {
-                        modal.Actor.Log?.Write($"$Instantaneous.YouFailUsing$ {item.DisplayName}.");
-                    }
-                    if(consumed) {
-                        modal.Actor.Log?.Write($"$Miscellaneous.AnItemIsConsumed$ {item.DisplayName}.");
-                    }
-                    break;
-                default: break;
-            }
         }
 
         public override void Update(RenderWindow win, float t, float dt)

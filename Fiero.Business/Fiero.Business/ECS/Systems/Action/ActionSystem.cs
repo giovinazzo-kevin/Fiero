@@ -46,25 +46,14 @@ namespace Fiero.Business
             PlayerTurnStarted = new(this, nameof(PlayerTurnStarted));
         }
 
-        protected virtual int? GetCost(ActionName action)
-        {
-
-            return action switch {
-                ActionName.None => default(int?),
-                ActionName.Interact => 25,
-                ActionName.Attack => 100,
-                ActionName.Move => 100,
-                _ => 0
-            };
-        }
-
         protected virtual int? HandleAction(Actor actor, ref IAction action)
         {
-            var cost = GetCost(action.Name);
+            var cost = action.Cost;
             cost = action.Name switch {
-                ActionName.Move     when(HandleMove  (actor, ref action, ref cost)) => cost,
-                ActionName.Attack   when(HandleAttack(actor, ref action, ref cost)) => cost,
-                ActionName.Interact when(HandleInteract   (actor, ref action, ref cost)) => cost,
+                ActionName.Move     when(HandleMove    (actor, ref action, ref cost)) => cost,
+                ActionName.Attack   when(HandleAttack  (actor, ref action, ref cost)) => cost,
+                ActionName.Interact when(HandleInteract(actor, ref action, ref cost)) => cost,
+                ActionName.Organize when(HandleOrganize(actor, ref action, ref cost)) => cost,
                 _ => null
             };
             actor.Action.LastAction = action;

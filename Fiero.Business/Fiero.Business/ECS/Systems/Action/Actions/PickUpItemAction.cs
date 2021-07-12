@@ -10,5 +10,6 @@ namespace Fiero.Business
             Item = item;
         }
         ActionName IAction.Name => ActionName.Interact;
+        int? IAction.Cost => 100;
     }
 }

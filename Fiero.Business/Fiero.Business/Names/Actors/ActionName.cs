@@ -7,5 +7,6 @@
         Move,
         Attack,
         Interact,
+        Organize
     }
 }

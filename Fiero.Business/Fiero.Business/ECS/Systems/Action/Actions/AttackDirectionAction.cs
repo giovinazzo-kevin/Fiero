@@ -10,5 +10,6 @@ namespace Fiero.Business
             Coord = coord;
         }
         ActionName IAction.Name => ActionName.Attack;
+        int? IAction.Cost => 100;
     }
 }

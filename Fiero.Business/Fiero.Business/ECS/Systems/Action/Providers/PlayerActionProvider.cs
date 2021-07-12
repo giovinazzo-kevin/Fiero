@@ -1,57 +1,87 @@
 ﻿using Fiero.Core;
+using SFML.Window;
+using System;
+using System.Collections.Generic;
 
 namespace Fiero.Business
 {
     public class PlayerActionProvider : ActionProvider
     {
-        protected readonly GameInput Input;
-        protected readonly GameDataStore Store;
+        protected readonly GameUI UI;
+        protected readonly Queue<IAction> QueuedActions;
+        protected Modal CurrentModal { get; private set; }
 
-        public PlayerActionProvider(GameInput input, GameDataStore store)
+        public PlayerActionProvider(GameUI ui)
         {
-            Input = input;
-            Store = store;
+            UI = ui;
+            QueuedActions = new();
         }
 
         public override IAction GetIntent(Actor a)
         {
-            var moveIntent = Input.IsKeyDown(SFML.Window.Keyboard.Key.LControl)
-                ? ActionName.Attack
-                : ActionName.Move;
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad7)) {
+            if (CurrentModal != null)
+                return new NoAction();
+            if(QueuedActions.TryDequeue(out var backedUp)) {
+                return backedUp;
+            }
+            if (IsKeyPressed(Data.Hotkeys.MoveNW)) {
                 return new MoveRelativeAction(new(-1, -1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad8)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveN)) {
                 return new MoveRelativeAction(new(0, -1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad9)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveNE)) {
                 return new MoveRelativeAction(new(1, -1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad4)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveW)) {
                 return new MoveRelativeAction(new(-1, 0));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad5)) {
+            if (IsKeyPressed(Data.Hotkeys.Wait)) {
                 return new MoveRelativeAction(new(0, 0));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad6)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveE)) {
                 return new MoveRelativeAction(new(1, 0));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad1)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveSW)) {
                 return new MoveRelativeAction(new(-1, 1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad2)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveS)) {
                 return new MoveRelativeAction(new(0, 1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.Numpad3)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveSE)) {
                 return new MoveRelativeAction(new(1, 1));
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.G)) {
+            if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
             }
-            if (Input.IsKeyPressed(SFML.Window.Keyboard.Key.I)) {
-
+            if (IsKeyPressed(Data.Hotkeys.Inventory)) {
+                var inventoryModal = UI.Inventory(a);
+                CurrentModal = inventoryModal;
+                inventoryModal.Closed += (_, __) => CurrentModal = null;
+                inventoryModal.ActionPerformed += (item, action) => {
+                    // inventoryModal.Close(ModalWindowButtons.None);
+                    switch(action) {
+                        case InventoryActionName.Drop:
+                            QueuedActions.Enqueue(new DropItemAction(item));
+                            break;
+                        case InventoryActionName.Use when item.TryCast<Consumable>(out var consumable):
+                            QueuedActions.Enqueue(new UseConsumableAction(consumable));
+                            break;
+                        case InventoryActionName.Equip:
+                            QueuedActions.Enqueue(new EquipItemAction(item));
+                            break;
+                        case InventoryActionName.Unequip:
+                            QueuedActions.Enqueue(new UnequipItemAction(item));
+                            break;
+                        default:
+                            throw new NotSupportedException();
+                    }
+                };
+                return new NoAction();
             }
             return new NoAction();
+
+            bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
         }
     }
 }

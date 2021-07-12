@@ -85,8 +85,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Static\Layouts\" />
-  </ItemGroup>
-
 </Project>

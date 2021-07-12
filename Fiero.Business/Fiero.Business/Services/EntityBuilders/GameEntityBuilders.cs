@@ -11,29 +11,26 @@ namespace Fiero.Business
     public class GameEntityBuilders
     {
         protected readonly GameEntities Entities;
-        protected readonly GameInput Input;
         protected readonly GameGlossaries Glossaries;
-        protected readonly GameDataStore Store;
+        protected readonly GameUI UI;
         protected readonly GameColors<ColorName> Colors;
 
         public GameEntityBuilders(
             GameEntities entities, 
-            GameInput input,
             GameGlossaries glossaries,
-            GameDataStore store,
+            GameUI ui,
             GameColors<ColorName> colors
         ) {
             Entities = entities;
-            Input = input;
             Glossaries = glossaries;
-            Store = store;
             Colors = colors;
+            UI = ui;
         }
 
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
-            .WithPlayerAI(Input, Store)
+            .WithPlayerAI(UI)
             .WithName(nameof(Player))
             .WithSprite(nameof(Player))
             .WithActorInfo(ActorName.Player, MonsterTierName.One)
@@ -88,7 +85,7 @@ namespace Fiero.Business
         
         public EntityBuilder<Potion> Potion(EffectName effect)
         {
-            var rng = Rng.Seeded(Store.Get(Data.Global.RngSeed) + (int)effect * 17);
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 17);
             var potionColor = rng.Choose(new(ColorName Color, string Adjective)[] {
                 (ColorName.White, "pale"),
                 (ColorName.Red, "warm"),
@@ -116,7 +113,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Scroll> Scroll(EffectName effect)
         {
-            var rng = Rng.Seeded(Store.Get(Data.Global.RngSeed) + (int)effect * 31);
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 31);
             var label = ScrollLabel();
             return Consumable<Scroll>($"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
             .WithName($"Scroll of {effect}")

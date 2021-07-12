@@ -8,5 +8,6 @@
             Victim = victim;
         }
         ActionName IAction.Name => ActionName.Attack;
+        int? IAction.Cost => 100;
     }
 }

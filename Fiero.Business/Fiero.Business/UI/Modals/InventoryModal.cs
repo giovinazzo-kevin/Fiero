@@ -26,7 +26,7 @@ namespace Fiero.Business
             : base(ui)
         {
             Actor = following;
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.ToggleInventory)), () => Close(ModalWindowButtons.ImplicitNo));
+            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButtons.ImplicitNo));
 
             Items.AddRange(Actor.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
             CurrentPage.ValueChanged += (_, __) => Invalidate();
@@ -52,7 +52,11 @@ namespace Fiero.Business
             );
             modal.Confirmed += (_, __) => {
                 ActionPerformed?.Invoke(Items[i], modal.SelectedOption);
-                if(!Actor.Inventory.GetItems().Any(x => x.Id == Items[i].Id)) {
+                bool shouldRemoveMenuItem = modal.SelectedOption == InventoryActionName.Drop;
+                shouldRemoveMenuItem |= modal.SelectedOption == InventoryActionName.Use
+                    && Items[i].TryCast<Consumable>(out var c) 
+                    && c.ConsumableProperties.ConsumedWhenEmpty && c.ConsumableProperties.RemainingUses == 1;
+                if(shouldRemoveMenuItem) {
                     Items.RemoveAt(i);
                 }
                 Invalidate();

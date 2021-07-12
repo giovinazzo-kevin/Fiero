@@ -102,7 +102,17 @@ namespace Fiero.Business
 
             Store.SetValue(Data.Hotkeys.Cancel, Keyboard.Key.Escape);
             Store.SetValue(Data.Hotkeys.Confirm, Keyboard.Key.Enter);
-            Store.SetValue(Data.Hotkeys.ToggleInventory, Keyboard.Key.I);
+            Store.SetValue(Data.Hotkeys.Inventory, Keyboard.Key.I);
+            Store.SetValue(Data.Hotkeys.Interact, Keyboard.Key.G);
+            Store.SetValue(Data.Hotkeys.MoveNW, Keyboard.Key.Numpad7);
+            Store.SetValue(Data.Hotkeys.MoveN, Keyboard.Key.Numpad8);
+            Store.SetValue(Data.Hotkeys.MoveNE, Keyboard.Key.Numpad9);
+            Store.SetValue(Data.Hotkeys.MoveW, Keyboard.Key.Numpad4);
+            Store.SetValue(Data.Hotkeys.Wait, Keyboard.Key.Numpad5);
+            Store.SetValue(Data.Hotkeys.MoveE, Keyboard.Key.Numpad6);
+            Store.SetValue(Data.Hotkeys.MoveSW, Keyboard.Key.Numpad1);
+            Store.SetValue(Data.Hotkeys.MoveS, Keyboard.Key.Numpad2);
+            Store.SetValue(Data.Hotkeys.MoveSE, Keyboard.Key.Numpad3);
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);

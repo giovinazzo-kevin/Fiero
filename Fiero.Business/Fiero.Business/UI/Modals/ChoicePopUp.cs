@@ -50,6 +50,10 @@ namespace Fiero.Business
                         };
                     })
                 .End())
+                .Repeat(Math.Max(0, 4 - Options.Length), (i, layout) => layout
+                .Row(@class: "spacer")
+                    .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
+                .End())
             .End()
             ;
     }

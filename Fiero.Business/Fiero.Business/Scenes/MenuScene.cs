@@ -57,7 +57,7 @@ namespace Fiero.Business.Scenes
         {
             await base.InitializeAsync();
             UI_Layout = UI.CreateLayout()
-                .Build(new(800, 800), grid => grid
+                .Build(UI.Store.Get(Data.UI.PopUpSize), grid => grid
                     .Style<Label>(s => s
                         .Match(x => x.HasClass("ng"))
                         .Apply(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }))

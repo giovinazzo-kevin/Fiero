@@ -34,7 +34,7 @@ namespace Fiero.Business
                 UI.NecessaryChoice(Node.Choices.Keys.ToArray())
                     .OptionChosen += (w, opt) => {
                         Close(ModalWindowButtons.ImplicitYes);
-                        if(Node.Choices.TryGetValue(opt, out var next)) {
+                        if(Node.Choices.TryGetValue(opt, out var next) && next != null) {
                             UI.Dialogue(Trigger, next, Speaker, Listeners);
                         }
                     };

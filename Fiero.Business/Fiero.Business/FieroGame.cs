@@ -95,7 +95,8 @@ namespace Fiero.Business
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
             Store.SetValue(Data.UI.TileSize, 8);
-            Store.SetValue(Data.UI.WindowSize, new(640, 480));
+            Store.SetValue(Data.UI.WindowSize, new(800, 800));
+            Store.SetValue(Data.UI.PopUpSize, new(400, 400));
             Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
             Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
             Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));

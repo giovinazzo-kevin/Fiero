@@ -15,12 +15,6 @@ namespace Fiero.Core
         public readonly List<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
 
-        protected static Coord DeltaPropagate(UIControlProperty<Coord> prop, UIControlProperty<Coord> child, Coord value)
-        {
-            var delta = prop.V - value;
-            return child.V + delta;
-        }
-
         public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false);
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
         public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new());
@@ -155,8 +149,8 @@ namespace Fiero.Core
             var rect = new RectangleShape(BorderRenderSize.ToVector2f()) {
                 Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background,
-                OutlineThickness = IsActive ? 1f : 0f,
-                OutlineColor = IsInteractive ? Accent : Foreground
+                OutlineThickness = 1f,
+                OutlineColor = Accent
             };
             target.Draw(rect, states);
         }

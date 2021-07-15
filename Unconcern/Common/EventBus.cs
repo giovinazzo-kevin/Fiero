@@ -73,7 +73,7 @@ namespace Unconcern.Common
         public Subscription Register(Action<Message> a)
         {
             OnMessageSent += a;
-            return new Subscription(new Action[] { () => { OnMessageSent -= a; } }, throwOnRepeatDispose: false);
+            return new Subscription(new Action[] { () => { OnMessageSent -= a; } }, throwOnDoubleDispose: false);
         }
 
         public void Send<T>(T msg, string fromHub, params string[] toHubs)

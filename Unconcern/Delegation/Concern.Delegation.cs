@@ -16,16 +16,16 @@ namespace Unconcern
             return new DelegateExpressionBuilder(
                 new DelegateExpression(
                     bus,
-                    Enumerable.Empty<Func<EventBus.Message, Task<bool>>>(),
-                    Enumerable.Empty<Func<EventBus.Message, Task<EventBus.Message>>>(),
-                    Enumerable.Empty<Func<EventBus.Message, Task>>(),
+                    Enumerable.Empty<Func<EventBus.Message, bool>>(),
+                    Enumerable.Empty<Func<EventBus.Message, EventBus.Message>>(),
+                    Enumerable.Empty<Action<EventBus.Message>>(),
                     Enumerable.Empty<IDelegateExpression>()));
         }
 
         public static partial class Delegation
         {
-            public static Task<Subscription> Listen(IDelegateExpression expr, string hub = null) => expr.Listen(hub);
-            public static Task Fire(IDelegateExpression expr, string hub) => expr.Fire(hub);
+            public static Subscription Listen(IDelegateExpression expr, string hub = null) => expr.Listen(hub);
+            public static void Fire(IDelegateExpression expr, string hub) => expr.Fire(hub);
         }
     }
 }

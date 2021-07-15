@@ -119,7 +119,7 @@ namespace Fiero.Business
 
             void DecorateNormal()
             {
-                if (Rng.Random.NextDouble() < 0.10) {
+                if (Rng.Random.NextDouble() < 0.30) {
                     node.Objects.Add(Rng.Random.Next(0, 2) switch {
                         0 => DungeonObjectName.Shrine,
                         _ => DungeonObjectName.Chest

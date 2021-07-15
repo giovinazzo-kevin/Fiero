@@ -18,23 +18,18 @@ namespace Fiero.Business
         protected readonly List<Item> Items = new();
         protected int NumPages => (Items.Count - 1) / PageSize.V + 1;
 
-
-        public InventoryModal(
-            GameUI ui,
-            Actor following
-        )
+        public InventoryModal(GameUI ui, Actor following)
             : base(ui)
         {
             Actor = following;
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButtons.ImplicitNo));
-
             Items.AddRange(Actor.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
             CurrentPage.ValueChanged += (_, __) => Invalidate();
         }
 
-        public override void Open(string title, ModalWindowButtons buttons)
+        protected override void RegisterHotkeys(ModalWindowButtons buttons)
         {
-            base.Open(title, buttons);
+            base.RegisterHotkeys(buttons);
+            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButtons.ImplicitNo));
         }
 
         protected virtual bool OnItemClicked(Button b, int index, Mouse.Button mouseButton)
@@ -140,8 +135,7 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                .End()
-                ;
+                .End();
 
             void RefreshItemSprite(Picture<TextureName> p, int index)
             {

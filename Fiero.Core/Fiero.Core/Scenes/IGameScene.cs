@@ -6,7 +6,7 @@ namespace Fiero.Core
     public interface IGameScene
     {
         object State { get; }
-        Task<bool> TrySetStateAsync(object newState);
+        bool TrySetState(object newState);
 
         void Update(RenderWindow win, float t, float dt);
         void Draw(RenderWindow win, float t, float dt);

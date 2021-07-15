@@ -17,17 +17,6 @@ namespace Fiero.Business
         protected readonly GameUI UI;
         protected readonly GameSprites<TextureName> Sprites;
 
-        public DialogueNode CurrentDialogue => UIDialogue.Node;
-        protected IDialogueTrigger CurrentTrigger { get; set; }
-        protected Drawable CurrentSpeaker { get; set; }
-        protected Drawable[] CurrentListeners { get; set; }
-
-
-
-        protected Layout UILayout { get; private set; }
-        protected ActorDialogue UIDialogue { get; private set; }
-
-
         public DialogueSystem(
             EventBus bus,
             FloorSystem floorSystem,
@@ -48,40 +37,8 @@ namespace Fiero.Business
             Sprites = sprites;
         }
 
-        public void Initialize()
-        {
-            var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
-            UILayout = UI.CreateLayout()
-                .Build(new(), grid => grid
-                    .Row(h: 0.25f)
-                        .Cell<ActorDialogue>(d => UIDialogue = d)
-                    .End());
-            UIDialogue.Node.ValueChanged += (owner, old) => UIDialogue.Node.V?.Trigger(CurrentTrigger, CurrentSpeaker, CurrentListeners);
-            Data.UI.WindowSize.ValueChanged += e => {
-                UILayout.Size.V = e.NewValue.Clamp(0, 800, 0, 800);
-                UILayout.Position.V = new(e.NewValue.X / 2 - UILayout.Size.V.X / 2, 0);
-            };
-        }
-
-        public void Update(float t, float dt)
-        {
-            if (CurrentDialogue == null)
-                return;
-            UILayout.Update(t, dt);
-        }
-
-        public void Draw(RenderWindow win, float t, float dt)
-        {
-            if (CurrentDialogue == null)
-                return;
-            win.Draw(UILayout);
-        }
-
         public void CheckTriggers()
         {
-            if (CurrentDialogue != null) {
-                throw new InvalidOperationException("Why is the turn counter advancing during a dialogue??");
-            }
             foreach (var comp in Entities.GetComponents<DialogueComponent>()) {
                 var dialogueKey = default(string);
                 var speaker = default(Drawable);
@@ -100,14 +57,11 @@ namespace Fiero.Business
                 foreach (var trigger in comp.Triggers) {
                     if (trigger.TryTrigger(FloorSystem.CurrentFloor, speaker, out var listeners)) {
                         var node = Dialogues.GetDialogue(dialogueKey, trigger.DialogueNode);
-                        CurrentTrigger = trigger;
-                        CurrentSpeaker = speaker;
-                        CurrentListeners = listeners.ToArray();
-                        UIDialogue.Node.V = node ?? throw new ArgumentException(trigger.DialogueNode); // triggers the dialogue handlers!
                         if (!trigger.Repeatable) {
                             comp.Triggers.Remove(trigger);
                         }
                         trigger.OnTrigger();
+                        UI.Dialogue(trigger, node, speaker, listeners.ToArray());
                         return;
                     }
                 }

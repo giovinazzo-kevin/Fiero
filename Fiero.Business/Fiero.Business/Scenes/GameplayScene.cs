@@ -76,14 +76,13 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             RenderSystem.Initialize();
-            DialogueSystem.Initialize();
             SubscribeDialogueHandlers();
             await base.InitializeAsync();
         }
 
-        public override async IAsyncEnumerable<Subscription> RouteEventsAsync()
+        public override IEnumerable<Subscription> RouteEvents()
         {
-            yield return await ActionSystem.PlayerTurnStarted.SubscribeHandler(DialogueSystem.CheckTriggers);
+            yield return ActionSystem.PlayerTurnStarted.SubscribeHandler(DialogueSystem.CheckTriggers);
         }
 
         public bool TrySpawn(int entityId, out Actor actor, float maxDistance = 10)
@@ -156,15 +155,10 @@ namespace Fiero.Business.Scenes
         public override void Update(RenderWindow win, float t, float dt)
         {
             RenderSystem.Update(win, t, dt);
-            if(DialogueSystem.CurrentDialogue != null) {
-                DialogueSystem.Update(t, dt);
-            }
-            else {
-                ActionSystem.Update();
-                Entities.RemoveFlaggedItems();
-            }
+            ActionSystem.Update();
+            Entities.RemoveFlaggedItems();
             if (Input.IsKeyPressed(Key.R)) {
-                Task.Run(async () => await TrySetStateAsync(SceneState.Main));
+                TrySetState(SceneState.Main);
             }
         }
 
@@ -172,11 +166,10 @@ namespace Fiero.Business.Scenes
         {
             win.Clear();
             RenderSystem.Draw(win, t, dt);
-            DialogueSystem.Draw(win, t, dt);
         }
 
-        protected override Task<bool> CanChangeStateAsync(SceneState newState) => Task.FromResult(true);
-        protected override async Task OnStateChangedAsync(SceneState oldState)
+        protected override bool CanChangeState(SceneState newState) => true;
+        protected override void OnStateChanged(SceneState oldState)
         {
             if(State == SceneState.Main) {
                 var newRngSeed = (int)DateTime.Now.ToBinary();
@@ -210,7 +203,7 @@ namespace Fiero.Business.Scenes
                 }
                 RenderSystem.SelectedActor.Following.V = Player = player;
             }
-            await base.OnStateChangedAsync(oldState);
+            base.OnStateChanged(oldState);
         }
     }
 }

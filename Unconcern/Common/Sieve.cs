@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Unconcern.Common
 {
-    public class Sieve<T> : IAsyncDisposable
+    public class Sieve<T> : IDisposable
     {
         private readonly Subscription _unsub;
         private readonly Func<EventBus.Message<T>, bool> _filter;
@@ -27,9 +27,9 @@ namespace Unconcern.Common
             });
         }
 
-        public ValueTask DisposeAsync()
+        public void Dispose()
         {
-            return _unsub.DisposeAsync();
+            _unsub.Dispose();
         }
     }
 }

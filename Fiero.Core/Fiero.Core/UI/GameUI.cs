@@ -22,12 +22,12 @@ namespace Fiero.Core
             OpenModals = new List<ModalWindow>();
         }
 
-        public T ShowModal<T>(T wnd, string title, ModalWindowButtons buttons)
+        public T ShowModal<T>(T wnd, string title, ModalWindowButtons buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
             where T : ModalWindow
         {
             OpenModals.Add(wnd);
             wnd.Closed += (_, __) => OpenModals.Remove(wnd);
-            wnd.Open(title, buttons);
+            wnd.Open(title, buttons, styles);
             return wnd;
         }
 

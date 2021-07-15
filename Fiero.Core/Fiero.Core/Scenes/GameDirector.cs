@@ -33,7 +33,7 @@ namespace Fiero.Core
             _transitions = new Queue<CachedItem>();
         }
 
-        public async Task<bool> TrySetStateAsync<T>(T state)
+        public bool TrySetState<T>(T state)
             where T : struct, Enum
         {
             var tState = typeof(T);
@@ -41,7 +41,7 @@ namespace Fiero.Core
                 throw new InvalidOperationException($"A scene with state {tState.Name} was not registered");
             }
             if(_currentItem != null) {
-                if(await _currentItem.Scene.TrySetStateAsync(state)) {
+                if(_currentItem.Scene.TrySetState(state)) {
                     return true;
                 }
                 return false;
@@ -96,9 +96,7 @@ namespace Fiero.Core
                     if (!_cache.TryGetValue(tNextState, out var nextItem)) {
                         throw new InvalidOperationException($"Could not access cached item for transition from  state {_currentItem.Scene.State.GetType().Name} to state {tNextState.Name}");
                     }
-                    var setState = nextItem.Scene.TrySetStateAsync(nextState);
-                    setState.Wait();
-                    if (setState.Result) {
+                    if (nextItem.Scene.TrySetState(nextState)) {
                         _currentItem = nextItem;
                     }
                 }

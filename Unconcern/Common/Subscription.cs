@@ -9,28 +9,22 @@ using System.Threading.Tasks;
 namespace Unconcern.Common
 {
 
-    public class Subscription : IAsyncDisposable
+    public class Subscription : IDisposable
     {
-        private readonly IEnumerable<Func<Task>> _unsub;
+        private readonly IEnumerable<Action> _unsub;
         private bool _unsubbed = false;
         public bool ThrowIfAlreadyDisposed { get; }
 
         public Subscription()
         {
-            _unsub = Enumerable.Empty<Func<Task>>();
+            _unsub = Enumerable.Empty<Action>();
             ThrowIfAlreadyDisposed = false;
         }
 
-        public Subscription(IEnumerable<Func<Task>> unsub, bool throwOnDoubleDispose = true)
+        public Subscription(IEnumerable<Action> unsub, bool throwOnDoubleDispose = true)
         {
             _unsub = unsub;
             ThrowIfAlreadyDisposed = throwOnDoubleDispose;
-        }
-
-        public Subscription(IEnumerable<Action> unsub, bool throwOnRepeatDispose = true)
-        {
-            _unsub = unsub.Select<Action, Func<Task>>(a => () => { a(); return Task.CompletedTask; });
-            ThrowIfAlreadyDisposed = throwOnRepeatDispose;
         }
 
         public Subscription(IEnumerable<Subscription> subs, bool throwOnDoubleDispose = true)
@@ -49,7 +43,7 @@ namespace Unconcern.Common
             return self.Add(other);
         }
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
             if (_unsubbed) {
                 if (ThrowIfAlreadyDisposed)
@@ -58,7 +52,7 @@ namespace Unconcern.Common
                     return;
             }
             foreach (var unsub in _unsub) {
-                await unsub();
+                unsub();
             }
             _unsubbed = true;
         }

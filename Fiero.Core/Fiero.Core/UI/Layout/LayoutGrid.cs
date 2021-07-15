@@ -7,6 +7,7 @@ using System.Xml.Linq;
 
 namespace Fiero.Core
 {
+
     public class LayoutGrid : IEnumerable<LayoutGrid>
     {
         protected readonly LayoutGrid Parent;
@@ -118,7 +119,7 @@ namespace Fiero.Core
                 Class = @class == null ? Class : @class + " " + (Class ?? ""),
                 Id = id,
                 X = _c,
-                Y = _r
+                Y = _r,
             };
             _c += w;
             Cols++;
@@ -131,7 +132,7 @@ namespace Fiero.Core
                 Class = @class == null ? Class : Class + " " + @class,
                 Id = id,
                 X = _c,
-                Y = _r
+                Y = _r,
             };
             _r += h;
             Rows++;

@@ -89,7 +89,7 @@ namespace Fiero.Business.Scenes
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
                 l.Text.V = Localizations.Get($"Menu.{option}");
                 l.Clicked += (_, __, ___) => {
-                    Task.Run(async () => await TrySetStateAsync(state));
+                    TrySetState(state);
                     return true;
                 };
             };
@@ -106,10 +106,10 @@ namespace Fiero.Business.Scenes
             win.Draw(UI_Layout);
         }
 
-        protected override Task<bool> CanChangeStateAsync(SceneState newState) => Task.FromResult(true);
-        protected override async Task OnStateChangedAsync(SceneState oldState)
+        protected override bool CanChangeState(SceneState newState) => true;
+        protected override void OnStateChanged(SceneState oldState)
         {
-            await base.OnStateChangedAsync(oldState);
+            base.OnStateChanged(oldState);
             switch (State) {
                 // Initialize
                 case SceneState.Main:

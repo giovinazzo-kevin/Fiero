@@ -15,7 +15,7 @@ namespace Fiero.Core
     {
         private volatile bool _initialized = false;
         object IGameScene.State => State;
-        Task<bool> IGameScene.TrySetStateAsync(object newState) => TrySetStateAsync((TState)newState);
+        bool IGameScene.TrySetState(object newState) => TrySetState((TState)newState);
 
         public TState State { get; private set; }
 
@@ -45,38 +45,41 @@ namespace Fiero.Core
             return Task.CompletedTask;
         }
 
-        public async Task<bool> TrySetStateAsync(TState newState)
+        public bool TrySetState(TState newState)
         {
-            if (!await CanChangeStateAsync(newState))
+            if (!CanChangeState(newState))
                 return false;
             var oldState = State;
             State = newState;
-            await OnStateChangedAsync(oldState);
+            OnStateChanged(oldState);
             return true;
         }
 
-        protected abstract Task<bool> CanChangeStateAsync(TState newState);
-        protected virtual async Task OnStateChangedAsync(TState oldState)
+        protected abstract bool CanChangeState(TState newState);
+        
+        private void RerouteEvents(TState newState)
         {
-            StateChanged?.Invoke(this, oldState);
-            if (ExitStates.Contains(State)) {
+            if (ExitStates.Contains(newState)) {
                 DisposeSubscriptions?.Invoke();
             }
 
-            if (EntryStates.Contains(State)) {
-                await foreach (var sub in RouteEventsAsync()) {
-                    Action dispose = async () => {
-                        await sub.DisposeAsync();
-                    };
+            if (EntryStates.Contains(newState)) {
+                foreach (var sub in RouteEvents()) {
+                    Action dispose = sub.Dispose;
                     dispose += () => DisposeSubscriptions -= dispose;
                     DisposeSubscriptions += dispose;
                 }
             }
         }
 
-        public virtual async IAsyncEnumerable<Subscription> RouteEventsAsync()
+        protected virtual void OnStateChanged(TState oldState)
         {
-            await Task.CompletedTask;
+            RerouteEvents(State);
+            StateChanged?.Invoke(this, oldState);
+        }
+
+        public virtual IEnumerable<Subscription> RouteEvents()
+        {
             yield break;
         }
 

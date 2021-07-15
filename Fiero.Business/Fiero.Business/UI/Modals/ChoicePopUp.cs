@@ -10,6 +10,9 @@ namespace Fiero.Business
         public readonly T[] Options;
         public T SelectedOption => Options[SelectedIndex];
 
+        public event Action<ChoicePopUp<T>, T> OptionChosen;
+        public event Action<ChoicePopUp<T>, T> OptionClicked;
+
         public ChoicePopUp(GameUI ui, params T[] options) : base(ui)
         {
             Options = options;
@@ -32,9 +35,11 @@ namespace Fiero.Business
                         b.Clicked += (_, __, ___) => {
                             if(SelectedIndex == i) {
                                 Close(ModalWindowButtons.ImplicitYes);
+                                OptionChosen?.Invoke(this, Options[i]);
                                 return false;
                             }
                             SelectedIndex = i;
+                            OptionClicked?.Invoke(this, Options[i]);
                             Invalidate();
                             return false;
                         };

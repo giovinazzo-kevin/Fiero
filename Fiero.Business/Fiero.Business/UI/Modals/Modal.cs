@@ -14,8 +14,6 @@ namespace Fiero.Business
         protected Modal(GameUI ui) : base(ui)
         {
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButtons.ImplicitNo));
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButtons.ImplicitYes));
             Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
         }
         
@@ -36,11 +34,29 @@ namespace Fiero.Business
 
         protected void Invalidate() => Invalidated?.Invoke();
 
-        public override void Open(string title, ModalWindowButtons buttons)
+
+        public override void Open(string title, ModalWindowButtons buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
         {
-            base.Open(title, buttons);
+            Hotkeys.Clear();
+            RegisterHotkeys(buttons);
+            base.Open(title, buttons, styles);
             BeforePresentation();
             Invalidate();
+        }
+
+        protected virtual void RegisterHotkeys(ModalWindowButtons buttons)
+        {
+            if (buttons.HasFlag(ModalWindowButtons.Yes)
+                || buttons.HasFlag(ModalWindowButtons.Ok)
+                || buttons.HasFlag(ModalWindowButtons.ImplicitYes)) {
+                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButtons.ImplicitYes));
+            }
+
+            if (buttons.HasFlag(ModalWindowButtons.No)
+                || buttons.HasFlag(ModalWindowButtons.Close)
+                || buttons.HasFlag(ModalWindowButtons.ImplicitNo)) {
+                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButtons.ImplicitNo));
+            }
         }
 
         protected virtual void BeforePresentation()

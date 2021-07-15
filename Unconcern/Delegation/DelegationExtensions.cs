@@ -9,44 +9,44 @@ namespace Unconcern.Delegation
 {
     public static class DelegationExtensions
     {
-        public static async Task Fire(this IDelegateExpression expr, string hub, CancellationToken ct = default)
+        public static void Fire(this IDelegateExpression expr, string hub)
         {
             if (expr.Triggers.Any())
                 throw new InvalidOperationException("Cannot fire an expression that has triggers bound to it, call Listen() instead.");
-            await using (await expr.Listen(hub, ct)) { }
+            using (expr.Listen(hub)) { }
         }
 
-        public static async Task<Subscription> Listen(this IDelegateExpression expression, string hub = null, CancellationToken ct = default)
+        public static Subscription Listen(this IDelegateExpression expression, string hub = null)
         {
             var subs = new List<Subscription>();
             foreach (var expr in expression.Siblings.Append(expression)) {
-                subs.Add(await Subscribe(expr, ct));
+                subs.Add(Subscribe(expr));
             }
             return new Subscription(subs);
 
-            async Task<Subscription> Subscribe(IDelegateExpression expression, CancellationToken ct = default)
+            Subscription Subscribe(IDelegateExpression expression)
             {
                 var subscriptions = new List<Subscription>();
                 foreach (var when in expression.Triggers) {
                     var i = subscriptions.Count;
-                    var sub = expression.Bus.Register(async msg => {
-                        if ((hub == null || msg.Recipients.Contains(hub) || msg.Recipients.Length == 0) && await when(msg)) {
-                            await Fire(msg, ct);
+                    var sub = expression.Bus.Register(msg => {
+                        if ((hub == null || msg.Recipients.Contains(hub) || msg.Recipients.Length == 0) && when(msg)) {
+                            Fire(msg);
                         }
                     });
                     subscriptions.Add(sub);
                 }
                 if (!expression.Triggers.Any()) {
-                    await Fire(new EventBus.Message(DateTime.Now, typeof(object), null, hub, new[] { hub }), ct);
+                    Fire(new EventBus.Message(DateTime.Now, typeof(object), null, hub, new[] { hub }));
                 }
                 return new Subscription(subscriptions, throwOnDoubleDispose: true);
             }
 
-            async Task Fire(EventBus.Message msg = default, CancellationToken ct = default)
+            void Fire(EventBus.Message msg = default)
             {
                 foreach (var transform in expression.Replies) {
                     try {
-                        var reply = await transform(msg);
+                        var reply = transform(msg);
                         expression.Bus.Send(reply.FromHub(hub));
                     }
                     catch(InvalidCastException e) when (e.Message == "wrong_reply") {
@@ -54,11 +54,8 @@ namespace Unconcern.Delegation
                     }
                 }
                 foreach (var handler in expression.Handlers) {
-                    if (ct.IsCancellationRequested) {
-                        return;
-                    }
                     try {
-                        await handler(msg);
+                        handler(msg);
                     }
                     catch (InvalidCastException e) when (e.Message == "wrong_handler") {
                         ;
@@ -67,13 +64,13 @@ namespace Unconcern.Delegation
             }
         }
 
-        internal static IDelegateExpression WithCondition(this IDelegateExpression expr, Func<EventBus.Message, Task<bool>> cond) 
+        internal static IDelegateExpression WithCondition(this IDelegateExpression expr, Func<EventBus.Message, bool> cond) 
             => new DelegateExpression(expr.Bus, expr.Triggers.Append(cond), expr.Replies, expr.Handlers, expr.Siblings);
 
-        internal static IDelegateExpression WithReply(this IDelegateExpression expr, Func<EventBus.Message, Task<EventBus.Message>> reply) 
+        internal static IDelegateExpression WithReply(this IDelegateExpression expr, Func<EventBus.Message, EventBus.Message> reply) 
             => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies.Append(reply), expr.Handlers, expr.Siblings);
 
-        internal static IDelegateExpression WithHandler(this IDelegateExpression expr, Func<EventBus.Message, Task> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.Handlers.Append(handler), expr.Siblings);
+        internal static IDelegateExpression WithHandler(this IDelegateExpression expr, Action<EventBus.Message> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.Handlers.Append(handler), expr.Siblings);
 
         internal static IDelegateExpression WithSibling(this IDelegateExpression expr, IDelegateExpression other) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.Handlers, expr.Siblings.Append(other));
 

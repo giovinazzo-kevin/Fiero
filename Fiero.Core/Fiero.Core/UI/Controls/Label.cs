@@ -20,7 +20,9 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), true);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
 
-        public string DisplayText => String.Join(String.Empty, (Text ?? String.Empty).Take(MaxLength));
+        public string DisplayText => String.IsNullOrEmpty(Text.V)
+            ? String.Empty
+            : String.Join(String.Empty, Text.V.Take(MaxLength));
 
         protected virtual void OnTextInvalidated()
         {

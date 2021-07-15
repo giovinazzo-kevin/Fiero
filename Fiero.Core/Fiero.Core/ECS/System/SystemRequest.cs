@@ -19,16 +19,16 @@ namespace Fiero.Core
             Response = new SystemEvent<TSys, TResponseArgs>(owner, $"Response({name})");
         }
 
-        public async IAsyncEnumerable<TResponseArgs> Send(TArgs args)
+        public IEnumerable<TResponseArgs> Send(TArgs args)
         {
-            await using var sieve = new Sieve<SystemMessage<TSys, TResponseArgs>>(Owner.EventBus, msg => true);
+            using var sieve = new Sieve<SystemMessage<TSys, TResponseArgs>>(Owner.EventBus, msg => true);
             Raise(args);
             foreach (var response in sieve.Responses) {
                 yield return response.Content.Message;
             }
         }
 
-        public Task<Subscription> SubscribeResponse<TOtherSystem>(Func<SystemMessage<TSys, TArgs>, SystemMessage<TOtherSystem, TResponseArgs>> transform)
+        public Subscription SubscribeResponse<TOtherSystem>(Func<SystemMessage<TSys, TArgs>, SystemMessage<TOtherSystem, TResponseArgs>> transform)
             where TOtherSystem : EcsSystem
         {
             return Concern.Delegate(Owner.EventBus)

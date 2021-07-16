@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace Fiero.Core
 {
     public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
+        : IGame
         where TFonts : struct, Enum
         where TTextures : struct, Enum
         where TLocales : struct, Enum
@@ -30,6 +31,7 @@ namespace Fiero.Core
         public readonly GameShaders<TShaders> Shaders;
         public readonly GameDirector Director;
         public readonly GameUI UI;
+        public readonly GameWindow Window;
         public readonly GameLocalizations<TLocales> Localization;
 
         public Game(
@@ -44,6 +46,7 @@ namespace Fiero.Core
             GameShaders<TShaders> shaders,
             GameLocalizations<TLocales> localization,
             GameUI ui,
+            GameWindow window,
             GameDirector director)
         {
             OffButton = off;
@@ -56,6 +59,7 @@ namespace Fiero.Core
             Sounds = sounds;
             Fonts = fonts;
             UI = ui;
+            Window = window;
             Director = director;
             Localization = localization;
         }
@@ -103,41 +107,42 @@ namespace Fiero.Core
         {
             await InitializeAsync();
             ValidateResources();
-            using var win = new RenderWindow(new VideoMode(800, 800), String.Empty);
-            InitializeWindow(win);
-            Loop.Tick += (t, dt) => {
-                win.DispatchEvents();
-            };
-            Loop.Update += (t, dt) => {
-                Update(win, t, dt);
-            };
-            // Always called once per frame before the window is drawn
-            Loop.Render += (t, dt) => {
-                Draw(win, t, dt);
-            };
-            Loop.Run(token);
+            using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty)) {
+                InitializeWindow(Window.RenderWindow);
+                Loop.Tick += (t, dt) => {
+                    Window.DispatchEvents();
+                };
+                Loop.Update += (t, dt) => {
+                    Update();
+                };
+                // Always called once per frame before the window is drawn
+                Loop.Render += (t, dt) => {
+                    Draw();
+                };
+                Loop.Run(token);
+            }
         }
 
-        public virtual void Update(RenderWindow win, float t, float dt)
+        public virtual void Update()
         {
-            if(win.HasFocus()) {
-                Input.Update(Mouse.GetPosition(win));
+            if(Window.HasFocus()) {
+                Input.Update(Window.GetMousePosition());
                 if (UI.GetOpenModals().LastOrDefault() is { } modal) {
-                    modal.Update(win, t, dt);
+                    modal.Update();
                 }
                 else {
-                    Director.Update(win, t, dt);
+                    Director.Update();
                 }
             }
         }
 
-        public virtual void Draw(RenderWindow win, float t, float dt)
+        public virtual void Draw()
         {
-            Director.Draw(win, t, dt);
+            Director.Draw();
             foreach (var modal in UI.GetOpenModals()) {
-                modal.Draw(win, t, dt);
+                modal.Draw();
             }
-            win.Display();
+            Window.Display();
         }
     }
 }

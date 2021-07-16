@@ -5,7 +5,6 @@ using Unconcern.Common;
 
 namespace Fiero.Core
 {
-
     public sealed class OffButton
     {
         private readonly CancellationTokenSource _source;

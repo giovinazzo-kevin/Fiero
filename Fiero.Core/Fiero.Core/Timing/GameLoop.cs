@@ -11,36 +11,41 @@ namespace Fiero.Core
         public event Action<float, float> Tick;
         public event Action<float, float> Update;
         public event Action<float, float> Render;
-
-        public float CurrentTime { get; private set; }
+        public float T { get; private set; }
 
         public GameLoop()
         {
-            TimeStep = 1f / 2500f;
+            TimeStep = 1f / 500f;
+        }
+
+        public virtual void Wait(TimeSpan time)
+        {
+            var innerLoop = new GameLoop();
+            innerLoop.Run(new CancellationTokenSource(time).Token);
         }
 
         public virtual void Run(CancellationToken ct = default)
         {
             var time = new Stopwatch();
             time.Start();
-            var (t, accumulator) =
-                (0f, 0f);
-            CurrentTime = (float)time.Elapsed.TotalSeconds;
+            T = 0f;
+            var accumulator = 0f;
+            var currentTime = (float)time.Elapsed.TotalSeconds;
             while (!ct.IsCancellationRequested) {
-                Tick?.Invoke(t, TimeStep);
                 var newTime = (float)time.Elapsed.TotalSeconds;
-                var frameTime = newTime - CurrentTime;
+                var frameTime = newTime - currentTime;
                 if (frameTime > 0.25f) {
                     frameTime = 0.25f;
                 }
-                CurrentTime = newTime;
+                currentTime = newTime;
+                Tick?.Invoke(T, TimeStep);
                 accumulator += frameTime;
                 while (accumulator >= TimeStep) {
-                    Update?.Invoke(t, TimeStep);
-                    t += TimeStep;
+                    Update?.Invoke(T, TimeStep);
+                    T += TimeStep;
                     accumulator -= TimeStep;
                 }
-                Render?.Invoke(t, TimeStep);
+                Render?.Invoke(T, TimeStep);
             }
         }
     }

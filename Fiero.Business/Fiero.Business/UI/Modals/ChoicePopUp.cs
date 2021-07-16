@@ -22,9 +22,9 @@ namespace Fiero.Business
             };
         }
 
-        public override void Update(RenderWindow win, float t, float dt)
+        public override void Update()
         {
-            base.Update(win, t, dt);
+            base.Update();
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))) {
                 SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
                 Invalidate();

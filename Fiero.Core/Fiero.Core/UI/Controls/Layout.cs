@@ -27,7 +27,7 @@ namespace Fiero.Core
             where T : UIControl
             => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).Cast<T>();
 
-        public override void Update(float t, float dt)
+        public override void Update()
         {
             var preventDefault = TrackMouse(Input.GetMousePosition().ToCoord(), out var clickedControl, out var clickedButton);
             if(!preventDefault) {
@@ -40,7 +40,7 @@ namespace Fiero.Core
                     }
                 }
             }
-            base.Update(t, dt);
+            base.Update();
         }
 
         public Layout(LayoutGrid dom, GameInput input, params UIControl[] controls) : base(input)

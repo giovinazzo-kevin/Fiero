@@ -87,10 +87,10 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Update(RenderWindow win, float t, float dt)
+        public virtual void Update()
         {
             if (_currentItem != null) {
-                _currentItem.Scene.Update(win, t, dt);
+                _currentItem.Scene.Update();
                 if (_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState)) {
                     var tNextState = nextState.GetType();
                     if (!_cache.TryGetValue(tNextState, out var nextItem)) {
@@ -103,10 +103,10 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Draw(RenderWindow win, float t, float dt)
+        public virtual void Draw()
         {
             if (_currentItem != null) {
-                _currentItem.Scene.Draw(win, t, dt);
+                _currentItem.Scene.Draw();
             }
         }
     }

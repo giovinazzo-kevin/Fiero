@@ -91,7 +91,7 @@ namespace Fiero.Core
             return this;
         }
 
-        public override void Update(float t, float dt)
+        public override void Update()
         {
             if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Up)) {
                 var i = Options.IndexOf(SelectedOption);

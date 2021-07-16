@@ -87,7 +87,7 @@ namespace Fiero.Core
             yield break;
         }
 
-        public virtual void Update(RenderWindow win, float t, float dt) { }
-        public virtual void Draw(RenderWindow win, float t, float dt) { }
+        public virtual void Update() { }
+        public virtual void Draw() { }
     }
 }

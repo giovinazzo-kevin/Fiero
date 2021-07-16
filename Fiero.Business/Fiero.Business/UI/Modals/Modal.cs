@@ -70,7 +70,7 @@ namespace Fiero.Business
             base.Close(buttonPressed);
         }
 
-        public override void Update(RenderWindow win, float t, float dt)
+        public override void Update()
         {
             var shift = UI.Input.IsKeyPressed(Keyboard.Key.LShift)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RShift);
@@ -89,7 +89,7 @@ namespace Fiero.Business
                     continue;
                 pair.Value();
             }
-            base.Update(win, t, dt);
+            base.Update();
         }
     }
 }

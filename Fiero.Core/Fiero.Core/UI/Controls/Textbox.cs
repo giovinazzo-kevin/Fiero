@@ -56,7 +56,7 @@ namespace Fiero.Core
             return false;
         }
 
-        public override void Update(float t, float dt)
+        public override void Update()
         {
             var text = new StringBuilder(Text);
             foreach (var key in Input.KeysPressed()) {

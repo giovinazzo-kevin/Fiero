@@ -35,8 +35,9 @@ namespace Fiero.Business
             GameDialogues dialogues,
             GameDataStore store,
             GameUI ui,
+            GameWindow win,
             IEnumerable<IGameScene> gameScenes)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, ui, director)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, ui, win, director)
         {
             Dialogues = dialogues;
             Glossary = glossary;

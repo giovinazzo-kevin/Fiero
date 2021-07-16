@@ -50,9 +50,9 @@ namespace Fiero.Business
             }
         }
 
-        public override void Update(float t, float dt)
+        public override void Update()
         {
-            base.Update(t, dt);
+            base.Update();
             if (!IsActive) {
                 return;
             }

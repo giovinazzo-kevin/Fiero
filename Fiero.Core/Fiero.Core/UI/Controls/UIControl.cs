@@ -151,10 +151,10 @@ namespace Fiero.Core
             return preventDefault;
         }
 
-        public virtual void Update(float t, float dt)
+        public virtual void Update()
         {
             foreach (var child in Children) {
-                child.Update(t, dt);
+                child.Update();
             }
         }
 

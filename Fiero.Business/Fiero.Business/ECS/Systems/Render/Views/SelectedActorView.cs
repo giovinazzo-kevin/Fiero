@@ -15,7 +15,8 @@ namespace Fiero.Business
         protected Label ActorHealth { get; private set; }
         protected Paragraph Logs { get; private set; }
 
-        internal SelectedActorView(LayoutBuilder layoutBuilder)
+        internal SelectedActorView(GameWindow win, LayoutBuilder layoutBuilder)
+            : base(win)
         {
             TopRow = layoutBuilder
                 .Build(new(), grid => ApplyStyles(grid)
@@ -71,10 +72,10 @@ namespace Fiero.Business
             }
         }
 
-        public override void Update(RenderWindow win, float t, float dt)
+        public override void Update()
         {
-            TopRow.Update(t, dt);
-            BottomRow.Update(t, dt);
+            TopRow.Update();
+            BottomRow.Update();
             if (Following.V != null && Following.V.Id != 0) {
                 ActorHealth.Text.V = $"HP: {Following.V.ActorProperties.Health}/{Following.V.ActorProperties.MaximumHealth}";
                 if(Following.V.Log != null) {
@@ -83,10 +84,10 @@ namespace Fiero.Business
             }
         }
 
-        public override void Draw(RenderWindow win, float t, float dt)
+        public override void Draw()
         {
-            win.Draw(TopRow);
-            win.Draw(BottomRow);
+            Window.Draw(TopRow);
+            Window.Draw(BottomRow);
         }
 
         public override void OnWindowResized(Coord newSize) => throw new NotImplementedException();

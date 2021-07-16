@@ -1,15 +1,13 @@
 ﻿using SFML.Graphics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
-    public interface IGameScene
+    public interface IGame
     {
-        object State { get; }
-        bool TrySetState(object newState);
-
+        Task RunAsync(CancellationToken ct);
         void Update();
         void Draw();
-
     }
 }

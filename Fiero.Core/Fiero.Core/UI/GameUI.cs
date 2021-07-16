@@ -9,16 +9,18 @@ namespace Fiero.Core
     {
         public readonly GameDataStore Store;
         public readonly GameInput Input;
+        public readonly GameWindow Window;
         protected readonly IServiceFactory ServiceProvider;
         protected readonly List<ModalWindow> OpenModals;
 
         public IEnumerable<ModalWindow> GetOpenModals() => OpenModals;
 
-        public GameUI(IServiceFactory sp, GameInput input, GameDataStore store)
+        public GameUI(IServiceFactory sp, GameInput input, GameDataStore store, GameWindow window)
         {
             ServiceProvider = sp;
             Store = store;
             Input = input;
+            Window = window;
             OpenModals = new List<ModalWindow>();
         }
 

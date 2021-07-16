@@ -95,15 +95,15 @@ namespace Fiero.Business.Scenes
             };
         }
 
-        public override void Update(RenderWindow win, float t, float dt)
+        public override void Update()
         {
-            UI_Layout.Update(t, dt);
+            UI_Layout.Update();
         }
 
-        public override void Draw(RenderWindow win, float t, float dt)
+        public override void Draw()
         {
-            win.Clear(Color.Black);
-            win.Draw(UI_Layout);
+            UI.Window.Clear(Color.Black);
+            UI.Window.Draw(UI_Layout);
         }
 
         protected override bool CanChangeState(SceneState newState) => true;

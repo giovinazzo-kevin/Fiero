@@ -27,6 +27,7 @@ namespace Fiero.Core
             where TShaders : struct, Enum
         {
             _ioc.Register<IServiceFactory>(_ => _ioc.BeginScope());
+            _ioc.Register<EventBus>(new PerContainerLifetime());
             _ioc.Register<OffButton>(new PerContainerLifetime());
             _ioc.Register<GameLoop>(new PerContainerLifetime());
             _ioc.Register<GameInput>(new PerContainerLifetime());
@@ -41,8 +42,9 @@ namespace Fiero.Core
             _ioc.Register<GameEntities>(new PerContainerLifetime());
             _ioc.Register<GameLocalizations<TLocales>>(new PerContainerLifetime());
             _ioc.Register<GameUI>(new PerContainerLifetime());
+            _ioc.Register<GameWindow>(new PerContainerLifetime());
             _ioc.Register<TGame>(new PerContainerLifetime());
-            _ioc.Register<EventBus>(new PerContainerLifetime());
+            _ioc.Register<IGame, TGame>(new PerContainerLifetime());
 
             var singletons = Assembly.GetEntryAssembly().GetTypes()
                 .Select(t => (Type: t, Attr: t.GetCustomAttribute<SingletonDependencyAttribute>()))

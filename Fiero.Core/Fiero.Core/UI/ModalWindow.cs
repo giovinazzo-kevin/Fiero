@@ -14,7 +14,7 @@ namespace Fiero.Core
         public event Action<ModalWindow, ModalWindowButton> Closed;
         public event Action<ModalWindow, ModalWindowButton> Confirmed;
         public event Action<ModalWindow, ModalWindowButton> Cancelled;
-        public event Action<float, float> Updated;
+        public event Action Updated;
 
 
         public virtual void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
@@ -98,15 +98,15 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Update(RenderWindow win, float t, float dt)
+        public virtual void Update()
         {
-            Layout.Update(t, dt);
-            Updated?.Invoke(t, dt);
+            Layout.Update();
+            Updated?.Invoke();
         }
 
-        public virtual void Draw(RenderWindow win, float t, float dt)
+        public virtual void Draw()
         {
-            win.Draw(Layout);
+            UI.Window.RenderWindow.Draw(Layout);
         }
     }
 }

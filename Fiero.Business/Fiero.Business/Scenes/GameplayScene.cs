@@ -157,9 +157,9 @@ namespace Fiero.Business.Scenes
                 };
         }
 
-        public override void Update(RenderWindow win, float t, float dt)
+        public override void Update()
         {
-            RenderSystem.Update(win, t, dt);
+            RenderSystem.Update();
             ActionSystem.Update();
             Entities.RemoveFlaggedItems();
             if (Input.IsKeyPressed(Key.R)) {
@@ -167,10 +167,10 @@ namespace Fiero.Business.Scenes
             }
         }
 
-        public override void Draw(RenderWindow win, float t, float dt)
+        public override void Draw()
         {
-            win.Clear();
-            RenderSystem.Draw(win, t, dt);
+            UI.Window.Clear();
+            RenderSystem.Draw();
         }
 
         protected override bool CanChangeState(SceneState newState) => true;

@@ -25,6 +25,7 @@ namespace Fiero.Business
         private readonly GameInput _input;
         private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
+        private readonly RenderSystem _renderSystem;
 
         public readonly SystemEvent<ActionSystem, TurnEvent> TurnStarted;
         public readonly SystemEvent<ActionSystem, TurnEvent> TurnEnded;
@@ -35,12 +36,14 @@ namespace Fiero.Business
             EventBus bus,
             GameEntities entities, 
             FloorSystem floorSystem,
-            GameDataStore store, 
+            GameDataStore store,
+            RenderSystem renderSystem,
             GameInput input,
             GameSounds<SoundName> sounds
         ) : base(bus) {
             _entities = entities;
             _floorSystem = floorSystem;
+            _renderSystem = renderSystem;
             _sounds = sounds;
             _store = store;
             _input = input;

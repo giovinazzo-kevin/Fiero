@@ -8,6 +8,6 @@
             Follow = follow;
         }
         ActionName IAction.Name => ActionName.Attack;
-        int? IAction.Cost => 100;
+        int? IAction.Cost => 1;
     }
 }

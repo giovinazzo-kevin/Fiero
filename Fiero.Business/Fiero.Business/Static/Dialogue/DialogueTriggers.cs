@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Fiero.Business
 {
+
     public static class DialogueTriggers
     {
         public static void Set(NpcName type, DialogueComponent component)

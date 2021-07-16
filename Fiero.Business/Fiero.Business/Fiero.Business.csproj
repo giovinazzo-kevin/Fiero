@@ -17,6 +17,9 @@
     <None Update="Resources\Fonts\AmaticSC-Regular.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Fonts\ModernDOS8x8.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Fonts\PressStart2P.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

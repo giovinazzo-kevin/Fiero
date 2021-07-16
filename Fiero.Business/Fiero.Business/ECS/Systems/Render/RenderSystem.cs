@@ -21,6 +21,7 @@ namespace Fiero.Business
 
         public SelectedActorView SelectedActor { get; private set; }
         public HealthbarDisplayView HealthbarDisplay { get; private set; }
+        public Coord Zoom { get; private set; } = new(1, 1);
 
         public RenderSystem(
             EventBus bus,
@@ -64,12 +65,16 @@ namespace Fiero.Business
                 for (int i = timeline.Count - 1; i >= 0; i--) {
                     var t = timeline[i];
                     if (t.Time <= time) {
-                        var sprite = Sprites.Get(t.Frame.Texture, t.Frame.Sprite);
-                        sprite.Position = position + t.Frame.Offset;
-                        UI.Window.Draw(sprite);
+                        foreach (var spriteDef in t.Frame.Sprites) {
+                            var sprite = Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
+                            sprite.Position = (position + spriteDef.Offset) * UI.Store.Get(Data.UI.TileSize);
+                            sprite.Scale = Zoom;
+                            UI.Window.Draw(sprite);
+                        }
                         timeline.RemoveAt(i);
                     }
                 }
+                UI.Window.Display();
                 Loop.Wait(increment);
                 time += increment;
             }
@@ -101,10 +106,10 @@ namespace Fiero.Business
             }
             // If no actor to follow is available focus on the geometric center of the map
             var followPos = (SelectedActor.Following.V?.Physics?.Position ?? mapCenter).ToVec();
-            var origin = winSize / 4f + followPos * tileSize - winSize / 2f;
+            var origin = followPos * tileSize - winSize / 2f;
             foreach (var drawable in drawables) {
                 var spriteSize = drawable.Render.Sprite.TextureRect.Size().ToVec();
-                var spriteScale = drawable.Render.Sprite.Scale.ToVec();
+                var spriteScale = drawable.Render.Sprite.Scale.ToVec() * Zoom;
                 // Center the sprite (the last term centers 2x2 sprites horizontally so that they match with the tile they're on)
                 drawable.Render.Sprite.Origin = origin + spriteSize * new Vec(0.5f, 1);
                 drawable.Render.Sprite.Position = drawable.Physics.Position * spriteScale * tileSize;

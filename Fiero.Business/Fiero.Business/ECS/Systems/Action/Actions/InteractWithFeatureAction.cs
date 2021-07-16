@@ -8,6 +8,6 @@
             Feature = feature;
         }
         ActionName IAction.Name => ActionName.Interact;
-        int? IAction.Cost => 100;
+        int? IAction.Cost => 1;
     }
 }

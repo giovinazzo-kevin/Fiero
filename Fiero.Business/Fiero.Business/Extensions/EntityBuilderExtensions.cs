@@ -12,7 +12,7 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, string sprite, SFML.Graphics.Color? tint = null)
             where T : Drawable => builder.AddOrTweak<RenderComponent>(c => {
                 c.SpriteName = sprite;
-                c.Sprite.Scale = new(2, 2);
+                c.Sprite.Scale = new(1, 1);
                 c.Sprite.Color = tint ?? c.Sprite.Color;
             });
         public static EntityBuilder<T> WithActorInfo<T>(this EntityBuilder<T> builder, ActorName type, MonsterTierName tier)

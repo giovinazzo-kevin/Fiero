@@ -1,20 +1,16 @@
-﻿using Fiero.Core;
-using System;
+﻿using System;
 
 namespace Fiero.Business
 {
+
     public readonly struct AnimationFrame
     {
-        public readonly TextureName Texture;
-        public readonly string Sprite;
-        public readonly Coord Offset;
+        public readonly AnimationSprite[] Sprites;
         public readonly TimeSpan Duration;
 
-        public AnimationFrame(string sprite, TextureName texture, Coord ofs, TimeSpan dur)
+        public AnimationFrame(TimeSpan dur, params AnimationSprite[] sprites)
         {
-            Sprite = sprite;
-            Texture = texture;
-            Offset = ofs;
+            Sprites = sprites;
             Duration = dur;
         }
     }

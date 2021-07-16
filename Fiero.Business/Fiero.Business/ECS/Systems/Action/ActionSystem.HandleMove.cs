@@ -68,6 +68,14 @@ namespace Fiero.Business
                             cost = HandleAction(actor, ref action);
                             return true;
                         }
+                        else if(actor.IsFriendlyTowards(target)) {
+                            // you can swap position with allies in twice the amount of time it takes to move
+                            var tmp = actor.Physics.Position;
+                            actor.Physics.Position = target.Physics.Position;
+                            target.Physics.Position = tmp;
+                            cost *= 2;
+                            return true;
+                        }
                     }
                 }
                 else {

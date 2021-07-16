@@ -63,7 +63,7 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
-            Fonts.Add(FontName.UI, new Font("Resources/Fonts/Roboto-Medium.ttf"));
+            Fonts.Add(FontName.UI, new Font("Resources/Fonts/ModernDOS8x8.ttf"));
 
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));

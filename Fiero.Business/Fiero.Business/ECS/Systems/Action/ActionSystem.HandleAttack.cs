@@ -22,6 +22,7 @@ namespace Fiero.Business
                 var newPos = actor.Physics.Position + dir.Coord;
                 var actorsHere = _floorSystem.ActorsAt(newPos);
                 if (!actorsHere.Any(a => actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
+                    _renderSystem.Play(actor.Physics.Position, Animation.Fireball);
                     return false;
                 }
                 victim = actorsHere.Single();

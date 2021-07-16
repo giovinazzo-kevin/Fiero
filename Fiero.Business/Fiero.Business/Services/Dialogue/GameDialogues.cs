@@ -41,6 +41,10 @@ namespace Fiero.Business
                         && linesProp.EnumerateArray().Select(x => x.GetString()) is { } lines)) {
                         lines = Enumerable.Empty<string>();
                     }
+                    if (!(prop.Value.TryGetProperty("Cancellable", out var cancellableProp)
+                        && cancellableProp.GetBoolean() is { } cancellable)) {
+                        cancellable = false;
+                    }
                     if (!(prop.Value.TryGetProperty("Choices", out var choicesProp)
                         && choicesProp.EnumerateArray().Select(x => {
                             if (!(x.TryGetProperty("Line", out var lineProp)
@@ -59,10 +63,10 @@ namespace Fiero.Business
                         && nextProp.GetString() is { } next)) {
                         next = String.Empty;
                     }
-                    return new DialogueNodeDefinition(prop.Name, face, lines.ToArray(), choices.ToArray(), next);
+                    return new DialogueNodeDefinition(prop.Name, face, lines.ToArray(), cancellable, choices.ToArray(), next);
                 })
                 .ToDictionary(x => x.Id);
-            var nodes = definitions.Values.Select(d => new DialogueNode(d.Id, d.Face, d.Lines))
+            var nodes = definitions.Values.Select(d => new DialogueNode(d.Id, d.Face, d.Lines, d.Cancellable))
                 .ToDictionary(x => x.Id);
             foreach (var node in nodes.Values) {
                 if (!String.IsNullOrWhiteSpace(definitions[node.Id].Next)) {

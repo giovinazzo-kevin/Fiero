@@ -10,14 +10,11 @@
       "Smintheus": {
         "Face": "GreatKingRatDead",
         "Lines": [ "You offer a prayer to Smintheus,", "god of rats and pestilence." ],
+        "Cancellable": true,
         "Choices": [
           {
             "Line": "Follow Smintheus",
             "Next": "Smintheus_Follow"
-          },
-          {
-            "Line": "Cancel",
-            "Next": ""
           }
         ],
         "Next": ""

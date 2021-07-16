@@ -59,15 +59,19 @@ namespace Fiero.Core
         
         private void RerouteEvents(TState newState)
         {
-            if (ExitStates.Contains(newState)) {
+            var isExitState = ExitStates.Contains(newState);
+            var isEntryState = EntryStates.Contains(newState);
+            if (isEntryState || isExitState) {
                 DisposeSubscriptions?.Invoke();
             }
-
-            if (EntryStates.Contains(newState)) {
+            if (isEntryState) {
                 foreach (var sub in RouteEvents()) {
-                    Action dispose = sub.Dispose;
-                    dispose += () => DisposeSubscriptions -= dispose;
-                    DisposeSubscriptions += dispose;
+                    DisposeSubscriptions += DisposeSubscription;
+                    void DisposeSubscription()
+                    {
+                        sub.Dispose();
+                        DisposeSubscriptions -= DisposeSubscription;
+                    }
                 }
             }
         }

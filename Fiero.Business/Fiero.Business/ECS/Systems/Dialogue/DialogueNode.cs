@@ -10,6 +10,7 @@ namespace Fiero.Business
         public readonly string Id;
         public readonly string Face;
         public readonly string[] Lines;
+        public readonly bool Cancellable;
         public readonly IDictionary<string, DialogueNode> Choices;
         public DialogueNode Next { get; set; }
 
@@ -20,13 +21,20 @@ namespace Fiero.Business
             Triggered?.Invoke(trigger, new(this, speaker, listeners));
         }
 
-        public DialogueNode(string id, string face, string[] lines, DialogueNode next = null, IDictionary<string, DialogueNode> choices = null)
-        {
+        public DialogueNode(
+            string id, 
+            string face, 
+            string[] lines,
+            bool cancellable,
+            DialogueNode next = null, 
+            IDictionary<string, DialogueNode> choices = null
+        ) {
             Id = id;
             Face = face;
             Lines = lines;
             Next = next;
             Choices = choices ?? new Dictionary<string, DialogueNode>();
+            Cancellable = cancellable;
         }
     }
 }

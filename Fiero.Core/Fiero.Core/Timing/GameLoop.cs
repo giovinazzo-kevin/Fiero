@@ -16,7 +16,7 @@ namespace Fiero.Core
 
         public GameLoop()
         {
-            TimeStep = 1f / 100f;
+            TimeStep = 1f / 2500f;
         }
 
         public virtual void Run(CancellationToken ct = default)

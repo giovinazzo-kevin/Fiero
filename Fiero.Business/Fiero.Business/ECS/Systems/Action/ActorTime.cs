@@ -5,16 +5,18 @@ namespace Fiero.Business
     internal readonly struct ActorTime
     {
         public readonly int ActorId;
+        public readonly Actor Proxy;
         public readonly int Time;
-        public readonly Func<int?> Act;
+        public readonly Func<IAction> GetIntent;
 
-        public ActorTime(int actorId, Func<int?> actionCost, int time = 0)
+        public ActorTime(int actorId, Actor proxy, Func<IAction> actionCost, int time = 0)
         {
             Time = time;
+            Proxy = proxy;
             ActorId = actorId;
-            Act = actionCost;
+            GetIntent = actionCost;
         }
 
-        public ActorTime WithTime(int newTime) => new(ActorId, Act, newTime);
+        public ActorTime WithTime(int newTime) => new(ActorId, Proxy, GetIntent, newTime);
     }
 }

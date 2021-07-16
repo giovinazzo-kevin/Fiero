@@ -35,11 +35,6 @@ namespace Fiero.Business
             }
         }
 
-        public override void Close(ModalWindowButtons buttonPressed)
-        {
-            base.Close(buttonPressed);
-        }
-
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<Button>(s => s
                 .Match(x => x.HasClass("choice"))
@@ -60,7 +55,7 @@ namespace Fiero.Business
                         b.Text.V = Options[i]?.ToString() ?? "(ERROR)";
                         b.Clicked += (_, __, ___) => {
                             if(SelectedIndex == i) {
-                                Close(ModalWindowButtons.ImplicitYes);
+                                Close(ModalWindowButton.ImplicitYes);
                                 return false;
                             }
                             SelectedIndex = i;

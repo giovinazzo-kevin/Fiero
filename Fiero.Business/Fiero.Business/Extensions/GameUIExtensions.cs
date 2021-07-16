@@ -12,7 +12,7 @@ namespace Fiero.Business
             => ui.ShowModal(
                 new InventoryModal(ui, actor),
                 title,
-                ModalWindowButtons.Close,
+                new[] { ModalWindowButton.Close },
                 title != null ? ModalWindowStyles.Default
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );
@@ -20,14 +20,14 @@ namespace Fiero.Business
             => ui.ShowModal(
                 new DialogueModal(ui, trigger, node, speaker, listeners),
                 null,
-                ModalWindowButtons.Ok,
+                new[] { ModalWindowButton.Ok },
                 ModalWindowStyles.None
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.ShowModal(
                 new ChoicePopUp<T>(ui, choices), 
                 title, 
-                ModalWindowButtons.Ok,
+                new[] { ModalWindowButton.Ok },
                 title != null ? ModalWindowStyles.Default
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );
@@ -35,7 +35,7 @@ namespace Fiero.Business
             => ui.ShowModal(
                 new ChoicePopUp<T>(ui, choices), 
                 title, 
-                ModalWindowButtons.Ok | ModalWindowButtons.Cancel,
+                new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
                 title != null ? ModalWindowStyles.Default
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );

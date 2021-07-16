@@ -62,7 +62,7 @@ namespace Fiero.Business
                 CurrentModal = inventoryModal;
                 inventoryModal.Closed += (_, __) => CurrentModal = null;
                 inventoryModal.ActionPerformed += (item, action) => {
-                    // inventoryModal.Close(ModalWindowButtons.None);
+                    inventoryModal.Close(ModalWindowButton.None);
                     switch(action) {
                         case InventoryActionName.Drop:
                             QueuedActions.Enqueue(new DropItemAction(item));

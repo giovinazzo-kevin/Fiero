@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
 using SFML.System;
+using SFML.Window;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,11 +18,11 @@ namespace Fiero.Business
         private const int TURN_ACTOR_ID = -1;
 
         private readonly List<ActorTime> _queue;
-        public int CurrentTime { get; private set; }
         public int CurrentTurn { get; private set; }
 
         private readonly GameEntities _entities;
         private readonly GameDataStore _store;
+        private readonly GameInput _input;
         private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
 
@@ -35,12 +36,14 @@ namespace Fiero.Business
             GameEntities entities, 
             FloorSystem floorSystem,
             GameDataStore store, 
+            GameInput input,
             GameSounds<SoundName> sounds
         ) : base(bus) {
             _entities = entities;
             _floorSystem = floorSystem;
             _sounds = sounds;
             _store = store;
+            _input = input;
             _queue = new List<ActorTime>();
             Clear();
 
@@ -53,8 +56,10 @@ namespace Fiero.Business
         protected virtual int? HandleAction(Actor actor, ref IAction action)
         {
             var cost = action.Cost;
+            if (actor is null)
+                return cost;
             cost = action.Name switch {
-                ActionName.Wait                                                       => cost,
+                ActionName.Wait     when(HandleWait    (actor, ref action, ref cost)) => cost,
                 ActionName.Move     when(HandleMove    (actor, ref action, ref cost)) => cost,
                 ActionName.Attack   when(HandleAttack  (actor, ref action, ref cost)) => cost,
                 ActionName.Interact when(HandleInteract(actor, ref action, ref cost)) => cost,
@@ -71,16 +76,8 @@ namespace Fiero.Business
             var time = _queue.Single(x => x.ActorId == TURN_ACTOR_ID).Time;
             var proxy = _entities.GetProxy<Actor>(actorId);
             var currentTurn = CurrentTurn;
-            _queue.Add(new ActorTime(actorId, () => {
-                if(currentTurn != CurrentTurn) {
-                    ActorTurnStarted.Raise(new(proxy, currentTurn = CurrentTurn));
-                }
-                var action = proxy.Action.ActionProvider.GetIntent(proxy);
-                if(HandleAction(proxy, ref action) is { } cost) {
-                    ActorTurnEnded.Raise(new(proxy, currentTurn));
-                    return cost;
-                }
-                return null;
+            _queue.Add(new ActorTime(actorId, proxy, () => {
+                return proxy.Action.ActionProvider.GetIntent(proxy);
             }, time + Rng.Random.Next(0, 100)));
         }
 
@@ -92,23 +89,40 @@ namespace Fiero.Business
         public void Clear()
         {
             _queue.Clear();
-            _queue.Add(new ActorTime(TURN_ACTOR_ID, () => 100, 0));
-            CurrentTime = 0;
+            _queue.Add(new ActorTime(TURN_ACTOR_ID, null, () => new WaitAction(), 0));
         }
 
-        public int? Update()
+        private ActorTime Dequeue()
         {
             var next = _queue[0];
             _queue.RemoveAt(0);
+            return next;
+        }
 
-            var cost = next.Act();
-            if (!cost.HasValue) {
+        public int? ElapseTick()
+        {
+            var next = Dequeue();
+            var isTurnCounter = next.ActorId == TURN_ACTOR_ID;
+            if (isTurnCounter) {
+                TurnStarted.Raise(new(++CurrentTurn));
+            }
+            else {
+                ActorTurnStarted.Raise(new(next.Proxy, CurrentTurn));
+            }
+            var intent = next.GetIntent();
+            if (HandleAction(next.Proxy, ref intent) is { } cost) {
+                if (isTurnCounter) {
+                    TurnEnded.Raise(new(CurrentTurn));
+                }
+                else {
+                    ActorTurnEnded.Raise(new(next.Proxy, CurrentTurn));
+                }
+            }
+            else {
                 _queue.Insert(0, next);
                 return null;
             }
-
-            next = next.WithTime(next.Time + cost.Value);
-
+            next = next.WithTime(next.Time + cost);
             var index = _queue.FindIndex(0, t => t.Time >= next.Time);
             if (index > -1) {
                 _queue.Insert(index, next);
@@ -116,15 +130,12 @@ namespace Fiero.Business
             else {
                 _queue.Add(next);
             }
-
-            CurrentTime += cost.Value;
-
-            if (next.ActorId == TURN_ACTOR_ID) {
-                TurnEnded.Raise(new(CurrentTurn));
-                TurnStarted.Raise(new(++CurrentTurn));
-            }
-
             return cost;
+        }
+
+        public void Update()
+        {
+            ElapseTick();
         }
     }
 }

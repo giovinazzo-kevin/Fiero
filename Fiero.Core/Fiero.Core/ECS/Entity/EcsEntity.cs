@@ -23,5 +23,8 @@ namespace Fiero.Core
             newEntity = (T)_cast(this, typeof(T));
             return newEntity != null;
         }
+
+        public override int GetHashCode() => Id;
+        public override bool Equals(object obj) => obj is EcsEntity other ? Id == other.Id : base.Equals(obj);
     }
 }

@@ -25,11 +25,24 @@ namespace Fiero.Business
             Items.AddRange(Actor.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
             CurrentPage.ValueChanged += (_, __) => Invalidate();
         }
+        
+        protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        {
+            var modalSize = UI.Store.Get(Data.UI.PopUpSize) * 2;
+            Layout.Size.V = modalSize;
+            Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
+        }
 
-        protected override void RegisterHotkeys(ModalWindowButtons buttons)
+        protected override void BeforePresentation()
+        {
+            var windowSize = UI.Store.Get(Data.UI.WindowSize);
+            OnWindowSizeChanged(new(Data.UI.WindowSize, windowSize, windowSize));
+        }
+
+        protected override void RegisterHotkeys(ModalWindowButton[] buttons)
         {
             base.RegisterHotkeys(buttons);
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButtons.ImplicitNo));
+            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButton.ImplicitNo));
         }
 
         protected virtual bool OnItemClicked(Button b, int index, Mouse.Button mouseButton)
@@ -99,7 +112,7 @@ namespace Fiero.Business
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
                 .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
-                    .Col(w: 0.06f, @class: "item-sprite")
+                    .Col(w: 0.08f, @class: "item-sprite")
                         .Cell<Picture<TextureName>>(p => {
                             Invalidated += () => RefreshItemSprite(p, index);
                         })

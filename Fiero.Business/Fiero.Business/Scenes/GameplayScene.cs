@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
 using SFML.System;
+using SFML.Window;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -139,7 +140,7 @@ namespace Fiero.Business.Scenes
             Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
                 .Triggered += (t, eh) => {
                     foreach (var player in eh.DialogueListeners.Players()) {
-                        var friends = Enumerable.Range(0, 5)
+                        var friends = Enumerable.Range(99, 100)
                             .Select(i => EntityBuilders
                                 .Rat(MonsterTierName.Two)
                                 .WithFaction(FactionName.Players)

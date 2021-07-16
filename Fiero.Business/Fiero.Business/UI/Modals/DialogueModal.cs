@@ -26,18 +26,28 @@ namespace Fiero.Business
             Listeners = listeners;
         }
 
-        public override void Open(string title, ModalWindowButtons buttons, ModalWindowStyles styles = default)
+        public override void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = default)
         {
             Node.Trigger(Trigger, Speaker, Listeners);
             base.Open(title, buttons, styles);
             if (Node.Choices.Count > 0) {
-                UI.NecessaryChoice(Node.Choices.Keys.ToArray())
-                    .OptionChosen += (w, opt) => {
-                        Close(ModalWindowButtons.ImplicitYes);
-                        if(Node.Choices.TryGetValue(opt, out var next) && next != null) {
-                            UI.Dialogue(Trigger, next, Speaker, Listeners);
-                        }
-                    };
+                var keys = Node.Choices.Keys.ToArray();
+                if (Node.Cancellable) {
+                    var modal = UI.OptionalChoice(keys);
+                    modal.Cancelled += (_, btn) => Close(btn);
+                    modal.OptionChosen += DialogueModal_OptionChosen;
+                }
+                else {
+                    UI.NecessaryChoice(keys).OptionChosen += DialogueModal_OptionChosen;
+                }
+            }
+        }
+
+        private void DialogueModal_OptionChosen(ChoicePopUp<string> popUp, string option)
+        {
+            Close(ModalWindowButton.ImplicitYes);
+            if (Node.Choices.TryGetValue(option, out var next) && next != null) {
+                UI.Dialogue(Trigger, next, Speaker, Listeners);
             }
         }
 

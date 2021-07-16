@@ -3,6 +3,7 @@ using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -39,7 +40,7 @@ namespace Fiero.Business
         }
 
 
-        public override void Open(string title, ModalWindowButtons buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+        public override void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
         {
             Hotkeys.Clear();
             RegisterHotkeys(buttons);
@@ -48,18 +49,13 @@ namespace Fiero.Business
             Invalidate();
         }
 
-        protected virtual void RegisterHotkeys(ModalWindowButtons buttons)
+        protected virtual void RegisterHotkeys(ModalWindowButton[] buttons)
         {
-            if (buttons.HasFlag(ModalWindowButtons.Yes)
-                || buttons.HasFlag(ModalWindowButtons.Ok)
-                || buttons.HasFlag(ModalWindowButtons.ImplicitYes)) {
-                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButtons.ImplicitYes));
+            if (buttons.Any(b => b.ResultType == true)) {
+                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButton.ImplicitYes));
             }
-
-            if (buttons.HasFlag(ModalWindowButtons.No)
-                || buttons.HasFlag(ModalWindowButtons.Close)
-                || buttons.HasFlag(ModalWindowButtons.ImplicitNo)) {
-                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButtons.ImplicitNo));
+            if (buttons.Any(b => b.ResultType == false)) {
+                Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButton.ImplicitNo));
             }
         }
 
@@ -68,7 +64,7 @@ namespace Fiero.Business
             Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
         }
 
-        public override void Close(ModalWindowButtons buttonPressed)
+        public override void Close(ModalWindowButton buttonPressed)
         {
             Data.UI.WindowSize.ValueChanged -= OnWindowSizeChanged;
             base.Close(buttonPressed);

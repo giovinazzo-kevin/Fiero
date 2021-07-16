@@ -15,7 +15,6 @@ namespace Fiero.Business
         protected Label ActorHealth { get; private set; }
         protected Paragraph Logs { get; private set; }
 
-
         internal SelectedActorView(LayoutBuilder layoutBuilder)
         {
             TopRow = layoutBuilder

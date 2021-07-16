@@ -126,13 +126,7 @@ namespace Fiero.Business
                 return null;
             }
             next = next.WithTime(next.Time + cost);
-            var index = _queue.FindIndex(0, t => t.Time >= next.Time);
-            if (index > -1) {
-                _queue.Insert(index, next);
-            }
-            else {
-                _queue.Add(next);
-            }
+            _queue.Add(next);
             return cost;
         }
 

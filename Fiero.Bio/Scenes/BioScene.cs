@@ -56,31 +56,8 @@ namespace Fiero.Bio
             Grid = new HardwareGrid(512, 512);
         }
 
-        public override void Draw(RenderWindow win, float t, float dt)
+        public override void Draw()
         {
-            win.Clear();
-            if (Input.IsKeyDown(Keyboard.Key.R)) {
-                Grid.SetPixels(c => {
-                    var rng = new Random();
-                    var A = (byte)255;
-                    var B = (byte)(rng.Next(0, 2) * 255);
-                    if (c.Dist(new(256, 256)) < 100) {
-                        return new(0, 0, B, 255);
-                    }
-                    return new(A, 0, 0, 255);
-                }, maxDegreeOfParallelism: 8);
-            }
-
-            Grid.ReactionDiffusion(1f, 0.5f, 0.0367f, 0.0569f, 1f);
-            Grid.Flow(t * 100, 0.1f, 1f);
-            win.Draw(Grid);
-            //using var img = new HardwareGrid(Grid);
-            //img.SetPixels(p => {
-            //    var c = img.GetPixel(p);
-            //    var X = c.B;
-            //    return new(X, X, X, 255);
-            //});
-            //win.Draw(img);
         }
 
     }

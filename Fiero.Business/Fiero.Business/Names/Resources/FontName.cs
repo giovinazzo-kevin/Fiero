@@ -2,6 +2,7 @@
 {
     public enum FontName
     {
-        UI
+        Bold,
+        Light
     }
 }

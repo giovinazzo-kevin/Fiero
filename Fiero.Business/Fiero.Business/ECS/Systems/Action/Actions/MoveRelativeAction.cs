@@ -12,6 +12,6 @@ namespace Fiero.Business
         }
 
         ActionName IAction.Name => ActionName.Move;
-        int? IAction.Cost => 1;
+        int? IAction.Cost => 100;
     }
 }

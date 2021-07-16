@@ -5,7 +5,7 @@ namespace Fiero.Core
 {
     public class ComboItem : Label
     {
-        public ComboItem(GameInput input, Func<string, int, Text> getText) : base(input, getText)
+        public ComboItem(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
         {
             IsInteractive.V = true;
         }

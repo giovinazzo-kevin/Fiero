@@ -20,7 +20,7 @@ namespace Fiero.Business
         public UIControlProperty<byte> Octave { get; private set; } = new(nameof(Octave));
         public UIControlProperty<TrackerNote> Note { get; private set; } = new(nameof(Note));
 
-        public TrackerNoteCell(GameInput input, Func<string, int, Text> getText)
+        public TrackerNoteCell(GameInput input, Func<string, BitmapText> getText)
             : base(input, getText)
         {
             IsInteractive.V = true;

@@ -103,7 +103,7 @@ namespace Fiero.Core
             }
         }
 
-        public Combobox(GameInput input, Func<string, int, Text> getText, Func<ComboItem> buildItem) : base(input, getText)
+        public Combobox(GameInput input, Func<string, BitmapText> getText, Func<ComboItem> buildItem) : base(input, getText)
         {
             BuildItem = buildItem;
             Options = new List<Option>();

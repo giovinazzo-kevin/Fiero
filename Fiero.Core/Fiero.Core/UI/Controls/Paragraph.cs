@@ -6,10 +6,8 @@ namespace Fiero.Core
 {
     public class Paragraph : UIControl
     {
-        protected readonly Func<string, int, Text> GetText;
+        protected readonly Func<string, BitmapText> GetText;
 
-
-        public readonly UIControlProperty<Action<Text>> ConfigureText = new(nameof(ConfigureText), null);
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
@@ -18,13 +16,9 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
 
-        public Paragraph(GameInput input, Func<string, int, Text> getText) : base(input)
+        public Paragraph(GameInput input, Func<string, BitmapText> getText) : base(input)
         {
-            GetText = (s, i) => {
-                var text = getText(s, i);
-                ConfigureText.V?.Invoke(text);
-                return text;
-            };
+            GetText = getText;
             Size.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };

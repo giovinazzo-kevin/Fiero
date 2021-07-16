@@ -7,12 +7,11 @@ namespace Fiero.Core
 {
     public class Label : UIControl
     {
-        private Text _drawable;
+        private BitmapText _drawable;
         private double _knownTextSize;
 
-        protected readonly Func<string, int, Text> GetText;
+        protected readonly Func<string, BitmapText> GetText;
 
-        public readonly UIControlProperty<Action<Text>> ConfigureText = new(nameof(ConfigureText), null);
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8) { Propagate = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
@@ -28,40 +27,32 @@ namespace Fiero.Core
         {
             var text = DisplayText;
             if (_drawable is null) {
-                _drawable = GetText(text, (int)FontSize.V);
+                _drawable = GetText(text);
             }
             if (ContentAwareScale) {
                 const int testFontSize = 8;
-                if(_drawable.DisplayedString != text) {
+                if(_drawable.Text != text) {
                     // Calculate font size by extrapolating from a known size
-                    _drawable.DisplayedString = text;
-                    _drawable.CharacterSize = testFontSize;
-                    _knownTextSize = _drawable.GetLocalBounds().Size().Magnitude();
+                    _drawable.Text = text;
+                    _knownTextSize = _drawable.GetLocalBounds().Size().ToVec().Magnitude();
                 }
                 FontSize.V = (uint)(ContentRenderSize.ToVec().Magnitude() * testFontSize / _knownTextSize);
                 FontSize.V -= FontSize.V % 4;
                 if(FontSize.V <= 4) {
                     FontSize.V = 4;
                 }
-                // TODO: Figure out why this line causes a memory leak
-                _drawable.CharacterSize = FontSize.V;
                 // Correct for error and warp to fit by rescaling
                 _drawable.Scale = Scale * ContentRenderSize.ToVec() / _drawable.GetLocalBounds().Size();
             }
             else {
-                _drawable.CharacterSize = FontSize.V;
-                _drawable.DisplayedString = text;
+                _drawable.Text = text;
                 _drawable.Scale = Scale.V;
             }
         }
 
-        public Label(GameInput input, Func<string, int, Text> getText) : base(input)
+        public Label(GameInput input, Func<string, BitmapText> getText) : base(input)
         {
-            GetText = (s, i) => {
-                var text = getText(s, i);
-                ConfigureText.V?.Invoke(text);
-                return text;
-            };
+            GetText = getText;
             Text.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };
@@ -85,10 +76,10 @@ namespace Fiero.Core
                 var drawableSize = drawableBounds.Size();
                 var delta = ContentRenderPos - drawablePos - drawableSize / 2 + ContentRenderSize / 2;
                 if (CenterContentH) {
-                    _drawable.Position += delta * new Vec(1, 0);
+                    _drawable.Position += delta * new Coord(1, 0);
                 }
                 if (CenterContentV) {
-                    _drawable.Position += delta * new Vec(0, 1);
+                    _drawable.Position += delta * new Coord(0, 1);
                 }
                 _drawable.FillColor = Foreground;
                 target.Draw(_drawable, states);

@@ -25,7 +25,7 @@ namespace Fiero.Business
         public UIControlProperty<byte> MinValue { get; private set; } = new(nameof(MinValue), 0);
         public UIControlProperty<byte> Value { get; private set; } = new(nameof(Value));
 
-        public TrackerHexCell(GameInput input, Func<string, int, Text> getText) 
+        public TrackerHexCell(GameInput input, Func<string, BitmapText> getText) 
             : base(input, getText)
         {
             IsInteractive.V = true;

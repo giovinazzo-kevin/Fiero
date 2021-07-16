@@ -14,6 +14,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<int> Length = new(nameof(Length), 3);
         public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
         public readonly UIControlProperty<bool> Center = new(nameof(Center), false);
+        public readonly UIControlProperty<bool> Capped = new(nameof(Capped), true);
 
         public ProgressBar(GameInput input, int tileSize,
             Sprite le, Sprite me, Sprite re,
@@ -37,10 +38,10 @@ namespace Fiero.Core
                 var full = i < Length * Progress;
                 var half = (i + 1) > Length * Progress;
                 var piece = full ? half ? MiddleHalf : MiddleFull : MiddleEmpty;
-                if (i == 0) {
+                if (Capped.V && i == 0) {
                     piece = full ? half ? LeftHalf : LeftFull : LeftEmpty;
                 }
-                else if (i == Length - 1) {
+                else if (Capped.V && i == Length - 1) {
                     piece = full ? half ? RightHalf : RightFull : RightEmpty;
                 }
                 piece.Color = Foreground;

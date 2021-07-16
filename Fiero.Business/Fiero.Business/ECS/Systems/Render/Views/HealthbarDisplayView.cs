@@ -24,7 +24,9 @@ namespace Fiero.Business
                     .Cell<ProgressBar>(x => {
                         EnemyBar = x;
                         x.Center.V = true;
-                        x.Length.V = 3;
+                        x.Length.V = 1;
+                        x.Capped.V = false;
+                        x.Origin.V = new Vec(0.5f, 0);
                     })
                 .End()
             );
@@ -34,7 +36,7 @@ namespace Fiero.Business
                         BossBar = x;
                         x.Center.V = true;
                         x.Length.V = 5;
-                        x.Origin.V = new Vec(1f, 0);
+                        x.Origin.V = new Vec(-0.25f, 0);
                     })
                 .End()
             );

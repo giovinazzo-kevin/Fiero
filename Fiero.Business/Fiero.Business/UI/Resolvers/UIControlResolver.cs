@@ -29,14 +29,14 @@ namespace Fiero.Business
             TileSize = store.Get(Data.UI.TileSize);
         }
 
-        protected virtual Font GetFont()
+        protected virtual BitmapFont GetFont()
         {
-            return Fonts.Get(FontName.UI);
+            return Fonts.Get(FontName.Bold);
         }
 
-        protected virtual Text GetText(string str, int fontSize)
+        protected virtual BitmapText GetText(string str)
         {
-            return new Text(str, GetFont(), (uint)fontSize);
+            return new BitmapText(GetFont(), str);
         }
 
         protected virtual Sprite GetUISprite(string str) => GetSprite(TextureName.UI, str);

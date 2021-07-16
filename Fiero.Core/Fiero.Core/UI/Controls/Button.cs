@@ -5,7 +5,7 @@ namespace Fiero.Core
 {
     public class Button : Label
     {
-        public Button(GameInput input, Func<string, int, Text> getText) : base(input, getText)
+        public Button(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
         {
             IsInteractive.V = true;
         }

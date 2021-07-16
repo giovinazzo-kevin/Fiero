@@ -8,7 +8,7 @@ namespace Fiero.Core
 {
     public class Textbox : Label
     {
-        public Textbox(GameInput input, Func<string, int, Text> getText) : base(input, getText)
+        public Textbox(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
         {
             IsInteractive.V = true;
         }

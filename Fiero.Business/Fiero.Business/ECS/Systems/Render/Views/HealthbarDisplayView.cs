@@ -18,14 +18,6 @@ namespace Fiero.Business
 
         public HealthbarDisplayView(LayoutBuilder layoutBuilder)
         {
-            //layoutBuilder.ProgressBar(new(), 3, 0, initialize: x => EnemyBar = x);
-            //layoutBuilder.ProgressBar(new(), 6, 0, initialize: x => BossBar = x);
-            //layoutBuilder.Build();
-            //EnemyBar.Scale = new(1, 1);
-            //EnemyBar.Center = true;
-            //BossBar.Scale = new(1, 1);
-            //BossBar.Center = true;
-
             layoutBuilder.Build(new(), grid => grid
                 .Row()
                     .Cell<ProgressBar>(x => {
@@ -34,11 +26,14 @@ namespace Fiero.Business
                         x.Length.V = 3;
                     })
                 .End()
+            );
+            layoutBuilder.Build(new(), grid => grid
                 .Row()
                     .Cell<ProgressBar>(x => {
                         BossBar = x;
                         x.Center.V = true;
-                        x.Length.V = 6;
+                        x.Length.V = 5;
+                        x.Origin.V = new Vec(1f, 0);
                     })
                 .End()
             );

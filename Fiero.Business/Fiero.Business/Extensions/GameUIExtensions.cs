@@ -21,8 +21,7 @@ namespace Fiero.Business
                 new DialogueModal(ui, trigger, node, speaker, listeners),
                 null,
                 ModalWindowButtons.Ok,
-                node.Choices.Count == 0 ? ModalWindowStyles.Buttons
-                                        : ModalWindowStyles.None
+                ModalWindowStyles.None
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.ShowModal(

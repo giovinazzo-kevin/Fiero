@@ -25,8 +25,10 @@ namespace Fiero.Business
         private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
 
-        public readonly SystemEvent<ActionSystem, TurnStartedEvent> TurnStarted;
-        public readonly SystemEvent<ActionSystem, PlayerTurnStartedEvent> PlayerTurnStarted;
+        public readonly SystemEvent<ActionSystem, TurnEvent> TurnStarted;
+        public readonly SystemEvent<ActionSystem, TurnEvent> TurnEnded;
+        public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorTurnStarted;
+        public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorTurnEnded;
 
         public ActionSystem(
             EventBus bus,
@@ -43,13 +45,16 @@ namespace Fiero.Business
             Clear();
 
             TurnStarted = new(this, nameof(TurnStarted));
-            PlayerTurnStarted = new(this, nameof(PlayerTurnStarted));
+            TurnEnded = new(this, nameof(TurnEnded));
+            ActorTurnStarted = new(this, nameof(ActorTurnStarted));
+            ActorTurnEnded = new(this, nameof(ActorTurnEnded));
         }
 
         protected virtual int? HandleAction(Actor actor, ref IAction action)
         {
             var cost = action.Cost;
             cost = action.Name switch {
+                ActionName.Wait                                                       => cost,
                 ActionName.Move     when(HandleMove    (actor, ref action, ref cost)) => cost,
                 ActionName.Attack   when(HandleAttack  (actor, ref action, ref cost)) => cost,
                 ActionName.Interact when(HandleInteract(actor, ref action, ref cost)) => cost,
@@ -65,9 +70,17 @@ namespace Fiero.Business
             // Actors have their energy randomized when spawning, to distribute them better across turns
             var time = _queue.Single(x => x.ActorId == TURN_ACTOR_ID).Time;
             var proxy = _entities.GetProxy<Actor>(actorId);
+            var currentTurn = CurrentTurn;
             _queue.Add(new ActorTime(actorId, () => {
+                if(currentTurn != CurrentTurn) {
+                    ActorTurnStarted.Raise(new(proxy, currentTurn = CurrentTurn));
+                }
                 var action = proxy.Action.ActionProvider.GetIntent(proxy);
-                return HandleAction(proxy, ref action);
+                if(HandleAction(proxy, ref action) is { } cost) {
+                    ActorTurnEnded.Raise(new(proxy, currentTurn));
+                    return cost;
+                }
+                return null;
             }, time + Rng.Random.Next(0, 100)));
         }
 
@@ -88,11 +101,6 @@ namespace Fiero.Business
             var next = _queue[0];
             _queue.RemoveAt(0);
 
-            if(next.ActorId != TURN_ACTOR_ID && _entities.TryGetFirstComponent<ActorComponent>(next.ActorId, out var comp) 
-                && comp.Type == ActorName.Player) {
-                PlayerTurnStarted.Raise(new(next.ActorId, CurrentTurn));
-            }
-
             var cost = next.Act();
             if (!cost.HasValue) {
                 _queue.Insert(0, next);
@@ -110,9 +118,10 @@ namespace Fiero.Business
             }
 
             CurrentTime += cost.Value;
+
             if (next.ActorId == TURN_ACTOR_ID) {
-                CurrentTurn++;
-                TurnStarted.Raise(new(CurrentTurn));
+                TurnEnded.Raise(new(CurrentTurn));
+                TurnStarted.Raise(new(++CurrentTurn));
             }
 
             return cost;

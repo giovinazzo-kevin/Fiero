@@ -25,8 +25,7 @@ namespace Fiero.Core
             var grid = build(new());
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
-            layout.Size.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
-            layout.Position.ValueChanged += (owner, old) => ResizeRecursive(layout.Size.V, grid, p, s);
+            layout.Invalidated += _ => ResizeRecursive(layout.Size.V, grid, p, s);
             ResizeRecursive(size, grid, p, s);
             return layout;
 

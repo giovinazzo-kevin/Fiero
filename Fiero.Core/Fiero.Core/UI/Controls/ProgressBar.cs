@@ -31,7 +31,7 @@ namespace Fiero.Core
         {
             if (IsHidden)
                 return;
-            Size.V = new(Length * TileSize, TileSize);
+            Size.V = new((Length - 1) * TileSize, TileSize);
             base.Draw(target, states);
             for (var i = 0; i < Length; i++) {
                 var full = i < Length * Progress;
@@ -48,7 +48,7 @@ namespace Fiero.Core
                 piece.Position = Center
                     ? (new(ContentRenderPos.X * Scale.V.X + i * TileSize * Scale.V.X - (Length / 4 * TileSize * Scale.V.X), ContentRenderPos.Y * Scale.V.Y))
                     : (new(ContentRenderPos.X * Scale.V.X + i * TileSize * Scale.V.X, ContentRenderPos.Y * Scale.V.Y));
-                piece.Origin = new(TileSize / 2, 0);
+                piece.Origin = new Coord(TileSize / 2, 0) - Origin.V * new Coord(TileSize, TileSize);
                 target.Draw(piece, states);
             }
         }

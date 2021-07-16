@@ -32,7 +32,11 @@ namespace Fiero.Business
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
             ;
 
-        protected void Invalidate() => Invalidated?.Invoke();
+        protected void Invalidate()
+        {
+            Invalidated?.Invoke();
+            Layout.Invalidate();
+        }
 
 
         public override void Open(string title, ModalWindowButtons buttons, ModalWindowStyles styles = ModalWindowStyles.Default)

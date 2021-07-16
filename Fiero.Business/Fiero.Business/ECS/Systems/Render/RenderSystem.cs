@@ -39,7 +39,6 @@ namespace Fiero.Business
 
         public void Initialize()
         {
-            var tileSize = Store.GetOrDefault(Data.UI.TileSize, 8);
             SelectedActor = new SelectedActorView(UI.CreateLayout());
             HealthbarDisplay = new HealthbarDisplayView(UI.CreateLayout());
         }

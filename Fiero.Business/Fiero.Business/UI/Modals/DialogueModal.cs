@@ -41,6 +41,19 @@ namespace Fiero.Business
             }
         }
 
+        protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        {
+            var popupSize = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Size.V = new(popupSize.X * 2, popupSize.Y / 2);
+            Layout.Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
+        }
+
+        protected override void BeforePresentation()
+        {
+            var windowSize = UI.Store.Get(Data.UI.WindowSize);
+            OnWindowSizeChanged(new(Data.UI.WindowSize, windowSize, windowSize));
+        }
+
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<UIControl>(s => s
                 .Apply(x => {
@@ -64,7 +77,7 @@ namespace Fiero.Business
             ;
 
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
-            .Row(h: 0.25f)
+            .Row()
                 .Col(@class: "portrait", w: 0.25f)
                     .Cell<Picture<TextureName>>()
                 .End()

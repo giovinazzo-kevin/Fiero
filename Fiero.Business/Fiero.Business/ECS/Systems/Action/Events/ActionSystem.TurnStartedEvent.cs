@@ -2,10 +2,10 @@
 {
     public partial class ActionSystem
     {
-        public readonly struct TurnStartedEvent
+        public readonly struct TurnEvent
         {
             public readonly int TurnId;
-            public TurnStartedEvent(int turnId) 
+            public TurnEvent(int turnId) 
                 => TurnId = turnId;
         }
     }

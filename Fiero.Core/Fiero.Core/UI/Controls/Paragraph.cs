@@ -28,6 +28,9 @@ namespace Fiero.Core
             Size.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };
+            Position.ValueChanged += (owner, old) => {
+                OnTextInvalidated();
+            };
             FontSize.ValueChanged += (owner, old) => {
                 OnTextInvalidated();
             };

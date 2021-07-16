@@ -82,7 +82,11 @@ namespace Fiero.Business.Scenes
 
         public override IEnumerable<Subscription> RouteEvents()
         {
-            yield return ActionSystem.PlayerTurnStarted.SubscribeHandler(DialogueSystem.CheckTriggers);
+            yield return ActionSystem.ActorTurnEnded.SubscribeHandler(msg => {
+                    if(msg.Content.Message.Actor.Id == Player.Id) {
+                        DialogueSystem.CheckTriggers();
+                    }
+                });
         }
 
         public bool TrySpawn(int entityId, out Actor actor, float maxDistance = 10)

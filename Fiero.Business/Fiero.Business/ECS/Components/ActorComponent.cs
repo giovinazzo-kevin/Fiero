@@ -5,8 +5,8 @@ namespace Fiero.Business
 {
     public class ActorComponent : EcsComponent
     {
-        public int Health { get; set; } = 1;
         public int MaximumHealth { get; set; } = 5;
+        public int Health { get; set; } = 5;
 
         public ActorName Type { get; set; }
         public MonsterTierName Tier { get; set; }

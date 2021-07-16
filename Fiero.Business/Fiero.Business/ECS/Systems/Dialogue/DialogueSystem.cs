@@ -11,7 +11,6 @@ namespace Fiero.Business
     {
         protected readonly FloorSystem FloorSystem;
         protected readonly GameEntities Entities;
-        protected readonly GameGlossaries Glossaries;
         protected readonly GameDialogues Dialogues;
         protected readonly GameDataStore Store;
         protected readonly GameUI UI;
@@ -29,7 +28,6 @@ namespace Fiero.Business
             : base(bus)
         {
             FloorSystem = floorSystem;
-            Glossaries = glossaries;
             Dialogues = dialogues;
             Entities = entities;
             Store = store;

@@ -18,7 +18,7 @@ namespace Fiero.Business
             var victim = default(Actor);
             if (action is AttackOtherAction oth)
                 victim = oth.Victim;
-            if (action is AttackDirectionAction dir) {
+            else if (action is AttackDirectionAction dir) {
                 var newPos = actor.Physics.Position + dir.Coord;
                 var actorsHere = _floorSystem.ActorsAt(newPos);
                 if (!actorsHere.Any(a => actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
@@ -26,7 +26,7 @@ namespace Fiero.Business
                 }
                 victim = actorsHere.Single();
             }
-            else throw new NotSupportedException();
+            else throw new NotSupportedException(action.GetType().Name);
             if (actor.DistanceFrom(victim) >= 2) {
                 // out of reach
                 return false;
@@ -36,9 +36,9 @@ namespace Fiero.Business
                 actor.Log?.Write($"$Action.YouAttack$ {victim.Info.Name}.");
                 victim.Log?.Write($"{actor.Info.Name} $Action.AttacksYou$.");
                 // make sure that neutrals aggro the attacker
-                //if (victim.Action.Target == null) {
-                //    victim.Action.Target = actor;
-                //}
+                if (victim.AI != null && victim.AI.Target == null) {
+                    victim.AI.Target = actor;
+                }
                 // make sure that people hold a grudge regardless of factions
                 victim.ActorProperties.Relationships.TryUpdate(actor, x => x
                     .With(StandingName.Hated)

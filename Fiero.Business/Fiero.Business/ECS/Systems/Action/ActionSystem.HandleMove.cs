@@ -26,7 +26,6 @@ namespace Fiero.Business
 
             var newPos = actor.Physics.Position + direction;
             if (newPos == actor.Physics.Position) {
-                actor.ActorProperties.Health = Math.Min(actor.ActorProperties.MaximumHealth, actor.ActorProperties.Health + 1);
                 action = new WaitAction();
                 cost = HandleAction(actor, ref action);
                 return true;

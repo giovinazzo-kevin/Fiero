@@ -2,12 +2,12 @@
 {
     public partial class ActionSystem
     {
-        public readonly struct PlayerTurnStartedEvent
+        public readonly struct ActorTurnEvent
         {
-            public readonly int PlayerId;
+            public readonly Actor Actor;
             public readonly int TurnId;
-            public PlayerTurnStartedEvent(int playerId, int turnId)
-                => (PlayerId, TurnId) = (playerId, turnId);
+            public ActorTurnEvent(Actor actor, int turnId)
+                => (Actor, TurnId) = (actor, turnId);
         }
     }
 }

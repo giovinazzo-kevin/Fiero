@@ -59,17 +59,7 @@ namespace Fiero.Core
             Director = director;
             Localization = localization;
         }
-
-        protected virtual async Task InitializeAsync()
-        {
-            await RouteEventsAsync();
-        }
-
-        protected virtual Task RouteEventsAsync()
-        {
-            return Task.CompletedTask;
-        }
-
+        protected abstract Task InitializeAsync();
         protected bool ValidateResources<TEnum>(Func<TEnum, bool> validate, out IEnumerable<TEnum> failures)
             where TEnum : struct, Enum
         {
@@ -132,12 +122,12 @@ namespace Fiero.Core
         {
             if(win.HasFocus()) {
                 Input.Update(Mouse.GetPosition(win));
-            }
-            if (UI.GetOpenModals().LastOrDefault() is { } modal) {
-                modal.Update(win, t, dt);
-            }
-            else {
-                Director.Update(win, t, dt);
+                if (UI.GetOpenModals().LastOrDefault() is { } modal) {
+                    modal.Update(win, t, dt);
+                }
+                else {
+                    Director.Update(win, t, dt);
+                }
             }
         }
 

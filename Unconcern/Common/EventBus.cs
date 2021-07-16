@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Unconcern.Common
 {
     public class EventBus
     {
         public static readonly EventBus Default = new();
-
+        
         public readonly struct Message
         {
             public readonly DateTime Timestamp;
@@ -77,13 +80,33 @@ namespace Unconcern.Common
         }
 
         public void Send<T>(T msg, string fromHub, params string[] toHubs)
-        {
-            OnMessageSent.Invoke(new Message(DateTime.Now, typeof(T), msg, fromHub, toHubs));
-        }
+            => Send(new (DateTime.Now, typeof(T), msg, fromHub, toHubs));
 
+        /// <summary>
+        /// Sends a message and waits for all handlers to complete synchronously.
+        /// </summary>
         public void Send(Message m)
         {
-            OnMessageSent.Invoke(m);
+            var handlers = OnMessageSent
+                .GetInvocationList()
+                .OfType<Action<Message>>();
+            foreach (var handle in handlers) {
+                handle(m);
+            }
+        }
+
+        /// <summary>
+        /// Sends a message and waits for all handlers to complete asynchronously.
+        /// </summary>
+        public Task SendAsync(Message m)
+        {
+            var handlers = OnMessageSent
+                .GetInvocationList()
+                .OfType<Action<Message>>();
+            return Task.WhenAll(handlers.Select(handle => { 
+                handle(m); 
+                return Task.CompletedTask; 
+            }));
         }
 
         public Sieve<T> Filter<T>(Func<Message<T>, bool> filter = null)

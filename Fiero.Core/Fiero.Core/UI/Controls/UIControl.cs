@@ -19,8 +19,9 @@ namespace Fiero.Core
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
         public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new());
         public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new());
-        public readonly UIControlProperty<Coord> Position = new(nameof(Position), new());
-        public readonly UIControlProperty<Coord> Size = new(nameof(Size), new());
+        public readonly UIControlProperty<Coord> Position = new(nameof(Position), new(), invalidate: true);
+        public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
+        public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new(), invalidate: true);
         public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1));
         public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255));
         public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0));
@@ -29,6 +30,11 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagate = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
+        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255));
+        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0);
+
+        public event Action<UIControl> Invalidated;
+        public void Invalidate() => Invalidated?.Invoke(this);
 
         public Coord BorderRenderPos => (Position.V + Margin.V).Align(Snap);
         public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
@@ -44,7 +50,6 @@ namespace Fiero.Core
             }
         }
 
-
         public UIControl(GameInput input)
         {
             Input = input;
@@ -56,9 +61,18 @@ namespace Fiero.Core
                 .Select(p => (IUIControlProperty)p.GetValue(this))
                 .ToList();
 
+            var registerInvalidationEvents = typeof(UIControl)
+                .GetMethod(nameof(RegisterInvalidationEvents), BindingFlags.Instance | BindingFlags.NonPublic);
             foreach (var prop in Properties) {
                 prop.SetOwner(this);
+                registerInvalidationEvents.MakeGenericMethod(prop.PropertyType)
+                    .Invoke(this, new object[] { prop });
             }
+        }
+
+        private void RegisterInvalidationEvents<T>(UIControlProperty<T> prop)
+        {
+            prop.ValueChanged += (_, __) => Invalidate();
         }
 
         public virtual bool Contains(Coord point, out UIControl owner)
@@ -149,8 +163,8 @@ namespace Fiero.Core
             var rect = new RectangleShape(BorderRenderSize.ToVector2f()) {
                 Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background,
-                OutlineThickness = 1f,
-                OutlineColor = Accent
+                OutlineThickness = OutlineThickness.V,
+                OutlineColor = OutlineColor.V
             };
             target.Draw(rect, states);
         }

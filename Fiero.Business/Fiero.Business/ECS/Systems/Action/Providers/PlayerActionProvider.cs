@@ -24,32 +24,35 @@ namespace Fiero.Business
             if(QueuedActions.TryDequeue(out var backedUp)) {
                 return backedUp;
             }
+
+            var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
+
             if (IsKeyPressed(Data.Hotkeys.MoveNW)) {
-                return new MoveRelativeAction(new(-1, -1));
+                return MoveOrAttack(new(-1, -1));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveN)) {
-                return new MoveRelativeAction(new(0, -1));
+                return MoveOrAttack(new(0, -1));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveNE)) {
-                return new MoveRelativeAction(new(1, -1));
+                return MoveOrAttack(new(1, -1));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveW)) {
-                return new MoveRelativeAction(new(-1, 0));
+                return MoveOrAttack(new(-1, 0));
             }
             if (IsKeyPressed(Data.Hotkeys.Wait)) {
-                return new MoveRelativeAction(new(0, 0));
+                return new WaitAction();
             }
             if (IsKeyPressed(Data.Hotkeys.MoveE)) {
-                return new MoveRelativeAction(new(1, 0));
+                return MoveOrAttack(new(1, 0));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveSW)) {
-                return new MoveRelativeAction(new(-1, 1));
+                return MoveOrAttack(new(-1, 1));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveS)) {
-                return new MoveRelativeAction(new(0, 1));
+                return MoveOrAttack(new(0, 1));
             }
             if (IsKeyPressed(Data.Hotkeys.MoveSE)) {
-                return new MoveRelativeAction(new(1, 1));
+                return MoveOrAttack(new(1, 1));
             }
             if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
@@ -81,7 +84,9 @@ namespace Fiero.Business
             }
             return new NoAction();
 
+            IAction MoveOrAttack(Coord c) => wantToAttack ? new AttackDirectionAction(c) : new MoveRelativeAction(c);
             bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
+            bool IsKeyDown(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));
         }
     }
 }

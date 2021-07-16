@@ -62,8 +62,6 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
-            await base.InitializeAsync();
-
             Fonts.Add(FontName.UI, new Font("Resources/Fonts/Roboto-Medium.ttf"));
 
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
@@ -75,7 +73,7 @@ namespace Fiero.Business
             Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/UIOk.ogg"));
             Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Shutdown.ogg"));
             Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
-            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/Alarm Mid.ogg"));
+            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/Alarm Low.ogg"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
@@ -103,6 +101,7 @@ namespace Fiero.Business
 
             Store.SetValue(Data.Hotkeys.Cancel, Keyboard.Key.Escape);
             Store.SetValue(Data.Hotkeys.Confirm, Keyboard.Key.Enter);
+            Store.SetValue(Data.Hotkeys.Modifier, Keyboard.Key.LControl);
             Store.SetValue(Data.Hotkeys.Inventory, Keyboard.Key.I);
             Store.SetValue(Data.Hotkeys.Interact, Keyboard.Key.G);
             Store.SetValue(Data.Hotkeys.MoveNW, Keyboard.Key.Numpad7);

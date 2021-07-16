@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using System;
 
 namespace Fiero.Business
@@ -16,6 +17,27 @@ namespace Fiero.Business
         public ChoicePopUp(GameUI ui, params T[] options) : base(ui)
         {
             Options = options;
+            Confirmed += (_, __) => {
+                OptionChosen?.Invoke(this, Options[SelectedIndex]);
+            };
+        }
+
+        public override void Update(RenderWindow win, float t, float dt)
+        {
+            base.Update(win, t, dt);
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))) {
+                SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
+                Invalidate();
+            }
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS))) {
+                SelectedIndex = (SelectedIndex + 1).Mod(Options.Length);
+                Invalidate();
+            }
+        }
+
+        public override void Close(ModalWindowButtons buttonPressed)
+        {
+            base.Close(buttonPressed);
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
@@ -23,6 +45,9 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("choice"))
                 .Apply(x => {
                     x.FontSize.V = 16;
+                    x.Background.V = SelectedIndex == x.ZOrder.V
+                        ? UI.Store.Get(Data.UI.DefaultAccent)
+                        : UI.Store.Get(Data.UI.DefaultBackground);
                 }))
             ;
 
@@ -31,22 +56,17 @@ namespace Fiero.Business
                 .Repeat(Options.Length, (i, layout) => layout
                 .Row(@class: "choice")
                     .Cell<Button>(b => {
+                        b.ZOrder.V = i;
                         b.Text.V = Options[i]?.ToString() ?? "(ERROR)";
                         b.Clicked += (_, __, ___) => {
                             if(SelectedIndex == i) {
                                 Close(ModalWindowButtons.ImplicitYes);
-                                OptionChosen?.Invoke(this, Options[i]);
                                 return false;
                             }
                             SelectedIndex = i;
                             OptionClicked?.Invoke(this, Options[i]);
                             Invalidate();
                             return false;
-                        };
-                        Invalidated += () => {
-                            b.Background.V = SelectedIndex == i
-                                ? UI.Store.Get(Data.UI.DefaultAccent)
-                                : UI.Store.Get(Data.UI.DefaultBackground);
                         };
                     })
                 .End())

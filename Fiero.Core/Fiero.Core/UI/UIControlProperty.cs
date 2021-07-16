@@ -12,6 +12,8 @@ namespace Fiero.Core
         public string Name { get; }
         public UIControl Owner { get; private set; }
         public bool Propagate { get; set; }
+        public bool InvalidateOnChange { get; set; }
+        public Type PropertyType { get; } = typeof(T);
 
         public event Action<UIControlProperty<T>, T> ValueChanged;
         public event Action<UIControlProperty<T>, UIControl> OwnerChanged;
@@ -21,13 +23,14 @@ namespace Fiero.Core
             T defaultValue = default, 
             Func<UIControlProperty<T>, UIControlProperty<T>, T, T> propagate = null,
             Func<T, T> get = null,
-            Func<T, T> set = null)
+            Func<T, T> set = null,
+            bool invalidate = false)
         {
             Name = name;
             _value = defaultValue;
             _propagate = propagate ?? ((a, b, _) => a.V);
             Propagate = propagate != null;
-
+            InvalidateOnChange = invalidate;
             _get = get ?? (a => a);
             _set = set ?? (a => a);
         }

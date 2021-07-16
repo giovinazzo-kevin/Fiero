@@ -9,6 +9,7 @@ namespace Fiero.Business
         {
             public static readonly GameDatum<Keyboard.Key> Cancel = new(nameof(Hotkeys) + nameof(Cancel));
             public static readonly GameDatum<Keyboard.Key> Confirm = new(nameof(Hotkeys) + nameof(Confirm));
+            public static readonly GameDatum<Keyboard.Key> Modifier = new(nameof(Hotkeys) + nameof(Modifier));
             public static readonly GameDatum<Keyboard.Key> Inventory = new(nameof(Hotkeys) + nameof(Inventory));
             public static readonly GameDatum<Keyboard.Key> Interact = new(nameof(Hotkeys) + nameof(Interact));
             public static readonly GameDatum<Keyboard.Key> MoveNW = new(nameof(Hotkeys) + nameof(MoveNW));

@@ -9,18 +9,18 @@ namespace Fiero.Business
     {
         public float PercentageThreshold { get; set; } = 0.5f;
 
-        public LowHealthDialogueTrigger(TDialogue node, bool repeatable)
-            : base(node, repeatable)
+        public LowHealthDialogueTrigger(GameSystems sys, TDialogue node, bool repeatable)
+            : base(sys, node, repeatable)
         {
 
         }
 
-        public override bool TryTrigger(Floor floor, Drawable speaker, out IEnumerable<Drawable> listeners)
+        public override bool TryTrigger(FloorId floorId, Drawable speaker, out IEnumerable<Drawable> listeners)
         {
             listeners = default;
             if(speaker is Actor a) {
                 var healthPercentage = (a.ActorProperties.Health / (float)a.ActorProperties.MaximumHealth);
-                if (healthPercentage <= PercentageThreshold && base.TryTrigger(floor, speaker, out listeners)) {
+                if (healthPercentage <= PercentageThreshold && base.TryTrigger(floorId, speaker, out listeners)) {
                     return listeners.Any();
                 }
             }

@@ -46,8 +46,8 @@ namespace Unconcern.Delegation
             {
                 foreach (var transform in expression.Replies) {
                     try {
-                        var reply = transform(msg);
-                        expression.Bus.Send(reply.FromHub(hub));
+                        var reply = transform(msg.FromHub(hub));
+                        expression.Bus.Send(reply);
                     }
                     catch(InvalidCastException e) when (e.Message == "wrong_reply") {
                         ;

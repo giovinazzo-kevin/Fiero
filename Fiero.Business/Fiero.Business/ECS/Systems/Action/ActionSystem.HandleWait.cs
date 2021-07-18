@@ -13,7 +13,7 @@ namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
-        protected virtual bool HandleWait(Actor actor, ref IAction action, ref int? cost)
+        private bool HandleWait(ActorTime t, ref IAction action, ref int? cost)
         {
             if (!(action is WaitAction))
                 throw new NotSupportedException();

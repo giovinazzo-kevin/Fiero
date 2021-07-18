@@ -10,5 +10,9 @@ namespace Fiero.Core
         {
             return source[rng.Next(source.Length)];
         }
+        public static bool OneChanceIn(this Random rng, int denominator)
+        {
+            return rng.NextDouble() < 1f / denominator;
+        }
     }
 }

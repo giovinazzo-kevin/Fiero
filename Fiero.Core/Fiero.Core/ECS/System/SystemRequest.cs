@@ -11,34 +11,30 @@ namespace Fiero.Core
         : SystemEvent<TSys, TArgs>
         where TSys : EcsSystem
     {
-        public readonly SystemEvent<TSys, TResponseArgs> Response;
-
         public SystemRequest(TSys owner, string name)
             : base(owner, name)
         {
-            Response = new SystemEvent<TSys, TResponseArgs>(owner, $"Response({name})");
         }
 
-        public IEnumerable<TResponseArgs> Send(TArgs args)
+        public IEnumerable<TResponseArgs> Request(TArgs args)
         {
-            using var sieve = new Sieve<SystemMessage<TSys, TResponseArgs>>(Owner.EventBus, msg => true);
+            using var sieve = new Sieve<TResponseArgs>(Owner.EventBus, msg => msg.IsFrom(Name));
             Raise(args);
-            foreach (var response in sieve.Responses) {
-                yield return response.Content.Message;
+            foreach (var response in sieve.Messages) {
+                yield return response.Content;
             }
         }
 
-        public Subscription SubscribeResponse<TOtherSystem>(Func<SystemMessage<TSys, TArgs>, SystemMessage<TOtherSystem, TResponseArgs>> transform)
-            where TOtherSystem : EcsSystem
+        public Subscription SubscribeResponse(Func<TArgs, TResponseArgs> transform)
         {
             return Concern.Delegate(Owner.EventBus)
                 .When<SystemMessage<TSys, TArgs>>
                     (msg => Name.Equals(msg.Content.Sender))
-                .Reply<SystemMessage<TSys, TArgs>, SystemMessage<TOtherSystem, TResponseArgs>>
+                .Reply<SystemMessage<TSys, TArgs>, TResponseArgs>
                     (msg => {
-                        var response = msg.WithContent(transform(msg.Content));
-                        Response.Raise(response.Content.Message);
-                        return response;
+                        var data = transform(msg.Content.Data);
+                        var ret = msg.WithContent(data).From(Name).To(msg.Sender);
+                        return ret;
                     })
                 .Build()
                 .Listen(Owner.EventHubName);

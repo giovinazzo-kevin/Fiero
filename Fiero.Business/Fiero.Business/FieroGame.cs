@@ -1,28 +1,38 @@
 ﻿using Fiero.Business.Scenes;
 using Fiero.Core;
+using Newtonsoft.Json;
 using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
-
     public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName>
     {
         protected readonly IEnumerable<IGameScene> Scenes;
 
+        protected readonly EventBus Bus;
         protected readonly GameDataStore Store;
         protected readonly GameGlossaries Glossary;
         protected readonly GameDialogues Dialogues;
 
         public FieroGame(
+            EventBus bus,
             OffButton off,
             GameLoop loop,
             GameInput input, 
+            GameDirector director,
+            GameGlossaries glossary,
+            GameDialogues dialogues,
+            GameDataStore store,
+            GameUI ui,
+            GameWindow win,
             GameTextures<TextureName> textures,
             GameSprites<TextureName> sprites, 
             GameFonts<FontName> fonts,
@@ -30,15 +40,10 @@ namespace Fiero.Business
             GameColors<ColorName> colors,
             GameShaders<ShaderName> shaders,
             GameLocalizations<LocaleName> localization,
-            GameDirector director,
-            GameGlossaries glossary,
-            GameDialogues dialogues,
-            GameDataStore store,
-            GameUI ui,
-            GameWindow win,
             IEnumerable<IGameScene> gameScenes)
             : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, ui, win, director)
         {
+            Bus = bus;
             Dialogues = dialogues;
             Glossary = glossary;
             Scenes = gameScenes;
@@ -63,11 +68,13 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
-            Fonts.Add(FontName.Bold, new(8, 8), new Texture("Resources/Fonts/CGA8x8thick.png"));
-            Fonts.Add(FontName.Light, new(8, 8), new Texture("Resources/Fonts/CGA8x8thin.png"));
-
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
+            Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
+            Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
+            
+            Fonts.Add(FontName.Bold, new(8, 8), Textures.Get(TextureName.FontBold));
+            Fonts.Add(FontName.Light, new(8, 8), Textures.Get(TextureName.FontLight));
 
             Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
@@ -82,6 +89,8 @@ namespace Fiero.Business
 
             await Sprites.LoadJsonAsync(TextureName.Atlas, "Resources/Spritesheets/atlas.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
+            await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");
+            await Sprites.LoadJsonAsync(TextureName.FontLight, "Resources/Spritesheets/index.json");
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
 
@@ -120,6 +129,31 @@ namespace Fiero.Business
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
             // Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
+
+#if DEBUG
+            // Start logging everything that passes through the event global event bus
+            var sieve = Bus.Filter<object>();
+            var ignores = new[] { 
+                nameof(RenderSystem),
+                nameof(ActionSystem.ActorTurnStarted),
+                nameof(ActionSystem.ActorTurnEnded),
+                nameof(ActionSystem.ActorMoved),
+                nameof(ActionSystem.TurnStarted),
+                nameof(ActionSystem.TurnEnded),
+            };
+            _ = Task.Run(async () => {
+                while(true) {
+                    while (sieve.Messages.TryDequeue(out var msg)) {
+                        var log = msg.ToString();
+                        if(!ignores.Any(i => log.Contains(i))) {
+                            Console.WriteLine(log);
+                        }
+                    }
+                    await Task.Delay(10);
+                }
+            }, OffButton.Token);
+            OffButton.Pressed += _ => sieve.Dispose();
+#endif
         }
     }
 }

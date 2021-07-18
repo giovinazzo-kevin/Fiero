@@ -9,7 +9,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class RenderSystem : EcsSystem
+    public partial class RenderSystem : EcsSystem
     {
         protected readonly GameUI UI;
         protected readonly GameSprites<TextureName> Sprites;
@@ -22,6 +22,11 @@ namespace Fiero.Business
         public SelectedActorView SelectedActor { get; private set; }
         public HealthbarDisplayView HealthbarDisplay { get; private set; }
         public Coord Zoom { get; private set; } = new(1, 1);
+        protected readonly List<Sprite> Vfx = new();
+
+        public readonly SystemEvent<RenderSystem, AnimationFramePlayedEvent> AnimationFramePlayed;
+        public readonly SystemEvent<RenderSystem, FrameEvent> DrawStarted;
+        public readonly SystemEvent<RenderSystem, FrameEvent> DrawEnded;
 
         public RenderSystem(
             EventBus bus,
@@ -40,6 +45,10 @@ namespace Fiero.Business
             Input = input;
             Loop = loop;
             FloorSystem = floor;
+
+            AnimationFramePlayed = new(this, nameof(AnimationFramePlayed));
+            DrawStarted = new(this, nameof(DrawStarted));
+            DrawEnded = new(this, nameof(DrawEnded));
         }
 
         public void Initialize()
@@ -48,7 +57,7 @@ namespace Fiero.Business
             HealthbarDisplay = new HealthbarDisplayView(UI.Window, UI.CreateLayout());
         }
 
-        public void Update()
+        public void UpdateViews()
         {
             SelectedActor.Update();
         }
@@ -64,39 +73,45 @@ namespace Fiero.Business
             while(timeline.Count > 0) {
                 for (int i = timeline.Count - 1; i >= 0; i--) {
                     var t = timeline[i];
-                    if (t.Time <= time) {
+                    if (time < t.Time + t.Frame.Duration && time >= t.Time) {
                         foreach (var spriteDef in t.Frame.Sprites) {
                             var sprite = Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
                             sprite.Position = (position + spriteDef.Offset) * UI.Store.Get(Data.UI.TileSize);
                             sprite.Scale = Zoom;
-                            UI.Window.Draw(sprite);
+                            sprite.Color = spriteDef.Tint;
+                            Vfx.Add(sprite);
                         }
+                        t.Anim.OnFramePlaying(t.Index);
+                        AnimationFramePlayed.Raise(new(t.Anim, t.Index));
+                    }
+                    else if(time >= t.Time + t.Frame.Duration) {
                         timeline.RemoveAt(i);
                     }
                 }
-                UI.Window.Display();
-                Loop.Wait(increment);
+                Loop.WaitAndDraw(increment, (float)increment.TotalSeconds);
                 time += increment;
+                Vfx.Clear();
             }
 
-
-            IEnumerable<(TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
+            IEnumerable<(int Index, Animation Anim, TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
             {
                 var time = TimeSpan.Zero;
-                foreach (var frame in anim.Frames) {
-                    yield return (time, frame);
-                    time += frame.Duration;
+                for(int i = 0; i < anim.Frames.Length; ++i) {
+                    yield return (i, anim, time, anim.Frames[i]);
+                    time += anim.Frames[i].Duration;
                 }
             }
         }
 
         public void Draw()
         {
+            DrawStarted.Raise(new());
             var tileSize = Store.Get(Data.UI.TileSize);
-            var mapCenter = FloorSystem.CurrentFloor.Tiles.Keys
-                .Aggregate((a, b) => (a + b) / 2);
+            var floorId = SelectedActor.Following.V?.ActorProperties.FloorId
+                ?? FloorSystem.GetAllFloors().First().Id;
+            var mapCenter = FloorSystem.GetFloor(floorId).Size / 2;
             var winSize = UI.Window.Size.ToVec();
-            var drawables = FloorSystem.CurrentFloor.GetDrawables()
+            var drawables = FloorSystem.GetDrawables(floorId)
                 ?? Enumerable.Empty<Drawable>();
             // If the player dies focus on the killer if one is available
             if(SelectedActor.Following == null || SelectedActor.Following.V.Id == 0) {
@@ -120,17 +135,14 @@ namespace Fiero.Business
                     HealthbarDisplay.Position = spritePosition - new Coord(0, tileSize);
                     HealthbarDisplay.Following = actor;
                     HealthbarDisplay.Draw();
-                    if(actor.Npc != null) {
-                        if(actor.Npc.IsBoss) {
-                            //drawable.Render.Sprite.
-                        }
-                        else {
-
-                        }
-                    }
                 }
             }
+            foreach (var vfx in Vfx) {
+                vfx.Origin = origin + vfx.TextureRect.Size().ToVec() * new Vec(0.5f, 1);
+                UI.Window.Draw(vfx);
+            }
             SelectedActor.Draw();
+            DrawEnded.Raise(new());
         }
     }
 }

@@ -34,21 +34,20 @@ namespace Fiero.Business.Scenes
         }
 
         protected readonly GameUI UI;
-        protected readonly GameLocalizations<LocaleName> Localizations;
-        protected readonly GameShaders<ShaderName> Shaders;
+        protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly OffButton OffButton;
 
         protected UIControl UI_Layout { get; private set; }
-        protected Label UI_PlayerName { get; private set; }
 
-        protected static MenuOptions[] AllOptions => Enum.GetValues<MenuOptions>();
-
-        public MenuScene(GameDataStore store, GameUI ui, GameLocalizations<LocaleName> locals, GameShaders<ShaderName> shaders, OffButton off)
-        {
+        public MenuScene(
+            GameResources resources,
+            GameDataStore store, 
+            GameUI ui, 
+            OffButton off
+        ) {
             UI = ui;
-            Localizations = locals;
-            Shaders = shaders;
+            Resources = resources;
             Store = store;
             OffButton = off;
         }
@@ -79,6 +78,7 @@ namespace Fiero.Business.Scenes
                         .End()
                     .End()
                 );
+
             Data.UI.WindowSize.ValueChanged += e => {
                 if (State == SceneState.Main) {
                     UI_Layout.Position.V = e.NewValue / 4;
@@ -87,7 +87,7 @@ namespace Fiero.Business.Scenes
             };
 
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
-                l.Text.V = Localizations.Get($"Menu.{option}");
+                l.Text.V = Resources.Localizations.Get($"Menu.{option}");
                 l.Clicked += (_, __, ___) => {
                     TrySetState(state);
                     return true;

@@ -9,15 +9,15 @@ namespace Fiero.Business
     public class BumpedByPlayerDialogueTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
-        public BumpedByPlayerDialogueTrigger(TDialogue node, bool repeatable)
-            : base(node, repeatable)
+        public BumpedByPlayerDialogueTrigger(GameSystems sys, TDialogue node, bool repeatable)
+            : base(sys, node, repeatable)
         {
 
         }
 
-        public override bool TryTrigger(Floor floor, Drawable speaker, out IEnumerable<Drawable> listeners)
+        public override bool TryTrigger(FloorId floorId, Drawable speaker, out IEnumerable<Drawable> listeners)
         {
-            if(base.TryTrigger(floor, speaker, out listeners)) {
+            if(base.TryTrigger(floorId, speaker, out listeners)) {
                 listeners = listeners
                     .Where(l => l is Actor a && a.Action.LastAction is InteractWithFeatureAction i && i.Feature.Id == speaker.Id);
                 return listeners.Any();

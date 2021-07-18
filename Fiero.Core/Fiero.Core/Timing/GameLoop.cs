@@ -15,23 +15,31 @@ namespace Fiero.Core
 
         public GameLoop()
         {
-            TimeStep = 1f / 500f;
+            TimeStep = 1f / 10000f;
         }
 
-        public virtual void Wait(TimeSpan time)
+        public virtual void Wait(TimeSpan time, float timestep)
         {
-            var innerLoop = new GameLoop();
-            innerLoop.Run(new CancellationTokenSource(time).Token);
+            var innerLoop = new GameLoop() {  TimeStep = timestep }; 
+            innerLoop.Run(time);
+
         }
 
-        public virtual void Run(CancellationToken ct = default)
+        public virtual void WaitAndDraw(TimeSpan time, float timestep)
+        {
+            var innerLoop = new GameLoop() { TimeStep = timestep };
+            innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
+            innerLoop.Run(time);
+        }
+
+        public virtual void Run(TimeSpan duration = default, CancellationToken ct = default)
         {
             var time = new Stopwatch();
             time.Start();
             T = 0f;
             var accumulator = 0f;
             var currentTime = (float)time.Elapsed.TotalSeconds;
-            while (!ct.IsCancellationRequested) {
+            while ((duration.TotalSeconds == 0 || time.Elapsed < duration) && !ct.IsCancellationRequested) {
                 var newTime = (float)time.Elapsed.TotalSeconds;
                 var frameTime = newTime - currentTime;
                 if (frameTime > 0.25f) {

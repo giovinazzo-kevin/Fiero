@@ -8,89 +8,83 @@ namespace Fiero.Business
 {
     public class Floor
     {
-        public readonly GameEntities Entities;
+        public readonly FloorId Id;
+        public readonly Coord Size;
 
-        private readonly SpatialDictionary<Tile> _tiles;
-        private readonly HashSet<Actor> _actors;
-        private readonly HashSet<Item> _items;
-        private readonly HashSet<Feature> _features;
+        private readonly SpatialDictionary<MapCell> _cells;
+        public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
+        public SpatialAStar<MapCell, object> Pathfinder { get; private set; }
 
-        public IReadOnlyDictionary<Coord, Tile> Tiles => _tiles;
-        public IReadOnlyCollection<Actor> Actors => _actors;
-        public IReadOnlyCollection<Item> Items => _items;
-        public IReadOnlyCollection<Feature> Features => _features;
-
-        public IEnumerable<Drawable> GetDrawables() => Tiles.Values.Cast<Drawable>()
-            .Concat(Items)
-            .Concat(Features)
-            .Concat(Actors);
-
-        public SpatialAStar<Tile, object> Pathfinder { get; private set; }
-
-        public Tile SetTile(int entityId)
+        public Floor(FloorId id, FloorGenerationContext ctx)
         {
-            if (!Entities.TryGetProxy<Tile>(entityId, out var tile)) {
-                throw new ArgumentException();
+            Id = id;
+            Size = ctx.Size;
+            _cells = new SpatialDictionary<MapCell>(ctx.Size);
+        }
+
+        public IEnumerable<Drawable> GetDrawables() 
+            => Cells.Values.SelectMany(c => c.GetDrawables());
+
+        public void SetTile(Tile tile)
+        {
+            if (!_cells.TryGetValue(tile.Physics.Position, out var cell)) {
+                cell = _cells[tile.Physics.Position] = new(tile);
             }
-            _tiles[tile.Physics.Position] = tile;
+            cell.Tile = tile;
             if (Pathfinder != null) {
-                Pathfinder.Update(tile.Physics.Position, tile, out var old);
-                old?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
+                Pathfinder.Update(tile.Physics.Position, cell, out var old);
+                old?.Tile?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
             }
-            return tile;
         }
 
-        public Actor AddActor(int entityId)
+        public void AddActor(Actor actor)
         {
-            if (!Entities.TryGetProxy<Actor>(entityId, out var actor)) {
-                throw new ArgumentException();
+            actor.ActorProperties.FloorId = Id;
+            if(_cells.TryGetValue(actor.Physics.Position, out var cell)) {
+                cell.Actors.Add(actor);
             }
-            actor.ActorProperties.CurrentFloor = this;
-            _actors.Add(actor);
-            return actor;
-        }
-        public void RemoveActor(int entityId)
-        {
-            _actors.Remove(_actors.Single(v => v.Id == entityId));
-        }
-        public Item AddItem(int entityId)
-        {
-            if (!Entities.TryGetProxy<Item>(entityId, out var item)) {
-                throw new ArgumentException();
-            }
-            _items.Add(item);
-            return item;
-        }
-        public void RemoveItem(int entityId)
-        {
-            _items.Remove(_items.Single(v => v.Id == entityId));
-        }
-        public Feature AddFeature(int entityId)
-        {
-            if (!Entities.TryGetProxy<Feature>(entityId, out var feature)) {
-                throw new ArgumentException();
-            }
-            _features.Add(feature);
-            return feature;
-        }
-        public void RemoveFeature(int entityId)
-        {
-            _features.Remove(_features.Single(v => v.Id == entityId));
         }
 
-        public Floor(GameEntities entities, FloorGenerationContext ctx)
+        public void RemoveActor(Actor actor)
         {
-            Entities = entities;
-            _tiles = new SpatialDictionary<Tile>(ctx.Size);
-            _actors = new HashSet<Actor>();
-            _items = new HashSet<Item>();
-            _features = new HashSet<Feature>();
+            if (_cells.TryGetValue(actor.Physics.Position, out var cell)) {
+                cell.Actors.Remove(actor);
+            }
+        }
+
+        public void AddItem(Item item)
+        {
+            if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
+                cell.Items.Add(item);
+            }
+        }
+
+        public void RemoveItem(Item item)
+        {
+            if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
+                cell.Items.Remove(item);
+            }
+        }
+
+        public void AddFeature(Feature feature)
+        {
+            feature.FeatureProperties.FloorId = Id;
+            if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
+                cell.Features.Add(feature);
+            }
+        }
+
+        public void RemoveFeature(Feature feature)
+        {
+            if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
+                cell.Features.Remove(feature);
+            }
         }
 
         public void CreatePathfinder()
         {
-            Pathfinder = _tiles.GetPathfinder();
-            foreach (var feature in Features.Where(f => f.Properties.BlocksMovement)) {
+            Pathfinder = _cells.GetPathfinder();
+            foreach (var feature in Cells.Values.SelectMany(c => c.Features).Where(f => f.FeatureProperties.BlocksMovement)) {
                 Pathfinder.Update(feature.Physics.Position, null, out _);
             }
         }

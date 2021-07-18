@@ -11,14 +11,12 @@ namespace Fiero.Business
     public sealed class FloorBuilder
     {
         public readonly Coord Size;
-        public readonly Coord TileSize;
 
         private readonly List<Action<FloorGenerationContext>> _steps;
 
-        internal FloorBuilder(Coord size, Coord tileSize)
+        internal FloorBuilder(Coord size)
         {
             Size = size;
-            TileSize = tileSize;
             _steps = new List<Action<FloorGenerationContext>>();
         }
 
@@ -143,7 +141,7 @@ namespace Fiero.Business
             }
         }
 
-        public Floor Build(GameEntities entities, GameEntityBuilders builders)
+        public Floor Build(FloorId id, GameEntities entities, GameEntityBuilders builders)
         {
             var context = new FloorGenerationContext(Size.X, Size.Y);
             for (int x = 0; x < Size.X; x++) {
@@ -154,7 +152,7 @@ namespace Fiero.Business
             foreach (var step in _steps) {
                 step(context);
             }
-            var floor = new Floor(entities, context);
+            var floor = new Floor(id, context);
             var objects = context.GetObjects().Select(o => CreateEntity(builders, o))
                 .ToList();
             var tileObjects = objects.TrySelect(e => (entities.TryGetProxy<Tile>(e, out var t), t));
@@ -165,20 +163,20 @@ namespace Fiero.Business
                 if (tileObjects.Any(t => t.Physics.Position == item.P))
                     return;
                 if (item.Tile != TileName.None) {
-                    floor.SetTile(builders.Tile(item.Tile).WithPosition(item.P).Build().Id);
+                    floor.SetTile(builders.Tile(item.Tile).WithPosition(item.P).Build());
                 }
             });
             foreach (var tile in tileObjects) {
-                floor.SetTile(tile.Id);
+                floor.SetTile(tile);
             }
             foreach (var actor in actorObjects) {
-                floor.AddActor(actor.Id);
+                floor.AddActor(actor);
             }
             foreach (var item in itemObjects) {
-                floor.AddItem(item.Id);
+                floor.AddItem(item);
             }
             foreach (var feature in featureObjects) {
-                floor.AddFeature(feature.Id);
+                floor.AddFeature(feature);
             }
             // Once everything is in its place, build the pathfinder and assign it to each actor
             floor.CreatePathfinder();

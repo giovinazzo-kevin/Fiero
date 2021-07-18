@@ -13,7 +13,7 @@ namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
-        protected virtual bool HandleMove(Actor actor, ref IAction action, ref int? cost)
+        private bool HandleMove(ActorTime t, ref IAction action, ref int? cost)
         {
             var direction = default(Coord);
             if (action is MoveRelativeAction rel)
@@ -21,66 +21,55 @@ namespace Fiero.Business
             else if (action is MoveRandomlyAction ran)
                 direction = new(Rng.Random.Next(-1, 2), Rng.Random.Next(-1, 2));
             else if (action is MoveTowardsAction tow)
-                direction = tow.Follow.Physics.Position - actor.Physics.Position;
+                direction = tow.Follow.Physics.Position - t.Actor.Physics.Position;
             else throw new NotSupportedException();
 
-            var newPos = actor.Physics.Position + direction;
-            if (newPos == actor.Physics.Position) {
+            var floorId = t.Actor.FloorId();
+            var oldPos = t.Actor.Physics.Position;
+            var newPos = t.Actor.Physics.Position + direction;
+            if (newPos == t.Actor.Physics.Position) {
                 action = new WaitAction();
-                cost = HandleAction(actor, ref action);
-                return true;
+                cost = HandleAction(t, ref action);
             }
-
-            if (_floorSystem.TileAt(newPos, out var tile)) {
+            else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile)) {
                 if (tile.TileProperties.Name == TileName.Door) {
-                    _floorSystem.UpdateTile(newPos, TileName.Ground);
-                    actor.Log?.Write($"$Action.YouOpenThe$ {tile.TileProperties.Name}.");
+                    _floorSystem.SetTileAt(t.Actor.FloorId(), newPos, TileName.Ground);
+                    t.Actor.Log?.Write($"$Action.YouOpenThe$ {tile.TileProperties.Name}.");
+                    // TODO: Move to event
                 }
                 else if (!tile.TileProperties.BlocksMovement) {
-                    var actorsHere = _floorSystem.ActorsAt(newPos);
-                    var featuresHere = _floorSystem.FeaturesAt(newPos);
-                    var itemsHere = _floorSystem.ItemsAt(newPos);
+                    var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
+                    var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
+                    var itemsHere = _floorSystem.GetItemsAt(floorId, newPos);
                     if (!actorsHere.Any()) {
-                        if (!featuresHere.Any(f => f.Properties.BlocksMovement)) {
-                            actor.Physics.Position = newPos;
-                            if (itemsHere.Any()) {
-                                var item = itemsHere.Single();
-                                actor.Log?.Write($"$Action.YouStepOverA$ {item.DisplayName}.");
-                            }
-                            else if (featuresHere.Any()) {
-                                var feature = featuresHere.Single();
-                                actor.Log?.Write($"$Action.YouStepOverA$ {feature.Info.Name}.");
-                            }
+                        if (!featuresHere.Any(f => f.FeatureProperties.BlocksMovement)) {
+                            return ActorMoved.Request(new(t.Actor, oldPos, newPos)).All(x => x);
                         }
                         else {
                             var feature = featuresHere.Single();
                             // you can bump shrines and chests to interact with them
                             action = new InteractWithFeatureAction(feature); 
-                            cost = HandleAction(actor, ref action);
-                            return true;
+                            cost = HandleAction(t, ref action);
                         }
                     }
                     else {
                         var target = actorsHere.Single();
-                        if (actor.IsHotileTowards(target)) {
+                        if (t.Actor.IsHotileTowards(target)) {
                             // attack-bump is a free "combo"
                             action = new AttackOtherAction(target);
-                            cost = HandleAction(actor, ref action);
-                            return true;
+                            cost = HandleAction(t, ref action);
                         }
-                        else if(actor.IsFriendlyTowards(target)) {
+                        else if(t.Actor.IsFriendlyTowards(target)) {
                             // you can swap position with allies in twice the amount of time it takes to move
-                            var tmp = actor.Physics.Position;
-                            actor.Physics.Position = target.Physics.Position;
-                            target.Physics.Position = tmp;
                             cost *= 2;
-                            return true;
+                            return ActorMoved.Request(new(t.Actor, oldPos, newPos)).Concat(
+                                   ActorMoved.Request(new(target, newPos, oldPos))).All(x => x);
                         }
                     }
                 }
                 else {
-                    actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
-                    if (actor.ActorProperties.Type == ActorName.Player) {
+                    t.Actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
+                    if (t.Actor.ActorProperties.Type == ActorName.Player) {
                         _sounds.Get(SoundName.WallBump).Play();
                     }
                     return false;

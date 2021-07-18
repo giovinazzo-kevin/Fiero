@@ -10,18 +10,23 @@ namespace Unconcern.Common
     {
         private readonly Subscription _unsub;
         private readonly Func<EventBus.Message<T>, bool> _filter;
-        public readonly ConcurrentQueue<EventBus.Message<T>> Responses;
+
         public readonly EventBus Bus;
+        public readonly ConcurrentQueue<EventBus.Message<T>> Messages;
+
+        public event Action<Sieve<T>, EventBus.Message<T>> MessageSieved;
+
         public Sieve(EventBus bus, Func<EventBus.Message<T>, bool> filter)
         {
             Bus = bus;
             _filter = filter;
-            Responses = new ConcurrentQueue<EventBus.Message<T>>();
+            Messages = new ConcurrentQueue<EventBus.Message<T>>();
             _unsub = Bus.Register(msg => {
                 if(msg.Type.IsAssignableTo(typeof(T))) {
                     var tMsg = new EventBus.Message<T>(msg.Timestamp, (T)msg.Content, msg.Sender, msg.Recipients);
                     if(_filter(tMsg)) {
-                        Responses.Enqueue(tMsg);
+                        MessageSieved?.Invoke(this, tMsg);
+                        Messages.Enqueue(tMsg);
                     }
                 }
             });

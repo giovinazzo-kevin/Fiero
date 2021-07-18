@@ -9,18 +9,18 @@ namespace Fiero.Business
     {
         public float DistanceThreshold { get; set; } = 5;
 
-        public PlayerInSightDialogueTrigger(TDialogue node, bool repeatable) 
-            : base(node, repeatable)
+        public PlayerInSightDialogueTrigger(GameSystems sys, TDialogue node, bool repeatable) 
+            : base(sys, node, repeatable)
         {
 
         }
 
-        public override bool TryTrigger(Floor floor, Drawable speaker, out IEnumerable<Drawable> listeners)
+        public override bool TryTrigger(FloorId floorId, Drawable speaker, out IEnumerable<Drawable> listeners)
         {
-            listeners = floor.Actors
+            listeners = Systems.Floor.GetAllActors(floorId)
                 .Where(a => a.ActorProperties.Type == ActorName.Player 
                     && a.DistanceFrom(speaker) < DistanceThreshold
-                    && a.CanSee(speaker));
+                    && Systems.Floor.CanSee(a, speaker));
             return listeners.Any();
         }
     }

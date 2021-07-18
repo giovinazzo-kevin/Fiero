@@ -119,7 +119,7 @@ namespace Fiero.Core
                 Loop.Render += (t, dt) => {
                     Draw();
                 };
-                Loop.Run(token);
+                Loop.Run(ct: token);
             }
         }
 

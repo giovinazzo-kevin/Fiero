@@ -13,53 +13,37 @@ namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
-        protected virtual bool HandleAttack(Actor actor, ref IAction action, ref int? cost)
+        private bool HandleAttack(ActorTime t, ref IAction action, ref int? cost)
         {
             var victim = default(Actor);
             if (action is AttackOtherAction oth)
                 victim = oth.Victim;
             else if (action is AttackDirectionAction dir) {
-                var newPos = actor.Physics.Position + dir.Coord;
-                var actorsHere = _floorSystem.ActorsAt(newPos);
-                if (!actorsHere.Any(a => actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
-                    _renderSystem.Play(actor.Physics.Position, Animation.Fireball);
+                var newPos = t.Actor.Physics.Position + dir.Coord;
+                var actorsHere = _floorSystem.GetActorsAt(t.Actor.FloorId(), newPos);
+                if (!actorsHere.Any(a => t.Actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
                     return false;
                 }
                 victim = actorsHere.Single();
             }
             else throw new NotSupportedException(action.GetType().Name);
-            if (actor.DistanceFrom(victim) >= 2) {
+            if (t.Actor.DistanceFrom(victim) >= 2) {
                 // out of reach
                 return false;
             }
-            if (actor.Faction.Relationships.Get(victim.Faction.Type).MayAttack()) {
+            if (t.Actor.Faction.Relationships.Get(victim.Faction.Type).MayAttack()) {
                 // attack!
-                actor.Log?.Write($"$Action.YouAttack$ {victim.Info.Name}.");
-                victim.Log?.Write($"{actor.Info.Name} $Action.AttacksYou$.");
-                // make sure that neutrals aggro the attacker
-                if (victim.AI != null && victim.AI.Target == null) {
-                    victim.AI.Target = actor;
+                if(!ActorAttacked.Request(new(t.Actor, victim)).All(x => x)) {
+                    return false;
                 }
-                // make sure that people hold a grudge regardless of factions
-                victim.ActorProperties.Relationships.TryUpdate(actor, x => x
-                    .With(StandingName.Hated)
-                , out _);
-
-                if (--victim.ActorProperties.Health <= 0) {
-                    victim.Log?.Write($"{actor.Info.Name} $Action.KillsYou$.");
-                    actor.Log?.Write($"$Action.YouKill$ {victim.Info.Name}.");
-                    if (victim.ActorProperties.Type == ActorName.Player) {
-                        _sounds.Get(SoundName.PlayerDeath).Play();
-                        _store.SetValue(Data.Player.KilledBy, actor);
-                    }
+                if (victim.ActorProperties.Health <= 0) {
                     RemoveActor(victim.Id);
-                    _floorSystem.CurrentFloor.RemoveActor(victim.Id);
-                    _floorSystem.CurrentFloor.Entities.FlagEntityForRemoval(victim.Id);
-                    victim.TryRefresh(0); // invalidate target proxy
+                    return ActorKilled.Request(new(t.Actor, victim)).All(x => x);
                 }
             }
             else {
-                // friendly fire?
+                // TODO: friendly fire?
+                return false;
             }
             return true;
         }

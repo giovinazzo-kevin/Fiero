@@ -78,13 +78,15 @@ namespace Fiero.Business
             };
         }
 
-        public static bool CanSee(this Actor a, Drawable other) 
-            => a.CanSee(other.Physics.Position);
-        public static bool CanSee(this Actor a, Coord bPos)
+        public static FloorId FloorId(this Actor a) => a.ActorProperties.FloorId;
+
+        public static bool CanSee(this FloorSystem floorSystem, Actor a, Drawable other) 
+            => floorSystem.CanSee(a, other.Physics.Position);
+        public static bool CanSee(this FloorSystem floorSystem, Actor a, Coord bPos)
         {
             var aPos = a.Physics.Position;
             return Utils.Bresenham((aPos.X, aPos.Y), (bPos.X, bPos.Y), (x, y) => {
-                if (!a.ActorProperties.CurrentFloor.Tiles.TryGetValue(new(x, y), out var tile)) {
+                if(!floorSystem.TryGetTileAt(a.FloorId(), new(x, y), out var tile)) {
                     return false;
                 }
                 if (tile.TileProperties.BlocksMovement) {

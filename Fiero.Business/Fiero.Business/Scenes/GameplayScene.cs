@@ -27,18 +27,11 @@ namespace Fiero.Business.Scenes
             Exit_SaveAndQuit
         }
 
+        protected readonly GameInput Input; // TODO: Remove
+        protected readonly GameSystems Systems;
+        protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly GameEntities Entities;
-        protected readonly GameInput Input;
-
-        protected readonly FloorSystem FloorSystem;
-        protected readonly FactionSystem FactionSystem;
-        protected readonly ActionSystem ActionSystem;
-        protected readonly RenderSystem RenderSystem;
-        protected readonly DialogueSystem DialogueSystem;
-        protected readonly GameDialogues Dialogues;
-        protected readonly GameSounds<SoundName> Sounds;
-        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly OffButton OffButton;
         protected readonly GameUI UI;
 
@@ -48,120 +41,336 @@ namespace Fiero.Business.Scenes
             GameInput input,
             GameDataStore store,
             GameEntities entities,
-            GameDialogues dialogues,
-            FloorSystem floorSystem,
-            RenderSystem renderSystem,
-            DialogueSystem dialogueSystem,
-            FactionSystem factionSystem,
-            ActionSystem actionSystem,
-            GameEntityBuilders entityBuilders,
+            GameSystems systems,
+            GameResources resources,
             GameUI ui,
-            OffButton off,
-            GameSounds<SoundName> sounds)
+            OffButton off)
         {
             Input = input;
             Store = store;
             Entities = entities;
-            FloorSystem = floorSystem;
-            RenderSystem = renderSystem;
-            ActionSystem = actionSystem;
-            FactionSystem = factionSystem;
-            DialogueSystem = dialogueSystem;
-            Dialogues = dialogues;
-            EntityBuilders = entityBuilders;
+            Systems = systems;
+            Resources = resources;
             UI = ui;
             OffButton = off;
-            Sounds = sounds;
         }
 
         public override async Task InitializeAsync()
         {
-            RenderSystem.Initialize();
-            SubscribeDialogueHandlers();
             await base.InitializeAsync();
+            SubscribeDialogueHandlers();
+            Systems.Render.Initialize();
+
+            void SubscribeDialogueHandlers()
+            {
+                Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
+                    .Triggered += (t, eh) => {
+                        Resources.Sounds.Get(SoundName.BossSpotted).Play();
+                    };
+                Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
+                    .Triggered += (t, eh) => {
+                        foreach (var player in eh.DialogueListeners.Players()) {
+                            Systems.Faction.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
+                                x => x.With(StandingName.Loved), out _);
+                        }
+                    };
+                Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
+                    .Triggered += (t, eh) => {
+                        foreach (var player in eh.DialogueListeners.Players()) {
+                            Systems.Faction.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
+                                x => x.With(StandingName.Hated), out _);
+                            Systems.Faction.TryCreateConflict(
+                                FactionName.Rats, (r, i) => i < 3,
+                                FactionName.Players, (p, i) => i == 0,
+                                out _);
+                            Systems.Faction.TryCreateConflict(
+                                FactionName.Rats, (r, i) => i < 3,
+                                FactionName.Players, (p, i) => i == 0,
+                                out _);
+                            Systems.Faction.TryCreateConflict(
+                                FactionName.Rats, (r, i) => i < 3,
+                                FactionName.Players, (p, i) => i == 0,
+                                out _);
+                            Systems.Faction.TryCreateConflict(
+                                FactionName.Rats, (r, i) => i < 3,
+                                FactionName.Players, (p, i) => i == 0,
+                                out _);
+                        }
+                    };
+                Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
+                    .Triggered += (t, eh) => {
+                        foreach (var player in eh.DialogueListeners.Players()) {
+                            var friends = Enumerable.Range(99, 100)
+                                .Select(i => Resources.Entities
+                                    .Rat(MonsterTierName.Two)
+                                    .WithFaction(FactionName.Players)
+                                    .WithPosition(player.Physics.Position)
+                                    .Build());
+                            foreach (var f in friends) {
+                                TrySpawn(player.ActorProperties.FloorId, f);
+                            }
+                        }
+                    // Remove trigger from the shrine
+                    if (Entities.TryGetFirstComponent<DialogueComponent>(eh.DialogueStarter.Id, out var dialogue)) {
+                            dialogue.Triggers.Remove(t);
+                        }
+                    };
+            }
         }
 
+        /// <summary>
+        /// Registers handlers for all system events. Is responsible for presentation-level business logic.
+        /// </summary>
+        /// <returns>A list of subscriptions that are automatically released when the scene goes into an exit state.</returns>
         public override IEnumerable<Subscription> RouteEvents()
         {
-            yield return ActionSystem.ActorTurnEnded.SubscribeHandler(msg => {
-                    if(msg.Content.Message.Actor.Id == Player.Id) {
-                        DialogueSystem.CheckTriggers();
+            // ActionSystem.GameStarted:
+                // - Clear old entities and references if present
+                // - Generate a new RNG seed
+                // - Generate map and spawn actors
+                // - Create and spawn player
+                // - Track player visually in the interface
+            yield return Systems.Action.GameStarted.SubscribeResponse(e => {
+                Systems.Floor.Reset();
+                Entities.Clear(true);
+
+                var newRngSeed = (int)DateTime.Now.ToBinary();
+                Store.SetValue(Data.Global.RngSeed, newRngSeed);
+
+                // Generate map
+                var d1FloorId = new FloorId(DungeonBranchName.Dungeon, 1);
+                Systems.Floor.AddFloor(d1FloorId, new(100, 100), floor =>
+                   floor.WithStep(ctx => {
+                       var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
+                           .Generate();
+                       ctx.DrawBox((0, 0), (ctx.Size.X, ctx.Size.Y), TileName.Wall);
+                       ctx.DrawDungeon(dungeon);
+                   }));
+
+                // Track agents
+                foreach (var comp in Entities.GetComponents<ActionComponent>()) {
+                    Systems.Action.AddActor(comp.EntityId);
+                }
+
+                // Create player on top of the starting stairs
+                var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
+                var upstairs = Systems.Floor.GetAllTiles(d1FloorId)
+                    .Single(t => t.TileProperties.Name == TileName.Upstairs)
+                    .Physics.Position;
+                Player = Resources.Entities.Player
+                    .WithPosition(upstairs)
+                    .WithName(playerName)
+                    .Build();
+                if (!TrySpawn(d1FloorId, Player)) {
+                    throw new InvalidOperationException("Can't spawn the player??");
+                }
+
+                Systems.Render.SelectedActor.Following.V = Player;
+                return true;
+            });
+            // ActionSystem.ActorTurnEnded:
+                // - Check dialogue triggers when the player's turn ends
+            yield return Systems.Action.ActorTurnEnded.SubscribeResponse(e => {
+                if (e.Actor.ActorProperties.Type == ActorName.Player) {
+                    Systems.Dialogue.CheckTriggers();
+                }
+                return true;
+            });
+            // ActionSystem.ActorMoved:
+                // - Update position
+                // - Notify current floor of new position
+                // - Log stuff that was stepped over
+            yield return Systems.Action.ActorMoved.SubscribeResponse(e => {
+                var floor = Systems.Floor.GetFloor(e.Actor.FloorId());
+                floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
+                floor.Cells[e.NewPosition].Actors.Add(e.Actor);
+                var itemsHere = Systems.Floor.GetItemsAt(floor.Id, e.NewPosition);
+                var featuresHere = Systems.Floor.GetFeaturesAt(floor.Id, e.NewPosition);
+                foreach (var item in itemsHere) {
+                    e.Actor.Log?.Write($"$Action.YouStepOverA$ {item.DisplayName}.");
+                }
+                foreach (var feature in featuresHere) {
+                    e.Actor.Log?.Write($"$Action.YouStepOverA$ {feature.Info.Name}.");
+                }
+                e.Actor.Physics.Position = e.NewPosition;
+                return true;
+            });
+            // ActionSystem.ActorAttacked:
+                // - Handle damage calculations
+                // - Handle AI aggro and grudges
+            yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
+                e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
+                e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
+                // make sure that neutrals aggro the attacker
+                if (e.Victim.AI != null && e.Victim.AI.Target == null) {
+                    e.Victim.AI.Target = e.Attacker;
+                }
+                // make sure that people hold a grudge regardless of factions
+                e.Victim.ActorProperties.Relationships.TryUpdate(e.Attacker, x => x
+                    .With(StandingName.Hated)
+                , out _);
+                // calculate damage
+                --e.Victim.ActorProperties.Health;
+                return true;
+            });
+            // ActionSystem.ActorKilled:
+                // - Remove entity from floor and handle cleanup
+                // - Handle game over when the player dies
+            yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
+                e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
+                e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
+                if (e.Victim.ActorProperties.Type == ActorName.Player) {
+                    Resources.Sounds.Get(SoundName.PlayerDeath).Play();
+                    Store.SetValue(Data.Player.KilledBy, e.Killer);
+                }
+                Systems.Floor.RemoveActor(e.Victim.ActorProperties.FloorId, e.Victim);
+                Entities.FlagEntityForRemoval(e.Victim.Id);
+                e.Victim.TryRefresh(0); // invalidate target proxy
+                return true;
+            });
+            // ActionSystem.ItemDropped:
+                // - Drop item (remove from actor's inventory and add to floor) or fail if there's no space
+            yield return Systems.Action.ItemDropped.SubscribeResponse(e => {
+                if (Systems.Floor.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Physics.Position, out var tile)) {
+                    if(!e.Actor.Inventory.TryTake(e.Item)) {
+                        e.Actor.Log?.Write($"$Action.UnableToDrop$ {e.Item.DisplayName}.");
+                        return false;
                     }
-                });
+                    else {
+                        e.Item.Physics.Position = tile.Physics.Position;
+                        Systems.Floor.AddItem(e.Actor.FloorId(), e.Item);
+                        e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
+                    }
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.NoSpaceToDrop$ {e.Item.DisplayName}.");
+                    return false;
+                }
+                return true;
+            });
+            // ActionSystem.ItemPickedUp:
+            // - Store item in inventory or fail
+            yield return Systems.Action.ItemPickedUp.SubscribeResponse(e => {
+                if (e.Actor.Inventory.TryPut(e.Item)) {
+                    Systems.Floor.RemoveItem(e.Actor.FloorId(), e.Item);
+                    e.Actor.Log?.Write($"$Action.YouPickUpA$ {e.Item.DisplayName}.");
+                    return true;
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.YourInventoryIsTooFullFor$ {e.Item.DisplayName}.");
+                    return false;
+                }
+            });
+            // ActionSystem.ItemEquipped:
+                // - Equip item or fail
+            yield return Systems.Action.ItemEquipped.SubscribeResponse(e => {
+                if (e.Actor.Equipment.TryEquip(e.Item)) {
+                    e.Actor.Log?.Write($"$Action.YouEquip$ {e.Item.DisplayName}.");
+                    return true;
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.YouFailEquipping$ {e.Item.DisplayName}.");
+                    return false;
+                }
+            });
+            // ActionSystem.ItemUnequipped:
+                // - Unequip item or fail
+            yield return Systems.Action.ItemUnequipped.SubscribeResponse(e => {
+                if (e.Actor.Equipment.TryUnequip(e.Item)) {
+                    e.Actor.Log?.Write($"$Action.YouUnequip$ {e.Item.DisplayName}.");
+                    return true;
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.YouFailUnequipping$ {e.Item.DisplayName}.");
+                    return false;
+                }
+            });
+            // ActionSystem.ItemConsumed:
+                // - Use up item and remove it from the floor when completely consumed
+            yield return Systems.Action.ItemConsumed.SubscribeResponse(e => {
+                if (TryUseItem(e.Item, e.Actor, out var consumed)) {
+                    e.Actor.Log?.Write($"$Action.YouUse$ {e.Item.DisplayName}.");
+                    if (consumed) {
+                        e.Actor.Log?.Write($"$Action.AnItemIsConsumed$ {e.Item.DisplayName}.");
+                    }
+                    return true;
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.YouFailUsing$ {e.Item.DisplayName}.");
+                    return false;
+                }
+            });
+            // ActionSystem.FeatureInteractedWith:
+                // - Handle shrine interactions
+                // - Handle chest interactions
+            yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e => {
+                if (e.Feature.FeatureProperties.Type == FeatureName.Shrine) {
+                    e.Actor.Log?.Write($"$Action.YouKneelAt$ {e.Feature.Info.Name}.");
+                }
+                if (e.Feature.FeatureProperties.Type == FeatureName.Chest) {
+                    e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
+                }
+                return true;
+            });
         }
 
-        public bool TrySpawn(int entityId, out Actor actor, float maxDistance = 10)
+        public bool TrySpawn(FloorId floorId, Actor actor, float maxDistance = 10)
         {
-            actor = FloorSystem.CurrentFloor.AddActor(entityId);
-            if(!FloorSystem.TryGetClosestFreeTile(actor.Physics.Position, out var spawnTile, maxDistance)) {
+            if(!Systems.Floor.TryGetClosestFreeTile(floorId, actor.Physics.Position, out var spawnTile, maxDistance)) {
                 return false;
             }
             actor.Physics.Position = spawnTile.Physics.Position;
-            ActionSystem.AddActor(entityId);
+            Systems.Action.AddActor(actor.Id);
+            Systems.Floor.AddActor(floorId, actor);
             return true;
         }
-        
-        protected void SubscribeDialogueHandlers()
+
+        public bool TryUseItem(Item item, Actor actor, out bool consumed)
         {
-            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
-                .Triggered += (t, eh) => {
-                    Sounds.Get(SoundName.BossSpotted).Play();
-                };
-            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
-                .Triggered += (t, eh) => {
-                    foreach (var player in eh.DialogueListeners.Players()) {
-                        FactionSystem.TryUpdateRelationship(FactionName.Rats, FactionName.Players, 
-                            x => x.With(StandingName.Loved), out _);
-                    }
-                };
-            Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
-                .Triggered += (t, eh) => {
-                    foreach (var player in eh.DialogueListeners.Players()) {
-                        FactionSystem.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
-                            x => x.With(StandingName.Hated), out _);
-                        FactionSystem.TryCreateConflict(
-                            FactionName.Rats, (r, i) => i < 3,
-                            FactionName.Players, (p, i) => i == 0,
-                            out _);
-                        FactionSystem.TryCreateConflict(
-                            FactionName.Rats, (r, i) => i < 3,
-                            FactionName.Players, (p, i) => i == 0,
-                            out _);
-                        FactionSystem.TryCreateConflict(
-                            FactionName.Rats, (r, i) => i < 3,
-                            FactionName.Players, (p, i) => i == 0,
-                            out _);
-                        FactionSystem.TryCreateConflict(
-                            FactionName.Rats, (r, i) => i < 3,
-                            FactionName.Players, (p, i) => i == 0,
-                            out _);
-                    }
-                };
-            Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
-                .Triggered += (t, eh) => {
-                    foreach (var player in eh.DialogueListeners.Players()) {
-                        var friends = Enumerable.Range(99, 100)
-                            .Select(i => EntityBuilders
-                                .Rat(MonsterTierName.Two)
-                                .WithFaction(FactionName.Players)
-                                .WithPosition(player.Physics.Position)
-                                .Build());
-                        foreach (var f in friends) {
-                            TrySpawn(f.Id, out _);
-                        }
-                    }
-                    // Remove trigger from the shrine
-                    if(Entities.TryGetFirstComponent<DialogueComponent>(eh.DialogueStarter.Id, out var dialogue)) {
-                        dialogue.Triggers.Remove(t);
-                    }
-                };
+            var used = false;
+            consumed = false;
+            if (item.TryCast<Consumable>(out var consumable)) {
+                if (consumable.TryCast<Potion>(out var potion)
+                && TryApply(potion.PotionProperties.Effect)) {
+                    used = TryConsume(out consumed);
+                }
+                if (consumable.TryCast<Scroll>(out var scroll)
+                && TryApply(scroll.ScrollProperties.Effect)) {
+                    used = TryConsume(out consumed);
+                }
+            }
+            if (consumed) {
+                // Assumes item was used from inventory
+                _ = actor.Inventory.TryTake(item);
+            }
+            return used;
+
+            bool TryConsume(out bool consumed)
+            {
+                consumed = false;
+                if (consumable.ConsumableProperties.RemainingUses <= 0) {
+                    return false;
+                }
+                if (--consumable.ConsumableProperties.RemainingUses <= 0
+                 && consumable.ConsumableProperties.ConsumedWhenEmpty) {
+                    consumed = true;
+                }
+                return true;
+            }
+
+            bool TryApply(EffectName effect)
+            {
+                switch (effect) {
+                    default: return true;
+                }
+            }
         }
 
         public override void Update()
         {
-            RenderSystem.Update();
-            ActionSystem.Update();
-            Entities.RemoveFlaggedItems();
+            Systems.Action.Update();
+            Systems.Render.UpdateViews();
+            Entities.RemoveFlaggedEntities();
             if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);
             }
@@ -170,45 +379,16 @@ namespace Fiero.Business.Scenes
         public override void Draw()
         {
             UI.Window.Clear();
-            RenderSystem.Draw();
+            Systems.Render.Draw();
         }
 
         protected override bool CanChangeState(SceneState newState) => true;
         protected override void OnStateChanged(SceneState oldState)
         {
-            if(State == SceneState.Main) {
-                var newRngSeed = (int)DateTime.Now.ToBinary();
-                Store.SetValue(Data.Global.RngSeed, newRngSeed);
-                Entities.Clear();
-                FloorSystem.Clear();
-                ActionSystem.Clear();
-                // Generate map
-                FloorSystem.AddFloor(new (100, 100), floor =>
-                    floor.WithStep(ctx => {
-                        var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
-                            .Generate();
-                        ctx.DrawBox((0, 0), (ctx.Size.X, ctx.Size.Y), TileName.Wall);
-                        ctx.DrawDungeon(dungeon);
-                    }));
-                // Track agents
-                foreach (var comp in Entities.GetComponents<ActionComponent>()) {
-                    ActionSystem.AddActor(comp.EntityId);
-                }
-                // Create player on top of the starting stairs
-                var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
-                var upstairs = FloorSystem.CurrentFloor.Tiles.Values
-                    .Single(t => t.TileProperties.Name == TileName.Upstairs)
-                    .Physics.Position;
-                var pid = EntityBuilders.Player
-                    .WithPosition(upstairs)
-                    .WithName(playerName)
-                    .Build().Id;
-                if(!TrySpawn(pid, out var player)) {
-                    throw new InvalidOperationException("Can't spawn the player??");
-                }
-                RenderSystem.SelectedActor.Following.V = Player = player;
-            }
             base.OnStateChanged(oldState);
+            if (State == SceneState.Main) {
+                Systems.Action.Reset();
+            }
         }
     }
 }

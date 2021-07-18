@@ -10,7 +10,7 @@ namespace Fiero.Business
 
         public ActorName Type { get; set; }
         public MonsterTierName Tier { get; set; }
-        public Floor CurrentFloor { get; set; }
+        public FloorId FloorId { get; set; }
         public ActorRelationships Relationships { get; set; } = new();
         public Personality Personality { get; set; } = new();
     }

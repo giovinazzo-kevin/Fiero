@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,12 +58,20 @@ namespace Unconcern.Common
                 return new Message<U>(Timestamp, newContent, Sender, Recipients);
             }
 
+            public Message<T> From(string newSender)
+            {
+                return new Message<T>(Timestamp, Content, newSender, Recipients);
+            }
+
             public Message<T> To(params string[] recipients)
             {
                 if (recipients.Length == 0)
                     throw new ArgumentOutOfRangeException(nameof(recipients));
                 return new Message<T>(Timestamp, Content, Sender, recipients);
             }
+
+            public override string ToString() 
+                => $"[{Timestamp:O}] {Sender} TO {(Recipients.Length == 0 ? "ALL" : String.Join(", ", Recipients))}: {Content}";
         }
 
 

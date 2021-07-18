@@ -29,8 +29,11 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
         public static EntityBuilder<T> WithEnemyAI<T>(this EntityBuilder<T> builder)
-            where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = new AIActionProvider())
-                                      .AddOrTweak<AIComponent>();
+            where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
+                    var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
+                    c.ActionProvider = new AIActionProvider(gameSystems);
+                })
+                .AddOrTweak<AIComponent>();
         public static EntityBuilder<T> WithPlayerAI<T>(this EntityBuilder<T> builder, GameUI ui)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = new PlayerActionProvider(ui));
         public static EntityBuilder<T> WithFaction<T>(this EntityBuilder<T> builder, FactionName faction)
@@ -44,9 +47,15 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type)
             where T : Actor => builder.AddOrTweak<NpcComponent>(c => c.Type = type);
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, NpcName type)
-            where T : Actor => builder.AddOrTweak<DialogueComponent>(c => DialogueTriggers.Set(type, c));
+            where T : Actor => builder.AddOrTweak<DialogueComponent>(c => {
+                var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
+                gameSystems.Dialogue.SetTriggers(gameSystems, type, c);
+            });
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, FeatureName type)
-            where T : Feature => builder.AddOrTweak<DialogueComponent>(c => DialogueTriggers.Set(type, c));
+            where T : Feature => builder.AddOrTweak<DialogueComponent>(c => {
+                var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
+                gameSystems.Dialogue.SetTriggers(gameSystems, type, c);
+            });
         public static EntityBuilder<T> WithFeatureInfo<T>(this EntityBuilder<T> builder, FeatureName type)
             where T : Feature => builder.AddOrTweak<FeatureComponent>(c => {
                 c.Type = type;

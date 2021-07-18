@@ -23,11 +23,11 @@ namespace Fiero.Core
             Owner.EventBus.Send(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName);
         }
 
-        public Subscription SubscribeHandler(Action<EventBus.Message<SystemMessage<TSystem, TArgs>>> doStuff)
+        public Subscription SubscribeHandler(Action<TArgs> doStuff)
         {
             return Concern.Delegate(Owner.EventBus)
                 .When<SystemMessage<TSystem, TArgs>>(x => Name.Equals(x.Content.Sender))
-                .Do(doStuff)
+                .Do<SystemMessage<TSystem, TArgs>>(msg => doStuff(msg.Content.Data))
                 .Build()
                 .Listen(Owner.EventHubName);
         }

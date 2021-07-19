@@ -13,6 +13,8 @@ namespace Fiero.Business
         protected readonly List<string> Messages;
 
         public IEnumerable<string> GetMessages() => Messages;
+        public event Action<LogComponent, string> LogAdded;
+        public event Action<LogComponent, string> LogRemoved;
 
         public LogComponent(GameLocalizations<LocaleName> localizations)
         {
@@ -38,8 +40,10 @@ namespace Fiero.Business
                     message += $" x{repeatCount + 1}";
                 }
             }
+            LogAdded?.Invoke(this, message);
             Messages.Add(message);
-            if(Messages.Count >= 100) {
+            if (Messages.Count >= 100) {
+                LogRemoved?.Invoke(this, Messages[0]);
                 Messages.RemoveAt(0);
             }
         }

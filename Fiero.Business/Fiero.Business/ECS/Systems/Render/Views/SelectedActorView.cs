@@ -15,8 +15,7 @@ namespace Fiero.Business
         protected Label ActorHealth { get; private set; }
         protected Paragraph Logs { get; private set; }
 
-        internal SelectedActorView(GameWindow win, LayoutBuilder layoutBuilder)
-            : base(win)
+        internal SelectedActorView(LayoutBuilder layoutBuilder)
         {
             TopRow = layoutBuilder
                 .Build(new(), grid => ApplyStyles(grid)
@@ -84,10 +83,10 @@ namespace Fiero.Business
             }
         }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target)
         {
-            Window.Draw(TopRow);
-            Window.Draw(BottomRow);
+            target.Draw(TopRow);
+            target.Draw(BottomRow);
         }
 
         public override void OnWindowResized(Coord newSize) => throw new NotImplementedException();

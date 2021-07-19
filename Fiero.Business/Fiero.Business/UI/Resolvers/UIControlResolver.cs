@@ -7,6 +7,8 @@ namespace Fiero.Business
     public abstract class UIControlResolver<T> : UIControlResolverBase<T, FontName, TextureName, LocaleName, SoundName, ColorName>
         where T : UIControl
     {
+        protected readonly GameResources Resources;
+
         protected readonly Color Foreground;
         protected readonly Color Background;
         protected readonly Color Accent;
@@ -14,24 +16,19 @@ namespace Fiero.Business
 
         protected UIControlResolver(
             GameUI ui, 
-            GameInput input, 
-            GameDataStore store, 
-            GameFonts<FontName> fonts, 
-            GameSounds<SoundName> sounds, 
-            GameColors<ColorName> colors,
-            GameSprites<TextureName> sprites, 
-            GameLocalizations<LocaleName> localizations) 
-            : base(ui, input, store, fonts, sounds, colors, sprites, localizations)
+            GameResources resources) 
+            : base(ui)
         {
-            Foreground = store.Get(Data.UI.DefaultForeground);
-            Background = store.Get(Data.UI.DefaultBackground);
-            Accent = store.Get(Data.UI.DefaultAccent);
-            TileSize = store.Get(Data.UI.TileSize);
+            Resources = resources;
+            Foreground = UI.Store.Get(Data.UI.DefaultForeground);
+            Background = UI.Store.Get(Data.UI.DefaultBackground);
+            Accent = UI.Store.Get(Data.UI.DefaultAccent);
+            TileSize = UI.Store.Get(Data.UI.TileSize);
         }
 
         protected virtual BitmapFont GetFont()
         {
-            return Fonts.Get(FontName.Bold);
+            return Resources.Fonts.Get(FontName.Bold);
         }
 
         protected virtual BitmapText GetText(string str)
@@ -43,17 +40,17 @@ namespace Fiero.Business
         protected virtual Sprite GetAtlasSprite(string str) => GetSprite(TextureName.Atlas, str);
         protected virtual Sprite GetSprite(TextureName texture, string str)
         {
-            return Sprites.TryGet(texture, str, out var sprite) ? sprite : null;
+            return Resources.Sprites.TryGet(texture, str, out var sprite) ? sprite : null;
         }
 
         protected virtual Sound GetSound(SoundName sound)
         {
-            return Sounds.Get(sound);
+            return Resources.Sounds.Get(sound);
         }
 
         protected virtual Color GetColor(ColorName color)
         {
-            return Colors.Get(color);
+            return Resources.Colors.Get(color);
         }
     }
 }

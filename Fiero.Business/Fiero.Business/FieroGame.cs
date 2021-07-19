@@ -124,6 +124,8 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.MoveSW, Keyboard.Key.Numpad1);
             Store.SetValue(Data.Hotkeys.MoveS, Keyboard.Key.Numpad2);
             Store.SetValue(Data.Hotkeys.MoveSE, Keyboard.Key.Numpad3);
+            Store.SetValue(Data.Hotkeys.Zoom, Keyboard.Key.Z);
+
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
@@ -135,6 +137,7 @@ namespace Fiero.Business
             var sieve = Bus.Filter<object>();
             var ignores = new[] { 
                 nameof(RenderSystem),
+                nameof(ActionSystem.ActorIntentEvaluated),
                 nameof(ActionSystem.ActorTurnStarted),
                 nameof(ActionSystem.ActorTurnEnded),
                 nameof(ActionSystem.ActorMoved),

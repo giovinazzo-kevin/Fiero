@@ -23,9 +23,9 @@ namespace Fiero.Business
         public IEnumerable<Drawable> GetDrawables()
         {
             yield return Tile;
-            foreach (var x in Actors) yield return x;
-            foreach (var x in Items) yield return x;
             foreach (var x in Features) yield return x;
+            foreach (var x in Items) yield return x;
+            foreach (var x in Actors) yield return x;
         }
     }
 }

@@ -60,6 +60,7 @@ namespace Fiero.Business.Scenes
             await base.InitializeAsync();
             SubscribeDialogueHandlers();
             Systems.Render.Initialize();
+            Systems.Render.Initialize();
 
             void SubscribeDialogueHandlers()
             {
@@ -139,7 +140,7 @@ namespace Fiero.Business.Scenes
 
                 // Generate map
                 var d1FloorId = new FloorId(DungeonBranchName.Dungeon, 1);
-                Systems.Floor.AddFloor(d1FloorId, new(100, 100), floor =>
+                Systems.Floor.AddFloor(d1FloorId, new(200, 200), floor =>
                    floor.WithStep(ctx => {
                        var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
                            .Generate();
@@ -164,9 +165,18 @@ namespace Fiero.Business.Scenes
                 if (!TrySpawn(d1FloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
-
-                Systems.Render.SelectedActor.Following.V = Player;
+                Systems.Render.CenterOn(Player);
                 return true;
+            });
+            // ActionSystem.ActorIntentEvaluated:
+                // - Recenter viewport on player and update UI
+            yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e => {
+                if (e.Actor.ActorProperties.Type == ActorName.Player) {
+                    Systems.Render.CenterOn(e.Actor);
+                }
+            });
+            // ActionSystem.ActorTurnStarted:
+            yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e => {
             });
             // ActionSystem.ActorTurnEnded:
                 // - Check dialogue triggers when the player's turn ends
@@ -369,7 +379,7 @@ namespace Fiero.Business.Scenes
         public override void Update()
         {
             Systems.Action.Update();
-            Systems.Render.UpdateViews();
+            Systems.Render.Update();
             Entities.RemoveFlaggedEntities();
             if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);

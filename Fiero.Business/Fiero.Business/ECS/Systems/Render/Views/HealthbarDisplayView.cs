@@ -16,8 +16,7 @@ namespace Fiero.Business
         protected ProgressBar EnemyBar { get; private set; }
         protected ProgressBar BossBar { get; private set; }
 
-        public HealthbarDisplayView(GameWindow win, LayoutBuilder layoutBuilder)
-            : base(win)
+        public HealthbarDisplayView(LayoutBuilder layoutBuilder)
         {
             layoutBuilder.Build(new(), grid => grid
                 .Row()
@@ -42,7 +41,7 @@ namespace Fiero.Business
             );
         }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target)
         {
             if (Following is null || Following.Id == 0)
                 return;
@@ -72,7 +71,7 @@ namespace Fiero.Business
             else if(bar.Progress >= 0.0) {
                 bar.Foreground.V = new(128, 0, 0);
             }
-            Window.Draw(bar);
+            target.Draw(bar);
         }
 
         public override void OnWindowResized(Coord newSize) => throw new System.NotImplementedException();

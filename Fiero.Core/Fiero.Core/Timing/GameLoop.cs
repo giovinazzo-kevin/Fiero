@@ -15,7 +15,7 @@ namespace Fiero.Core
 
         public GameLoop()
         {
-            TimeStep = 1f / 10000f;
+            TimeStep = 1f / 500f;
         }
 
         public virtual void Wait(TimeSpan time, float timestep)

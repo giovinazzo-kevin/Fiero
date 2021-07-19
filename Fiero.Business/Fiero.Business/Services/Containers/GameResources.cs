@@ -11,6 +11,7 @@ namespace Fiero.Business
         public readonly GameSounds<SoundName> Sounds;
         public readonly GameSprites<TextureName> Sprites;
         public readonly GameTextures<TextureName> Textures;
+        public readonly GameFonts<FontName> Fonts;
         public readonly GameGlossaries Glossaries;
         public readonly GameDialogues Dialogues;
         public readonly GameEntityBuilders Entities;
@@ -22,6 +23,7 @@ namespace Fiero.Business
             GameSounds<SoundName> sounds,
             GameSprites<TextureName> sprites,
             GameTextures<TextureName> textures,
+            GameFonts<FontName> fonts,
             GameGlossaries glossaries,
             GameDialogues dialogues,
             GameEntityBuilders entities
@@ -33,6 +35,7 @@ namespace Fiero.Business
             Sounds = sounds;
             Sprites = sprites;
             Textures = textures;
+            Fonts = fonts;
             Glossaries = glossaries;
             Dialogues = dialogues;
             Entities = entities;

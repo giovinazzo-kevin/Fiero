@@ -41,6 +41,8 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ItemDroppedEvent, bool> ItemConsumed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, bool> FeatureInteractedWith;
 
+        public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
+
         public ActionSystem(
             EventBus bus,
             GameEntities entities, 
@@ -56,6 +58,7 @@ namespace Fiero.Business
             TurnStarted = new(this, nameof(TurnStarted));
             TurnEnded = new(this, nameof(TurnEnded));
             ActorTurnStarted = new(this, nameof(ActorTurnStarted));
+            ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorTurnEnded = new(this, nameof(ActorTurnEnded));
             ActorMoved = new(this, nameof(ActorMoved));
             ActorSpawned = new(this, nameof(ActorSpawned));
@@ -87,6 +90,7 @@ namespace Fiero.Business
                 _ => null
             };
             t.Actor.Action.LastAction = action;
+            ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn));
             return cost;
         }
         

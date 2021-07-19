@@ -1,9 +1,7 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
-using SFML.System;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Unconcern.Common;
 
@@ -12,57 +10,30 @@ namespace Fiero.Business
     public partial class RenderSystem : EcsSystem
     {
         protected readonly GameUI UI;
-        protected readonly GameSprites<TextureName> Sprites;
-        protected readonly GameEntities Entities;
-        protected readonly GameDataStore Store;
-        protected readonly GameInput Input;
         protected readonly GameLoop Loop;
-        protected readonly FloorSystem FloorSystem;
+        protected readonly GameResources Resources;
 
-        public SelectedActorView SelectedActor { get; private set; }
-        public HealthbarDisplayView HealthbarDisplay { get; private set; }
-        public Coord Zoom { get; private set; } = new(1, 1);
+        protected Layout Layout { get; private set; }
+        protected Viewport Viewport { get; private set; }
+        protected Paragraph Logs { get; private set; }
+
         protected readonly List<Sprite> Vfx = new();
 
-        public readonly SystemEvent<RenderSystem, AnimationFramePlayedEvent> AnimationFramePlayed;
-        public readonly SystemEvent<RenderSystem, FrameEvent> DrawStarted;
-        public readonly SystemEvent<RenderSystem, FrameEvent> DrawEnded;
 
-        public RenderSystem(
-            EventBus bus,
-            GameUI ui,
-            GameSprites<TextureName> sprites,
-            GameEntities entities,
-            GameDataStore store,
-            FloorSystem floor,
-            GameLoop loop,
-            GameInput input
-        ) : base(bus) {
-            UI = ui;
-            Sprites = sprites;
-            Entities = entities;
-            Store = store;
-            Input = input;
-            Loop = loop;
-            FloorSystem = floor;
-
-            AnimationFramePlayed = new(this, nameof(AnimationFramePlayed));
-            DrawStarted = new(this, nameof(DrawStarted));
-            DrawEnded = new(this, nameof(DrawEnded));
-        }
-
-        public void Initialize()
+        public void CenterOn(Actor a)
         {
-            SelectedActor = new SelectedActorView(UI.Window, UI.CreateLayout());
-            HealthbarDisplay = new HealthbarDisplayView(UI.Window, UI.CreateLayout());
-        }
+            var pos = a.Physics.Position;
+            var viewSize = Viewport.ViewArea.V.Size();
 
-        public void UpdateViews()
-        {
-            SelectedActor.Update();
-        }
+            Viewport.ViewFloor.V = a.ActorProperties.FloorId;
+            Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
 
-        public void Play(Coord position, params Animation[] animations)
+            if(a.Log != null) {
+                Logs.Text.V = String.Join('\n', a.Log.GetMessages().TakeLast(Logs.MaxLines));
+            }
+        }
+        
+        public void Animate(Coord position, params Animation[] animations)
         {
             var time = TimeSpan.Zero;
             var increment = TimeSpan.FromMilliseconds(10);
@@ -70,79 +41,102 @@ namespace Fiero.Business
                 .OrderBy(x => x.Time)
                 .ToList();
 
-            while(timeline.Count > 0) {
+            var viewPos = Viewport.ViewArea.V.Position();
+            while (timeline.Count > 0) {
                 for (int i = timeline.Count - 1; i >= 0; i--) {
                     var t = timeline[i];
                     if (time < t.Time + t.Frame.Duration && time >= t.Time) {
                         foreach (var spriteDef in t.Frame.Sprites) {
-                            var sprite = Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
-                            sprite.Position = (position + spriteDef.Offset) * UI.Store.Get(Data.UI.TileSize);
-                            sprite.Scale = Zoom;
+                            var sprite = Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
+                            sprite.Position = (position + spriteDef.Offset) * Viewport.ViewTileSize.V;
+                            sprite.Scale = sprite.GetLocalBounds().Size() / Viewport.ViewTileSize.V;
                             sprite.Color = spriteDef.Tint;
                             Vfx.Add(sprite);
                         }
                         t.Anim.OnFramePlaying(t.Index);
-                        AnimationFramePlayed.Raise(new(t.Anim, t.Index));
+                        // AnimationFramePlayed.Raise(new(t.Anim, t.Index));
                     }
-                    else if(time >= t.Time + t.Frame.Duration) {
+                    else if (time >= t.Time + t.Frame.Duration) {
                         timeline.RemoveAt(i);
                     }
                 }
                 Loop.WaitAndDraw(increment, (float)increment.TotalSeconds);
                 time += increment;
+                foreach (var vfx in Vfx) {
+                    vfx.Dispose();
+                }
                 Vfx.Clear();
             }
 
             IEnumerable<(int Index, Animation Anim, TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
             {
                 var time = TimeSpan.Zero;
-                for(int i = 0; i < anim.Frames.Length; ++i) {
+                for (int i = 0; i < anim.Frames.Length; ++i) {
                     yield return (i, anim, time, anim.Frames[i]);
                     time += anim.Frames[i].Duration;
                 }
             }
         }
 
+        public RenderSystem(EventBus bus, GameUI ui, GameLoop loop, GameResources resources) : base(bus)
+        {
+            UI = ui;
+            Loop = loop;
+            Resources = resources;
+        }
+
+        protected virtual LayoutGrid BuildLayout(LayoutGrid grid) => grid
+            .Row()
+                .Row(h: 3 * 0.025f, id: "top-bar")
+                    .Cell<Label>(x => x.Text.V = "Fiero")
+                .End()
+                .Row(h: 3 * 0.775f, id: "player-view")
+                    .Col()
+                        .Cell<Viewport>(x => Viewport = x)
+                    .End()
+                .End()
+                .Row(h: 3 * 0.200f, id: "player-logs")
+                    .Cell<Paragraph>(x => Logs = x)
+                .End()
+            .End();
+
+        public void Initialize()
+        {
+            Layout = UI.CreateLayout().Build(new(), BuildLayout);
+            Data.UI.WindowSize.ValueChanged += args => {
+                var oldValue = Viewport.Size.V;
+                Layout.Size.V = args.NewValue;
+                var newValue = Viewport.Size.V;
+                var recenter = (oldValue - newValue) / Viewport.ViewTileSize.V / 2;
+                var viewPos = Viewport.ViewArea.V.Position() + recenter;
+                var viewSize = newValue / Viewport.ViewTileSize.V;
+                Viewport.ViewArea.V = new(viewPos.X, viewPos.Y, viewSize.X, viewSize.Y);
+            };
+            Viewport.ViewTileSize.ValueChanged += (e, oldValue) => {
+                var newValue = Viewport.ViewTileSize.V;
+                var viewSize = Viewport.ViewArea.V.Size();
+                var recenter = (viewSize * newValue - viewSize * oldValue) / newValue / 2;
+                var viewPos = Viewport.ViewArea.V.Position() + recenter;
+                viewSize = Viewport.Size.V / Viewport.ViewTileSize.V;
+                Viewport.ViewArea.V = new(viewPos.X, viewPos.Y, viewSize.X, viewSize.Y);
+            };
+        }
+
+        public void Update()
+        {
+            Layout.Update();
+            if(UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.Zoom))) {
+                Viewport.ViewTileSize.V = Viewport.ViewTileSize.V == new Coord(8, 8)
+                    ? new Coord(16, 16) : new Coord(8, 8);
+            }
+        }
+
         public void Draw()
         {
-            DrawStarted.Raise(new());
-            var tileSize = Store.Get(Data.UI.TileSize);
-            var floorId = SelectedActor.Following.V?.ActorProperties.FloorId
-                ?? FloorSystem.GetAllFloors().First().Id;
-            var mapCenter = FloorSystem.GetFloor(floorId).Size / 2;
-            var winSize = UI.Window.Size.ToVec();
-            var drawables = FloorSystem.GetDrawables(floorId)
-                ?? Enumerable.Empty<Drawable>();
-            // If the player dies focus on the killer if one is available
-            if(SelectedActor.Following == null || SelectedActor.Following.V.Id == 0) {
-                if(Store.TryGetValue(Data.Player.KilledBy, out var killer) && killer != null && killer.Id != 0) {
-                    SelectedActor.Following.V = killer;
-                }
-            }
-            // If no actor to follow is available focus on the geometric center of the map
-            var followPos = (SelectedActor.Following.V?.Physics?.Position ?? mapCenter).ToVec();
-            var origin = followPos * tileSize - winSize / 2f;
-            foreach (var drawable in drawables) {
-                var spriteSize = drawable.Render.Sprite.TextureRect.Size().ToVec();
-                var spriteScale = drawable.Render.Sprite.Scale.ToVec() * Zoom;
-                // Center the sprite (the last term centers 2x2 sprites horizontally so that they match with the tile they're on)
-                drawable.Render.Sprite.Origin = origin + spriteSize * new Vec(0.5f, 1);
-                drawable.Render.Sprite.Position = drawable.Physics.Position * spriteScale * tileSize;
-                UI.Window.Draw(drawable.Render.Sprite);
-                if(drawable is Actor actor) {
-                    var spritePosition = drawable.Render.Sprite.Transform.TransformPoint(0, 0).ToCoord();
-                    // Place the health bar right above this sprite
-                    HealthbarDisplay.Position = spritePosition - new Coord(0, tileSize);
-                    HealthbarDisplay.Following = actor;
-                    HealthbarDisplay.Draw();
-                }
-            }
+            UI.Window.Draw(Layout);
             foreach (var vfx in Vfx) {
-                vfx.Origin = origin + vfx.TextureRect.Size().ToVec() * new Vec(0.5f, 1);
                 UI.Window.Draw(vfx);
             }
-            SelectedActor.Draw();
-            DrawEnded.Raise(new());
         }
     }
 }

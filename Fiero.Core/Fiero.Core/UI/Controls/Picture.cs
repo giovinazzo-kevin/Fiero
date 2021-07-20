@@ -28,6 +28,7 @@ namespace Fiero.Core
 
             void UpdateSprite()
             {
+                Sprite?.Dispose();
                 if (SpriteName.V != null) {
                     Sprite = GetSprite(TextureName.V, SpriteName.V);
                 }

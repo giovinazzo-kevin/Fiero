@@ -16,9 +16,15 @@ namespace Fiero.Business
         protected Layout Layout { get; private set; }
         protected Viewport Viewport { get; private set; }
         protected Paragraph Logs { get; private set; }
+        protected Label LookBar { get; private set; }
 
         protected readonly List<Sprite> Vfx = new();
 
+        public FloorId GetViewportFloor() => Viewport.ViewFloor.V;
+        public Coord GetViewportTileSize() => Viewport.ViewTileSize.V;
+        public Coord GetViewportPosition() => Viewport.ViewArea.V.Position();
+        public Coord GetViewportCenter() => Viewport.ViewArea.V.Position() + Viewport.ViewArea.V.Size() / 2;
+        public IntRect GetViewportArea() => Viewport.ViewArea.V;
 
         public void CenterOn(Actor a)
         {
@@ -31,16 +37,47 @@ namespace Fiero.Business
             if(a.Log != null) {
                 Logs.Text.V = String.Join('\n', a.Log.GetMessages().TakeLast(Logs.MaxLines));
             }
+
+            Viewport.SetDirty();
         }
-        
-        public void Animate(Coord position, params Animation[] animations)
+
+        public bool IsCursorVisible() => Viewport.CursorPosition.V.HasValue;
+        public Coord GetCursorPosition() => Viewport.CursorPosition.V ?? throw new InvalidOperationException();
+
+        public void ShowCursor(Coord worldPos)
+        {
+            Viewport.CursorPosition.V = worldPos;
+        }
+
+        public void MoveCursor(Coord offset)
+        {
+            if(!Viewport.CursorPosition.V.HasValue) {
+                throw new InvalidOperationException();
+            }
+            var viewArea = GetViewportArea();
+            Viewport.CursorPosition.V = (Viewport.CursorPosition.V.Value + offset).Clamp(
+                viewArea.Left, viewArea.Left + viewArea.Width - 1, 
+                viewArea.Top, viewArea.Top + viewArea.Height - 1
+            );
+        }
+
+        public void HideCursor()
+        {
+            Viewport.CursorPosition.V = null;
+        }
+
+        public void SetLookText(string text)
+        {
+            LookBar.Text.V = text;
+        }
+
+        public void Animate(Coord worldPos, params Animation[] animations)
         {
             var time = TimeSpan.Zero;
             var increment = TimeSpan.FromMilliseconds(10);
             var timeline = animations.SelectMany(a => Timeline(a))
                 .OrderBy(x => x.Time)
                 .ToList();
-
             var viewPos = Viewport.ViewArea.V.Position();
             while (timeline.Count > 0) {
                 for (int i = timeline.Count - 1; i >= 0; i--) {
@@ -48,8 +85,8 @@ namespace Fiero.Business
                     if (time < t.Time + t.Frame.Duration && time >= t.Time) {
                         foreach (var spriteDef in t.Frame.Sprites) {
                             var sprite = Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
-                            sprite.Position = (position + spriteDef.Offset) * Viewport.ViewTileSize.V;
-                            sprite.Scale = sprite.GetLocalBounds().Size() / Viewport.ViewTileSize.V;
+                            sprite.Position = (worldPos - viewPos + spriteDef.Offset) * Viewport.ViewTileSize.V + Viewport.Position.V;
+                            sprite.Scale = Viewport.ViewTileSize.V / sprite.GetLocalBounds().Size();
                             sprite.Color = spriteDef.Tint;
                             Vfx.Add(sprite);
                         }
@@ -60,10 +97,10 @@ namespace Fiero.Business
                         timeline.RemoveAt(i);
                     }
                 }
-                Loop.WaitAndDraw(increment, (float)increment.TotalSeconds);
+                Loop.WaitAndDraw(increment);
                 time += increment;
-                foreach (var vfx in Vfx) {
-                    vfx.Dispose();
+                foreach (var sprite in Vfx) {
+                    sprite.Dispose();
                 }
                 Vfx.Clear();
             }
@@ -87,16 +124,19 @@ namespace Fiero.Business
 
         protected virtual LayoutGrid BuildLayout(LayoutGrid grid) => grid
             .Row()
-                .Row(h: 3 * 0.025f, id: "top-bar")
+                .Row(h: 4 * 0.025f, id: "top-bar")
                     .Cell<Label>(x => x.Text.V = "Fiero")
                 .End()
-                .Row(h: 3 * 0.775f, id: "player-view")
+                .Row(h: 4 * 0.775f, id: "player-view")
                     .Col()
                         .Cell<Viewport>(x => Viewport = x)
                     .End()
                 .End()
-                .Row(h: 3 * 0.200f, id: "player-logs")
+                .Row(h: 4 * 0.175f, id: "player-logs")
                     .Cell<Paragraph>(x => Logs = x)
+                .End()
+                .Row(h: 4 * 0.025f, id: "look-bar")
+                    .Cell<Label>(x => LookBar = x)
                 .End()
             .End();
 
@@ -125,7 +165,7 @@ namespace Fiero.Business
         public void Update()
         {
             Layout.Update();
-            if(UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.Zoom))) {
+            if(UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.ToggleZoom))) {
                 Viewport.ViewTileSize.V = Viewport.ViewTileSize.V == new Coord(8, 8)
                     ? new Coord(16, 16) : new Coord(8, 8);
             }

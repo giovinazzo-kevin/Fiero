@@ -12,63 +12,63 @@ namespace Fiero.Business
 
     public static class FloorGenerationExtensions
     {
-        public static void DrawLine(this FloorGenerationContext ctx, (int X, int Y) start, (int X, int Y) end, TileName tile) 
+        public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, TileName tile) 
         {
-            Utils.Bresenham(start, end, (x, y) => { ctx.Set(x, y, tile); return true; });
+            Utils.Bresenham(start, end, p => { ctx.Set(p.X, p.Y, tile); return true; });
         }
 
-        public static void DrawBox(this FloorGenerationContext ctx, (int X, int Y) topLeft, (int Width, int Height) size, TileName tile)
+        public static void DrawBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, TileName tile)
         {
-            size = (topLeft.X + size.Width, topLeft.Y + size.Height);
+            size = new(topLeft.X + size.X, topLeft.Y + size.Y);
 
-            ctx.DrawLine(topLeft, (size.Width - 1, topLeft.Y), tile);
-            ctx.DrawLine(topLeft, (topLeft.X, size.Height - 1), tile);
-            ctx.DrawLine((size.Width - 1, topLeft.Y), (size.Width - 1, size.Height - 1), tile);
-            ctx.DrawLine((topLeft.X, size.Height - 1), (size.Width - 1, size.Height - 1), tile);
+            ctx.DrawLine(topLeft, new(size.X - 1, topLeft.Y), tile);
+            ctx.DrawLine(topLeft, new(topLeft.X, size.Y - 1), tile);
+            ctx.DrawLine(new(size.X - 1, topLeft.Y), new(size.X - 1, size.Y - 1), tile);
+            ctx.DrawLine(new(topLeft.X, size.Y - 1), new(size.X - 1, size.Y - 1), tile);
         }
 
         public static void DrawRoom(this FloorGenerationContext ctx, 
-            (int X, int Y) topLeft, 
-            (int Width, int Height) size, 
+            Coord topLeft, 
+            Coord size, 
             (bool L, bool R, bool U, bool D) doors,
             TileName wall = TileName.Wall,
             TileName door = TileName.Door,
             bool isCorridor = false,
             bool hasRoundedCorners = false)
         {
-            for (var x = topLeft.X + 1; x < topLeft.X + size.Width - 1; x++) {
-                for (var y = topLeft.Y + 1; y < topLeft.Y + size.Height - 1; y++) {
+            for (var x = topLeft.X + 1; x < topLeft.X + size.X - 1; x++) {
+                for (var y = topLeft.Y + 1; y < topLeft.Y + size.Y - 1; y++) {
                     ctx.Set(x, y, isCorridor ? TileName.Wall : TileName.Ground);
                 }
             }
 
             ctx.DrawBox(topLeft, size, wall);
-            var middle = (topLeft.X + size.Width / 2, topLeft.Y + size.Height / 2);
+            var middle = new Coord(topLeft.X + size.X / 2, topLeft.Y + size.Y / 2);
             if (doors.L) {
-                var p = (X: topLeft.X, Y: topLeft.Y + (size.Height - 1) / 2);
+                var p = new Coord(topLeft.X, topLeft.Y + (size.Y - 1) / 2);
                 if(isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
                 ctx.Set(p.X, p.Y, door);
             }
             if (doors.R) {
-                var p = (X: topLeft.X + size.Width - 1, Y: topLeft.Y + (size.Height - 1) / 2);
+                var p = new Coord(topLeft.X + size.X - 1, topLeft.Y + (size.Y - 1) / 2);
                 if(isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
                 ctx.Set(p.X, p.Y, door);
             }
             if (doors.U) {
-                var p = (X: topLeft.X + (size.Width - 1) / 2, Y: topLeft.Y);
+                var p = new Coord(topLeft.X + (size.X - 1) / 2, topLeft.Y);
                 if (isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
                 ctx.Set(p.X, p.Y, door);
             }
             if (doors.D) {
-                var p = (X: topLeft.X + (size.Width - 1) / 2, Y: topLeft.Y + size.Height - 1);
+                var p = new Coord(topLeft.X + (size.X - 1) / 2, topLeft.Y + size.Y - 1);
                 if (isCorridor) ctx.DrawLine(p, middle, TileName.Ground);
                 ctx.Set(p.X, p.Y, door);
             }
             if(hasRoundedCorners) {
                 ctx.Set(topLeft.X + 1, topLeft.Y + 1, wall);
-                ctx.Set(topLeft.X + size.Width - 3 + 1, topLeft.Y + 1, wall);
-                ctx.Set(topLeft.X + 1, topLeft.Y + size.Height - 3 + 1, wall);
-                ctx.Set(topLeft.X + size.Width - 3 + 1, topLeft.Y + size.Height - 3 + 1, wall);
+                ctx.Set(topLeft.X + size.X - 3 + 1, topLeft.Y + 1, wall);
+                ctx.Set(topLeft.X + 1, topLeft.Y + size.Y - 3 + 1, wall);
+                ctx.Set(topLeft.X + size.X - 3 + 1, topLeft.Y + size.Y - 3 + 1, wall);
             }
         }
 
@@ -133,29 +133,28 @@ namespace Fiero.Business
 
                 Coord RoomTopLeft(DungeonGenerationNode node)
                 {
-                    var roomTopLeftRelativeToOrigin = new Coord(node.Position.X * roomSizeInTiles.X, node.Position.Y * roomSizeInTiles.Y);
-                    return new Coord(roomTopLeftRelativeToOrigin.X + origin.X + viewportOffset.X, roomTopLeftRelativeToOrigin.Y + origin.Y + viewportOffset.Y);
+                    return node.Position * roomSizeInTiles + origin + viewportOffset;
                 }
 
                 void MergeNorth(DungeonGenerationNode node, Coord roomTopLeft)
                 {
-                    ctx.DrawLine((roomTopLeft.X + 1, roomTopLeft.Y), (roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y), TileName.Ground);
-                    ctx.DrawLine((roomTopLeft.X + 1, roomTopLeft.Y - 1), (roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y - 1), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + 1, roomTopLeft.Y), new Coord(roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + 1, roomTopLeft.Y - 1), new Coord(roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y - 1), TileName.Ground);
                 }
                 void MergeSouth(DungeonGenerationNode node, Coord roomTopLeft)
                 {
-                    ctx.DrawLine((roomTopLeft.X + 1, roomTopLeft.Y + roomSizeInTiles.Y - 0), (roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y + roomSizeInTiles.Y - 0), TileName.Ground);
-                    ctx.DrawLine((roomTopLeft.X + 1, roomTopLeft.Y + roomSizeInTiles.Y - 1), (roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y + roomSizeInTiles.Y - 1), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + 1, roomTopLeft.Y + roomSizeInTiles.Y - 0), new Coord(roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y + roomSizeInTiles.Y - 0), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + 1, roomTopLeft.Y + roomSizeInTiles.Y - 1), new Coord(roomTopLeft.X + roomSizeInTiles.X - 2, roomTopLeft.Y + roomSizeInTiles.Y - 1), TileName.Ground);
                 }
                 void MergeWest(DungeonGenerationNode node, Coord roomTopLeft)
                 {
-                    ctx.DrawLine((roomTopLeft.X, roomTopLeft.Y + 1), (roomTopLeft.X, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
-                    ctx.DrawLine((roomTopLeft.X - 1, roomTopLeft.Y + 1), (roomTopLeft.X - 1, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X, roomTopLeft.Y + 1), new Coord(roomTopLeft.X, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X - 1, roomTopLeft.Y + 1), new Coord(roomTopLeft.X - 1, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
                 }
                 void MergeEast(DungeonGenerationNode node, Coord roomTopLeft)
                 {
-                    ctx.DrawLine((roomTopLeft.X + roomSizeInTiles.X - 0, roomTopLeft.Y + 1), (roomTopLeft.X + roomSizeInTiles.X - 0, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
-                    ctx.DrawLine((roomTopLeft.X + roomSizeInTiles.X - 1, roomTopLeft.Y + 1), (roomTopLeft.X + roomSizeInTiles.X - 1, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + roomSizeInTiles.X - 0, roomTopLeft.Y + 1), new Coord(roomTopLeft.X + roomSizeInTiles.X - 0, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
+                    ctx.DrawLine(new Coord(roomTopLeft.X + roomSizeInTiles.X - 1, roomTopLeft.Y + 1), new Coord(roomTopLeft.X + roomSizeInTiles.X - 1, roomTopLeft.Y + roomSizeInTiles.Y - 2), TileName.Ground);
                 }
             }
             void Draw(DungeonGenerationNode node, HashSet<DungeonGenerationNode> visited = null)
@@ -185,8 +184,8 @@ namespace Fiero.Business
                 var doors = (node.West != null, node.East != null, node.North != null, node.South != null);
                 var openSet = new List<Coord>();
                 ctx.DrawRoom(
-                    (roomTopLeft.X, roomTopLeft.Y), 
-                    (roomSizeInTiles.X, roomSizeInTiles.Y), 
+                    roomTopLeft,
+                    roomSizeInTiles, 
                     doors, wallTile, doorTile, isCorridor, hasRoundedCorners);
                 for (var y = roomTopLeft.Y; y < roomTopLeft.Y + roomSizeInTiles.Y; y++) {
                     for (var x = roomTopLeft.X; x < roomTopLeft.X + roomSizeInTiles.X; x++) {

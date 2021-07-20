@@ -12,6 +12,7 @@ namespace Fiero.Business
             public static readonly GameDatum<Keyboard.Key> Modifier = new(nameof(Hotkeys) + nameof(Modifier));
             public static readonly GameDatum<Keyboard.Key> Inventory = new(nameof(Hotkeys) + nameof(Inventory));
             public static readonly GameDatum<Keyboard.Key> Interact = new(nameof(Hotkeys) + nameof(Interact));
+            public static readonly GameDatum<Keyboard.Key> FireWeapon = new(nameof(Hotkeys) + nameof(FireWeapon));
             public static readonly GameDatum<Keyboard.Key> MoveNW = new(nameof(Hotkeys) + nameof(MoveNW));
             public static readonly GameDatum<Keyboard.Key> MoveN = new(nameof(Hotkeys) + nameof(MoveN));
             public static readonly GameDatum<Keyboard.Key> MoveNE = new(nameof(Hotkeys) + nameof(MoveNE));
@@ -21,8 +22,7 @@ namespace Fiero.Business
             public static readonly GameDatum<Keyboard.Key> MoveSW = new(nameof(Hotkeys) + nameof(MoveSW));
             public static readonly GameDatum<Keyboard.Key> MoveW = new(nameof(Hotkeys) + nameof(MoveW));
             public static readonly GameDatum<Keyboard.Key> Wait = new(nameof(Hotkeys) + nameof(Wait));
-
-            public static readonly GameDatum<Keyboard.Key> Zoom = new(nameof(Hotkeys) + nameof(Zoom));
+            public static readonly GameDatum<Keyboard.Key> ToggleZoom = new(nameof(Hotkeys) + nameof(ToggleZoom));
         }
 
     }

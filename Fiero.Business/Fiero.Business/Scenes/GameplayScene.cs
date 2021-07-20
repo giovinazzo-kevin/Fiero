@@ -144,7 +144,7 @@ namespace Fiero.Business.Scenes
                    floor.WithStep(ctx => {
                        var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
                            .Generate();
-                       ctx.DrawBox((0, 0), (ctx.Size.X, ctx.Size.Y), TileName.Wall);
+                       ctx.DrawBox(new(0, 0), new(ctx.Size.X, ctx.Size.Y), TileName.Wall);
                        ctx.DrawDungeon(dungeon);
                    }));
 
@@ -169,14 +169,14 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorIntentEvaluated:
-                // - Recenter viewport on player and update UI
             yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e => {
+            });
+            // ActionSystem.ActorTurnStarted:
+                // - Recenter viewport on player and update UI
+            yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e => {
                 if (e.Actor.ActorProperties.Type == ActorName.Player) {
                     Systems.Render.CenterOn(e.Actor);
                 }
-            });
-            // ActionSystem.ActorTurnStarted:
-            yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e => {
             });
             // ActionSystem.ActorTurnEnded:
                 // - Check dialogue triggers when the player's turn ends
@@ -208,6 +208,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorAttacked:
                 // - Handle damage calculations
                 // - Handle AI aggro and grudges
+                // - Show projectile animations
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
@@ -219,6 +220,13 @@ namespace Fiero.Business.Scenes
                 e.Victim.ActorProperties.Relationships.TryUpdate(e.Attacker, x => x
                     .With(StandingName.Hated)
                 , out _);
+                // animate projectile if this was a ranged attack
+                if(e.Type == AttackName.Ranged) {
+                    Systems.Render.Animate(
+                        e.Attacker.Physics.Position,
+                        Animation.Projectile(e.Attacker.Physics.Position, e.Victim.Physics.Position, tint: Color.Red)
+                    );
+                }
                 // calculate damage
                 --e.Victim.ActorProperties.Health;
                 return true;
@@ -235,6 +243,7 @@ namespace Fiero.Business.Scenes
                 }
                 Systems.Floor.RemoveActor(e.Victim.ActorProperties.FloorId, e.Victim);
                 Entities.FlagEntityForRemoval(e.Victim.Id);
+                Entities.RemoveFlagged(true);
                 e.Victim.TryRefresh(0); // invalidate target proxy
                 return true;
             });
@@ -259,7 +268,7 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ItemPickedUp:
-            // - Store item in inventory or fail
+                // - Store item in inventory or fail
             yield return Systems.Action.ItemPickedUp.SubscribeResponse(e => {
                 if (e.Actor.Inventory.TryPut(e.Item)) {
                     Systems.Floor.RemoveItem(e.Actor.FloorId(), e.Item);
@@ -380,7 +389,7 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update();
             Systems.Render.Update();
-            Entities.RemoveFlaggedEntities();
+            Entities.RemoveFlagged();
             if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);
             }

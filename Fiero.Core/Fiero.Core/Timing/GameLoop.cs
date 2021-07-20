@@ -18,22 +18,25 @@ namespace Fiero.Core
             TimeStep = 1f / 500f;
         }
 
-        public virtual void Wait(TimeSpan time, float timestep)
+        public virtual void WaitAndDraw(TimeSpan time, Action<float, float> onUpdate = null)
         {
-            var innerLoop = new GameLoop() {  TimeStep = timestep }; 
-            innerLoop.Run(time);
-
-        }
-
-        public virtual void WaitAndDraw(TimeSpan time, float timestep)
-        {
-            var innerLoop = new GameLoop() { TimeStep = timestep };
+            var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
+            if (onUpdate != null) innerLoop.Update += onUpdate;
             innerLoop.Run(time);
         }
 
-        public virtual void Run(TimeSpan duration = default, CancellationToken ct = default)
+        public virtual void LoopAndDraw(Func<bool> @break, Action<float, float> onUpdate = null)
         {
+            var innerLoop = new GameLoop() { TimeStep = TimeStep };
+            innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
+            if (onUpdate != null) innerLoop.Update += onUpdate;
+            innerLoop.Run(@break: @break);
+        }
+
+        public virtual void Run(TimeSpan duration = default, Func<bool> @break = null, CancellationToken ct = default)
+        {
+            @break ??= () => false;
             var time = new Stopwatch();
             time.Start();
             T = 0f;
@@ -50,6 +53,7 @@ namespace Fiero.Core
                 accumulator += frameTime;
                 while (accumulator >= TimeStep) {
                     Update?.Invoke(T, TimeStep);
+                    if (@break()) return;
                     T += TimeStep;
                     accumulator -= TimeStep;
                 }

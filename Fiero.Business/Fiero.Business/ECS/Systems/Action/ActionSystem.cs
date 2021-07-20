@@ -90,7 +90,9 @@ namespace Fiero.Business
                 _ => null
             };
             t.Actor.Action.LastAction = action;
-            ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn));
+            if(action.Name != ActionName.None) {
+                ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn));
+            }
             return cost;
         }
         
@@ -122,6 +124,7 @@ namespace Fiero.Business
         {
             var next = Dequeue();
             OnTurnStarted(next.ActorId);
+            next = next.WithLastActedTime(next.Time);
             var intent = next.GetIntent();
             if (HandleAction(next, ref intent) is { } cost) {
                 OnTurnEnded(next.ActorId);
@@ -131,7 +134,13 @@ namespace Fiero.Business
                 return null;
             }
             next = next.WithTime(next.Time + cost);
-            _queue.Add(next);
+            var index = _queue.FindIndex(t => t.Time > next.Time);
+            if(index == -1) {
+                _queue.Add(next);
+            }
+            else {
+                _queue.Insert(index, next);
+            }
             return cost;
 
             ActorTime Dequeue()
@@ -145,8 +154,9 @@ namespace Fiero.Business
             {
                 if (actorId == TURN_ACTOR_ID)
                     TurnStarted.Raise(new(++CurrentTurn));
-                else
+                else if(next.LastActedTime < next.Time) {
                     ActorTurnStarted.Raise(new(next.Actor, CurrentTurn));
+                }
             }
 
             void OnTurnEnded(int actorId)

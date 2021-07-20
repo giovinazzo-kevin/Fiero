@@ -95,7 +95,7 @@ namespace Fiero.Core
 
         protected virtual void InitializeWindow(RenderWindow win)
         {
-            win.SetFramerateLimit(60);
+            win.SetFramerateLimit(144);
             win.SetKeyRepeatEnabled(true);
             win.SetActive(true);
             win.Resized += (e, eh) => {

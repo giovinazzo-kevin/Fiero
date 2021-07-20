@@ -4,10 +4,11 @@
     {
         public readonly struct ActorAttackedEvent
         {
+            public readonly AttackName Type;
             public readonly Actor Attacker;
             public readonly Actor Victim;
-            public ActorAttackedEvent(Actor attacker, Actor victim)
-                => (Attacker, Victim) = (attacker, victim);
+            public ActorAttackedEvent(AttackName type, Actor attacker, Actor victim)
+                => (Type, Attacker, Victim) = (type, attacker, victim);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Fiero.Business
 
         public override IAction GetIntent(Actor a)
         {
+            return new MoveRandomlyAction();
             if (a.AI.Target is { Id: 0 }) {
                 a.AI.Target = null; // invalidation
             }
@@ -36,11 +37,10 @@ namespace Fiero.Business
                 }
             }
             // If wandering aimlessly, seek a new target (this is expensive so only do it occasionally)
-            if (a.AI.Target == null && Rng.Random.OneChanceIn(3)) {
+            if (a.AI.Target == null) {
                 // Seek new target to attack
                 var target = Systems.Floor.GetAllActors(a.ActorProperties.FloorId)
                     .Where(b => a.IsHotileTowards(b))
-                    .Where(b => Systems.Floor.CanSee(a, b))
                     .FirstOrDefault();
                 if (target != null) {
                     a.AI.Target = target;
@@ -48,7 +48,7 @@ namespace Fiero.Business
             }
             if (a.AI.Target != null) {
                 if (a.AI.Target.DistanceFrom(a) < 2) {
-                    return new AttackOtherAction(a.AI.Target);
+                    return new MeleeAttackOtherAction(a.AI.Target);
                 }
                 if (Systems.Floor.CanSee(a, a.AI.Target) && Systems.Floor.TryGetFloor(a.ActorProperties.FloorId, out var floor)) {
                     // If we can see the target and it has moved, recalculate the path as to remember its last position

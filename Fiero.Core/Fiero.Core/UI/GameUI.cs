@@ -10,7 +10,7 @@ namespace Fiero.Core
         public readonly GameDataStore Store;
         public readonly GameInput Input;
         public readonly GameWindow Window;
-        protected readonly IServiceFactory ServiceProvider;
+        public readonly IServiceFactory ServiceProvider;
         protected readonly List<ModalWindow> OpenModals;
 
         public IEnumerable<ModalWindow> GetOpenModals() => OpenModals;

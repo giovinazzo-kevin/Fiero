@@ -85,8 +85,8 @@ namespace Fiero.Business
         public static bool CanSee(this FloorSystem floorSystem, Actor a, Coord bPos)
         {
             var aPos = a.Physics.Position;
-            return Utils.Bresenham((aPos.X, aPos.Y), (bPos.X, bPos.Y), (x, y) => {
-                if(!floorSystem.TryGetTileAt(a.FloorId(), new(x, y), out var tile)) {
+            return Utils.Bresenham(new(aPos.X, aPos.Y), new(bPos.X, bPos.Y), p => {
+                if(!floorSystem.TryGetTileAt(a.FloorId(), p, out var tile)) {
                     return false;
                 }
                 if (tile.TileProperties.BlocksMovement) {

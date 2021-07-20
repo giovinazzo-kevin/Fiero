@@ -115,6 +115,7 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.Modifier, Keyboard.Key.LControl);
             Store.SetValue(Data.Hotkeys.Inventory, Keyboard.Key.I);
             Store.SetValue(Data.Hotkeys.Interact, Keyboard.Key.G);
+            Store.SetValue(Data.Hotkeys.FireWeapon, Keyboard.Key.F);
             Store.SetValue(Data.Hotkeys.MoveNW, Keyboard.Key.Numpad7);
             Store.SetValue(Data.Hotkeys.MoveN, Keyboard.Key.Numpad8);
             Store.SetValue(Data.Hotkeys.MoveNE, Keyboard.Key.Numpad9);
@@ -124,8 +125,7 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.MoveSW, Keyboard.Key.Numpad1);
             Store.SetValue(Data.Hotkeys.MoveS, Keyboard.Key.Numpad2);
             Store.SetValue(Data.Hotkeys.MoveSE, Keyboard.Key.Numpad3);
-            Store.SetValue(Data.Hotkeys.Zoom, Keyboard.Key.Z);
-
+            Store.SetValue(Data.Hotkeys.ToggleZoom, Keyboard.Key.Z);
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
@@ -133,7 +133,7 @@ namespace Fiero.Business
             Director.TrySetState(MenuScene.SceneState.Main);
 
 #if DEBUG
-            // Start logging everything that passes through the event global event bus
+            // Start logging everything that passes through the global event bus
             var sieve = Bus.Filter<object>();
             var ignores = new[] { 
                 nameof(RenderSystem),

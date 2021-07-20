@@ -24,7 +24,6 @@ namespace Fiero.Business
             if(QueuedActions.TryDequeue(out var backedUp)) {
                 return backedUp;
             }
-
             var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
 
             if (IsKeyPressed(Data.Hotkeys.MoveNW)) {
@@ -57,6 +56,11 @@ namespace Fiero.Business
             if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
             }
+            if (IsKeyPressed(Data.Hotkeys.FireWeapon)) {
+                if (UI.Look(out var cursor)) {
+                    return new RangedAttackPointAction(cursor - a.Physics.Position);
+                }
+            }
             if (IsKeyPressed(Data.Hotkeys.Inventory)) {
                 var inventoryModal = UI.Inventory(a);
                 CurrentModal = inventoryModal;
@@ -80,11 +84,10 @@ namespace Fiero.Business
                             throw new NotSupportedException();
                     }
                 };
-                return new NoAction();
             }
             return new NoAction();
 
-            IAction MoveOrAttack(Coord c) => wantToAttack ? new AttackDirectionAction(c) : new MoveRelativeAction(c);
+            IAction MoveOrAttack(Coord c) => wantToAttack ? new MeleeAttackPointAction(c) : new MoveRelativeAction(c);
             bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
             bool IsKeyDown(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));
         }

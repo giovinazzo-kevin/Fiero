@@ -14,5 +14,6 @@ namespace Fiero.Business
     {
         [RequiredComponent]
         public InfoComponent Info { get; private set; }
+        public override string ToString() => Info.Name;
     }
 }

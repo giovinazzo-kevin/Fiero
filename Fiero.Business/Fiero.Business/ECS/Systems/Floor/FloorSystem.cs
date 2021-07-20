@@ -36,7 +36,7 @@ namespace Fiero.Business
                     }
                 }
             }
-            Entities.RemoveFlaggedEntities(propagate: true);
+            Entities.RemoveFlagged(propagate: true);
             Floors.Clear();
         }
 
@@ -206,5 +206,8 @@ namespace Fiero.Business
             }
             return false;
         }
+
+        public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
+            => !TryGetFloor(id, out var floor) || Utils.BresenhamPoints(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
     }
 }

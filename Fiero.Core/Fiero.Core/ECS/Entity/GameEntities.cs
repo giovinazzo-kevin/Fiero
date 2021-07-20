@@ -81,7 +81,7 @@ namespace Fiero.Core
             foreach (var e in Entities) {
                 FlagEntityForRemoval(e.Id);
             }
-            RemoveFlaggedEntities(propagate);
+            RemoveFlagged(propagate);
         }
 
         public int CreateEntity()
@@ -221,7 +221,7 @@ namespace Fiero.Core
             return Parent?.FlagComponentForRemoval(entityId, componentId) ?? true;
         }
 
-        public void RemoveFlaggedEntities(bool propagate = true) // Don't call while enumerating, obviously
+        public void RemoveFlagged(bool propagate = true) // Don't call while enumerating, obviously
         {
             while(ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup)) {
                 var equalEntity = new TrackedEntity(tup.EntityId);
@@ -252,7 +252,7 @@ namespace Fiero.Core
                 Entities.Remove(trackedEntity);
             }
             if(propagate) {
-                Parent?.RemoveFlaggedEntities();
+                Parent?.RemoveFlagged();
             }
         }
 
@@ -321,7 +321,7 @@ namespace Fiero.Core
             foreach (var e in Entities) {
                 FlagEntityForRemoval(e.Id);
             }
-            RemoveFlaggedEntities(propagate: true);
+            RemoveFlagged(propagate: true);
             _diposed = true;
             GC.SuppressFinalize(this);
         }

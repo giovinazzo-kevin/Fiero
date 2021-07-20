@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Fiero.Business
 {
@@ -26,6 +28,11 @@ namespace Fiero.Business
             foreach (var x in Features) yield return x;
             foreach (var x in Items) yield return x;
             foreach (var x in Actors) yield return x;
+        }
+
+        public override string ToString()
+        {
+            return $"{String.Join(", ", GetDrawables())}.";
         }
     }
 }

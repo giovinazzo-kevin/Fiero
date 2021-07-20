@@ -11,5 +11,7 @@ namespace Fiero.Business
         public string DisplayName => ItemProperties.Identified
             ? Info.Name
             : ItemProperties.UnidentifiedName;
+
+        public override string ToString() => $"{DisplayName}";
     }
 }

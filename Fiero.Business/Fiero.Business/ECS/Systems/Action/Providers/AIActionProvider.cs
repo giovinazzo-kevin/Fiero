@@ -4,56 +4,57 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public class AIActionProvider : ActionProvider
+    public class AiActionProvider : ActionProvider
     {
         protected readonly GameSystems Systems;
 
-        public AIActionProvider(GameSystems systems)
+        public AiActionProvider(GameSystems systems)
         {
             Systems = systems;
         }
 
         public override IAction GetIntent(Actor a)
         {
-            return new MoveRandomlyAction();
-            if (a.AI.Target is { Id: 0 }) {
-                a.AI.Target = null; // invalidation
+            if (a.Ai.Target is { Id: 0 }) {
+                a.Ai.Target = null; // invalidation
+            }
+            // If wandering aimlessly, seek a new target (this is expensive so only do it occasionally)
+            if (a.Ai.Target == null) {
+                // Seek new target to attack
+                var floorId = a.FloorId();
+                var target = a.Fov.VisibleTiles
+                    .SelectMany(p => Systems.Floor.GetActorsAt(floorId, p))
+                    .Where(b => a.IsHostileTowards(b))
+                    .FirstOrDefault();
+                if (target != null) {
+                    a.Ai.Target = target;
+                }
+            }
+            if (a.Ai.Target != null) {
+                if (a.Ai.Target.DistanceFrom(a) < 2) {
+                    return new MeleeAttackOtherAction(a.Ai.Target);
+                }
+                if (a.CanSee(a.Ai.Target) && Systems.Floor.TryGetFloor(a.ActorProperties.FloorId, out var floor)) {
+                    // If we can see the target and it has moved, recalculate the path as to remember its last position
+                    a.Ai.Path = floor.Pathfinder.Search(a.Physics.Position, a.Ai.Target.Physics.Position, default);
+                    a.Ai.Path?.RemoveFirst();
+                }
             }
             // If following a path, do so until the end or an obstacle is reached
-            if (a.AI.Path != null) {
-                if (a.AI.Path.First != null) {
-                    var pos = a.AI.Path.First.Value.Tile.Physics.Position;
+            if (a.Ai.Path != null) {
+                if (a.Ai.Path.First != null) {
+                    var pos = a.Ai.Path.First.Value.Tile.Physics.Position;
                     var dir = new Coord(pos.X - a.Physics.Position.X, pos.Y - a.Physics.Position.Y);
                     var diff = Math.Abs(dir.X) + Math.Abs(dir.Y);
-                    a.AI.Path.RemoveFirst();
+                    a.Ai.Path.RemoveFirst();
                     if (diff > 0 && diff <= 2) {
                         // one tile ahead
                         return new MoveRelativeAction(dir);
                     }
                 }
                 else {
-                    a.AI.Path = null;
+                    a.Ai.Path = null;
                     return GetIntent(a);
-                }
-            }
-            // If wandering aimlessly, seek a new target (this is expensive so only do it occasionally)
-            if (a.AI.Target == null) {
-                // Seek new target to attack
-                var target = Systems.Floor.GetAllActors(a.ActorProperties.FloorId)
-                    .Where(b => a.IsHostileTowards(b))
-                    .FirstOrDefault();
-                if (target != null) {
-                    a.AI.Target = target;
-                }
-            }
-            if (a.AI.Target != null) {
-                if (a.AI.Target.DistanceFrom(a) < 2) {
-                    return new MeleeAttackOtherAction(a.AI.Target);
-                }
-                if (Systems.Floor.CanSee(a, a.AI.Target) && Systems.Floor.TryGetFloor(a.ActorProperties.FloorId, out var floor)) {
-                    // If we can see the target and it has moved, recalculate the path as to remember its last position
-                    a.AI.Path = floor.Pathfinder.Search(a.Physics.Position, a.AI.Target.Physics.Position, default);
-                    a.AI.Path?.RemoveFirst();
                 }
             }
             return new MoveRandomlyAction();

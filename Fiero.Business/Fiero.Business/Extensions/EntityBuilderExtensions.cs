@@ -22,22 +22,24 @@ namespace Fiero.Business
             });
         public static EntityBuilder<T> WithMaximumHealth<T>(this EntityBuilder<T> builder, int maximum)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Health = c.MaximumHealth = maximum);
-        public static EntityBuilder<T> WithPersonality<T>(this EntityBuilder<T> builder, Personality pers)
-            where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Personality = pers);
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
         public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
-        public static EntityBuilder<T> WithEnemyAI<T>(this EntityBuilder<T> builder)
+        public static EntityBuilder<T> WithEnemyAi<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
                 var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
-                c.ActionProvider = new AIActionProvider(gameSystems);
+                c.ActionProvider = new AiActionProvider(gameSystems);
             })
-                .AddOrTweak<AIComponent>();
-        public static EntityBuilder<T> WithPlayerAI<T>(this EntityBuilder<T> builder, GameUI ui)
+                .AddOrTweak<AiComponent>();
+        public static EntityBuilder<T> WithPlayerAi<T>(this EntityBuilder<T> builder, GameUI ui)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
                 var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
                 c.ActionProvider = new PlayerActionProvider(ui, gameSystems);
+            });
+        public static EntityBuilder<T> WithFieldOfView<T>(this EntityBuilder<T> builder, int radius)
+            where T : Actor => builder.AddOrTweak<FieldOfViewComponent>(c => {
+                c.Radius = radius;
             });
         public static EntityBuilder<T> WithFaction<T>(this EntityBuilder<T> builder, FactionName faction)
             where T : Actor => builder.AddOrTweak<FactionComponent>(c => {
@@ -71,7 +73,7 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithTileInfo<T>(this EntityBuilder<T> builder, TileName type)
             where T : Tile => builder.AddOrTweak<TileComponent>(c => {
                 c.Name = type;
-                c.BlocksMovement = type switch {
+                c.BlocksMovement = c.BlocksLight = type switch {
                     TileName.Ground => false,
                     TileName.Downstairs => false,
                     TileName.Upstairs => false,

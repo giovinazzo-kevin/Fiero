@@ -20,7 +20,7 @@ namespace Fiero.Business
             listeners = Systems.Floor.GetAllActors(floorId)
                 .Where(a => a.ActorProperties.Type == ActorName.Player 
                     && a.DistanceFrom(speaker) < DistanceThreshold
-                    && Systems.Floor.CanSee(a, speaker));
+                    && a.CanSee(speaker));
             return listeners.Any();
         }
     }

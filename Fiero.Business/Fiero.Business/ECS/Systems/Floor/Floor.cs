@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public class Floor
     {
         public readonly FloorId Id;
@@ -79,6 +80,17 @@ namespace Fiero.Business
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Remove(feature);
             }
+        }
+
+        public IEnumerable<Coord> CalculateFov(Coord center, int radius)
+        {
+            var result = new HashSet<Coord>();
+            new JordixVisibility(
+                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.TileProperties.BlocksLight,
+                (x, y) => result.Add(new(x, y)),
+                (x, y) => (int)new Coord().DistSq(new(x, y))
+            ).Compute(center, radius * radius);
+            return result;
         }
 
         public void CreatePathfinder()

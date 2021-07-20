@@ -21,12 +21,14 @@ namespace Fiero.Business
         }
 
         public bool IsWalkable(object inContext) => ((IPathNode<object>)Tile).IsWalkable(inContext)
-            && !Actors.Any() && !Features.Any(f => f.FeatureProperties.BlocksMovement);
-        public IEnumerable<Drawable> GetDrawables()
+            && !Features.Any(f => f.FeatureProperties.BlocksMovement);
+        public IEnumerable<Drawable> GetDrawables(bool seen = true)
         {
             yield return Tile;
             foreach (var x in Features) yield return x;
             foreach (var x in Items) yield return x;
+            if (!seen)
+                yield break;
             foreach (var x in Actors) yield return x;
         }
 

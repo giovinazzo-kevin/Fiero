@@ -7,6 +7,6 @@ namespace Fiero.Business
     {
         public TileName Name { get; set; }
         public bool BlocksMovement { get; set; }
-
+        public bool BlocksLight { get; set; }
     }
 }

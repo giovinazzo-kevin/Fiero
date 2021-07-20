@@ -14,19 +14,16 @@ namespace Fiero.Business
                 throw new ArgumentException("Can't set faction standing of self");
             _dict[faction] = standing;
         }
-        public bool TryUpdate(FactionName faction, Func<Relationship, Relationship> update, out Relationship value)
+
+        public void Update(FactionName other, Func<Relationship, Relationship> update, out Relationship value)
         {
-            if (_dict.TryGetValue(faction, out value)) {
-                value = _dict[faction] = update(value);
-                return true;
-            }
-            return false;
+            _dict[other] = value = update(_dict[other]);
         }
 
         public Relationship Get(FactionName faction)
         {
             if (faction == Faction)
-                return new(StandingName.Loved, TrustName.Admired, PowerComparisonName.FairFight);
+                return new(StandingName.Loved);
             return _dict[faction];
         }
 
@@ -37,7 +34,7 @@ namespace Fiero.Business
             foreach (var val in Enum.GetValues<FactionName>()) {
                 if (val == Faction)
                     continue;
-                _dict[val] = new(StandingName.Tolerated, TrustName.Known, PowerComparisonName.FairFight);
+                _dict[val] = new(StandingName.Tolerated);
             }
         }
     }

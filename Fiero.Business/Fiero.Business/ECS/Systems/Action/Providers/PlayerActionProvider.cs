@@ -66,7 +66,7 @@ namespace Fiero.Business
                 if(a.Equipment.GetEquipedWeapons(w => w.AttackType == AttackName.Ranged).Any()) {
                     var possibleTargets = Systems.Floor.GetAllActors(a.FloorId())
                         .Except(new[] { a })
-                        .Where(b => Systems.Floor.CanSee(a, b.Physics.Position))
+                        .Where(b => a.CanSee(b))
                         .Select(t => t.Physics.Position)
                         .OrderBy(p => p.DistSq(a.Physics.Position));
                     if (possibleTargets.Any() && UI.Target(possibleTargets.ToArray(), out var cursor)) {

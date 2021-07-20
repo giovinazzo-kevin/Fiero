@@ -12,13 +12,12 @@ namespace Fiero.Business
             _dict[other.Id] = standing;
         }
 
-        public bool TryUpdate(Actor other, Func<Relationship, Relationship> update, out Relationship value)
+        public void Update(Actor other, Func<Relationship, Relationship> update, out Relationship value)
         {
-            if (_dict.TryGetValue(other.Id, out value)) {
-                value = _dict[other.Id] = update(value);
-                return true;
+            if(!TryGet(other, out value)) {
+                value = new(StandingName.Tolerated);
             }
-            return false;
+            _dict[other.Id] = value = update(value);
         }
 
         public bool TryGet(Actor other, out Relationship standing)

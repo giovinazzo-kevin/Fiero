@@ -71,31 +71,20 @@ namespace Fiero.Business.Scenes
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
                     .Triggered += (t, eh) => {
                         foreach (var player in eh.DialogueListeners.Players()) {
-                            Systems.Faction.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
+                            Systems.Faction.UpdateRelationship(FactionName.Rats, FactionName.Players,
                                 x => x.With(StandingName.Loved), out _);
                         }
                     };
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
                     .Triggered += (t, eh) => {
+                        var gkr = (Actor)eh.DialogueStarter;
                         foreach (var player in eh.DialogueListeners.Players()) {
-                            Systems.Faction.TryUpdateRelationship(FactionName.Rats, FactionName.Players,
+                            Systems.Faction.UpdateRelationship(FactionName.Rats, FactionName.Players,
                                 x => x.With(StandingName.Hated), out _);
-                            Systems.Faction.TryCreateConflict(
-                                FactionName.Rats, (r, i) => i < 3,
-                                FactionName.Players, (p, i) => i == 0,
-                                out _);
-                            Systems.Faction.TryCreateConflict(
-                                FactionName.Rats, (r, i) => i < 3,
-                                FactionName.Players, (p, i) => i == 0,
-                                out _);
-                            Systems.Faction.TryCreateConflict(
-                                FactionName.Rats, (r, i) => i < 3,
-                                FactionName.Players, (p, i) => i == 0,
-                                out _);
-                            Systems.Faction.TryCreateConflict(
-                                FactionName.Rats, (r, i) => i < 3,
-                                FactionName.Players, (p, i) => i == 0,
-                                out _);
+                            player.ActorProperties.Relationships.Update(gkr,
+                                x => x.With(StandingName.Hated), out _);
+                            gkr.ActorProperties.Relationships.Update(player,
+                                x => x.With(StandingName.Hated), out _);
                         }
                     };
                 Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
@@ -130,6 +119,7 @@ namespace Fiero.Business.Scenes
                 // - Generate a new RNG seed
                 // - Generate map and spawn actors
                 // - Create and spawn player
+                // - Set faction relationships to default values
                 // - Track player visually in the interface
             yield return Systems.Action.GameStarted.SubscribeResponse(e => {
                 Systems.Floor.Reset();
@@ -165,21 +155,25 @@ namespace Fiero.Business.Scenes
                 if (!TrySpawn(d1FloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
+                // Set faction defaults
+                Systems.Faction.SetDefaultRelationships();
                 Systems.Render.CenterOn(Player);
                 return true;
             });
-            // ActionSystem.ActorIntentEvaluated:
-            yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e => {
-            });
             // ActionSystem.ActorTurnStarted:
+                // - Update Fov
                 // - Recenter viewport on player and update UI
             yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e => {
+                Systems.Floor.RecalculateFov(e.Actor);
                 if (e.Actor.ActorProperties.Type == ActorName.Player) {
                     Systems.Render.CenterOn(e.Actor);
                 }
             });
+            // ActionSystem.ActorIntentEvaluated:
+            yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e => {
+            });
             // ActionSystem.ActorTurnEnded:
-                // - Check dialogue triggers when the player's turn ends
+            // - Check dialogue triggers when the player's turn ends
             yield return Systems.Action.ActorTurnEnded.SubscribeResponse(e => {
                 if (e.Actor.ActorProperties.Type == ActorName.Player) {
                     Systems.Dialogue.CheckTriggers();
@@ -187,8 +181,8 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorMoved:
-                // - Update position
-                // - Notify current floor of new position
+                // - Update actor position
+                // - Update FloorSystem positional caches
                 // - Log stuff that was stepped over
             yield return Systems.Action.ActorMoved.SubscribeResponse(e => {
                 var floor = Systems.Floor.GetFloor(e.Actor.FloorId());
@@ -206,21 +200,13 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorAttacked:
-                // - Handle damage calculations
-                // - Handle AI aggro and grudges
+                // - Calculate damage depending on equipment 
+                // - Handle Ai aggro and grudges
                 // - Show projectile animations
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
                 var addCost = 0;
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
-                // make sure that neutrals aggro the attacker
-                if (e.Victim.AI != null && e.Victim.AI.Target == null) {
-                    e.Victim.AI.Target = e.Attacker;
-                }
-                // make sure that people hold a grudge regardless of factions
-                e.Victim.ActorProperties.Relationships.TryUpdate(e.Attacker, x => x
-                    .With(StandingName.Hated)
-                , out _);
                 // animate projectile if this was a ranged attack
                 if(e.Type == AttackName.Ranged) {
                     var dir = (e.Victim.Physics.Position - e.Attacker.Physics.Position).Clamp(-1, 1);
@@ -243,6 +229,18 @@ namespace Fiero.Business.Scenes
                     damage = weaponsUsed.Sum(w => w.WeaponProperties.BaseDamage);
                 }
                 e.Victim.ActorProperties.Health -= damage;
+
+                if(damage > 0) {
+                    // make sure that neutrals aggro the attacker
+                    if (e.Victim.Ai != null && e.Victim.Ai.Target == null) {
+                        e.Victim.Ai.Target = e.Attacker;
+                    }
+                    // make sure that people hold a grudge regardless of factions
+                    e.Victim.ActorProperties.Relationships.Update(e.Attacker, x => x
+                        .With(StandingName.Hated)
+                    , out _);
+                }
+
                 return new(true, addCost);
             });
             // ActionSystem.ActorKilled:

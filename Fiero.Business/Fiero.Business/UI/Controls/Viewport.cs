@@ -2,6 +2,7 @@
 using SFML.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -17,6 +18,8 @@ namespace Fiero.Business
         public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
         public readonly UIControlProperty<Coord?> CursorPosition = new(nameof(CursorPosition), default);
         public readonly UIControlProperty<Color> CursorColor = new(nameof(CursorColor), Color.White);
+        public readonly UIControlProperty<IEnumerable<Coord>> KnownTiles = new(nameof(KnownTiles), Enumerable.Empty<Coord>());
+        public readonly UIControlProperty<IEnumerable<Coord>> VisibleTiles = new(nameof(VisibleTiles), Enumerable.Empty<Coord>());
 
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
@@ -70,6 +73,12 @@ namespace Fiero.Business
                     if (!floor.Cells.TryGetValue(coord, out var cell))
                         continue;
 
+                    var known = KnownTiles.V.Contains(coord);
+                    var seen = VisibleTiles.V.Contains(coord);
+
+                    if (!known)
+                        continue;
+
                     var relativePos = coord - new Coord(ViewArea.V.Left, ViewArea.V.Top);
                     var screenPos = relativePos * ViewTileSize.V + Position.V;
                     if (
@@ -78,8 +87,8 @@ namespace Fiero.Business
                         continue;
                     }
 
-                    foreach (var drawable in cell.GetDrawables()) {
-                        var sprite = drawable.Render.Sprite;
+                    foreach (var drawable in cell.GetDrawables(seen)) {
+                        using var sprite = new Sprite(drawable.Render.Sprite);
                         sprite.Position = screenPos;
                         var spriteSize = sprite.GetLocalBounds().Size();
                         if (drawable is Actor actor && (actor.Npc?.IsBoss ?? false)) {
@@ -88,6 +97,9 @@ namespace Fiero.Business
                         }
                         else {
                             sprite.Scale = ViewTileSize.V / spriteSize;
+                        }
+                        if(!seen) {
+                            sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
                         }
                         _renderTexture.Draw(sprite, states);
                     }

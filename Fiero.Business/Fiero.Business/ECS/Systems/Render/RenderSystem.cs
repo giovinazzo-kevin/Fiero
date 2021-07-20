@@ -33,8 +33,10 @@ namespace Fiero.Business
 
             Viewport.ViewFloor.V = a.ActorProperties.FloorId;
             Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
+            Viewport.VisibleTiles.V = a.Fov?.VisibleTiles ?? Enumerable.Empty<Coord>();
+            Viewport.KnownTiles.V = a.Fov?.KnownTiles ?? Enumerable.Empty<Coord>();
 
-            if(a.Log != null) {
+            if (a.Log != null) {
                 Logs.Text.V = String.Join('\n', a.Log.GetMessages().TakeLast(Logs.MaxLines));
             }
 

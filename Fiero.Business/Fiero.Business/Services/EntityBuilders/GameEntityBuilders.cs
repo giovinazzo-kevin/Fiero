@@ -30,29 +30,29 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
-            .WithPlayerAI(UI)
+            .WithPlayerAi(UI)
             .WithName(nameof(Player))
             .WithSprite(nameof(Player))
             .WithActorInfo(ActorName.Player, MonsterTierName.One)
             .WithFaction(FactionName.Players)
-            .WithPersonality(default)
             .WithPosition(Coord.Zero)
             .WithInventory(50)
             .WithEquipment()
+            .WithFieldOfView(7)
             ;
 
         public EntityBuilder<Actor> Enemy(MonsterTierName tier) 
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
-            .WithEnemyAI()
+            .WithEnemyAi()
             .WithName(nameof(Enemy))
             .WithSprite("None")
             .WithActorInfo(ActorName.None, tier)
             .WithFaction(FactionName.None)
-            .WithPersonality(Personality.RandomPersonality())
             .WithPosition(Coord.Zero)
             .WithInventory(5)
             .WithEquipment()
+            .WithFieldOfView(7)
             ;
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, AttackName attack, WeaponHandednessName hands, int baseDamage, int swingDelay, int itemRarity)

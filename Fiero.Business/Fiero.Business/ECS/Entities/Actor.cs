@@ -17,6 +17,7 @@ namespace Fiero.Business
         public InventoryComponent Inventory { get; private set; }
         public EquipmentComponent Equipment { get; private set; }
         public DialogueComponent Dialogue { get; private set; }
-        public AIComponent AI { get; private set; }
+        public AiComponent Ai { get; private set; }
+        public FieldOfViewComponent Fov { get; private set; }
     }
 }

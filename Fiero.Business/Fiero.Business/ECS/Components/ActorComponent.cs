@@ -12,6 +12,5 @@ namespace Fiero.Business
         public MonsterTierName Tier { get; set; }
         public FloorId FloorId { get; set; }
         public ActorRelationships Relationships { get; set; } = new();
-        public Personality Personality { get; set; } = new();
     }
 }

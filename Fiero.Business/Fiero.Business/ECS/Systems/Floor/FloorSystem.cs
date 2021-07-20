@@ -207,6 +207,15 @@ namespace Fiero.Business
             return false;
         }
 
+        public void RecalculateFov(Actor a)
+        {
+            if(a.Fov != null && TryGetFloor(a.FloorId(), out var floor)) {
+                a.Fov.VisibleTiles.Clear();
+                a.Fov.VisibleTiles.UnionWith(floor.CalculateFov(a.Physics.Position, a.Fov.Radius));
+                a.Fov.KnownTiles.UnionWith(a.Fov.VisibleTiles);
+            }
+        }
+
         public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
             => !TryGetFloor(id, out var floor) || Utils.BresenhamPoints(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
     }

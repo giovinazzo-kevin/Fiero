@@ -30,12 +30,15 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
         public static EntityBuilder<T> WithEnemyAI<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
-                    var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
-                    c.ActionProvider = new AIActionProvider(gameSystems);
-                })
+                var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
+                c.ActionProvider = new AIActionProvider(gameSystems);
+            })
                 .AddOrTweak<AIComponent>();
         public static EntityBuilder<T> WithPlayerAI<T>(this EntityBuilder<T> builder, GameUI ui)
-            where T : Actor => builder.AddOrTweak<ActionComponent>(c => c.ActionProvider = new PlayerActionProvider(ui));
+            where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
+                var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
+                c.ActionProvider = new PlayerActionProvider(ui, gameSystems);
+            });
         public static EntityBuilder<T> WithFaction<T>(this EntityBuilder<T> builder, FactionName faction)
             where T : Actor => builder.AddOrTweak<FactionComponent>(c => {
                 var factionSystem = (FactionSystem)builder.ServiceFactory.GetInstance(typeof(FactionSystem));
@@ -89,10 +92,11 @@ namespace Fiero.Business
             where T : Scroll => builder.AddOrTweak<ScrollComponent>(c => {
                 c.Effect = effect;
             });
-        public static EntityBuilder<T> WithWeaponInfo<T>(this EntityBuilder<T> builder, 
-            WeaponName type, WeaponHandednessName hands, int baseDamage, int swingDelay)
+        public static EntityBuilder<T> WithWeaponInfo<T>(this EntityBuilder<T> builder,
+            WeaponName type, AttackName attack, WeaponHandednessName hands, int baseDamage, int swingDelay)
             where T : Weapon => builder.AddOrTweak<WeaponComponent>(c => {
                 c.Type = type;
+                c.AttackType = attack;
                 c.Handedness = hands;
                 c.BaseDamage = baseDamage;
                 c.SwingDelay = swingDelay;

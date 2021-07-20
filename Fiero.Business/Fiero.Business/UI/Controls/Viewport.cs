@@ -16,6 +16,7 @@ namespace Fiero.Business
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
         public readonly UIControlProperty<Coord?> CursorPosition = new(nameof(CursorPosition), default);
+        public readonly UIControlProperty<Color> CursorColor = new(nameof(CursorColor), Color.White);
 
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
@@ -56,6 +57,7 @@ namespace Fiero.Business
             if(CursorPosition.V is { } cur) {
                 _cursorSprite.Position = (cur - new Coord(ViewArea.V.Left, ViewArea.V.Top)) * ViewTileSize.V + Position.V;
                 _cursorSprite.Scale = ViewTileSize.V / _cursorSprite.GetLocalBounds().Size();
+                _cursorSprite.Color = CursorColor.V;
                 target.Draw(_cursorSprite);
             }
             bool Bake()

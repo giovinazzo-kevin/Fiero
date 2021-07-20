@@ -40,7 +40,7 @@ namespace Fiero.Business
             if (a.AI.Target == null) {
                 // Seek new target to attack
                 var target = Systems.Floor.GetAllActors(a.ActorProperties.FloorId)
-                    .Where(b => a.IsHotileTowards(b))
+                    .Where(b => a.IsHostileTowards(b))
                     .FirstOrDefault();
                 if (target != null) {
                     a.AI.Target = target;

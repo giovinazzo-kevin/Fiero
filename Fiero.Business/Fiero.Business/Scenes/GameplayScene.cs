@@ -210,6 +210,7 @@ namespace Fiero.Business.Scenes
                 // - Handle AI aggro and grudges
                 // - Show projectile animations
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
+                var addCost = 0;
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                 // make sure that neutrals aggro the attacker
@@ -222,14 +223,27 @@ namespace Fiero.Business.Scenes
                 , out _);
                 // animate projectile if this was a ranged attack
                 if(e.Type == AttackName.Ranged) {
+                    var dir = (e.Victim.Physics.Position - e.Attacker.Physics.Position).Clamp(-1, 1);
                     Systems.Render.Animate(
                         e.Attacker.Physics.Position,
                         Animation.Projectile(e.Attacker.Physics.Position, e.Victim.Physics.Position, tint: Color.Red)
                     );
                 }
                 // calculate damage
-                --e.Victim.ActorProperties.Health;
-                return true;
+                var damage = 0;
+                var weaponsUsed = e.Attacker.Equipment?.GetEquipedWeapons(w => w.AttackType == e.Type)
+                    ?? Enumerable.Empty<Weapon>();
+                if(!weaponsUsed.Any()) {
+                    // Attack using intrinsics
+                    damage = 1;
+                }
+                else {
+                    // Attack using equipment
+                    addCost = weaponsUsed.Max(w => w.WeaponProperties.SwingDelay);
+                    damage = weaponsUsed.Sum(w => w.WeaponProperties.BaseDamage);
+                }
+                e.Victim.ActorProperties.Health -= damage;
+                return new(true, addCost);
             });
             // ActionSystem.ActorKilled:
                 // - Remove entity from floor and handle cleanup

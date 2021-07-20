@@ -44,9 +44,10 @@ namespace Fiero.Business
         public bool IsCursorVisible() => Viewport.CursorPosition.V.HasValue;
         public Coord GetCursorPosition() => Viewport.CursorPosition.V ?? throw new InvalidOperationException();
 
-        public void ShowCursor(Coord worldPos)
+        public void ShowCursor(Coord worldPos, Color? c = null)
         {
             Viewport.CursorPosition.V = worldPos;
+            Viewport.CursorColor.V = c ?? Color.White;
         }
 
         public void MoveCursor(Coord offset)
@@ -64,6 +65,7 @@ namespace Fiero.Business
         public void HideCursor()
         {
             Viewport.CursorPosition.V = null;
+            Viewport.CursorColor.V = Color.White;
         }
 
         public void SetLookText(string text)

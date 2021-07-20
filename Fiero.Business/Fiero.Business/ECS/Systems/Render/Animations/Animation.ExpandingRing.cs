@@ -43,7 +43,8 @@ namespace Fiero.Business
             Color? tint = null,
             TimeSpan? frameDuration = null
         ) => new(
-            Utils.BresenhamPoints(from, to)
+            Utils.BresenhamPoints(to, from)
+                .Reverse()
                 .Select(p => new AnimationFrame(
                     frameDuration ?? TimeSpan.FromMilliseconds(16), new AnimationSprite(texture, sprite, tint ?? Color.White, p - from)))
                 .ToArray()

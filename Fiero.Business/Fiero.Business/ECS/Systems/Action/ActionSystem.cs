@@ -13,6 +13,23 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
 
+    public readonly struct EventResult
+    {
+        public readonly bool Cancel;
+        public readonly int AdditionalCost;
+
+        public EventResult(bool cancel, int additionalCost = 0)
+        {
+            Cancel = cancel;
+            AdditionalCost = additionalCost;
+        }
+
+
+        public static implicit operator bool(EventResult r) => r.Cancel;
+        public static implicit operator EventResult(bool b) => new(b);
+
+    }
+
     public sealed partial class ActionSystem : EcsSystem
     {
         private const int TURN_ACTOR_ID = -1;
@@ -24,22 +41,22 @@ namespace Fiero.Business
         private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
 
-        public readonly SystemRequest<ActionSystem, TurnEvent, bool> GameStarted;
-        public readonly SystemRequest<ActionSystem, TurnEvent, bool> TurnStarted;
-        public readonly SystemRequest<ActionSystem, TurnEvent, bool> TurnEnded;
-        public readonly SystemRequest<ActionSystem, ActorTurnEvent, bool> ActorTurnStarted;
-        public readonly SystemRequest<ActionSystem, ActorTurnEvent, bool> ActorTurnEnded;
-        public readonly SystemRequest<ActionSystem, ActorMovedEvent, bool> ActorMoved;
-        public readonly SystemRequest<ActionSystem, ActorSpawnedEvent, bool> ActorSpawned;
-        public readonly SystemRequest<ActionSystem, ActorDiedEvent, bool> ActorDied;
-        public readonly SystemRequest<ActionSystem, ActorKilledEvent, bool> ActorKilled;
-        public readonly SystemRequest<ActionSystem, ActorAttackedEvent, bool> ActorAttacked;
-        public readonly SystemRequest<ActionSystem, ItemPickedUpEvent, bool> ItemPickedUp;
-        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, bool> ItemDropped;
-        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, bool> ItemEquipped;
-        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, bool> ItemUnequipped;
-        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, bool> ItemConsumed;
-        public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, bool> FeatureInteractedWith;
+        public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> GameStarted;
+        public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnStarted;
+        public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnEnded;
+        public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnStarted;
+        public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnEnded;
+        public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorMoved;
+        public readonly SystemRequest<ActionSystem, ActorSpawnedEvent, EventResult> ActorSpawned;
+        public readonly SystemRequest<ActionSystem, ActorDiedEvent, EventResult> ActorDied;
+        public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
+        public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
+        public readonly SystemRequest<ActionSystem, ItemPickedUpEvent, EventResult> ItemPickedUp;
+        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemDropped;
+        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemEquipped;
+        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemUnequipped;
+        public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemConsumed;
+        public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
 
         public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
 

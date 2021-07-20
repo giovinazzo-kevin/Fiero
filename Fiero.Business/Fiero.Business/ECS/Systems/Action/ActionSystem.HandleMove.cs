@@ -54,7 +54,7 @@ namespace Fiero.Business
                     }
                     else {
                         var target = actorsHere.Single();
-                        if (t.Actor.IsHotileTowards(target)) {
+                        if (t.Actor.IsHostileTowards(target)) {
                             // attack-bump is a free "combo"
                             action = new MeleeAttackOtherAction(target);
                             cost = HandleAction(t, ref action);

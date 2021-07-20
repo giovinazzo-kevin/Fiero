@@ -1,4 +1,6 @@
 ﻿using Fiero.Core;
+using System;
+using System.Collections.Generic;
 
 namespace Fiero.Business
 {
@@ -20,6 +22,15 @@ namespace Fiero.Business
             || ArmsSlot?.Id == i.Id
             || LegsSlot?.Id == i.Id
             ;
+
+        public IEnumerable<Weapon> GetEquipedWeapons(Func<WeaponComponent, bool> filter = null)
+        {
+            filter ??= _ => true;
+            if (LeftHandWeapon != null && filter(LeftHandWeapon.WeaponProperties))
+                yield return LeftHandWeapon;
+            if (RightHandWeapon != LeftHandWeapon && RightHandWeapon != null && filter(RightHandWeapon.WeaponProperties))
+                yield return RightHandWeapon;
+        }
 
         public bool TryEquip(Item i)
         {

@@ -55,12 +55,12 @@ namespace Fiero.Business
             .WithEquipment()
             ;
 
-        public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, WeaponHandednessName hands, int baseDamage, int swingDelay, int itemRarity)
+        public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, AttackName attack, WeaponHandednessName hands, int baseDamage, int swingDelay, int itemRarity)
             => Entities.CreateBuilder<Weapon>()
             .WithName(type.ToString())
             .WithSprite(type.ToString())
             .WithPosition(Coord.Zero)
-            .WithWeaponInfo(type, hands, baseDamage, swingDelay)
+            .WithWeaponInfo(type, attack, hands, baseDamage, swingDelay)
             .WithItemInfo(itemRarity, unidentName)
             ;
 
@@ -239,13 +239,13 @@ namespace Fiero.Business
 
         #region WEAPONS
         public EntityBuilder<Weapon> Sword()
-            => Weapon("sword", WeaponName.Sword, WeaponHandednessName.OneHanded, 10, 100, itemRarity: 10)
+            => Weapon("sword", WeaponName.Sword, AttackName.Melee, WeaponHandednessName.OneHanded, 10, 100, itemRarity: 10)
             ;
         public EntityBuilder<Weapon> Bow()
-            => Weapon("bow", WeaponName.Bow, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
+            => Weapon("bow", WeaponName.Bow, AttackName.Ranged, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
             ;
         public EntityBuilder<Weapon> Staff()
-            => Weapon("staff", WeaponName.Staff, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
+            => Weapon("staff", WeaponName.Staff, AttackName.Magical, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
             ;
         #endregion
 

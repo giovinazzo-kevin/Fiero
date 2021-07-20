@@ -40,13 +40,18 @@ namespace Fiero.Business
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );
 
-        public static bool Cursor(this GameUI ui, out Coord cursorPos, Coord? cursorInitialPos = null, Action<Coord> cursorMoved = null)
+        internal static bool FreeCursor(this GameUI ui,
+            out Coord cursorPos,
+            Coord? cursorInitialPos = null,
+            Action<Coord> cursorMoved = null
+        )
         {
             var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var result = false;
             cursorPos = cursorInitialPos ?? renderSystem.GetViewportCenter();
             renderSystem.ShowCursor(cursorPos);
+            cursorMoved?.Invoke(renderSystem.GetCursorPosition());
             gameLoop.LoopAndDraw(() => {
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
                     result = false;
@@ -88,11 +93,76 @@ namespace Fiero.Business
             }
         }
 
+        internal static bool TargetedCursor(this GameUI ui,
+            out Coord cursorPos,
+            Coord[] allowedPositions,
+            Action<Coord> cursorMoved = null
+        )
+        {
+            var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
+            var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
+            var result = false;
+            cursorPos = allowedPositions.First();
+            renderSystem.ShowCursor(cursorPos, ui.Store.Get(Data.UI.DefaultAccent));
+            cursorMoved?.Invoke(renderSystem.GetCursorPosition());
+            gameLoop.LoopAndDraw(() => {
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
+                    result = false;
+                    return true;
+                }
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Confirm))) {
+                    result = true;
+                    return true;
+                }
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.FireWeapon))) {
+                    result = true;
+                    return true;
+                }
+                return false;
+            }, (t, dt) => {
+                ui.Window.DispatchEvents();
+                ui.Input.Update(ui.Window.GetMousePosition());
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
+                    Move(-1);
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveE)))
+                    Move(+1);
+            });
+            cursorPos = renderSystem.GetCursorPosition();
+            renderSystem.HideCursor();
+            return result;
+
+            void Move(int i)
+            {
+                var pos = renderSystem.GetCursorPosition();
+                var index = Array.IndexOf(allowedPositions, pos);
+                var newPos = allowedPositions[(index + i).Mod(allowedPositions.Length)];
+                renderSystem.ShowCursor(newPos, ui.Store.Get(Data.UI.DefaultAccent));
+                cursorMoved?.Invoke(renderSystem.GetCursorPosition());
+            }
+        }
+
         public static bool Look(this GameUI ui, out Coord cursorPos)
         {
             var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var result = ui.Cursor(out cursorPos, cursorMoved: c => {
+            var result = ui.FreeCursor(out cursorPos, cursorMoved: c => {
+                var floorId = renderSystem.GetViewportFloor();
+                if (floorSystem.TryGetCellAt(floorId, c, out var cell)) {
+                    renderSystem.SetLookText(cell.ToString());
+                }
+                else {
+                    renderSystem.SetLookText(String.Empty);
+                }
+            });
+            renderSystem.SetLookText(String.Empty);
+            return result;
+        }
+
+        public static bool Target(this GameUI ui, Coord[] allowedPositions, out Coord cursorPos)
+        {
+            var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
+            var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
+            var result = ui.TargetedCursor(out cursorPos, allowedPositions, cursorMoved: c => {
                 var floorId = renderSystem.GetViewportFloor();
                 if (floorSystem.TryGetCellAt(floorId, c, out var cell)) {
                     renderSystem.SetLookText(cell.ToString());

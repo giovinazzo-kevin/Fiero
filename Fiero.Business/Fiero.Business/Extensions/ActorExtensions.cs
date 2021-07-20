@@ -7,7 +7,7 @@ namespace Fiero.Business
 
     public static class ActorExtensions
     {
-        public static bool IsHotileTowards(this Actor a, Actor b)
+        public static bool IsHostileTowards(this Actor a, Actor b)
         {
             if (a.ActorProperties.Relationships.TryGet(b, out var standing)) {
                 return standing.MayTarget();

@@ -18,20 +18,20 @@ namespace Fiero.Business
             var victim = default(Actor);
             if (action is MeleeAttackOtherAction oth) {
                 victim = oth.Victim;
-                return HandleMeleeAttack();
+                return HandleMeleeAttack(ref cost);
             }
             else if (action is MeleeAttackPointAction dir) {
                 var newPos = t.Actor.Physics.Position + dir.Point;
-                return TryFindVictim(newPos, out victim) && HandleMeleeAttack();
+                return TryFindVictim(newPos, out victim) && HandleMeleeAttack(ref cost);
             }
             else if (action is RangedAttackOtherAction rOth) {
                 victim = rOth.Victim;
-                return HandleRangedAttack();
+                return HandleRangedAttack(ref cost);
             }
             else if (action is RangedAttackPointAction rDir) {
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Physics.Position + rDir.Point;
-                return TryFindVictim(newPos, out victim) && HandleRangedAttack();
+                return TryFindVictim(newPos, out victim) && HandleRangedAttack(ref cost);
             }
             else throw new NotSupportedException(action.GetType().Name);
 
@@ -46,31 +46,33 @@ namespace Fiero.Business
                 return true;
             }
 
-            bool HandleMeleeAttack()
+            bool HandleMeleeAttack(ref int? cost)
             {
                 if (t.Actor.DistanceFrom(victim) >= 2) {
                     // out of reach
                     return false;
                 }
-                return HandleAttack(AttackName.Melee);
+                return HandleAttack(AttackName.Melee, ref cost);
             }
 
-            bool HandleRangedAttack()
+            bool HandleRangedAttack(ref int? cost)
             {
                 if(_floorSystem.IsLineOfSightBlocked(t.Actor.FloorId(), t.Actor.Physics.Position, victim.Physics.Position)) {
                     return false;
                 }
                 // TODO: Check for weapon max range
-                return HandleAttack(AttackName.Ranged);
+                return HandleAttack(AttackName.Ranged, ref cost);
             }
 
-            bool HandleAttack(AttackName type)
+            bool HandleAttack(AttackName type, ref int? cost)
             {
                 if (t.Actor.Faction.Relationships.Get(victim.Faction.Type).MayAttack()) {
                     // attack!
-                    if (!ActorAttacked.Request(new(type, t.Actor, victim)).All(x => x)) {
+                    var attackResponse = ActorAttacked.Request(new(type, t.Actor, victim)).First(x => x);
+                    if (!attackResponse) {
                         return false;
                     }
+                    cost += attackResponse.AdditionalCost;
                     if (victim.ActorProperties.Health <= 0) {
                         RemoveActor(victim.Id);
                         return ActorKilled.Request(new(t.Actor, victim)).All(x => x);

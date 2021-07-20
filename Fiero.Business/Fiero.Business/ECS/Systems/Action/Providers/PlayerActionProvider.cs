@@ -2,18 +2,21 @@
 using SFML.Window;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
     public class PlayerActionProvider : ActionProvider
     {
         protected readonly GameUI UI;
+        protected readonly GameSystems Systems;
         protected readonly Queue<IAction> QueuedActions;
         protected Modal CurrentModal { get; private set; }
 
-        public PlayerActionProvider(GameUI ui)
+        public PlayerActionProvider(GameUI ui, GameSystems systems)
         {
             UI = ui;
+            Systems = systems;
             QueuedActions = new();
         }
 
@@ -56,9 +59,19 @@ namespace Fiero.Business
             if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
             }
+            if (IsKeyPressed(Data.Hotkeys.Look)) {
+                UI.Look(out _);
+            }
             if (IsKeyPressed(Data.Hotkeys.FireWeapon)) {
-                if (UI.Look(out var cursor)) {
-                    return new RangedAttackPointAction(cursor - a.Physics.Position);
+                if(a.Equipment.GetEquipedWeapons(w => w.AttackType == AttackName.Ranged).Any()) {
+                    var possibleTargets = Systems.Floor.GetAllActors(a.FloorId())
+                        .Except(new[] { a })
+                        .Where(b => Systems.Floor.CanSee(a, b.Physics.Position))
+                        .Select(t => t.Physics.Position)
+                        .OrderBy(p => p.DistSq(a.Physics.Position));
+                    if (possibleTargets.Any() && UI.Target(possibleTargets.ToArray(), out var cursor)) {
+                        return new RangedAttackPointAction(cursor - a.Physics.Position);
+                    }
                 }
             }
             if (IsKeyPressed(Data.Hotkeys.Inventory)) {

@@ -22,7 +22,7 @@ namespace Fiero.Business
             if (a.Ai.Target == null) {
                 // Seek new target to attack
                 var floorId = a.FloorId();
-                var target = a.Fov.VisibleTiles
+                var target = a.Fov.VisibleTiles[floorId]
                     .SelectMany(p => Systems.Floor.GetActorsAt(floorId, p))
                     .Where(b => a.IsHostileTowards(b))
                     .FirstOrDefault();

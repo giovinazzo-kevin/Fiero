@@ -4,14 +4,12 @@
     {
         Item,
         Consumable,
-        ItemForSale,
-        ConsumableForSale,
         Enemy,
         Boss,
-        Upstairs,
-        Downstairs,
         Shrine,
         Chest,
-        Trap
+        Trap,
+        Upstairs,
+        Downstairs
     }
 }

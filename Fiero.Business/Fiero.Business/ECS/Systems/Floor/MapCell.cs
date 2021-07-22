@@ -24,7 +24,8 @@ namespace Fiero.Business
             && !Features.Any(f => f.FeatureProperties.BlocksMovement);
         public IEnumerable<Drawable> GetDrawables(bool seen = true)
         {
-            yield return Tile;
+            if(!Items.Any() && !Features.Any() && (!seen || !Actors.Any()))
+                yield return Tile;
             foreach (var x in Features) yield return x;
             foreach (var x in Items) yield return x;
             if (!seen)

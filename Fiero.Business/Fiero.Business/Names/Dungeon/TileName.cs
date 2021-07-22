@@ -5,8 +5,6 @@
         None,
         Ground,
         Wall,
-        Upstairs,
-        Downstairs,
         Door,
     }
 }

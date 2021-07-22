@@ -15,6 +15,10 @@ namespace Fiero.Business
                 c.Sprite.Scale = new(1, 1);
                 c.Sprite.Color = tint ?? c.Sprite.Color;
             });
+        public static EntityBuilder<T> WithColor<T>(this EntityBuilder<T> builder, SFML.Graphics.Color tint)
+            where T : Drawable => builder.AddOrTweak<RenderComponent>(c => {
+                c.Sprite.Color = tint;
+            });
         public static EntityBuilder<T> WithActorInfo<T>(this EntityBuilder<T> builder, ActorName type, MonsterTierName tier)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
                 c.Type = type;
@@ -61,10 +65,14 @@ namespace Fiero.Business
                 var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
                 gameSystems.Dialogue.SetTriggers(gameSystems, type, c);
             });
+        public static EntityBuilder<T> WithPortalInfo<T>(this EntityBuilder<T> builder, FloorConnection conn)
+            where T : Feature => builder.AddOrTweak<PortalComponent>(c => {
+                c.Connection = conn;
+            });
         public static EntityBuilder<T> WithFeatureInfo<T>(this EntityBuilder<T> builder, FeatureName type)
             where T : Feature => builder.AddOrTweak<FeatureComponent>(c => {
-                c.Type = type;
-                c.BlocksMovement = c.Type switch {
+                c.Name = type;
+                c.BlocksMovement = c.Name switch {
                     FeatureName.Shrine => true,
                     FeatureName.Chest => true,
                     _ => false
@@ -75,8 +83,6 @@ namespace Fiero.Business
                 c.Name = type;
                 c.BlocksMovement = c.BlocksLight = type switch {
                     TileName.Ground => false,
-                    TileName.Downstairs => false,
-                    TileName.Upstairs => false,
                     _ => true
                 };
             });

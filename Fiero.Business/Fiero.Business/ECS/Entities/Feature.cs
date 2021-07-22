@@ -7,5 +7,6 @@ namespace Fiero.Business
         [RequiredComponent]
         public FeatureComponent FeatureProperties { get; private set; }
         public DialogueComponent Dialogue { get; private set; }
+        public PortalComponent Portal { get; private set; }
     }
 }

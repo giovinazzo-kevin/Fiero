@@ -24,7 +24,7 @@ namespace Fiero.Business
         }
 
         public static FloorId FloorId(this Actor a) => a.ActorProperties.FloorId;
-        public static bool CanSee(this Actor a, Coord c) => a.Fov?.VisibleTiles.Contains(c) ?? true;
+        public static bool CanSee(this Actor a, Coord c) => a.Fov?.VisibleTiles[a.FloorId()].Contains(c) ?? true;
         public static bool CanSee(this Actor a, Drawable e) => a.CanSee(e.Physics.Position);
     }
 }

@@ -7,7 +7,7 @@ namespace Fiero.Business
     public class FeatureComponent : EcsComponent
     {
         public FloorId FloorId { get; set; }
-        public FeatureName Type { get; set; }
+        public FeatureName Name { get; set; }
         public bool BlocksMovement { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -177,8 +178,6 @@ namespace Fiero.Business
             .WithSprite(type.ToString(), tint: Colors.Get(type switch {
                 TileName.Door       => ColorName.Red,
                 TileName.Wall       => ColorName.Gray,
-                TileName.Upstairs   => ColorName.LightGray,
-                TileName.Downstairs => ColorName.LightGray,
                 _ => ColorName.White
             }))
             .WithPosition(Coord.Zero)
@@ -265,6 +264,25 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Feature> Trap()
             => Feature(FeatureName.Trap)
+            ;
+
+
+        private Color GetBranchColor(DungeonBranchName branch) => branch switch {
+            DungeonBranchName.Dungeon => Colors.Get(ColorName.Gray),
+            DungeonBranchName.Sewers => Colors.Get(ColorName.Green),
+            DungeonBranchName.Kennels => Colors.Get(ColorName.Red),
+            _ => Colors.Get(ColorName.White)
+        };
+
+        public EntityBuilder<Feature> Downstairs(FloorConnection conn)
+            => Feature(FeatureName.Downstairs)
+            .WithColor(GetBranchColor(conn.To.Branch))
+            .WithPortalInfo(conn)
+            ;
+        public EntityBuilder<Feature> Upstairs(FloorConnection conn)
+            => Feature(FeatureName.Upstairs)
+            .WithColor(GetBranchColor(conn.From.Branch))
+            .WithPortalInfo(conn)
             ;
         #endregion
     }

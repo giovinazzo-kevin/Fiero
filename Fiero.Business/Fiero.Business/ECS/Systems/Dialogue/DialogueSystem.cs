@@ -75,7 +75,7 @@ namespace Fiero.Business
                         throw new ArgumentException();
                     }
                     floorId = featureSpeaker.FeatureProperties.FloorId;
-                    dialogueKey = featureSpeaker.FeatureProperties.Type.ToString();
+                    dialogueKey = featureSpeaker.FeatureProperties.Name.ToString();
                     speaker = featureSpeaker;
                 }
                 else {

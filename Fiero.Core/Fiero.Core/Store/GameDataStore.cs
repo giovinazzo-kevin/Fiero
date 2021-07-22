@@ -41,5 +41,10 @@ namespace Fiero.Core
         }
 
         public void SetValue<T>(GameDatum<T> datum, T newValue) => TrySetValue(datum, GetOrDefault(datum), newValue);
+        public void UpdateValue<T>(GameDatum<T> datum, Func<T, T> update) 
+        {
+            var old = GetOrDefault(datum);
+            TrySetValue(datum, old, update(old));
+        }
     }
 }

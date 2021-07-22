@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using LightInject;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,20 +9,23 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     public class FloorSystem : EcsSystem
     {
         protected readonly Dictionary<FloorId, Floor> Floors;
 
+        public readonly IServiceFactory ServiceProvider;
         public readonly GameEntities Entities;
         public readonly GameEntityBuilders EntityBuilders;
         public readonly GameDataStore Store;
 
-        public FloorSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store)
+        public FloorSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store, IServiceFactory sp)
             : base(bus)
         {
             Entities = entities;
             Store = store;
             EntityBuilders = entityBuilders;
+            ServiceProvider = sp;
             Floors = new();
         }
 
@@ -46,8 +50,17 @@ namespace Fiero.Business
 
         public void AddFloor(FloorId id, Coord size, Func<FloorBuilder, FloorBuilder> configure)
         {
-            Floors.Add(id, configure(new FloorBuilder(size))
-                .Build(id, Entities, EntityBuilders));
+            var builder = configure(new FloorBuilder(size, Entities, EntityBuilders));
+            var floor = builder.Build(id);
+            Floors.Add(id, floor);
+        }
+
+        public void AddDungeon(Func<DungeonBuilder, DungeonBuilder> configure)
+        {
+            var builder = configure(new DungeonBuilder(Entities, EntityBuilders, ServiceProvider));
+            foreach(var floor in builder.Build()) {
+                Floors.Add(floor.Id, floor);
+            }
         }
 
         public bool TryGetCellAt(FloorId id, Coord pos, out MapCell cell)
@@ -209,14 +222,22 @@ namespace Fiero.Business
 
         public void RecalculateFov(Actor a)
         {
-            if(a.Fov != null && TryGetFloor(a.FloorId(), out var floor)) {
-                a.Fov.VisibleTiles.Clear();
-                a.Fov.VisibleTiles.UnionWith(floor.CalculateFov(a.Physics.Position, a.Fov.Radius));
-                a.Fov.KnownTiles.UnionWith(a.Fov.VisibleTiles);
+            var floorId = a.FloorId();
+            if(a.Fov != null && TryGetFloor(floorId, out var floor)) {
+                if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles)) {
+                    a.Fov.KnownTiles[floorId] = knownTiles = new();
+                }
+                if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var visibleTiles)) {
+                    a.Fov.VisibleTiles[floorId] = visibleTiles = new();
+                }
+                visibleTiles.Clear();
+                visibleTiles.UnionWith(floor.CalculateFov(a.Physics.Position, a.Fov.Radius));
+                knownTiles.UnionWith(visibleTiles);
             }
         }
 
         public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
-            => !TryGetFloor(id, out var floor) || Utils.BresenhamPoints(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
+            => !TryGetFloor(id, out var floor) 
+                || Shape.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
     }
 }

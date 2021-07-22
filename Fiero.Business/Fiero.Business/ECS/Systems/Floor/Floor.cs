@@ -16,11 +16,11 @@ namespace Fiero.Business
         public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
         public SpatialAStar<MapCell, object> Pathfinder { get; private set; }
 
-        public Floor(FloorId id, FloorGenerationContext ctx)
+        public Floor(FloorId id, Coord size)
         {
             Id = id;
-            Size = ctx.Size;
-            _cells = new SpatialDictionary<MapCell>(ctx.Size);
+            Size = size;
+            _cells = new SpatialDictionary<MapCell>(size);
         }
 
         public IEnumerable<Drawable> GetDrawables() 

@@ -90,7 +90,7 @@ namespace Fiero.Business.Scenes
                 Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
                     .Triggered += (t, eh) => {
                         foreach (var player in eh.DialogueListeners.Players()) {
-                            var friends = Enumerable.Range(99, 100)
+                            var friends = Enumerable.Range(5, 10)
                                 .Select(i => Resources.Entities
                                     .Rat(MonsterTierName.Two)
                                     .WithFaction(FactionName.Players)
@@ -129,14 +129,16 @@ namespace Fiero.Business.Scenes
                 Store.SetValue(Data.Global.RngSeed, newRngSeed);
 
                 // Generate map
-                var d1FloorId = new FloorId(DungeonBranchName.Dungeon, 1);
-                Systems.Floor.AddFloor(d1FloorId, new(200, 200), floor =>
-                   floor.WithStep(ctx => {
-                       var dungeon = new DungeonGenerator(DungeonGenerationSettings.Default)
-                           .Generate();
-                       ctx.DrawBox(new(0, 0), new(ctx.Size.X, ctx.Size.Y), TileName.Wall);
-                       ctx.DrawDungeon(dungeon);
-                   }));
+                var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
+                Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
+                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 15, i => new Coord(10, 10) * (i / 3 + 1));
+                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Sewers,   9, i => new Coord(25, 25) * (i / 3 + 1));
+                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Kennels,  1, i => new Coord(40, 40));
+                    // Connect branches at semi-random depths
+                    ctx.Connect(default, entranceFloorId);
+                    ctx.Connect(new(DungeonBranchName.Dungeon, Rng.Random.Between(4, 7)), new(DungeonBranchName.Sewers, 1));
+                    ctx.Connect(new(DungeonBranchName.Dungeon, Rng.Random.Between(6, 9)), new(DungeonBranchName.Kennels, 1));
+                }));
 
                 // Track agents
                 foreach (var comp in Entities.GetComponents<ActionComponent>()) {
@@ -145,18 +147,19 @@ namespace Fiero.Business.Scenes
 
                 // Create player on top of the starting stairs
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
-                var upstairs = Systems.Floor.GetAllTiles(d1FloorId)
-                    .Single(t => t.TileProperties.Name == TileName.Upstairs)
+                var upstairs = Systems.Floor.GetAllFeatures(entranceFloorId)
+                    .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Physics.Position;
                 Player = Resources.Entities.Player
                     .WithPosition(upstairs)
                     .WithName(playerName)
                     .Build();
-                if (!TrySpawn(d1FloorId, Player)) {
+                if (!TrySpawn(entranceFloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
                 // Set faction defaults
                 Systems.Faction.SetDefaultRelationships();
+                Systems.Floor.RecalculateFov(Player);
                 Systems.Render.CenterOn(Player);
                 return true;
             });
@@ -334,14 +337,37 @@ namespace Fiero.Business.Scenes
             // ActionSystem.FeatureInteractedWith:
                 // - Handle shrine interactions
                 // - Handle chest interactions
+                // - Handle stair and portal interactions
             yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e => {
-                if (e.Feature.FeatureProperties.Type == FeatureName.Shrine) {
+                if (e.Feature.FeatureProperties.Name == FeatureName.Shrine) {
                     e.Actor.Log?.Write($"$Action.YouKneelAt$ {e.Feature.Info.Name}.");
                 }
-                if (e.Feature.FeatureProperties.Type == FeatureName.Chest) {
+                if (e.Feature.FeatureProperties.Name == FeatureName.Chest) {
                     e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
                 }
+                if (e.Feature.FeatureProperties.Name == FeatureName.Upstairs) {
+                    return HandleStairs(e.Feature.Portal.Connection.To, e.Feature.Portal.Connection.From);
+                }
+                if (e.Feature.FeatureProperties.Name == FeatureName.Downstairs) {
+                    return HandleStairs(e.Feature.Portal.Connection.From, e.Feature.Portal.Connection.To);
+                }
                 return true;
+                bool HandleStairs(FloorId current, FloorId next)
+                {
+                    var currentFloor = Systems.Floor.GetFloor(current);
+                    if (!Systems.Floor.TryGetFloor(next, out var nextFloor)) {
+                        e.Actor.Log?.Write($"$Error.NoFloorWithId$ {next}.");
+                        return false;
+                    }
+                    var stairs = Systems.Floor.GetAllFeatures(next)
+                        .Single(f => f.Portal?.Connects(current, next) ?? false);
+                    currentFloor.RemoveActor(e.Actor);
+                    e.Actor.Physics.Position = stairs.Physics.Position;
+                    e.Actor.ActorProperties.FloorId = next;
+                    nextFloor.AddActor(e.Actor);
+                    e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
+                    return true;
+                }
             });
         }
 

@@ -15,7 +15,7 @@ namespace Fiero.Business
             TimeSpan? frameDuration = null
         ) => new (
             Enumerable.Range(1, radius)
-                .Select(i => new AnimationFrame(frameDuration ?? TimeSpan.FromMilliseconds(16), CoordEnumerable.Circle(i)
+                .Select(i => new AnimationFrame(frameDuration ?? TimeSpan.FromMilliseconds(16), Shape.Circle(new(), i)
                     .Select(p => new AnimationSprite(texture, sprite, tint ?? Color.White, p))
                     .ToArray()))
                 .ToArray()
@@ -43,7 +43,7 @@ namespace Fiero.Business
             Color? tint = null,
             TimeSpan? frameDuration = null
         ) => new(
-            Utils.BresenhamPoints(to, from)
+            Shape.Line(to, from)
                 .Reverse()
                 .Select(p => new AnimationFrame(
                     frameDuration ?? TimeSpan.FromMilliseconds(16), new AnimationSprite(texture, sprite, tint ?? Color.White, p - from)))

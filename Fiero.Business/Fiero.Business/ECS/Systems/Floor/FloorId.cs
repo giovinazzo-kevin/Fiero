@@ -34,5 +34,7 @@ namespace Fiero.Business
         {
             return !(left == right);
         }
+
+        public override string ToString() => $"{Branch.ToString()[0]}{Depth}";
     }
 }

@@ -60,6 +60,9 @@ namespace Fiero.Business
 
         public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
 
+        public int CurrentActorId => _queue[0].ActorId;
+        public IEnumerable<int> ActorIds => _queue.Select(x => x.ActorId);
+
         public ActionSystem(
             EventBus bus,
             GameEntities entities, 
@@ -108,7 +111,7 @@ namespace Fiero.Business
             };
             t.Actor.Action.LastAction = action;
             if(action.Name != ActionName.None) {
-                ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn));
+                ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn, t.Time));
             }
             return cost;
         }
@@ -152,7 +155,7 @@ namespace Fiero.Business
             }
             next = next.WithTime(next.Time + cost);
             var index = _queue.FindIndex(t => t.Time > next.Time);
-            if(index == -1) {
+            if(index < 0) {
                 _queue.Add(next);
             }
             else {
@@ -169,10 +172,11 @@ namespace Fiero.Business
 
             void OnTurnStarted(int actorId)
             {
-                if (actorId == TURN_ACTOR_ID)
+                if (actorId == TURN_ACTOR_ID) {
                     TurnStarted.Raise(new(++CurrentTurn));
+                }
                 else if(next.LastActedTime < next.Time) {
-                    ActorTurnStarted.Raise(new(next.Actor, CurrentTurn));
+                    ActorTurnStarted.Raise(new(next.Actor, CurrentTurn, next.Time));
                 }
             }
 
@@ -181,7 +185,7 @@ namespace Fiero.Business
                 if (actorId == TURN_ACTOR_ID)
                     TurnEnded.Raise(new(CurrentTurn));
                 else
-                    ActorTurnEnded.Raise(new(next.Actor, CurrentTurn));
+                    ActorTurnEnded.Raise(new(next.Actor, CurrentTurn, next.Time));
             }
         }
 

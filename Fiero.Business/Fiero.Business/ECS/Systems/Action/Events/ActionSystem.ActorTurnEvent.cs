@@ -6,8 +6,9 @@
         {
             public readonly Actor Actor;
             public readonly int TurnId;
-            public ActorTurnEvent(Actor actor, int turnId)
-                => (Actor, TurnId) = (actor, turnId);
+            public readonly int Time;
+            public ActorTurnEvent(Actor actor, int turnId, int time)
+                => (Actor, TurnId, Time) = (actor, turnId, time);
         }
     }
 }

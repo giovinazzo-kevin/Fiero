@@ -9,14 +9,14 @@ namespace Fiero.Business
         public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, TileName tile)
         {
             foreach (var p in Shape.Line(start, end)) {
-                ctx.SetTile(p.X, p.Y, tile);
+                ctx.SetTile(p, tile);
             }
         }
 
         public static void DrawCircle(this FloorGenerationContext ctx, Coord center, int radius, TileName tile)
         {
             foreach (var p in Shape.Circle(center, radius)) {
-                ctx.SetTile(p.X, p.Y, tile);
+                ctx.SetTile(p, tile);
             }
         }
 
@@ -33,7 +33,7 @@ namespace Fiero.Business
         {
             for (int x = 0; x < size.X; x++) {
                 for (int y = 0; y < size.Y; y++) {
-                    ctx.SetTile(x + topLeft.X, y + topLeft.Y, tile);
+                    ctx.SetTile(new Coord(x, y) + topLeft, tile);
                 }
             }
         }
@@ -47,13 +47,15 @@ namespace Fiero.Business
                         var xSym = center.X - (x - center.X);
                         var ySym = center.Y - (y - center.Y);
                         // (x, y), (x, ySym), (xSym , y), (xSym, ySym) are in the circle
-                        ctx.SetTile(x, y, tile);
-                        ctx.SetTile(x, ySym, tile);
-                        ctx.SetTile(xSym, y, tile);
-                        ctx.SetTile(xSym, ySym, tile);
+                        ctx.SetTile(new Coord(x, y), tile);
+                        ctx.SetTile(new Coord(x, ySym), tile);
+                        ctx.SetTile(new Coord(xSym, y), tile);
+                        ctx.SetTile(new Coord(xSym, ySym), tile);
                     }
                 }
             }
         }
+
+        public static void Draw(this FloorGenerationContext ctx, IFloorGenerationPrefab r) => r.Draw(ctx);
     }
 }

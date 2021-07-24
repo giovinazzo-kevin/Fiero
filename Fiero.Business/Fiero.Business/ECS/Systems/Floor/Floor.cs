@@ -86,7 +86,7 @@ namespace Fiero.Business
         {
             var result = new HashSet<Coord>();
             new JordixVisibility(
-                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.TileProperties.BlocksLight,
+                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.TileProperties.BlocksLight || cell.Features.Any(f => f.FeatureProperties.BlocksLight),
                 (x, y) => result.Add(new(x, y)),
                 (x, y) => (int)new Coord().DistSq(new(x, y))
             ).Compute(center, radius * radius);

@@ -88,6 +88,8 @@ namespace Fiero.Business
                     }
 
                     foreach (var drawable in cell.GetDrawables(seen)) {
+                        if (drawable.Render.Hidden)
+                            continue;
                         using var sprite = new Sprite(drawable.Render.Sprite);
                         sprite.Position = screenPos;
                         var spriteSize = sprite.GetLocalBounds().Size();

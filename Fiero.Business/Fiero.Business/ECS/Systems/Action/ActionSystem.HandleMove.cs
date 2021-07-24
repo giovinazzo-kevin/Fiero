@@ -32,12 +32,7 @@ namespace Fiero.Business
                 cost = HandleAction(t, ref action);
             }
             else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile)) {
-                if (tile.TileProperties.Name == TileName.Door) {
-                    _floorSystem.SetTileAt(t.Actor.FloorId(), newPos, TileName.Ground);
-                    t.Actor.Log?.Write($"$Action.YouOpenThe$ {tile.TileProperties.Name}.");
-                    // TODO: Move to event
-                }
-                else if (!tile.TileProperties.BlocksMovement) {
+                if (!tile.TileProperties.BlocksMovement) {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
                     var itemsHere = _floorSystem.GetItemsAt(floorId, newPos);

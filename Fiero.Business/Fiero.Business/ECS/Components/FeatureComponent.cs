@@ -9,5 +9,6 @@ namespace Fiero.Business
         public FloorId FloorId { get; set; }
         public FeatureName Name { get; set; }
         public bool BlocksMovement { get; set; }
+        public bool BlocksLight { get; set; }
     }
 }

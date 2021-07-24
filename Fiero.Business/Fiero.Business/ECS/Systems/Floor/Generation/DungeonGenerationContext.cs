@@ -33,7 +33,7 @@ namespace Fiero.Business
             DungeonBranchName branch, 
             int levels, 
             Func<int, Coord> getSize
-        ) where T : DungeonGenerator
+        ) where T : BranchGenerator
         {
             var connections = new HashSet<FloorConnection>();
             for (int i = 1; i <= levels; i++) {

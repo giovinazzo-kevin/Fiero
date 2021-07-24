@@ -15,13 +15,13 @@ namespace Fiero.Core
         {
             protected readonly TTextures Key;
             protected readonly GameTextures<TTextures> Textures;
-            protected readonly Dictionary<string, Func<Sprite>> Sprites;
+            protected readonly Dictionary<string, Sprite> Sprites;
 
             internal SpritesheetBuilder(GameTextures<TTextures> textures, TTextures key)
             {
                 Key = key;
                 Textures = textures;
-                Sprites = new Dictionary<string, Func<Sprite>>(StringComparer.OrdinalIgnoreCase);
+                Sprites = new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
             }
 
             public SpritesheetBuilder WithSprite(string name, Func<Texture, Sprite> build)
@@ -29,20 +29,20 @@ namespace Fiero.Core
                 if(Sprites.ContainsKey(name)) {
                     throw new InvalidOperationException($"A spritesheet named {name} already exists");
                 }
-                Sprites[name] = () => build(Textures.Get(Key));
+                Sprites[name] = build(Textures.Get(Key));
                 return this;
             }
 
-            internal Dictionary<string, Func<Sprite>> Build() => Sprites;
+            internal Dictionary<string, Sprite> Build() => Sprites;
         }
 
         protected readonly GameTextures<TTextures> Textures;
-        protected readonly Dictionary<TTextures, Dictionary<string, Func<Sprite>>> Sprites;
+        protected readonly Dictionary<TTextures, Dictionary<string, Sprite>> Sprites;
 
         public GameSprites(GameTextures<TTextures> textures)
         {
             Textures = textures;
-            Sprites = new Dictionary<TTextures, Dictionary<string, Func<Sprite>>>();
+            Sprites = new Dictionary<TTextures, Dictionary<string, Sprite>>();
         }
 
         public void AddSpritesheet(TTextures texture, Action<SpritesheetBuilder> build)
@@ -82,10 +82,9 @@ namespace Fiero.Core
             if (!Sprites.TryGetValue(texture, out var dict)) {
                 throw new InvalidOperationException($"A spritesheet for texture {texture} does not exist");
             }
-            if (!dict.TryGetValue(key, out var makeSprite)) {
+            if (!dict.TryGetValue(key, out sprite)) {
                 return false;
             }
-            sprite = makeSprite();
             return true;
         }
 

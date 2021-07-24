@@ -28,11 +28,16 @@ namespace Fiero.Business
         protected readonly HashSet<Object> Objects;
         protected readonly HashSet<FloorConnection> Connections;
 
-        public TileName GetTile(int x, int y) => Tiles[x, y];
+        public TileName GetTile(Coord c) => Tiles[c.X, c.Y];
         public IEnumerable<Tile> GetAllTiles() => Enumerable.Range(0, Size.X)
             .SelectMany(x => Enumerable.Range(0, Size.Y)
                 .Select(y => new Tile(Tiles[x, y], new Coord(x, y))));
-        public void SetTile(int x, int y, TileName value) => Tiles[x, y] = value;
+        public void SetTile(Coord c, TileName value)
+        {
+            if(c.X >= 0 && c.Y >= 0 && c.X < Size.X && c.Y < Size.Y) {
+                Tiles[c.X, c.Y] = value;
+            }
+        }
 
         public void AddObject(DungeonObjectName obj, Coord pos) => Objects.Add(new Object(obj, pos));
         public void AddConnection(FloorConnection c) => Connections.Add(c);

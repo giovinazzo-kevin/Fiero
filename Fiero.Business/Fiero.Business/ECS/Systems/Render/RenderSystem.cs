@@ -89,7 +89,7 @@ namespace Fiero.Business
                     var t = timeline[i];
                     if (time < t.Time + t.Frame.Duration && time >= t.Time) {
                         foreach (var spriteDef in t.Frame.Sprites) {
-                            var sprite = Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite);
+                            var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite));
                             sprite.Position = (worldPos - viewPos + spriteDef.Offset) * Viewport.ViewTileSize.V + Viewport.Position.V;
                             sprite.Scale = Viewport.ViewTileSize.V / sprite.GetLocalBounds().Size();
                             sprite.Color = spriteDef.Tint;

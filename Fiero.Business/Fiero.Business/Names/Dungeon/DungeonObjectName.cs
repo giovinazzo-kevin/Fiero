@@ -2,6 +2,7 @@
 {
     public enum DungeonObjectName
     {
+        Door,
         Item,
         Consumable,
         Enemy,

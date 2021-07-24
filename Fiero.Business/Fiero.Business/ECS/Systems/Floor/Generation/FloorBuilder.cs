@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -59,7 +60,7 @@ namespace Fiero.Business
             Coord GetRandomPosition()
             {
                 var validTiles = context.GetAllTiles()
-                    .Where(t => t.Name == TileName.Ground)
+                    .Where(t => t.Name == TileName.Ground && !context.GetObjects().Any(o => o.Position == t.Position))
                     .ToArray();
                 return Rng.Random.Choose(validTiles).Position;
             }
@@ -68,6 +69,7 @@ namespace Fiero.Business
         private int CreateEntity(FloorGenerationContext.Object obj)
         {
             var drawable = obj.Name switch {
+                DungeonObjectName.Door => CreateDoor(),
                 DungeonObjectName.Chest => CreateChest(),
                 DungeonObjectName.Shrine => CreateShrine(),
                 DungeonObjectName.Trap => CreateTrap(),
@@ -84,6 +86,13 @@ namespace Fiero.Business
             {
                 return Rng.Random.Choose<Func<Drawable>>(
                     () => _entityBuilders.Shrine().WithPosition(obj.Position).Build()
+                )();
+            }
+
+            Drawable CreateDoor()
+            {
+                return Rng.Random.Choose<Func<Drawable>>(
+                    () => _entityBuilders.Door().WithPosition(obj.Position).Build()
                 )();
             }
 

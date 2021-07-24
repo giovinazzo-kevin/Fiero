@@ -131,13 +131,9 @@ namespace Fiero.Business.Scenes
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
                 Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
-                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 15, i => new Coord(10, 10) * (i / 3 + 1));
-                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Sewers,   9, i => new Coord(25, 25) * (i / 3 + 1));
-                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Kennels,  1, i => new Coord(40, 40));
+                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 2, i => new Coord(100, 100));
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
-                    ctx.Connect(new(DungeonBranchName.Dungeon, Rng.Random.Between(4, 7)), new(DungeonBranchName.Sewers, 1));
-                    ctx.Connect(new(DungeonBranchName.Dungeon, Rng.Random.Between(6, 9)), new(DungeonBranchName.Kennels, 1));
                 }));
 
                 // Track agents
@@ -153,6 +149,7 @@ namespace Fiero.Business.Scenes
                 Player = Resources.Entities.Player
                     .WithPosition(upstairs)
                     .WithName(playerName)
+                    .WithItems(Resources.Entities.Bow().Build())
                     .Build();
                 if (!TrySpawn(entranceFloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
@@ -335,15 +332,25 @@ namespace Fiero.Business.Scenes
                 }
             });
             // ActionSystem.FeatureInteractedWith:
+                // - Open/close doors
                 // - Handle shrine interactions
                 // - Handle chest interactions
                 // - Handle stair and portal interactions
             yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e => {
+                if (e.Feature.FeatureProperties.Name == FeatureName.Door) {
+                    e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
+                    e.Feature.FeatureProperties.BlocksMovement ^= true;
+                    e.Feature.FeatureProperties.BlocksLight = e.Feature.FeatureProperties.BlocksMovement;
+                    e.Feature.Render.Hidden = !e.Feature.FeatureProperties.BlocksMovement;
+                    return true;
+                }
                 if (e.Feature.FeatureProperties.Name == FeatureName.Shrine) {
                     e.Actor.Log?.Write($"$Action.YouKneelAt$ {e.Feature.Info.Name}.");
+                    return true;
                 }
                 if (e.Feature.FeatureProperties.Name == FeatureName.Chest) {
                     e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
+                    return true;
                 }
                 if (e.Feature.FeatureProperties.Name == FeatureName.Upstairs) {
                     return HandleStairs(e.Feature.Portal.Connection.To, e.Feature.Portal.Connection.From);
@@ -351,7 +358,7 @@ namespace Fiero.Business.Scenes
                 if (e.Feature.FeatureProperties.Name == FeatureName.Downstairs) {
                     return HandleStairs(e.Feature.Portal.Connection.From, e.Feature.Portal.Connection.To);
                 }
-                return true;
+                return false;
                 bool HandleStairs(FloorId current, FloorId next)
                 {
                     var currentFloor = Systems.Floor.GetFloor(current);

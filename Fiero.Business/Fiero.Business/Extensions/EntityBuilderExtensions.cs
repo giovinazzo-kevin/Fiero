@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using System;
 using System.Drawing;
 
 namespace Fiero.Business
@@ -28,6 +29,13 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Health = c.MaximumHealth = maximum);
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
+        public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
+            where T : Actor => builder.AddOrTweak<InventoryComponent>(c => {
+                c.Capacity = Math.Max(c.Capacity, items.Length);
+                foreach (var item in items) {
+                    c.TryPut(item);
+                }
+            });
         public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
         public static EntityBuilder<T> WithEnemyAi<T>(this EntityBuilder<T> builder)
@@ -73,15 +81,30 @@ namespace Fiero.Business
             where T : Feature => builder.AddOrTweak<FeatureComponent>(c => {
                 c.Name = type;
                 c.BlocksMovement = c.Name switch {
+                    FeatureName.Door => true,
                     FeatureName.Shrine => true,
                     FeatureName.Chest => true,
+                    _ => false
+                };
+                c.BlocksLight = c.Name switch {
+                    FeatureName.Door => true,
                     _ => false
                 };
             });
         public static EntityBuilder<T> WithTileInfo<T>(this EntityBuilder<T> builder, TileName type)
             where T : Tile => builder.AddOrTweak<TileComponent>(c => {
                 c.Name = type;
-                c.BlocksMovement = c.BlocksLight = type switch {
+                c.BlocksMovement = type switch {
+                    TileName.Debug1 => false,
+                    TileName.Debug2 => false,
+                    TileName.Debug3 => false,
+                    TileName.Ground => false,
+                    _ => true
+                };
+                c.BlocksLight = type switch {
+                    TileName.Debug1 => false,
+                    TileName.Debug2 => false,
+                    TileName.Debug3 => false,
                     TileName.Ground => false,
                     _ => true
                 };

@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace Fiero.Core
 {
-    public readonly struct Coord
+    public readonly struct Coord : IComparable<Coord>
     {
         public readonly int X, Y;
         public Coord(int x = 0, int y = 0)
@@ -58,6 +58,8 @@ namespace Fiero.Core
         }
 
         public static Coord Zero { get; } = new Coord(0, 0);
+        public static Coord PositiveOne { get; } = new Coord(+1, +1);
+        public static Coord NegativeOne { get; } = new Coord(-1, -1);
 
         public override bool Equals(object obj)
             => obj is Coord other && this == other;
@@ -81,5 +83,6 @@ namespace Fiero.Core
         }
 
         public override string ToString() => $"{{ {X}; {Y} }}";
+        public int CompareTo(Coord other) => (X + Y).CompareTo(other.X + other.Y);
     }
 }

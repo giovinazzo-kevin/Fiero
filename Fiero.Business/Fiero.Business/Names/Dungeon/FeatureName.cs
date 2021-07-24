@@ -3,6 +3,7 @@
     public enum FeatureName
     {
         None,
+        Door,
         Downstairs,
         Upstairs,
         Chest,

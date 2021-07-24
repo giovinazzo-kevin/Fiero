@@ -38,7 +38,7 @@ namespace Fiero.Business
             foreach (var node in context.GetFloors()) {
                 var builder = new FloorBuilder(node.Size, _entities, _builders)
                     .WithStep(ctx => ctx.AddConnections(node.Connections));
-                var generator = (DungeonGenerator)_serviceFactory.GetInstance(node.Builder);
+                var generator = (BranchGenerator)_serviceFactory.GetInstance(node.Builder);
                 var floor = generator.GenerateFloor(node.Id, builder);
                 yield return floor;
             }

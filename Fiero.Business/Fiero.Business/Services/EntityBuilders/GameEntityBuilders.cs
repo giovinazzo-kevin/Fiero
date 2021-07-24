@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Fiero.Business
@@ -176,7 +177,6 @@ namespace Fiero.Business
             => Entities.CreateBuilder<Tile>()
             .WithName(type.ToString())
             .WithSprite(type.ToString(), tint: Colors.Get(type switch {
-                TileName.Door       => ColorName.Red,
                 TileName.Wall       => ColorName.Gray,
                 _ => ColorName.White
             }))
@@ -264,6 +264,9 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Feature> Trap()
             => Feature(FeatureName.Trap)
+            ;
+        public EntityBuilder<Feature> Door()
+            => Feature(FeatureName.Door)
             ;
 
 

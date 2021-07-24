@@ -37,9 +37,9 @@ namespace Fiero.Business
             var dy = Math.Abs(end.Y - start.Y); var sy = start.Y < end.Y ? 1 : -1;
             var er = (dx > dy ? dx : -dy) / 2;
             for (; ; ) {
+                yield return start;
                 if (start.X == end.X && start.Y == end.Y)
                     yield break;
-                yield return start;
                 var e2 = er;
                 if (e2 > -dx) { er -= dy; start = new(start.X + sx, start.Y); }
                 if (e2 < dy) { er += dx; start = new(start.X, start.Y + sy); }

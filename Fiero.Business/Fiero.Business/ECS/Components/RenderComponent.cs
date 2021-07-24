@@ -32,5 +32,6 @@ namespace Fiero.Business
             }
         }
         public Sprite Sprite { get; private set; }
+        public bool Hidden { get; set; }
     }
 }

@@ -432,10 +432,7 @@ namespace Fiero.Business.Scenes
 
         public override void Update()
         {
-            do {
-                Systems.Action.Update();
-            }
-            while (Systems.Action.ActorIds.Contains(Player.Id) && Systems.Action.CurrentActorId != Player.Id);
+            Systems.Action.Update(Player.Id);
             Systems.Render.Update();
             Entities.RemoveFlagged();
             if (Input.IsKeyPressed(Key.R)) {

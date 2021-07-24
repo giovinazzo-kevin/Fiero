@@ -30,7 +30,7 @@ namespace Fiero.Core
             {
                 Sprite?.Dispose();
                 if (SpriteName.V != null) {
-                    Sprite = GetSprite(TextureName.V, SpriteName.V);
+                    Sprite = new Sprite(GetSprite(TextureName.V, SpriteName.V));
                 }
             }
         }

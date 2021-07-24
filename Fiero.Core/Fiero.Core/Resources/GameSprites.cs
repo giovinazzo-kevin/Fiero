@@ -15,34 +15,34 @@ namespace Fiero.Core
         {
             protected readonly TTextures Key;
             protected readonly GameTextures<TTextures> Textures;
-            protected readonly Dictionary<string, Sprite> Sprites;
+            protected readonly Dictionary<string, HashSet<Sprite>> Sprites;
 
             internal SpritesheetBuilder(GameTextures<TTextures> textures, TTextures key)
             {
                 Key = key;
                 Textures = textures;
-                Sprites = new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
+                Sprites = new Dictionary<string, HashSet<Sprite>>(StringComparer.OrdinalIgnoreCase);
             }
 
             public SpritesheetBuilder WithSprite(string name, Func<Texture, Sprite> build)
             {
-                if(Sprites.ContainsKey(name)) {
-                    throw new InvalidOperationException($"A spritesheet named {name} already exists");
+                if(!Sprites.TryGetValue(name, out var hash)) {
+                    hash = Sprites[name] = new();
                 }
-                Sprites[name] = build(Textures.Get(Key));
+                hash.Add(build(Textures.Get(Key)));
                 return this;
             }
 
-            internal Dictionary<string, Sprite> Build() => Sprites;
+            internal Dictionary<string, HashSet<Sprite>> Build() => Sprites;
         }
 
         protected readonly GameTextures<TTextures> Textures;
-        protected readonly Dictionary<TTextures, Dictionary<string, Sprite>> Sprites;
+        protected readonly Dictionary<TTextures, Dictionary<string, HashSet<Sprite>>> Sprites;
 
         public GameSprites(GameTextures<TTextures> textures)
         {
             Textures = textures;
-            Sprites = new Dictionary<TTextures, Dictionary<string, Sprite>>();
+            Sprites = new Dictionary<TTextures, Dictionary<string, HashSet<Sprite>>>();
         }
 
         public void AddSpritesheet(TTextures texture, Action<SpritesheetBuilder> build)
@@ -67,11 +67,15 @@ namespace Fiero.Core
                     var rect = kv.Value.Split(' ')
                         .Select(x => Int32.TryParse(x.Trim(), out var i) ? i : -1)
                         .ToArray();
-                    if(rect.Length != 4) {
+                    if(rect.Length % 4 != 0) {
                         // TODO: log warning
                         continue;
                     }
-                    builder.WithSprite(kv.Key, tex => new Sprite(tex, new(rect[0], rect[1], rect[2], rect[3])));
+                    for (int i = 0; i < rect.Length / 4; i++) {
+                        builder.WithSprite(kv.Key, tex => new Sprite(tex,
+                            new(rect[i * 4], rect[i * 4 + 1], rect[i * 4 + 2], rect[i * 4 + 3])))
+                        ;
+                    }
                 }
             });
         }
@@ -82,9 +86,10 @@ namespace Fiero.Core
             if (!Sprites.TryGetValue(texture, out var dict)) {
                 throw new InvalidOperationException($"A spritesheet for texture {texture} does not exist");
             }
-            if (!dict.TryGetValue(key, out sprite)) {
+            if (!dict.TryGetValue(key, out var sprites)) {
                 return false;
             }
+            sprite = sprites.Shuffle(Rng.Random).First();
             return true;
         }
 

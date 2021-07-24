@@ -178,6 +178,7 @@ namespace Fiero.Business
             .WithName(type.ToString())
             .WithSprite(type.ToString(), tint: Colors.Get(type switch {
                 TileName.Wall       => ColorName.Gray,
+                TileName.Ground     => ColorName.LightGray,
                 _ => ColorName.White
             }))
             .WithPosition(Coord.Zero)

@@ -189,9 +189,12 @@ namespace Fiero.Business
             }
         }
 
-        public void Update()
+        public void Update(int playerId)
         {
-            ElapseTick();
+            do {
+                ElapseTick();
+            }
+            while (ActorIds.Contains(playerId) && CurrentActorId != playerId);
         }
     }
 }

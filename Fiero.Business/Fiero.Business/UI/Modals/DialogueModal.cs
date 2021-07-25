@@ -14,11 +14,12 @@ namespace Fiero.Business
 
         public DialogueModal(
             GameUI ui, 
+            GameResources resources,
             IDialogueTrigger trigger, 
             DialogueNode node,
             Drawable speaker,
             params Drawable[] listeners
-        ) : base(ui)
+        ) : base(ui, resources)
         {
             Trigger = trigger;
             Node = node;
@@ -69,13 +70,12 @@ namespace Fiero.Business
                 .Apply(x => {
                 })
             )
-            .AddRule<Picture<TextureName>>(s => s
+            .AddRule<Picture>(s => s
                 .Match(x => x.HasClass("portrait"))
                 .Apply(x => {
                     x.HorizontalAlignment.V = HorizontalAlignment.Center;
-                    x.TextureName.V = TextureName.UI;
+                    x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}");
                     x.LockAspectRatio.V = true;
-                    x.SpriteName.V = $"face-{Node.Face}";
                     x.Scale.V = new Vec(0.5f, 0.5f);
                 }))
             .AddRule<Paragraph>(s => s
@@ -89,7 +89,7 @@ namespace Fiero.Business
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
             .Row()
                 .Col(@class: "portrait", w: 0.25f)
-                    .Cell<Picture<TextureName>>()
+                    .Cell<Picture>()
                 .End()
                 .Col(@class: "content", w: 1.75f)
                     .Cell<Paragraph>()

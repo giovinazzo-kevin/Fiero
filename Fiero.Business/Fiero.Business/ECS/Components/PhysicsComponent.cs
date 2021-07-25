@@ -6,6 +6,9 @@ namespace Fiero.Business
 {
     public class PhysicsComponent : EcsComponent
     {
+        public FloorId FloorId { get; set; }
         public Coord Position { get; set; }
+        public bool BlocksMovement { get; set; }
+        public bool BlocksLight { get; set; }
     }
 }

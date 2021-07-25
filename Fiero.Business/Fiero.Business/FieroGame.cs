@@ -141,9 +141,10 @@ namespace Fiero.Business
                 nameof(ActionSystem.ActorIntentEvaluated),
                 nameof(ActionSystem.ActorTurnStarted),
                 nameof(ActionSystem.ActorTurnEnded),
-                nameof(ActionSystem.ActorMoved),
                 nameof(ActionSystem.TurnStarted),
                 nameof(ActionSystem.TurnEnded),
+                nameof(ActionSystem.ActorMoved),
+                nameof(ActionSystem.ActorBumpedObstacle),
             };
             _ = Task.Run(async () => {
                 while(true) {

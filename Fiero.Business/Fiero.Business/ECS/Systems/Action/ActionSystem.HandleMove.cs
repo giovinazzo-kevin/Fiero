@@ -32,16 +32,17 @@ namespace Fiero.Business
                 cost = HandleAction(t, ref action);
             }
             else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile)) {
-                if (!tile.TileProperties.BlocksMovement) {
+                if (!tile.Physics.BlocksMovement) {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
                     var itemsHere = _floorSystem.GetItemsAt(floorId, newPos);
                     if (!actorsHere.Any()) {
-                        if (!featuresHere.Any(f => f.FeatureProperties.BlocksMovement)) {
+                        if (!featuresHere.Any(f => f.Physics.BlocksMovement)) {
                             return ActorMoved.Request(new(t.Actor, oldPos, newPos)).All(x => x);
                         }
                         else {
                             var feature = featuresHere.Single();
+                            ActorBumpedObstacle.Raise(new(t.Actor, feature));
                             // you can bump shrines and chests to interact with them
                             action = new InteractWithFeatureAction(feature); 
                             cost = HandleAction(t, ref action);
@@ -63,10 +64,7 @@ namespace Fiero.Business
                     }
                 }
                 else {
-                    t.Actor.Log?.Write("$Action.YouBumpIntoTheWall$.");
-                    if (t.Actor.ActorProperties.Type == ActorName.Player) {
-                        _sounds.Get(SoundName.WallBump).Play();
-                    }
+                    ActorBumpedObstacle.Raise(new(t.Actor, tile));
                     return false;
                 }
             }

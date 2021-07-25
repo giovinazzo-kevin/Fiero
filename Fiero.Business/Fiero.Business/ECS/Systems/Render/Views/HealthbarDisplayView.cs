@@ -45,13 +45,13 @@ namespace Fiero.Business
         {
             if (Following is null || Following.Id == 0)
                 return;
-            if (Following.ActorProperties.Health == Following.ActorProperties.MaximumHealth)
+            if (Following.ActorProperties.Stats.Health == Following.ActorProperties.Stats.MaximumHealth)
                 return;
             var bar = (Following.Npc?.IsBoss ?? false)
                 ? BossBar : EnemyBar;
             bar.Position.V = Position;
-            bar.Progress.V = Following.ActorProperties.MaximumHealth > 0
-                ? Following.ActorProperties.Health / (float)Following.ActorProperties.MaximumHealth 
+            bar.Progress.V = Following.ActorProperties.Stats.MaximumHealth > 0
+                ? Following.ActorProperties.Stats.Health / (float)Following.ActorProperties.Stats.MaximumHealth 
                 : 0;
             if (bar.Progress > 1) {
                 bar.Foreground.V = new(255, 0, 255);

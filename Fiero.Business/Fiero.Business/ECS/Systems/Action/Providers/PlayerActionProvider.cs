@@ -63,14 +63,15 @@ namespace Fiero.Business
                 UI.Look(out _);
             }
             if (IsKeyPressed(Data.Hotkeys.FireWeapon)) {
-                if(a.Equipment.GetEquipedWeapons(w => w.AttackType == AttackName.Ranged).Any()) {
+                var rangedWeapons = a.Equipment.GetEquipedWeapons(w => w.AttackType == AttackName.Ranged);
+                if (rangedWeapons.Any()) {
                     var possibleTargets = Systems.Floor.GetAllActors(a.FloorId())
                         .Except(new[] { a })
-                        .Where(b => a.CanSee(b))
+                        .Where(b => a.CanSee(b) && a.IsHostileTowards(b))
                         .Select(t => t.Physics.Position)
                         .OrderBy(p => p.DistSq(a.Physics.Position));
                     if (possibleTargets.Any() && UI.Target(possibleTargets.ToArray(), out var cursor)) {
-                        return new RangedAttackPointAction(cursor - a.Physics.Position);
+                        return new RangedAttackPointAction(cursor - a.Physics.Position, rangedWeapons.ToArray());
                     }
                 }
             }
@@ -100,7 +101,14 @@ namespace Fiero.Business
             }
             return new NoAction();
 
-            IAction MoveOrAttack(Coord c) => wantToAttack ? new MeleeAttackPointAction(c) : new MoveRelativeAction(c);
+            IAction MoveOrAttack(Coord c)
+            {
+                var meleeWeapons = a.Equipment.GetEquipedWeapons(w => w.AttackType == AttackName.Melee);
+                if(wantToAttack) {
+                    return new MeleeAttackPointAction(c, meleeWeapons.ToArray());
+                }
+                return new MoveRelativeAction(c);
+            }
             bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
             bool IsKeyDown(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));
         }

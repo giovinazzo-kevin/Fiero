@@ -5,20 +5,15 @@ using System.Collections.Generic;
 
 namespace Fiero.Business
 {
+    [TransientDependency]
     public sealed class DungeonBuilder
     {
-        private readonly GameEntities _entities;
-        private readonly GameEntityBuilders _builders;
         private readonly IServiceFactory _serviceFactory;
         private readonly List<Action<DungeonGenerationContext>> _steps;
 
-        internal DungeonBuilder(
-            GameEntities entities, 
-            GameEntityBuilders builders,
+        public DungeonBuilder(
             IServiceFactory services
         ) {
-            _entities = entities;
-            _builders = builders;
             _serviceFactory = services;
             _steps = new();
         }
@@ -36,10 +31,10 @@ namespace Fiero.Business
                 step(context);
             }
             foreach (var node in context.GetFloors()) {
-                var builder = new FloorBuilder(node.Size, _entities, _builders)
+                var builder = _serviceFactory.GetInstance<FloorBuilder>()
                     .WithStep(ctx => ctx.AddConnections(node.Connections));
                 var generator = (BranchGenerator)_serviceFactory.GetInstance(node.Builder);
-                var floor = generator.GenerateFloor(node.Id, builder);
+                var floor = generator.GenerateFloor(node.Id, node.Size, builder);
                 yield return floor;
             }
         }

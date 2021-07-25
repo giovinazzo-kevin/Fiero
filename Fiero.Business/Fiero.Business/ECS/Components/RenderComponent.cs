@@ -13,25 +13,13 @@ namespace Fiero.Business
 
     public class RenderComponent : EcsComponent
     {
-        protected readonly GameSprites<TextureName> Sprites;
-
-        public RenderComponent(GameSprites<TextureName> sprites)
+        public RenderComponent()
         {
-            Sprites = sprites;
         }
 
-        private string _spriteName;
-        public string SpriteName {
-            get => _spriteName;
-            set {
-                if(!Sprites.TryGet(TextureName.Atlas, value, out var sprite)) {
-                    throw new ArgumentException($"A sprite named {value} was not declared in the atlas");
-                }
-                _spriteName = value;
-                Sprite = sprite;
-            }
-        }
-        public Sprite Sprite { get; private set; }
+        public string SpriteName { get; set; } = "None";
+        public TextureName TextureName { get; set; } = TextureName.Atlas;
+        public ColorName Color { get; set; } = ColorName.White;
         public bool Hidden { get; set; }
     }
 }

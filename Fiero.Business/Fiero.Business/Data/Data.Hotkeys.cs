@@ -14,6 +14,10 @@ namespace Fiero.Business
             public static readonly GameDatum<Keyboard.Key> Interact = new(nameof(Hotkeys) + nameof(Interact));
             public static readonly GameDatum<Keyboard.Key> Look = new(nameof(Hotkeys) + nameof(Look));
             public static readonly GameDatum<Keyboard.Key> FireWeapon = new(nameof(Hotkeys) + nameof(FireWeapon));
+            public static readonly GameDatum<Keyboard.Key> QuickCast1 = new(nameof(Hotkeys) + nameof(QuickCast1));
+            public static readonly GameDatum<Keyboard.Key> QuickCast2 = new(nameof(Hotkeys) + nameof(QuickCast2));
+            public static readonly GameDatum<Keyboard.Key> QuickCast3 = new(nameof(Hotkeys) + nameof(QuickCast3));
+            public static readonly GameDatum<Keyboard.Key> QuickCast4 = new(nameof(Hotkeys) + nameof(QuickCast4));
             public static readonly GameDatum<Keyboard.Key> MoveNW = new(nameof(Hotkeys) + nameof(MoveNW));
             public static readonly GameDatum<Keyboard.Key> MoveN = new(nameof(Hotkeys) + nameof(MoveN));
             public static readonly GameDatum<Keyboard.Key> MoveNE = new(nameof(Hotkeys) + nameof(MoveNE));

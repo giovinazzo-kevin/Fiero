@@ -74,12 +74,12 @@ namespace Fiero.Business
                     if (!Entities.TryGetProxy<Feature>(comp.EntityId, out var featureSpeaker)) {
                         throw new ArgumentException();
                     }
-                    floorId = featureSpeaker.FeatureProperties.FloorId;
+                    floorId = featureSpeaker.Physics.FloorId;
                     dialogueKey = featureSpeaker.FeatureProperties.Name.ToString();
                     speaker = featureSpeaker;
                 }
                 else {
-                    floorId = actorSpeaker.ActorProperties.FloorId;
+                    floorId = actorSpeaker.FloorId();
                     dialogueKey = actorSpeaker.Npc?.Type.ToString() ?? actorSpeaker.ActorProperties.Type.ToString();
                     speaker = actorSpeaker;
                 }

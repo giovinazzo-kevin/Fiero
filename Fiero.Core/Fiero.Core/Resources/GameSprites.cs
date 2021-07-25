@@ -80,7 +80,7 @@ namespace Fiero.Core
             });
         }
 
-        public bool TryGet(TTextures texture, string key, out Sprite sprite)
+        public bool TryGet(TTextures texture, string key, out Sprite sprite, int? rngSeed = null)
         {
             sprite = default;
             if (!Sprites.TryGetValue(texture, out var dict)) {
@@ -89,7 +89,8 @@ namespace Fiero.Core
             if (!dict.TryGetValue(key, out var sprites)) {
                 return false;
             }
-            sprite = sprites.Shuffle(Rng.Random).First();
+            var rng = rngSeed is { } seed ? new Random(seed) : new Random();
+            sprite = sprites.Shuffle(rng).First();
             return true;
         }
 

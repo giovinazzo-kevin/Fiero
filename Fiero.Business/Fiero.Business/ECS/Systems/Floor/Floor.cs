@@ -40,7 +40,7 @@ namespace Fiero.Business
 
         public void AddActor(Actor actor)
         {
-            actor.ActorProperties.FloorId = Id;
+            actor.Physics.FloorId = Id;
             if(_cells.TryGetValue(actor.Physics.Position, out var cell)) {
                 cell.Actors.Add(actor);
             }
@@ -69,7 +69,7 @@ namespace Fiero.Business
 
         public void AddFeature(Feature feature)
         {
-            feature.FeatureProperties.FloorId = Id;
+            feature.Physics.FloorId = Id;
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Add(feature);
             }
@@ -86,7 +86,7 @@ namespace Fiero.Business
         {
             var result = new HashSet<Coord>();
             new JordixVisibility(
-                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.TileProperties.BlocksLight || cell.Features.Any(f => f.FeatureProperties.BlocksLight),
+                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.Physics.BlocksLight || cell.Features.Any(f => f.Physics.BlocksLight),
                 (x, y) => result.Add(new(x, y)),
                 (x, y) => (int)new Coord().DistSq(new(x, y))
             ).Compute(center, radius * radius);
@@ -96,7 +96,7 @@ namespace Fiero.Business
         public void CreatePathfinder()
         {
             Pathfinder = _cells.GetPathfinder();
-            foreach (var feature in Cells.Values.SelectMany(c => c.Features).Where(f => f.FeatureProperties.BlocksMovement)) {
+            foreach (var feature in Cells.Values.SelectMany(c => c.Features).Where(f => f.Physics.BlocksMovement)) {
                 Pathfinder.Update(feature.Physics.Position, null, out _);
             }
         }

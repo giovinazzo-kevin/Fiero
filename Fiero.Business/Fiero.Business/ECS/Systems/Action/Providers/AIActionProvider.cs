@@ -37,7 +37,7 @@ namespace Fiero.Business
                 if (a.Ai.Target.DistanceFrom(a) < 2) {
                     return new MeleeAttackOtherAction(a.Ai.Target);
                 }
-                if (a.CanSee(a.Ai.Target) && Systems.Floor.TryGetFloor(a.ActorProperties.FloorId, out var floor)) {
+                if (a.CanSee(a.Ai.Target) && Systems.Floor.TryGetFloor(a.FloorId(), out var floor)) {
                     // If we can see the target and it has moved, recalculate the path as to remember its last position
                     a.Ai.Path = floor.Pathfinder.Search(a.Physics.Position, a.Ai.Target.Physics.Position, default);
                     a.Ai.Path?.RemoveFirst();

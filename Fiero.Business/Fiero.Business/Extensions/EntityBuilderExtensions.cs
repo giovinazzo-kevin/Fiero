@@ -8,17 +8,20 @@ namespace Fiero.Business
     {
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
-        public static EntityBuilder<T> WithPosition<T>(this EntityBuilder<T> builder, Coord pos)
-            where T : Drawable => builder.AddOrTweak<PhysicsComponent>(c => c.Position = pos);
-        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, string sprite, SFML.Graphics.Color? tint = null)
+        public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool blocksMovement = false, bool blocksLight = false)
+            where T : Drawable => builder.AddOrTweak<PhysicsComponent>(c => {
+                c.Position = pos;
+                c.BlocksLight = blocksMovement;
+                c.BlocksLight = blocksLight;
+            });
+        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, string sprite, ColorName color)
             where T : Drawable => builder.AddOrTweak<RenderComponent>(c => {
                 c.SpriteName = sprite;
-                c.Sprite.Scale = new(1, 1);
-                c.Sprite.Color = tint ?? c.Sprite.Color;
+                c.Color = color;
             });
-        public static EntityBuilder<T> WithColor<T>(this EntityBuilder<T> builder, SFML.Graphics.Color tint)
+        public static EntityBuilder<T> WithColor<T>(this EntityBuilder<T> builder, ColorName color)
             where T : Drawable => builder.AddOrTweak<RenderComponent>(c => {
-                c.Sprite.Color = tint;
+                c.Color = color;
             });
         public static EntityBuilder<T> WithActorInfo<T>(this EntityBuilder<T> builder, ActorName type, MonsterTierName tier)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
@@ -26,7 +29,7 @@ namespace Fiero.Business
                 c.Tier = tier;
             });
         public static EntityBuilder<T> WithMaximumHealth<T>(this EntityBuilder<T> builder, int maximum)
-            where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Health = c.MaximumHealth = maximum);
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Stats.Health = c.Stats.MaximumHealth = maximum);
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
         public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
@@ -80,34 +83,10 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithFeatureInfo<T>(this EntityBuilder<T> builder, FeatureName type)
             where T : Feature => builder.AddOrTweak<FeatureComponent>(c => {
                 c.Name = type;
-                c.BlocksMovement = c.Name switch {
-                    FeatureName.Door => true,
-                    FeatureName.Shrine => true,
-                    FeatureName.Chest => true,
-                    _ => false
-                };
-                c.BlocksLight = c.Name switch {
-                    FeatureName.Door => true,
-                    _ => false
-                };
             });
         public static EntityBuilder<T> WithTileInfo<T>(this EntityBuilder<T> builder, TileName type)
             where T : Tile => builder.AddOrTweak<TileComponent>(c => {
                 c.Name = type;
-                c.BlocksMovement = type switch {
-                    TileName.Debug1 => false,
-                    TileName.Debug2 => false,
-                    TileName.Debug3 => false,
-                    TileName.Ground => false,
-                    _ => true
-                };
-                c.BlocksLight = type switch {
-                    TileName.Debug1 => false,
-                    TileName.Debug2 => false,
-                    TileName.Debug3 => false,
-                    TileName.Ground => false,
-                    _ => true
-                };
             });
         public static EntityBuilder<T> WithConsumableInfo<T>(this EntityBuilder<T> builder, int remainingUses, int maxUses, bool consumable)
             where T : Consumable => builder.AddOrTweak<ConsumableComponent>(c => {

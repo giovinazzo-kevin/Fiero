@@ -10,13 +10,13 @@ namespace Fiero.Business
     {
         protected readonly HashSet<IntRect> Rects;
 
+        public event Action<Room, FloorGenerationContext> Drawn;
+
         public Coord Position { get; private set; }
         public Coord Size { get; private set; }
 
-        public TileName WallTile { get; set; } = TileName.Wall;
-        public TileName GroundTile { get; set; } = TileName.Ground;
-
-        public event Action<Room, FloorGenerationContext> Drawn;
+        protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
+        protected virtual TileDef GroundTile(Coord c) => new(TileName.Ground, c);
 
         public IEnumerable<IntRect> GetRects() => Rects;
         public IEnumerable<Coord> GetPointCloud() => Rects.SelectMany(r => r.Enumerate());

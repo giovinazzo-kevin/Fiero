@@ -10,24 +10,23 @@ namespace Fiero.Business
 
     public class DungeonBranchGenerator : BranchGenerator
     {
-        public override Floor GenerateFloor(FloorId floorId, FloorBuilder builder)
+        public override Floor GenerateFloor(FloorId floorId, Coord size, FloorBuilder builder)
         {
             var subdivisions = new Coord(2, 2);
-            var sectors = new IntRect(new(), builder.Size).Subdivide(subdivisions).ToList();
+            var sectors = new IntRect(new(), size).Subdivide(subdivisions).ToList();
 
             var info = (
                 ShrineRoomChance: 0.05f, 
                 MonstersChance: 0.66f,
                 MonstersPerRoll: (Min: 1, Max: 4),
                 ConsumablesChance: 0.20f,
-                ConsumablesPerRoll: (Min: 1, Max: 3),
+                ConsumablesPerRoll: (Min: 1, Max: 2),
                 ItemsChance: 0.15f,
                 ItemsPerRoll: (Min: 1, Max: 1)
             );
 
             var roomSectors = sectors.Select(s => RoomSector.Create(s, CreateRoom)).ToList();
             var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors).ToList();
-
 
             return builder
                 .WithStep(ctx => {
@@ -38,7 +37,7 @@ namespace Fiero.Business
                         ctx.Draw(corridor);
                     }
                 })
-                .Build(floorId);
+                .Build(floorId, size);
 
             Room CreateRoom()
             {
@@ -72,7 +71,7 @@ namespace Fiero.Business
                         .Shuffle(Rng.Random);
                     for (int i = 0; i < roll; i++) {
                         var pos = pointCloud
-                            .Where(p => ctx.GetTile(p) == TileName.Ground)
+                            .Where(p => ctx.GetTile(p).Name == TileName.Ground)
                             .First();
                         ctx.AddObject(type, pos);
                     }

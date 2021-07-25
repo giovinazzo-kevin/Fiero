@@ -6,39 +6,43 @@ namespace Fiero.Business
 
     public static class FloorGenerationExtensions
     {
-        public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, TileName tile)
+        public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, Func<Coord, TileDef> makeTile)
         {
             foreach (var p in Shape.Line(start, end)) {
-                ctx.SetTile(p, tile);
+                var tile = makeTile(p);
+                ctx.SetTile(p, tile.Name, tile.Color);
             }
         }
 
-        public static void DrawCircle(this FloorGenerationContext ctx, Coord center, int radius, TileName tile)
+        public static void DrawCircle(this FloorGenerationContext ctx, Coord center, int radius, Func<Coord, TileDef> makeTile)
         {
             foreach (var p in Shape.Circle(center, radius)) {
-                ctx.SetTile(p, tile);
+                var tile = makeTile(p);
+                ctx.SetTile(p, tile.Name, tile.Color);
             }
         }
 
-        public static void DrawBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, TileName tile)
+        public static void DrawBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, Func<Coord, TileDef> makeTile)
         {
             size = new(topLeft.X + size.X, topLeft.Y + size.Y);
-            ctx.DrawLine(topLeft, new(size.X - 1, topLeft.Y), tile);
-            ctx.DrawLine(topLeft, new(topLeft.X, size.Y - 1), tile);
-            ctx.DrawLine(new(size.X - 1, topLeft.Y), new(size.X - 1, size.Y - 1), tile);
-            ctx.DrawLine(new(topLeft.X, size.Y - 1), new(size.X - 1, size.Y - 1), tile);
+            ctx.DrawLine(topLeft, new(size.X - 1, topLeft.Y), makeTile);
+            ctx.DrawLine(topLeft, new(topLeft.X, size.Y - 1), makeTile);
+            ctx.DrawLine(new(size.X - 1, topLeft.Y), new(size.X - 1, size.Y - 1), makeTile);
+            ctx.DrawLine(new(topLeft.X, size.Y - 1), new(size.X - 1, size.Y - 1), makeTile);
         }
 
-        public static void FillBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, TileName tile)
+        public static void FillBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, Func<Coord, TileDef> makeTile)
         {
             for (int x = 0; x < size.X; x++) {
                 for (int y = 0; y < size.Y; y++) {
-                    ctx.SetTile(new Coord(x, y) + topLeft, tile);
+                    var p = new Coord(x, y);
+                    var tile = makeTile(p);
+                    ctx.SetTile(p + topLeft, tile.Name, tile.Color);
                 }
             }
         }
 
-        public static void FillCircle(this FloorGenerationContext ctx, Coord center, int radius, TileName tile)
+        public static void FillCircle(this FloorGenerationContext ctx, Coord center, int radius, Func<Coord, TileDef> makeTile)
         {
             for (var x = center.X - radius; x <= center.X; x++) {
                 for (var y = center.Y - radius; y <= center.Y; y++) {
@@ -47,12 +51,18 @@ namespace Fiero.Business
                         var xSym = center.X - (x - center.X);
                         var ySym = center.Y - (y - center.Y);
                         // (x, y), (x, ySym), (xSym , y), (xSym, ySym) are in the circle
-                        ctx.SetTile(new Coord(x, y), tile);
-                        ctx.SetTile(new Coord(x, ySym), tile);
-                        ctx.SetTile(new Coord(xSym, y), tile);
-                        ctx.SetTile(new Coord(xSym, ySym), tile);
+                        SetTile(new(x, y));
+                        SetTile(new(x, ySym));
+                        SetTile(new(xSym, y));
+                        SetTile(new(xSym, ySym));
                     }
                 }
+            }
+
+            void SetTile(Coord xy)
+            {
+                var tile = makeTile(xy);
+                ctx.SetTile(xy, tile.Name, tile.Color);
             }
         }
 

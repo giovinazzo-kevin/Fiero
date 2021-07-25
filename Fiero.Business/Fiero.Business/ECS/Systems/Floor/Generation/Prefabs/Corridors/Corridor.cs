@@ -5,33 +5,6 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    class Line
-    {
-        public readonly int A, B, C;
-
-        public Line(Coord a, Coord b)
-        {
-            A = (a.Y - b.Y);
-            B = (b.X - a.X);
-            C = (a.X * b.Y - b.X * a.Y);
-        }
-
-        public bool IsParallel(Line other) => A * other.B - B * other.A == 0;
-
-        public bool Intersection(Line other, out Coord p)
-        {
-            var D = A * other.B - B * other.A;
-            var Dx = C * other.B - B * other.C;
-            var Dy = A * other.C - C * other.A;
-            if (D != 0) {
-                p = new(Dx / D, Dy / D);
-                return true;
-            }
-            p = default;
-            return false;
-        }
-    }
-
     public class Corridor : IFloorGenerationPrefab
     {
 
@@ -39,8 +12,8 @@ namespace Fiero.Business
         public UnorderedPair<Coord> End { get; set; }
         public int Thickness { get; set; }
 
-        public TileName WallTile { get; set; } = TileName.Wall;
-        public TileName GroundTile { get; set; } = TileName.Ground;
+        protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
+        protected virtual TileDef GroundTile(Coord c) => new(TileName.Ground, c);
 
         public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, int thickness = 1)
         {

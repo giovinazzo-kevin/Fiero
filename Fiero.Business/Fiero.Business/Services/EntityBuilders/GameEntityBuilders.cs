@@ -34,24 +34,24 @@ namespace Fiero.Business
             .WithLogging()
             .WithPlayerAi(UI)
             .WithName(nameof(Player))
-            .WithSprite(nameof(Player))
+            .WithSprite(nameof(Player), ColorName.White)
             .WithActorInfo(ActorName.Player, MonsterTierName.One)
             .WithFaction(FactionName.Players)
-            .WithPosition(Coord.Zero)
+            .WithPhysics(Coord.Zero)
             .WithInventory(50)
             .WithEquipment()
             .WithFieldOfView(7)
             ;
 
-        public EntityBuilder<Actor> Enemy(MonsterTierName tier) 
+        private EntityBuilder<Actor> Enemy(MonsterTierName tier) 
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
             .WithEnemyAi()
             .WithName(nameof(Enemy))
-            .WithSprite("None")
+            .WithSprite("None", ColorName.White)
             .WithActorInfo(ActorName.None, tier)
             .WithFaction(FactionName.None)
-            .WithPosition(Coord.Zero)
+            .WithPhysics(Coord.Zero)
             .WithInventory(5)
             .WithEquipment()
             .WithFieldOfView(7)
@@ -60,8 +60,8 @@ namespace Fiero.Business
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, AttackName attack, WeaponHandednessName hands, int baseDamage, int swingDelay, int itemRarity)
             => Entities.CreateBuilder<Weapon>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString())
-            .WithPosition(Coord.Zero)
+            .WithSprite(type.ToString(), ColorName.White)
+            .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, attack, hands, baseDamage, swingDelay)
             .WithItemInfo(itemRarity, unidentName)
             ;
@@ -69,22 +69,22 @@ namespace Fiero.Business
         public EntityBuilder<Armor> Armor(string unidentName, ArmorName type, ArmorSlotName slot, int itemRarity) 
             => Entities.CreateBuilder<Armor>()
             .WithName(type.ToString())
-            .WithSprite(slot.ToString())
-            .WithPosition(Coord.Zero)
+            .WithSprite(slot.ToString(), ColorName.White)
+            .WithPhysics(Coord.Zero)
             .WithArmorInfo(type, slot)
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        public EntityBuilder<T> Consumable<T>(string unidentName, int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty)
+        private EntityBuilder<T> Consumable<T>(string unidentName, int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty)
             where T : Consumable
             => Entities.CreateBuilder<T>()
-            .WithPosition(Coord.Zero)
+            .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
-            .WithSprite("None")
+            .WithSprite("None", ColorName.White)
             .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty)
             .WithItemInfo(itemRarity, unidentName)
             ;
-        
+
         public EntityBuilder<Potion> Potion(EffectName effect)
         {
             var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 17);
@@ -108,7 +108,7 @@ namespace Fiero.Business
             });
             return Consumable<Potion>($"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
            .WithName($"Potion of {effect}")
-           .WithSprite(nameof(Potion), Colors.Get(potionColor.Color))
+           .WithSprite(nameof(Potion), potionColor.Color)
            .WithPotionInfo(effect)
            ;
         }
@@ -119,7 +119,7 @@ namespace Fiero.Business
             var label = ScrollLabel();
             return Consumable<Scroll>($"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
             .WithName($"Scroll of {effect}")
-            .WithSprite(nameof(Scroll), Colors.Get(ColorName.Yellow))
+            .WithSprite(nameof(Scroll), ColorName.Yellow)
             .WithScrollInfo(effect)
             ;
 
@@ -165,23 +165,19 @@ namespace Fiero.Business
             }
         }
 
-        public EntityBuilder<Feature> Feature(FeatureName type)
+        private EntityBuilder<Feature> Feature(FeatureName type)
             => Entities.CreateBuilder<Feature>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString())
-            .WithPosition(Coord.Zero)
+            .WithSprite(type.ToString(), ColorName.White)
+            .WithPhysics(Coord.Zero)
             .WithFeatureInfo(type)
             ;
 
-        public EntityBuilder<Tile> Tile(TileName type)
+        private EntityBuilder<Tile> Tile(TileName type, ColorName color)
             => Entities.CreateBuilder<Tile>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString(), tint: Colors.Get(type switch {
-                TileName.Wall       => ColorName.Gray,
-                TileName.Ground     => ColorName.LightGray,
-                _ => ColorName.White
-            }))
-            .WithPosition(Coord.Zero)
+            .WithSprite(type.ToString(), color)
+            .WithPhysics(Coord.Zero)
             .WithTileInfo(type)
             ;
 
@@ -191,7 +187,7 @@ namespace Fiero.Business
             .WithName(Glossaries.GetMonsterName(FactionName.Rats, tier))
             .WithActorInfo(ActorName.Rat, tier)
             .WithFaction(FactionName.Rats)
-            .WithSprite(nameof(ActorName.Rat))
+            .WithSprite(nameof(ActorName.Rat), ColorName.White)
             ;
 
         public EntityBuilder<Actor> Snake(MonsterTierName tier) 
@@ -199,7 +195,7 @@ namespace Fiero.Business
             .WithName(Glossaries.GetMonsterName(FactionName.Snakes, tier))
             .WithActorInfo(ActorName.Snake, tier)
             .WithFaction(FactionName.Snakes)
-            .WithSprite(nameof(ActorName.Snake))
+            .WithSprite(nameof(ActorName.Snake), ColorName.White)
             ;
 
         public EntityBuilder<Actor> Cat(MonsterTierName tier) 
@@ -207,7 +203,7 @@ namespace Fiero.Business
             .WithName(Glossaries.GetMonsterName(FactionName.Cats, tier))
             .WithActorInfo(ActorName.Cat, tier)
             .WithFaction(FactionName.Cats)
-            .WithSprite(nameof(ActorName.Cat))
+            .WithSprite(nameof(ActorName.Cat), ColorName.White)
             ;
 
         public EntityBuilder<Actor> Dog(MonsterTierName tier) 
@@ -215,7 +211,7 @@ namespace Fiero.Business
             .WithName(Glossaries.GetMonsterName(FactionName.Dogs, tier))
             .WithActorInfo(ActorName.Dog, tier)
             .WithFaction(FactionName.Dogs)
-            .WithSprite(nameof(ActorName.Dog))
+            .WithSprite(nameof(ActorName.Dog), ColorName.White)
             ;
 
         public EntityBuilder<Actor> Boar(MonsterTierName tier) 
@@ -223,7 +219,7 @@ namespace Fiero.Business
             .WithName(Glossaries.GetMonsterName(FactionName.Boars, tier))
             .WithActorInfo(ActorName.Boar, tier)
             .WithFaction(FactionName.Boars)
-            .WithSprite(nameof(ActorName.Boar))
+            .WithSprite(nameof(ActorName.Boar), ColorName.White)
             ;
         #endregion
 
@@ -233,7 +229,7 @@ namespace Fiero.Business
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithDialogueTriggers(NpcName.GreatKingRat)
-            .WithSprite(nameof(NpcName.GreatKingRat))
+            .WithSprite(nameof(NpcName.GreatKingRat), ColorName.White)
             ;
         #endregion
 
@@ -256,28 +252,29 @@ namespace Fiero.Business
         #endregion
 
         #region FEATURES
+        private ColorName GetBranchColor(DungeonBranchName branch) => branch switch {
+            DungeonBranchName.Dungeon => ColorName.Gray,
+            DungeonBranchName.Sewers => ColorName.Green,
+            DungeonBranchName.Kennels => ColorName.Red,
+            _ => ColorName.White
+        };
+
         public EntityBuilder<Feature> Chest()
             => Feature(FeatureName.Chest)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
             ;
         public EntityBuilder<Feature> Shrine()
             => Feature(FeatureName.Shrine)
             .WithDialogueTriggers(FeatureName.Shrine)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
             ;
         public EntityBuilder<Feature> Trap()
             => Feature(FeatureName.Trap)
             ;
         public EntityBuilder<Feature> Door()
             => Feature(FeatureName.Door)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
             ;
-
-
-        private Color GetBranchColor(DungeonBranchName branch) => branch switch {
-            DungeonBranchName.Dungeon => Colors.Get(ColorName.Gray),
-            DungeonBranchName.Sewers => Colors.Get(ColorName.Green),
-            DungeonBranchName.Kennels => Colors.Get(ColorName.Red),
-            _ => Colors.Get(ColorName.White)
-        };
-
         public EntityBuilder<Feature> Downstairs(FloorConnection conn)
             => Feature(FeatureName.Downstairs)
             .WithColor(GetBranchColor(conn.To.Branch))
@@ -287,6 +284,19 @@ namespace Fiero.Business
             => Feature(FeatureName.Upstairs)
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
+            ;
+        #endregion
+
+        #region TILES
+        public EntityBuilder<Tile> WallTile()
+            => Tile(TileName.Wall, ColorName.Gray)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
+            ;
+        public EntityBuilder<Tile> GroundTile()
+            => Tile(TileName.Ground, ColorName.LightGray)
+            ;
+        public EntityBuilder<Tile> UnimplementedTile()
+            => Tile(TileName.Error, ColorName.LightMagenta)
             ;
         #endregion
     }

@@ -9,55 +9,42 @@ namespace Fiero.Business
 {
     public class FloorGenerationContext
     {
-        public class Object
-        {
-            public readonly DungeonObjectName Name;
-            public readonly Coord Position;
-            public Object(DungeonObjectName name, Coord pos) => (Name, Position) = (name, pos);
-        }
-
-        public readonly struct Tile
-        {
-            public readonly TileName Name;
-            public readonly Coord Position;
-            public Tile(TileName name, Coord pos) => (Name, Position) = (name, pos);
-        }
 
         public readonly Coord Size;
-        protected readonly TileName[,] Tiles;
-        protected readonly HashSet<Object> Objects;
+        protected readonly TileDef[,] Tiles;
+        protected readonly HashSet<ObjectDef> Objects;
         protected readonly HashSet<FloorConnection> Connections;
 
-        public TileName GetTile(Coord c) => Tiles[c.X, c.Y];
-        public IEnumerable<Tile> GetAllTiles() => Enumerable.Range(0, Size.X)
+        public TileDef GetTile(Coord c) => Tiles[c.X, c.Y];
+        public IEnumerable<TileDef> GetAllTiles() => Enumerable.Range(0, Size.X)
             .SelectMany(x => Enumerable.Range(0, Size.Y)
-                .Select(y => new Tile(Tiles[x, y], new Coord(x, y))));
-        public void SetTile(Coord c, TileName value)
+                .Select(y => Tiles[x, y]));
+        public void SetTile(Coord c, TileName value, ColorName? color = null)
         {
             if(c.X >= 0 && c.Y >= 0 && c.X < Size.X && c.Y < Size.Y) {
-                Tiles[c.X, c.Y] = value;
+                var tile = new TileDef(value, c, color);
+                Tiles[c.X, c.Y] = tile;
             }
         }
 
-        public void AddObject(DungeonObjectName obj, Coord pos) => Objects.Add(new Object(obj, pos));
+        public void AddObject(DungeonObjectName obj, Coord pos) => Objects.Add(new ObjectDef(obj, pos));
         public void AddConnection(FloorConnection c) => Connections.Add(c);
         public void AddConnections(IEnumerable<FloorConnection> c) => Connections.UnionWith(c);
-        public IEnumerable<Object> GetObjects() => Objects;
+        public IEnumerable<ObjectDef> GetObjects() => Objects;
         public IEnumerable<FloorConnection> GetConnections() => Connections;
 
-        public void ForEach(Action<Tile> xy)
+        public void ForEach(Action<TileDef> xy)
         {
             for (var y = 0; y < Size.Y; y++) {
                 for (var x = 0; x < Size.X; x++) {
-                    xy(new(Tiles[x, y], new Coord(x, y)));
+                    xy(Tiles[x, y]);
                 }
             }
         }
-
         public FloorGenerationContext(int width, int height)
         {
             Size = new Coord(width, height);
-            Tiles = new TileName[width, height];
+            Tiles = new TileDef[width, height];
             Objects = new();
             Connections = new();
         }

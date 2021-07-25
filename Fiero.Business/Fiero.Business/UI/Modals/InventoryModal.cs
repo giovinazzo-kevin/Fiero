@@ -18,8 +18,8 @@ namespace Fiero.Business
         protected readonly List<Item> Items = new();
         protected int NumPages => (Items.Count - 1) / PageSize.V + 1;
 
-        public InventoryModal(GameUI ui, Actor following)
-            : base(ui)
+        public InventoryModal(GameUI ui, GameResources resources, Actor following)
+            : base(ui, resources)
         {
             Actor = following;
             Items.AddRange(Actor.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
@@ -90,11 +90,10 @@ namespace Fiero.Business
         }
         
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Picture<TextureName>>(s => s
+            .AddRule<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
                 .Apply(x => {
                     x.HorizontalAlignment.V = HorizontalAlignment.Right;
-                    x.TextureName.V = TextureName.Atlas;
                     x.LockAspectRatio.V = true;
                 }))
             .AddRule<Button>(s => s
@@ -113,7 +112,7 @@ namespace Fiero.Business
                 .Repeat(PageSize.V, (index, grid) => grid
                 .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
                     .Col(w: 0.08f, @class: "item-sprite")
-                        .Cell<Picture<TextureName>>(p => {
+                        .Cell<Picture>(p => {
                             Invalidated += () => RefreshItemSprite(p, index);
                         })
                     .End()
@@ -150,15 +149,14 @@ namespace Fiero.Business
                     .End()
                 .End();
 
-            void RefreshItemSprite(Picture<TextureName> p, int index)
+            void RefreshItemSprite(Picture p, int index)
             {
                 var i = CurrentPage.V * PageSize.V + index;
                 if (i >= Items.Count) {
-                    p.SpriteName.V = "None";
+                    p.Sprite.V = Resources.Sprites.Get(TextureName.Atlas, "None");
                 }
                 else {
-                    p.SpriteName.V = Items[i].Render.SpriteName;
-                    p.Sprite.Color = Items[i].Render.Sprite.Color;
+                    p.Sprite.V = Resources.MakeSprite(Items[i].Render);
                 }
             }
 

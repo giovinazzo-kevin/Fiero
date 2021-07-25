@@ -23,7 +23,8 @@ namespace Fiero.Business
             return a.Faction.Relationships.Get(b.Faction.Type).MayHelp();
         }
 
-        public static FloorId FloorId(this Actor a) => a.ActorProperties.FloorId;
+        public static FloorId FloorId(this Actor a) => a.Physics.FloorId;
+        public static bool IsPlayer(this Actor a) => a.ActorProperties.Type == ActorName.Player;
         public static bool CanSee(this Actor a, Coord c) => a.Fov?.VisibleTiles[a.FloorId()].Contains(c) ?? true;
         public static bool CanSee(this Actor a, Drawable e) => a.CanSee(e.Physics.Position);
     }

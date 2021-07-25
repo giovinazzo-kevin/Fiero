@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using LightInject;
 using SFML.Window;
 using System;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Fiero.Business
     {
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
             => ui.ShowModal(
-                new InventoryModal(ui, actor),
+                new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),
                 title,
                 new[] { ModalWindowButton.Close },
                 title != null ? ModalWindowStyles.Default
@@ -18,14 +19,14 @@ namespace Fiero.Business
             );
         public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, Drawable speaker, params Drawable[] listeners)
             => ui.ShowModal(
-                new DialogueModal(ui, trigger, node, speaker, listeners),
+                new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
                 null,
                 new[] { ModalWindowButton.Ok },
                 ModalWindowStyles.None
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.ShowModal(
-                new ChoicePopUp<T>(ui, choices), 
+                new ChoicePopUp<T>(ui, ui.ServiceProvider.GetInstance<GameResources>(), choices), 
                 title, 
                 new[] { ModalWindowButton.Ok },
                 title != null ? ModalWindowStyles.Default
@@ -33,7 +34,7 @@ namespace Fiero.Business
             );
         public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.ShowModal(
-                new ChoicePopUp<T>(ui, choices), 
+                new ChoicePopUp<T>(ui, ui.ServiceProvider.GetInstance<GameResources>(), choices), 
                 title, 
                 new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
                 title != null ? ModalWindowStyles.Default

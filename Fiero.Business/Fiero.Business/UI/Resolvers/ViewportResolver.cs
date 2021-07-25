@@ -15,7 +15,7 @@ namespace Fiero.Business
 
         public override Viewport Resolve(LayoutGrid dom)
         {
-            return new Viewport(UI.Input, FloorSystem, GetSprite(TextureName.Atlas, "Trap"));
+            return new Viewport(UI.Input, FloorSystem, Resources.Sprites, Resources.Colors, GetSprite(TextureName.Atlas, "Trap"));
         }
     }
 }

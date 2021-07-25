@@ -14,7 +14,7 @@ namespace Fiero.Business
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
-        public ChoicePopUp(GameUI ui, params T[] options) : base(ui)
+        public ChoicePopUp(GameUI ui, GameResources resources, params T[] options) : base(ui, resources)
         {
             Options = options;
             Confirmed += (_, __) => {

@@ -76,7 +76,7 @@ namespace Fiero.Business
             TopRow.Update();
             BottomRow.Update();
             if (Following.V != null && Following.V.Id != 0) {
-                ActorHealth.Text.V = $"HP: {Following.V.ActorProperties.Health}/{Following.V.ActorProperties.MaximumHealth}";
+                ActorHealth.Text.V = $"HP: {Following.V.ActorProperties.Stats.Health}/{Following.V.ActorProperties.Stats.MaximumHealth}";
                 if(Following.V.Log != null) {
                     Logs.Text.V = String.Join('\n', Following.V.Log.GetMessages().TakeLast(Logs.MaxLines));
                 }

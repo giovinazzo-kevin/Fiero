@@ -9,19 +9,19 @@ using System.Linq;
 namespace Fiero.Business
 {
 
+    [TransientDependency]
     public sealed class FloorBuilder
     {
-        public readonly Coord Size;
-
         private readonly GameEntities _entities;
         private readonly GameEntityBuilders _entityBuilders;
+        private readonly GameColors<ColorName> _colors;
         private readonly List<Action<FloorGenerationContext>> _steps;
 
-        internal FloorBuilder(Coord size, GameEntities entities, GameEntityBuilders builders)
+        public FloorBuilder(GameEntities entities, GameEntityBuilders builders, GameColors<ColorName> colors)
         {
-            Size = size;
             _entities = entities;
             _entityBuilders = builders;
+            _colors = colors;
             _steps = new List<Action<FloorGenerationContext>>();
         }
 
@@ -31,7 +31,7 @@ namespace Fiero.Business
             return this;
         }
 
-        private int CreateStairs(FloorId id, FloorConnection conn, FloorGenerationContext context, HashSet<FloorGenerationContext.Object> hints)
+        private int CreateStairs(FloorId id, FloorConnection conn, FloorGenerationContext context, HashSet<ObjectDef> hints)
         {
             var pos = new Coord();
             if(id == conn.To) {
@@ -39,7 +39,7 @@ namespace Fiero.Business
                     ? UseHint(hint)
                     : GetRandomPosition();
                 return _entityBuilders.Upstairs(conn)
-                    .WithPosition(pos)
+                    .WithPhysics(pos)
                     .Build().Id;
             }
             else {
@@ -47,11 +47,11 @@ namespace Fiero.Business
                     ? UseHint(hint)
                     : GetRandomPosition();
                 return _entityBuilders.Downstairs(conn)
-                    .WithPosition(pos)
+                    .WithPhysics(pos)
                     .Build().Id;
             }
 
-            Coord UseHint(FloorGenerationContext.Object hint)
+            Coord UseHint(ObjectDef hint)
             {
                 hints.Remove(hint);
                 return hint.Position;
@@ -66,7 +66,7 @@ namespace Fiero.Business
             }
         }
 
-        private int CreateEntity(FloorGenerationContext.Object obj)
+        private int CreateEntity(ObjectDef obj)
         {
             var drawable = obj.Name switch {
                 DungeonObjectName.Door => CreateDoor(),
@@ -85,61 +85,61 @@ namespace Fiero.Business
             Drawable CreateShrine()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Shrine().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Shrine().WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateDoor()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Door().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Door().WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateTrap()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Trap().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Trap().WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateChest()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Chest().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Chest().WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateConsumable()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                   () => _entityBuilders.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Haste).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Love).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Rage).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test1).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test2).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test3).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test4).WithPosition(obj.Position).Build()
+                   () => _entityBuilders.Potion(EffectName.Haste).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Potion(EffectName.Haste).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Potion(EffectName.Love).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Potion(EffectName.Rage).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Scroll(EffectName.Test1).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Scroll(EffectName.Test2).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Scroll(EffectName.Test3).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Scroll(EffectName.Test4).WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateWeapon()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Sword().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Bow().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Staff().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Sword().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Bow().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Staff().WithPhysics(obj.Position).Build()
                 )();
             }
 
             Drawable CreateArmor()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Head).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Arms).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Legs).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Torso).WithPosition(obj.Position).Build()
+                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Head).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Arms).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Legs).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Torso).WithPhysics(obj.Position).Build()
                 )();
             }
 
@@ -153,7 +153,7 @@ namespace Fiero.Business
 
             Drawable CreateBoss()
             {
-                return _entityBuilders.NpcGreatKingRat().WithPosition(obj.Position).Build();
+                return _entityBuilders.NpcGreatKingRat().WithPhysics(obj.Position).Build();
             }
 
             Drawable CreateEnemy()
@@ -176,19 +176,32 @@ namespace Fiero.Business
                     MonsterTierName.Five
                 );
                 return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Rat(tier).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Snake(tier).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Cat(tier).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Dog(tier).WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.Boar(tier).WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Rat(tier).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Snake(tier).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Cat(tier).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Dog(tier).WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Boar(tier).WithPhysics(obj.Position).Build()
                 )();
             }
         }
 
-        public Floor Build(FloorId id)
+        private EntityBuilder<Tile> BuildTile(TileDef tile)
         {
-            var floor = new Floor(id, Size);
-            var context = new FloorGenerationContext(Size.X, Size.Y);
+            var ret = tile.Name switch {
+                TileName.Wall => _entityBuilders.WallTile(),
+                TileName.Ground => _entityBuilders.GroundTile(),
+                _ => _entityBuilders.UnimplementedTile()
+            };
+            if(tile.Color is { } tint) {
+                ret = ret.WithColor(tint);
+            }
+            return ret;
+        }
+
+        public Floor Build(FloorId id, Coord size)
+        {
+            var floor = new Floor(id, size);
+            var context = new FloorGenerationContext(size.X, size.Y);
             // Run user steps, initializing the context
             foreach (var step in _steps) {
                 step(context);
@@ -207,7 +220,9 @@ namespace Fiero.Business
                 if (tileObjects.Any(t => t.Physics.Position == item.Position))
                     return;
                 if (item.Name != TileName.None) {
-                    floor.SetTile(_entityBuilders.Tile(item.Name).WithPosition(item.Position).Build());
+                    floor.SetTile(BuildTile(item)
+                        .Tweak<PhysicsComponent>(x => x.Position = item.Position)
+                    .Build());
                 }
             });
             // Place all features that were added to the context

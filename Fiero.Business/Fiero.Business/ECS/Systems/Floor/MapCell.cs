@@ -21,7 +21,7 @@ namespace Fiero.Business
         }
 
         public bool IsWalkable(object inContext) => ((IPathNode<object>)Tile).IsWalkable(inContext)
-            && !Features.Any(f => f.FeatureProperties.BlocksMovement);
+            && !Features.Any(f => f.Physics.BlocksMovement);
         public IEnumerable<Drawable> GetDrawables(bool seen = true)
         {
             if(!Items.Any() && !Features.Any() && (!seen || !Actors.Any()))

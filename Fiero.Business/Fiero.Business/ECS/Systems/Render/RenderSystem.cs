@@ -32,7 +32,7 @@ namespace Fiero.Business
             var pos = a.Physics.Position;
             var viewSize = Viewport.ViewArea.V.Size();
 
-            Viewport.ViewFloor.V = a.ActorProperties.FloorId;
+            Viewport.ViewFloor.V = a.FloorId();
             Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
             Viewport.VisibleTiles.V = a.Fov?.VisibleTiles[floorId] ?? Enumerable.Empty<Coord>();
             Viewport.KnownTiles.V = a.Fov?.KnownTiles[floorId] ?? Enumerable.Empty<Coord>();

@@ -50,14 +50,14 @@ namespace Fiero.Business
 
         public void AddFloor(FloorId id, Coord size, Func<FloorBuilder, FloorBuilder> configure)
         {
-            var builder = configure(new FloorBuilder(size, Entities, EntityBuilders));
-            var floor = builder.Build(id);
+            var builder = configure(ServiceProvider.GetInstance<FloorBuilder>());
+            var floor = builder.Build(id, size);
             Floors.Add(id, floor);
         }
 
         public void AddDungeon(Func<DungeonBuilder, DungeonBuilder> configure)
         {
-            var builder = configure(new DungeonBuilder(Entities, EntityBuilders, ServiceProvider));
+            var builder = configure(ServiceProvider.GetInstance<DungeonBuilder>());
             foreach(var floor in builder.Build()) {
                 Floors.Add(floor.Id, floor);
             }
@@ -86,16 +86,15 @@ namespace Fiero.Business
             return false;
         }
         public Tile GetTileAt(FloorId id, Coord pos) => TryGetCellAt(id, pos, out var cell) ? cell.Tile : null;
-        public void SetTileAt(FloorId id, Coord pos, TileName tile)
+        public void SetTileAt(FloorId id, Coord pos, Tile tile)
         {
             if(TryGetFloor(id, out var floor)) {
                 if (TryGetCellAt(id, pos, out var old)) {
                     Entities.FlagEntityForRemoval(old.Tile.Id);
                 }
-                var entity = EntityBuilders.Tile(tile)
-                    .WithPosition(pos)
-                    .Build();
-                floor.SetTile(entity);
+                tile.Physics.FloorId = id;
+                tile.Physics.Position = pos;
+                floor.SetTile(tile);
             }
         }
         public IEnumerable<MapCell> GetNeighborsAt(FloorId id, Coord pos)
@@ -125,7 +124,7 @@ namespace Fiero.Business
             if (TryGetCellAt(id, pos, out var closestCell)
                 && !closestCell.Actors.Any()
                 && !closestCell.Items.Any()
-                && !closestCell.Features.Any(f => f.FeatureProperties.BlocksMovement)) {
+                && !closestCell.Features.Any(f => f.Physics.BlocksMovement)) {
                 closest = closestCell.Tile;
                 return true;
             }
@@ -133,7 +132,7 @@ namespace Fiero.Business
                 return false;
             var neighbors = GetNeighborsAt(id, pos)
                 .Select(c => c.Tile)
-                .Where(n => !n.TileProperties.BlocksMovement)
+                .Where(n => !n.Physics.BlocksMovement)
                 .OrderBy(n => Rng.Random.NextDouble())
                 .ToList();
             if (neighbors.All(n => n.DistanceFrom(pos) > maxDistance))

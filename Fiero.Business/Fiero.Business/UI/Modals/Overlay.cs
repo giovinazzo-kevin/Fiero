@@ -5,7 +5,7 @@ namespace Fiero.Business
 {
     public abstract class Overlay : Modal
     {
-        protected Overlay(GameUI ui) : base(ui)
+        protected Overlay(GameUI ui, GameResources resources) : base(ui, resources)
         {
         }
 

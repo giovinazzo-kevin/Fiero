@@ -94,10 +94,10 @@ namespace Fiero.Business.Scenes
                                 .Select(i => Resources.Entities
                                     .Rat(MonsterTierName.Two)
                                     .WithFaction(FactionName.Players)
-                                    .WithPosition(player.Physics.Position)
+                                    .WithPhysics(player.Physics.Position)
                                     .Build());
                             foreach (var f in friends) {
-                                TrySpawn(player.ActorProperties.FloorId, f);
+                                TrySpawn(player.FloorId(), f);
                             }
                         }
                     // Remove trigger from the shrine
@@ -143,11 +143,12 @@ namespace Fiero.Business.Scenes
 
                 // Create player on top of the starting stairs
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
-                var upstairs = Systems.Floor.GetAllFeatures(entranceFloorId)
+                var features = Systems.Floor.GetAllFeatures(entranceFloorId);
+                var upstairs = features
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Physics.Position;
                 Player = Resources.Entities.Player
-                    .WithPosition(upstairs)
+                    .WithPhysics(upstairs)
                     .WithName(playerName)
                     .WithItems(Resources.Entities.Bow().Build())
                     .Build();
@@ -165,7 +166,7 @@ namespace Fiero.Business.Scenes
                 // - Recenter viewport on player and update UI
             yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e => {
                 Systems.Floor.RecalculateFov(e.Actor);
-                if (e.Actor.ActorProperties.Type == ActorName.Player) {
+                if (e.Actor.IsPlayer()) {
                     Systems.Render.CenterOn(e.Actor);
                 }
             });
@@ -175,7 +176,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorTurnEnded:
             // - Check dialogue triggers when the player's turn ends
             yield return Systems.Action.ActorTurnEnded.SubscribeResponse(e => {
-                if (e.Actor.ActorProperties.Type == ActorName.Player) {
+                if (e.Actor.IsPlayer()) {
                     Systems.Dialogue.CheckTriggers();
                 }
                 return true;
@@ -228,7 +229,7 @@ namespace Fiero.Business.Scenes
                     addCost = weaponsUsed.Max(w => w.WeaponProperties.SwingDelay);
                     damage = weaponsUsed.Sum(w => w.WeaponProperties.BaseDamage);
                 }
-                e.Victim.ActorProperties.Health -= damage;
+                e.Victim.ActorProperties.Stats.Health -= damage;
 
                 if(damage > 0) {
                     // make sure that neutrals aggro the attacker
@@ -249,11 +250,11 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
-                if (e.Victim.ActorProperties.Type == ActorName.Player) {
+                if (e.Victim.IsPlayer()) {
                     Resources.Sounds.Get(SoundName.PlayerDeath).Play();
                     Store.SetValue(Data.Player.KilledBy, e.Killer);
                 }
-                Systems.Floor.RemoveActor(e.Victim.ActorProperties.FloorId, e.Victim);
+                Systems.Floor.RemoveActor(e.Victim.FloorId(), e.Victim);
                 Entities.FlagEntityForRemoval(e.Victim.Id);
                 Entities.RemoveFlagged(true);
                 e.Victim.TryRefresh(0); // invalidate target proxy
@@ -331,6 +332,14 @@ namespace Fiero.Business.Scenes
                     return false;
                 }
             });
+            // ActionSystem.ActorBumpedObstacle:
+                // - Play a sound when it's the player
+            yield return Systems.Action.ActorBumpedObstacle.SubscribeHandler(e => {
+                e.Actor.Log?.Write($"$Action.YouBumpInto$ {e.Obstacle.Info.Name}.");
+                if(e.Actor.IsPlayer()) {
+                    Resources.Sounds.Get(SoundName.WallBump, e.Obstacle.Physics.Position).Play();
+                }
+            });
             // ActionSystem.FeatureInteractedWith:
                 // - Open/close doors
                 // - Handle shrine interactions
@@ -338,10 +347,15 @@ namespace Fiero.Business.Scenes
                 // - Handle stair and portal interactions
             yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e => {
                 if (e.Feature.FeatureProperties.Name == FeatureName.Door) {
-                    e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
-                    e.Feature.FeatureProperties.BlocksMovement ^= true;
-                    e.Feature.FeatureProperties.BlocksLight = e.Feature.FeatureProperties.BlocksMovement;
-                    e.Feature.Render.Hidden = !e.Feature.FeatureProperties.BlocksMovement;
+                    e.Feature.Physics.BlocksMovement ^= true;
+                    e.Feature.Physics.BlocksLight = e.Feature.Physics.BlocksMovement;
+                    e.Feature.Render.Hidden = !e.Feature.Physics.BlocksMovement;
+                    if (e.Feature.Physics.BlocksMovement) {
+                        e.Actor.Log?.Write($"$Action.YouCloseThe$ {e.Feature.Info.Name}.");
+                    }
+                    else {
+                        e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
+                    }
                     return true;
                 }
                 if (e.Feature.FeatureProperties.Name == FeatureName.Shrine) {
@@ -370,7 +384,7 @@ namespace Fiero.Business.Scenes
                         .Single(f => f.Portal?.Connects(current, next) ?? false);
                     currentFloor.RemoveActor(e.Actor);
                     e.Actor.Physics.Position = stairs.Physics.Position;
-                    e.Actor.ActorProperties.FloorId = next;
+                    e.Actor.Physics.FloorId = next;
                     nextFloor.AddActor(e.Actor);
                     e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
                     return true;

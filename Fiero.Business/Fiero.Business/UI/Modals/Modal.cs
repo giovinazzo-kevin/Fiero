@@ -9,11 +9,13 @@ namespace Fiero.Business
 {
     public abstract class Modal : ModalWindow
     {
+        protected readonly GameResources Resources;
         protected readonly Dictionary<Hotkey, Action> Hotkeys;
         protected event Action Invalidated;
 
-        protected Modal(GameUI ui) : base(ui)
+        protected Modal(GameUI ui, GameResources resources) : base(ui)
         {
+            Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
             Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
         }

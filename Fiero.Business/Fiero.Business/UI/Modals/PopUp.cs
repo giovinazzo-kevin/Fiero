@@ -4,7 +4,7 @@ namespace Fiero.Business
 {
     public abstract class PopUp : Modal
     {
-        public PopUp(GameUI ui) : base(ui)
+        public PopUp(GameUI ui, GameResources resources) : base(ui, resources)
         {
         }
 

@@ -38,7 +38,6 @@ namespace Fiero.Business
         public int CurrentTurn { get; private set; }
 
         private readonly GameEntities _entities;
-        private readonly GameSounds<SoundName> _sounds;
         private readonly FloorSystem _floorSystem;
 
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> GameStarted;
@@ -58,6 +57,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemConsumed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
 
+        public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
         public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
 
         public int CurrentActorId => _queue[0].ActorId;
@@ -71,14 +71,12 @@ namespace Fiero.Business
         ) : base(bus) {
             _entities = entities;
             _floorSystem = floorSystem;
-            _sounds = sounds;
             _queue = new List<ActorTime>();
 
             GameStarted = new(this, nameof(GameStarted));
             TurnStarted = new(this, nameof(TurnStarted));
             TurnEnded = new(this, nameof(TurnEnded));
             ActorTurnStarted = new(this, nameof(ActorTurnStarted));
-            ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorTurnEnded = new(this, nameof(ActorTurnEnded));
             ActorMoved = new(this, nameof(ActorMoved));
             ActorSpawned = new(this, nameof(ActorSpawned));
@@ -91,6 +89,9 @@ namespace Fiero.Business
             ItemUnequipped = new(this, nameof(ItemUnequipped));
             ItemConsumed = new(this, nameof(ItemConsumed));
             FeatureInteractedWith = new(this, nameof(FeatureInteractedWith));
+
+            ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
+            ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
 
             ActorKilled.SubscribeHandler(e => ActorDied.Raise(new(e.Victim)));
             Reset();

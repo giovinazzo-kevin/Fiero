@@ -16,6 +16,15 @@ namespace Fiero.Business
         public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
         public SpatialAStar<MapCell, object> Pathfinder { get; private set; }
 
+        public event Action<Floor, Tile, Tile> TileChanged;
+
+        public event Action<Floor, Feature> FeatureAdded;
+        public event Action<Floor, Feature> FeatureRemoved;
+        public event Action<Floor, Actor> ActorAdded;
+        public event Action<Floor, Actor> ActorRemoved;
+        public event Action<Floor, Item> ItemAdded;
+        public event Action<Floor, Item> ItemRemoved;
+
         public Floor(FloorId id, Coord size)
         {
             Id = id;
@@ -31,7 +40,9 @@ namespace Fiero.Business
             if (!_cells.TryGetValue(tile.Physics.Position, out var cell)) {
                 cell = _cells[tile.Physics.Position] = new(tile);
             }
+            var oldTile = cell.Tile;
             cell.Tile = tile;
+            TileChanged?.Invoke(this, oldTile, tile);
             if (Pathfinder != null) {
                 Pathfinder.Update(tile.Physics.Position, cell, out var old);
                 old?.Tile?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
@@ -43,6 +54,7 @@ namespace Fiero.Business
             actor.Physics.FloorId = Id;
             if(_cells.TryGetValue(actor.Physics.Position, out var cell)) {
                 cell.Actors.Add(actor);
+                ActorAdded?.Invoke(this, actor);
             }
         }
 
@@ -50,6 +62,7 @@ namespace Fiero.Business
         {
             if (_cells.TryGetValue(actor.Physics.Position, out var cell)) {
                 cell.Actors.Remove(actor);
+                ActorRemoved?.Invoke(this, actor);
             }
         }
 
@@ -57,6 +70,7 @@ namespace Fiero.Business
         {
             if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
                 cell.Items.Add(item);
+                ItemAdded?.Invoke(this, item);
             }
         }
 
@@ -64,6 +78,7 @@ namespace Fiero.Business
         {
             if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
                 cell.Items.Remove(item);
+                ItemRemoved?.Invoke(this, item);
             }
         }
 
@@ -72,6 +87,7 @@ namespace Fiero.Business
             feature.Physics.FloorId = Id;
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Add(feature);
+                FeatureAdded?.Invoke(this, feature);
             }
         }
 
@@ -79,6 +95,7 @@ namespace Fiero.Business
         {
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Remove(feature);
+                FeatureRemoved?.Invoke(this, feature);
             }
         }
 

@@ -21,10 +21,10 @@
     <None Update="Resources\Fonts\AmaticSC-Regular.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Fonts\CGA8x8thick.png">
+    <None Update="Resources\Fonts\CGA8x8thick.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Fonts\CGA8x8thin.png">
+    <None Update="Resources\Fonts\CGA8x8thin.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Fonts\ModernDOS8x8.ttf">
@@ -36,67 +36,67 @@
     <None Update="Resources\Fonts\Roboto-Medium.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Localizations\en\en.json">
+    <None Update="Resources\Localizations\en\en.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Localizations\it\it.json">
+    <None Update="Resources\Localizations\it\it.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Palettes\default.json">
+    <None Update="Resources\Palettes\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Shaders\test.frag">
+    <None Update="Resources\Shaders\test.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Alarm High.ogg">
+    <None Update="Resources\Sounds\Alarm High.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Alarm Low.ogg">
+    <None Update="Resources\Sounds\Alarm Low.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Alarm Mid.ogg">
+    <None Update="Resources\Sounds\Alarm Mid.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Alarm Loop.ogg">
+    <None Update="Resources\Sounds\Alarm Loop.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\converted_Loop_Alarm.wav">
+    <None Update="Resources\Sounds\converted_Loop_Alarm.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Oof.ogg">
+    <None Update="Resources\Sounds\Oof.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\Shutdown.ogg">
+    <None Update="Resources\Sounds\Shutdown.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\StoneDrag.ogg">
+    <None Update="Resources\Sounds\StoneDrag.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\StoneMove.ogg">
+    <None Update="Resources\Sounds\StoneMove.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\UIOk.ogg">
+    <None Update="Resources\Sounds\UIOk.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Sounds\UIBlip.ogg">
+    <None Update="Resources\Sounds\UIBlip.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Spritesheets\index.json">
+    <None Update="Resources\Spritesheets\index.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Spritesheets\ui.json">
+    <None Update="Resources\Spritesheets\ui.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Spritesheets\atlas.json">
+    <None Update="Resources\Spritesheets\atlas.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Textures\8x8.png">
+    <None Update="Resources\Textures\8x8.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Fonts\SegoeUI.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="DOM.Resources\Textures\8x8_ui.png">
+    <None Update="Resources\Textures\8x8_ui.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

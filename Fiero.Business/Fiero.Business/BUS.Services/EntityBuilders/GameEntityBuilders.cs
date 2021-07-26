@@ -85,9 +85,9 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        public EntityBuilder<Potion> Potion(EffectName effect)
+        public EntityBuilder<Potion> Potion(PotionEffectName effectType)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 17);
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effectType * 17);
             var potionColor = rng.Choose(new(ColorName Color, string Adjective)[] {
                 (ColorName.White, "pale"),
                 (ColorName.Red, "warm"),
@@ -106,14 +106,19 @@ namespace Fiero.Business
                 (ColorName.LightMagenta, "lumpy"),
                 (ColorName.Black, "dark")
             });
+
             return Consumable<Potion>($"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
-           .WithName($"Potion of {effect}")
-           .WithSprite(nameof(Potion), potionColor.Color)
-           .WithPotionInfo(effect)
+               .WithName($"Potion of {effectType}")
+               .WithSprite(nameof(Potion), potionColor.Color)
+               .WithPotionInfo(effectType)
+               .WithIntrinsicEffect(() => effectType switch {
+                   PotionEffectName.Healing => new VampirismEffect().Temporary(10).GrantedOnUse(),
+                   _ => throw new NotImplementedException()
+               });
            ;
         }
 
-        public EntityBuilder<Scroll> Scroll(EffectName effect)
+        public EntityBuilder<Scroll> Scroll(ScrollEffectName effect)
         {
             var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 31);
             var label = ScrollLabel();
@@ -270,6 +275,8 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Feature> Trap()
             => Feature(FeatureName.Trap)
+            .WithIntrinsicEffect(() => new TrapEffect())
+            .Tweak<RenderComponent>(x => x.Hidden = true)
             ;
         public EntityBuilder<Feature> Door()
             => Feature(FeatureName.Door)

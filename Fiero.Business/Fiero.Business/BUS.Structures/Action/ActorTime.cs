@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    internal readonly struct ActorTime
+    public readonly struct ActorTime
     {
         public readonly int LastActedTime;
         public readonly int Time;

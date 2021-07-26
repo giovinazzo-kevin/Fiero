@@ -89,7 +89,7 @@ namespace Fiero.Core
             if (!dict.TryGetValue(key, out var sprites)) {
                 return false;
             }
-            var rng = rngSeed is { } seed ? new Random(seed) : new Random();
+            var rng = rngSeed is { } seed ? Rng.Seeded(seed) : new Random();
             sprite = sprites.Shuffle(rng).First();
             return true;
         }

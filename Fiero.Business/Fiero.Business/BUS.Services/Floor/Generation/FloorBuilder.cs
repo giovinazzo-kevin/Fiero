@@ -14,14 +14,12 @@ namespace Fiero.Business
     {
         private readonly GameEntities _entities;
         private readonly GameEntityBuilders _entityBuilders;
-        private readonly GameColors<ColorName> _colors;
         private readonly List<Action<FloorGenerationContext>> _steps;
 
-        public FloorBuilder(GameEntities entities, GameEntityBuilders builders, GameColors<ColorName> colors)
+        public FloorBuilder(GameEntities entities, GameEntityBuilders builders)
         {
             _entities = entities;
             _entityBuilders = builders;
-            _colors = colors;
             _steps = new List<Action<FloorGenerationContext>>();
         }
 
@@ -113,14 +111,7 @@ namespace Fiero.Business
             Drawable CreateConsumable()
             {
                 return Rng.Random.Choose<Func<Drawable>>(
-                   () => _entityBuilders.Potion(EffectName.Haste).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Haste).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Love).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Potion(EffectName.Rage).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test1).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test2).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test3).WithPhysics(obj.Position).Build(),
-                   () => _entityBuilders.Scroll(EffectName.Test4).WithPhysics(obj.Position).Build()
+                   () => _entityBuilders.Potion(PotionEffectName.Healing).WithPhysics(obj.Position).Build()
                 )();
             }
 

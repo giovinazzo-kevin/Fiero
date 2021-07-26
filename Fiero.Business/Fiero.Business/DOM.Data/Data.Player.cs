@@ -7,7 +7,6 @@ namespace Fiero.Business
         public static class Player
         {
             public static readonly GameDatum<string> Name = new(nameof(Player) + nameof(Name));
-            public static readonly GameDatum<Actor> KilledBy = new(nameof(Player) + nameof(KilledBy));
         }
     }
 }

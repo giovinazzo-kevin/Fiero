@@ -26,5 +26,13 @@ namespace Fiero.Core
 
         public override int GetHashCode() => Id;
         public override bool Equals(object obj) => obj is EcsEntity other ? Id == other.Id : base.Equals(obj);
+        public static bool operator ==(EcsEntity left, EcsEntity right)
+        {
+            return left?.Id == right?.Id;
+        }
+        public static bool operator !=(EcsEntity left, EcsEntity right)
+        {
+            return !(left == right);
+        }
     }
 }

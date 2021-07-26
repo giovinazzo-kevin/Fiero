@@ -10,7 +10,7 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
 
-    public class FloorSystem : EcsSystem
+    public partial class FloorSystem : EcsSystem
     {
         protected readonly Dictionary<FloorId, Floor> Floors;
 
@@ -18,6 +18,14 @@ namespace Fiero.Business
         public readonly GameEntities Entities;
         public readonly GameEntityBuilders EntityBuilders;
         public readonly GameDataStore Store;
+
+        public readonly SystemEvent<FloorSystem, TileChangedEvent> TileChanged;
+        public readonly SystemEvent<FloorSystem, ActorChangedEvent> ActorAdded;
+        public readonly SystemEvent<FloorSystem, ActorChangedEvent> ActorRemoved;
+        public readonly SystemEvent<FloorSystem, ItemChangedEvent> ItemAdded;
+        public readonly SystemEvent<FloorSystem, ItemChangedEvent> ItemRemoved;
+        public readonly SystemEvent<FloorSystem, FeatureChangedEvent> FeatureAdded;
+        public readonly SystemEvent<FloorSystem, FeatureChangedEvent> FeatureRemoved;
 
         public FloorSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store, IServiceFactory sp)
             : base(bus)
@@ -27,12 +35,19 @@ namespace Fiero.Business
             EntityBuilders = entityBuilders;
             ServiceProvider = sp;
             Floors = new();
+
+            TileChanged = new(this, nameof(TileChanged));
+            ActorAdded = new(this, nameof(ActorAdded));
+            ActorRemoved = new(this, nameof(ActorRemoved));
+            ItemAdded = new(this, nameof(ItemAdded));
+            ItemRemoved = new(this, nameof(ItemRemoved));
+            FeatureAdded = new(this, nameof(FeatureAdded));
+            FeatureRemoved = new(this, nameof(FeatureRemoved));
         }
 
         public void Reset()
         {
             foreach (var floor in Floors.Values) {
-
                 foreach (var cell in floor.Cells.Values) {
                     Entities.FlagEntityForRemoval(cell.Tile.Id);
                     foreach (var actor in cell.Actors) {
@@ -48,10 +63,22 @@ namespace Fiero.Business
         public Floor GetFloor(FloorId id) => TryGetFloor(id, out var floor) ? floor : null;
         public IEnumerable<Floor> GetAllFloors() => Floors.Values;
 
+        private void RouteEvents(Floor floor)
+        {
+            floor.TileChanged += (f, oldTile, newTile) => TileChanged.Raise(new(floor, oldTile, newTile));
+            floor.ActorAdded += (f, a) => ActorAdded.Raise(new(f, null, a));
+            floor.ActorRemoved += (f, a) => ActorRemoved.Raise(new(f, a, null));
+            floor.ItemAdded += (f, a) => ItemAdded.Raise(new(f, null, a));
+            floor.ItemRemoved += (f, a) => ItemRemoved.Raise(new(f, a, null));
+            floor.FeatureAdded += (f, a) => FeatureAdded.Raise(new(f, null, a));
+            floor.FeatureRemoved += (f, a) => FeatureRemoved.Raise(new(f, a, null));
+        }
+
         public void AddFloor(FloorId id, Coord size, Func<FloorBuilder, FloorBuilder> configure)
         {
             var builder = configure(ServiceProvider.GetInstance<FloorBuilder>());
             var floor = builder.Build(id, size);
+            RouteEvents(floor);
             Floors.Add(id, floor);
         }
 
@@ -59,6 +86,7 @@ namespace Fiero.Business
         {
             var builder = configure(ServiceProvider.GetInstance<DungeonBuilder>());
             foreach(var floor in builder.Build()) {
+                RouteEvents(floor);
                 Floors.Add(floor.Id, floor);
             }
         }

@@ -1,6 +1,9 @@
 ﻿using Fiero.Core;
+using LightInject;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -8,6 +11,12 @@ namespace Fiero.Business
     {
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
+        public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, Func<Effect> getEffect)
+            where T : Entity => builder.AddOrTweak<EffectComponent>(c => {
+                builder.Built += (b, e) => {
+                    getEffect().Start(b.ServiceFactory.GetInstance<GameSystems>(), e);
+                };
+            });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool blocksMovement = false, bool blocksLight = false)
             where T : Drawable => builder.AddOrTweak<PhysicsComponent>(c => {
                 c.Position = pos;
@@ -35,9 +44,22 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => {
                 c.Capacity = Math.Max(c.Capacity, items.Length);
-                foreach (var item in items) {
-                    c.TryPut(item);
-                }
+                // Delegate the actual adding of each item to when the owner of the inventory is spawned
+                builder.Built += (b, e) => {
+                    var actionSystem = b.ServiceFactory.GetInstance<ActionSystem>();
+                    var subs = new List<Subscription>();
+                    subs.Add(actionSystem.ActorSpawned.SubscribeHandler(e => {
+                        if(e.Actor.Id != c.EntityId) {
+                            return;
+                        }
+                        foreach (var item in items) {
+                            actionSystem.ItemPickedUp.Raise(new(e.Actor, item));
+                        }
+                        foreach (var sub in subs) {
+                            sub.Dispose();
+                        }
+                    }));
+                };
             });
         public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<EquipmentComponent>();
@@ -94,11 +116,11 @@ namespace Fiero.Business
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
             });
-        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, EffectName effect)
+        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, PotionEffectName effect)
             where T : Potion => builder.AddOrTweak<PotionComponent>(c => {
                 c.Effect = effect;
             });
-        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, EffectName effect)
+        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, ScrollEffectName effect)
             where T : Scroll => builder.AddOrTweak<ScrollComponent>(c => {
                 c.Effect = effect;
             });

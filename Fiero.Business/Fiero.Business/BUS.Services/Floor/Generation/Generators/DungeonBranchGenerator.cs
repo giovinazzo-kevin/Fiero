@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
 using SFML.Graphics.Glsl;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,24 +44,24 @@ namespace Fiero.Business
                 if(Rng.Random.NextDouble() < info.ShrineRoomChance) {
                     room = new ShrineRoom();
                 }
-                if (Rng.Random.NextDouble() < info.ConsumablesChance) {
-                    var roll = Rng.Random.Between(info.ConsumablesPerRoll.Min, info.ConsumablesPerRoll.Max);
-                    room.Drawn += (r, ctx) => {
+
+                room.Drawn += (r, ctx) => {
+                    // Chances are not actually per-room but per room square, as to make them normalized
+                    var area = r.GetRects().Count();
+                    if (Rng.Random.NextDouble() < info.ConsumablesChance * area) {
+                        var roll = Rng.Random.Between(info.ConsumablesPerRoll.Min, info.ConsumablesPerRoll.Max) * area;
                         AddObjects(r, ctx, DungeonObjectName.Consumable, roll);
-                    };
-                }
-                if (Rng.Random.NextDouble() < info.MonstersChance) {
-                    var roll = Rng.Random.Between(info.MonstersPerRoll.Min, info.MonstersPerRoll.Max);
-                    room.Drawn += (r, ctx) => {
+                    }
+                    if (Rng.Random.NextDouble() < info.MonstersChance * area) {
+                        var roll = Rng.Random.Between(info.MonstersPerRoll.Min, info.MonstersPerRoll.Max) * area;
                         AddObjects(r, ctx, DungeonObjectName.Enemy, roll);
-                    };
-                }
-                if (Rng.Random.NextDouble() < info.ItemsChance) {
-                    var roll = Rng.Random.Between(info.ItemsPerRoll.Min, info.ItemsPerRoll.Max);
-                    room.Drawn += (r, ctx) => {
+                        AddObjects(r, ctx, DungeonObjectName.Trap, roll);
+                    }
+                    if (Rng.Random.NextDouble() < info.ItemsChance * area) {
+                        var roll = Rng.Random.Between(info.ItemsPerRoll.Min, info.ItemsPerRoll.Max) * area;
                         AddObjects(r, ctx, DungeonObjectName.Item, roll);
-                    };
-                }
+                    }
+                };
                 return room;
 
                 void AddObjects(Room r, FloorGenerationContext ctx, DungeonObjectName type, int roll)

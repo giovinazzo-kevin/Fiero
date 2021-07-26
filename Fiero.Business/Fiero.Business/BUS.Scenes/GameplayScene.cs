@@ -114,10 +114,20 @@ namespace Fiero.Business.Scenes
         /// <returns>A list of subscriptions that are automatically released when the scene goes into an exit state.</returns>
         public override IEnumerable<Subscription> RouteEvents()
         {
+            // FloorSystem.FeatureRemoved:
+                // - Mark feature for deletion
+            yield return Systems.Floor.FeatureRemoved.SubscribeHandler(e => {
+                Entities.FlagEntityForRemoval(e.OldState.Id);
+            });
+            // FloorSystem.TileRemoved:
+                // - Mark tile for deletion
+            yield return Systems.Floor.TileChanged.SubscribeHandler(e => {
+                Entities.FlagEntityForRemoval(e.OldState.Id);
+            });
             // ActionSystem.GameStarted:
                 // - Clear old entities and references if present
                 // - Generate a new RNG seed
-                // - Generate map and spawn actors
+                // - Generate map
                 // - Create and spawn player
                 // - Set faction relationships to default values
                 // - Track player visually in the interface
@@ -128,6 +138,13 @@ namespace Fiero.Business.Scenes
                 var newRngSeed = (int)DateTime.Now.ToBinary();
                 Store.SetValue(Data.Global.RngSeed, newRngSeed);
 
+                // Create player
+                var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
+                Player = Resources.Entities.Player
+                    .WithName(playerName)
+                    .WithItems(Resources.Entities.Bow().Build(), Resources.Entities.Potion(PotionEffectName.Healing).Build())
+                    .Build();
+
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
                 Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
@@ -136,25 +153,27 @@ namespace Fiero.Business.Scenes
                     ctx.Connect(default, entranceFloorId);
                 }));
 
-                // Track agents
-                foreach (var comp in Entities.GetComponents<ActionComponent>()) {
-                    Systems.Action.AddActor(comp.EntityId);
-                }
-
-                // Create player on top of the starting stairs
-                var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 var features = Systems.Floor.GetAllFeatures(entranceFloorId);
-                var upstairs = features
+                Player.Physics.Position = features
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Physics.Position;
-                Player = Resources.Entities.Player
-                    .WithPhysics(upstairs)
-                    .WithName(playerName)
-                    .WithItems(Resources.Entities.Bow().Build())
-                    .Build();
+
                 if (!TrySpawn(entranceFloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
+
+                // Spawn all actors once at floorgen
+                foreach (var comp in Entities.GetComponents<ActorComponent>()) {
+                    var proxy = Entities.GetProxy<Actor>(comp.EntityId);
+                    Systems.Action.Spawn(proxy);
+                }
+
+                // Track all actors on the first floor since the player's floorId was null during floorgen
+                // Afterwards, this is handled when the player uses a portal or stairs or when a monster spawns
+                foreach (var actor in Systems.Floor.GetAllActors(entranceFloorId)) {
+                    Systems.Action.Track(actor.Id);
+                }
+
                 // Set faction defaults
                 Systems.Faction.SetDefaultRelationships();
                 Systems.Floor.RecalculateFov(Player);
@@ -174,7 +193,7 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e => {
             });
             // ActionSystem.ActorTurnEnded:
-            // - Check dialogue triggers when the player's turn ends
+                // - Check dialogue triggers when the player's turn ends
             yield return Systems.Action.ActorTurnEnded.SubscribeResponse(e => {
                 if (e.Actor.IsPlayer()) {
                     Systems.Dialogue.CheckTriggers();
@@ -205,7 +224,7 @@ namespace Fiero.Business.Scenes
                 // - Handle Ai aggro and grudges
                 // - Show projectile animations
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
-                var addCost = 0;
+                var swingDelay = 0;
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                 // animate projectile if this was a ranged attack
@@ -226,7 +245,7 @@ namespace Fiero.Business.Scenes
                 }
                 else {
                     // Attack using equipment
-                    addCost = weaponsUsed.Max(w => w.WeaponProperties.SwingDelay);
+                    swingDelay = weaponsUsed.Max(w => w.WeaponProperties.SwingDelay);
                     damage = weaponsUsed.Sum(w => w.WeaponProperties.BaseDamage);
                 }
                 e.Victim.ActorProperties.Stats.Health -= damage;
@@ -242,22 +261,31 @@ namespace Fiero.Business.Scenes
                     , out _);
                 }
 
-                return new(true, addCost);
+                return new(damage, swingDelay, true);
+            });
+            // ActionSystem.ActorDespawned:
+                // - Remove entity from floor and action systems and handle cleanup
+            yield return Systems.Action.ActorDespawned.SubscribeResponse(e => {
+                Systems.Action.StopTracking(e.Actor.Id);
+                Systems.Floor.RemoveActor(e.Actor.FloorId(), e.Actor);
+                Entities.FlagEntityForRemoval(e.Actor.Id);
+                Entities.RemoveFlagged(true);
+                e.Actor.TryRefresh(0); // invalidate target proxy
+                return true;
+            });
+            // ActionSystem.ActorDied:
+                // - Handle game over when the player dies
+            yield return Systems.Action.ActorDied.SubscribeResponse(e => {
+                e.Actor.Log?.Write($"$Action.YouDie$.");
+                if (e.Actor.IsPlayer()) {
+                    Resources.Sounds.Get(SoundName.PlayerDeath).Play();
+                }
+                return true;
             });
             // ActionSystem.ActorKilled:
-                // - Remove entity from floor and handle cleanup
-                // - Handle game over when the player dies
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
-                if (e.Victim.IsPlayer()) {
-                    Resources.Sounds.Get(SoundName.PlayerDeath).Play();
-                    Store.SetValue(Data.Player.KilledBy, e.Killer);
-                }
-                Systems.Floor.RemoveActor(e.Victim.FloorId(), e.Victim);
-                Entities.FlagEntityForRemoval(e.Victim.Id);
-                Entities.RemoveFlagged(true);
-                e.Victim.TryRefresh(0); // invalidate target proxy
                 return true;
             });
             // ActionSystem.ItemDropped:
@@ -345,6 +373,7 @@ namespace Fiero.Business.Scenes
                 // - Handle shrine interactions
                 // - Handle chest interactions
                 // - Handle stair and portal interactions
+                    // - Empty and fill action queue on player floor change
             yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e => {
                 if (e.Feature.FeatureProperties.Name == FeatureName.Door) {
                     e.Feature.Physics.BlocksMovement ^= true;
@@ -387,6 +416,16 @@ namespace Fiero.Business.Scenes
                     e.Actor.Physics.FloorId = next;
                     nextFloor.AddActor(e.Actor);
                     e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
+
+                    if(e.Actor.IsPlayer()) {
+                        foreach (var actor in Systems.Floor.GetAllActors(current)) {
+                            Systems.Action.StopTracking(actor.Id);
+                        }
+                        foreach (var actor in Systems.Floor.GetAllActors(next)) {
+                            Systems.Action.Track(actor.Id);
+                        }
+                    }
+
                     return true;
                 }
             });
@@ -398,7 +437,8 @@ namespace Fiero.Business.Scenes
                 return false;
             }
             actor.Physics.Position = spawnTile.Physics.Position;
-            Systems.Action.AddActor(actor.Id);
+            Systems.Action.Track(actor.Id);
+            Systems.Action.Spawn(actor);
             Systems.Floor.AddActor(floorId, actor);
             return true;
         }
@@ -408,14 +448,7 @@ namespace Fiero.Business.Scenes
             var used = false;
             consumed = false;
             if (item.TryCast<Consumable>(out var consumable)) {
-                if (consumable.TryCast<Potion>(out var potion)
-                && TryApply(potion.PotionProperties.Effect)) {
-                    used = TryConsume(out consumed);
-                }
-                if (consumable.TryCast<Scroll>(out var scroll)
-                && TryApply(scroll.ScrollProperties.Effect)) {
-                    used = TryConsume(out consumed);
-                }
+                used = TryConsume(out consumed);
             }
             if (consumed) {
                 // Assumes item was used from inventory
@@ -435,20 +468,12 @@ namespace Fiero.Business.Scenes
                 }
                 return true;
             }
-
-            bool TryApply(EffectName effect)
-            {
-                switch (effect) {
-                    default: return true;
-                }
-            }
         }
 
         public override void Update()
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
-            Entities.RemoveFlagged();
             if (Input.IsKeyPressed(Key.R)) {
                 TrySetState(SceneState.Main);
             }

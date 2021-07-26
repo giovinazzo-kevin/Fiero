@@ -14,6 +14,7 @@ namespace Fiero.Core
         private readonly GameEntities _entities;
 
         public IServiceFactory ServiceFactory => _entities.ServiceFactory;
+        public event Action<EntityBuilder<TProxy>, TProxy> Built;
 
         internal EntityBuilder(GameEntities entities, IEnumerable<Type> compTypes = null, Action<int> configure = null)
         {
@@ -33,7 +34,7 @@ namespace Fiero.Core
             if (!proxyableComps.Contains(typeof(T))) {
                 throw new ArgumentException($"Entity proxy of type {typeof(TProxy).Name} has no component definition of type {typeof(T).Name}");
             }
-            return new EntityBuilder<TProxy>(
+            var builder = new EntityBuilder<TProxy>(
                 _entities,
                 _componentTypes.Add(typeof(T)),
                 e => {
@@ -41,6 +42,8 @@ namespace Fiero.Core
                     _entities.AddComponent<T>(e, c => { configure?.Invoke(c); return c; });
                 }
             );
+            builder.Built += (b, e) => Built?.Invoke(b, e);
+            return builder;
         }
 
         public EntityBuilder<TProxy> Tweak<T>(Action<T> configure)
@@ -49,7 +52,7 @@ namespace Fiero.Core
             if (!_componentTypes.Contains(typeof(T))) {
                 throw new ArgumentException($"EntityBuilder for entity of type {typeof(TProxy).Name} has no component definition of type {typeof(T).Name}");
             }
-            return new EntityBuilder<TProxy>(
+            var builder = new EntityBuilder<TProxy>(
                 _entities,
                 _componentTypes,
                 e => {
@@ -57,6 +60,8 @@ namespace Fiero.Core
                     configure?.Invoke(_entities.GetFirstComponent<T>(e));
                 }
             );
+            builder.Built += (b, e) => Built?.Invoke(b, e);
+            return builder;
         }
 
         public EntityBuilder<TProxy> AddOrTweak<T>(Action<T> configure = null)
@@ -75,6 +80,7 @@ namespace Fiero.Core
             if(!_entities.TryGetProxy(e, out TProxy proxy)) {
                 throw new ArgumentException($"Could not build a proxy for entity type {typeof(TProxy).Name} out of components {String.Join(", ", _componentTypes.Select(x => x.Name))}");
             }
+            Built?.Invoke(this, proxy);
             return proxy;
         }
 

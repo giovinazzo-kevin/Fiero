@@ -1,5 +1,8 @@
-﻿namespace Fiero.Business
+﻿using System.Security;
+
+namespace Fiero.Business
 {
+
     public readonly struct DropItemAction : IAction
     {
         public readonly Item Item;

@@ -2,6 +2,7 @@
 using SFML.Graphics;
 using System;
 using System.Linq;
+using Shape = Fiero.Core.Shape;
 
 namespace Fiero.Business
 {

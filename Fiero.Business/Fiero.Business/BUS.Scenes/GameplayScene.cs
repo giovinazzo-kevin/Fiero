@@ -269,7 +269,6 @@ namespace Fiero.Business.Scenes
                 Systems.Action.StopTracking(e.Actor.Id);
                 Systems.Floor.RemoveActor(e.Actor.FloorId(), e.Actor);
                 Entities.FlagEntityForRemoval(e.Actor.Id);
-                // e.Actor.TryRefresh(0); // invalidate target proxy
                 return true;
             });
             // ActionSystem.ActorDied:

@@ -92,7 +92,7 @@ namespace Fiero.Business
                             var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite));
                             sprite.Position = (worldPos - viewPos + spriteDef.Offset) * Viewport.ViewTileSize.V + Viewport.Position.V;
                             sprite.Scale = Viewport.ViewTileSize.V / sprite.GetLocalBounds().Size();
-                            sprite.Color = spriteDef.Tint;
+                            sprite.Color = Resources.Colors.Get(spriteDef.Tint);
                             Vfx.Add(sprite);
                         }
                         t.Anim.OnFramePlaying(t.Index);

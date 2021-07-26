@@ -42,11 +42,16 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ItemConsumedEvent, EventResult> ItemConsumed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
 
+        public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
         public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
         public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
 
         public int CurrentActorId => _actorQueue[0].ActorId;
         public IEnumerable<int> ActorIds => _actorQueue.Select(x => x.ActorId);
+
+        private bool _invalidate;
+
+        public void AbortCurrentTurn() => _invalidate = true;
 
         public ActionSystem(
             EventBus bus,
@@ -76,11 +81,9 @@ namespace Fiero.Business
             ItemConsumed = new(this, nameof(ItemConsumed));
             FeatureInteractedWith = new(this, nameof(FeatureInteractedWith));
 
+            ActorSteppedOnTrap = new(this, nameof(ActorSteppedOnTrap));
             ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
-
-            ActorKilled.SubscribeHandler(e => ActorDied.Raise(new(e.Victim)));
-            ActorDied.SubscribeHandler(e => ActorDespawned.Raise(new(e.Actor)));
             Reset();
         }
 
@@ -137,7 +140,6 @@ namespace Fiero.Business
 
         public void StopTracking(int actorId)
         {
-            var proxy = _entities.GetProxy<Actor>(actorId);
             _actorQueue.RemoveAll(x => x.ActorId == actorId);
         }
 
@@ -148,6 +150,10 @@ namespace Fiero.Business
             next = next.WithLastActedTime(next.Time);
             var intent = next.GetIntent();
             if (HandleAction(next, ref intent) is { } cost) {
+                if(_invalidate) {
+                    _invalidate = false;
+                    return cost;
+                }
                 OnTurnEnded(next.ActorId);
             }
             else {
@@ -195,6 +201,7 @@ namespace Fiero.Business
         public void Update(int playerId)
         {
             do {
+                _entities.RemoveFlagged(true);
                 ElapseTick();
             }
             while (ActorIds.Contains(playerId) && CurrentActorId != playerId);

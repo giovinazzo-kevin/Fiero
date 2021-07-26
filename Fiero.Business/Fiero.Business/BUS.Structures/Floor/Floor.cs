@@ -87,6 +87,9 @@ namespace Fiero.Business
             feature.Physics.FloorId = Id;
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Add(feature);
+                if(feature.Physics.BlocksMovement) {
+                    Pathfinder?.Update(feature.Physics.Position, null, out _);
+                }
                 FeatureAdded?.Invoke(this, feature);
             }
         }
@@ -95,6 +98,9 @@ namespace Fiero.Business
         {
             if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
                 cell.Features.Remove(feature);
+                if (feature.Physics.BlocksMovement) {
+                    Pathfinder?.Update(feature.Physics.Position, cell, out _);
+                }
                 FeatureRemoved?.Invoke(this, feature);
             }
         }

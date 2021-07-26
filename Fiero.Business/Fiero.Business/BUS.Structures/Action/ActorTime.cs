@@ -21,5 +21,18 @@ namespace Fiero.Business
 
         public ActorTime WithTime(int newTime) => new(ActorId, Actor, GetIntent, newTime, LastActedTime);
         public ActorTime WithLastActedTime(int newLast) => new(ActorId, Actor, GetIntent, Time, newLast);
+
+        public override int GetHashCode() => ActorId;
+        public override bool Equals(object obj) => obj is ActorTime t && t.ActorId == ActorId;
+
+        public static bool operator ==(ActorTime left, ActorTime right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ActorTime left, ActorTime right)
+        {
+            return !(left == right);
+        }
     }
 }

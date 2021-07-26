@@ -15,7 +15,7 @@ namespace Fiero.Business
 
         public override IAction GetIntent(Actor a)
         {
-            if (a.Ai.Target is { Id: 0 }) {
+            if ((a.Ai.Target?.ActorProperties?.Stats?.Health ?? 0) <= 0) {
                 a.Ai.Target = null; // invalidation
             }
             // If wandering aimlessly, seek a new target (this is expensive so only do it occasionally)

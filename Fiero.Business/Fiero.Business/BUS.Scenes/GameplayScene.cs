@@ -232,7 +232,7 @@ namespace Fiero.Business.Scenes
                     var dir = (e.Victim.Physics.Position - e.Attacker.Physics.Position).Clamp(-1, 1);
                     Systems.Render.Animate(
                         e.Attacker.Physics.Position,
-                        Animation.Projectile(e.Attacker.Physics.Position, e.Victim.Physics.Position, tint: Color.Red)
+                        Animation.Projectile(e.Attacker.Physics.Position, e.Victim.Physics.Position, tint: ColorName.Red)
                     );
                 }
                 // calculate damage
@@ -269,23 +269,26 @@ namespace Fiero.Business.Scenes
                 Systems.Action.StopTracking(e.Actor.Id);
                 Systems.Floor.RemoveActor(e.Actor.FloorId(), e.Actor);
                 Entities.FlagEntityForRemoval(e.Actor.Id);
-                Entities.RemoveFlagged(true);
-                e.Actor.TryRefresh(0); // invalidate target proxy
+                // e.Actor.TryRefresh(0); // invalidate target proxy
                 return true;
             });
             // ActionSystem.ActorDied:
                 // - Handle game over when the player dies
+                // - Raise ActionSystem.ActorDespawned
             yield return Systems.Action.ActorDied.SubscribeResponse(e => {
                 e.Actor.Log?.Write($"$Action.YouDie$.");
                 if (e.Actor.IsPlayer()) {
                     Resources.Sounds.Get(SoundName.PlayerDeath).Play();
                 }
+                Systems.Action.ActorDespawned.Raise(new(e.Actor));
                 return true;
             });
             // ActionSystem.ActorKilled:
+                // - Raise ActionSystem.ActorDied
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
+                Systems.Action.ActorDied.Raise(new(e.Victim));
                 return true;
             });
             // ActionSystem.ItemDropped:
@@ -368,6 +371,14 @@ namespace Fiero.Business.Scenes
                     Resources.Sounds.Get(SoundName.WallBump, e.Obstacle.Physics.Position).Play();
                 }
             });
+            // ActionSystem.ActorSteppedOnTrap:
+                // - Show an animation if the player can see this
+            yield return Systems.Action.ActorSteppedOnTrap.SubscribeHandler(e => {
+                e.Actor.Log?.Write($"$Action.YouTriggerATrap$.");
+                if(Player.CanSee(e.Actor)) {
+                    Systems.Render.Animate(e.Feature.Physics.Position, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
+                }
+            });
             // ActionSystem.FeatureInteractedWith:
                 // - Open/close doors
                 // - Handle shrine interactions
@@ -424,6 +435,7 @@ namespace Fiero.Business.Scenes
                         foreach (var actor in Systems.Floor.GetAllActors(next)) {
                             Systems.Action.Track(actor.Id);
                         }
+                        Systems.Action.AbortCurrentTurn();
                     }
 
                     return true;

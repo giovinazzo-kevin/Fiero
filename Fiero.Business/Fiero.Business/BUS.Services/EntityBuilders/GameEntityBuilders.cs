@@ -292,6 +292,10 @@ namespace Fiero.Business
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
             ;
+        public EntityBuilder<Feature> BloodSplatter(ColorName color = ColorName.Red)
+            => Feature(FeatureName.BloodSplatter)
+            .WithColor(color)
+            ;
         #endregion
 
         #region TILES

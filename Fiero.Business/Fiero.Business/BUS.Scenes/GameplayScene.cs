@@ -32,6 +32,7 @@ namespace Fiero.Business.Scenes
         protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly GameEntities Entities;
+        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly OffButton OffButton;
         protected readonly GameUI UI;
 
@@ -43,6 +44,7 @@ namespace Fiero.Business.Scenes
             GameEntities entities,
             GameSystems systems,
             GameResources resources,
+            GameEntityBuilders entityBuilders,
             GameUI ui,
             OffButton off)
         {
@@ -50,6 +52,7 @@ namespace Fiero.Business.Scenes
             Store = store;
             Entities = entities;
             Systems = systems;
+            EntityBuilders = entityBuilders;
             Resources = resources;
             UI = ui;
             OffButton = off;
@@ -210,11 +213,23 @@ namespace Fiero.Business.Scenes
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);
                 var itemsHere = Systems.Floor.GetItemsAt(floor.Id, e.NewPosition);
                 var featuresHere = Systems.Floor.GetFeaturesAt(floor.Id, e.NewPosition);
-                foreach (var item in itemsHere) {
-                    e.Actor.Log?.Write($"$Action.YouStepOverA$ {item.DisplayName}.");
+                foreach (var items in itemsHere.GroupBy(i => i.DisplayName)) {
+                    var count = items.Count();
+                    if(count == 1) {
+                        e.Actor.Log?.Write($"$Action.YouStepOverA$ {items.Key}.");
+                    }
+                    else {
+                        e.Actor.Log?.Write($"$Action.YouStepOverSeveral$ {count} {items.Key}.");
+                    }
                 }
-                foreach (var feature in featuresHere) {
-                    e.Actor.Log?.Write($"$Action.YouStepOverA$ {feature.Info.Name}.");
+                foreach (var features in featuresHere.GroupBy(i => i.FeatureProperties.Name)) {
+                    var count = features.Count();
+                    if (count == 1) {
+                        e.Actor.Log?.Write($"$Action.YouStepOverA$ {features.Key}.");
+                    }
+                    else {
+                        e.Actor.Log?.Write($"$Action.YouStepOverSeveral$ {count} {features.Key}.");
+                    }
                 }
                 e.Actor.Physics.Position = e.NewPosition;
                 return true;
@@ -248,20 +263,30 @@ namespace Fiero.Business.Scenes
                     swingDelay = weaponsUsed.Max(w => w.WeaponProperties.SwingDelay);
                     damage = weaponsUsed.Sum(w => w.WeaponProperties.BaseDamage);
                 }
-                e.Victim.ActorProperties.Stats.Health -= damage;
-
-                if(damage > 0) {
-                    // make sure that neutrals aggro the attacker
-                    if (e.Victim.Ai != null && e.Victim.Ai.Target == null) {
-                        e.Victim.Ai.Target = e.Attacker;
-                    }
-                    // make sure that people hold a grudge regardless of factions
-                    e.Victim.ActorProperties.Relationships.Update(e.Attacker, x => x
-                        .With(StandingName.Hated)
-                    , out _);
-                }
-
                 return new(damage, swingDelay, true);
+            });
+            // ActionSystem.ActorDamaged 
+                // - Deal damage
+                // - Handle aggro
+                // - Spawn blood splatters
+            yield return Systems.Action.ActorDamaged.SubscribeResponse(e => {
+                e.Victim.ActorProperties.Stats.Health -= e.Damage;
+                if (e.Damage > 0) {
+                    if (e.Source.TryCast<Actor>(out var attacker)) {
+                        // make sure that neutrals aggro the attacker
+                        if(e.Victim.Ai != null && e.Victim.Ai.Target == null) {
+                            e.Victim.Ai.Target = attacker;
+                        }
+                        // make sure that people hold a grudge regardless of factions
+                        e.Victim.ActorProperties.Relationships.Update(attacker, x => x
+                            .With(StandingName.Hated)
+                        , out _);
+                    }
+                    Systems.Floor.AddFeature(e.Victim.FloorId(), EntityBuilders.BloodSplatter()
+                        .WithPhysics(e.Victim.Physics.Position)
+                        .Build());
+                }
+                return true;
             });
             // ActionSystem.ActorDespawned:
                 // - Remove entity from floor and action systems and handle cleanup

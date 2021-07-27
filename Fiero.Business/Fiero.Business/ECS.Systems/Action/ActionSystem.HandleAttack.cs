@@ -74,21 +74,21 @@ namespace Fiero.Business
             bool HandleAttack(AttackName type, ref int? cost, Weapon[] weapons)
             {
                 // attack!
-                var attack = ActorAttacked.Request(new(type, t.Actor, victim, weapons)).First(x => x);
+                var attack = ActorAttacked.Request(new(type, t.Actor, victim, weapons))
+                    .First(x => x);
                 if (!attack)
                     return false;
-                if(attack.Damage > 0) {
-                    ActorDamaged.Raise(new(t.Actor, weapons, victim, attack.Damage));
-                }
-                cost += attack.SwingDelay;
-                if (victim.ActorProperties.Stats.Health <= 0) {
-                    if(ActorKilled.Handle(new(t.Actor, victim))) {
-                        if(!ActorDied.Handle(new(victim)) || !ActorDespawned.Handle(new(victim))) {
-                            throw new InvalidOperationException();
+                if(ActorDamaged.Handle(new(t.Actor, weapons, victim, attack.Damage))) {
+                    if (victim.ActorProperties.Stats.Health <= 0) {
+                        if (ActorKilled.Handle(new(t.Actor, victim))) {
+                            if (!ActorDied.Handle(new(victim)) || !ActorDespawned.Handle(new(victim))) {
+                                throw new InvalidOperationException();
+                            }
+                            return true;
                         }
-                        return true;
                     }
                 }
+                cost += attack.SwingDelay;
                 return true;
             }
         }

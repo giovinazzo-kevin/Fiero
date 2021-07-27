@@ -8,6 +8,7 @@
         Upstairs,
         Chest,
         Shrine,
-        Trap
+        Trap,
+        BloodSplatter
     }
 }

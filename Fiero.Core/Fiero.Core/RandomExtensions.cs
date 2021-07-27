@@ -7,9 +7,13 @@ namespace Fiero.Core
     public static class RandomExtensions
     {
         public static T Choose<T>(this Random rng, params T[] source) => source.Shuffle(rng).First();
-        public static bool OneChanceIn(this Random rng, int denominator)
+        public static bool OneChanceIn(this Random rng, float denominator)
         {
             return rng.NextDouble() < 1f / denominator;
+        }
+        public static bool NChancesIn(this Random rng, float numerator, float denominator)
+        {
+            return rng.NextDouble() < numerator / denominator;
         }
         public static int Between(this Random rng, int min, int max)
             => rng.Next(min, max + 1);

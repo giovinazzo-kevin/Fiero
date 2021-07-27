@@ -22,7 +22,7 @@ namespace Fiero.Business
 
         public bool IsWalkable(object inContext) => ((IPathNode<object>)Tile).IsWalkable(inContext)
             && !Features.Any(f => f.Physics.BlocksMovement);
-        public IEnumerable<Drawable> GetDrawables(bool seen = true)
+        public IEnumerable<DrawableEntity> GetDrawables(bool seen = true)
         {
             // Only show the tile if there's nothing visible on it
             if(    !Items.Any(x => !x.Render.Hidden) 

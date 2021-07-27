@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fiero.Business
 {
-    public class Item : Drawable
+    public class Item : PhysicalEntity
     {
         [RequiredComponent]
         public ItemComponent ItemProperties { get; private set; }

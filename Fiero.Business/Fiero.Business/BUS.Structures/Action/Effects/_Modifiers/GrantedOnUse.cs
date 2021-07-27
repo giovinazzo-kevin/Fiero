@@ -1,9 +1,12 @@
 ﻿namespace Fiero.Business
 {
-    public class GrantOnUseEffect : UseEffect
+    public class GrantedOnUse : UseEffect
     {
+        public override string Name => $"{Source.Name} ($Effect.GrantedOnUse$)";
+        public override string Description => Source.Description;
+
         public readonly Effect Source;
-        public GrantOnUseEffect(Effect source)
+        public GrantedOnUse(Effect source)
         {
             Source = source;
         }

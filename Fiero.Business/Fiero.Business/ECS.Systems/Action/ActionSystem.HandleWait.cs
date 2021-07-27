@@ -17,7 +17,7 @@ namespace Fiero.Business
         {
             if (!(action is WaitAction))
                 throw new NotSupportedException();
-            return true;
+            return ActorWaited.Handle(new(t.Actor, CurrentTurn, t.Time));
         }
     }
 }

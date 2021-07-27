@@ -9,16 +9,16 @@ namespace Fiero.Business
     {
         public readonly IDialogueTrigger Trigger;
         public readonly DialogueNode Node;
-        public readonly Drawable Speaker;
-        public readonly Drawable[] Listeners;
+        public readonly DrawableEntity Speaker;
+        public readonly DrawableEntity[] Listeners;
 
         public DialogueModal(
             GameUI ui, 
             GameResources resources,
             IDialogueTrigger trigger, 
             DialogueNode node,
-            Drawable speaker,
-            params Drawable[] listeners
+            DrawableEntity speaker,
+            params DrawableEntity[] listeners
         ) : base(ui, resources)
         {
             Trigger = trigger;

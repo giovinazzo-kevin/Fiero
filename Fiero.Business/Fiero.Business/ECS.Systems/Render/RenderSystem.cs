@@ -29,7 +29,7 @@ namespace Fiero.Business
         public void CenterOn(Actor a)
         {
             var floorId = a.FloorId();
-            var pos = a.Physics.Position;
+            var pos = a.Position();
             var viewSize = Viewport.ViewArea.V.Size();
 
             Viewport.ViewFloor.V = a.FloorId();

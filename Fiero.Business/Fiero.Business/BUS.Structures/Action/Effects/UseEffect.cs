@@ -4,8 +4,11 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     /// <summary>
-    /// Use effects can be applied to:
-    /// - Consumables, in which case the effect starts and ends when the consumable is used
+    /// Intrinsic effects can be applied to:
+    /// - Consumables:
+    ///     - The effect is applied to the actor that uses the consumable, and it ends when the consumable is used up.
+    /// - Spells:
+    ///     - The effect is applied to the actor that casts the spell, and it ends when the actor forgets the spell.
     /// </summary>
     public abstract class UseEffect : Effect
     {
@@ -20,6 +23,22 @@ namespace Fiero.Business
                         if (consumable.ConsumableProperties.RemainingUses <= 0) {
                             End();
                         }
+                    }
+                });
+            }
+            else if (owner.TryCast<Spell>(out var spell)) {
+                yield return systems.Action.SpellLearned.SubscribeHandler(e => {
+                    if (e.Spell == spell) {
+                        Subscriptions.Add(systems.Action.SpellCast.SubscribeHandler(e => {
+                            if (e.Spell == spell) {
+                                OnApplied(systems, owner, e.Actor);
+                            }
+                        }));
+                    }
+                });
+                yield return systems.Action.SpellForgotten.SubscribeHandler(e => {
+                    if (e.Spell == spell) {
+                        End(); // TODO: If spells become singletons, remove this
                     }
                 });
             }

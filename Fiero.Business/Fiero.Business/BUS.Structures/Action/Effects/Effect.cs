@@ -11,6 +11,10 @@ namespace Fiero.Business
         public event Action<Effect> Started;
         public event Action<Effect> Ended;
 
+        public abstract string Name { get; }
+        public abstract string Description { get; }
+
+
         protected abstract IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner);
         protected virtual void OnStarted(GameSystems systems, Entity owner) { }
         public void Start(GameSystems systems, Entity owner)

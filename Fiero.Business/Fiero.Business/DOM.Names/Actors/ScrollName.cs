@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public enum ScrollEffectName
+    public enum ScrollName
     {
         Sight,
     }

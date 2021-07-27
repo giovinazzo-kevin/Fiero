@@ -21,13 +21,13 @@ namespace Fiero.Business
             else if (action is MoveRandomlyAction ran)
                 direction = new(Rng.Random.Next(-1, 2), Rng.Random.Next(-1, 2));
             else if (action is MoveTowardsAction tow)
-                direction = tow.Follow.Physics.Position - t.Actor.Physics.Position;
+                direction = tow.Follow.Position() - t.Actor.Position();
             else throw new NotSupportedException();
 
             var floorId = t.Actor.FloorId();
-            var oldPos = t.Actor.Physics.Position;
-            var newPos = t.Actor.Physics.Position + direction;
-            if (newPos == t.Actor.Physics.Position) {
+            var oldPos = t.Actor.Position();
+            var newPos = t.Actor.Position() + direction;
+            if (newPos == t.Actor.Position()) {
                 action = new WaitAction();
                 cost = HandleAction(t, ref action);
             }

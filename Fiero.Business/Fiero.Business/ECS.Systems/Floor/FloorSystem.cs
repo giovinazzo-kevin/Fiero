@@ -98,9 +98,9 @@ namespace Fiero.Business
         }
         public MapCell GetCellAt(FloorId id, Coord pos) => TryGetCellAt(id, pos, out var cell) ? cell : null;
 
-        public IEnumerable<Drawable> GetDrawables(FloorId id) => TryGetFloor(id, out var floor)
+        public IEnumerable<DrawableEntity> GetDrawables(FloorId id) => TryGetFloor(id, out var floor)
             ? floor.GetDrawables()
-            : Enumerable.Empty<Drawable>();
+            : Enumerable.Empty<DrawableEntity>();
         public IEnumerable<Tile> GetAllTiles(FloorId id) => TryGetFloor(id, out var floor)
             ? floor.Cells.Values.Select(c => c.Tile)
             : Enumerable.Empty<Tile>();
@@ -125,48 +125,39 @@ namespace Fiero.Business
                 floor.SetTile(tile);
             }
         }
-        public IEnumerable<MapCell> GetNeighborsAt(FloorId id, Coord pos)
+        
+        public IEnumerable<MapCell> GetNeighborhood(FloorId id, Coord pos, int size = 3)
         {
-            if (TryGetCellAt(id, new(pos.X - 1, pos.Y - 1), out var n1))
-                yield return n1;
-            if (TryGetCellAt(id, new(pos.X, pos.Y - 1), out var n2))
-                yield return n2;
-            if (TryGetCellAt(id, new(pos.X + 1, pos.Y - 1), out var n3))
-                yield return n3;
-            if (TryGetCellAt(id, new(pos.X - 1, pos.Y), out var n4))
-                yield return n4;
-            if (TryGetCellAt(id, new(pos.X, pos.Y), out var n5))
-                yield return n5;
-            if (TryGetCellAt(id, new(pos.X + 1, pos.Y), out var n6))
-                yield return n6;
-            if (TryGetCellAt(id, new(pos.X - 1, pos.Y + 1), out var n7))
-                yield return n7;
-            if (TryGetCellAt(id, new(pos.X, pos.Y + 1), out var n8))
-                yield return n8;
-            if (TryGetCellAt(id, new(pos.X + 1, pos.Y + 1), out var n9))
-                yield return n9;
+            size /= 2;
+            for (int x = -size; x < size; x++) {
+                for (int y = -size; y < size; y++) {
+                    if (TryGetCellAt(id, new(pos.X + x, pos.Y + y), out var n))
+                        yield return n;
+                }
+            }
         }
-        public bool TryGetClosestFreeTile(FloorId id, Coord pos, out Tile closest, float maxDistance = 10)
+
+        public bool TryGetClosestFreeTile(FloorId id, Coord pos, out Tile closest, float maxDistance = 10, Func<MapCell, bool> pred = null)
         {
             closest = default;
-            if (TryGetCellAt(id, pos, out var closestCell)
-                && !closestCell.Actors.Any()
-                && !closestCell.Items.Any()
-                && !closestCell.Features.Any(f => f.Physics.BlocksMovement)) {
+            pred ??= cell => !cell.Items.Any() && !cell.Features.Any() && !cell.Actors.Any();
+
+            if (TryGetCellAt(id, pos, out var closestCell) && pred(closestCell)) {
                 closest = closestCell.Tile;
                 return true;
             }
             if (--maxDistance <= 0)
                 return false;
-            var neighbors = GetNeighborsAt(id, pos)
+            var neighbors = GetNeighborhood(id, pos)
                 .Select(c => c.Tile)
                 .Where(n => !n.Physics.BlocksMovement)
-                .OrderBy(n => Rng.Random.NextDouble())
+                .Shuffle(Rng.Random)
                 .ToList();
-            if (neighbors.All(n => n.DistanceFrom(pos) > maxDistance))
+            var maxDistanceSquared = maxDistance * maxDistance;
+            if (neighbors.All(n => n.SquaredDistanceFrom(pos) > maxDistanceSquared))
                 return false;
             foreach (var n in neighbors) {
-                if (TryGetClosestFreeTile(id, n.Physics.Position, out closest, maxDistance)) {
+                if (TryGetClosestFreeTile(id, n.Position(), out closest, maxDistance, pred)) {
                     return true;
                 }
             }
@@ -188,9 +179,9 @@ namespace Fiero.Business
             }
             return false;
         }
-        public bool RemoveActor(FloorId id, Actor actor)
+        public bool RemoveActor(Actor actor)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(actor.FloorId(), out var floor)) {
                 floor.RemoveActor(actor);
                 return true;
             }
@@ -213,9 +204,9 @@ namespace Fiero.Business
             }
             return false;
         }
-        public bool RemoveItem(FloorId id, Item item)
+        public bool RemoveItem(Item item)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(item.FloorId(), out var floor)) {
                 floor.RemoveItem(item);
                 return true;
             }
@@ -238,9 +229,9 @@ namespace Fiero.Business
             }
             return false;
         }
-        public bool RemoveFeature(FloorId id, Feature feature)
+        public bool RemoveFeature(Feature feature)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(feature.FloorId(), out var floor)) {
                 floor.RemoveFeature(feature);
                 return true;
             }
@@ -258,7 +249,7 @@ namespace Fiero.Business
                     a.Fov.VisibleTiles[floorId] = visibleTiles = new();
                 }
                 visibleTiles.Clear();
-                visibleTiles.UnionWith(floor.CalculateFov(a.Physics.Position, a.Fov.Radius));
+                visibleTiles.UnionWith(floor.CalculateFov(a.Position(), a.Fov.Radius));
                 knownTiles.UnionWith(visibleTiles);
             }
         }

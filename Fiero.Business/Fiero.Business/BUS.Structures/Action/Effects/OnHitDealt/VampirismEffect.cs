@@ -2,8 +2,11 @@
 
 namespace Fiero.Business
 {
-    public class VampirismEffect : OnHitDealtEffect
+    public class VampirismEffect : HitDealtEffect
     {
+        public override string Name => "$Spell.Vampirism.Name$";
+        public override string Description => "$Spell.Vampirism.Desc$";
+
         protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage)
         {
             var roll = Rng.Random.Between(0, damage);

@@ -5,8 +5,8 @@
         public readonly struct ActorBumpedObstacleEvent
         {
             public readonly Actor Actor;
-            public readonly Drawable Obstacle;
-            public ActorBumpedObstacleEvent(Actor actor, Drawable obstacle)
+            public readonly PhysicalEntity Obstacle;
+            public ActorBumpedObstacleEvent(Actor actor, PhysicalEntity obstacle)
                 => (Actor, Obstacle) = (actor, obstacle);
         }
     }

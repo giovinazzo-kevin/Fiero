@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace Fiero.Business
 {
-    public class Actor : Drawable
+    public class Actor : PhysicalEntity
     {
         [RequiredComponent]
         public ActionComponent Action { get; private set; }
@@ -19,5 +19,7 @@ namespace Fiero.Business
         public DialogueComponent Dialogue { get; private set; }
         public AiComponent Ai { get; private set; }
         public FieldOfViewComponent Fov { get; private set; }
+        public SpellLibraryComponent Spells { get; private set; }
+        public BloodComponent Blood { get; private set; }
     }
 }

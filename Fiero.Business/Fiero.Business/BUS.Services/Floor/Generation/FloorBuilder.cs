@@ -36,7 +36,7 @@ namespace Fiero.Business
                 pos = hints.FirstOrDefault(h => h.Name == DungeonObjectName.Upstairs) is { } hint 
                     ? UseHint(hint)
                     : GetRandomPosition();
-                return _entityBuilders.Upstairs(conn)
+                return _entityBuilders.Feature_Upstairs(conn)
                     .WithPhysics(pos)
                     .Build().Id;
             }
@@ -44,7 +44,7 @@ namespace Fiero.Business
                 pos = hints.FirstOrDefault(h => h.Name == DungeonObjectName.Downstairs) is { } hint 
                     ? UseHint(hint)
                     : GetRandomPosition();
-                return _entityBuilders.Downstairs(conn)
+                return _entityBuilders.Feature_Downstairs(conn)
                     .WithPhysics(pos)
                     .Build().Id;
             }
@@ -80,98 +80,81 @@ namespace Fiero.Business
             
             return drawable.Id;
 
-            Drawable CreateShrine()
+            DrawableEntity CreateShrine()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Shrine().WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Feature_Shrine().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateDoor()
+            DrawableEntity CreateDoor()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Door().WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Feature_Door().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateTrap()
+            DrawableEntity CreateTrap()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Trap().WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Feature_Trap().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateChest()
+            DrawableEntity CreateChest()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Chest().WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Feature_Chest().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateConsumable()
+            DrawableEntity CreateConsumable()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                   () => _entityBuilders.Potion(PotionEffectName.Healing).WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                   () => _entityBuilders.Potion(PotionName.Healing).WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateWeapon()
+            DrawableEntity CreateWeapon()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Sword().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Bow().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Staff().WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Weapon_Sword().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Weapon_Bow().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Weapon_Staff().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateArmor()
+            DrawableEntity CreateArmor()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Head).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Arms).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Legs).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.LeatherArmor(ArmorSlotName.Torso).WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build()
                 )();
             }
 
-            Drawable CreateItem()
+            DrawableEntity CreateItem()
             {
-                return Rng.Random.Choose<Func<Drawable>>(
+                return Rng.Random.Choose<Func<DrawableEntity>>(
                     () => CreateArmor(),
                     () => CreateWeapon()
                 )();
             }
 
-            Drawable CreateBoss()
+            DrawableEntity CreateBoss()
             {
-                return _entityBuilders.NpcGreatKingRat().WithPhysics(obj.Position).Build();
+                return _entityBuilders.Boss_NpcGreatKingRat().WithPhysics(obj.Position).Build();
             }
 
-            Drawable CreateEnemy()
+            DrawableEntity CreateEnemy()
             {
-                var tier = Rng.Random.Choose(
-                    MonsterTierName.One,
-                    MonsterTierName.One,
-                    MonsterTierName.One,
-                    MonsterTierName.One,
-                    MonsterTierName.One,
-                    MonsterTierName.Two,
-                    MonsterTierName.Two,
-                    MonsterTierName.Two,
-                    MonsterTierName.Two,
-                    MonsterTierName.Three,
-                    MonsterTierName.Three,
-                    MonsterTierName.Three,
-                    MonsterTierName.Four,
-                    MonsterTierName.Four,
-                    MonsterTierName.Five
-                );
-                return Rng.Random.Choose<Func<Drawable>>(
-                    () => _entityBuilders.Rat(tier).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Snake(tier).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Cat(tier).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Dog(tier).WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Boar(tier).WithPhysics(obj.Position).Build()
+                return Rng.Random.Choose<Func<DrawableEntity>>(
+                    () => _entityBuilders.NPC_Rat().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Snake().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Cat().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Dog().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Boar().WithPhysics(obj.Position).Build()
                 )();
             }
         }
@@ -179,9 +162,9 @@ namespace Fiero.Business
         private EntityBuilder<Tile> BuildTile(TileDef tile)
         {
             var ret = tile.Name switch {
-                TileName.Wall => _entityBuilders.WallTile(),
-                TileName.Ground => _entityBuilders.GroundTile(),
-                _ => _entityBuilders.UnimplementedTile()
+                TileName.Wall => _entityBuilders.Tile_Wall(),
+                TileName.Ground => _entityBuilders.Tile_Ground(),
+                _ => _entityBuilders.Tile_Unimplemented()
             };
             if(tile.Color is { } tint) {
                 ret = ret.WithColor(tint);
@@ -208,7 +191,7 @@ namespace Fiero.Business
                 floor.SetTile(tile);
             }
             context.ForEach(item => {
-                if (tileObjects.Any(t => t.Physics.Position == item.Position))
+                if (tileObjects.Any(t => t.Position() == item.Position))
                     return;
                 if (item.Name != TileName.None) {
                     floor.SetTile(BuildTile(item)
@@ -245,8 +228,6 @@ namespace Fiero.Business
             foreach (var actor in actorObjects) {
                 floor.AddActor(actor);
             }
-            // Once everything is in its place, build the A* pathfinder
-            floor.CreatePathfinder();
             return floor;
 
             bool IsStairHint(DungeonObjectName n)

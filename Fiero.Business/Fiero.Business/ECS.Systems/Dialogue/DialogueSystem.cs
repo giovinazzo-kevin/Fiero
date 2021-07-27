@@ -67,7 +67,7 @@ namespace Fiero.Business
         {
             foreach (var comp in Entities.GetComponents<DialogueComponent>()) {
                 var dialogueKey = default(string);
-                var speaker = default(Drawable);
+                var speaker = default(PhysicalEntity);
                 var floorId = default(FloorId);
                 if (!Entities.TryGetProxy<Actor>(comp.EntityId, out var actorSpeaker)) {
                     // This is a dialogue that was triggered by a dungeon feature

@@ -31,25 +31,27 @@ namespace Fiero.Business
 
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
-            .WithLogging()
             .WithPlayerAi(UI)
+            .WithPhysics(Coord.Zero)
             .WithName(nameof(Player))
             .WithSprite(nameof(Player), ColorName.White)
-            .WithActorInfo(ActorName.Player, MonsterTierName.One)
+            .WithActorInfo(ActorName.Player)
             .WithFaction(FactionName.Players)
-            .WithPhysics(Coord.Zero)
-            .WithInventory(50)
             .WithEquipment()
+            .WithInventory(50)
+            .WithSpellLibrary()
             .WithFieldOfView(7)
+            .WithLogging()
+            .WithBlood(ColorName.Red, 100)
             ;
 
-        private EntityBuilder<Actor> Enemy(MonsterTierName tier) 
+        private EntityBuilder<Actor> Enemy() 
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
             .WithEnemyAi()
             .WithName(nameof(Enemy))
             .WithSprite("None", ColorName.White)
-            .WithActorInfo(ActorName.None, tier)
+            .WithActorInfo(ActorName.None)
             .WithFaction(FactionName.None)
             .WithPhysics(Coord.Zero)
             .WithInventory(5)
@@ -66,16 +68,16 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        public EntityBuilder<Armor> Armor(string unidentName, ArmorName type, ArmorSlotName slot, int itemRarity) 
+        public EntityBuilder<Armor> Armor(string unidentName, ArmorName type, int itemRarity) 
             => Entities.CreateBuilder<Armor>()
             .WithName(type.ToString())
-            .WithSprite(slot.ToString(), ColorName.White)
+            .WithSprite(type.ToString(), ColorName.White)
             .WithPhysics(Coord.Zero)
-            .WithArmorInfo(type, slot)
+            .WithArmorInfo(type)
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Consumable<T>(string unidentName, int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty)
+        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, string unidentName = null)
             where T : Consumable
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
@@ -85,47 +87,57 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        public EntityBuilder<Potion> Potion(PotionEffectName effectType)
-        {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effectType * 17);
-            var potionColor = rng.Choose(new(ColorName Color, string Adjective)[] {
-                (ColorName.White, "pale"),
-                (ColorName.Red, "warm"),
-                (ColorName.Green, "slimy"),
-                (ColorName.Blue, "aqueous"),
-                (ColorName.Cyan, "clear"),
-                (ColorName.Yellow, "foaming"),
-                (ColorName.Magenta, "fizzling"),
-                (ColorName.Gray, "murky"),
-                (ColorName.LightGray, "sedimented"),
-                (ColorName.LightRed, "glittering"),
-                (ColorName.LightGreen, "glowing"),
-                (ColorName.LightBlue, "cold"),
-                (ColorName.LightCyan, "gelatinous"),
-                (ColorName.LightYellow, "bubbling"),
-                (ColorName.LightMagenta, "lumpy"),
-                (ColorName.Black, "dark")
-            });
+        public EntityBuilder<Spell> Spell(SpellName type)
+            => Entities.CreateBuilder<Spell>()
+            .WithName(type.ToString())
+            .WithSprite(type.ToString(), ColorName.White)
+            .WithSpellInfo(type)
+            ;
 
-            return Consumable<Potion>($"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
-               .WithName($"Potion of {effectType}")
+        public EntityBuilder<Potion> Potion(PotionName type)
+        {
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)type * 17);
+
+            var adjectives = new[] {
+                "swirling", "warm", "slimy", "dilute", "clear", "foaming", "fizzling",
+                "murky", "sedimented", "glittering", "glowing", "cold", "gelatinous",
+                "bubbling", "lumpy", "viscous"
+            };
+            var colors = new[] {
+                ColorName.Red,
+                ColorName.Green,
+                ColorName.Blue,
+                ColorName.Cyan,
+                ColorName.Yellow,
+                ColorName.Magenta,
+                ColorName.LightRed,
+                ColorName.LightGreen,
+                ColorName.LightBlue,
+                ColorName.LightCyan,
+                ColorName.LightYellow,
+                ColorName.LightMagenta
+            };
+            var potionColor = (Adjective: rng.Choose(adjectives), Color: rng.Choose(colors));
+
+            return Consumable<Potion>(unidentName: $"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
+               .WithName($"Potion of {type}")
                .WithSprite(nameof(Potion), potionColor.Color)
-               .WithPotionInfo(effectType)
-               .WithIntrinsicEffect(() => effectType switch {
-                   PotionEffectName.Healing => new VampirismEffect().Temporary(10).GrantedOnUse(),
+               .WithPotionInfo(type)
+               .WithIntrinsicEffect(() => type switch {
+                   PotionName.Healing => new VampirismEffect().Temporary(10).GrantedOnUse(),
                    _ => throw new NotImplementedException()
                });
            ;
         }
 
-        public EntityBuilder<Scroll> Scroll(ScrollEffectName effect)
+        public EntityBuilder<Scroll> Scroll(ScrollName type)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 31);
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)type * 31);
             var label = ScrollLabel();
-            return Consumable<Scroll>($"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
-            .WithName($"Scroll of {effect}")
+            return Consumable<Scroll>(unidentName: $"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
+            .WithName($"Scroll of {type}")
             .WithSprite(nameof(Scroll), ColorName.Yellow)
-            .WithScrollInfo(effect)
+            .WithScrollInfo(type)
             ;
 
             string ScrollLabel()
@@ -170,8 +182,9 @@ namespace Fiero.Business
             }
         }
 
-        private EntityBuilder<Feature> Feature(FeatureName type)
-            => Entities.CreateBuilder<Feature>()
+        private EntityBuilder<TFeature> Feature<TFeature>(FeatureName type)
+            where TFeature : Feature
+            => Entities.CreateBuilder<TFeature>()
             .WithName(type.ToString())
             .WithSprite(type.ToString(), ColorName.White)
             .WithPhysics(Coord.Zero)
@@ -186,51 +199,56 @@ namespace Fiero.Business
             .WithTileInfo(type)
             ;
 
-        #region ENEMIES
-        public EntityBuilder<Actor> Rat(MonsterTierName tier) 
-            => Enemy(tier)
-            .WithName(Glossaries.GetMonsterName(FactionName.Rats, tier))
-            .WithActorInfo(ActorName.Rat, tier)
+        #region NPCs
+        public EntityBuilder<Actor> NPC_Rat() 
+            => Enemy()
+            .WithName(nameof(ActorName.Rat))
+            .WithActorInfo(ActorName.Rat)
             .WithFaction(FactionName.Rats)
             .WithSprite(nameof(ActorName.Rat), ColorName.White)
+            .WithBlood(ColorName.LightRed, 25)
             ;
 
-        public EntityBuilder<Actor> Snake(MonsterTierName tier) 
-            => Enemy(tier)
-            .WithName(Glossaries.GetMonsterName(FactionName.Snakes, tier))
-            .WithActorInfo(ActorName.Snake, tier)
+        public EntityBuilder<Actor> NPC_Snake() 
+            => Enemy()
+            .WithName(nameof(ActorName.Snake))
+            .WithActorInfo(ActorName.Snake)
             .WithFaction(FactionName.Snakes)
             .WithSprite(nameof(ActorName.Snake), ColorName.White)
+            .WithBlood(ColorName.LightRed, 10)
             ;
 
-        public EntityBuilder<Actor> Cat(MonsterTierName tier) 
-            => Enemy(tier)
-            .WithName(Glossaries.GetMonsterName(FactionName.Cats, tier))
-            .WithActorInfo(ActorName.Cat, tier)
+        public EntityBuilder<Actor> NPC_Cat() 
+            => Enemy()
+            .WithName(nameof(ActorName.Cat))
+            .WithActorInfo(ActorName.Cat)
             .WithFaction(FactionName.Cats)
             .WithSprite(nameof(ActorName.Cat), ColorName.White)
+            .WithBlood(ColorName.LightRed, 50)
             ;
 
-        public EntityBuilder<Actor> Dog(MonsterTierName tier) 
-            => Enemy(tier)
-            .WithName(Glossaries.GetMonsterName(FactionName.Dogs, tier))
-            .WithActorInfo(ActorName.Dog, tier)
+        public EntityBuilder<Actor> NPC_Dog() 
+            => Enemy()
+            .WithName(nameof(ActorName.Dog))
+            .WithActorInfo(ActorName.Dog)
             .WithFaction(FactionName.Dogs)
             .WithSprite(nameof(ActorName.Dog), ColorName.White)
+            .WithBlood(ColorName.LightRed, 80)
             ;
 
-        public EntityBuilder<Actor> Boar(MonsterTierName tier) 
-            => Enemy(tier)
-            .WithName(Glossaries.GetMonsterName(FactionName.Boars, tier))
-            .WithActorInfo(ActorName.Boar, tier)
+        public EntityBuilder<Actor> NPC_Boar() 
+            => Enemy()
+            .WithName(nameof(ActorName.Boar))
+            .WithActorInfo(ActorName.Boar)
             .WithFaction(FactionName.Boars)
             .WithSprite(nameof(ActorName.Boar), ColorName.White)
+            .WithBlood(ColorName.LightRed, 200)
             ;
         #endregion
 
         #region BOSSES
-        public EntityBuilder<Actor> NpcGreatKingRat() 
-            => Rat(MonsterTierName.Five)
+        public EntityBuilder<Actor> Boss_NpcGreatKingRat() 
+            => NPC_Rat()
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithDialogueTriggers(NpcName.GreatKingRat)
@@ -239,20 +257,31 @@ namespace Fiero.Business
         #endregion
 
         #region WEAPONS
-        public EntityBuilder<Weapon> Sword()
+        public EntityBuilder<Weapon> Weapon_Sword()
             => Weapon("sword", WeaponName.Sword, AttackName.Melee, WeaponHandednessName.OneHanded, 10, 100, itemRarity: 10)
             ;
-        public EntityBuilder<Weapon> Bow()
+        public EntityBuilder<Weapon> Weapon_Bow()
             => Weapon("bow", WeaponName.Bow, AttackName.Ranged, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
             ;
-        public EntityBuilder<Weapon> Staff()
+        public EntityBuilder<Weapon> Weapon_Staff()
             => Weapon("staff", WeaponName.Staff, AttackName.Magical, WeaponHandednessName.TwoHanded, 10, 100, itemRarity: 10)
             ;
         #endregion
 
         #region ARMORS
-        public EntityBuilder<Armor> LeatherArmor(ArmorSlotName slot)
-            => Armor($"leather armor ({slot})", ArmorName.Light, slot, itemRarity: 10)
+        public EntityBuilder<Armor> Armor_Leather()
+            => Armor($"leather armor", ArmorName.LeatherArmor, itemRarity: 10)
+            ;
+        #endregion
+
+        #region SPELLS
+        public EntityBuilder<Spell> Spell_Bloodbath()
+            => Spell(SpellName.Bloodbath)
+            .WithIntrinsicEffect(() => new BloodbathEffect())
+            ;
+        public EntityBuilder<Spell> Spell_ClotBlock()
+            => Spell(SpellName.ClotBlock)
+            .WithIntrinsicEffect(() => new ClotBlockEffect())
             ;
         #endregion
 
@@ -264,49 +293,50 @@ namespace Fiero.Business
             _ => ColorName.White
         };
 
-        public EntityBuilder<Feature> Chest()
-            => Feature(FeatureName.Chest)
+        public EntityBuilder<Feature> Feature_Chest()
+            => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
             ;
-        public EntityBuilder<Feature> Shrine()
-            => Feature(FeatureName.Shrine)
+        public EntityBuilder<Feature> Feature_Shrine()
+            => Feature<Feature>(FeatureName.Shrine)
             .WithDialogueTriggers(FeatureName.Shrine)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
             ;
-        public EntityBuilder<Feature> Trap()
-            => Feature(FeatureName.Trap)
+        public EntityBuilder<Feature> Feature_Trap()
+            => Feature<Feature>(FeatureName.Trap)
             .WithIntrinsicEffect(() => new TrapEffect())
             .Tweak<RenderComponent>(x => x.Hidden = true)
             ;
-        public EntityBuilder<Feature> Door()
-            => Feature(FeatureName.Door)
+        public EntityBuilder<Feature> Feature_Door()
+            => Feature<Feature>(FeatureName.Door)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
             ;
-        public EntityBuilder<Feature> Downstairs(FloorConnection conn)
-            => Feature(FeatureName.Downstairs)
+        public EntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
+            => Feature<Portal>(FeatureName.Downstairs)
             .WithColor(GetBranchColor(conn.To.Branch))
             .WithPortalInfo(conn)
             ;
-        public EntityBuilder<Feature> Upstairs(FloorConnection conn)
-            => Feature(FeatureName.Upstairs)
+        public EntityBuilder<Portal> Feature_Upstairs(FloorConnection conn)
+            => Feature<Portal>(FeatureName.Upstairs)
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
             ;
-        public EntityBuilder<Feature> BloodSplatter(ColorName color = ColorName.Red)
-            => Feature(FeatureName.BloodSplatter)
-            .WithColor(color)
+        public EntityBuilder<BloodSplatter> Feature_BloodSplatter(int bloodAmount, ColorName bloodColor = ColorName.Red)
+            => Feature<BloodSplatter>(FeatureName.BloodSplatter)
+            .WithColor(bloodColor)
+            .WithBlood(bloodColor, Math.Min(100, bloodAmount), 100)
             ;
         #endregion
 
         #region TILES
-        public EntityBuilder<Tile> WallTile()
+        public EntityBuilder<Tile> Tile_Wall()
             => Tile(TileName.Wall, ColorName.Gray)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
             ;
-        public EntityBuilder<Tile> GroundTile()
+        public EntityBuilder<Tile> Tile_Ground()
             => Tile(TileName.Ground, ColorName.LightGray)
             ;
-        public EntityBuilder<Tile> UnimplementedTile()
+        public EntityBuilder<Tile> Tile_Unimplemented()
             => Tile(TileName.Error, ColorName.LightMagenta)
             ;
         #endregion

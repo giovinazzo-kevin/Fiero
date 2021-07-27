@@ -84,9 +84,9 @@ namespace Fiero.Business.Scenes
                         foreach (var player in eh.DialogueListeners.Players()) {
                             Systems.Faction.UpdateRelationship(FactionName.Rats, FactionName.Players,
                                 x => x.With(StandingName.Hated), out _);
-                            player.ActorProperties.Relationships.Update(gkr,
+                            player.Faction.PersonalRelationships.Update(gkr,
                                 x => x.With(StandingName.Hated), out _);
-                            gkr.ActorProperties.Relationships.Update(player,
+                            gkr.Faction.PersonalRelationships.Update(player,
                                 x => x.With(StandingName.Hated), out _);
                         }
                     };
@@ -95,9 +95,9 @@ namespace Fiero.Business.Scenes
                         foreach (var player in eh.DialogueListeners.Players()) {
                             var friends = Enumerable.Range(5, 10)
                                 .Select(i => Resources.Entities
-                                    .Rat(MonsterTierName.Two)
+                                    .NPC_Rat()
                                     .WithFaction(FactionName.Players)
-                                    .WithPhysics(player.Physics.Position)
+                                    .WithPhysics(player.Position())
                                     .Build());
                             foreach (var f in friends) {
                                 TrySpawn(player.FloorId(), f);
@@ -145,7 +145,12 @@ namespace Fiero.Business.Scenes
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 Player = Resources.Entities.Player
                     .WithName(playerName)
-                    .WithItems(Resources.Entities.Bow().Build(), Resources.Entities.Potion(PotionEffectName.Healing).Build())
+                    .WithItems(
+                        Resources.Entities.Weapon_Bow().Build(), 
+                        Resources.Entities.Potion(PotionName.Healing).Build())
+                    .WithSpells(
+                        Resources.Entities.Spell_Bloodbath().Build(),
+                        Resources.Entities.Spell_ClotBlock().Build())
                     .Build();
 
                 // Generate map
@@ -159,7 +164,7 @@ namespace Fiero.Business.Scenes
                 var features = Systems.Floor.GetAllFeatures(entranceFloorId);
                 Player.Physics.Position = features
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
-                    .Physics.Position;
+                    .Position();
 
                 if (!TrySpawn(entranceFloorId, Player)) {
                     throw new InvalidOperationException("Can't spawn the player??");
@@ -244,10 +249,10 @@ namespace Fiero.Business.Scenes
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                 // animate projectile if this was a ranged attack
                 if(e.Type == AttackName.Ranged) {
-                    var dir = (e.Victim.Physics.Position - e.Attacker.Physics.Position).Clamp(-1, 1);
+                    var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
                     Systems.Render.Animate(
-                        e.Attacker.Physics.Position,
-                        Animation.Projectile(e.Attacker.Physics.Position, e.Victim.Physics.Position, tint: ColorName.Red)
+                        e.Attacker.Position(),
+                        Animation.Projectile(e.Attacker.Position(), e.Victim.Position(), tint: ColorName.Red)
                     );
                 }
                 // calculate damage
@@ -274,17 +279,28 @@ namespace Fiero.Business.Scenes
                 if (e.Damage > 0) {
                     if (e.Source.TryCast<Actor>(out var attacker)) {
                         // make sure that neutrals aggro the attacker
-                        if(e.Victim.Ai != null && e.Victim.Ai.Target == null) {
+                        if (e.Victim.Ai != null && e.Victim.Ai.Target == null) {
                             e.Victim.Ai.Target = attacker;
                         }
                         // make sure that people hold a grudge regardless of factions
-                        e.Victim.ActorProperties.Relationships.Update(attacker, x => x
+                        e.Victim.Faction?.PersonalRelationships.Update(attacker, x => x
                             .With(StandingName.Hated)
                         , out _);
                     }
-                    Systems.Floor.AddFeature(e.Victim.FloorId(), EntityBuilders.BloodSplatter()
-                        .WithPhysics(e.Victim.Physics.Position)
-                        .Build());
+                    // TODO: this is only relevant to bleeding, move out of ActorDamaged and into the bleeding effect
+                    if (e.Victim.Blood is { } blood) {
+                        var existingSplatter = Systems.Floor.GetFeaturesAt(e.Victim.FloorId(), e.Victim.Position())
+                            .TrySelect(e => (e.TryCast<BloodSplatter>(out var splatter), splatter))
+                            .SingleOrDefault();
+                        if (existingSplatter != null) {
+                            existingSplatter.Blood.TryAdd(10);
+                        }
+                        else {
+                            Systems.Floor.AddFeature(e.Victim.FloorId(), EntityBuilders.Feature_BloodSplatter(10, blood.Color)
+                                .WithPhysics(e.Victim.Position())
+                                .Build());
+                        }
+                    }
                 }
                 return true;
             });
@@ -292,7 +308,7 @@ namespace Fiero.Business.Scenes
                 // - Remove entity from floor and action systems and handle cleanup
             yield return Systems.Action.ActorDespawned.SubscribeResponse(e => {
                 Systems.Action.StopTracking(e.Actor.Id);
-                Systems.Floor.RemoveActor(e.Actor.FloorId(), e.Actor);
+                Systems.Floor.RemoveActor(e.Actor);
                 Entities.FlagEntityForRemoval(e.Actor.Id);
                 return true;
             });
@@ -307,7 +323,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorKilled:
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
-                Systems.Render.Animate(e.Victim.Physics.Position, Animation.Explosion());
+                Systems.Render.Animate(e.Victim.Position(), Animation.Explosion());
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
                 return true;
@@ -315,13 +331,14 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ItemDropped:
                 // - Drop item (remove from actor's inventory and add to floor) or fail if there's no space
             yield return Systems.Action.ItemDropped.SubscribeResponse(e => {
-                if (Systems.Floor.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Physics.Position, out var tile)) {
+                if (Systems.Floor.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var tile, 10,
+                        cell => !cell.Items.Any() && !cell.Features.Any())) {
                     if(!e.Actor.Inventory.TryTake(e.Item)) {
                         e.Actor.Log?.Write($"$Action.UnableToDrop$ {e.Item.DisplayName}.");
                         return false;
                     }
                     else {
-                        e.Item.Physics.Position = tile.Physics.Position;
+                        e.Item.Physics.Position = tile.Position();
                         Systems.Floor.AddItem(e.Actor.FloorId(), e.Item);
                         e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
                     }
@@ -336,7 +353,7 @@ namespace Fiero.Business.Scenes
                 // - Store item in inventory or fail
             yield return Systems.Action.ItemPickedUp.SubscribeResponse(e => {
                 if (e.Actor.Inventory.TryPut(e.Item)) {
-                    Systems.Floor.RemoveItem(e.Actor.FloorId(), e.Item);
+                    Systems.Floor.RemoveItem(e.Item);
                     e.Actor.Log?.Write($"$Action.YouPickUpA$ {e.Item.DisplayName}.");
                     return true;
                 }
@@ -384,12 +401,41 @@ namespace Fiero.Business.Scenes
                     return false;
                 }
             });
+            // ActionSystem.SpellLearned:
+                // - Add spell to actor's library
+                // - Play sound and animation if player
+            yield return Systems.Action.SpellLearned.SubscribeResponse(e => {
+                if (!e.Actor.Spells.Learn(e.Spell))
+                    return false;
+                e.Actor.Log?.Write($"$Action.YouLearn$ {e.Spell.Info.Name}.");
+                if(e.Actor.IsPlayer()) {
+                    // TODO: Play sound and animation if player
+                }
+                return true;
+            });
+            // ActionSystem.SpellForgotten:
+                // - Remove spell from actor's library
+                // - Play sound and animation if player
+            yield return Systems.Action.SpellForgotten.SubscribeResponse(e => {
+                if (!e.Actor.Spells.Forget(e.Spell))
+                    return false;
+                e.Actor.Log?.Write($"$Action.YouForget$ {e.Spell.Info.Name}.");
+                if (e.Actor.IsPlayer()) {
+                    // TODO: Play sound and animation if player
+                }
+                return true;
+            });
+            // ActionSystem.SpellCast:
+            yield return Systems.Action.SpellForgotten.SubscribeResponse(e => {
+                e.Actor.Log?.Write($"$Action.YouCast$ {e.Spell.Info.Name}.");
+                return true;
+            });
             // ActionSystem.ActorBumpedObstacle:
                 // - Play a sound when it's the player
             yield return Systems.Action.ActorBumpedObstacle.SubscribeHandler(e => {
                 e.Actor.Log?.Write($"$Action.YouBumpInto$ {e.Obstacle.Info.Name}.");
                 if(e.Actor.IsPlayer()) {
-                    Resources.Sounds.Get(SoundName.WallBump, e.Obstacle.Physics.Position).Play();
+                    Resources.Sounds.Get(SoundName.WallBump, e.Obstacle.Position()).Play();
                 }
             });
             // ActionSystem.ActorSteppedOnTrap:
@@ -397,7 +443,7 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorSteppedOnTrap.SubscribeHandler(e => {
                 e.Actor.Log?.Write($"$Action.YouTriggerATrap$.");
                 if(Player.CanSee(e.Actor)) {
-                    Systems.Render.Animate(e.Feature.Physics.Position, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
+                    Systems.Render.Animate(e.Feature.Position(), Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }
             });
             // ActionSystem.FeatureInteractedWith:
@@ -427,11 +473,13 @@ namespace Fiero.Business.Scenes
                     e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
                     return true;
                 }
-                if (e.Feature.FeatureProperties.Name == FeatureName.Upstairs) {
-                    return HandleStairs(e.Feature.Portal.Connection.To, e.Feature.Portal.Connection.From);
-                }
-                if (e.Feature.FeatureProperties.Name == FeatureName.Downstairs) {
-                    return HandleStairs(e.Feature.Portal.Connection.From, e.Feature.Portal.Connection.To);
+                if(e.Feature.TryCast<Portal>(out var portal)) {
+                    if (e.Feature.FeatureProperties.Name == FeatureName.Upstairs) {
+                        return HandleStairs(portal.PortalProperties.Connection.To, portal.PortalProperties.Connection.From);
+                    }
+                    if (e.Feature.FeatureProperties.Name == FeatureName.Downstairs) {
+                        return HandleStairs(portal.PortalProperties.Connection.From, portal.PortalProperties.Connection.To);
+                    }
                 }
                 return false;
                 bool HandleStairs(FloorId current, FloorId next)
@@ -442,9 +490,10 @@ namespace Fiero.Business.Scenes
                         return false;
                     }
                     var stairs = Systems.Floor.GetAllFeatures(next)
-                        .Single(f => f.Portal?.Connects(current, next) ?? false);
+                        .TrySelect(f => (f.TryCast<Portal>(out var portal), portal))
+                        .Single(f => f.PortalProperties.Connects(current, next));
                     currentFloor.RemoveActor(e.Actor);
-                    e.Actor.Physics.Position = stairs.Physics.Position;
+                    e.Actor.Physics.Position = stairs.Position();
                     e.Actor.Physics.FloorId = next;
                     nextFloor.AddActor(e.Actor);
                     e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
@@ -467,10 +516,10 @@ namespace Fiero.Business.Scenes
 
         public bool TrySpawn(FloorId floorId, Actor actor, float maxDistance = 10)
         {
-            if(!Systems.Floor.TryGetClosestFreeTile(floorId, actor.Physics.Position, out var spawnTile, maxDistance)) {
+            if(!Systems.Floor.TryGetClosestFreeTile(floorId, actor.Position(), out var spawnTile, maxDistance)) {
                 return false;
             }
-            actor.Physics.Position = spawnTile.Physics.Position;
+            actor.Physics.Position = spawnTile.Position();
             Systems.Action.Track(actor.Id);
             Systems.Action.Spawn(actor);
             Systems.Floor.AddActor(floorId, actor);

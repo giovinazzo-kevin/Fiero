@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Fiero.Business
 {
 
-    public class Tile : Drawable, IPathNode<object>
+    public class Tile : PhysicalEntity, IPathNode<object>
     {
         [RequiredComponent]
         public TileComponent TileProperties { get; private set; }

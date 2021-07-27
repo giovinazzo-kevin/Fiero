@@ -22,7 +22,7 @@ namespace Fiero.Business
             Repeatable = repeatable;
         }
 
-        public abstract bool TryTrigger(FloorId floorId, Drawable speaker, out IEnumerable<Drawable> listeners);
+        public abstract bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners);
         public virtual void OnTrigger()
         {
             Triggered?.Invoke(this);

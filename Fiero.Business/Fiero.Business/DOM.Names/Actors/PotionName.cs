@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public enum PotionEffectName
+    public enum PotionName
     {
         Healing
     }

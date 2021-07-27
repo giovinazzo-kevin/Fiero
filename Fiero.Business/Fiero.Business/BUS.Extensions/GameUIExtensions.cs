@@ -17,7 +17,7 @@ namespace Fiero.Business
                 title != null ? ModalWindowStyles.Default
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );
-        public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, Drawable speaker, params Drawable[] listeners)
+        public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, DrawableEntity speaker, params DrawableEntity[] listeners)
             => ui.ShowModal(
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
                 null,

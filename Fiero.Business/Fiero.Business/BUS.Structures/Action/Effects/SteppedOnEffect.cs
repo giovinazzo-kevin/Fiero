@@ -20,10 +20,10 @@ namespace Fiero.Business
                     if (tile.FloorId() != e.Actor.FloorId()) {
                         return;
                     }
-                    if (e.NewPosition == tile.Physics.Position) {
+                    if (e.NewPosition == tile.Position()) {
                         OnApplied(systems, owner, e.Actor);
                     }
-                    else if (e.OldPosition == tile.Physics.Position) {
+                    else if (e.OldPosition == tile.Position()) {
                         OnRemoved(systems, owner, e.Actor);
                     }
                 });
@@ -39,10 +39,10 @@ namespace Fiero.Business
                     if(feature.FloorId() != e.Actor.FloorId()) {
                         return;
                     }
-                    if (e.NewPosition == feature.Physics.Position) {
+                    if (e.NewPosition == feature.Position()) {
                         OnApplied(systems, owner, e.Actor);
                     }
-                    else if (e.OldPosition == feature.Physics.Position) {
+                    else if (e.OldPosition == feature.Position()) {
                         OnRemoved(systems, owner, e.Actor);
                     }
                 });

@@ -2,11 +2,10 @@
 
 namespace Fiero.Business
 {
-    public class Feature : Drawable
+    public class Feature : PhysicalEntity
     {
         [RequiredComponent]
         public FeatureComponent FeatureProperties { get; private set; }
         public DialogueComponent Dialogue { get; private set; }
-        public PortalComponent Portal { get; private set; }
     }
 }

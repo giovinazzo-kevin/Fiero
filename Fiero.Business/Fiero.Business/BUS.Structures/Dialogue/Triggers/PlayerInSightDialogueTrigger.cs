@@ -15,7 +15,7 @@ namespace Fiero.Business
 
         }
 
-        public override bool TryTrigger(FloorId floorId, Drawable speaker, out IEnumerable<Drawable> listeners)
+        public override bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners)
         {
             listeners = Systems.Floor.GetAllActors(floorId)
                 .Where(a => a.IsPlayer() 

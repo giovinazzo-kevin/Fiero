@@ -3,7 +3,7 @@
     public enum ArmorName
     {
         None,
-        Light,
+        LeatherArmor,
         Medium,
         Heavy
     }

@@ -56,6 +56,26 @@ namespace Fiero.Business
             if (IsKeyPressed(Data.Hotkeys.MoveSE)) {
                 return MoveOrAttack(new(1, 1));
             }
+            if (IsKeyPressed(Data.Hotkeys.QuickCast1)) {
+                if (a.Spells.KnownSpells.ElementAtOrDefault(0) is { } spell) {
+                    return new CastSpellAction(spell);
+                }
+            }
+            if (IsKeyPressed(Data.Hotkeys.QuickCast2)) {
+                if (a.Spells.KnownSpells.ElementAtOrDefault(1) is { } spell) {
+                    return new CastSpellAction(spell);
+                }
+            }
+            if (IsKeyPressed(Data.Hotkeys.QuickCast3)) {
+                if (a.Spells.KnownSpells.ElementAtOrDefault(2) is { } spell) {
+                    return new CastSpellAction(spell);
+                }
+            }
+            if (IsKeyPressed(Data.Hotkeys.QuickCast4)) {
+                if (a.Spells.KnownSpells.ElementAtOrDefault(3) is { } spell) {
+                    return new CastSpellAction(spell);
+                }
+            }
             if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
             }
@@ -68,10 +88,10 @@ namespace Fiero.Business
                     var possibleTargets = Systems.Floor.GetAllActors(a.FloorId())
                         .Except(new[] { a })
                         .Where(b => a.CanSee(b) && a.IsHostileTowards(b))
-                        .Select(t => t.Physics.Position)
-                        .OrderBy(p => p.DistSq(a.Physics.Position));
+                        .Select(t => t.Position())
+                        .OrderBy(p => p.DistSq(a.Position()));
                     if (possibleTargets.Any() && UI.Target(possibleTargets.ToArray(), out var cursor)) {
-                        return new RangedAttackPointAction(cursor - a.Physics.Position, rangedWeapons.ToArray());
+                        return new RangedAttackPointAction(cursor - a.Position(), rangedWeapons.ToArray());
                     }
                 }
             }

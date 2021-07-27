@@ -14,10 +14,9 @@ namespace Fiero.Business
 
         private readonly SpatialDictionary<MapCell> _cells;
         public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
-        public SpatialAStar<MapCell, object> Pathfinder { get; private set; }
+        public readonly SpatialAStar<MapCell, object> Pathfinder;
 
         public event Action<Floor, Tile, Tile> TileChanged;
-
         public event Action<Floor, Feature> FeatureAdded;
         public event Action<Floor, Feature> FeatureRemoved;
         public event Action<Floor, Actor> ActorAdded;
@@ -30,21 +29,22 @@ namespace Fiero.Business
             Id = id;
             Size = size;
             _cells = new SpatialDictionary<MapCell>(size);
+            Pathfinder = _cells.GetPathfinder();
         }
 
-        public IEnumerable<Drawable> GetDrawables() 
+        public IEnumerable<DrawableEntity> GetDrawables() 
             => Cells.Values.SelectMany(c => c.GetDrawables());
 
         public void SetTile(Tile tile)
         {
-            if (!_cells.TryGetValue(tile.Physics.Position, out var cell)) {
-                cell = _cells[tile.Physics.Position] = new(tile);
+            if (!_cells.TryGetValue(tile.Position(), out var cell)) {
+                cell = _cells[tile.Position()] = new(tile);
             }
             var oldTile = cell.Tile;
             cell.Tile = tile;
             TileChanged?.Invoke(this, oldTile, tile);
             if (Pathfinder != null) {
-                Pathfinder.Update(tile.Physics.Position, cell, out var old);
+                Pathfinder.Update(tile.Position(), cell, out var old);
                 old?.Tile?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
             }
         }
@@ -52,7 +52,7 @@ namespace Fiero.Business
         public void AddActor(Actor actor)
         {
             actor.Physics.FloorId = Id;
-            if(_cells.TryGetValue(actor.Physics.Position, out var cell)) {
+            if(_cells.TryGetValue(actor.Position(), out var cell)) {
                 cell.Actors.Add(actor);
                 ActorAdded?.Invoke(this, actor);
             }
@@ -60,7 +60,7 @@ namespace Fiero.Business
 
         public void RemoveActor(Actor actor)
         {
-            if (_cells.TryGetValue(actor.Physics.Position, out var cell)) {
+            if (_cells.TryGetValue(actor.Position(), out var cell)) {
                 cell.Actors.Remove(actor);
                 ActorRemoved?.Invoke(this, actor);
             }
@@ -68,7 +68,8 @@ namespace Fiero.Business
 
         public void AddItem(Item item)
         {
-            if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
+            item.Physics.FloorId = Id;
+            if (_cells.TryGetValue(item.Position(), out var cell)) {
                 cell.Items.Add(item);
                 ItemAdded?.Invoke(this, item);
             }
@@ -76,7 +77,7 @@ namespace Fiero.Business
 
         public void RemoveItem(Item item)
         {
-            if (_cells.TryGetValue(item.Physics.Position, out var cell)) {
+            if (_cells.TryGetValue(item.Position(), out var cell)) {
                 cell.Items.Remove(item);
                 ItemRemoved?.Invoke(this, item);
             }
@@ -85,22 +86,18 @@ namespace Fiero.Business
         public void AddFeature(Feature feature)
         {
             feature.Physics.FloorId = Id;
-            if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
+            if (_cells.TryGetValue(feature.Position(), out var cell)) {
                 cell.Features.Add(feature);
-                if(feature.Physics.BlocksMovement) {
-                    Pathfinder?.Update(feature.Physics.Position, null, out _);
-                }
+                Pathfinder.Update(feature.Position(), cell, out _);
                 FeatureAdded?.Invoke(this, feature);
             }
         }
 
         public void RemoveFeature(Feature feature)
         {
-            if (_cells.TryGetValue(feature.Physics.Position, out var cell)) {
+            if (_cells.TryGetValue(feature.Position(), out var cell)) {
                 cell.Features.Remove(feature);
-                if (feature.Physics.BlocksMovement) {
-                    Pathfinder?.Update(feature.Physics.Position, cell, out _);
-                }
+                Pathfinder.Update(feature.Position(), cell, out _);
                 FeatureRemoved?.Invoke(this, feature);
             }
         }
@@ -114,14 +111,6 @@ namespace Fiero.Business
                 (x, y) => (int)new Coord().DistSq(new(x, y))
             ).Compute(center, radius * radius);
             return result;
-        }
-
-        public void CreatePathfinder()
-        {
-            Pathfinder = _cells.GetPathfinder();
-            foreach (var feature in Cells.Values.SelectMany(c => c.Features).Where(f => f.Physics.BlocksMovement)) {
-                Pathfinder.Update(feature.Physics.Position, null, out _);
-            }
         }
     }
 }

@@ -5,8 +5,12 @@ namespace Fiero.Business
 {
     /// <summary>
     /// Intrinsic effects can be applied to:
-    /// - Actors, in which case the effect starts when the actor spawns and ends when it dies
-    /// - Items, in which case the effect starts when an actor picks up the item, and ends when the item is dropped
+    /// - Actors:
+    ///     - The effect is applied to the actor when the actor spawns, and it ends when the actor dies.
+    /// - Items:
+    ///     - The effect is applied to the actor that picks up the item, and it ends when the actor drops the item.
+    /// - Spells:
+    ///     - The effect is applied to the actor that learns the spell, and it ends when the actor forgets the spell.
     /// </summary>
     public abstract class IntrinsicEffect : Effect
     {
@@ -41,6 +45,19 @@ namespace Fiero.Business
                     }
                 });
                 // TODO: End the effect when the item is destroyed, if I end up adding a way to destroy items
+            }
+            else if (owner.TryCast<Spell>(out var spell)) {
+                yield return systems.Action.SpellLearned.SubscribeHandler(e => {
+                    if (e.Spell == spell) {
+                        OnApplied(systems, owner, e.Actor);
+                    }
+                });
+                yield return systems.Action.SpellForgotten.SubscribeHandler(e => {
+                    if (e.Spell == spell) {
+                        OnRemoved(systems, owner, e.Actor);
+                        End(); // TODO: If spells become singletons, remove this
+                    }
+                });
             }
         }
     }

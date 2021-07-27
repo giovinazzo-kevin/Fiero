@@ -21,7 +21,7 @@ namespace Fiero.Business
                 return CanTargetVictim() && HandleMeleeAttack(ref cost, oth.Weapons);
             }
             else if (action is MeleeAttackPointAction dir) {
-                var newPos = t.Actor.Physics.Position + dir.Point;
+                var newPos = t.Actor.Position() + dir.Point;
                 return TryFindVictim(newPos, out victim) && CanTargetVictim() 
                     && HandleMeleeAttack(ref cost, dir.Weapons);
             }
@@ -31,9 +31,12 @@ namespace Fiero.Business
             }
             else if (action is RangedAttackPointAction rDir) {
                 // the point is relative to the actor's position
-                var newPos = t.Actor.Physics.Position + rDir.Point;
-                return TryFindVictim(newPos, out victim) && CanTargetVictim() 
+                var newPos = t.Actor.Position() + rDir.Point;
+                return TryFindVictim(newPos, out victim) && CanTargetVictim()
                     && HandleRangedAttack(ref cost, rDir.Weapons);
+            }
+            else if (action is CastSpellAction cast) {
+                throw new NotImplementedException();
             }
             else throw new NotSupportedException(action.GetType().Name);
 
@@ -41,7 +44,7 @@ namespace Fiero.Business
             {
                 victim = default;
                 var actorsHere = _floorSystem.GetActorsAt(t.Actor.FloorId(), p);
-                if (!actorsHere.Any(a => t.Actor.Faction.Relationships.Get(a.Faction.Type).MayAttack())) {
+                if (!actorsHere.Any(a => t.Actor.Faction.FactionRelationships.Get(a.Faction.Type).MayAttack())) {
                     return false;
                 }
                 victim = actorsHere.Single();
@@ -50,7 +53,7 @@ namespace Fiero.Business
 
             bool CanTargetVictim()
             {
-                return t.Actor.Faction.Relationships.Get(victim.Faction.Type).MayAttack();
+                return t.Actor.Faction.FactionRelationships.Get(victim.Faction.Type).MayAttack();
             }
 
             bool HandleMeleeAttack(ref int? cost, Weapon[] weapons)
@@ -64,7 +67,7 @@ namespace Fiero.Business
 
             bool HandleRangedAttack(ref int? cost, Weapon[] weapons)
             {
-                if (_floorSystem.IsLineOfSightBlocked(t.Actor.FloorId(), t.Actor.Physics.Position, victim.Physics.Position)) {
+                if (_floorSystem.IsLineOfSightBlocked(t.Actor.FloorId(), t.Actor.Position(), victim.Position())) {
                     return false;
                 }
                 // TODO: Check for weapon max range

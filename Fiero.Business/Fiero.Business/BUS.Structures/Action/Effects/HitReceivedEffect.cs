@@ -1,24 +1,23 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Unconcern.Common;
 
 namespace Fiero.Business
 {
     /// <summary>
-    /// On-hit-dealt effects can be applied to:
-    /// - Actors, in which case the effect is applied when an enemy is hit by the actor
-    /// - Weapons, in which case the effect is applied when an enemy is hit by the weapon
+    /// On-hit-received effects can be applied to:
+    /// - Actors, in which case the effect is applied when the actor is hit 
+    /// - Armor, in which case the effect is applied when the wearer is hit 
     /// </summary>
-    public abstract class OnHitDealtEffect : Effect
+    public abstract class HitReceivedEffect : Effect
     {
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage);
+        protected abstract void OnApplied(GameSystems systems, Entity owner, Entity source, Actor target, int damage);
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
             if (owner.TryCast<Actor>(out var actor)) {
                 yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if (e.Source == actor) {
-                        OnApplied(systems, owner, actor, e.Victim, e.Damage);
+                    if (e.Victim == actor) {
+                        OnApplied(systems, owner, e.Source, e.Victim, e.Damage);
                     }
                 });
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
@@ -28,10 +27,10 @@ namespace Fiero.Business
                     }
                 });
             }
-            else if (owner.TryCast<Weapon>(out var weapon)) {
+            if (owner.TryCast<Armor>(out var armor)) {
                 yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if (e.Weapons.Contains(weapon) && e.Source.TryCast<Actor>(out var source)) {
-                        OnApplied(systems, owner, source, e.Victim, e.Damage);
+                    if ((e.Victim.Equipment?.IsEquipped(armor) ?? false)) {
+                        OnApplied(systems, owner, e.Source, e.Victim, e.Damage);
                     }
                 });
                 // TODO: End the effect when the item is destroyed, if I end up adding a way to destroy items

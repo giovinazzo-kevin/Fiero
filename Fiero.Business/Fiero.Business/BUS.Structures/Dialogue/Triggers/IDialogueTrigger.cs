@@ -6,7 +6,7 @@ namespace Fiero.Business
     {
         string DialogueNode { get; }
         bool Repeatable { get; }
-        bool TryTrigger(FloorId floor, Drawable speaker, out IEnumerable<Drawable> listeners);
+        bool TryTrigger(FloorId floor, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners);
         void OnTrigger();
     }
 }

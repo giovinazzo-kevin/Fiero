@@ -4,13 +4,15 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class TemporaryEffect : Effect
+    public class Temporary : Effect
     {
         public readonly Effect Source;
         public readonly int Duration;
         public int Time { get; private set; }
-        
-        public TemporaryEffect(Effect source, int duration)
+        public override string Name => $"{Source.Name} ({Duration - Time})";
+        public override string Description => Source.Description;
+
+        public Temporary(Effect source, int duration)
         {
             Source = source;
             Duration = duration;

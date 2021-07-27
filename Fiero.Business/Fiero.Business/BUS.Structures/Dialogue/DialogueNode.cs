@@ -16,7 +16,7 @@ namespace Fiero.Business
 
         public event Action<IDialogueTrigger, DialogueTriggeredEventArgs> Triggered;
 
-        public void Trigger(IDialogueTrigger trigger, Drawable speaker, params Drawable[] listeners)
+        public void Trigger(IDialogueTrigger trigger, DrawableEntity speaker, params DrawableEntity[] listeners)
         {
             Triggered?.Invoke(trigger, new(this, speaker, listeners));
         }

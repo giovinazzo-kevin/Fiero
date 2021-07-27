@@ -29,7 +29,7 @@ namespace Fiero.Business
             {
                 // Use handles both grabbing items from the ground and using dungeon features
                 var floorId = t.Actor.FloorId();
-                var usePos = t.Actor.Physics.Position + point;
+                var usePos = t.Actor.Position() + point;
                 var itemsHere = _floorSystem.GetItemsAt(floorId, usePos);
                 var featuresHere = _floorSystem.GetFeaturesAt(floorId, usePos);
                 if (itemsHere.Any() && t.Actor.Inventory != null) {

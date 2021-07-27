@@ -11,6 +11,5 @@
 
         public static implicit operator bool(EventResult r) => r.Result;
         public static implicit operator EventResult(bool b) => new(b);
-
     }
 }

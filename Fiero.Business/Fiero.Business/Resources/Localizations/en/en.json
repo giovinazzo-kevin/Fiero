@@ -119,5 +119,10 @@
     "YouBumpIntoTheWall": "You bump into the wall",
     "YouPickUpA": "You pick up a",
     "KillsYou": "kills you"
+  },
+  "Spell": {
+    "Bloodbath": {
+      "ProcMessage": "You bathe in the blood"
+    }
   }
 }

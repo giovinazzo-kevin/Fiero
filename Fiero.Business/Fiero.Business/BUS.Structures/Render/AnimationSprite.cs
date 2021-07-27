@@ -9,12 +9,14 @@ namespace Fiero.Business
         public readonly string Sprite;
         public readonly ColorName Tint;
         public readonly Coord Offset;
-        public AnimationSprite(TextureName texture, string sprite, ColorName tint, Coord ofs)
+        public readonly Coord Scale;
+        public AnimationSprite(TextureName texture, string sprite, ColorName tint, Coord ofs, Coord scale)
         {
             Sprite = sprite;
             Texture = texture;
             Tint = tint;
             Offset = ofs;
+            Scale = scale;
         }
     }
 }

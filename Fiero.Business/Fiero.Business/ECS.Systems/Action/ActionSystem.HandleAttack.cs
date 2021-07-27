@@ -82,7 +82,12 @@ namespace Fiero.Business
                 }
                 cost += attack.SwingDelay;
                 if (victim.ActorProperties.Stats.Health <= 0) {
-                    return ActorKilled.Request(new(t.Actor, victim)).All(x => x);
+                    if(ActorKilled.Handle(new(t.Actor, victim))) {
+                        if(!ActorDied.Handle(new(victim)) || !ActorDespawned.Handle(new(victim))) {
+                            throw new InvalidOperationException();
+                        }
+                        return true;
+                    }
                 }
                 return true;
             }

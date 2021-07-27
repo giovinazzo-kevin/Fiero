@@ -90,9 +90,11 @@ namespace Fiero.Business
                     if (time < t.Time + t.Frame.Duration && time >= t.Time) {
                         foreach (var spriteDef in t.Frame.Sprites) {
                             var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite));
+                            var spriteSize = sprite.GetLocalBounds().Size();
                             sprite.Position = (worldPos - viewPos + spriteDef.Offset) * Viewport.ViewTileSize.V + Viewport.Position.V;
-                            sprite.Scale = Viewport.ViewTileSize.V / sprite.GetLocalBounds().Size();
+                            sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                             sprite.Color = Resources.Colors.Get(spriteDef.Tint);
+                            sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                             Vfx.Add(sprite);
                         }
                         t.Anim.OnFramePlaying(t.Index);

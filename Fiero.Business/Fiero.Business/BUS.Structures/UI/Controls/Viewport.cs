@@ -64,9 +64,11 @@ namespace Fiero.Business
             }
             target.Draw(_renderSprite);
             if(CursorPosition.V is { } cur) {
+                var spriteSize = _cursorSprite.GetLocalBounds().Size();
                 _cursorSprite.Position = (cur - new Coord(ViewArea.V.Left, ViewArea.V.Top)) * ViewTileSize.V + Position.V;
-                _cursorSprite.Scale = ViewTileSize.V / _cursorSprite.GetLocalBounds().Size();
+                _cursorSprite.Scale = ViewTileSize.V / spriteSize;
                 _cursorSprite.Color = CursorColor.V;
+                _cursorSprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                 target.Draw(_cursorSprite);
             }
             bool Bake()
@@ -104,6 +106,7 @@ namespace Fiero.Business
                         sprite.Color = Colors.Get(drawable.Render.Color);
                         sprite.Position = screenPos;
                         var spriteSize = sprite.GetLocalBounds().Size();
+                        sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                         if (drawable is Actor actor && (actor.Npc?.IsBoss ?? false)) {
                             sprite.Scale = ViewTileSize.V / spriteSize * 2;
                             sprite.Position -= ViewTileSize.V * new Vec(0.5f, 1f);

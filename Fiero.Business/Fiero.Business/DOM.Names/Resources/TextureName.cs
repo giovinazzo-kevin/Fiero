@@ -3,6 +3,7 @@
     public enum TextureName
     {
         Atlas,
+        Animations,
         UI,
 
         FontLight,

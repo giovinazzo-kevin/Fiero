@@ -273,21 +273,18 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorDied:
                 // - Handle game over when the player dies
-                // - Raise ActionSystem.ActorDespawned
             yield return Systems.Action.ActorDied.SubscribeResponse(e => {
                 e.Actor.Log?.Write($"$Action.YouDie$.");
                 if (e.Actor.IsPlayer()) {
                     Resources.Sounds.Get(SoundName.PlayerDeath).Play();
                 }
-                Systems.Action.ActorDespawned.Raise(new(e.Actor));
                 return true;
             });
             // ActionSystem.ActorKilled:
-                // - Raise ActionSystem.ActorDied
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
+                Systems.Render.Animate(e.Victim.Physics.Position, Animation.Explosion());
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
-                Systems.Action.ActorDied.Raise(new(e.Victim));
                 return true;
             });
             // ActionSystem.ItemDropped:
@@ -434,6 +431,7 @@ namespace Fiero.Business.Scenes
                         foreach (var actor in Systems.Floor.GetAllActors(next)) {
                             Systems.Action.Track(actor.Id);
                         }
+                        // Abruptly stop the current turn so that the actor queue is flushed completely
                         Systems.Action.AbortCurrentTurn();
                     }
 

@@ -19,10 +19,10 @@ namespace Fiero.Business
                 return HandleGenericUse(genericUse.Coord, ref action, ref cost);
             }
             else if (action is InteractWithFeatureAction useFeature) {
-                return FeatureInteractedWith.Request(new(t.Actor, useFeature.Feature)).All(x => x);
+                return FeatureInteractedWith.Handle(new(t.Actor, useFeature.Feature));
             }
             else if (action is PickUpItemAction pickUp) {
-                return ItemPickedUp.Request(new(t.Actor, pickUp.Item)).All(x => x);
+                return ItemPickedUp.Handle(new(t.Actor, pickUp.Item));
             }
             else throw new NotSupportedException();
             bool HandleGenericUse(Coord point, ref IAction action, ref int? cost)

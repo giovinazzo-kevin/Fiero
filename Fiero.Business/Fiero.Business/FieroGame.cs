@@ -69,6 +69,7 @@ namespace Fiero.Business
         protected override async Task InitializeAsync()
         {
             Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
+            Textures.Add(TextureName.Animations, new Texture("Resources/Textures/8x8_anim.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
@@ -83,11 +84,16 @@ namespace Fiero.Business
             Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Shutdown.ogg"));
             Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
             Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/Alarm Low.ogg"));
+            Sounds.Add(SoundName.ExplosionLarge1, new SoundBuffer("Resources/Sounds/ExplosionLarge1.ogg"));
+            Sounds.Add(SoundName.ExplosionLarge2, new SoundBuffer("Resources/Sounds/ExplosionLarge2.ogg"));
+            Sounds.Add(SoundName.ExplosionLarge3, new SoundBuffer("Resources/Sounds/ExplosionLarge3.ogg"));
+            Sounds.Add(SoundName.ExplosionLarge4, new SoundBuffer("Resources/Sounds/ExplosionLarge4.ogg"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
 
             await Sprites.LoadJsonAsync(TextureName.Atlas, "Resources/Spritesheets/atlas.json");
+            await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/anim.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
             await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");
             await Sprites.LoadJsonAsync(TextureName.FontLight, "Resources/Spritesheets/index.json");

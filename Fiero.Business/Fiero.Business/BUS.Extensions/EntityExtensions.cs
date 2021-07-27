@@ -28,7 +28,7 @@ namespace Fiero.Business
 
         public static FloorId FloorId(this Drawable a) => a.Physics.FloorId;
         public static bool IsPlayer(this Actor a) => a.ActorProperties.Type == ActorName.Player;
-        public static bool CanSee(this Actor a, Coord c) => a.Fov?.VisibleTiles[a.FloorId()].Contains(c) ?? true;
+        public static bool CanSee(this Actor a, Coord c) => a.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, Drawable e) => a.CanSee(e.Physics.Position);
         public static int Heal(this Actor a, int health)
         {

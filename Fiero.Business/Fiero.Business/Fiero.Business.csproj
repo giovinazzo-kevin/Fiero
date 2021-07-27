@@ -63,6 +63,18 @@
     <None Update="Resources\Sounds\converted_Loop_Alarm.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Sounds\ExplosionLarge1.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Sounds\ExplosionLarge2.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Sounds\ExplosionLarge3.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Sounds\ExplosionLarge4.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\Oof.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -81,6 +93,9 @@
     <None Update="Resources\Sounds\UIBlip.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Spritesheets\anim.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Spritesheets\index.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -94,6 +109,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Fonts\SegoeUI.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Textures\8x8_anim.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Textures\8x8_ui.png">

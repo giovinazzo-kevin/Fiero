@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -22,7 +23,10 @@ namespace Fiero.Business
 
         protected override void OnEnded()
         {
-            Source.End();
+            try {
+                Source.End();
+            }
+            catch(ObjectDisposedException) { }
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

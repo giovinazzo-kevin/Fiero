@@ -38,7 +38,7 @@ namespace Fiero.Business
                     var itemsHere = _floorSystem.GetItemsAt(floorId, newPos);
                     if (!actorsHere.Any()) {
                         if (!featuresHere.Any(f => f.Physics.BlocksMovement)) {
-                            return ActorMoved.Request(new(t.Actor, oldPos, newPos)).All(x => x);
+                            return ActorMoved.Handle(new(t.Actor, oldPos, newPos));
                         }
                         else {
                             var feature = featuresHere.Single();
@@ -58,8 +58,8 @@ namespace Fiero.Business
                         else if(t.Actor.IsFriendlyTowards(target)) {
                             // you can swap position with allies in twice the amount of time it takes to move
                             cost *= 2;
-                            return ActorMoved.Request(new(t.Actor, oldPos, newPos)).Concat(
-                                   ActorMoved.Request(new(target, newPos, oldPos))).All(x => x);
+                            return    ActorMoved.Handle(new(t.Actor, oldPos, newPos))
+                                   && ActorMoved.Handle(new(target, newPos, oldPos));
                         }
                     }
                 }

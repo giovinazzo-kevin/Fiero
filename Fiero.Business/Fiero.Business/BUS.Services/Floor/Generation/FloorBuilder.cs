@@ -58,7 +58,7 @@ namespace Fiero.Business
             Coord GetRandomPosition()
             {
                 var validTiles = context.GetAllTiles()
-                    .Where(t => t.Name == TileName.Ground && !context.GetObjects().Any(o => o.Position == t.Position))
+                    .Where(t => t.Name == TileName.Room && !context.GetObjects().Any(o => o.Position == t.Position))
                     .ToArray();
                 return Rng.Random.Choose(validTiles).Position;
             }
@@ -111,16 +111,14 @@ namespace Fiero.Business
             DrawableEntity CreateConsumable()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                   () => _entityBuilders.Potion(PotionName.Healing).WithPhysics(obj.Position).Build()
+                   () => _entityBuilders.Potion(EffectName.Confusion).WithPhysics(obj.Position).Build()
                 )();
             }
 
             DrawableEntity CreateWeapon()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Weapon_Sword().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Weapon_Bow().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Weapon_Staff().WithPhysics(obj.Position).Build()
+                    () => _entityBuilders.Weapon_Sword().WithPhysics(obj.Position).Build()
                 )();
             }
 
@@ -151,10 +149,22 @@ namespace Fiero.Business
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
                     () => _entityBuilders.NPC_Rat().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Snake().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Cat().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Dog().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Boar().WithPhysics(obj.Position).Build()
+                    () => _entityBuilders.NPC_RatKnight().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatArcher().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatWizard().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatMonk().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatPugilist().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatThief().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatOutcast().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatArsonist().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_RatMerchant().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_SandSnake().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Cobra().WithPhysics(obj.Position).Build(),
+                    () => _entityBuilders.NPC_Boa().WithPhysics(obj.Position).Build()
+                    //() => _entityBuilders.NPC_Snake().WithPhysics(obj.Position).Build(),
+                    //() => _entityBuilders.NPC_Cat().WithPhysics(obj.Position).Build(),
+                    //() => _entityBuilders.NPC_Dog().WithPhysics(obj.Position).Build(),
+                    //() => _entityBuilders.NPC_Boar().WithPhysics(obj.Position).Build()
                 )();
             }
         }
@@ -163,7 +173,8 @@ namespace Fiero.Business
         {
             var ret = tile.Name switch {
                 TileName.Wall => _entityBuilders.Tile_Wall(),
-                TileName.Ground => _entityBuilders.Tile_Ground(),
+                TileName.Room => _entityBuilders.Tile_Room(),
+                TileName.Corridor => _entityBuilders.Tile_Corridor(),
                 _ => _entityBuilders.Tile_Unimplemented()
             };
             if(tile.Color is { } tint) {
@@ -186,7 +197,8 @@ namespace Fiero.Business
                 .Select(o => CreateEntity(o))
                 .ToList();
             // Place all tiles that were set in the context, including objects that eventually resolve to tiles
-            var tileObjects = objects.TrySelect(e => (_entities.TryGetProxy<Tile>(e, out var t), t));
+            var tileObjects = objects.TrySelect(e => (_entities.TryGetProxy<Tile>(e, out var t), t))
+                .ToList();
             foreach (var tile in tileObjects) {
                 floor.SetTile(tile);
             }
@@ -200,7 +212,8 @@ namespace Fiero.Business
                 }
             });
             // Place all features that were added to the context
-            var featureObjects = objects.TrySelect(e => (_entities.TryGetProxy<Feature>(e, out var f), f));
+            var featureObjects = objects.TrySelect(e => (_entities.TryGetProxy<Feature>(e, out var f), f))
+                .ToList();
             foreach (var feature in featureObjects) {
                 floor.AddFeature(feature);
             }
@@ -212,7 +225,8 @@ namespace Fiero.Business
                 .Where(o => IsStairHint(o.Name))
                 .ToHashSet();
             var stairs = context.GetConnections()
-                .Select(c => CreateStairs(id, c, context, hints));
+                .Select(c => CreateStairs(id, c, context, hints))
+                .ToList();
             // Stairs are features, not tiles, because you can use them
             var stairObjects = stairs.TrySelect(e => (_entities.TryGetProxy<Feature>(e, out var f), f));
             foreach (var stair in stairObjects) {

@@ -4,6 +4,6 @@ namespace Fiero.Business
 {
     public class PotionComponent : EcsComponent
     {
-        public PotionName Name { get; set; }
+        public EffectName Name { get; set; }
     }
 }

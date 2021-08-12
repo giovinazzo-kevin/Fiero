@@ -7,6 +7,7 @@ using SFML.Window;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Unconcern.Common;
@@ -79,15 +80,18 @@ namespace Fiero.Business
 
             Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
-            Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/UIBlip.ogg"));
-            Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/UIOk.ogg"));
-            Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/Shutdown.ogg"));
-            Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/StoneMove.ogg"));
-            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/Alarm Low.ogg"));
-            Sounds.Add(SoundName.ExplosionLarge1, new SoundBuffer("Resources/Sounds/ExplosionLarge1.ogg"));
-            Sounds.Add(SoundName.ExplosionLarge2, new SoundBuffer("Resources/Sounds/ExplosionLarge2.ogg"));
-            Sounds.Add(SoundName.ExplosionLarge3, new SoundBuffer("Resources/Sounds/ExplosionLarge3.ogg"));
-            Sounds.Add(SoundName.ExplosionLarge4, new SoundBuffer("Resources/Sounds/ExplosionLarge4.ogg"));
+            Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
+            Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/00_start1.wav"));
+            Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/77_arrowbounce.wav"));
+            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/62_miss.wav"));
+            Sounds.Add(SoundName.TrapSpotted, new SoundBuffer("Resources/Sounds/27_respawn2.wav"));
+            Sounds.Add(SoundName.ItemUsed, new SoundBuffer("Resources/Sounds/66_drink.wav"));
+            Sounds.Add(SoundName.SpellCast, new SoundBuffer("Resources/Sounds/16_falling.wav"));
+            Sounds.Add(SoundName.MeleeAttack, new SoundBuffer("Resources/Sounds/23_ladder.wav"));
+            Sounds.Add(SoundName.RangedAttack, new SoundBuffer("Resources/Sounds/33_rotate1.wav"));
+            Sounds.Add(SoundName.MagicAttack, new SoundBuffer("Resources/Sounds/31_text.wav"));
+            Sounds.Add(SoundName.EnemyDeath, new SoundBuffer("Resources/Sounds/69_explode.wav"));
+            Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/64_lose2.wav"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
@@ -110,7 +114,7 @@ namespace Fiero.Business
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
             Store.SetValue(Data.UI.TileSize, 8);
-            Store.SetValue(Data.UI.WindowSize, new(800, 800));
+            Store.SetValue(Data.UI.WindowSize, new(640, 480));
             Store.SetValue(Data.UI.PopUpSize, new(400, 400));
             Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
             Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
@@ -122,7 +126,6 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.Inventory, Keyboard.Key.I);
             Store.SetValue(Data.Hotkeys.Interact, Keyboard.Key.G);
             Store.SetValue(Data.Hotkeys.Look, Keyboard.Key.X);
-            Store.SetValue(Data.Hotkeys.FireWeapon, Keyboard.Key.F);
             Store.SetValue(Data.Hotkeys.MoveNW, Keyboard.Key.Numpad7);
             Store.SetValue(Data.Hotkeys.MoveN, Keyboard.Key.Numpad8);
             Store.SetValue(Data.Hotkeys.MoveNE, Keyboard.Key.Numpad9);
@@ -132,6 +135,12 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.MoveSW, Keyboard.Key.Numpad1);
             Store.SetValue(Data.Hotkeys.MoveS, Keyboard.Key.Numpad2);
             Store.SetValue(Data.Hotkeys.MoveSE, Keyboard.Key.Numpad3);
+            Store.SetValue(Data.Hotkeys.RotateTargetCW, Keyboard.Key.Multiply);
+            Store.SetValue(Data.Hotkeys.RotateTargetCCW, Keyboard.Key.Divide);
+            Store.SetValue(Data.Hotkeys.QuickCast1, Keyboard.Key.Num1);
+            Store.SetValue(Data.Hotkeys.QuickCast2, Keyboard.Key.Num2);
+            Store.SetValue(Data.Hotkeys.QuickCast3, Keyboard.Key.Num3);
+            Store.SetValue(Data.Hotkeys.QuickCast4, Keyboard.Key.Num4);
             Store.SetValue(Data.Hotkeys.ToggleZoom, Keyboard.Key.Z);
 
             await Director.AddScenes(Scenes);
@@ -142,21 +151,15 @@ namespace Fiero.Business
 #if DEBUG
             // Start logging everything that passes through the global event bus
             var sieve = Bus.Filter<object>();
-            var ignores = new[] { 
-                nameof(RenderSystem),
-                nameof(ActionSystem.ActorIntentEvaluated),
-                nameof(ActionSystem.ActorTurnStarted),
-                nameof(ActionSystem.ActorTurnEnded),
-                nameof(ActionSystem.TurnStarted),
-                nameof(ActionSystem.TurnEnded),
-                nameof(ActionSystem.ActorMoved),
-                nameof(ActionSystem.ActorBumpedObstacle),
-            };
             _ = Task.Run(async () => {
-                while(true) {
+                var logPath = "log.txt";
+                if(File.Exists(logPath)) {
+                    File.Delete(logPath);
+                }
+                while (true) {
                     while (sieve.Messages.TryDequeue(out var msg)) {
                         var log = msg.ToString();
-                        if(!ignores.Any(i => log.Contains(i))) {
+                        if(log.Contains("Player")) {
                             Console.WriteLine(log);
                         }
                     }

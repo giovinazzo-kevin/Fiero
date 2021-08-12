@@ -17,7 +17,7 @@ namespace Fiero.Business
                 GetUISprite("bar_half-l"), GetUISprite("bar_half-m"), GetUISprite("bar_half-r"),
                 GetUISprite("bar_full-l"), GetUISprite("bar_full-m"), GetUISprite("bar_full-r"));
             x.Foreground.V = Foreground;
-            x.Background.V = Color.Transparent;
+            x.Background.V = Background;
             return x;
         }
     }

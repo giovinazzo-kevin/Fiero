@@ -2,9 +2,6 @@
 {
     public enum WeaponName
     {
-        None,
-        Sword,
-        Bow,
-        Staff
+        Sword
     }
 }

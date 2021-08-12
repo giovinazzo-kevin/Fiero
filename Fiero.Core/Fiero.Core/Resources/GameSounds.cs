@@ -41,7 +41,7 @@ namespace Fiero.Core
         public Sound Get(TSounds key, Coord? pos = null, bool relativeToListener = false)
         {
             if(Buffers.GetValueOrDefault(key) is { } buf) {
-                var sound = new Sound(buf);
+                var sound = new Sound(buf) { Volume = 25 };
                 if (pos is { } p) {
                     sound.Position = new(p.X, p.Y, 0);
                 }

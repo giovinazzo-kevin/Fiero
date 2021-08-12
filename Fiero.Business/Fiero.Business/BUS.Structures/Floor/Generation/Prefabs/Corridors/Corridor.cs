@@ -13,7 +13,7 @@ namespace Fiero.Business
         public int Thickness { get; set; }
 
         protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
-        protected virtual TileDef GroundTile(Coord c) => new(TileName.Ground, c);
+        protected virtual TileDef GroundTile(Coord c) => new(TileName.Corridor, c);
 
         public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, int thickness = 1)
         {

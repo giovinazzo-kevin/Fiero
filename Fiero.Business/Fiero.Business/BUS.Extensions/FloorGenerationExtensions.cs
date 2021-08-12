@@ -8,7 +8,7 @@ namespace Fiero.Business
     {
         public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, Func<Coord, TileDef> makeTile)
         {
-            foreach (var p in Shape.Line(start, end)) {
+            foreach (var p in Shapes.Line(start, end)) {
                 var tile = makeTile(p);
                 ctx.SetTile(p, tile.Name, tile.Color);
             }
@@ -16,7 +16,7 @@ namespace Fiero.Business
 
         public static void DrawCircle(this FloorGenerationContext ctx, Coord center, int radius, Func<Coord, TileDef> makeTile)
         {
-            foreach (var p in Shape.Circle(center, radius)) {
+            foreach (var p in Shapes.Circle(center, radius)) {
                 var tile = makeTile(p);
                 ctx.SetTile(p, tile.Name, tile.Color);
             }

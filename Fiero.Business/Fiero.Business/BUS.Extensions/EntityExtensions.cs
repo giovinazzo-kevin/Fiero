@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http.Headers;
 
 namespace Fiero.Business
@@ -18,31 +19,29 @@ namespace Fiero.Business
             => a.Position().Dist(pos);
         public static double SquaredDistanceFrom(this PhysicalEntity a, Coord pos)
             => a.Position().DistSq(pos);
-        public static bool IsHostileTowards(this Actor a, Actor b)
-        {
-            if (a.Faction.PersonalRelationships.TryGet(b, out var standing)) {
-                return standing.MayTarget();
-            }
-            return a.Faction.FactionRelationships.Get(b.Faction.Type).MayTarget();
-        }
-
-        public static bool IsFriendlyTowards(this Actor a, Actor b)
-        {
-            if (a.Faction.PersonalRelationships.TryGet(b, out var standing)) {
-                return standing.MayHelp();
-            }
-            return a.Faction.FactionRelationships.Get(b.Faction.Type).MayHelp();
-        }
-
         public static FloorId FloorId(this PhysicalEntity a) => a.Physics.FloorId;
         public static Coord Position(this PhysicalEntity a) => a.Physics.Position;
+        public static bool IsAlive(this Actor a) => a.Id != 0 && a.FloorId() != default;
         public static bool IsPlayer(this Actor a) => a.ActorProperties.Type == ActorName.Player;
         public static bool CanSee(this Actor a, Coord c) => a.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, PhysicalEntity e) => a.CanSee(e.Position());
+        public static bool IsAffectedBy(this Actor a, EffectName effect) => a.Effects != null && a.Effects.Active.Any(e => e.Type == effect);
         public static int Heal(this Actor a, int health)
         {
             return a.ActorProperties.Stats.Health = 
                 Math.Clamp(a.ActorProperties.Stats.Health + health, 0, a.ActorProperties.Stats.MaximumHealth);
+        }
+        public static bool TryIdentify(this Actor a, Item i) => a.Inventory.TryIdentify(i);
+        public static bool Identify<T>(this Actor a, T i, Func<T, bool> rule)
+            where T : Item
+        {
+            if (!rule(i))
+                throw new ArgumentException(nameof(rule));
+            if(!a.TryIdentify(i)) {
+                a.Inventory.AddIdentificationRule(i => i is T _t && rule(_t) || i.TryCast<T>(out var t) && rule(t));
+                return a.TryIdentify(i);
+            }
+            return false;
         }
     }
 }

@@ -70,7 +70,7 @@ namespace Fiero.Business
                         .Shuffle(Rng.Random);
                     for (int i = 0; i < roll; i++) {
                         var pos = pointCloud
-                            .Where(p => ctx.GetTile(p).Name == TileName.Ground)
+                            .Where(p => ctx.GetTile(p).Name == TileName.Room)
                             .First();
                         ctx.AddObject(type, pos);
                     }

@@ -3,7 +3,8 @@
     public enum TileName
     {
         None,
-        Ground,
+        Room,
+        Corridor,
         Wall,
         Error
     }

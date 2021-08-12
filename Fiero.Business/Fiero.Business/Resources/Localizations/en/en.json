@@ -123,6 +123,10 @@
   "Spell": {
     "Bloodbath": {
       "ProcMessage": "You bathe in the blood"
+    },
+    "CrimsonLance": {
+      "ProcMessage": "You form a spear from the blood surrounding you",
+      "FailMessage": "There is not enough blood around you"
     }
   }
 }

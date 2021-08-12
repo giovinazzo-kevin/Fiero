@@ -41,6 +41,7 @@ namespace Fiero.Core
         protected readonly HashSet<TrackedEntity> Entities;
         protected readonly Dictionary<Type, HashSet<TrackedEntity>> Components;
         protected readonly Dictionary<Type, HashSet<PropertyInfo>> ProxyablePropertyCache;
+        protected readonly Dictionary<OrderedPair<int, Type>, EcsEntity> ProxyCache;
         protected readonly Queue<int> EntityRemovalQueue; 
         protected readonly Queue<(int Entity, int Component)> ComponentRemovalQueue;
         protected readonly HashSet<int> ProtectedEntities;
@@ -69,6 +70,7 @@ namespace Fiero.Core
             EntityRemovalQueue = new Queue<int>();
             ComponentRemovalQueue = new Queue<(int Entity, int Component)>();
             ProxyablePropertyCache = new Dictionary<Type, HashSet<PropertyInfo>>();
+            ProxyCache = new Dictionary<OrderedPair<int, Type>, EcsEntity>();
             Children = new HashSet<GameEntities>();
             ProtectedEntities = new HashSet<int>();
         }
@@ -121,9 +123,19 @@ namespace Fiero.Core
         public bool TryGetProxy<T>(int entityId, out T entity)
             where T : EcsEntity
         {
+            entity = default;
             var equalEntity = new TrackedEntity(entityId);
+            var cacheKey = new OrderedPair<int, Type>(entityId, typeof(T));
+            if (ProxyCache.TryGetValue(cacheKey, out var proxy)) {
+                if (!Entities.TryGetValue(equalEntity, out _)) {
+                    ProxyCache.Remove(cacheKey);
+                    return false;
+                }
+                entity = (T)proxy;
+                return true;
+            }
             if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
-                throw new ArgumentOutOfRangeException($"An entity with id {entityId} is not being tracked");
+                return false;
             }
             var props = GetProxyableProperties<T>();
             entity = ServiceFactory.GetInstance<T>();
@@ -158,7 +170,11 @@ namespace Fiero.Core
                 }
                 return null;
             };
-            return entity.TryRefresh(entityId);
+            if(entity.TryRefresh(entityId)) {
+                ProxyCache[cacheKey] = entity;
+                return true;
+            }
+            return false;
         }
 
 

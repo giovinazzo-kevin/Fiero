@@ -33,7 +33,7 @@ namespace Fiero.Business
                 var itemsHere = _floorSystem.GetItemsAt(floorId, usePos);
                 var featuresHere = _floorSystem.GetFeaturesAt(floorId, usePos);
                 if (itemsHere.Any() && t.Actor.Inventory != null) {
-                    var item = itemsHere.Single();
+                    var item = itemsHere.First();
                     action = new PickUpItemAction(item);
                     cost = HandleAction(t, ref action);
                 }

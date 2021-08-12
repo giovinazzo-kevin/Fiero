@@ -35,10 +35,11 @@ namespace Fiero.Business
                     foreach (var t in GreatKingRat()) component.Triggers.Add(t);
                     break;
             }
+
             IEnumerable<IDialogueTrigger> GreatKingRat()
             {
                 yield return new PlayerInSightDialogueTrigger<GKRDialogueName>(
-                    systems, GKRDialogueName.JustMet, repeatable: false);
+                    systems, repeatable: false, GKRDialogueName.JustMet);
             }
         }
 
@@ -58,7 +59,7 @@ namespace Fiero.Business
                 IEnumerable<IDialogueTrigger> Smintheus()
                 {
                     yield return new BumpedByPlayerDialogueTrigger<ShrineDialogueName>(
-                        systems, ShrineDialogueName.Smintheus, repeatable: true);
+                        systems, repeatable: true, ShrineDialogueName.Smintheus);
                 }
             }
         }

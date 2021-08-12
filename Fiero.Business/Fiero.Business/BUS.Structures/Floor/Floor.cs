@@ -32,7 +32,7 @@ namespace Fiero.Business
             Pathfinder = _cells.GetPathfinder();
         }
 
-        public IEnumerable<DrawableEntity> GetDrawables() 
+        public IEnumerable<PhysicalEntity> GetDrawables() 
             => Cells.Values.SelectMany(c => c.GetDrawables());
 
         public void SetTile(Tile tile)

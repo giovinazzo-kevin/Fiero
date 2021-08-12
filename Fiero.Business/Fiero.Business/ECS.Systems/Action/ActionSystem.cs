@@ -22,6 +22,7 @@ namespace Fiero.Business
 
         private readonly GameEntities _entities;
         private readonly FloorSystem _floorSystem;
+        private readonly FactionSystem _factionSystem;
 
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> GameStarted;
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnStarted;
@@ -34,11 +35,12 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorDespawnedEvent, EventResult> ActorDespawned;
         public readonly SystemRequest<ActionSystem, ActorDiedEvent, EventResult> ActorDied;
         public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
-        public readonly SystemRequest<ActionSystem, ActorAttackedEvent, ActorAttackedEventResult> ActorAttacked;
+        public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
         public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorDamaged;
         public readonly SystemRequest<ActionSystem, SpellLearnedEvent, EventResult> SpellLearned;
         public readonly SystemRequest<ActionSystem, SpellForgottenEvent, EventResult> SpellForgotten;
         public readonly SystemRequest<ActionSystem, SpellCastEvent, EventResult> SpellCast;
+        public readonly SystemRequest<ActionSystem, SpellTargetedEvent, EventResult> SpellTargeted;
         public readonly SystemRequest<ActionSystem, ItemPickedUpEvent, EventResult> ItemPickedUp;
         public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemDropped;
         public readonly SystemRequest<ActionSystem, ItemEquippedEvent, EventResult> ItemEquipped;
@@ -48,7 +50,10 @@ namespace Fiero.Business
 
         public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
         public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
-        public readonly SystemEvent<ActionSystem, ActorTurnEvent> ActorIntentEvaluated;
+
+        public readonly SystemRequest<ActionSystem, ActorIntentEvent, ReplaceIntentEventResult> ActorIntentSelected;
+        public readonly SystemEvent<ActionSystem, ActorIntentEvent> ActorIntentEvaluated;
+        public readonly SystemEvent<ActionSystem, ActorIntentEvent> ActorIntentFailed;
 
         public int CurrentActorId => _actorQueue[0].ActorId;
         public IEnumerable<int> ActorIds => _actorQueue.Select(x => x.ActorId);
@@ -61,10 +66,11 @@ namespace Fiero.Business
             EventBus bus,
             GameEntities entities, 
             FloorSystem floorSystem,
-            GameSounds<SoundName> sounds
+            FactionSystem factionSystem
         ) : base(bus) {
             _entities = entities;
             _floorSystem = floorSystem;
+            _factionSystem = factionSystem;
 
             GameStarted = new(this, nameof(GameStarted));
             TurnStarted = new(this, nameof(TurnStarted));
@@ -82,6 +88,7 @@ namespace Fiero.Business
             SpellLearned = new(this, nameof(SpellLearned));
             SpellForgotten = new(this, nameof(SpellForgotten));
             SpellCast = new(this, nameof(SpellCast));
+            SpellTargeted = new(this, nameof(SpellTargeted));
             ItemPickedUp = new(this, nameof(ItemPickedUp));
             ItemDropped = new(this, nameof(ItemDropped));
             ItemEquipped = new(this, nameof(ItemEquipped));
@@ -91,26 +98,82 @@ namespace Fiero.Business
 
             ActorSteppedOnTrap = new(this, nameof(ActorSteppedOnTrap));
             ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
+            ActorIntentSelected = new(this, nameof(ActorIntentSelected));
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
+            ActorIntentFailed = new(this, nameof(ActorIntentFailed));
+
+            ActorAttacked.ResponseReceived += (_, e, r) => {
+                if (r.All(x => x)) {
+                    ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapon, e.Damage));
+                }
+            };
+            ActorDamaged.ResponseReceived += (_, e, r) => {
+                if (r.All(x => x)) {
+                    if (e.Victim.ActorProperties.Stats.Health <= 0) {
+                        if (e.Source.TryCast<Actor>(out var killer)) {
+                            ActorKilled.HandleOrThrow(new(killer, e.Victim));
+                        }
+                        else {
+                            ActorDied.HandleOrThrow(new(e.Victim));
+                        }
+                    }
+                }
+            };
+            ActorKilled.ResponseReceived += (_, e, r) => {
+                if (r.All(x => x)) {
+                    ActorDied.HandleOrThrow(new(e.Victim));
+                }
+            };
+            ActorDied.ResponseReceived += (_, e, r) => {
+                if (r.All(x => x)) {
+                    ActorDespawned.HandleOrThrow(new(e.Actor));
+                }
+            };
             Reset();
         }
 
         private int? HandleAction(ActorTime t, ref IAction action)
         {
+            var ret = default(bool?);
             var cost = action.Cost;
             if (t.ActorId == TURN_ACTOR_ID)
                 return cost;
-            cost = action.Name switch {
-                ActionName.Wait     when(HandleWait    (t, ref action, ref cost)) => cost,
-                ActionName.Move     when(HandleMove    (t, ref action, ref cost)) => cost,
-                ActionName.Attack   when(HandleAttack  (t, ref action, ref cost)) => cost,
-                ActionName.Interact when(HandleInteract(t, ref action, ref cost)) => cost,
-                ActionName.Organize when(HandleOrganize(t, ref action, ref cost)) => cost,
-                _ => null
-            };
+
+            switch(action.Name) {
+                case ActionName.Wait:
+                    ret = HandleWait(t, ref action, ref cost);
+                    break;
+                case ActionName.Move:
+                    ret = HandleMove(t, ref action, ref cost);
+                    break;
+                case ActionName.MeleeAttack:
+                    ret = HandleMeleeAttack(t, ref action, ref cost);
+                    break;
+                case ActionName.Throw:
+                    ret = HandleThrowItem(t, ref action, ref cost);
+                    break;
+                case ActionName.CastSpell:
+                    ret = HandleCastSpell(t, ref action, ref cost);
+                    break;
+                case ActionName.Interact:
+                    ret = HandleInteract(t, ref action, ref cost);
+                    break;
+                case ActionName.Zap:
+                case ActionName.Read:
+                case ActionName.Drink:
+                case ActionName.Organize:
+                    ret = HandleOrganize(t, ref action, ref cost);
+                    break;
+                case ActionName.Fail:
+                    ret = false;
+                    break;
+            }
             t.Actor.Action.LastAction = action;
-            if(action.Name != ActionName.None) {
-                ActorIntentEvaluated.Raise(new(t.Actor, CurrentTurn, t.Time));
+            if (ret == true) {
+                ActorIntentEvaluated.Raise(new(t.Actor, action, CurrentTurn, t.Time));
+            }
+            else if(ret == false) {
+                ActorIntentFailed.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
             return cost;
         }
@@ -122,14 +185,58 @@ namespace Fiero.Business
             GameStarted.Raise(new());
         }
 
-
         public void Spawn(Actor a)
         {
             ActorSpawned.Raise(new(a));
         }
+
         public void Despawn(Actor a)
         {
             ActorDespawned.Raise(new(a));
+        }
+
+        private bool MayTarget(Actor attacker, Actor victim)
+        {
+            return attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelationships(attacker, victim).Left.IsHostile();
+        }
+
+        private bool TryFindVictim(Coord p, Actor attacker, out Actor victim)
+        {
+            victim = default;
+            var actorsHere = _floorSystem.GetActorsAt(attacker.FloorId(), p);
+            if (!actorsHere.Any(a => MayTarget(attacker, a))) {
+                return false;
+            }
+            victim = actorsHere.Single();
+            return true;
+        }
+
+        private bool HandleAttack(AttackName type, Actor attacker, Actor victim, ref int? cost, Entity weapon, out int damage, out int swingDelay)
+        {
+            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapon)) {
+                cost += swingDelay;
+                return true;
+            }
+            return false;
+        }
+
+        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor victim, Entity attackWith)
+        {
+            damage = 1; swingDelay = 0;
+            if(attackWith != null) {
+                if (attackWith.TryCast<Weapon>(out var w)) {
+                    swingDelay = w.WeaponProperties.SwingDelay;
+                    damage += w.WeaponProperties.BaseDamage;
+                }
+                else if (attackWith.TryCast<Spell>(out var s)) {
+                    swingDelay = s.SpellProperties.CastDelay;
+                    damage += s.SpellProperties.BaseDamage;
+                }
+                else if (attackWith.TryCast<Throwable>(out var t)) {
+                    damage += t.ThrowableProperties.BaseDamage;
+                }
+            }
+            return ActorAttacked.Handle(new(type, attacker, victim, attackWith, damage, swingDelay));
         }
 
         public void Track(int actorId)
@@ -157,6 +264,15 @@ namespace Fiero.Business
             OnTurnStarted(next.ActorId);
             next = next.WithLastActedTime(next.Time);
             var intent = next.GetIntent();
+            if(intent.Name != ActionName.None) {
+                // Some effects might want to hook into this request to change the intent of an actor right before it's evaluated
+                var altIntents = ActorIntentSelected.Request(new(next.Actor, intent, CurrentTurn, next.Time))
+                    .Where(i => i.Result)
+                    .OrderByDescending(i => i.Priority);
+                if (altIntents.FirstOrDefault() is { } altIntent) {
+                    intent = altIntent.NewIntent;
+                }
+            }
             if (HandleAction(next, ref intent) is { } cost) {
                 if(_invalidate) {
                     _invalidate = false;

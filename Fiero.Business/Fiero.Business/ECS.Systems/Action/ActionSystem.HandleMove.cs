@@ -50,12 +50,13 @@ namespace Fiero.Business
                     }
                     else {
                         var target = actorsHere.Single();
-                        if (t.Actor.IsHostileTowards(target)) {
+                        var relationship = _factionSystem.GetRelationships(t.Actor, target).Left;
+                        if (relationship.MayAttack()) {
                             // attack-bump is a free "combo"
-                            action = new MeleeAttackOtherAction(target);
+                            action = new MeleeAttackOtherAction(target, t.Actor.Equipment.Weapon);
                             cost = HandleAction(t, ref action);
                         }
-                        else if(t.Actor.IsFriendlyTowards(target)) {
+                        else if (relationship.IsFriendly()) {
                             // you can swap position with allies in twice the amount of time it takes to move
                             cost *= 2;
                             return    ActorMoved.Handle(new(t.Actor, oldPos, newPos))
@@ -67,6 +68,11 @@ namespace Fiero.Business
                     ActorBumpedObstacle.Raise(new(t.Actor, tile));
                     return false;
                 }
+            }
+            else {
+                // Bumped "nothingness"
+                ActorBumpedObstacle.Raise(new(t.Actor, null));
+                return false;
             }
             return true;
         }

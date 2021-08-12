@@ -6,8 +6,6 @@ namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
-
-
         private bool HandleOrganize(ActorTime t, ref IAction action, ref int? cost)
         {
             if (action is DropItemAction drop) {

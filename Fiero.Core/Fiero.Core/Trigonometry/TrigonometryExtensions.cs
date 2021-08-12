@@ -36,6 +36,7 @@ namespace Fiero.Core
         public static Vector2i ToVector2i(this Coord v) => new(v.X, v.Y);
         public static Vector2u ToVector2u(this Coord v) => new((uint)v.X, (uint)v.Y);
         public static Point ToPoint(this Coord v) => new(v.X, v.Y);
+        public static IntRect ToRect(this Coord v) => new(0, 0, v.X, v.Y);
         public static Coord Size(this IntRect rect) => new(rect.Width, rect.Height);
         public static Coord Position(this IntRect rect) => new(rect.Left, rect.Top);
         public static Coord Center(this IntRect rect) => rect.Position() + rect.Size() / 2;

@@ -42,8 +42,11 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
                 c.Type = type;
             });
-        public static EntityBuilder<T> WithMaximumHealth<T>(this EntityBuilder<T> builder, int maximum)
-            where T : Actor => builder.AddOrTweak<ActorComponent>(c => c.Stats.Health = c.Stats.MaximumHealth = maximum);
+        public static EntityBuilder<T> WithHealth<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
+                c.Stats.MaximumHealth = maximum;
+                c.Stats.Health = current ?? maximum;
+            });
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
         public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
@@ -100,9 +103,7 @@ namespace Fiero.Business
             });
         public static EntityBuilder<T> WithFaction<T>(this EntityBuilder<T> builder, FactionName faction)
             where T : Actor => builder.AddOrTweak<FactionComponent>(c => {
-                var factionSystem = (FactionSystem)builder.ServiceFactory.GetInstance(typeof(FactionSystem));
-                c.Type = faction;
-                c.FactionRelationships = factionSystem.GetRelationships(c.Type);
+                c.Name = faction;
             });
         public static EntityBuilder<T> WithLogging<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<LogComponent>(_ => { });
@@ -136,24 +137,40 @@ namespace Fiero.Business
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
             });
-        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, PotionName effect)
+        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, int damage, int maxRange, ThrowName @throw)
+            where T : Throwable => builder.AddOrTweak<ThrowableComponent>(c => {
+                c.BaseDamage = damage;
+                c.MaximumRange = maxRange;
+                c.Throw = @throw;
+            });
+        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, EffectName effect)
             where T : Potion => builder.AddOrTweak<PotionComponent>(c => {
                 c.Name = effect;
             });
-        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, ScrollName effect)
+        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, EffectName effect)
             where T : Scroll => builder.AddOrTweak<ScrollComponent>(c => {
                 c.Name = effect;
             });
-        public static EntityBuilder<T> WithSpellInfo<T>(this EntityBuilder<T> builder, SpellName effect)
+        public static EntityBuilder<T> WithSpellInfo<T>(this EntityBuilder<T> builder, SpellName effect, int damage, int delay)
             where T : Spell => builder.AddOrTweak<SpellComponent>(c => {
                 c.Name = effect;
+                c.TargetingShape = new(new(), false, new Coord());
+                c.TargetingFilter = (_, __, ___) => true;
+                c.BaseDamage = damage;
+                c.CastDelay = delay;
             });
-        public static EntityBuilder<T> WithWeaponInfo<T>(this EntityBuilder<T> builder,
-            WeaponName type, AttackName attack, WeaponHandednessName hands, int baseDamage, int swingDelay)
+        public static EntityBuilder<T> WithTargetingShape<T>(this EntityBuilder<T> builder, TargetingShape shape)
+            where T : Spell => builder.Tweak<SpellComponent>(c => {
+                c.TargetingShape = shape;
+            });
+        public static EntityBuilder<T> WithTargetingFilter<T>(this EntityBuilder<T> builder, Func<GameSystems, Actor, PhysicalEntity, bool> targetFilter)
+            where T : Spell => builder.Tweak<SpellComponent>(c => {
+                c.TargetingFilter = targetFilter;
+            });
+
+        public static EntityBuilder<T> WithWeaponInfo<T>(this EntityBuilder<T> builder, WeaponName type, int baseDamage, int swingDelay)
             where T : Weapon => builder.AddOrTweak<WeaponComponent>(c => {
                 c.Type = type;
-                c.AttackType = attack;
-                c.Handedness = hands;
                 c.BaseDamage = baseDamage;
                 c.SwingDelay = swingDelay;
             });

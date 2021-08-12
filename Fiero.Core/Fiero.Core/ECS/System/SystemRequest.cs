@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Unconcern;
 using Unconcern.Common;
@@ -11,6 +12,8 @@ namespace Fiero.Core
         : SystemEvent<TSys, TArgs>
         where TSys : EcsSystem
     {
+        public event Action<SystemRequest<TSys, TArgs, TResponseArgs>, TArgs, IEnumerable<TResponseArgs>> ResponseReceived;   
+
         public SystemRequest(TSys owner, string name)
             : base(owner, name)
         {
@@ -20,9 +23,9 @@ namespace Fiero.Core
         {
             using var sieve = new Sieve<TResponseArgs>(Owner.EventBus, msg => msg.IsFrom(Name));
             Raise(args);
-            foreach (var response in sieve.Messages) {
-                yield return response.Content;
-            }
+            var messages = sieve.Messages.Select(x => x.Content).ToList();
+            ResponseReceived?.Invoke(this, args, messages);
+            return messages;
         }
 
         public Subscription SubscribeResponse(Func<TArgs, TResponseArgs> transform)

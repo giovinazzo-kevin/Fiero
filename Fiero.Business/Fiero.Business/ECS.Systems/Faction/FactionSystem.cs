@@ -9,65 +9,108 @@ namespace Fiero.Business
     public class FactionSystem : EcsSystem
     {
         public readonly GameEntities Entities;
-        protected readonly Dictionary<FactionName, FactionRelationships> Relationships;
-
-        public FactionRelationships GetRelationships(FactionName faction) => Relationships[faction];
+        protected readonly Dictionary<OrderedPair<FactionName>, StandingName> FactionRelationships = new();
+        protected readonly Dictionary<OrderedPair<int>, StandingName> ActorRelationships = new();
 
         public void SetDefaultRelationships()
         {
-            SetMutualRelationship(FactionName.Rats, FactionName.Cats,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Rats, FactionName.Dogs,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Rats, FactionName.Snakes,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Rats, FactionName.Boars,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Cats, FactionName.Dogs,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Cats, FactionName.Snakes,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Cats, FactionName.Boars,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Dogs, FactionName.Snakes,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Dogs, FactionName.Boars,
-                new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Snakes, FactionName.Boars,
-                new(StandingName.Tolerated));
+            SetBilateralRelationship(FactionName.Rats, FactionName.Cats, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Rats, FactionName.Dogs, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Rats, FactionName.Snakes, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Rats, FactionName.Boars, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Cats, FactionName.Dogs, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Cats, FactionName.Snakes, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Cats, FactionName.Boars, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Dogs, FactionName.Snakes, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Dogs, FactionName.Boars, StandingName.Tolerated);
+            SetBilateralRelationship(FactionName.Snakes, FactionName.Boars, StandingName.Tolerated);
 
-            SetMutualRelationship(FactionName.Players, FactionName.Rats,
-                new(StandingName.Tolerated), new(StandingName.Tolerated));
-            SetMutualRelationship(FactionName.Players, FactionName.Cats,
-                new(StandingName.ApprovenOf));
-            SetMutualRelationship(FactionName.Players, FactionName.Dogs,
-                new(StandingName.Liked));
-            SetMutualRelationship(FactionName.Players, FactionName.Snakes,
-                new(StandingName.DisapprovenOf));
-            SetMutualRelationship(FactionName.Players, FactionName.Boars,
-                new(StandingName.Disliked));
-            SetMutualRelationship(FactionName.Players, FactionName.BeastGod,
-                new(StandingName.Hated));
+            SetBilateralRelationship(FactionName.Players, FactionName.Rats, StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.Cats,StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.Dogs, StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.Snakes, StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.Boars, StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.BeastGod, StandingName.DisapprovenOf);
         }
 
-        public void SetMutualRelationship(FactionName a, FactionName b, Relationship aTowardsB, Relationship? bTowardsA = null)
+        public void SetUnilateralRelationship(FactionName a, FactionName b, StandingName standing)
         {
-            GetRelationships(a).Set(b, aTowardsB);
-            GetRelationships(b).Set(a, bTowardsA ?? aTowardsB);
+            FactionRelationships[new(a, b)] = standing;
         }
 
-        public void UpdateRelationship(FactionName a, FactionName b, Func<Relationship, Relationship> update, out Relationship value)
+        public void SetBilateralRelationship(FactionName a, FactionName b, StandingName standing)
         {
-            GetRelationships(a).Update(b, update, out value);
+            SetUnilateralRelationship(a, b, standing);
+            SetUnilateralRelationship(b, a, standing);
         }
+
+        public void SetUnilateralRelationship(Actor a, Actor b, StandingName standing)
+        {
+            if (!a.IsAlive()) {
+                throw new ArgumentException(nameof(a));
+            }
+            if (!b.IsAlive()) {
+                throw new ArgumentException(nameof(b));
+            }
+            ActorRelationships[new(a.Id, b.Id)] = standing;
+        }
+
+        public void SetBilateralRelationship(Actor a, Actor b, StandingName standing)
+        {
+            SetUnilateralRelationship(a, b, standing);
+            SetUnilateralRelationship(b, a, standing);
+        }
+
+        public OrderedPair<StandingName> GetRelationships(FactionName a, FactionName b)
+        {
+            if (!FactionRelationships.TryGetValue(new(a, b), out var aTowardsB)) {
+                aTowardsB = StandingName.Tolerated;
+            }
+            if (!FactionRelationships.TryGetValue(new(b, a), out var bTowardsA)) {
+                bTowardsA = StandingName.Tolerated;
+            }
+            return new(aTowardsB, bTowardsA);
+        }
+
+        public OrderedPair<StandingName> GetRelationships(Actor a, Actor b)
+        {
+            if (!ActorRelationships.TryGetValue(new(a.Id, b.Id), out var aTowardsB)) {
+                if (!FactionRelationships.TryGetValue(new(a.Faction.Name, b.Faction.Name), out aTowardsB)) {
+                    aTowardsB = StandingName.Tolerated;
+                }
+            }
+            if (!ActorRelationships.TryGetValue(new(b.Id, a.Id), out var bTowardsA)) {
+                if (!FactionRelationships.TryGetValue(new(b.Faction.Name, a.Faction.Name), out bTowardsA)) {
+                    bTowardsA = StandingName.Tolerated;
+                }
+            }
+            return new(aTowardsB, bTowardsA);
+        }
+
+        public IEnumerable<(FactionName Faction, StandingName Standing)> GetRelationships(FactionName f)
+        {
+            var keys = FactionRelationships.Keys.Where(k => k.Left == f);
+            foreach (var key in keys) {
+                yield return (key.Right, FactionRelationships[key]);
+            }
+        }
+
+        public IEnumerable<(Actor Actor, StandingName Standing)> GetRelationships(Actor a)
+        {
+            var keys = ActorRelationships.Keys.Where(k => k.Left == a.Id);
+            foreach (var key in keys) {
+                if (!Entities.TryGetProxy<Actor>(key.Right, out var other)) {
+                    ActorRelationships.Remove(key);
+                    continue;
+                }
+                yield return (other, ActorRelationships[key]);
+            }
+        }
+
         public FactionSystem(EventBus bus, GameEntities entities)
             : base(bus)
         {
             Entities = entities;
-            Relationships = new Dictionary<FactionName, FactionRelationships>();
-            foreach (var val in Enum.GetValues<FactionName>()) {
-                Relationships[val] = new FactionRelationships(val);
-            }
         }
     }
 }

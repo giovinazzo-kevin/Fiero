@@ -4,10 +4,19 @@
     {
         // RATS
         GreatKingRat,
-        RatWithNoHood,
-        JunkieRat,
-        BusinessRat,
-        KeptoRat,
-        LepRat
+        RatKnight,
+        RatArcher,
+        RatWizard,
+        RatMonk,
+        RatPugilist,
+        RatThief,
+        RatOutcast,
+        RatMerchant,
+        RatArsonist,
+        // SNAKES
+        KingSerpent,
+        SandSnake,
+        Cobra,
+        Boa
     }
 }

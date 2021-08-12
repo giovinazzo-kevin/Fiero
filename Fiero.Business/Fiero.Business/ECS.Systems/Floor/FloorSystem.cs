@@ -98,9 +98,9 @@ namespace Fiero.Business
         }
         public MapCell GetCellAt(FloorId id, Coord pos) => TryGetCellAt(id, pos, out var cell) ? cell : null;
 
-        public IEnumerable<DrawableEntity> GetDrawables(FloorId id) => TryGetFloor(id, out var floor)
+        public IEnumerable<PhysicalEntity> GetDrawables(FloorId id) => TryGetFloor(id, out var floor)
             ? floor.GetDrawables()
-            : Enumerable.Empty<DrawableEntity>();
+            : Enumerable.Empty<PhysicalEntity>();
         public IEnumerable<Tile> GetAllTiles(FloorId id) => TryGetFloor(id, out var floor)
             ? floor.Cells.Values.Select(c => c.Tile)
             : Enumerable.Empty<Tile>();
@@ -116,7 +116,7 @@ namespace Fiero.Business
         public Tile GetTileAt(FloorId id, Coord pos) => TryGetCellAt(id, pos, out var cell) ? cell.Tile : null;
         public void SetTileAt(FloorId id, Coord pos, Tile tile)
         {
-            if(TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(id, out var floor)) {
                 if (TryGetCellAt(id, pos, out var old)) {
                     Entities.FlagEntityForRemoval(old.Tile.Id);
                 }
@@ -125,7 +125,7 @@ namespace Fiero.Business
                 floor.SetTile(tile);
             }
         }
-        
+
         public IEnumerable<MapCell> GetNeighborhood(FloorId id, Coord pos, int size = 3)
         {
             size /= 2;
@@ -256,6 +256,6 @@ namespace Fiero.Business
 
         public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
             => !TryGetFloor(id, out var floor) 
-                || Shape.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
+                || Shapes.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
     }
 }

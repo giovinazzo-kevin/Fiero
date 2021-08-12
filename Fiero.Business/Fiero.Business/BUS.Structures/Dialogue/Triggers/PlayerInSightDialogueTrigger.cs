@@ -9,8 +9,8 @@ namespace Fiero.Business
     {
         public float DistanceThreshold { get; set; } = 5;
 
-        public PlayerInSightDialogueTrigger(GameSystems sys, TDialogue node, bool repeatable) 
-            : base(sys, node, repeatable)
+        public PlayerInSightDialogueTrigger(GameSystems sys, bool repeatable, params TDialogue[] nodeChoices) 
+            : base(sys, repeatable, nodeChoices)
         {
 
         }

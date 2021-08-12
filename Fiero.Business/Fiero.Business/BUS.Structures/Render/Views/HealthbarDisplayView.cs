@@ -47,7 +47,7 @@ namespace Fiero.Business
                 return;
             if (Following.ActorProperties.Stats.Health == Following.ActorProperties.Stats.MaximumHealth)
                 return;
-            var bar = (Following.Npc?.IsBoss ?? false)
+            var bar = (Following.Npc != null)
                 ? BossBar : EnemyBar;
             bar.Position.V = Position;
             bar.Progress.V = Following.ActorProperties.Stats.MaximumHealth > 0

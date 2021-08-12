@@ -9,8 +9,8 @@ namespace Fiero.Business
     {
         public float PercentageThreshold { get; set; } = 0.5f;
 
-        public LowHealthDialogueTrigger(GameSystems sys, TDialogue node, bool repeatable)
-            : base(sys, node, repeatable)
+        public LowHealthDialogueTrigger(GameSystems sys, bool repeatable, params TDialogue[] nodeChoices)
+            : base(sys, repeatable, nodeChoices)
         {
 
         }

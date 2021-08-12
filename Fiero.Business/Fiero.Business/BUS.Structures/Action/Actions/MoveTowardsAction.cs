@@ -7,7 +7,7 @@
         {
             Follow = follow;
         }
-        ActionName IAction.Name => ActionName.Attack;
+        ActionName IAction.Name => ActionName.MeleeAttack;
         int? IAction.Cost => 100;
     }
 }

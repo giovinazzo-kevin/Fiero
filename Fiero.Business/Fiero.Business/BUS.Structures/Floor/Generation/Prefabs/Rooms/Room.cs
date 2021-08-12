@@ -16,7 +16,7 @@ namespace Fiero.Business
         public Coord Size { get; private set; }
 
         protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
-        protected virtual TileDef GroundTile(Coord c) => new(TileName.Ground, c);
+        protected virtual TileDef GroundTile(Coord c) => new(TileName.Room, c);
 
         public IEnumerable<IntRect> GetRects() => Rects;
         public IEnumerable<Coord> GetPointCloud() => Rects.SelectMany(r => r.Enumerate());

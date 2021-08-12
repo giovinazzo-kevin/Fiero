@@ -2,7 +2,6 @@
 
 namespace Fiero.Business
 {
-
     public readonly struct AnimationFrame
     {
         public readonly AnimationSprite[] Sprites;

@@ -3,10 +3,16 @@
     public enum ActionName
     {
         None,
+        Fail,
         Wait,
         Move,
-        Attack,
+        MeleeAttack,
+        CastSpell,
         Interact,
-        Organize
+        Organize,
+        Read,
+        Throw,
+        Drink,
+        Zap
     }
 }

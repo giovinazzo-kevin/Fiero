@@ -18,19 +18,21 @@ namespace Fiero.Core
             TimeStep = 1f / 500f;
         }
 
-        public virtual void WaitAndDraw(TimeSpan time, Action<float, float> onUpdate = null)
+        public virtual void WaitAndDraw(TimeSpan time, Action<float, float> onUpdate = null, Action<float, float> onRender = null)
         {
             var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
             if (onUpdate != null) innerLoop.Update += onUpdate;
+            if (onRender != null) innerLoop.Render += onRender;
             innerLoop.Run(time);
         }
 
-        public virtual void LoopAndDraw(Func<bool> @break, Action<float, float> onUpdate = null)
+        public virtual void LoopAndDraw(Func<bool> @break, Action<float, float> onUpdate = null, Action<float, float> onRender = null)
         {
             var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
             if (onUpdate != null) innerLoop.Update += onUpdate;
+            if (onRender != null) innerLoop.Render += onRender;
             innerLoop.Run(@break: @break);
         }
 

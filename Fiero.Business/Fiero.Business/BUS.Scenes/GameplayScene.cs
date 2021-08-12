@@ -255,21 +255,29 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorAttacked:
                 // - Handle Ai aggro and grudges
                 // - Show ranged projectile animations
+                // - Show melee attack animation
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
-                // animate projectile if this was a ranged attack
+                var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
                 if (e.Type == AttackName.Ranged) {
                     Resources.Sounds.Get(SoundName.RangedAttack, e.Attacker.Position() - Player.Position()).Play();
-                    var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
-                    Systems.Render.Screen.Animate(
-                        true,
-                        e.Attacker.Position(),
-                        Animation.Projectile(e.Attacker.Position(), e.Victim.Position(), tint: ColorName.LightGray)
-                    );
+                    if (Player.CanSee(e.Victim) || Player.CanSee(e.Attacker)) {
+                        Systems.Render.Screen.Animate(
+                            true,
+                            e.Attacker.Position(),
+                            Animation.Projectile(e.Attacker.Position(), e.Victim.Position(), tint: ColorName.LightGray)
+                        );
+                    }
                 }
                 else if (e.Type == AttackName.Melee) {
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
+                    if (Player.CanSee(e.Attacker)) {
+                        e.Attacker.Render.Hidden = true;
+                        Systems.Render.Screen.CenterOn(Player);
+                        Systems.Render.Screen.Animate(true, e.Attacker.Position(), Animation.MeleeAttack(e.Attacker, dir));
+                        e.Attacker.Render.Hidden = false;
+                    }
                 }
                 else if (e.Type == AttackName.Magical) {
                     Resources.Sounds.Get(SoundName.MagicAttack, e.Attacker.Position() - Player.Position()).Play();
@@ -297,15 +305,21 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorDespawned:
+                // - Handle game over when the player dies
                 // - Remove entity from floor and action systems and handle cleanup
             yield return Systems.Action.ActorDespawned.SubscribeResponse(e => {
-                Systems.Action.StopTracking(e.Actor.Id);
-                Systems.Floor.RemoveActor(e.Actor);
-                Entities.FlagEntityForRemoval(e.Actor.Id);
+                if (e.Actor.IsPlayer()) {
+                    Systems.Action.Reset();
+                }
+                else {
+                    Systems.Action.StopTracking(e.Actor.Id);
+                    Systems.Floor.RemoveActor(e.Actor);
+                    Entities.FlagEntityForRemoval(e.Actor.Id);
+                }
                 return true;
             });
             // ActionSystem.ActorDied:
-                // - Handle game over when the player dies
+                // - Play death animation
             yield return Systems.Action.ActorDied.SubscribeResponse(e => {
                 e.Actor.Log?.Write($"$Action.YouDie$.");
                 if (e.Actor.IsPlayer()) {
@@ -313,6 +327,12 @@ namespace Fiero.Business.Scenes
                 }
                 else {
                     Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
+                }
+                e.Actor.Render.Hidden = true;
+                if(Player.CanSee(e.Actor)) {
+                    // Since this is a blocking animation and we just hid the victim, we need to refresh the viewport before showing it
+                    Systems.Render.Screen.CenterOn(Player);
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Death(e.Actor));
                 }
                 return true;
             });

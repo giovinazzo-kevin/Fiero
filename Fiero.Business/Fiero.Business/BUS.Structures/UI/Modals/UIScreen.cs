@@ -77,8 +77,13 @@ namespace Fiero.Business
 
         public void Animate(bool blocking, Coord worldPos, params Animation[] animations)
         {
-            _ = Impl();
-            async Task Impl()
+            if(blocking) {
+                Impl();
+            }
+            else {
+                Task.Run(Impl);
+            }
+            void Impl()
             {
                 var time = TimeSpan.Zero;
                 var increment = TimeSpan.FromMilliseconds(10);
@@ -87,6 +92,7 @@ namespace Fiero.Business
                     .ToList();
                 var viewPos = Viewport.ViewArea.V.Position();
                 while (timeline.Count > 0) {
+                    Vfx.Clear();
                     for (int i = timeline.Count - 1; i >= 0; i--) {
                         var t = timeline[i];
                         if (time < t.Time + t.Frame.Duration && time >= t.Time) {
@@ -104,10 +110,9 @@ namespace Fiero.Business
                         Loop.WaitAndDraw(increment);
                     }
                     else {
-                        await Task.Delay(increment);
+                        new GameLoop().Run(increment);
                     }
                     time += increment;
-                    Vfx.Clear();
                 }
             }
 
@@ -203,7 +208,7 @@ namespace Fiero.Business
                 var (worldPos, spriteDef) = (pair.Left, pair.Right);
                 using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite));
                 var spriteSize = sprite.GetLocalBounds().Size();
-                sprite.Position = (worldPos - viewPos + spriteDef.Offset) * Viewport.ViewTileSize.V + Viewport.Position.V;
+                sprite.Position = (spriteDef.Offset + worldPos - viewPos) * Viewport.ViewTileSize.V + Viewport.Position.V;
                 sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                 sprite.Color = Resources.Colors.Get(spriteDef.Tint);
                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;

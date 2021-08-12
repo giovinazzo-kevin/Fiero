@@ -50,15 +50,49 @@ namespace Fiero.Business
             Vec? scale = null
         )
         {
+            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(10);
             return new(
             Shapes.Line(to, from)
                 .Reverse()
                 .SelectMany(p => new AnimationFrame[]{
-                    new(frameDuration ?? TimeSpan.FromMilliseconds(8), new AnimationSprite(texture, sprite, tint, (p - from).ToVec() + (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
-                    new(frameDuration ?? TimeSpan.FromMilliseconds(8), new AnimationSprite(texture, sprite, tint, (p - from).ToVec(), scale ?? new(1, 1))),
-                    new(frameDuration ?? TimeSpan.FromMilliseconds(8), new AnimationSprite(texture, sprite, tint, (p - from).ToVec() - (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
+                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec() + (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
+                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec(), scale ?? new(1, 1))),
+                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec() - (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
                 })
                 .ToArray());
+        }
+
+        public static Animation Death(
+            Actor actor,
+            TimeSpan? frameDuration = null
+        )
+        {
+            var sprite = new AnimationSprite(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, new(), new(1, 1));
+            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(32);
+            return new(Enumerable.Range(0, 6).SelectMany(i => new[] {
+                new AnimationFrame(frameDur, sprite),
+                new AnimationFrame(frameDur)
+            }).ToArray());
+        }
+
+        public static Animation MeleeAttack(
+            Actor actor,
+            Coord direction
+        )
+        {
+            var k = new Vec(1.0f, 1.0f);
+            return new(new[] {
+                new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(1.00f, 1.00f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
+            });
+
+            AnimationSprite MakeSprite(Vec ofs) =>
+                new(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, ofs, new(1, 1));
         }
 
         public static Animation DamageNumber(
@@ -71,13 +105,13 @@ namespace Fiero.Business
             var str = damage.ToString();
 
             return new(
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 10), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetSprites(new(0, -0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 32), GetSprites(new(0, -0.50f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 16), GetSprites(new(0, -0.25f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 10), GetSprites(new(0, +0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(3 *  8), GetSprites(new(0, +0.50f), tint, str))
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetSprites(new(0, +0.00f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetSprites(new(0, -0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 32), GetSprites(new(0, -0.50f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 16), GetSprites(new(0, -0.25f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetSprites(new(0, +0.00f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetSprites(new(0, +0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 *  8), GetSprites(new(0, +0.50f), tint, str))
             );
 
             AnimationSprite[] GetSprites(Vec ofs, ColorName tint, string text)

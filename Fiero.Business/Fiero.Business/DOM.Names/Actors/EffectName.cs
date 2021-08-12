@@ -14,6 +14,7 @@
         Vampirism,
         Rabies,
 
-        Trap
+        Trap,
+        Autopickup
     }
 }

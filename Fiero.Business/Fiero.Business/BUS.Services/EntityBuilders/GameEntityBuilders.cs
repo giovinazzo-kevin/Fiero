@@ -44,6 +44,7 @@ namespace Fiero.Business
             .WithFieldOfView(7)
             .WithLogging()
             .WithBlood(ColorName.Red, 100)
+            .WithIntrinsicEffect(() => new AutopickupEffect())
             ;
 
         private EntityBuilder<Actor> Enemy() 
@@ -88,10 +89,24 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Throwable<T>(int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, ThrowName @throw, string unidentName = null)
+        private EntityBuilder<T> Throwable<T>(ThrowableName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, ThrowName @throw, string unidentName = null)
             where T : Throwable
             => Consumable<T>(itemRarity, remainingUses, maxUses, true, unidentName)
-            .WithThrowableInfo(damage, maxRange, @throw)
+            .WithThrowableInfo(name, damage, maxRange, @throw)
+            .WithName(name.ToString())
+            .WithSprite(name.ToString(), ColorName.White)
+            ;
+
+        private EntityBuilder<T> Resource<T>(ResourceName name, int amount, int? maxAmount = null)
+            where T : Resource
+            => Entities.CreateBuilder<T>()
+            .WithPhysics(Coord.Zero)
+            .WithName(nameof(Consumable))
+            .WithSprite("None", ColorName.White)
+            .WithItemInfo(0, null)
+            .WithName(name.ToString())
+            .WithSprite(name.ToString(), ColorName.White)
+            .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
         private Func<Effect> ResolveEffect(EffectName effect) => effect switch {
@@ -364,6 +379,18 @@ namespace Fiero.Business
         #region WEAPONS
         public EntityBuilder<Weapon> Weapon_Sword()
             => Weapon("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10)
+            ;
+        #endregion
+
+        #region THROWABLES
+        public EntityBuilder<Throwable> Throwable_Rock(int charges)
+            => Throwable<Throwable>(ThrowableName.Rock, itemRarity: 1, remainingUses: charges, maxUses: charges, damage: 4, maxRange: 3, @throw: ThrowName.Arc)
+            ;
+        #endregion
+
+        #region RESOURCES
+        public EntityBuilder<Resource> Resource_Gold(int amount)
+            => Resource<Resource>(ResourceName.Gold, amount)
             ;
         #endregion
 

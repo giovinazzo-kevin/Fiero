@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using Fiero.Core;
+
+namespace Fiero.Business
 {
     public partial class ActionSystem
     {

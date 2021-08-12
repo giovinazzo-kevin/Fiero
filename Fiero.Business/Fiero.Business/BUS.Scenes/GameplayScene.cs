@@ -145,7 +145,8 @@ namespace Fiero.Business.Scenes
                     .WithHealth(100)
                     .WithItems(
                         Resources.Entities.Weapon_Sword().Build(), 
-                        Resources.Entities.Potion(EffectName.Confusion).Build())
+                        Resources.Entities.Potion(EffectName.Confusion).Build(),
+                        Resources.Entities.Throwable_Rock(10).Build())
                     //.WithSpells(
                     //    Resources.Entities.Spell_CrimsonLance().Build(),
                     //    Resources.Entities.Spell_Bloodbath().Build(),
@@ -254,23 +255,12 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorAttacked:
                 // - Handle Ai aggro and grudges
-                // - Show ranged projectile animations
                 // - Show melee attack animation
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                 var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
-                if (e.Type == AttackName.Ranged) {
-                    Resources.Sounds.Get(SoundName.RangedAttack, e.Attacker.Position() - Player.Position()).Play();
-                    if (Player.CanSee(e.Victim) || Player.CanSee(e.Attacker)) {
-                        Systems.Render.Screen.Animate(
-                            true,
-                            e.Attacker.Position(),
-                            Animation.Projectile(e.Attacker.Position(), e.Victim.Position(), tint: ColorName.LightGray)
-                        );
-                    }
-                }
-                else if (e.Type == AttackName.Melee) {
+                if (e.Type == AttackName.Melee) {
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
                     if (Player.CanSee(e.Attacker)) {
                         e.Attacker.Render.Hidden = true;
@@ -278,9 +268,6 @@ namespace Fiero.Business.Scenes
                         Systems.Render.Screen.Animate(true, e.Attacker.Position(), Animation.MeleeAttack(e.Attacker, dir));
                         e.Attacker.Render.Hidden = false;
                     }
-                }
-                else if (e.Type == AttackName.Magical) {
-                    Resources.Sounds.Get(SoundName.MagicAttack, e.Attacker.Position() - Player.Position()).Play();
                 }
                 return true;
             });
@@ -331,7 +318,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Render.Hidden = true;
                 if(Player.CanSee(e.Actor)) {
                     // Since this is a blocking animation and we just hid the victim, we need to refresh the viewport before showing it
-                    Systems.Render.Screen.CenterOn(Player);
+                    Systems.Render.Screen.SetDirty();
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Death(e.Actor));
                 }
                 return true;
@@ -366,10 +353,17 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ItemPickedUp:
                 // - Store item in inventory or fail
+                // - Play a sound if it's the player
             yield return Systems.Action.ItemPickedUp.SubscribeResponse(e => {
-                if (e.Actor.Inventory.TryPut(e.Item)) {
+                if (e.Actor.Inventory.TryPut(e.Item, out var fullyMerged)) {
                     Systems.Floor.RemoveItem(e.Item);
+                    if(fullyMerged) {
+                        Entities.FlagEntityForRemoval(e.Item.Id);
+                    }
                     e.Actor.Log?.Write($"$Action.YouPickUpA$ {e.Item.DisplayName}.");
+                    if(e.Actor.IsPlayer()) {
+                        Resources.Sounds.Get(SoundName.ItemPickedUp).Play();
+                    }
                     return true;
                 }
                 else {
@@ -401,6 +395,35 @@ namespace Fiero.Business.Scenes
                     return false;
                 }
             });
+            // ActionSystem.ItemThrown:
+                // - "Use" item in order to consume its charges
+                // - Spawn a 1-charge item where the consumable lands if it doesn't mulch
+                // - Play an animation and a sound as the projectile flies
+            yield return Systems.Action.ItemThrown.SubscribeResponse(e => {
+                if (TryUseItem(e.Item, e.Actor, out var consumed)) {
+                    e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
+                    Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
+                    if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
+                        var anim = Animation.ArcingProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName);
+                        Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
+                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    }
+                    if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance) {
+                        var clone = (Throwable)e.Item.Clone();
+                        clone.ConsumableProperties.RemainingUses = 1;
+                        clone.Physics.Position = e.Position;
+                        Systems.Floor.AddItem(e.Actor.FloorId(), clone);
+                    }
+                    else {
+                        Systems.Render.Screen.Animate(false, e.Position, Animation.Explosion(scale: new(0.5f, 0.5f)));
+                    }
+                    return true;
+                }
+                else {
+                    e.Actor.Log?.Write($"$Action.YouFailThrowing$ {e.Item.DisplayName}.");
+                    return false;
+                }
+            });
             // ActionSystem.ItemConsumed:
                 // - Use up item and remove it from the floor when completely consumed
                 // - Identify potions and scrolls (not wands, because they need to hit something)
@@ -412,9 +435,6 @@ namespace Fiero.Business.Scenes
                     }
                     if (e.Item.TryCast<Scroll>(out var s) && e.Actor.Identify(s, t => t.ScrollProperties.Name == s.ScrollProperties.Name)) {
                         e.Actor.Log?.Write($"$Action.YouIdentifyAScroll$ {e.Item.DisplayName}.");
-                    }
-                    if (consumed) {
-                        e.Actor.Log?.Write($"$Action.AnItemIsConsumed$ {e.Item.DisplayName}.");
                     }
                     Resources.Sounds.Get(SoundName.ItemUsed, e.Actor.Position() - Player.Position()).Play();
                     if (Player.CanSee(e.Actor)) {

@@ -137,11 +137,18 @@ namespace Fiero.Business
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
             });
-        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, int damage, int maxRange, ThrowName @throw)
+        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, ThrowableName name, int damage, int maxRange, ThrowName @throw)
             where T : Throwable => builder.AddOrTweak<ThrowableComponent>(c => {
+                c.Name = name;
                 c.BaseDamage = damage;
                 c.MaximumRange = maxRange;
                 c.Throw = @throw;
+            });
+        public static EntityBuilder<T> WithResourceInfo<T>(this EntityBuilder<T> builder, ResourceName name, int amount, int maxAmount)
+            where T : Resource => builder.AddOrTweak<ResourceComponent>(c => {
+                c.Name = name;
+                c.Amount = amount;
+                c.MaximumAmount = maxAmount;
             });
         public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, EffectName effect)
             where T : Potion => builder.AddOrTweak<PotionComponent>(c => {

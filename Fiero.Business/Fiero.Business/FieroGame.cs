@@ -86,6 +86,7 @@ namespace Fiero.Business
             Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/62_miss.wav"));
             Sounds.Add(SoundName.TrapSpotted, new SoundBuffer("Resources/Sounds/27_respawn2.wav"));
             Sounds.Add(SoundName.ItemUsed, new SoundBuffer("Resources/Sounds/66_drink.wav"));
+            Sounds.Add(SoundName.ItemPickedUp, new SoundBuffer("Resources/Sounds/14_item2.wav"));
             Sounds.Add(SoundName.SpellCast, new SoundBuffer("Resources/Sounds/16_falling.wav"));
             Sounds.Add(SoundName.MeleeAttack, new SoundBuffer("Resources/Sounds/23_ladder.wav"));
             Sounds.Add(SoundName.RangedAttack, new SoundBuffer("Resources/Sounds/33_rotate1.wav"));

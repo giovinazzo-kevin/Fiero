@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Fiero.Business
 {
@@ -30,13 +32,47 @@ namespace Fiero.Business
             return false;
         }
 
-        public bool TryPut(Item i)
+        public bool TryPut(Item i, out bool fullyMerged)
         {
+            fullyMerged = false;
             if (Capacity <= 0 || Count < Capacity) {
-                Items.Add(i);
+                // Merge charges on consumables of the same kind
+                var merged = false;
+                merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out var tMerge);
+                merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.Name == x.PotionProperties.Name, out var pMerge);
+                merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Name == x.ScrollProperties.Name, out var sMerge);
+                fullyMerged = tMerge || pMerge || sMerge;
+                if (!merged || !fullyMerged) {
+                    Items.Add(i);
+                }
                 return true;
             }
             return false;
+
+            bool TryMergeCharges<T>(Func<T, T, bool> equal, out bool fullyMerged)
+                where T : Consumable
+            {
+                fullyMerged = false;
+                if (i is T x && x.ItemProperties.Identified) {
+                    while(x.ConsumableProperties.RemainingUses > 0) {
+                        var same = Items.OfType<T>().FirstOrDefault(y =>
+                               y.ItemProperties.Identified
+                            && y.ConsumableProperties.RemainingUses < y.ConsumableProperties.MaximumUses
+                            && equal(x, y)
+                        );
+                        if (same is T y) {
+                            x.ConsumableProperties.RemainingUses--;
+                            y.ConsumableProperties.RemainingUses++;
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                    fullyMerged = true;
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool TryTake(Item i)

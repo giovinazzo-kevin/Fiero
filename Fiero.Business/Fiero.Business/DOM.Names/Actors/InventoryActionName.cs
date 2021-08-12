@@ -5,6 +5,7 @@
         Drop,
         Equip,
         Unequip,
-        Use
+        Use,
+        Throw
     }
 }

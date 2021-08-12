@@ -31,13 +31,13 @@ namespace Fiero.Business
             CanBeRotated = canRotate;
         }
 
-        public bool TryRotate(int deg, out TargetingShape rotated)
+        public bool TryRotate(Coord center, int deg, out TargetingShape rotated)
         {
             rotated = default;
             if (!CanBeRotated)
                 return false;
             var rad = deg * (float)Math.PI / 180;
-            var points = Points.Select(p => p.ToVec().Rotate(rad).ToCoord()).ToArray();
+            var points = Points.Select(p => p.ToVec().Rotate(center.ToVec(), rad).ToCoord()).ToArray();
             rotated = new(_origin, MaximumShiftRange, CanBeRotated, points);
             return true;
         }

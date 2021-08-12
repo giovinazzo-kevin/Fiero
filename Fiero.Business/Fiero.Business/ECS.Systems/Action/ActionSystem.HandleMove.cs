@@ -35,7 +35,6 @@ namespace Fiero.Business
                 if (!tile.Physics.BlocksMovement) {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
-                    var itemsHere = _floorSystem.GetItemsAt(floorId, newPos);
                     if (!actorsHere.Any()) {
                         if (!featuresHere.Any(f => f.Physics.BlocksMovement)) {
                             return ActorMoved.Handle(new(t.Actor, oldPos, newPos));

@@ -3,6 +3,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     /// <summary>
     /// Cast effects can be applied to:
     /// - Spells:

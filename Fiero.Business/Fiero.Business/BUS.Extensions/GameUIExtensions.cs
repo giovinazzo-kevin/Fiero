@@ -50,7 +50,8 @@ namespace Fiero.Business
             var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var result = false;
-            finalShape = TargetingShape.Offset(shape, renderSystem.Screen.GetViewportCenter());
+            var center = renderSystem.Screen.GetViewportCenter();
+            finalShape = TargetingShape.Offset(shape, center);
             renderSystem.Screen.ShowTargetingShape(finalShape);
             cursorMoved?.Invoke(renderSystem.Screen.GetTargetingShape());
             gameLoop.LoopAndDraw(() => {
@@ -83,9 +84,9 @@ namespace Fiero.Business
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveSE)))
                     Move(new(1, 1));
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCW)))
-                    Rotate(15);
+                    Rotate(90);
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCW)))
-                    Rotate(-15);
+                    Rotate(-90);
             });
             finalShape = renderSystem.Screen.GetTargetingShape();
             renderSystem.Screen.HideTargetingShape();
@@ -101,7 +102,7 @@ namespace Fiero.Business
 
             void Rotate(int deg)
             {
-                if (renderSystem.Screen.GetTargetingShape().TryRotate(deg, out var rotated)) {
+                if (renderSystem.Screen.GetTargetingShape().TryRotate(center, deg, out var rotated)) {
                     renderSystem.Screen.ShowTargetingShape(rotated);
                     cursorMoved?.Invoke(rotated);
                 }

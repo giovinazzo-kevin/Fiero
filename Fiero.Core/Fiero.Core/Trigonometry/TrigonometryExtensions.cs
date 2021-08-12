@@ -25,9 +25,10 @@ namespace Fiero.Core
         public static Coord ToCoord(this Point v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vec v) => new((int)v.X, (int)v.Y);
         public static Vec Rotate(this Vec v, float theta) => new(
-            (float)(Math.Cos(theta * v.X) - Math.Sin(theta * v.Y)),
-            (float)(Math.Sin(theta * v.X) + Math.Cos(theta * v.Y))
+            (float)(Math.Cos(theta) * v.X - Math.Sin(theta) * v.Y),
+            (float)(Math.Sin(theta) * v.X + Math.Cos(theta) * v.Y)
         );
+        public static Vec Rotate(this Vec v, Vec pivot, float theta) => (v - pivot).Rotate(theta) + pivot;
         public static Vector2f ToVector2f(this Vec v) => new(v.X, v.Y);
         public static Vector2i ToVector2i(this Vec v) => new((int)v.X, (int)v.Y);
         public static Vector2u ToVector2u(this Vec v) => new((uint)v.X, (uint)v.Y);

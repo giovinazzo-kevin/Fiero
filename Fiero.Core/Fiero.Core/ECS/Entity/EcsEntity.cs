@@ -8,9 +8,10 @@ namespace Fiero.Core
     public abstract class EcsEntity
     {
         internal Func<EcsEntity, int, bool> _refresh;
+        internal Func<EcsEntity> _clone;
         internal Func<EcsEntity, Type, EcsEntity> _cast;
 
-        public int Id { get; internal set; }
+        public int Id { get; set; }
 
         public bool TryRefresh(int newId)
         {
@@ -23,6 +24,8 @@ namespace Fiero.Core
             newEntity = (T)_cast(this, typeof(T));
             return newEntity != null;
         }
+
+        public EcsEntity Clone() => _clone();
 
         public override int GetHashCode() => Id;
         public override bool Equals(object obj) => obj is EcsEntity other ? Id == other.Id : base.Equals(obj);

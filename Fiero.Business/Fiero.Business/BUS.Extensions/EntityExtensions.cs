@@ -24,7 +24,7 @@ namespace Fiero.Business
         public static bool IsAlive(this Actor a) => a.Id != 0 && a.FloorId() != default;
         public static bool IsPlayer(this Actor a) => a.ActorProperties.Type == ActorName.Player;
         public static bool CanSee(this Actor a, Coord c) => a.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
-        public static bool CanSee(this Actor a, PhysicalEntity e) => a.CanSee(e.Position());
+        public static bool CanSee(this Actor a, PhysicalEntity e) => e != null && a.CanSee(e.Position());
         public static bool IsAffectedBy(this Actor a, EffectName effect) => a.Effects != null && a.Effects.Active.Any(e => e.Type == effect);
         public static int Heal(this Actor a, int health)
         {

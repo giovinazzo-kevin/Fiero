@@ -31,6 +31,7 @@ namespace Fiero.Business
             if(QueuedActions.TryDequeue(out var backedUp)) {
                 return backedUp;
             }
+            var floorId = a.FloorId();
             var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
 
             if (IsKeyPressed(Data.Hotkeys.MoveNW)) {
@@ -92,6 +93,23 @@ namespace Fiero.Business
                             break;
                         case InventoryActionName.Use when item.TryCast<Consumable>(out var consumable):
                             QueuedActions.Enqueue(new UseConsumableAction(consumable));
+                            break;
+                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable):
+                            var len = throwable.ThrowableProperties.MaximumRange + 1;
+                            var line = Shapes.Line(new(0, 0), new(0, len)).Skip(1).ToArray();
+                            var throwShape = new TargetingShape(0, true, line);
+                            if (UI.Target(throwShape, out throwShape)) {
+                                foreach (var p in throwShape.Points) {
+                                    var target = Systems.Floor.GetActorsAt(floorId, p)
+                                    .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
+                                    if (target != null) {
+                                        QueuedActions.Enqueue(new ThrowItemAtOtherAction(target, throwable));
+                                        return;
+                                    }
+                                }
+                                // Okay, then
+                                QueuedActions.Enqueue(new ThrowItemAtPointAction(throwShape.Points.Last() - a.Position(), throwable));
+                            }
                             break;
                         case InventoryActionName.Equip:
                             QueuedActions.Enqueue(new EquipItemAction(item));

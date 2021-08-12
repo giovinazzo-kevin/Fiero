@@ -7,6 +7,7 @@
         WallBump,
         SpellCast,
         ItemUsed,
+        ItemPickedUp,
         BossSpotted,
         TrapSpotted,
         MeleeAttack,

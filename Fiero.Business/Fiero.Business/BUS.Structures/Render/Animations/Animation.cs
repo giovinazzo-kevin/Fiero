@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Shapes = Fiero.Core.Shapes;
@@ -40,26 +41,55 @@ namespace Fiero.Business
                 .ToArray()
         );
 
-        public static Animation Projectile(
+        public static Animation StraightProjectile(
             Coord from,
             Coord to,
-            string sprite = "Skull",
+            string sprite = "Rock",
             TextureName texture = TextureName.Atlas,
             ColorName tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null
         )
         {
+            var dir = (from - to).ToVec().Clamp(-1, 1);
+            var a = dir * 0.33f;
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(10);
             return new(
             Shapes.Line(to, from)
                 .Reverse()
-                .SelectMany(p => new AnimationFrame[]{
-                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec() + (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
-                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec(), scale ?? new(1, 1))),
-                    new(frameDur, new AnimationSprite(texture, sprite, tint, (p - from).ToVec() - (from - p).ToVec().Clamp(-1, 1) / 2, scale ?? new(1, 1))),
+                .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
+                .Select(p => new AnimationFrame(frameDur, new AnimationSprite(texture, sprite, tint, p - from, scale ?? new(1, 1))))
+                .ToArray());
+        }
+
+        public static Animation ArcingProjectile(
+            Coord from,
+            Coord to,
+            string sprite = "Rock",
+            TextureName texture = TextureName.Atlas,
+            ColorName tint = ColorName.White,
+            TimeSpan? frameDuration = null,
+            Vec? scale = null
+        )
+        {
+            var dir = (from - to).ToVec().Clamp(-1, 1);
+            var a = dir * 0.33f;
+            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(30);
+            var line = Shapes.Line(to, from)
+                .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
+                .Skip(1).SkipLast(1)
+                .Reverse()
+                .ToArray();
+            return new(
+                line.Select((p, i) => {
+                    var v = p - from;
+                    var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
+                    v += new Vec(0, t);
+                    return new AnimationFrame(frameDur, new AnimationSprite(texture, sprite, tint, v, scale ?? new(1, 1)));
                 })
                 .ToArray());
+
+            float Quadratic(float k, float x, float x1, float x2) => k * (x - x1) * (x - x2);
         }
 
         public static Animation Death(

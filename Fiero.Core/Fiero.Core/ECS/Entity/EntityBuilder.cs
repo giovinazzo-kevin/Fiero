@@ -80,6 +80,7 @@ namespace Fiero.Core
             if(!_entities.TryGetProxy(e, out TProxy proxy)) {
                 throw new ArgumentException($"Could not build a proxy for entity type {typeof(TProxy).Name} out of components {String.Join(", ", _componentTypes.Select(x => x.Name))}");
             }
+            proxy._clone = Build;
             Built?.Invoke(this, proxy);
             return proxy;
         }

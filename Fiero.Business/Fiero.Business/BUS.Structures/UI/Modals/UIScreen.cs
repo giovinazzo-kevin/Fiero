@@ -62,6 +62,12 @@ namespace Fiero.Business
             Viewport.SetDirty();
         }
 
+        public void SetDirty()
+        {
+            Minimap.SetDirty();
+            Viewport.SetDirty();
+        }
+
         public void CenterOn(Coord pos)
         {
             var viewSize = Viewport.ViewArea.V.Size();

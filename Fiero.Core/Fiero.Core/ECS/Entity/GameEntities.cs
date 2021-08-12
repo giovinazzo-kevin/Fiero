@@ -149,7 +149,7 @@ namespace Fiero.Core
                     if (comp == null && p.GetCustomAttribute<RequiredComponentAttribute>() is { }) {
                         return false;
                     }
-                    if(entityId > 0) {
+                    if (entityId > 0) {
                         p.SetValue(entity, comp, BindingFlags.NonPublic | BindingFlags.Instance, null, null, null);
                     }
                     else {

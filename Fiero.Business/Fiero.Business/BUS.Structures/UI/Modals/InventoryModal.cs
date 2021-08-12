@@ -61,10 +61,10 @@ namespace Fiero.Business
             modal.Confirmed += (_, __) => {
                 ActionPerformed?.Invoke(Items[i], modal.SelectedOption);
                 bool shouldRemoveMenuItem = modal.SelectedOption == InventoryActionName.Drop;
-                shouldRemoveMenuItem |= modal.SelectedOption == InventoryActionName.Use
-                    && Items[i].TryCast<Consumable>(out var c) 
+                shouldRemoveMenuItem |= (modal.SelectedOption == InventoryActionName.Use || modal.SelectedOption == InventoryActionName.Throw)
+                    && Items[i].TryCast<Consumable>(out var c)
                     && c.ConsumableProperties.ConsumedWhenEmpty && c.ConsumableProperties.RemainingUses == 1;
-                if(shouldRemoveMenuItem) {
+                if (shouldRemoveMenuItem) {
                     Items.RemoveAt(i);
                 }
                 Invalidate();
@@ -84,7 +84,10 @@ namespace Fiero.Business
                     yield return InventoryActionName.Equip;
                 }
             }
-            if (i.TryCast<Consumable>(out _)) {
+            if (i.TryCast<Throwable>(out _)) {
+                yield return InventoryActionName.Throw;
+            }
+            else if (i.TryCast<Consumable>(out _)) {
                 yield return InventoryActionName.Use;
             }
         }

@@ -15,7 +15,7 @@ namespace Fiero.Business
 
         public override Viewport Resolve(LayoutGrid dom)
         {
-            var view = new Viewport(UI.Input, FloorSystem, Resources.Sprites, Resources.Colors);
+            var view = new Viewport(UI.Input, FloorSystem, Resources);
             view.Background.V = Background;
             view.Foreground.V = Foreground;
             return view;

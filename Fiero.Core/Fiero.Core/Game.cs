@@ -24,7 +24,7 @@ namespace Fiero.Core
         public readonly GameLoop Loop;
         public readonly GameInput Input;
         public readonly GameTextures<TTextures> Textures;
-        public readonly GameSprites<TTextures> Sprites;
+        public readonly GameSprites<TTextures, TColors> Sprites;
         public readonly GameColors<TColors> Colors;
         public readonly GameFonts<TFonts> Fonts;
         public readonly GameSounds<TSounds> Sounds;
@@ -39,7 +39,7 @@ namespace Fiero.Core
             GameLoop loop, 
             GameInput input, 
             GameTextures<TTextures> resources, 
-            GameSprites<TTextures> sprites,
+            GameSprites<TTextures, TColors> sprites,
             GameFonts<TFonts> fonts, 
             GameSounds<TSounds> sounds, 
             GameColors<TColors> colors,

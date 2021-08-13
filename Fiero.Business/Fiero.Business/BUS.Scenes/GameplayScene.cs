@@ -126,6 +126,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.GameStarted:
                 // - Clear old entities and references if present
+                // - Clear scratch textures for procedural sprites
                 // - Generate a new RNG seed
                 // - Generate map
                 // - Create and spawn player
@@ -133,6 +134,8 @@ namespace Fiero.Business.Scenes
                 // - Track player visually in the interface
             yield return Systems.Action.GameStarted.SubscribeResponse(e => {
                 Systems.Floor.Reset();
+                Resources.Textures.ClearProceduralTextures();
+                Resources.Sprites.ClearProceduralSprites();
                 Entities.Clear(true);
 
                 var newRngSeed = (int)DateTime.Now.ToBinary();
@@ -166,7 +169,7 @@ namespace Fiero.Business.Scenes
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Position();
 
-                if (!TrySpawn(entranceFloorId, Player)) {
+                if (!TrySpawn(entranceFloorId, Player, maxDistance: 100)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
 

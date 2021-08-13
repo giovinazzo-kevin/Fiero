@@ -212,11 +212,11 @@ namespace Fiero.Business
                     break;
                 }
                 var (worldPos, spriteDef) = (pair.Left, pair.Right);
-                using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite));
+                using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
                 var spriteSize = sprite.GetLocalBounds().Size();
                 sprite.Position = (spriteDef.Offset + worldPos - viewPos) * Viewport.ViewTileSize.V + Viewport.Position.V;
                 sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
-                sprite.Color = Resources.Colors.Get(spriteDef.Tint);
+                sprite.Color = Resources.Colors.Get(spriteDef.Color);
                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                 UI.Window.Draw(sprite);
                 Vfx.Enqueue(pair);

@@ -74,7 +74,7 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("portrait"))
                 .Apply(x => {
                     x.HorizontalAlignment.V = HorizontalAlignment.Center;
-                    x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}");
+                    x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}", ColorName.White);
                     x.LockAspectRatio.V = true;
                     x.Scale.V = new Vec(0.5f, 0.5f);
                 }))

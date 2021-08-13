@@ -36,10 +36,10 @@ namespace Fiero.Business
             return new BitmapText(GetFont(), str);
         }
 
-        protected virtual Sprite GetUISprite(string str) => GetSprite(TextureName.UI, str);
-        protected virtual Sprite GetSprite(TextureName texture, string str, int? seed = null)
+        protected virtual Sprite GetUISprite(string str, ColorName color) => GetSprite(TextureName.UI, str, color);
+        protected virtual Sprite GetSprite(TextureName texture, string str, ColorName color, int? seed = null)
         {
-            return Resources.Sprites.TryGet(texture, str, out var sprite, seed) ? sprite : null;
+            return Resources.Sprites.TryGet(texture, str, color, out var sprite, seed) ? sprite : null;
         }
 
         protected virtual Sound GetSound(SoundName sound)

@@ -35,7 +35,7 @@ namespace Fiero.Business
             GameUI ui,
             GameWindow win,
             GameTextures<TextureName> textures,
-            GameSprites<TextureName> sprites, 
+            GameSprites<TextureName, ColorName> sprites, 
             GameFonts<FontName> fonts,
             GameSounds<SoundName> sounds,
             GameColors<ColorName> colors,
@@ -69,6 +69,7 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
+            Textures.CreateScratchTexture(new(16, 16));
             Textures.Add(TextureName.Creatures, new Texture("Resources/Textures/16x16_creatures.png"));
             Textures.Add(TextureName.Items, new Texture("Resources/Textures/16x16_items.png"));
             Textures.Add(TextureName.Features, new Texture("Resources/Textures/16x16_features.png"));

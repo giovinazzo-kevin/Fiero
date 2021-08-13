@@ -12,6 +12,7 @@ namespace Fiero.Business
         protected readonly GameResources Resources;
         protected readonly Dictionary<Hotkey, Action> Hotkeys;
         protected event Action Invalidated;
+        private bool _dirty;
 
         protected Modal(GameUI ui, GameResources resources) : base(ui)
         {
@@ -37,8 +38,7 @@ namespace Fiero.Business
 
         protected void Invalidate()
         {
-            Invalidated?.Invoke();
-            Layout.Invalidate();
+            _dirty = true;
         }
 
 
@@ -70,6 +70,16 @@ namespace Fiero.Business
         {
             Data.UI.WindowSize.ValueChanged -= OnWindowSizeChanged;
             base.Close(buttonPressed);
+        }
+
+        public override void Draw()
+        {
+            if (_dirty) {
+                Invalidated?.Invoke();
+                Layout.Invalidate();
+                _dirty = false;
+            }
+            base.Draw();
         }
 
         public override void Update()

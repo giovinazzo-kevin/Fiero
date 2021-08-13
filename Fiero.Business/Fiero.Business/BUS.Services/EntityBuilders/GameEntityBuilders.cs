@@ -75,7 +75,7 @@ namespace Fiero.Business
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
-            .WithSprite(TextureName.Items, "Potion", ColorName.White)
+            .WithSprite(TextureName.Items, "None", ColorName.White)
             .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty)
             .WithItemInfo(itemRarity, unidentName)
             ;

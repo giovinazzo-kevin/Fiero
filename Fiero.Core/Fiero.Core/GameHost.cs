@@ -36,7 +36,7 @@ namespace Fiero.Core
             _ioc.Register<GameShaders<TShaders>>(new PerContainerLifetime());
             _ioc.Register<GameColors<TColors>>(new PerContainerLifetime());
             _ioc.Register<GameSounds<TSounds>>(new PerContainerLifetime());
-            _ioc.Register<GameSprites<TTextures>>(new PerContainerLifetime());
+            _ioc.Register<GameSprites<TTextures, TColors>>(new PerContainerLifetime());
             _ioc.Register<GameDataStore>(new PerContainerLifetime());
             _ioc.Register<GameDirector>(new PerContainerLifetime());
             _ioc.Register<GameEntities>(new PerContainerLifetime());

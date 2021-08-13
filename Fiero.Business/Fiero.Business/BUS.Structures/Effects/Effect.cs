@@ -20,13 +20,13 @@ namespace Fiero.Business
         protected virtual void OnStarted(GameSystems systems, Entity owner) { }
         public void Start(GameSystems systems, Entity owner)
         {
-            systems.Action.GameStarted.SubscribeHandler(e => {
+            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => {
                 // Force cleanup of old effects when a new game is started
                 try {
                     End();
                 }
                 catch (ObjectDisposedException) { }
-            });
+            }));
             Started += e => owner.Effects?.Active.Add(e);
             Ended += e => owner.Effects?.Active.Remove(e);
             Subscriptions.UnionWith(RouteEvents(systems, owner));

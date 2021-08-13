@@ -12,8 +12,7 @@ namespace Fiero.Business
     public class Viewport : UIControl
     {
         protected readonly FloorSystem FloorSystem;
-        protected readonly GameSprites<TextureName> Sprites;
-        protected readonly GameColors<ColorName> Colors;
+        protected readonly GameResources Resources;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
@@ -27,13 +26,11 @@ namespace Fiero.Business
         public Viewport(
             GameInput input, 
             FloorSystem floor,
-            GameSprites<TextureName> sprites,
-            GameColors<ColorName> colors
+            GameResources res
         ) : base(input)
         {
             FloorSystem = floor;
-            Sprites = sprites;
-            Colors = colors;
+            Resources = res;
             Size.ValueChanged += (_, __) => {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
@@ -111,14 +108,12 @@ namespace Fiero.Business
                     foreach (var drawable in cell.GetDrawables(seen)) {
                         if (drawable.Render.Hidden)
                             continue;
-                        var rngSeed = drawable.GetHashCode(); // Makes sure that randomized sprites stay consistent
-                        if(!Sprites.TryGet(drawable.Render.TextureName, drawable.Render.SpriteName, out var spriteDef, rngSeed)) {
+                        if(!Resources.Sprites.TryGet(drawable.Render.TextureName, drawable.Render.SpriteName, drawable.Render.Color, out var spriteDef, drawable.Render.GetHashCode())) {
                             continue;
                         }
                         using var sprite = new Sprite(spriteDef);
-                        sprite.Color = Colors.Get(drawable.Render.Color);
-                        sprite.Position = screenPos;
                         var spriteSize = sprite.GetLocalBounds().Size();
+                        sprite.Position = screenPos;
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                         if (drawable is Actor actor && actor.Npc != null) {
                             sprite.Scale = ViewTileSize.V / spriteSize;

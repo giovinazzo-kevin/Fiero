@@ -13,7 +13,7 @@ namespace Unconcern.Common
     {
         private readonly IEnumerable<Action> _unsub;
         private bool _unsubbed = false;
-        public bool ThrowIfAlreadyDisposed { get; }
+        public bool ThrowIfAlreadyDisposed { get; set; }
 
         public Subscription()
         {

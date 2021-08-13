@@ -13,9 +13,9 @@ namespace Fiero.Business
         public override ProgressBar Resolve(LayoutGrid dom)
         {
             var x = new ProgressBar(UI.Input, TileSize,
-                GetUISprite("bar_empty-l"), GetUISprite("bar_empty-m"), GetUISprite("bar_empty-r"),
-                GetUISprite("bar_half-l"), GetUISprite("bar_half-m"), GetUISprite("bar_half-r"),
-                GetUISprite("bar_full-l"), GetUISprite("bar_full-m"), GetUISprite("bar_full-r"));
+                GetUISprite("bar_empty-l", ColorName.White), GetUISprite("bar_empty-m", ColorName.White), GetUISprite("bar_empty-r", ColorName.White),
+                GetUISprite("bar_half-l", ColorName.White), GetUISprite("bar_half-m", ColorName.White), GetUISprite("bar_half-r", ColorName.White),
+                GetUISprite("bar_full-l", ColorName.White), GetUISprite("bar_full-m", ColorName.White), GetUISprite("bar_full-r", ColorName.White));
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             return x;

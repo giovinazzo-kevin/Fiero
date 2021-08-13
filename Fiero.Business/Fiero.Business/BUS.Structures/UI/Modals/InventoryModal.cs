@@ -156,10 +156,10 @@ namespace Fiero.Business
             {
                 var i = CurrentPage.V * PageSize.V + index;
                 if (i >= Items.Count) {
-                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None");
+                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None", ColorName.White);
                 }
                 else {
-                    p.Sprite.V = Resources.MakeSprite(Items[i].Render);
+                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, Items[i].Render.SpriteName, Items[i].Render.Color);
                 }
             }
 

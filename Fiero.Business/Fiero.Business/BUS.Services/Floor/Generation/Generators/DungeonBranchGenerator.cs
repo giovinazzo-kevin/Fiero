@@ -17,7 +17,7 @@ namespace Fiero.Business
             var info = (
                 ShrineRoomChance: 0.05f, 
                 MonstersChance: 0.66f,
-                MonstersPerRoll: (Min: 1, Max: 4),
+                MonstersPerRoll: (Min: 1, Max: 2),
                 ConsumablesChance: 0.20f,
                 ConsumablesPerRoll: (Min: 1, Max: 2),
                 ItemsChance: 0.15f,

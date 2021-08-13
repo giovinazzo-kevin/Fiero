@@ -156,7 +156,7 @@ namespace Fiero.Business
             {
                 var i = CurrentPage.V * PageSize.V + index;
                 if (i >= Items.Count) {
-                    p.Sprite.V = Resources.Sprites.Get(TextureName.Atlas, "None");
+                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None");
                 }
                 else {
                     p.Sprite.V = Resources.MakeSprite(Items[i].Render);

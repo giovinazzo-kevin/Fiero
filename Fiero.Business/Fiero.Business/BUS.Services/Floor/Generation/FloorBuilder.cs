@@ -124,20 +124,9 @@ namespace Fiero.Business
                 )();
             }
 
-            DrawableEntity CreateArmor()
-            {
-                return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build(),
-                    () => _entityBuilders.Armor_Leather().WithPhysics(obj.Position).Build()
-                )();
-            }
-
             DrawableEntity CreateItem()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => CreateArmor(),
                     () => CreateWeapon()
                 )();
             }

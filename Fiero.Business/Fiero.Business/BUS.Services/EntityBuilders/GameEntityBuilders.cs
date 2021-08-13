@@ -35,7 +35,7 @@ namespace Fiero.Business
             .WithPlayerAi(UI)
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Player))
-            .WithSprite(nameof(Player), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(Player), ColorName.White)
             .WithActorInfo(ActorName.Player)
             .WithFaction(FactionName.Players)
             .WithEquipment()
@@ -52,7 +52,7 @@ namespace Fiero.Business
             .WithLogging()
             .WithEnemyAi()
             .WithName(nameof(Enemy))
-            .WithSprite("None", ColorName.White)
+            .WithSprite(TextureName.Creatures, "None", ColorName.White)
             .WithActorInfo(ActorName.None)
             .WithFaction(FactionName.None)
             .WithPhysics(Coord.Zero)
@@ -64,18 +64,9 @@ namespace Fiero.Business
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity)
             => Entities.CreateBuilder<Weapon>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString(), ColorName.White)
+            .WithSprite(TextureName.Items, type.ToString(), ColorName.White)
             .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, baseDamage, swingDelay)
-            .WithItemInfo(itemRarity, unidentName)
-            ;
-
-        public EntityBuilder<Armor> Armor(string unidentName, ArmorName type, int itemRarity) 
-            => Entities.CreateBuilder<Armor>()
-            .WithName(type.ToString())
-            .WithSprite(type.ToString(), ColorName.White)
-            .WithPhysics(Coord.Zero)
-            .WithArmorInfo(type)
             .WithItemInfo(itemRarity, unidentName)
             ;
 
@@ -84,7 +75,7 @@ namespace Fiero.Business
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
-            .WithSprite("None", ColorName.White)
+            .WithSprite(TextureName.Items, "Potion", ColorName.White)
             .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty)
             .WithItemInfo(itemRarity, unidentName)
             ;
@@ -94,7 +85,7 @@ namespace Fiero.Business
             => Consumable<T>(itemRarity, remainingUses, maxUses, true, unidentName)
             .WithThrowableInfo(name, damage, maxRange, @throw)
             .WithName(name.ToString())
-            .WithSprite(name.ToString(), ColorName.White)
+            .WithSprite(TextureName.Items, name.ToString(), ColorName.White)
             ;
 
         private EntityBuilder<T> Resource<T>(ResourceName name, int amount, int? maxAmount = null)
@@ -102,10 +93,9 @@ namespace Fiero.Business
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
-            .WithSprite("None", ColorName.White)
             .WithItemInfo(0, null)
             .WithName(name.ToString())
-            .WithSprite(name.ToString(), ColorName.White)
+            .WithSprite(TextureName.Items, name.ToString(), ColorName.White)
             .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
@@ -117,7 +107,7 @@ namespace Fiero.Business
         public EntityBuilder<Spell> Spell(SpellName type, int baseDamage, int castDelay)
             => Entities.CreateBuilder<Spell>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString(), ColorName.White)
+            .WithSprite(TextureName.Items, type.ToString(), ColorName.White)
             .WithSpellInfo(type, baseDamage, castDelay)
             ;
 
@@ -148,7 +138,7 @@ namespace Fiero.Business
 
             return Consumable<Potion>(unidentName: $"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
                .WithName($"Potion of {effect}")
-               .WithSprite(nameof(Potion), potionColor.Color)
+               .WithSprite(TextureName.Items, nameof(Potion), potionColor.Color)
                .WithPotionInfo(effect)
                .WithIntrinsicEffect(ResolveEffect(effect))
                ;
@@ -161,7 +151,7 @@ namespace Fiero.Business
             var label = ScrollLabel();
             return Consumable<Scroll>(unidentName: $"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
             .WithName($"Scroll of {effect}")
-            .WithSprite(nameof(Scroll), ColorName.Yellow)
+            .WithSprite(TextureName.Items, nameof(Scroll), ColorName.Yellow)
             .WithScrollInfo(effect)
             .WithIntrinsicEffect(ResolveEffect(effect))
             ;
@@ -212,7 +202,7 @@ namespace Fiero.Business
             where TFeature : Feature
             => Entities.CreateBuilder<TFeature>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString(), ColorName.White)
+            .WithSprite(TextureName.Features, type.ToString(), ColorName.White)
             .WithPhysics(Coord.Zero)
             .WithFeatureInfo(type)
             ;
@@ -220,7 +210,7 @@ namespace Fiero.Business
         private EntityBuilder<Tile> Tile(TileName type, ColorName color)
             => Entities.CreateBuilder<Tile>()
             .WithName(type.ToString())
-            .WithSprite(type.ToString(), color)
+            .WithSprite(TextureName.Tiles, type.ToString(), color)
             .WithPhysics(Coord.Zero)
             .WithTileInfo(type)
             ;
@@ -231,7 +221,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Rat))
             .WithActorInfo(ActorName.Rat)
             .WithFaction(FactionName.Rats)
-            .WithSprite(nameof(ActorName.Rat), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(ActorName.Rat), ColorName.White)
             .WithBlood(ColorName.LightRed, 25)
             ;
 
@@ -240,7 +230,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Snake))
             .WithActorInfo(ActorName.Snake)
             .WithFaction(FactionName.Snakes)
-            .WithSprite(nameof(ActorName.Snake), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(ActorName.Snake), ColorName.White)
             .WithBlood(ColorName.LightRed, 10)
             ;
 
@@ -249,7 +239,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Cat))
             .WithActorInfo(ActorName.Cat)
             .WithFaction(FactionName.Cats)
-            .WithSprite(nameof(ActorName.Cat), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(ActorName.Cat), ColorName.White)
             .WithBlood(ColorName.LightRed, 50)
             ;
 
@@ -258,7 +248,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Dog))
             .WithActorInfo(ActorName.Dog)
             .WithFaction(FactionName.Dogs)
-            .WithSprite(nameof(ActorName.Dog), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(ActorName.Dog), ColorName.White)
             .WithBlood(ColorName.LightRed, 80)
             ;
 
@@ -267,7 +257,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Boar))
             .WithActorInfo(ActorName.Boar)
             .WithFaction(FactionName.Boars)
-            .WithSprite(nameof(ActorName.Boar), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(ActorName.Boar), ColorName.White)
             .WithBlood(ColorName.LightRed, 200)
             ;
         #endregion
@@ -278,84 +268,84 @@ namespace Fiero.Business
             .WithName("Rat Knight")
             .WithNpcInfo(NpcName.RatKnight)
             .WithDialogueTriggers(NpcName.RatKnight)
-            .WithSprite(nameof(NpcName.RatKnight), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatKnight), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatArcher()
             => NPC_Rat()
             .WithName("Rat Archer")
             .WithNpcInfo(NpcName.RatArcher)
             .WithDialogueTriggers(NpcName.RatArcher)
-            .WithSprite(nameof(NpcName.RatArcher), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatArcher), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatWizard()
             => NPC_Rat()
             .WithName("Rat Wizard")
             .WithNpcInfo(NpcName.RatWizard)
             .WithDialogueTriggers(NpcName.RatWizard)
-            .WithSprite(nameof(NpcName.RatWizard), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatWizard), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatMerchant()
             => NPC_Rat()
             .WithName("Rat Merchant")
             .WithNpcInfo(NpcName.RatMerchant)
             .WithDialogueTriggers(NpcName.RatMerchant)
-            .WithSprite(nameof(NpcName.RatMerchant), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatMerchant), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatMonk()
             => NPC_Rat()
             .WithName("Rat Monk")
             .WithNpcInfo(NpcName.RatMonk)
             .WithDialogueTriggers(NpcName.RatMonk)
-            .WithSprite(nameof(NpcName.RatMonk), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
             .WithName("Rat Pugilist")
             .WithNpcInfo(NpcName.RatPugilist)
             .WithDialogueTriggers(NpcName.RatPugilist)
-            .WithSprite(nameof(NpcName.RatPugilist), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatPugilist), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatThief()
             => NPC_Rat()
             .WithName("Rat Thief")
             .WithNpcInfo(NpcName.RatThief)
             .WithDialogueTriggers(NpcName.RatThief)
-            .WithSprite(nameof(NpcName.RatThief), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatThief), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatOutcast()
             => NPC_Rat()
             .WithName("Rat Outcast")
             .WithNpcInfo(NpcName.RatOutcast)
             .WithDialogueTriggers(NpcName.RatOutcast)
-            .WithSprite(nameof(NpcName.RatOutcast), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatOutcast), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatArsonist()
             => NPC_Rat()
             .WithName("Rat Arsonist")
             .WithNpcInfo(NpcName.RatArsonist)
             .WithDialogueTriggers(NpcName.RatArsonist)
-            .WithSprite(nameof(NpcName.RatArsonist), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.RatArsonist), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
             .WithName("Sand Snake")
             .WithNpcInfo(NpcName.SandSnake)
             .WithDialogueTriggers(NpcName.SandSnake)
-            .WithSprite(nameof(NpcName.SandSnake), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.SandSnake), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_Cobra()
             => NPC_Snake()
             .WithName("Cobra")
             .WithNpcInfo(NpcName.Cobra)
             .WithDialogueTriggers(NpcName.Cobra)
-            .WithSprite(nameof(NpcName.Cobra), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.Cobra), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_Boa()
             => NPC_Snake()
             .WithName("Boa")
             .WithNpcInfo(NpcName.Boa)
             .WithDialogueTriggers(NpcName.Boa)
-            .WithSprite(nameof(NpcName.Boa), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.Boa), ColorName.White)
             ;
         #endregion
 
@@ -365,14 +355,14 @@ namespace Fiero.Business
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithDialogueTriggers(NpcName.GreatKingRat)
-            .WithSprite(nameof(NpcName.GreatKingRat), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.GreatKingRat), ColorName.White)
             ;
         public EntityBuilder<Actor> Boss_NpcKingSerpent()
             => NPC_Rat()
             .WithName("Serpentine King")
             .WithNpcInfo(NpcName.KingSerpent)
             .WithDialogueTriggers(NpcName.KingSerpent)
-            .WithSprite(nameof(NpcName.KingSerpent), ColorName.White)
+            .WithSprite(TextureName.Creatures, nameof(NpcName.KingSerpent), ColorName.White)
             ;
         #endregion
 
@@ -390,32 +380,8 @@ namespace Fiero.Business
 
         #region RESOURCES
         public EntityBuilder<Resource> Resource_Gold(int amount)
-            => Resource<Resource>(ResourceName.Gold, amount)
+            => Resource<Resource>(ResourceName.Gold, amount, maxAmount: 999999)
             ;
-        #endregion
-
-        #region ARMORS
-        public EntityBuilder<Armor> Armor_Leather()
-            => Armor($"leather armor", ArmorName.LeatherArmor, itemRarity: 10)
-            ;
-        #endregion
-
-        #region SPELLS
-        //public EntityBuilder<Spell> Spell_CrimsonLance()
-        //    => Spell(SpellName.CrimsonLance, baseDamage: 10, castDelay: 100)
-        //    .WithIntrinsicEffect(() => new CrimsonLanceEffect())
-        //    .WithTargetingShape(new TargetingShape(4, false, Coord.Zero))
-        //    .WithTargetingFilter((systems, caster, target) => target.TryCast<Actor>(out var a)
-        //        && systems.Faction.GetRelationships(caster, a).Left.IsHostile())
-        //    ;
-        //public EntityBuilder<Spell> Spell_Bloodbath()
-        //    => Spell(SpellName.Bloodbath, baseDamage: 0, castDelay: 100)
-        //    .WithIntrinsicEffect(() => new BloodbathEffect())
-        //    ;
-        //public EntityBuilder<Spell> Spell_ClotBlock()
-        //    => Spell(SpellName.ClotBlock, baseDamage: 0, castDelay: 100)
-        //    .WithIntrinsicEffect(() => new ClotBlockEffect())
-        //    ;
         #endregion
 
         #region FEATURES

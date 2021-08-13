@@ -15,12 +15,15 @@ namespace Fiero.Business
 
         public override IAction GetIntent(Actor a)
         {
+            var floorId = a.FloorId();
+            if (!Systems.Floor.TryGetFloor(floorId, out var floor))
+                throw new ArgumentException(nameof(floorId));
+
             if (a.Ai.Target is null || !a.Ai.Target.IsAlive()) {
                 a.Ai.Target = null; // invalidation
             }
             if (a.Ai.Target == null) {
                 // Seek new target to attack
-                var floorId = a.FloorId();
                 if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var fov)) {
                     return new MoveRandomlyAction();
                 }
@@ -38,14 +41,20 @@ namespace Fiero.Business
                 if (a.Ai.Target.DistanceFrom(a) < 2) {
                     return new MeleeAttackOtherAction(a.Ai.Target, a.Equipment.Weapon);
                 }
-                if (a.CanSee(a.Ai.Target) && Systems.Floor.TryGetFloor(a.FloorId(), out var floor)) {
+                if (a.CanSee(a.Ai.Target)) {
                     // If we can see the target and it has moved, recalculate the path
                     a.Ai.Path = floor.Pathfinder.Search(a.Position(), a.Ai.Target.Position(), default);
                     a.Ai.Path?.RemoveFirst();
                 }
             }
+            // Path to a random tile
+            if (a.Ai.Path == null && Rng.Random.OneChanceIn(5)) {
+                var randomTile = floor.Cells.Values.Shuffle(Rng.Random).Where(c => c.Tile.TileProperties.Name == TileName.Room
+                    && c.IsWalkable(null)).First();
+                a.Ai.Path = floor.Pathfinder.Search(a.Position(), randomTile.Tile.Position(), default);
+            }
             // If following a path, do so until the end or an obstacle is reached
-            if (a.Ai.Path != null) {
+            else if (a.Ai.Path != null) {
                 if (a.Ai.Path.First != null) {
                     var pos = a.Ai.Path.First.Value.Tile.Position();
                     var dir = new Coord(pos.X - a.Position().X, pos.Y - a.Position().Y);

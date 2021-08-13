@@ -20,7 +20,7 @@ namespace Fiero.Core
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if(!(Sprite is { } spriteDef)) {
+            if(!(Sprite.V is { } spriteDef)) {
                 return;
             }
             using var sprite = new Sprite(spriteDef);

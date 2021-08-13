@@ -2,7 +2,11 @@
 {
     public enum TextureName
     {
-        Atlas,
+        Creatures,
+        Items,
+        Spells,
+        Features,
+        Tiles,
         Animations,
         UI,
 

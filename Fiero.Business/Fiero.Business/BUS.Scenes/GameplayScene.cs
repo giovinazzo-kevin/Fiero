@@ -296,7 +296,7 @@ namespace Fiero.Business.Scenes
                 // - Remove entity from floor and action systems and handle cleanup
             yield return Systems.Action.ActorDespawned.SubscribeResponse(e => {
                 if (e.Actor.IsPlayer()) {
-                    Systems.Action.Reset();
+                    TrySetState(SceneState.Main);
                 }
                 else {
                     Systems.Action.StopTracking(e.Actor.Id);

@@ -38,10 +38,19 @@ namespace Fiero.Business
             if (Capacity <= 0 || Count < Capacity) {
                 // Merge charges on consumables of the same kind
                 var merged = false;
-                merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out var tMerge);
-                merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.Name == x.PotionProperties.Name, out var pMerge);
-                merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Name == x.ScrollProperties.Name, out var sMerge);
-                fullyMerged = tMerge || pMerge || sMerge;
+                merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out fullyMerged);
+                if(!merged) {
+                    merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.Name == x.PotionProperties.Name, out var fully);
+                    fullyMerged |= fully;
+                }
+                if (!merged) {
+                    merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Name == x.ScrollProperties.Name, out var fully);
+                    fullyMerged |= fully;
+                }
+                if (!merged) {
+                    merged |= TryMergeResources<Resource>((x, y) => y.ResourceProperties.Name == x.ResourceProperties.Name, out var fully);
+                    fullyMerged |= fully;
+                }
                 if (!merged || !fullyMerged) {
                     Items.Add(i);
                 }
@@ -53,16 +62,41 @@ namespace Fiero.Business
                 where T : Consumable
             {
                 fullyMerged = false;
-                if (i is T x && x.ItemProperties.Identified) {
-                    while(x.ConsumableProperties.RemainingUses > 0) {
-                        var same = Items.OfType<T>().FirstOrDefault(y =>
+                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified) {
+                    while (x.ConsumableProperties.RemainingUses > 0) {
+                        var y = Items.TrySelect(x => (x.TryCast<T>(out var e), e)).FirstOrDefault(y =>
                                y.ItemProperties.Identified
                             && y.ConsumableProperties.RemainingUses < y.ConsumableProperties.MaximumUses
                             && equal(x, y)
                         );
-                        if (same is T y) {
+                        if (y is { }) {
                             x.ConsumableProperties.RemainingUses--;
                             y.ConsumableProperties.RemainingUses++;
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                    fullyMerged = true;
+                    return true;
+                }
+                return false;
+            }
+
+            bool TryMergeResources<T>(Func<T, T, bool> equal, out bool fullyMerged)
+                where T : Resource
+            {
+                fullyMerged = false;
+                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified) {
+                    while (x.ResourceProperties.Amount > 0) {
+                        var y = Items.TrySelect(x => (x.TryCast<T>(out var e), e)).FirstOrDefault(y =>
+                               y.ItemProperties.Identified
+                            && y.ResourceProperties.Amount < y.ResourceProperties.MaximumAmount
+                            && equal(x, y)
+                        );
+                        if (y is { }) {
+                            x.ResourceProperties.Amount--;
+                            y.ResourceProperties.Amount++;
                         }
                         else {
                             return true;

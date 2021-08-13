@@ -39,6 +39,9 @@ namespace Fiero.Business
                 throw new ArgumentException(nameof(rule));
             if(!a.TryIdentify(i)) {
                 a.Inventory.AddIdentificationRule(i => i is T _t && rule(_t) || i.TryCast<T>(out var t) && rule(t));
+                foreach (var other in a.Inventory.GetItems().Where(i => !i.ItemProperties.Identified)) {
+                    a.TryIdentify(other);
+                }
                 return a.TryIdentify(i);
             }
             return false;

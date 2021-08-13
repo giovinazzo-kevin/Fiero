@@ -69,7 +69,11 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
-            Textures.Add(TextureName.Atlas, new Texture("Resources/Textures/8x8.png"));
+            Textures.Add(TextureName.Creatures, new Texture("Resources/Textures/16x16_creatures.png"));
+            Textures.Add(TextureName.Items, new Texture("Resources/Textures/16x16_items.png"));
+            Textures.Add(TextureName.Features, new Texture("Resources/Textures/16x16_features.png"));
+            Textures.Add(TextureName.Tiles, new Texture("Resources/Textures/16x16_tiles.png"));
+            Textures.Add(TextureName.Spells, new Texture("Resources/Textures/16x16_spells.png"));
             Textures.Add(TextureName.Animations, new Texture("Resources/Textures/8x8_anim.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
@@ -97,7 +101,11 @@ namespace Fiero.Business
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
 
-            await Sprites.LoadJsonAsync(TextureName.Atlas, "Resources/Spritesheets/atlas.json");
+            await Sprites.LoadJsonAsync(TextureName.Creatures, "Resources/Spritesheets/creatures.json");
+            await Sprites.LoadJsonAsync(TextureName.Items, "Resources/Spritesheets/items.json");
+            await Sprites.LoadJsonAsync(TextureName.Features, "Resources/Spritesheets/features.json");
+            await Sprites.LoadJsonAsync(TextureName.Tiles, "Resources/Spritesheets/tiles.json");
+            await Sprites.LoadJsonAsync(TextureName.Spells, "Resources/Spritesheets/spells.json");
             await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/anim.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
             await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");

@@ -23,8 +23,9 @@ namespace Fiero.Business
                 c.BlocksLight = blocksMovement;
                 c.BlocksLight = blocksLight;
             });
-        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, string sprite, ColorName color)
+        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, TextureName texture, string sprite, ColorName color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>(c => {
+                c.TextureName = texture;
                 c.SpriteName = sprite;
                 c.Color = color;
             });

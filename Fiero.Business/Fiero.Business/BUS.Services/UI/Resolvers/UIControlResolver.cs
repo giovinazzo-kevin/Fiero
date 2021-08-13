@@ -37,7 +37,6 @@ namespace Fiero.Business
         }
 
         protected virtual Sprite GetUISprite(string str) => GetSprite(TextureName.UI, str);
-        protected virtual Sprite GetAtlasSprite(string str) => GetSprite(TextureName.Atlas, str);
         protected virtual Sprite GetSprite(TextureName texture, string str, int? seed = null)
         {
             return Resources.Sprites.TryGet(texture, str, out var sprite, seed) ? sprite : null;

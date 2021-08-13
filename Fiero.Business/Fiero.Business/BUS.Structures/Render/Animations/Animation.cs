@@ -12,8 +12,8 @@ namespace Fiero.Business
     {
         public static Animation ExpandingRing(
             int radius,
-            string sprite = "Skull",
-            TextureName texture = TextureName.Atlas,
+            string sprite = "Explosion_1",
+            TextureName texture = TextureName.Animations,
             ColorName tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null
@@ -25,27 +25,11 @@ namespace Fiero.Business
                 .ToArray()
         );
 
-        public static Animation Flash(
-            int durationInFrames,
-            ColorName flashColor,
-            string sprite = "Skull",
-            TextureName texture = TextureName.Atlas,
-            ColorName tint = ColorName.White,
-            TimeSpan? frameDuration = null,
-            Vec? scale = null
-        ) => new(
-            Enumerable.Range(1, durationInFrames)
-                .Select(i => new AnimationFrame(
-                    frameDuration ?? TimeSpan.FromMilliseconds(32),
-                    new AnimationSprite(texture, sprite, i % 2 == 0 ? flashColor : tint, new(), scale ?? new(1, 1))))
-                .ToArray()
-        );
-
         public static Animation StraightProjectile(
             Coord from,
             Coord to,
             string sprite = "Rock",
-            TextureName texture = TextureName.Atlas,
+            TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null
@@ -66,7 +50,7 @@ namespace Fiero.Business
             Coord from,
             Coord to,
             string sprite = "Rock",
-            TextureName texture = TextureName.Atlas,
+            TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null

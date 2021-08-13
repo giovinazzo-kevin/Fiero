@@ -18,7 +18,7 @@ namespace Fiero.Business
         }
 
         public string SpriteName { get; set; } = "None";
-        public TextureName TextureName { get; set; } = TextureName.Atlas;
+        public TextureName TextureName { get; set; }
         public ColorName Color { get; set; } = ColorName.White;
         public bool Hidden { get; set; }
     }

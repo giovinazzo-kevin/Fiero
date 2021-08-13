@@ -13,9 +13,9 @@ namespace Fiero.Business
             AutoRemove = autoRemove;
         }
 
-        public override string Name => "$Trap.Name$";
-        public override string Description => "$Trap.Desc$";
-        public override EffectName Type => EffectName.Trap;
+        public override string DisplayName => "$Trap.Name$";
+        public override string DisplayDescription => "$Trap.Desc$";
+        public override EffectName Name => EffectName.Trap;
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {

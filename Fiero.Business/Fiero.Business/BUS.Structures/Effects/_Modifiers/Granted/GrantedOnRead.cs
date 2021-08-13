@@ -2,9 +2,9 @@
 {
     public class GrantedOnRead : ReadEffect
     {
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => "$Effect.GrantedOnRead$";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => "$Effect.GrantedOnRead$";
+        public override EffectName Name => Source.Name;
 
         public GrantedOnRead(EffectDef source) : base(source)
         {

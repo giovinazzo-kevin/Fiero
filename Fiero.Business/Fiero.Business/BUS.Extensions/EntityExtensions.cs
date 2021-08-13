@@ -21,11 +21,15 @@ namespace Fiero.Business
             => a.Position().DistSq(pos);
         public static FloorId FloorId(this PhysicalEntity a) => a.Physics.FloorId;
         public static Coord Position(this PhysicalEntity a) => a.Physics.Position;
-        public static bool IsAlive(this Actor a) => a.Id != 0 && a.FloorId() != default;
-        public static bool IsPlayer(this Actor a) => a.ActorProperties.Type == ActorName.Player;
-        public static bool CanSee(this Actor a, Coord c) => a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
-        public static bool CanSee(this Actor a, PhysicalEntity e) => e != null && a.CanSee(e.Position());
-        public static bool IsAffectedBy(this Actor a, EffectName effect) => a.Effects != null && a.Effects.Active.Any(e => e.Type == effect);
+        public static bool IsInvalid(this Entity e) => e is null || e.Id == 0;
+        public static bool IsAlive(this PhysicalEntity a) => !a.IsInvalid() && a.FloorId() != default;
+        public static bool TryRoot(this PhysicalEntity a) => a.IsAlive() && a.Physics.CanMove ? !(a.Physics.CanMove = false) : false;
+        public static bool TryFree(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove ? (a.Physics.CanMove = true) : false;
+        public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove;
+        public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
+        public static bool CanSee(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
+        public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position());
+        public static bool IsAffectedBy(this Actor a, EffectName effect) => a.IsAlive() && a.Effects != null && a.Effects.Active.Any(e => e.Name == effect);
         public static int Heal(this Actor a, int health)
         {
             return a.ActorProperties.Stats.Health = 

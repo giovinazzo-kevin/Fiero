@@ -1,25 +1,22 @@
-﻿using Fiero.Core;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class Chance : ModifierEffect
+    public class NonStacking : ModifierEffect
     {
-        public readonly float Probability;
-
-        public Chance(EffectDef source, float chance) : base(source)
+        public NonStacking(EffectDef source) : base(source)
         {
-            Probability = chance;
         }
 
         public override string DisplayName => $"$Effect.{Source.Name}$";
-        public override string DisplayDescription => $"$Effect.Chance$ ({(int)(Probability * 100)}%)";
+        public override string DisplayDescription => $"$Effect.NonStacking$";
         public override EffectName Name => Source.Name;
 
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
-            if(Rng.Random.NextDouble() < Probability) {
+            if (!owner.Effects.Active.Any(e => e.Name == Source.Name)) {
                 Source.Resolve().Start(systems, owner);
             }
         }

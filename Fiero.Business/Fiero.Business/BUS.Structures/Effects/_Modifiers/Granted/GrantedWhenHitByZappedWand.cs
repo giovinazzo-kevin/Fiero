@@ -8,9 +8,9 @@ namespace Fiero.Business
         {
         }
 
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => "$Effect.GrantedWhenHitByZappedWand$";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => "$Effect.GrantedWhenHitByZappedWand$";
+        public override EffectName Name => Source.Name;
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {

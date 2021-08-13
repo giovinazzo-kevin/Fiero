@@ -9,9 +9,9 @@ namespace Fiero.Business
     {
         public readonly int Duration;
         public int Time { get; private set; }
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => $"$Effect.Temporary$ ({Time})";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => $"$Effect.Temporary$ ({Time})";
+        public override EffectName Name => Source.Name;
 
         public Temporary(EffectDef source, int duration) : base(source)
         {

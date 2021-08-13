@@ -16,6 +16,7 @@ namespace Fiero.Business
         public abstract bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle);
         public abstract bool TryRotateCw();
         public abstract bool TryRotateCCw();
+        public abstract bool CanRotateWithDirectionKeys();
         public abstract bool TryOffset(Coord offs);
         public abstract IEnumerable<Coord> GetPoints();
     }

@@ -9,28 +9,34 @@ namespace Fiero.Business
         public readonly EffectName Name;
         public readonly int? Duration;
         public readonly float? Chance;
+        public readonly bool Stacking;
 
-        public EffectDef(EffectName name, int? duration = null, float? chance = null)
+        public EffectDef(EffectName name, int? duration = null, float? chance = null, bool canStack = false)
         {
             Name = name;
             Duration = duration;
             Chance = chance;
+            Stacking = canStack;
         }
 
-        public EffectDef NotTemporary() => new(Name, null, Chance);
-        public EffectDef NotProbabilistic() => new(Name, Duration, null);
+        public EffectDef AsNonTemporary() => new(Name, null, Chance, Stacking);
+        public EffectDef AsNonProbabilistic() => new(Name, Duration, null, Stacking);
+        public EffectDef AsStacking() => new(Name, Duration, Chance, true);
 
         public Effect Resolve()
         {
+            if (!Stacking) {
+                return new NonStacking(AsStacking());
+            }
             if (Chance.HasValue) {
-                return new Chance(NotProbabilistic(), Chance.Value);
+                return new Chance(AsNonProbabilistic(), Chance.Value);
             }
             if (Duration.HasValue) {
-                return new Temporary(NotTemporary(), Duration.Value);
+                return new Temporary(AsNonTemporary(), Duration.Value);
             }
             return Name switch {
                 EffectName.Confusion => new ConfusionEffect(),
-                EffectName.Sleep => throw new NotImplementedException(),
+                EffectName.Sleep => new SleepEffect(),
                 EffectName.Silence => throw new NotImplementedException(),
                 EffectName.Paralysis => throw new NotImplementedException(),
                 EffectName.Bleeding => throw new NotImplementedException(),

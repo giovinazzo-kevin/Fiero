@@ -28,7 +28,7 @@ namespace Fiero.Business
         
         protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
-            var modalSize = UI.Store.Get(Data.UI.PopUpSize);
+            var modalSize = UI.Store.Get(Data.UI.PopUpSize) * 2;
             Layout.Size.V = modalSize;
             Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
         }

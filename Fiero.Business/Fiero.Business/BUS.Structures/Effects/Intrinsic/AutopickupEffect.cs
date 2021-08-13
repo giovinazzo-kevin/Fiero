@@ -4,9 +4,9 @@ namespace Fiero.Business
 {
     public class AutopickupEffect : IntrinsicEffect
     {
-        public override string Name => "$Intrinsic.Autopickup.Name$";
-        public override string Description => "$Intrinsic.Autopickup.Desc$";
-        public override EffectName Type => EffectName.Autopickup;
+        public override string DisplayName => "$Intrinsic.Autopickup.Name$";
+        public override string DisplayDescription => "$Intrinsic.Autopickup.Desc$";
+        public override EffectName Name => EffectName.Autopickup;
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {

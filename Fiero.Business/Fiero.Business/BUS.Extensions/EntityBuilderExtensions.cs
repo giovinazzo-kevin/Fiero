@@ -11,17 +11,24 @@ namespace Fiero.Business
     {
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
+        public static EntityBuilder<T> WithEffectTracking<T>(this EntityBuilder<T> builder)
+            where T : Entity => builder.AddOrTweak<EffectComponent>();
         public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, Func<Effect> getEffect)
             where T : Entity => builder.AddOrTweak<EffectComponent>(c => {
                 builder.Built += (b, e) => {
                     getEffect().Start(b.ServiceFactory.GetInstance<GameSystems>(), e);
                 };
             });
-        public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool blocksMovement = false, bool blocksLight = false)
+        public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
             where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>(c => {
                 c.Position = pos;
                 c.BlocksLight = blocksMovement;
                 c.BlocksLight = blocksLight;
+                c.CanMove = canMove;
+            });
+        public static EntityBuilder<T> WithPosition<T>(this EntityBuilder<T> builder, Coord pos)
+            where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>(c => {
+                c.Position = pos;
             });
         public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, TextureName texture, string sprite, ColorName color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>(c => {

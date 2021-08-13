@@ -339,6 +339,9 @@
     <None Update="Resources\Spritesheets\animations.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Spritesheets\icons.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Spritesheets\spells.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -378,13 +381,10 @@
     <None Update="Resources\Textures\16x16_tiles.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Textures\8x8.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\Fonts\SegoeUI.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Textures\8x8_anim.png">
+    <None Update="Resources\Textures\8x8_icons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Textures\8x8_ui.png">

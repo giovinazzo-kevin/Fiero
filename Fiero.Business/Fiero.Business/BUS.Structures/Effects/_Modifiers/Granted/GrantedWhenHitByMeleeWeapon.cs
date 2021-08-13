@@ -6,9 +6,9 @@
         {
         }
 
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => "$Effect.GrantedWhenHitByMeleeWeapon$";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => "$Effect.GrantedWhenHitByMeleeWeapon$";
+        public override EffectName Name => Source.Name;
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage)
         {

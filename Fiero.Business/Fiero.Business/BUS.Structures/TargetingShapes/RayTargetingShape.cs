@@ -37,6 +37,8 @@ namespace Fiero.Business
             );
         }
 
+        public override bool CanRotateWithDirectionKeys() => true;
+
         public override bool TryRotateCCw()
         {
             Rotate(-45);

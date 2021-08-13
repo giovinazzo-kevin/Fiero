@@ -124,6 +124,8 @@ namespace Fiero.Core
             where T : EcsEntity
         {
             entity = default;
+            if (entityId == 0)
+                return false;
             var equalEntity = new TrackedEntity(entityId);
             var cacheKey = new OrderedPair<int, Type>(entityId, typeof(T));
             if (ProxyCache.TryGetValue(cacheKey, out var proxy)) {

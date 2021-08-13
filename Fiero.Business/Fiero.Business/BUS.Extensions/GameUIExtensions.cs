@@ -80,9 +80,11 @@ namespace Fiero.Business
                     Move(new(-1, 1));
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveSE)))
                     Move(new(1, 1));
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCw)))
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCw))
+                    || shape.CanRotateWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveE)))
                     RotateCw();
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCw)))
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCw))
+                    || shape.CanRotateWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
                     RotateCCw();
             });
             renderSystem.Screen.HideTargetingShape();

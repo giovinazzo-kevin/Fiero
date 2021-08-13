@@ -15,6 +15,11 @@ namespace Fiero.Business
     {
         private bool HandleMove(ActorTime t, ref IAction action, ref int? cost)
         {
+            if(t.Actor.IsRooted()) {
+                action = new WaitAction();
+                cost = HandleAction(t, ref action);
+                return true;
+            }
             var direction = default(Coord);
             if (action is MoveRelativeAction rel)
                 direction = rel.Coord;

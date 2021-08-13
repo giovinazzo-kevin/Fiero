@@ -5,17 +5,14 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-
     // High chance to change the direction of your attack, throw, zap or move into a random direction; can't read scrolls.
     public class ConfusionEffect : StatusEffect
     {
-        public override string Name => "$Effect.Confusion.Name$";
-        public override string Description => "$Effect.Confusion.Desc$";
-        public override EffectName Type => EffectName.Confusion;
+        public override string DisplayName => "$Effect.Confusion.Name$";
+        public override string DisplayDescription => "$Effect.Confusion.Desc$";
+        public override EffectName Name => EffectName.Confusion;
 
-        protected override void Apply(GameSystems systems, Actor target)
-        {
-        }
+        protected override void Apply(GameSystems systems, Actor target) { }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {

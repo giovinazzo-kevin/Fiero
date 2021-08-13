@@ -33,7 +33,7 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi(UI)
-            .WithPhysics(Coord.Zero)
+            .WithPhysics(Coord.Zero, canMove: true)
             .WithName(nameof(Player))
             .WithSprite(TextureName.Creatures, nameof(Player), ColorName.White)
             .WithActorInfo(ActorName.Player)
@@ -44,6 +44,7 @@ namespace Fiero.Business
             .WithFieldOfView(7)
             .WithLogging()
             .WithBlood(ColorName.Red, 100)
+            .WithEffectTracking()
             .WithIntrinsicEffect(() => new AutopickupEffect())
             ;
 
@@ -55,10 +56,11 @@ namespace Fiero.Business
             .WithSprite(TextureName.Creatures, "None", ColorName.White)
             .WithActorInfo(ActorName.None)
             .WithFaction(FactionName.None)
-            .WithPhysics(Coord.Zero)
+            .WithPhysics(Coord.Zero, canMove: true)
             .WithInventory(5)
             .WithEquipment()
             .WithFieldOfView(7)
+            .WithEffectTracking()
             ;
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity)
@@ -454,16 +456,22 @@ namespace Fiero.Business
         #region POTIONS
         public EntityBuilder<Potion> Potion_OfConfusion()
             => Potion(new(EffectName.Confusion, 10), new(EffectName.Confusion, 10));
+        public EntityBuilder<Potion> Potion_OfSleep()
+            => Potion(new(EffectName.Sleep, 10), new(EffectName.Sleep, 10));
         #endregion
 
         #region SCROLLS
         public EntityBuilder<Scroll> Scroll_OfMassConfusion()
             => Scroll(new(EffectName.Confusion, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMassSleep()
+            => Scroll(new(EffectName.Sleep, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         #endregion
 
         #region WANDS
         public EntityBuilder<Wand> Wand_OfConfusion(int charges)
             => Wand(new(EffectName.Confusion, 10), charges);
+        public EntityBuilder<Wand> Wand_OfSleep(int charges)
+            => Wand(new(EffectName.Sleep, 10), charges);
         #endregion
 
         #region RESOURCES

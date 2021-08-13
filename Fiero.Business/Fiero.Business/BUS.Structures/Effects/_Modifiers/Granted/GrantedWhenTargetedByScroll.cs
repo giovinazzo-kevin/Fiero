@@ -12,9 +12,9 @@ namespace Fiero.Business
             Modifier = modifier;
         }
 
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => "$Effect.GrantedWhenTargetedByScroll$";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => "$Effect.GrantedWhenTargetedByScroll$";
+        public override EffectName Name => Source.Name;
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {

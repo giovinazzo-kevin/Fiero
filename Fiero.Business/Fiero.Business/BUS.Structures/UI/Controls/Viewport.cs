@@ -16,7 +16,7 @@ namespace Fiero.Business
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
-        public readonly UIControlProperty<TargetingShape?> TargetingShape = new(nameof(TargetingShape), default);
+        public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
         private RenderTexture _renderTexture;
@@ -115,17 +115,32 @@ namespace Fiero.Business
                         var spriteSize = sprite.GetLocalBounds().Size();
                         sprite.Position = screenPos;
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                        if (drawable is Actor actor && actor.Npc != null) {
-                            sprite.Scale = ViewTileSize.V / spriteSize;
-                            //sprite.Position -= ViewTileSize.V * new Vec(0.5f, 0.5f);
-                        }
-                        else {
-                            sprite.Scale = ViewTileSize.V / spriteSize;
-                        }
+                        sprite.Scale = ViewTileSize.V / spriteSize;
                         if (!seen) {
                             sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
                         }
                         _renderTexture.Draw(sprite, states);
+                        if (drawable is Actor actor && actor.Effects != null) {
+                            var offs = Coord.Zero;
+                            var _i = 0;
+                            foreach (var effect in actor.Effects.Active.Distinct()) {
+                                var color = effect.Name switch {
+                                    EffectName.Confusion => ColorName.LightYellow,
+                                    EffectName.Sleep => ColorName.LightBlue,
+                                    _ => ColorName.White
+                                };
+                                var icon = effect.Name.ToString();
+                                if (Resources.Sprites.TryGet(TextureName.Icons, icon, color, out var iconDef, effect.GetHashCode())) {
+                                    using var iconSprite = new Sprite(iconDef);
+                                    var iconSize = iconSprite.GetLocalBounds().Size();
+                                    iconSprite.Position = screenPos + offs - iconSize;
+                                    iconSprite.Origin = new Vec(0.5f, 0.5f) * iconSize;
+                                    iconSprite.Scale = ViewTileSize.V / iconSize / 2;
+                                    offs += iconSize.ToCoord() * (_i > 0 && _i % 3 == 0 ? new Coord(0, 1) : new Coord(1, 0));
+                                    _renderTexture.Draw(iconSprite, states);
+                                }
+                            }
+                        }
                     }
                 }
                 _renderTexture.Display();

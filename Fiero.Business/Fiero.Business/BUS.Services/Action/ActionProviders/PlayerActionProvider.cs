@@ -178,6 +178,7 @@ namespace Fiero.Business
 
             bool TryZap(Wand wand, out IAction action)
             {
+                floorId = a.FloorId();
                 // All wands use the same targeting shape and have "infinite" range
                 var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
                 var zapShape = new RayTargetingShape(a.Position(), 100);
@@ -205,6 +206,7 @@ namespace Fiero.Business
 
             bool TryThrow(Throwable throwable, out IAction action)
             {
+                floorId = a.FloorId();
                 var len = throwable.ThrowableProperties.MaximumRange + 1;
                 var line = Shapes.Line(new(0, 0), new(0, len))
                     .Skip(1)

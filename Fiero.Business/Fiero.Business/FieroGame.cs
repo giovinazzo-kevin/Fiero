@@ -76,6 +76,7 @@ namespace Fiero.Business
             Textures.Add(TextureName.Tiles, new Texture("Resources/Textures/16x16_tiles.png"));
             Textures.Add(TextureName.Spells, new Texture("Resources/Textures/16x16_spells.png"));
             Textures.Add(TextureName.Animations, new Texture("Resources/Textures/16x16_animations.png"));
+            Textures.Add(TextureName.Icons, new Texture("Resources/Textures/8x8_icons.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
@@ -111,6 +112,7 @@ namespace Fiero.Business
             await Sprites.LoadJsonAsync(TextureName.Spells, "Resources/Spritesheets/spells.json");
             await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/animations.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
+            await Sprites.LoadJsonAsync(TextureName.Icons, "Resources/Spritesheets/icons.json");
             await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");
             await Sprites.LoadJsonAsync(TextureName.FontLight, "Resources/Spritesheets/index.json");
 
@@ -127,7 +129,7 @@ namespace Fiero.Business
 
             Store.SetValue(Data.UI.TileSize, 8);
             Store.SetValue(Data.UI.WindowSize, new(640, 480));
-            Store.SetValue(Data.UI.PopUpSize, new(400, 400));
+            Store.SetValue(Data.UI.PopUpSize, new(200, 200));
             Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
             Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
             Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));

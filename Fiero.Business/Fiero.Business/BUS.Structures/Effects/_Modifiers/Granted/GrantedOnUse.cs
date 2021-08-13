@@ -2,9 +2,9 @@
 {
     public class GrantedOnUse : UseEffect
     {
-        public override string Name => $"$Effect.{Source.Name}$";
-        public override string Description => "$Effect.GrantedOnUse$";
-        public override EffectName Type => Source.Name;
+        public override string DisplayName => $"$Effect.{Source.Name}$";
+        public override string DisplayDescription => "$Effect.GrantedOnUse$";
+        public override EffectName Name => Source.Name;
 
         public GrantedOnUse(EffectDef source) : base(source)
         {

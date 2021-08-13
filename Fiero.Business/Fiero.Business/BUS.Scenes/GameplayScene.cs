@@ -95,7 +95,7 @@ namespace Fiero.Business.Scenes
                             var friends = Enumerable.Range(5, 10)
                                 .Select(i => Resources.Entities
                                     .NPC_Rat()
-                                    .WithPhysics(player.Position())
+                                    .WithPosition(player.Position())
                                     .Build());
                             foreach (var f in friends) {
                                 if(TrySpawn(player.FloorId(), f)) {
@@ -268,11 +268,12 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorGainedEffect.SubscribeHandler(e => {
                 if (!Player.CanSee(e.Actor))
                     return;
-                var (isBuff, isDebuff, color) = e.Effect.Type switch {
+                var (isBuff, isDebuff, color) = e.Effect.Name switch {
                     EffectName.Confusion => (false, true, ColorName.LightYellow),
+                    EffectName.Sleep => (false, true, ColorName.LightBlue),
                     _ => (false, false, ColorName.White)
                 };
-                Systems.Render.Screen.SetDirty();
+                Systems.Render.Screen.CenterOn(Player);
                 if (isBuff) {
                     Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Buff(color));
@@ -281,7 +282,7 @@ namespace Fiero.Business.Scenes
                     Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Debuff(color));
                 }
-                Systems.Render.Screen.SetDirty();
+                Systems.Render.Screen.CenterOn(Player);
             });
             // ActionSystem.ActorLostEffect:
             yield return Systems.Action.ActorLostEffect.SubscribeHandler(e => {
@@ -297,6 +298,7 @@ namespace Fiero.Business.Scenes
                 if (e.Type == AttackName.Melee) {
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
                     if (Player.CanSee(e.Attacker)) {
+                        Systems.Render.Screen.CenterOn(Player);
                         var anim = Animation.MeleeAttack(e.Attacker, dir)
                             .OnFirstFrame(() => {
                                 e.Attacker.Render.Hidden = true;
@@ -353,6 +355,8 @@ namespace Fiero.Business.Scenes
                     Systems.Action.StopTracking(e.Actor.Id);
                     Systems.Floor.RemoveActor(e.Actor);
                     Entities.FlagEntityForRemoval(e.Actor.Id);
+                    e.Actor.TryRefresh(0);
+                    Entities.RemoveFlagged(true);
                 }
                 return true;
             });
@@ -369,7 +373,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Render.Hidden = true;
                 if(Player.CanSee(e.Actor)) {
                     // Since this is a blocking animation and we just hid the victim, we need to refresh the viewport before showing it
-                    Systems.Render.Screen.SetDirty();
+                    Systems.Render.Screen.CenterOn(Player);
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Death(e.Actor));
                 }
                 return true;

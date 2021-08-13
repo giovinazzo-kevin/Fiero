@@ -30,6 +30,8 @@ namespace Fiero.Business
             return true;
         }
 
+        public override bool CanRotateWithDirectionKeys() => false;
+
         public override bool TryRotateCCw()
         {
             return false;

@@ -8,6 +8,7 @@
         Features,
         Tiles,
         Animations,
+        Icons,
         UI,
 
         FontLight,

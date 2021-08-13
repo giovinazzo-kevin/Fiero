@@ -80,10 +80,10 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Throwable<T>(ThrowableName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, ThrowName @throw, string unidentName = null)
+        private EntityBuilder<T> Throwable<T>(ThrowableName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, ThrowName @throw, string unidentName = null)
             where T : Throwable
-            => Consumable<T>(itemRarity, remainingUses, maxUses, true, unidentName)
-            .WithThrowableInfo(name, damage, maxRange, @throw)
+            => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, unidentName)
+            .WithThrowableInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw)
             .WithName(name.ToString())
             .WithSprite(TextureName.Items, name.ToString(), ColorName.White)
             ;
@@ -99,21 +99,16 @@ namespace Fiero.Business
             .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
-        private Func<Effect> ResolveEffect(EffectName effect) => effect switch {
-            EffectName.Confusion => () => new GrantedOnUse(new Temporary(new ConfusionEffect(), 10)),
-            _ => () => throw new NotImplementedException(effect.ToString())
-        };
-
-        public EntityBuilder<Spell> Spell(SpellName type, int baseDamage, int castDelay)
+        public EntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay)
             => Entities.CreateBuilder<Spell>()
             .WithName(type.ToString())
             .WithSprite(TextureName.Items, type.ToString(), ColorName.White)
-            .WithSpellInfo(type, baseDamage, castDelay)
+            .WithSpellInfo(shape, type, baseDamage, castDelay)
             ;
 
-        public EntityBuilder<Potion> Potion(EffectName effect)
+        public EntityBuilder<Potion> Potion(EffectDef quaffEffect, EffectDef throwEffect)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + effect.GetHashCode());
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
 
             var adjectives = new[] {
                 "swirling", "warm", "slimy", "dilute", "clear", "foaming", "fizzling",
@@ -136,24 +131,91 @@ namespace Fiero.Business
             };
             var potionColor = (Adjective: rng.Choose(adjectives), Color: rng.Choose(colors));
 
-            return Consumable<Potion>(unidentName: $"{potionColor.Adjective} potion", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
-               .WithName($"Potion of {effect}")
+            return Throwable<Potion>(
+                @throw: ThrowName.Arc,
+                name: ThrowableName.Misc,
+                damage: 1,
+                maxRange: 4,
+                mulchChance: 1,
+                unidentName: $"{potionColor.Adjective} potion", 
+                itemRarity: 1, 
+                remainingUses: 1, 
+                maxUses: 1, 
+                consumedWhenEmpty: true,
+                throwsUseCharges: false
+                )
+               .WithName($"Potion of {quaffEffect}")
                .WithSprite(TextureName.Items, nameof(Potion), potionColor.Color)
-               .WithPotionInfo(effect)
-               .WithIntrinsicEffect(ResolveEffect(effect))
+               .WithPotionInfo(quaffEffect, throwEffect)
+               .WithIntrinsicEffect(() => new GrantedOnQuaff(quaffEffect))
+               .WithIntrinsicEffect(() => new GrantedWhenHitByThrownItem(throwEffect))
                ;
-           ;
         }
 
-        public EntityBuilder<Scroll> Scroll(EffectName effect)
+
+        public EntityBuilder<Wand> Wand(EffectDef effect, int charges)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + (int)effect * 31);
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
+
+            var adjectives = new[] {
+                "crooked", "rotten", "decorated", "carved", "gnarled", "twisted", "long",
+                "short", "chipped", "magic", "humming", "simple", "heavy",
+                "plain", "straight", "curved"
+            };
+            var colors = new[] {
+                ColorName.LightRed,
+                ColorName.LightGreen,
+                ColorName.LightBlue,
+                ColorName.LightCyan,
+                ColorName.LightYellow,
+                ColorName.LightMagenta,
+                ColorName.White
+
+            };
+            var wandColor = (Adjective: rng.Choose(adjectives), Color: rng.Choose(colors));
+
+            return Throwable<Wand>(
+                @throw: ThrowName.Line,
+                name: ThrowableName.Misc,
+                damage: 1,
+                maxRange: 7,
+                mulchChance: .75f,
+                unidentName: $"{wandColor.Adjective} wand",
+                itemRarity: 1, 
+                remainingUses: charges, 
+                maxUses: charges,
+                consumedWhenEmpty: false,
+                throwsUseCharges: false
+                )
+               .WithName($"Wand of {effect}")
+               .WithSprite(TextureName.Items, nameof(Wand), wandColor.Color)
+               .WithWandInfo(effect)
+               .WithIntrinsicEffect(() => new GrantedWhenHitByZappedWand(effect))
+               .WithIntrinsicEffect(() => new GrantedWhenHitByThrownItem(effect))
+               ;
+        }
+
+        public EntityBuilder<Scroll> Scroll(EffectDef effect, ScrollModifierName modifier)
+        {
+            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
             var label = ScrollLabel();
-            return Consumable<Scroll>(unidentName: $"scroll labelled '{label}'", itemRarity: 1, remainingUses: 1, maxUses: 1, consumedWhenEmpty: true)
+            return Throwable<Scroll>(
+                @throw: ThrowName.Line,
+                name: ThrowableName.Misc, 
+                unidentName: $"scroll labelled '{label}'", 
+                damage: 1, 
+                maxRange: 10, 
+                mulchChance: 0,
+                itemRarity: 1,
+                remainingUses: 1,
+                maxUses: 1, 
+                consumedWhenEmpty: true,
+                throwsUseCharges: false
+            )
             .WithName($"Scroll of {effect}")
-            .WithSprite(TextureName.Items, nameof(Scroll), ColorName.Yellow)
-            .WithScrollInfo(effect)
-            .WithIntrinsicEffect(ResolveEffect(effect))
+            .WithSprite(TextureName.Items, nameof(Scroll), ColorName.White)
+            .WithScrollInfo(effect, modifier)
+            .WithIntrinsicEffect(() => new GrantedWhenTargetedByScroll(effect, modifier))
             ;
 
             string ScrollLabel()
@@ -374,8 +436,34 @@ namespace Fiero.Business
 
         #region THROWABLES
         public EntityBuilder<Throwable> Throwable_Rock(int charges)
-            => Throwable<Throwable>(ThrowableName.Rock, itemRarity: 1, remainingUses: charges, maxUses: charges, damage: 4, maxRange: 3, @throw: ThrowName.Arc)
+            => Throwable<Throwable>(
+                name: ThrowableName.Rock, 
+                itemRarity: 1, 
+                remainingUses: charges, 
+                maxUses: charges, 
+                damage: 4, 
+                maxRange: 3, 
+                mulchChance: 1/4f,
+                @throw: ThrowName.Arc, 
+                consumedWhenEmpty: true,
+                throwsUseCharges: true
+            )
             ;
+        #endregion
+
+        #region POTIONS
+        public EntityBuilder<Potion> Potion_OfConfusion()
+            => Potion(new(EffectName.Confusion, 10), new(EffectName.Confusion, 10));
+        #endregion
+
+        #region SCROLLS
+        public EntityBuilder<Scroll> Scroll_OfMassConfusion()
+            => Scroll(new(EffectName.Confusion, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        #endregion
+
+        #region WANDS
+        public EntityBuilder<Wand> Wand_OfConfusion(int charges)
+            => Wand(new(EffectName.Confusion, 10), charges);
         #endregion
 
         #region RESOURCES

@@ -13,7 +13,7 @@ namespace Fiero.Business
                 var name = ItemProperties.Identified
                     ? Info.Name
                     : ItemProperties.UnidentifiedName;
-                if (TryCast<Consumable>(out var consumable) && consumable.ConsumableProperties.RemainingUses > 1) {
+                if (TryCast<Consumable>(out var consumable) && (consumable.ConsumableProperties.MaximumUses != 1 || consumable.ConsumableProperties.RemainingUses == 0)) {
                     return $"{name} ({consumable.ConsumableProperties.RemainingUses})";
                 }
                 else if (TryCast<Resource>(out var resource) && resource.ResourceProperties.Amount > 1) {

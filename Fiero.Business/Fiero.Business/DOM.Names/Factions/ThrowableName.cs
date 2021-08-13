@@ -3,6 +3,7 @@
     public enum ThrowableName
     {
         Rock,
-        Dart
+        Dart,
+        Misc
     }
 }

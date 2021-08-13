@@ -44,13 +44,18 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ItemPickedUpEvent, EventResult> ItemPickedUp;
         public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemDropped;
         public readonly SystemRequest<ActionSystem, ItemThrownEvent, EventResult> ItemThrown;
+        public readonly SystemRequest<ActionSystem, WandZappedEvent, EventResult> WandZapped;
         public readonly SystemRequest<ActionSystem, ItemEquippedEvent, EventResult> ItemEquipped;
         public readonly SystemRequest<ActionSystem, ItemUnequippedEvent, EventResult> ItemUnequipped;
         public readonly SystemRequest<ActionSystem, ItemConsumedEvent, EventResult> ItemConsumed;
+        public readonly SystemRequest<ActionSystem, ScrollReadEvent, EventResult> ScrollRead;
+        public readonly SystemRequest<ActionSystem, PotionQuaffedEvent, EventResult> PotionQuaffed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
 
         public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
         public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
+        public readonly SystemEvent<ActionSystem, ActorGainedEffectEvent> ActorGainedEffect;
+        public readonly SystemEvent<ActionSystem, ActorLostEffectEvent> ActorLostEffect;
 
         public readonly SystemRequest<ActionSystem, ActorIntentEvent, ReplaceIntentEventResult> ActorIntentSelected;
         public readonly SystemEvent<ActionSystem, ActorIntentEvent> ActorIntentEvaluated;
@@ -93,6 +98,9 @@ namespace Fiero.Business
             ItemPickedUp = new(this, nameof(ItemPickedUp));
             ItemDropped = new(this, nameof(ItemDropped));
             ItemThrown = new(this, nameof(ItemThrown));
+            WandZapped = new(this, nameof(WandZapped));
+            ScrollRead = new(this, nameof(ScrollRead));
+            PotionQuaffed = new(this, nameof(PotionQuaffed));
             ItemEquipped = new(this, nameof(ItemEquipped));
             ItemUnequipped = new(this, nameof(ItemUnequipped));
             ItemConsumed = new(this, nameof(ItemConsumed));
@@ -100,6 +108,8 @@ namespace Fiero.Business
 
             ActorSteppedOnTrap = new(this, nameof(ActorSteppedOnTrap));
             ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
+            ActorGainedEffect = new(this, nameof(ActorGainedEffect));
+            ActorLostEffect = new(this, nameof(ActorLostEffect));
             ActorIntentSelected = new(this, nameof(ActorIntentSelected));
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
@@ -161,8 +171,14 @@ namespace Fiero.Business
                     ret = HandleInteract(t, ref action, ref cost);
                     break;
                 case ActionName.Zap:
+                    ret = HandleZapWand(t, ref action, ref cost);
+                    break;
                 case ActionName.Read:
-                case ActionName.Drink:
+                    ret = HandleReadScroll(t, ref action, ref cost);
+                    break;
+                case ActionName.Quaff:
+                    ret = HandleQuaffPotion(t, ref action, ref cost);
+                    break;
                 case ActionName.Organize:
                     ret = HandleOrganize(t, ref action, ref cost);
                     break;
@@ -226,16 +242,19 @@ namespace Fiero.Business
         {
             damage = 1; swingDelay = 0;
             if(attackWith != null) {
-                if (attackWith.TryCast<Weapon>(out var w)) {
+                if (type == AttackName.Melee && attackWith.TryCast<Weapon>(out var w)) {
                     swingDelay = w.WeaponProperties.SwingDelay;
                     damage += w.WeaponProperties.BaseDamage;
                 }
-                else if (attackWith.TryCast<Spell>(out var s)) {
+                else if (type == AttackName.Ranged && attackWith.TryCast<Throwable>(out var t)) {
+                    damage += t.ThrowableProperties.BaseDamage;
+                }
+                else if (type == AttackName.Magic && attackWith.TryCast<Spell>(out var s)) {
                     swingDelay = s.SpellProperties.CastDelay;
                     damage += s.SpellProperties.BaseDamage;
                 }
-                else if (attackWith.TryCast<Throwable>(out var t)) {
-                    damage += t.ThrowableProperties.BaseDamage;
+                else if (type == AttackName.Magic && attackWith.TryCast<Wand>(out _)) {
+                    damage = 0;
                 }
             }
             return ActorAttacked.Handle(new(type, attacker, victim, attackWith, damage, swingDelay));

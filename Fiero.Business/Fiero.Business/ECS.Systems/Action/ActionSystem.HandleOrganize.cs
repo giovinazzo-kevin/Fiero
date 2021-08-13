@@ -17,9 +17,6 @@ namespace Fiero.Business
             else if (action is UnequipItemAction unequip) {
                 return ItemUnequipped.Handle(new(t.Actor, unequip.Item));
             }
-            else if (action is UseConsumableAction use) {
-                return ItemConsumed.Handle(new(t.Actor, use.Item));
-            }
             else throw new NotSupportedException();
         }
     }

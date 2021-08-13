@@ -75,7 +75,7 @@ namespace Fiero.Business
             Textures.Add(TextureName.Features, new Texture("Resources/Textures/16x16_features.png"));
             Textures.Add(TextureName.Tiles, new Texture("Resources/Textures/16x16_tiles.png"));
             Textures.Add(TextureName.Spells, new Texture("Resources/Textures/16x16_spells.png"));
-            Textures.Add(TextureName.Animations, new Texture("Resources/Textures/8x8_anim.png"));
+            Textures.Add(TextureName.Animations, new Texture("Resources/Textures/16x16_animations.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
@@ -91,6 +91,8 @@ namespace Fiero.Business
             Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/62_miss.wav"));
             Sounds.Add(SoundName.TrapSpotted, new SoundBuffer("Resources/Sounds/27_respawn2.wav"));
             Sounds.Add(SoundName.ItemUsed, new SoundBuffer("Resources/Sounds/66_drink.wav"));
+            Sounds.Add(SoundName.Buff, new SoundBuffer("Resources/Sounds/79_arrowchain.wav"));
+            Sounds.Add(SoundName.Debuff, new SoundBuffer("Resources/Sounds/74_bowrelease2.wav"));
             Sounds.Add(SoundName.ItemPickedUp, new SoundBuffer("Resources/Sounds/14_item2.wav"));
             Sounds.Add(SoundName.SpellCast, new SoundBuffer("Resources/Sounds/16_falling.wav"));
             Sounds.Add(SoundName.MeleeAttack, new SoundBuffer("Resources/Sounds/23_ladder.wav"));
@@ -107,7 +109,7 @@ namespace Fiero.Business
             await Sprites.LoadJsonAsync(TextureName.Features, "Resources/Spritesheets/features.json");
             await Sprites.LoadJsonAsync(TextureName.Tiles, "Resources/Spritesheets/tiles.json");
             await Sprites.LoadJsonAsync(TextureName.Spells, "Resources/Spritesheets/spells.json");
-            await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/anim.json");
+            await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/animations.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
             await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");
             await Sprites.LoadJsonAsync(TextureName.FontLight, "Resources/Spritesheets/index.json");
@@ -145,12 +147,17 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.MoveSW, Keyboard.Key.Numpad1);
             Store.SetValue(Data.Hotkeys.MoveS, Keyboard.Key.Numpad2);
             Store.SetValue(Data.Hotkeys.MoveSE, Keyboard.Key.Numpad3);
-            Store.SetValue(Data.Hotkeys.RotateTargetCW, Keyboard.Key.Multiply);
-            Store.SetValue(Data.Hotkeys.RotateTargetCCW, Keyboard.Key.Divide);
-            Store.SetValue(Data.Hotkeys.QuickCast1, Keyboard.Key.Num1);
-            Store.SetValue(Data.Hotkeys.QuickCast2, Keyboard.Key.Num2);
-            Store.SetValue(Data.Hotkeys.QuickCast3, Keyboard.Key.Num3);
-            Store.SetValue(Data.Hotkeys.QuickCast4, Keyboard.Key.Num4);
+            Store.SetValue(Data.Hotkeys.RotateTargetCw, Keyboard.Key.Multiply);
+            Store.SetValue(Data.Hotkeys.RotateTargetCCw, Keyboard.Key.Divide);
+            Store.SetValue(Data.Hotkeys.QuickSlot1, Keyboard.Key.Num1);
+            Store.SetValue(Data.Hotkeys.QuickSlot2, Keyboard.Key.Num2);
+            Store.SetValue(Data.Hotkeys.QuickSlot3, Keyboard.Key.Num3);
+            Store.SetValue(Data.Hotkeys.QuickSlot4, Keyboard.Key.Num4);
+            Store.SetValue(Data.Hotkeys.QuickSlot5, Keyboard.Key.Num5);
+            Store.SetValue(Data.Hotkeys.QuickSlot6, Keyboard.Key.Num6);
+            Store.SetValue(Data.Hotkeys.QuickSlot7, Keyboard.Key.Num7);
+            Store.SetValue(Data.Hotkeys.QuickSlot8, Keyboard.Key.Num8);
+            Store.SetValue(Data.Hotkeys.QuickSlot9, Keyboard.Key.Num9);
             Store.SetValue(Data.Hotkeys.ToggleZoom, Keyboard.Key.Z);
 
             await Director.AddScenes(Scenes);

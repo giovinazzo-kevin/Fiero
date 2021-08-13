@@ -10,8 +10,24 @@ namespace Fiero.Business
         public readonly AnimationFrame[] Frames;
         public readonly TimeSpan Duration;
 
-        public event Action<Animation, AnimationFrame> FramePlaying;
-        public void OnFramePlaying(int frame) => FramePlaying?.Invoke(this, Frames[frame]);
+        public event Action<Animation, int, AnimationFrame> FramePlaying;
+        public void OnFramePlaying(int frame) => FramePlaying?.Invoke(this, frame, Frames[frame]);
+
+        public Animation OnFirstFrame(Action a)
+        {
+            FramePlaying += (_, i, f) => {
+                if (i == 0) a();
+            };
+            return this;
+        }
+
+        public Animation OnLastFrame(Action a)
+        {
+            FramePlaying += (_, i, f) => {
+                if (i == Frames.Length - 1) a();
+            };
+            return this;
+        }
 
         public Animation(params AnimationFrame[] frames)
         {

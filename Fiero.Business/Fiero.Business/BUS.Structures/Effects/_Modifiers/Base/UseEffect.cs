@@ -6,10 +6,14 @@ namespace Fiero.Business
     /// <summary>
     /// Use effects can be applied to:
     /// - Consumables:
-    ///     - The effect is applied to the actor that uses the consumable, and it ends when the consumable is used up.
+    ///     - The effect is applied to the actor that uses (quaffs/reads/throws...) the consumable.
     /// </summary>
-    public abstract class UseEffect : Effect
+    public abstract class UseEffect : ModifierEffect
     {
+        protected UseEffect(EffectDef source) : base(source)
+        {
+        }
+
         protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
@@ -18,9 +22,6 @@ namespace Fiero.Business
                 yield return systems.Action.ItemConsumed.SubscribeHandler(e => {
                     if (e.Item == owner) {
                         OnApplied(systems, owner, e.Actor);
-                        if (consumable.ConsumableProperties.RemainingUses <= 0) {
-                            End();
-                        }
                     }
                 });
             }

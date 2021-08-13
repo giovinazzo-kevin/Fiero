@@ -8,8 +8,12 @@ namespace Fiero.Business
     /// - Actors, in which case the effect is applied when the actor is hit 
     /// - Armor, in which case the effect is applied when the wearer is hit 
     /// </summary>
-    public abstract class HitReceivedEffect : Effect
+    public abstract class HitReceivedEffect : ModifierEffect
     {
+        protected HitReceivedEffect(EffectDef source) : base(source)
+        {
+        }
+
         protected abstract void OnApplied(GameSystems systems, Entity owner, Entity source, Actor target, int damage);
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

@@ -8,8 +8,12 @@ namespace Fiero.Business
     /// - Tiles
     /// - Features
     /// </summary>
-    public abstract class SteppedOnEffect : Effect
+    public abstract class SteppedOnEffect : ModifierEffect
     {
+        protected SteppedOnEffect(EffectDef source) : base(source)
+        {
+        }
+
         protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
         protected abstract void OnRemoved(GameSystems systems, Entity owner, Actor target);
 

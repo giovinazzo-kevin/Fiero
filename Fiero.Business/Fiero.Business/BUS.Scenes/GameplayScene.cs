@@ -35,6 +35,7 @@ namespace Fiero.Business.Scenes
         protected readonly GameEntities Entities;
         protected readonly GameEntityBuilders EntityBuilders;
         protected readonly OffButton OffButton;
+        protected readonly QuickSlotHelper QuickSlots;
         protected readonly GameUI UI;
 
         public Actor Player { get; private set; }
@@ -46,6 +47,7 @@ namespace Fiero.Business.Scenes
             GameSystems systems,
             GameResources resources,
             GameEntityBuilders entityBuilders,
+            QuickSlotHelper quickSlots,
             GameUI ui,
             OffButton off)
         {
@@ -55,6 +57,7 @@ namespace Fiero.Business.Scenes
             Systems = systems;
             EntityBuilders = entityBuilders;
             Resources = resources;
+            QuickSlots = quickSlots;
             UI = ui;
             OffButton = off;
         }
@@ -136,6 +139,7 @@ namespace Fiero.Business.Scenes
                 Systems.Floor.Reset();
                 Resources.Textures.ClearProceduralTextures();
                 Resources.Sprites.ClearProceduralSprites();
+                QuickSlots.UnsetAll();
                 Entities.Clear(true);
 
                 var newRngSeed = (int)DateTime.Now.ToBinary();
@@ -147,8 +151,11 @@ namespace Fiero.Business.Scenes
                     .WithName(playerName)
                     .WithHealth(100)
                     .WithItems(
-                        Resources.Entities.Weapon_Sword().Build(), 
-                        Resources.Entities.Potion(EffectName.Confusion).Build(),
+                        Resources.Entities.Weapon_Sword().WithIntrinsicEffect(() => 
+                            new GrantedWhenHitByMeleeWeapon(new(EffectName.Confusion, chance: .25f))).Build(),
+                        Resources.Entities.Potion_OfConfusion().Build(),
+                        Resources.Entities.Wand_OfConfusion(Rng.Random.Between(4, 8)).Build(),
+                        Resources.Entities.Scroll_OfMassConfusion().Build(),
                         Resources.Entities.Throwable_Rock(10).Build())
                     //.WithSpells(
                     //    Resources.Entities.Spell_CrimsonLance().Build(),
@@ -256,9 +263,33 @@ namespace Fiero.Business.Scenes
                 e.Actor.Physics.Position = e.NewPosition;
                 return true;
             });
+            // ActionSystem.ActorLostEffect:
+                // - Show an animation and play a sound
+            yield return Systems.Action.ActorGainedEffect.SubscribeHandler(e => {
+                if (!Player.CanSee(e.Actor))
+                    return;
+                var (isBuff, isDebuff, color) = e.Effect.Type switch {
+                    EffectName.Confusion => (false, true, ColorName.LightYellow),
+                    _ => (false, false, ColorName.White)
+                };
+                Systems.Render.Screen.SetDirty();
+                if (isBuff) {
+                    Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Buff(color));
+                }
+                if (isDebuff) {
+                    Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Debuff(color));
+                }
+                Systems.Render.Screen.SetDirty();
+            });
+            // ActionSystem.ActorLostEffect:
+            yield return Systems.Action.ActorLostEffect.SubscribeHandler(e => {
+            });
             // ActionSystem.ActorAttacked:
                 // - Handle Ai aggro and grudges
                 // - Show melee attack animation
+                // - Identify wands and potions
             yield return Systems.Action.ActorAttacked.SubscribeResponse(e => {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
@@ -266,10 +297,28 @@ namespace Fiero.Business.Scenes
                 if (e.Type == AttackName.Melee) {
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
                     if (Player.CanSee(e.Attacker)) {
-                        e.Attacker.Render.Hidden = true;
-                        Systems.Render.Screen.CenterOn(Player);
-                        Systems.Render.Screen.Animate(true, e.Attacker.Position(), Animation.MeleeAttack(e.Attacker, dir));
-                        e.Attacker.Render.Hidden = false;
+                        var anim = Animation.MeleeAttack(e.Attacker, dir)
+                            .OnFirstFrame(() => {
+                                e.Attacker.Render.Hidden = true;
+                                Systems.Render.Screen.CenterOn(Player);
+                            })
+                            .OnLastFrame(() => {
+                                e.Attacker.Render.Hidden = false;
+                                Systems.Render.Screen.CenterOn(Player);
+                            });
+                        Systems.Render.Screen.Animate(true, e.Attacker.Position(), anim);
+                    }
+                }
+                else if (e.Type == AttackName.Ranged && e.Weapon.TryCast<Potion>(out var potion)) {
+                    if (e.Attacker.Identify(potion, q => q.PotionProperties.QuaffEffect.Name == potion.PotionProperties.QuaffEffect.Name
+                                                      && q.PotionProperties.ThrowEffect.Name == potion.PotionProperties.ThrowEffect.Name)) {
+                        e.Attacker.Log?.Write($"$Action.YouIdentifyAPotion$ {potion.DisplayName}.");
+                    }
+                }
+                else if(e.Type == AttackName.Magic && e.Weapon.TryCast<Wand>(out var wand)) {
+
+                    if (e.Attacker.Identify(wand, q => q.WandProperties.Effect.Name == wand.WandProperties.Effect.Name)) {
+                        e.Attacker.Log?.Write($"$Action.YouIdentifyAWand$ {wand.DisplayName}.");
                     }
                 }
                 return true;
@@ -277,7 +326,6 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorDamaged 
                 // - Deal damage
                 // - Handle aggro
-                // - Spawn blood splatters
             yield return Systems.Action.ActorDamaged.SubscribeResponse(e => {
                 e.Victim.ActorProperties.Stats.Health -= e.Damage;
                 if (e.Damage > 0) {
@@ -328,7 +376,6 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorKilled:
             yield return Systems.Action.ActorKilled.SubscribeResponse(e => {
-                Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.Explosion());
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
                 return true;
@@ -399,49 +446,55 @@ namespace Fiero.Business.Scenes
                 }
             });
             // ActionSystem.ItemThrown:
-                // - "Use" item in order to consume its charges
                 // - Spawn a 1-charge item where the consumable lands if it doesn't mulch
                 // - Play an animation and a sound as the projectile flies
             yield return Systems.Action.ItemThrown.SubscribeResponse(e => {
-                if (TryUseItem(e.Item, e.Actor, out var consumed)) {
-                    e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
-                    Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
-                    if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
-                        var anim = Animation.ArcingProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName);
-                        Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
-                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
-                    }
-                    if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance) {
-                        var clone = (Throwable)e.Item.Clone();
+                e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
+                Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
+                if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
+                    var anim = e.Item.ThrowableProperties.Throw switch {
+                        ThrowName.Arc => Animation.ArcingProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName),
+                        _ => Animation.StraightProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName)
+                    };
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
+                    Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                }
+                if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance) {
+                    var clone = (Throwable)e.Item.Clone();
+                    if (e.Item.ThrowableProperties.ThrowsUseCharges) {
                         clone.ConsumableProperties.RemainingUses = 1;
-                        clone.Physics.Position = e.Position;
-                        Systems.Floor.AddItem(e.Actor.FloorId(), clone);
                     }
-                    else {
-                        Systems.Render.Screen.Animate(false, e.Position, Animation.Explosion(scale: new(0.5f, 0.5f)));
-                    }
-                    return true;
+                    clone.Physics.Position = e.Position;
+                    Systems.Floor.AddItem(e.Actor.FloorId(), clone);
                 }
                 else {
-                    e.Actor.Log?.Write($"$Action.YouFailThrowing$ {e.Item.DisplayName}.");
-                    return false;
+                    Systems.Render.Screen.Animate(false, e.Position, Animation.Explosion(scale: new(0.5f, 0.5f)));
                 }
+                if (!e.Item.ThrowableProperties.ThrowsUseCharges) {
+                    // Despawn item
+                    e.Actor.Inventory.TryTake(e.Item);
+                    Entities.FlagEntityForRemoval(e.Item.Id);
+                }
+                return true;
+            });
+            // ActionSystem.WandZapped:
+                // - Play an animation and a sound as the projectile flies
+            yield return Systems.Action.WandZapped.SubscribeResponse(e => {
+                e.Actor.Log?.Write($"$Action.YouZap{e.Wand.DisplayName}.");
+                Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
+                if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
+                    var anim = Animation.StraightProjectile(e.Actor.Position(), e.Position, sprite: e.Wand.Render.SpriteName);
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
+                    Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                }
+                return true;
             });
             // ActionSystem.ItemConsumed:
-                // - Use up item and remove it from the floor when completely consumed
-                // - Identify potions and scrolls (not wands, because they need to hit something)
+                // - Use up item and remove it from the game when completely consumed
             yield return Systems.Action.ItemConsumed.SubscribeResponse(e => {
                 if (TryUseItem(e.Item, e.Actor, out var consumed)) {
-                    e.Actor.Log?.Write($"$Action.YouUse$ {e.Item.DisplayName}.");
-                    if(e.Item.TryCast<Potion>(out var p) && e.Actor.Identify(p, q => q.PotionProperties.Name == p.PotionProperties.Name)) {
-                        e.Actor.Log?.Write($"$Action.YouIdentifyAPotion$ {e.Item.DisplayName}.");
-                    }
-                    if (e.Item.TryCast<Scroll>(out var s) && e.Actor.Identify(s, t => t.ScrollProperties.Name == s.ScrollProperties.Name)) {
-                        e.Actor.Log?.Write($"$Action.YouIdentifyAScroll$ {e.Item.DisplayName}.");
-                    }
-                    Resources.Sounds.Get(SoundName.ItemUsed, e.Actor.Position() - Player.Position()).Play();
-                    if (Player.CanSee(e.Actor)) {
-                        Systems.Render.Screen.Animate(false, e.Actor.Position(), Animation.ExpandingRing(5, tint: ColorName.LightMagenta));
+                    if(consumed) {
+                        Entities.FlagEntityForRemoval(e.Item.Id);
                     }
                     return true;
                 }
@@ -449,6 +502,25 @@ namespace Fiero.Business.Scenes
                     e.Actor.Log?.Write($"$Action.YouFailUsing$ {e.Item.DisplayName}.");
                     return false;
                 }
+            });
+            // ActionSystem.PotionQuaffed:
+                // - Identify potions
+            yield return Systems.Action.PotionQuaffed.SubscribeResponse(e => {
+                e.Actor.Log?.Write($"$Action.YouQuaff$ {e.Potion.DisplayName}.");
+                if (e.Actor.Identify(e.Potion, q => q.PotionProperties.QuaffEffect.Name == e.Potion.PotionProperties.QuaffEffect.Name
+                                                 && q.PotionProperties.ThrowEffect.Name == e.Potion.PotionProperties.ThrowEffect.Name)) {
+                    e.Actor.Log?.Write($"$Action.YouIdentifyAPotion$ {e.Potion.DisplayName}.");
+                }
+                return true;
+            });
+            // ActionSystem.ScrollRead:
+                // - Identify scrolls
+            yield return Systems.Action.ScrollRead.SubscribeResponse(e => {
+                e.Actor.Log?.Write($"$Action.YouRead$ {e.Scroll.DisplayName}.");
+                if (e.Actor.Identify(e.Scroll, q => q.ScrollProperties.Effect.Name == e.Scroll.ScrollProperties.Effect.Name)) {
+                    e.Actor.Log?.Write($"$Action.YouIdentifyAScroll$ {e.Scroll.DisplayName}.");
+                }
+                return true;
             });
             // ActionSystem.SpellLearned:
                 // - Add spell to actor's library
@@ -507,6 +579,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Log?.Write($"$Action.YouTriggerATrap$.");
                 if(Player.CanSee(e.Actor)) {
                     var pos = e.Feature.Position();
+                    Systems.Render.Screen.CenterOn(Player);
                     Resources.Sounds.Get(SoundName.TrapSpotted, pos - Player.Position()).Play();
                     Systems.Render.Screen.Animate(false, pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }

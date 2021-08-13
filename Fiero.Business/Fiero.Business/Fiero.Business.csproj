@@ -336,7 +336,7 @@
     <None Update="Resources\Sounds\UIBlip.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Spritesheets\anim.json">
+    <None Update="Resources\Spritesheets\animations.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Spritesheets\spells.json">
@@ -358,6 +358,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Spritesheets\ui.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Textures\16x16_animations.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Textures\16x16_creatures.png">
@@ -392,6 +395,8 @@
   <ItemGroup>
     <Folder Include="BUS.Services\Spells\" />
     <Folder Include="BUS.Structures\Effects\Cast\" />
+    <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
+    <Folder Include="BUS.Structures\Effects\SteppedOn\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
   </ItemGroup>

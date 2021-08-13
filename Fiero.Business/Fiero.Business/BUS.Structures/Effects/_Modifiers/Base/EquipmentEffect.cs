@@ -9,8 +9,12 @@ namespace Fiero.Business
     /// - Weapons, in which case the effect starts when the weapon is wielded and ends when the weapon is sheated
     /// - Armor, in which case the effect starts when the armor is worn and ends when the armor is removed
     /// </summary>
-    public abstract class EquipmentEffect : Effect
+    public abstract class EquipmentEffect : ModifierEffect
     {
+        protected EquipmentEffect(EffectDef source) : base(source)
+        {
+        }
+
         protected abstract void OnApplied(GameSystems systems, Actor target);
         protected abstract void OnRemoved(GameSystems systems, Actor target);
 

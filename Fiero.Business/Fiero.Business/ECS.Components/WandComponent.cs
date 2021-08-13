@@ -4,6 +4,6 @@ namespace Fiero.Business
 {
     public class WandComponent : EcsComponent
     {
-        public EffectName Name { get; set; }
+        public EffectDef Effect { get; set; }
     }
 }

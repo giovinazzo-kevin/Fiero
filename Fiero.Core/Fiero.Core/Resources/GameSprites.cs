@@ -109,15 +109,21 @@ namespace Fiero.Core
             if (dict.TryGetValue($"{key}_Mask", out var masks)) {
                 var mask = masks.Shuffle(rng).First();
                 sprite.Color = Color.White;
-                mask.Color = Colors.Get(color);
+                mask.Color = Color.White;
 
                 var renderTarget = Textures.GetScratchTexture();
                 while(!renderTarget.SetActive(true)) {
                     continue;
                 }
+
+                using var shape = new RectangleShape(sprite.TextureRect.Size()) {
+                    FillColor = Colors.Get(color),
+                    OutlineThickness = 0
+                };
                 renderTarget.Clear(Color.Transparent);
-                renderTarget.Draw(sprite);
                 renderTarget.Draw(mask);
+                renderTarget.Draw(shape, new(BlendMode.Multiply));
+                renderTarget.Draw(sprite);
                 renderTarget.Display();
                 using var image = renderTarget.Texture.CopyToImage();
                 image.SaveToFile(@"E:\Repos\Fiero\Fiero.Business\Fiero.Business\Resources\Textures\hmm.png");

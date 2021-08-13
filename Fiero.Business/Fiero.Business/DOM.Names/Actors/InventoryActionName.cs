@@ -2,10 +2,13 @@
 {
     public enum InventoryActionName
     {
+        Set,
         Drop,
         Equip,
         Unequip,
-        Use,
-        Throw
+        Throw,
+        Zap,
+        Quaff,
+        Read
     }
 }

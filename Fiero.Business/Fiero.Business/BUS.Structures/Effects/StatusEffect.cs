@@ -7,6 +7,14 @@
     /// </summary>
     public abstract class StatusEffect : Effect
     {
+        protected abstract void Apply(GameSystems systems, Actor target);
 
+        protected override void OnStarted(GameSystems systems, Entity owner)
+        {
+            base.OnStarted(systems, owner);
+            if(owner.TryCast<Actor>(out var target)) {
+                Apply(systems, target);
+            }
+        }
     }
 }

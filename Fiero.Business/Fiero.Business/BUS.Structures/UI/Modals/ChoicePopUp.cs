@@ -1,5 +1,6 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
+using SFML.Window;
 using System;
 
 namespace Fiero.Business
@@ -25,6 +26,7 @@ namespace Fiero.Business
         public override void Update()
         {
             base.Update();
+
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))) {
                 SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
                 Invalidate();
@@ -32,6 +34,31 @@ namespace Fiero.Business
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS))) {
                 SelectedIndex = (SelectedIndex + 1).Mod(Options.Length);
                 Invalidate();
+            }
+
+            SelectNumber(Keyboard.Key.Num1, 0);
+            SelectNumber(Keyboard.Key.Num2, 1);
+            SelectNumber(Keyboard.Key.Num3, 2);
+            SelectNumber(Keyboard.Key.Num4, 3);
+            SelectNumber(Keyboard.Key.Num5, 4);
+            SelectNumber(Keyboard.Key.Num6, 5);
+            SelectNumber(Keyboard.Key.Num7, 6);
+            SelectNumber(Keyboard.Key.Num8, 7);
+            SelectNumber(Keyboard.Key.Num9, 8);
+
+            void SelectNumber(Keyboard.Key key, int index)
+            {
+                if(index < 0 || index >= Options.Length) {
+                    return;
+                }
+                if (UI.Input.IsKeyPressed(key)) {
+                    if(SelectedIndex == index) {
+                        Close(ModalWindowButton.ImplicitYes);
+                        return;
+                    }
+                    SelectedIndex = index;
+                    Invalidate();
+                }
             }
         }
 
@@ -52,7 +79,7 @@ namespace Fiero.Business
                 .Row(@class: "choice")
                     .Cell<Button>(b => {
                         b.ZOrder.V = i;
-                        b.Text.V = Options[i]?.ToString() ?? "(ERROR)";
+                        b.Text.V = $"{i+1}) " + Options[i]?.ToString() ?? "(ERROR)";
                         b.Clicked += (_, __, ___) => {
                             if(SelectedIndex == i) {
                                 Close(ModalWindowButton.ImplicitYes);

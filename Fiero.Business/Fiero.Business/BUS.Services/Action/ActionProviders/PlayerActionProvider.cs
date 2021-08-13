@@ -8,27 +8,26 @@ namespace Fiero.Business
 {
     public class PlayerActionProvider : ActionProvider
     {
-        protected static readonly GameDatum<Keyboard.Key>[] QuickCastSlotKeys = new[] {
-            Data.Hotkeys.QuickCast1, Data.Hotkeys.QuickCast2, Data.Hotkeys.QuickCast3, Data.Hotkeys.QuickCast4
-        };
-
         protected readonly GameUI UI;
         protected readonly GameSystems Systems;
         protected readonly Queue<IAction> QueuedActions;
+        protected readonly QuickSlotHelper QuickSlots;
+
         protected Modal CurrentModal { get; private set; }
 
-        public PlayerActionProvider(GameUI ui, GameSystems systems)
+        public PlayerActionProvider(GameUI ui, GameSystems systems, QuickSlotHelper slots)
         {
             UI = ui;
             Systems = systems;
             QueuedActions = new();
+            QuickSlots = slots;
         }
 
         public override IAction GetIntent(Actor a)
         {
             if (CurrentModal != null)
                 return new NoAction();
-            if(QueuedActions.TryDequeue(out var backedUp)) {
+            if (QueuedActions.TryDequeue(out var backedUp)) {
                 return backedUp;
             }
             var floorId = a.FloorId();
@@ -61,55 +60,36 @@ namespace Fiero.Business
             if (IsKeyPressed(Data.Hotkeys.MoveSE)) {
                 return MoveOrAttack(new(1, 1));
             }
-            for (int i = 0; i < QuickCastSlotKeys.Length; i++) {
-                if (IsKeyPressed(QuickCastSlotKeys[i])) {
-                    if (a.Spells.KnownSpells.ElementAtOrDefault(i) is { } spell) {
-                        foreach (var effect in spell.Effects.Active) {
-                            if (effect is CastEffect cast && !cast.ShouldApply(Systems, spell, a)) {
-                                return new FailAction();
-                            }
-                        }
-                        if (UI.Target(spell.SpellProperties.TargetingShape, out var target)) {
-                            return new CastSpellAction(spell, target);
-                        }
-                    }
-                }
-            }
             if (IsKeyPressed(Data.Hotkeys.Interact)) {
                 return new InteractRelativeAction();
             }
             if (IsKeyPressed(Data.Hotkeys.Look)) {
-                UI.Look(out _);
+                UI.Look();
+            }
+            if (QuickSlots.TryGetAction(out var action)) {
+                return action;
             }
             if (IsKeyPressed(Data.Hotkeys.Inventory)) {
-                var inventoryModal = UI.Inventory(a);
+                var inventoryModal = UI.Inventory(a, "Bag");
                 CurrentModal = inventoryModal;
                 inventoryModal.Closed += (_, __) => CurrentModal = null;
                 inventoryModal.ActionPerformed += (item, action) => {
                     inventoryModal.Close(ModalWindowButton.None);
-                    switch(action) {
-                        case InventoryActionName.Drop:
-                            QueuedActions.Enqueue(new DropItemAction(item));
+                    switch (action) {
+                        case InventoryActionName.Set:
+                            Set(item);
                             break;
-                        case InventoryActionName.Use when item.TryCast<Consumable>(out var consumable):
-                            QueuedActions.Enqueue(new UseConsumableAction(consumable));
+                        case InventoryActionName.Quaff when item.TryCast<Potion>(out var potion):
+                            QueuedActions.Enqueue(new QuaffPotionAction(potion));
                             break;
-                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable):
-                            var len = throwable.ThrowableProperties.MaximumRange + 1;
-                            var line = Shapes.Line(new(0, 0), new(0, len)).Skip(1).ToArray();
-                            var throwShape = new TargetingShape(0, true, line);
-                            if (UI.Target(throwShape, out throwShape)) {
-                                foreach (var p in throwShape.Points) {
-                                    var target = Systems.Floor.GetActorsAt(floorId, p)
-                                    .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
-                                    if (target != null) {
-                                        QueuedActions.Enqueue(new ThrowItemAtOtherAction(target, throwable));
-                                        return;
-                                    }
-                                }
-                                // Okay, then
-                                QueuedActions.Enqueue(new ThrowItemAtPointAction(throwShape.Points.Last() - a.Position(), throwable));
-                            }
+                        case InventoryActionName.Read when item.TryCast<Scroll>(out var scroll):
+                            QueuedActions.Enqueue(new ReadScrollAction(scroll));
+                            break;
+                        case InventoryActionName.Zap when item.TryCast<Wand>(out var wand) && TryZap(wand, out var zap):
+                            QueuedActions.Enqueue(zap);
+                            break;
+                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable) && TryThrow(throwable, out var @throw):
+                            QueuedActions.Enqueue(@throw);
                             break;
                         case InventoryActionName.Equip:
                             QueuedActions.Enqueue(new EquipItemAction(item));
@@ -117,16 +97,144 @@ namespace Fiero.Business
                         case InventoryActionName.Unequip:
                             QueuedActions.Enqueue(new UnequipItemAction(item));
                             break;
-                        default:
-                            throw new NotSupportedException();
+                        case InventoryActionName.Drop:
+                            QueuedActions.Enqueue(new DropItemAction(item));
+                            break;
                     }
                 };
             }
             return new NoAction();
 
+            void Set(Item item)
+            {
+                UI.NecessaryChoice(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, "Which quick slot?").OptionChosen += (popup, slot) => {
+                    if (item.TryCast<Wand>(out var wand)) {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, "Which action?").OptionChosen += (popup, choice) => {
+                            if (choice == InventoryActionName.Throw) {
+                                QuickSlots.Set(slot, item, () => {
+                                    if(TryThrow(wand, out action)) {
+                                        QuickSlots.Unset(slot);
+                                        return action;
+                                    }
+                                    return new FailAction();
+                                });
+                            }
+                            else {
+                                QuickSlots.Set(slot, item, () => TryZap(wand, out var action) ? action : new FailAction());
+                            }
+                        };
+                    }
+                    else if (item.TryCast<Potion>(out var potion)) {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, "Which action?").OptionChosen += (popup, choice) => {
+                            if (choice == InventoryActionName.Throw) {
+                                QuickSlots.Set(slot, item, () => {
+                                    if (TryThrow(potion, out action)) {
+                                        QuickSlots.Unset(slot);
+                                        return action;
+                                    }
+                                    return new FailAction();
+                                });
+                            }
+                            else {
+                                QuickSlots.Set(slot, item, () => {
+                                    QuickSlots.Unset(slot);
+                                    return new QuaffPotionAction(potion);
+                                });
+                            }
+                        };
+                    }
+                    else if (item.TryCast<Scroll>(out var scroll)) {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, "Which action?").OptionChosen += (popup, choice) => {
+                            if (choice == InventoryActionName.Throw) {
+                                QuickSlots.Set(slot, item, () => {
+                                    if (TryThrow(scroll, out action)) {
+                                        QuickSlots.Unset(slot);
+                                        return action;
+                                    }
+                                    return new FailAction();
+                                });
+                            }
+                            else {
+                                QuickSlots.Set(slot, item, () => {
+                                    QuickSlots.Unset(slot);
+                                    return new ReadScrollAction(scroll);
+                                });
+                            }
+                        };
+                    }
+                    else if (item.TryCast<Throwable>(out var throwable)) {
+                        QuickSlots.Set(slot, item, () => {
+                            if(TryThrow(throwable, out action)) {
+                                if(!throwable.ThrowableProperties.ThrowsUseCharges || throwable.ConsumableProperties.RemainingUses == 1) {
+                                    QuickSlots.Unset(slot);
+                                }
+                                return action;
+                            }
+                            return new FailAction();
+                        });
+                    }
+                };
+            }
+
+            bool TryZap(Wand wand, out IAction action)
+            {
+                // All wands use the same targeting shape and have "infinite" range
+                var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
+                var zapShape = new RayTargetingShape(a.Position(), 100);
+                zapShape.TryAutoTarget(
+                    p => Systems.Floor.GetActorsAt(floorId, p).Any(),
+                    p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                );
+                if (UI.Target(zapShape)) {
+                    var points = zapShape.GetPoints().ToArray();
+                    foreach (var p in points) {
+                        var target = Systems.Floor.GetActorsAt(floorId, p)
+                            .FirstOrDefault();
+                        if (target != null) {
+                            action = new ZapWandAtOtherAction(wand, target);
+                            return true;
+                        }
+                    }
+                    // Okay, then
+                    action = new ZapWandAtPointAction(wand, points.Last() - a.Position());
+                    return true;
+                }
+                action = default;
+                return false;
+            }
+
+            bool TryThrow(Throwable throwable, out IAction action)
+            {
+                var len = throwable.ThrowableProperties.MaximumRange + 1;
+                var line = Shapes.Line(new(0, 0), new(0, len))
+                    .Skip(1)
+                    .ToArray();
+                var throwShape = new RayTargetingShape(a.Position(), len);
+                throwShape.TryAutoTarget(
+                    p => Systems.Floor.GetActorsAt(floorId, p).Any(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile()),
+                    p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                );
+                if (UI.Target(throwShape)) {
+                    var points = throwShape.GetPoints().ToArray();
+                    foreach (var p in points) {
+                        var target = Systems.Floor.GetActorsAt(floorId, p)
+                            .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
+                        if (target != null) {
+                            action = new ThrowItemAtOtherAction(target, throwable);
+                            return true;
+                        }
+                    }
+                    // Okay, then
+                    action = new ThrowItemAtPointAction(points.Last() - a.Position(), throwable);
+                    return true;
+                }
+                action = default;
+                return false;
+            }
+
             IAction MoveOrAttack(Coord c)
             {
-                if(wantToAttack) {
+                if (wantToAttack) {
                     return new MeleeAttackPointAction(c, a.Equipment.Weapon);
                 }
                 return new MoveRelativeAction(c);

@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class Scroll : Consumable
+    public class Scroll : Throwable
     {
         [RequiredComponent]
         public ScrollComponent ScrollProperties { get; private set; }

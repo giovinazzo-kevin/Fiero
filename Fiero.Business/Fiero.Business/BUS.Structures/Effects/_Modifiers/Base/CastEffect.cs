@@ -9,8 +9,12 @@ namespace Fiero.Business
     /// - Spells:
     ///     - The effect is applied to the actor that casts the spell, and it ends when the actor forgets the spell.
     /// </summary>
-    public abstract class CastEffect : Effect
+    public abstract class CastEffect : ModifierEffect
     {
+        protected CastEffect(EffectDef source) : base(source)
+        {
+        }
+
         public abstract bool ShouldApply(GameSystems systems, Entity owner, Actor caster);
         protected abstract bool OnApplied(GameSystems systems, Entity owner, Actor caster, PhysicalEntity[] targets);
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

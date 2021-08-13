@@ -4,6 +4,7 @@ namespace Fiero.Business
 {
     public class ScrollComponent : EcsComponent
     {
-        public EffectName Name { get; set; }
+        public EffectDef Effect { get; set; }
+        public ScrollModifierName Modifier { get; set; }
     }
 }

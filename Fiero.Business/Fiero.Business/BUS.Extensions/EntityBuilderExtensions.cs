@@ -96,7 +96,8 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithPlayerAi<T>(this EntityBuilder<T> builder, GameUI ui)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
                 var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));
-                c.ActionProvider = new PlayerActionProvider(ui, gameSystems);
+                var quickSlots = (QuickSlotHelper)builder.ServiceFactory.GetInstance(typeof(QuickSlotHelper));
+                c.ActionProvider = new PlayerActionProvider(ui, gameSystems, quickSlots);
             });
         public static EntityBuilder<T> WithFieldOfView<T>(this EntityBuilder<T> builder, int radius)
             where T : Actor => builder.AddOrTweak<FieldOfViewComponent>(c => {
@@ -138,11 +139,13 @@ namespace Fiero.Business
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
             });
-        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, ThrowableName name, int damage, int maxRange, ThrowName @throw)
+        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, ThrowableName name, int damage, int maxRange, float mulchChance, bool throwsUseCharges, ThrowName @throw)
             where T : Throwable => builder.AddOrTweak<ThrowableComponent>(c => {
                 c.Name = name;
                 c.BaseDamage = damage;
                 c.MaximumRange = maxRange;
+                c.MulchChance = mulchChance;
+                c.ThrowsUseCharges = throwsUseCharges;
                 c.Throw = @throw;
             });
         public static EntityBuilder<T> WithResourceInfo<T>(this EntityBuilder<T> builder, ResourceName name, int amount, int maxAmount)
@@ -151,18 +154,24 @@ namespace Fiero.Business
                 c.Amount = amount;
                 c.MaximumAmount = maxAmount;
             });
-        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, EffectName effect)
+        public static EntityBuilder<T> WithPotionInfo<T>(this EntityBuilder<T> builder, EffectDef quaffEffect, EffectDef throwEffect)
             where T : Potion => builder.AddOrTweak<PotionComponent>(c => {
-                c.Name = effect;
+                c.QuaffEffect = quaffEffect;
+                c.ThrowEffect = throwEffect;
             });
-        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, EffectName effect)
+        public static EntityBuilder<T> WithWandInfo<T>(this EntityBuilder<T> builder, EffectDef effect)
+            where T : Wand => builder.AddOrTweak<WandComponent>(c => {
+                c.Effect = effect;
+            });
+        public static EntityBuilder<T> WithScrollInfo<T>(this EntityBuilder<T> builder, EffectDef effect, ScrollModifierName modifier)
             where T : Scroll => builder.AddOrTweak<ScrollComponent>(c => {
-                c.Name = effect;
+                c.Effect = effect;
+                c.Modifier = modifier;
             });
-        public static EntityBuilder<T> WithSpellInfo<T>(this EntityBuilder<T> builder, SpellName effect, int damage, int delay)
+        public static EntityBuilder<T> WithSpellInfo<T>(this EntityBuilder<T> builder, TargetingShape shape, SpellName effect, int damage, int delay)
             where T : Spell => builder.AddOrTweak<SpellComponent>(c => {
                 c.Name = effect;
-                c.TargetingShape = new(new(), false, new Coord());
+                c.TargetingShape = shape;
                 c.TargetingFilter = (_, __, ___) => true;
                 c.BaseDamage = damage;
                 c.CastDelay = delay;

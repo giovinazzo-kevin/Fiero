@@ -9,8 +9,12 @@ namespace Fiero.Business
     /// - Actors, in which case the effect is applied when an enemy is hit by the actor
     /// - Weapons, in which case the effect is applied when an enemy is hit by the weapon
     /// </summary>
-    public abstract class HitDealtEffect : Effect
+    public abstract class HitDealtEffect : ModifierEffect
     {
+        protected HitDealtEffect(EffectDef source) : base(source)
+        {
+        }
+
         protected abstract void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage);
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

@@ -28,7 +28,7 @@ namespace Fiero.Business
         
         protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
-            var modalSize = UI.Store.Get(Data.UI.PopUpSize) * 2;
+            var modalSize = UI.Store.Get(Data.UI.PopUpSize);
             Layout.Size.V = modalSize;
             Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
         }
@@ -60,9 +60,10 @@ namespace Fiero.Business
             );
             modal.Confirmed += (_, __) => {
                 ActionPerformed?.Invoke(Items[i], modal.SelectedOption);
-                bool shouldRemoveMenuItem = modal.SelectedOption == InventoryActionName.Drop;
-                shouldRemoveMenuItem |= (modal.SelectedOption == InventoryActionName.Use || modal.SelectedOption == InventoryActionName.Throw)
-                    && Items[i].TryCast<Consumable>(out var c)
+                var shouldRemoveMenuItem = modal.SelectedOption == InventoryActionName.Drop;
+                var consumingAction = new[] { InventoryActionName.Read, InventoryActionName.Throw, InventoryActionName.Zap, InventoryActionName.Quaff }
+                    .Contains(modal.SelectedOption);
+                shouldRemoveMenuItem |= consumingAction && Items[i].TryCast<Consumable>(out var c)
                     && c.ConsumableProperties.ConsumedWhenEmpty && c.ConsumableProperties.RemainingUses == 1;
                 if (shouldRemoveMenuItem) {
                     Items.RemoveAt(i);
@@ -85,10 +86,20 @@ namespace Fiero.Business
                 }
             }
             if (i.TryCast<Throwable>(out _)) {
+                yield return InventoryActionName.Set;
                 yield return InventoryActionName.Throw;
             }
-            else if (i.TryCast<Consumable>(out _)) {
-                yield return InventoryActionName.Use;
+            if (i.TryCast<Potion>(out _)) {
+                yield return InventoryActionName.Quaff;
+                yield return InventoryActionName.Set;
+            }
+            if (i.TryCast<Scroll>(out _)) {
+                yield return InventoryActionName.Read;
+                yield return InventoryActionName.Set;
+            }
+            if (i.TryCast<Wand>(out _)) {
+                yield return InventoryActionName.Set;
+                yield return InventoryActionName.Zap;
             }
         }
         

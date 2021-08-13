@@ -57,7 +57,7 @@ namespace Fiero.Business
                 darkerSprite.Color = new(128, 128, 128);
                 target.Draw(darkerSprite);
 
-                foreach (var point in shape.Points) {
+                foreach (var point in shape.GetPoints()) {
                     var pos = (point - new Coord(ViewArea.V.Left, ViewArea.V.Top)) * ViewTileSize.V + Position.V;
                     var origin = new Vec(0.5f, 0.5f) * ViewTileSize.V;
                     var spriteRect = new IntRect(pos.X - (int)origin.X, pos.Y - (int)origin.Y, ViewTileSize.V.X, ViewTileSize.V.Y);

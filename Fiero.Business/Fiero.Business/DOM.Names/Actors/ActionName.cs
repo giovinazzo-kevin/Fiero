@@ -12,7 +12,7 @@
         Organize,
         Read,
         Throw,
-        Drink,
+        Quaff,
         Zap
     }
 }

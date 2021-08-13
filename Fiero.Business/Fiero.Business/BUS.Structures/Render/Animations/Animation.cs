@@ -20,10 +20,34 @@ namespace Fiero.Business
         ) => new(
             Enumerable.Range(1, radius)
                 .Select(i => new AnimationFrame(frameDuration ?? TimeSpan.FromMilliseconds(24), Shapes.Circle(new(), i)
-                    .Select(p => new AnimationSprite(texture, sprite, tint, p.ToVec(), scale ?? new(1, 1)))
+                    .Select(p => new SpriteDef(texture, sprite, tint, p.ToVec(), scale ?? new(1, 1)))
                     .ToArray()))
                 .ToArray()
         );
+
+        public static Animation Debuff(
+            ColorName tint = ColorName.White,
+            TimeSpan? frameDuration = null,
+            Vec? scale = null
+        )
+        {
+            return new(Enumerable.Range(0, 9).Select(i => new AnimationFrame(
+                frameDuration ?? TimeSpan.FromMilliseconds(24),
+                new SpriteDef(TextureName.Animations, $"Debuff_{i + 1}", tint, new(), scale ?? new(1, 1))))
+            .ToArray());
+        }
+
+        public static Animation Buff(
+            ColorName tint = ColorName.White,
+            TimeSpan? frameDuration = null,
+            Vec? scale = null
+        )
+        {
+            return new(Enumerable.Range(0, 9).Select(i => new AnimationFrame(
+                frameDuration ?? TimeSpan.FromMilliseconds(24),
+                new SpriteDef(TextureName.Animations, $"Buff_{i + 1}", tint, new(), scale ?? new(1, 1))))
+            .ToArray());
+        }
 
         public static Animation StraightProjectile(
             Coord from,
@@ -35,14 +59,14 @@ namespace Fiero.Business
             Vec? scale = null
         )
         {
-            var dir = (from - to).ToVec().Clamp(-1, 1);
+            var dir = (to - from).ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(10);
             return new(
             Shapes.Line(to, from)
                 .Reverse()
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
-                .Select(p => new AnimationFrame(frameDur, new AnimationSprite(texture, sprite, tint, p - from, scale ?? new(1, 1))))
+                .Select(p => new AnimationFrame(frameDur, new SpriteDef(texture, sprite, tint, p - from, scale ?? new(1, 1))))
                 .ToArray());
         }
 
@@ -69,7 +93,7 @@ namespace Fiero.Business
                     var v = p - from;
                     var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
                     v += new Vec(0, t);
-                    return new AnimationFrame(frameDur, new AnimationSprite(texture, sprite, tint, v, scale ?? new(1, 1)));
+                    return new AnimationFrame(frameDur, new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1)));
                 })
                 .ToArray());
 
@@ -81,7 +105,7 @@ namespace Fiero.Business
             TimeSpan? frameDuration = null
         )
         {
-            var sprite = new AnimationSprite(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, new(), new(1, 1));
+            var sprite = new SpriteDef(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, new(), new(1, 1));
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(32);
             return new(Enumerable.Range(0, 6).SelectMany(i => new[] {
                 new AnimationFrame(frameDur, sprite),
@@ -94,8 +118,9 @@ namespace Fiero.Business
             Coord direction
         )
         {
-            var k = new Vec(1.0f, 1.0f);
+            var k = new Vec(0.5f, 0.5f);
             return new(new[] {
+                new AnimationFrame(TimeSpan.FromMilliseconds(4), MakeSprite(new())),
                 new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
@@ -103,9 +128,10 @@ namespace Fiero.Business
                 new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4), MakeSprite(new())),
             });
 
-            AnimationSprite MakeSprite(Vec ofs) =>
+            SpriteDef MakeSprite(Vec ofs) =>
                 new(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, ofs, new(1, 1));
         }
 
@@ -128,9 +154,9 @@ namespace Fiero.Business
                 new AnimationFrame(TimeSpan.FromMilliseconds(4 *  8), GetSprites(new(0, +0.50f), tint, str))
             );
 
-            AnimationSprite[] GetSprites(Vec ofs, ColorName tint, string text)
+            SpriteDef[] GetSprites(Vec ofs, ColorName tint, string text)
             {
-                return text.Select((c, i) => new AnimationSprite(
+                return text.Select((c, i) => new SpriteDef(
                         TextureName.FontLight, 
                         ((int)c).ToString(), 
                         tint, 
@@ -148,7 +174,7 @@ namespace Fiero.Business
         ) => new(
             Enumerable.Range(0, 8).Select(i => new AnimationFrame(
                 frameDuration ?? TimeSpan.FromMilliseconds(i < 6 ? i < 3 ? 8 : 24 : 48),
-                new AnimationSprite(TextureName.Animations, $"Explosion_{i + 1}", tint, new(), scale ?? new(2, 2))))
+                new SpriteDef(TextureName.Animations, $"Explosion_{i + 1}", tint, new(), scale ?? new(2, 2))))
             .ToArray()
         );
     }

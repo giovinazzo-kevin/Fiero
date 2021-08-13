@@ -11,7 +11,7 @@ namespace Fiero.Business
     public class UIScreen : Modal
     {
         protected readonly GameLoop Loop;
-        protected readonly ConcurrentQueue<OrderedPair<Coord, AnimationSprite>> Vfx = new();
+        protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
         public Viewport Viewport { get; private set; }
         public Minimap Minimap { get; private set; }
         public Label Look { get; private set; }
@@ -92,23 +92,24 @@ namespace Fiero.Business
             void Impl()
             {
                 var time = TimeSpan.Zero;
-                var increment = TimeSpan.FromMilliseconds(10);
+                var increment = TimeSpan.FromMilliseconds(4);
                 var timeline = animations.SelectMany(a => Timeline(a))
                     .OrderBy(x => x.Time)
                     .ToList();
                 var viewPos = Viewport.ViewArea.V.Position();
+                var myVfx = new ConcurrentQueue<OrderedPair<Coord, SpriteDef>>();
+                var k = Vfx.Keys.LastOrDefault() + 1;
+                Vfx[k] = myVfx;
                 while (timeline.Count > 0) {
-                    Vfx.Clear();
                     for (int i = timeline.Count - 1; i >= 0; i--) {
                         var t = timeline[i];
-                        if (time < t.Time + t.Frame.Duration && time >= t.Time) {
+                        if (time <= t.Time + t.Frame.Duration && time > t.Time) {
                             foreach (var spriteDef in t.Frame.Sprites) {
-                                Vfx.Enqueue(new(worldPos, spriteDef));
+                                myVfx.Enqueue(new(worldPos, spriteDef));
                             }
                             t.Anim.OnFramePlaying(t.Index);
-                            // AnimationFramePlayed.Raise(new(t.Anim, t.Index));
                         }
-                        else if (time >= t.Time + t.Frame.Duration) {
+                        else if (time > t.Time + t.Frame.Duration) {
                             timeline.RemoveAt(i);
                         }
                     }
@@ -119,7 +120,9 @@ namespace Fiero.Business
                         new GameLoop().Run(increment);
                     }
                     time += increment;
+                    myVfx.Clear();
                 }
+                Vfx.Remove(k, out _);
             }
 
             IEnumerable<(int Index, Animation Anim, TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
@@ -204,22 +207,21 @@ namespace Fiero.Business
         {
             base.Draw();
             var viewPos = Viewport.ViewArea.V.Position();
-
-            var vfxCount = Vfx.Count;
-            for(int i = 0; i < vfxCount; ++i)
-            { 
-                if(!Vfx.TryDequeue(out var pair)) {
-                    break;
+            foreach (var k in Vfx.Keys) {
+                if(!Vfx.TryGetValue(k, out var anim)) {
+                    continue;
                 }
-                var (worldPos, spriteDef) = (pair.Left, pair.Right);
-                using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
-                var spriteSize = sprite.GetLocalBounds().Size();
-                sprite.Position = (spriteDef.Offset + worldPos - viewPos) * Viewport.ViewTileSize.V + Viewport.Position.V;
-                sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
-                sprite.Color = Resources.Colors.Get(spriteDef.Color);
-                sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                UI.Window.Draw(sprite);
-                Vfx.Enqueue(pair);
+                for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++) {
+                    var (worldPos, spriteDef) = (pair.Left, pair.Right);
+                    using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
+                    var spriteSize = sprite.GetLocalBounds().Size();
+                    sprite.Position = (spriteDef.Offset + worldPos - viewPos) * Viewport.ViewTileSize.V + Viewport.Position.V;
+                    sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
+                    sprite.Color = Resources.Colors.Get(spriteDef.Color);
+                    sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                    UI.Window.Draw(sprite);
+                    anim.Enqueue(pair);
+                }
             }
         }
 

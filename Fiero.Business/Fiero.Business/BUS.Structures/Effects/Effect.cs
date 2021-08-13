@@ -4,6 +4,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     public abstract class Effect
     {
         protected readonly HashSet<Subscription> Subscriptions = new();
@@ -27,6 +28,10 @@ namespace Fiero.Business
                 }
                 catch (ObjectDisposedException) { }
             }));
+            if(owner.TryCast<Actor>(out var actor) && !(this is ModifierEffect)) {
+                Started += e => systems.Action.ActorGainedEffect.Raise(new(actor, this));
+                Ended += e => systems.Action.ActorLostEffect.Raise(new(actor, this));
+            }
             Started += e => owner.Effects?.Active.Add(e);
             Ended += e => owner.Effects?.Active.Remove(e);
             Subscriptions.UnionWith(RouteEvents(systems, owner));
@@ -37,10 +42,11 @@ namespace Fiero.Business
         protected virtual void OnEnded() { }
         public void End()
         {
+            OnEnded();
             foreach (var sub in Subscriptions) {
                 sub.Dispose();
             }
-            OnEnded();
+            Subscriptions.Clear();
             Ended?.Invoke(this);
         }
     }

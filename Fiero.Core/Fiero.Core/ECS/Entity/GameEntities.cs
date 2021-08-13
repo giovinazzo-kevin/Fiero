@@ -166,7 +166,8 @@ namespace Fiero.Core
                 object[] args = new object[] { entity.Id, proxiedEntity };
                 var ret = (bool)tryGetProxy.Invoke(this, args);
                 if(ret) {
-                    return (EcsEntity)args[1];
+                    var retEnt = (EcsEntity)args[1];
+                    return retEnt;
                 }
                 return null;
             };

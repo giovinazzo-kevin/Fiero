@@ -36,15 +36,17 @@ namespace Fiero.Business
         {
             fullyMerged = false;
             if (Capacity <= 0 || Count < Capacity) {
-                // Merge charges on consumables of the same kind
+                // Merge charges on consumables of the same kind (not wands)
                 var merged = false;
                 merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out fullyMerged);
                 if(!merged) {
-                    merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.Name == x.PotionProperties.Name, out var fully);
+                    merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.QuaffEffect.Name == x.PotionProperties.QuaffEffect.Name
+                                                             && y.PotionProperties.ThrowEffect.Name == x.PotionProperties.ThrowEffect.Name, out var fully);
                     fullyMerged |= fully;
                 }
                 if (!merged) {
-                    merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Name == x.ScrollProperties.Name, out var fully);
+                    merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Effect.Name == x.ScrollProperties.Effect.Name
+                                                             && y.ScrollProperties.Modifier == x.ScrollProperties.Modifier, out var fully);
                     fullyMerged |= fully;
                 }
                 if (!merged) {

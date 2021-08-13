@@ -81,6 +81,14 @@ namespace Fiero.Core
                 throw new ArgumentException($"Could not build a proxy for entity type {typeof(TProxy).Name} out of components {String.Join(", ", _componentTypes.Select(x => x.Name))}");
             }
             proxy._clone = Build;
+            var cast = proxy._cast;
+            proxy._cast = (e, t) => {
+                var r = cast(e, t);
+                if(r != null) {
+                    r._clone = Build;
+                }
+                return r;
+            };
             Built?.Invoke(this, proxy);
             return proxy;
         }

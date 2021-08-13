@@ -111,7 +111,9 @@ namespace Fiero.Business
             DrawableEntity CreateConsumable()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                   () => _entityBuilders.Potion(EffectName.Confusion).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Potion_OfConfusion().WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Wand_OfConfusion(Rng.Random.Between(4, 8)).WithPhysics(obj.Position).Build(),
+                   () => _entityBuilders.Scroll_OfMassConfusion().WithPhysics(obj.Position).Build(),
                    () => _entityBuilders.Throwable_Rock(Rng.Random.Between(1, 10)).WithPhysics(obj.Position).Build(),
                    () => _entityBuilders.Resource_Gold(Rng.Random.Between(1, 100)).WithPhysics(obj.Position).Build()
                 )();

@@ -4,6 +4,6 @@
     {
         Melee,
         Ranged,
-        Magical
+        Magic
     }
 }

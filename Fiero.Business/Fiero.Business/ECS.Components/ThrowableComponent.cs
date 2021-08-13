@@ -8,6 +8,7 @@ namespace Fiero.Business
         public int BaseDamage { get; set; } = 1;
         public int MaximumRange { get; set; } = 3;
         public float MulchChance { get; set; } = 0.25f;
+        public bool ThrowsUseCharges { get; set; }
         public ThrowName Throw { get; set; }
     }
 }

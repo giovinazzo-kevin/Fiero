@@ -12,7 +12,8 @@ namespace Fiero.Core
     {
         public static int Mod(this int x, int m) => (x % m + m) % m;
         public static double Dist(this Coord p, Coord q) => Math.Sqrt(Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2));
-        public static double DistSq(this Coord p, Coord q) => Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2);
+        public static int DistSq(this Coord p, Coord q) => (int)Math.Pow(p.X - q.X, 2) + (int)Math.Pow(p.Y - q.Y, 2);
+        public static int DistTaxi(this Coord p, Coord q) => p.X - q.X + p.Y - q.Y;
         public static Vec ToVec(this Vector2u v) => new(v.X, v.Y);
         public static Vec ToVec(this Vector2i v) => new(v.X, v.Y);
         public static Vec ToVec(this Vector2f v) => new(v.X, v.Y);
@@ -24,11 +25,15 @@ namespace Fiero.Core
         public static Coord ToCoord(this Vector2f v) => new((int)v.X, (int)v.Y);
         public static Coord ToCoord(this Point v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vec v) => new((int)v.X, (int)v.Y);
-        public static Vec Rotate(this Vec v, float theta) => new(
-            (float)(Math.Cos(theta) * v.X - Math.Sin(theta) * v.Y),
-            (float)(Math.Sin(theta) * v.X + Math.Cos(theta) * v.Y)
-        );
-        public static Vec Rotate(this Vec v, Vec pivot, float theta) => (v - pivot).Rotate(theta) + pivot;
+        public static Vec RotateAround(this Vec v, Vec pivot, float theta)
+        {
+            var cT = (float)Math.Cos(theta);
+            var sT = (float)Math.Sin(theta);
+            return new(
+                cT * (v.X - pivot.X) - sT * (v.Y - pivot.Y) + pivot.X,
+                sT * (v.X - pivot.X) + cT * (v.Y - pivot.Y) + pivot.Y
+            );
+        }
         public static Vector2f ToVector2f(this Vec v) => new(v.X, v.Y);
         public static Vector2i ToVector2i(this Vec v) => new((int)v.X, (int)v.Y);
         public static Vector2u ToVector2u(this Vec v) => new((uint)v.X, (uint)v.Y);

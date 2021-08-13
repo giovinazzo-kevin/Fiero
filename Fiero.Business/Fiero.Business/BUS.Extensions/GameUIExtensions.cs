@@ -43,16 +43,13 @@ namespace Fiero.Business
 
         internal static bool FreeCursor(this GameUI ui,
             TargetingShape shape,
-            out TargetingShape finalShape,
             Action<TargetingShape> cursorMoved = null
         )
         {
             var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var result = false;
-            var center = renderSystem.Screen.GetViewportCenter();
-            finalShape = TargetingShape.Offset(shape, center);
-            renderSystem.Screen.ShowTargetingShape(finalShape);
+            renderSystem.Screen.ShowTargetingShape(shape);
             cursorMoved?.Invoke(renderSystem.Screen.GetTargetingShape());
             gameLoop.LoopAndDraw(() => {
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
@@ -83,84 +80,44 @@ namespace Fiero.Business
                     Move(new(-1, 1));
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveSE)))
                     Move(new(1, 1));
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCW)))
-                    Rotate(90);
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCW)))
-                    Rotate(-90);
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCw)))
+                    RotateCw();
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCw)))
+                    RotateCCw();
             });
-            finalShape = renderSystem.Screen.GetTargetingShape();
             renderSystem.Screen.HideTargetingShape();
             return result;
 
             void Move(Coord c)
             {
-                if (renderSystem.Screen.GetTargetingShape().TryOffset(c, out var offset)) {
-                    renderSystem.Screen.ShowTargetingShape(offset);
-                    cursorMoved?.Invoke(offset);
+                if (shape.TryOffset(c)) {
+                    cursorMoved?.Invoke(shape);
                 }
             }
 
-            void Rotate(int deg)
+            void RotateCw()
             {
-                if (renderSystem.Screen.GetTargetingShape().TryRotate(center, deg, out var rotated)) {
-                    renderSystem.Screen.ShowTargetingShape(rotated);
-                    cursorMoved?.Invoke(rotated);
+                if (shape.TryRotateCw()) {
+                    cursorMoved?.Invoke(shape);
+                }
+            }
+
+            void RotateCCw()
+            {
+                if (shape.TryRotateCCw()) {
+                    cursorMoved?.Invoke(shape);
                 }
             }
         }
 
-        internal static bool TargetedCursor(this GameUI ui,
-            out Coord cursorPos,
-            Coord[] allowedPositions,
-            Action<Coord> cursorMoved = null
-        )
-        {
-            var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
-            var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var result = false;
-            cursorPos = allowedPositions.First();
-            renderSystem.Screen.ShowTargetingShape(new(4, false, cursorPos));
-            cursorMoved?.Invoke(renderSystem.Screen.GetTargetingShape().Points.Single());
-            gameLoop.LoopAndDraw(() => {
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
-                    result = false;
-                    return true;
-                }
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Confirm))) {
-                    result = true;
-                    return true;
-                }
-                return false;
-            }, (t, dt) => {
-                ui.Window.DispatchEvents();
-                ui.Input.Update(ui.Window.GetMousePosition());
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
-                    Move(-1);
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveE)))
-                    Move(+1);
-            });
-            cursorPos = renderSystem.Screen.GetTargetingShape().Points.Single();
-            renderSystem.Screen.HideTargetingShape();
-            return result;
-
-            void Move(int i)
-            {
-                var pos = renderSystem.Screen.GetTargetingShape().Points.Single();
-                var index = Array.IndexOf(allowedPositions, pos);
-                var newPos = allowedPositions[(index + i).Mod(allowedPositions.Length)];
-            renderSystem.Screen.ShowTargetingShape(new(1000, false, newPos));
-                cursorMoved?.Invoke(renderSystem.Screen.GetTargetingShape().Points.Single());
-            }
-        }
-
-        public static bool Look(this GameUI ui, out TargetingShape cursorPos)
+        public static bool Look(this GameUI ui)
         {
             var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var shape = new TargetingShape(1000, false, new Coord());
-            var result = ui.FreeCursor(shape, out cursorPos, cursorMoved: c => {
+            var shape = new PointTargetingShape(renderSystem.Screen.GetViewportCenter(), 1000);
+            var result = ui.FreeCursor(shape, cursorMoved: c => {
                 var floorId = renderSystem.Screen.GetViewportFloor();
-                if (floorSystem.TryGetCellAt(floorId, c.Points.Single(), out var cell)) {
+                if (floorSystem.TryGetCellAt(floorId, c.GetPoints().Single(), out var cell)) {
                     renderSystem.Screen.SetLookText(cell.ToString());
                 }
                 else {
@@ -171,29 +128,9 @@ namespace Fiero.Business
             return result;
         }
 
-        public static bool OldTarget(this GameUI ui, Coord[] allowedPositions, out Coord cursorPos)
+        public static bool Target(this GameUI ui, TargetingShape shape)
         {
-            var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
-            var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var result = ui.TargetedCursor(out cursorPos, allowedPositions, cursorMoved: c => {
-                var floorId = renderSystem.Screen.GetViewportFloor();
-                if (floorSystem.TryGetCellAt(floorId, c, out var cell)) {
-                    renderSystem.Screen.SetLookText(cell.ToString());
-                }
-                else {
-                    renderSystem.Screen.SetLookText(String.Empty);
-                }
-            });
-            renderSystem.Screen.SetLookText(String.Empty);
-            return result;
-        }
-
-        public static bool Target(this GameUI ui, TargetingShape shape, out TargetingShape finalShape)
-        {
-            var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
-            var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var result = ui.FreeCursor(shape, out finalShape);
-            return result;
+            return ui.FreeCursor(shape);
         }
     }
 }

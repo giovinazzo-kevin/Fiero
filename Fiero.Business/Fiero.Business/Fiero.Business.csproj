@@ -372,6 +372,9 @@
     <None Update="Resources\Textures\16x16_features.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Textures\16x16_icons.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Textures\16x16_items.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -382,9 +385,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Fonts\SegoeUI.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Textures\8x8_icons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Textures\8x8_ui.png">

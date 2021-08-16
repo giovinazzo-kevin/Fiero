@@ -153,7 +153,10 @@ namespace Fiero.Business
                 .Col(w: 2 * 0.75f)
                     .Row()
                         .Row(h: 3 * 0.75f, id: "viewport")
-                            .Cell<Viewport>(x => Viewport = x)
+                            .Cell<Viewport>(x => {
+                                Viewport = x;
+                                Viewport.ViewTileSize.V = new(32, 32);
+                            })
                         .End()
                         .Row(h: 3 * 0.025f, id: "look-bar")
                             .Cell<Label>(x => Look = x)
@@ -198,8 +201,8 @@ namespace Fiero.Business
         {
             base.Update();
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.ToggleZoom))) {
-                Viewport.ViewTileSize.V = Viewport.ViewTileSize.V == new Coord(16, 16)
-                    ? new Coord(32, 32) : new Coord(16, 16);
+                Viewport.ViewTileSize.V = Viewport.ViewTileSize.V == new Coord(32, 32)
+                    ? new Coord(64, 64) : new Coord(32, 32);
             }
         }
 

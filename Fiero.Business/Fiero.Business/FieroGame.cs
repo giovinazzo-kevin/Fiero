@@ -76,7 +76,7 @@ namespace Fiero.Business
             Textures.Add(TextureName.Tiles, new Texture("Resources/Textures/16x16_tiles.png"));
             Textures.Add(TextureName.Spells, new Texture("Resources/Textures/16x16_spells.png"));
             Textures.Add(TextureName.Animations, new Texture("Resources/Textures/16x16_animations.png"));
-            Textures.Add(TextureName.Icons, new Texture("Resources/Textures/8x8_icons.png"));
+            Textures.Add(TextureName.Icons, new Texture("Resources/Textures/16x16_icons.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));

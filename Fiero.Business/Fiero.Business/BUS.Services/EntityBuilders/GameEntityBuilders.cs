@@ -458,6 +458,10 @@ namespace Fiero.Business
             => Potion(new(EffectName.Confusion, 10), new(EffectName.Confusion, 10));
         public EntityBuilder<Potion> Potion_OfSleep()
             => Potion(new(EffectName.Sleep, 10), new(EffectName.Sleep, 10));
+        public EntityBuilder<Potion> Potion_OfSilence()
+            => Potion(new(EffectName.Silence, 10), new(EffectName.Silence, 10));
+        public EntityBuilder<Potion> Potion_OfEntrapment()
+            => Potion(new(EffectName.Entrapment, 10), new(EffectName.Entrapment, 10));
         #endregion
 
         #region SCROLLS
@@ -465,6 +469,10 @@ namespace Fiero.Business
             => Scroll(new(EffectName.Confusion, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSleep()
             => Scroll(new(EffectName.Sleep, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMassSilence()
+            => Scroll(new(EffectName.Silence, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMassEntrapment()
+            => Scroll(new(EffectName.Entrapment, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         #endregion
 
         #region WANDS
@@ -472,6 +480,10 @@ namespace Fiero.Business
             => Wand(new(EffectName.Confusion, 10), charges);
         public EntityBuilder<Wand> Wand_OfSleep(int charges)
             => Wand(new(EffectName.Sleep, 10), charges);
+        public EntityBuilder<Wand> Wand_OfSilence(int charges)
+            => Wand(new(EffectName.Silence, 10), charges);
+        public EntityBuilder<Wand> Wand_OfEntrapment(int charges)
+            => Wand(new(EffectName.Entrapment, 10), charges);
         #endregion
 
         #region RESOURCES

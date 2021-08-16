@@ -11,7 +11,7 @@
             TargetingShape = target;
         }
 
-        ActionName IAction.Name => ActionName.CastSpell;
+        ActionName IAction.Name => ActionName.Cast;
         int? IAction.Cost => 100;
     }
 }

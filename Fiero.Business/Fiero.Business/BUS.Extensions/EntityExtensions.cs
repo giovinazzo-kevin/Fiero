@@ -23,9 +23,24 @@ namespace Fiero.Business
         public static Coord Position(this PhysicalEntity a) => a.Physics.Position;
         public static bool IsInvalid(this Entity e) => e is null || e.Id == 0;
         public static bool IsAlive(this PhysicalEntity a) => !a.IsInvalid() && a.FloorId() != default;
-        public static bool TryRoot(this PhysicalEntity a) => a.IsAlive() && a.Physics.CanMove ? !(a.Physics.CanMove = false) : false;
-        public static bool TryFree(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove ? (a.Physics.CanMove = true) : false;
-        public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove;
+        public static bool TryRoot(this PhysicalEntity a)
+        {
+            var ret = a.IsAlive() && !a.IsRooted();
+            if(ret) {
+                ++a.Physics.Roots;
+            }
+            return ret;
+        }
+        public static bool TryFree(this PhysicalEntity a)
+        {
+            var ret = a.IsAlive() && a.IsRooted();
+            if (ret) {
+                --a.Physics.Roots;
+            }
+            return ret;
+        }
+        public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && a.Physics.Roots > 0;
+        public static bool IsImmobile(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove || a.Physics.Roots > 0;
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
         public static bool CanSee(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position());
@@ -35,6 +50,8 @@ namespace Fiero.Business
             return a.ActorProperties.Stats.Health = 
                 Math.Clamp(a.ActorProperties.Stats.Health + health, 0, a.ActorProperties.Stats.MaximumHealth);
         }
+        public static int Damage(this Actor a, int health) => a.Heal(-health);
+
         public static bool TryIdentify(this Actor a, Item i) => a.Inventory.TryIdentify(i);
         public static bool Identify<T>(this Actor a, T i, Func<T, bool> rule)
             where T : Item

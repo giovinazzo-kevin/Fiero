@@ -156,6 +156,9 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Potion_OfConfusion().Build(),
                         Resources.Entities.Wand_OfConfusion(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),
+                        Resources.Entities.Scroll_OfMassEntrapment().Build(),
+                        Resources.Entities.Scroll_OfMassSilence().Build(),
+                        Resources.Entities.Scroll_OfMassSleep().Build(),
                         Resources.Entities.Throwable_Rock(10).Build())
                     //.WithSpells(
                     //    Resources.Entities.Spell_CrimsonLance().Build(),
@@ -268,11 +271,15 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorGainedEffect.SubscribeHandler(e => {
                 if (!Player.CanSee(e.Actor))
                     return;
-                var (isBuff, isDebuff, color) = e.Effect.Name switch {
-                    EffectName.Confusion => (false, true, ColorName.LightYellow),
-                    EffectName.Sleep => (false, true, ColorName.LightBlue),
-                    _ => (false, false, ColorName.White)
+                var (isBuff, isDebuff) = e.Effect.Name switch {
+                    EffectName.Confusion => (false, true),
+                    EffectName.Sleep => (false, true),
+                    EffectName.Poison => (false, true),
+                    EffectName.Entrapment => (false, true),
+                    EffectName.Silence => (false, true),
+                    _ => (false, false)
                 };
+                var color = isBuff && isDebuff ? ColorName.LightYellow : isBuff ? ColorName.LightGreen : ColorName.LightRed;
                 Systems.Render.Screen.CenterOn(Player);
                 if (isBuff) {
                     Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
@@ -340,8 +347,9 @@ namespace Fiero.Business.Scenes
                         Systems.Faction.SetUnilateralRelationship(e.Victim, attacker, StandingName.Hated);
                     }
                 }
-                Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(e.Damage,
-                    e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan));
+                var color = e.Damage < 0 ? ColorName.LightGreen : e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
+
+                Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(e.Damage), color));
                 return true;
             });
             // ActionSystem.ActorDespawned:

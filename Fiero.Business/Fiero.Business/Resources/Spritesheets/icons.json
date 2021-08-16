@@ -1,6 +1,10 @@
 ﻿{
   "None": "0 0 0 0",
 
-  "Sleep": "0 0 8 8",
-  "Confusion": "8 0 8 8"
+  "Star": "0 0 8 8",
+  "Sleep": "8 0 8 8",
+  "Silence": "16 0 8 8",
+  "Poison": "24 0 8 8",
+  "Confusion": "0 8 8 8",
+  "Entrapment": "8 8 8 8"
 }

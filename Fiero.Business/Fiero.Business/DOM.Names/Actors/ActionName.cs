@@ -7,7 +7,7 @@
         Wait,
         Move,
         MeleeAttack,
-        CastSpell,
+        Cast,
         Interact,
         Organize,
         Read,

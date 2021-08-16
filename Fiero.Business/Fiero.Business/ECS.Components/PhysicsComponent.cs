@@ -8,6 +8,7 @@ namespace Fiero.Business
     {
         public FloorId FloorId { get; set; }
         public Coord Position { get; set; }
+        public int Roots { get; set; }
         public bool CanMove { get; set; }
         public bool BlocksMovement { get; set; }
         public bool BlocksLight { get; set; }

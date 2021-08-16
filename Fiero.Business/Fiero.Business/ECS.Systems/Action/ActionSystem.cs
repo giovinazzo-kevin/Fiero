@@ -164,7 +164,7 @@ namespace Fiero.Business
                 case ActionName.Throw:
                     ret = HandleThrowItem(t, ref action, ref cost);
                     break;
-                case ActionName.CastSpell:
+                case ActionName.Cast:
                     ret = HandleCastSpell(t, ref action, ref cost);
                     break;
                 case ActionName.Interact:

@@ -15,7 +15,7 @@ namespace Fiero.Business
         protected readonly GameResources Resources;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
-        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
+        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(32, 32));
         public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
@@ -108,7 +108,8 @@ namespace Fiero.Business
                     foreach (var drawable in cell.GetDrawables(seen)) {
                         if (drawable.Render.Hidden)
                             continue;
-                        if(!Resources.Sprites.TryGet(drawable.Render.TextureName, drawable.Render.SpriteName, drawable.Render.Color, out var spriteDef, drawable.Render.GetHashCode())) {
+                        var rngSeed = drawable.Render.GetHashCode();
+                        if (!Resources.Sprites.TryGet(drawable.Render.TextureName, drawable.Render.SpriteName, drawable.Render.Color, out var spriteDef, rngSeed)) {
                             continue;
                         }
                         using var sprite = new Sprite(spriteDef);
@@ -122,23 +123,25 @@ namespace Fiero.Business
                         _renderTexture.Draw(sprite, states);
                         if (drawable is Actor actor && actor.Effects != null) {
                             var offs = Coord.Zero;
-                            var _i = 0;
-                            foreach (var effect in actor.Effects.Active.Distinct()) {
-                                var color = effect.Name switch {
-                                    EffectName.Confusion => ColorName.LightYellow,
-                                    EffectName.Sleep => ColorName.LightBlue,
-                                    _ => ColorName.White
-                                };
+                            int _i = 0;
+                            foreach (var effect in actor.Effects.Active) {
                                 var icon = effect.Name.ToString();
-                                if (Resources.Sprites.TryGet(TextureName.Icons, icon, color, out var iconDef, effect.GetHashCode())) {
+                                if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed)) {
                                     using var iconSprite = new Sprite(iconDef);
                                     var iconSize = iconSprite.GetLocalBounds().Size();
-                                    iconSprite.Position = screenPos + offs - iconSize;
-                                    iconSprite.Origin = new Vec(0.5f, 0.5f) * iconSize;
-                                    iconSprite.Scale = ViewTileSize.V / iconSize / 2;
-                                    offs += iconSize.ToCoord() * (_i > 0 && _i % 3 == 0 ? new Coord(0, 1) : new Coord(1, 0));
+                                    var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
+                                    iconSprite.Position = screenPos + offs - iconSize * scale;
+                                    iconSprite.Origin = new Vec(1f, 1f) * iconSize;
+                                    if (_i++ % 4 == 3) {
+                                        offs += iconSize.ToCoord() * scale * new Coord(0, 1);
+                                        offs *= new Coord(0, 1);
+                                    }
+                                    else {
+                                        offs += iconSize.ToCoord() * scale * new Coord(1, 0);
+                                    }
                                     _renderTexture.Draw(iconSprite, states);
                                 }
+
                             }
                         }
                     }

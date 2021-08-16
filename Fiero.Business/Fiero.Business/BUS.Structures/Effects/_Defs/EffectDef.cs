@@ -37,9 +37,9 @@ namespace Fiero.Business
             return Name switch {
                 EffectName.Confusion => new ConfusionEffect(),
                 EffectName.Sleep => new SleepEffect(),
-                EffectName.Silence => throw new NotImplementedException(),
-                EffectName.Paralysis => throw new NotImplementedException(),
-                EffectName.Bleeding => throw new NotImplementedException(),
+                EffectName.Silence => new SilenceEffect(),
+                EffectName.Entrapment => new EntrapEffect(),
+                EffectName.Bleed => new BleedEffect(),
                 EffectName.Poison => throw new NotImplementedException(),
                 EffectName.Berserk => throw new NotImplementedException(),
                 EffectName.Hardening => throw new NotImplementedException(),

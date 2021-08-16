@@ -15,7 +15,7 @@ namespace Fiero.Business
     {
         private bool HandleMove(ActorTime t, ref IAction action, ref int? cost)
         {
-            if(t.Actor.IsRooted()) {
+            if(t.Actor.IsImmobile()) {
                 action = new WaitAction();
                 cost = HandleAction(t, ref action);
                 return true;

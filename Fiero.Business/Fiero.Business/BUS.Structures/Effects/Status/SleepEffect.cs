@@ -25,7 +25,7 @@ namespace Fiero.Business
 
             yield return systems.Action.ActorIntentSelected.SubscribeResponse(e => {
                 if (e.Actor == owner) {
-                    e.Actor.Heal(Rng.Random.Between(1, 3));
+                    systems.Action.ActorDamaged.Raise(new(e.Actor, e.Actor, e.Actor, -Rng.Random.Between(1, 3)));
                     return new(new WaitAction());
                 }
                 return new();

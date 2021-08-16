@@ -396,7 +396,6 @@
     <Folder Include="BUS.Services\Spells\" />
     <Folder Include="BUS.Structures\Effects\Cast\" />
     <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
-    <Folder Include="BUS.Structures\Effects\SteppedOn\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
   </ItemGroup>

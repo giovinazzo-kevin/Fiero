@@ -32,7 +32,7 @@ namespace Fiero.Business
         public Animation(params AnimationFrame[] frames)
         {
             Frames = frames;
-            Duration = frames.Select(f => f.Duration).Aggregate((a, b) => a + b);
+            Duration = frames.Length == 0 ? TimeSpan.Zero : frames.Select(f => f.Duration).Aggregate((a, b) => a + b);
         }
     }
 }

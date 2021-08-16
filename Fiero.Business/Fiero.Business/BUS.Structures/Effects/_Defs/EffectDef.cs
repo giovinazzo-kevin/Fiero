@@ -45,7 +45,7 @@ namespace Fiero.Business
                 EffectName.Hardening => throw new NotImplementedException(),
                 EffectName.Evasion => throw new NotImplementedException(),
                 EffectName.Vampirism => throw new NotImplementedException(),
-                EffectName.Rabies => throw new NotImplementedException(),
+                EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.Autopickup => new AutopickupEffect(),
                 _ => throw new NotSupportedException(Name.ToString()),

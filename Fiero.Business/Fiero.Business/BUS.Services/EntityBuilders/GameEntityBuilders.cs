@@ -484,6 +484,8 @@ namespace Fiero.Business
             => Wand(new(EffectName.Silence, 10), charges);
         public EntityBuilder<Wand> Wand_OfEntrapment(int charges)
             => Wand(new(EffectName.Entrapment, 10), charges);
+        public EntityBuilder<Wand> Wand_OfTeleport(int charges)
+            => Wand(new(EffectName.UncontrolledTeleport), charges);
         #endregion
 
         #region RESOURCES

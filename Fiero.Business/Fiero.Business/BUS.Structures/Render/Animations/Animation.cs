@@ -55,18 +55,19 @@ namespace Fiero.Business
             string sprite = "Rock",
             TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
-            TimeSpan? frameDuration = null,
+            Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null
         )
         {
             var dir = (to - from).ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
-            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(10);
+            frameDuration ??= (_ => TimeSpan.FromMilliseconds(10));
             return new(
             Shapes.Line(to, from)
+                .Skip(1).SkipLast(1)
                 .Reverse()
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
-                .Select(p => new AnimationFrame(frameDur, new SpriteDef(texture, sprite, tint, p - from, scale ?? new(1, 1))))
+                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, p - from, scale ?? new(1, 1))))
                 .ToArray());
         }
 
@@ -76,13 +77,13 @@ namespace Fiero.Business
             string sprite = "Rock",
             TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
-            TimeSpan? frameDuration = null,
+            Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null
         )
         {
             var dir = (from - to).ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
-            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(30);
+            frameDuration ??= (_ => TimeSpan.FromMilliseconds(30));
             var line = Shapes.Line(to, from)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
                 .Skip(1).SkipLast(1)
@@ -93,7 +94,7 @@ namespace Fiero.Business
                     var v = p - from;
                     var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
                     v += new Vec(0, t);
-                    return new AnimationFrame(frameDur, new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1)));
+                    return new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1)));
                 })
                 .ToArray());
 
@@ -134,6 +135,30 @@ namespace Fiero.Business
             SpriteDef MakeSprite(Vec ofs) =>
                 new(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, ofs, new(1, 1));
         }
+
+        public static Animation TeleportOut(
+            Actor actor
+        )
+            => StraightProjectile(
+                actor.Position(),
+                actor.Position() - new Coord(0, 25),
+                actor.Render.SpriteName,
+                actor.Render.TextureName,
+                actor.Render.Color,
+                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4))
+            );
+
+        public static Animation TeleportIn(
+            Actor actor
+        )
+            => StraightProjectile(
+                actor.Position() - new Coord(0, 25),
+                actor.Position(),
+                actor.Render.SpriteName,
+                actor.Render.TextureName,
+                actor.Render.Color,
+                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4))
+            );
 
         public static Animation DamageNumber(
             int damage,

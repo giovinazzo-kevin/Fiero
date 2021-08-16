@@ -30,6 +30,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnStarted;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnEnded;
         public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorMoved;
+        public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorTeleporting;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorWaited;
         public readonly SystemRequest<ActionSystem, ActorSpawnedEvent, EventResult> ActorSpawned;
         public readonly SystemRequest<ActionSystem, ActorDespawnedEvent, EventResult> ActorDespawned;
@@ -37,6 +38,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
         public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
         public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorDamaged;
+        public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorHealed;
         public readonly SystemRequest<ActionSystem, SpellLearnedEvent, EventResult> SpellLearned;
         public readonly SystemRequest<ActionSystem, SpellForgottenEvent, EventResult> SpellForgotten;
         public readonly SystemRequest<ActionSystem, SpellCastEvent, EventResult> SpellCast;
@@ -84,6 +86,7 @@ namespace Fiero.Business
             ActorTurnStarted = new(this, nameof(ActorTurnStarted));
             ActorTurnEnded = new(this, nameof(ActorTurnEnded));
             ActorMoved = new(this, nameof(ActorMoved));
+            ActorTeleporting = new(this, nameof(ActorTeleporting));
             ActorSpawned = new(this, nameof(ActorSpawned));
             ActorDespawned = new(this, nameof(ActorDespawned));
             ActorWaited = new(this, nameof(ActorWaited));
@@ -91,6 +94,7 @@ namespace Fiero.Business
             ActorKilled = new(this, nameof(ActorKilled));
             ActorAttacked = new(this, nameof(ActorAttacked));
             ActorDamaged = new(this, nameof(ActorDamaged));
+            ActorHealed = new(this, nameof(ActorHealed));
             SpellLearned = new(this, nameof(SpellLearned));
             SpellForgotten = new(this, nameof(SpellForgotten));
             SpellCast = new(this, nameof(SpellCast));
@@ -114,6 +118,11 @@ namespace Fiero.Business
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
 
+            ActorTeleporting.ResponseReceived += (_, e, r) => {
+                if (r.All(x => x)) {
+                    ActorMoved.HandleOrThrow(e);
+                }
+            };
             ActorAttacked.ResponseReceived += (_, e, r) => {
                 if (r.All(x => x)) {
                     ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapon, e.Damage));

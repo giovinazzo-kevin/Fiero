@@ -12,7 +12,8 @@
         Hardening,
         Evasion,
         Vampirism,
-        Rabies,
+
+        UncontrolledTeleport,
 
         Trap,
         Autopickup

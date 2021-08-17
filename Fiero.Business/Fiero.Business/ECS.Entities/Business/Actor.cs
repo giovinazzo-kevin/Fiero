@@ -20,6 +20,5 @@ namespace Fiero.Business
         public AiComponent Ai { get; private set; }
         public FieldOfViewComponent Fov { get; private set; }
         public SpellLibraryComponent Spells { get; private set; }
-        public BloodComponent Blood { get; private set; }
     }
 }

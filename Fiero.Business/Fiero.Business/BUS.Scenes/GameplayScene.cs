@@ -98,7 +98,7 @@ namespace Fiero.Business.Scenes
                                     .WithPosition(player.Position())
                                     .Build());
                             foreach (var f in friends) {
-                                if (TrySpawn(player.FloorId(), f)) {
+                                if (Systems.TrySpawn(player.FloorId(), f)) {
                                     Systems.Faction.SetBilateralRelationship(player, f, StandingName.Loved);
                                 }
                             }
@@ -149,17 +149,12 @@ namespace Fiero.Business.Scenes
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 Player = Resources.Entities.Player
                     .WithName(playerName)
-                    .WithHealth(100)
                     .WithItems(
-                        Resources.Entities.Weapon_Sword().WithIntrinsicEffect(() =>
-                            new GrantedWhenHitByMeleeWeapon(new(EffectName.Confusion, chance: .25f))).Build(),
-                        Resources.Entities.Potion_OfConfusion().Build(),
-                        Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
-                        Resources.Entities.Scroll_OfMassConfusion().Build(),
-                        Resources.Entities.Scroll_OfMassEntrapment().Build(),
-                        Resources.Entities.Scroll_OfMassSilence().Build(),
-                        Resources.Entities.Scroll_OfMassSleep().Build(),
-                        Resources.Entities.Throwable_Rock(10).Build())
+                        Resources.Entities.Weapon_Sword()
+                            .WithIntrinsicEffect(new(EffectName.UncontrolledTeleport, chance: .25f), e => new GrantedWhenHitByMeleeWeapon(e)).Build(),
+                        Resources.Entities.Potion_OfTeleportation().Build(),
+                        Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build()
+                    )
                     //.WithSpells(
                     //    Resources.Entities.Spell_CrimsonLance().Build(),
                     //    Resources.Entities.Spell_Bloodbath().Build(),
@@ -179,7 +174,7 @@ namespace Fiero.Business.Scenes
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Position();
 
-                if (!TrySpawn(entranceFloorId, Player, maxDistance: 100)) {
+                if (!Systems.TrySpawn(entranceFloorId, Player, maxDistance: 100)) {
                     throw new InvalidOperationException("Can't spawn the player??");
                 }
 
@@ -246,12 +241,17 @@ namespace Fiero.Business.Scenes
                             Systems.Render.Screen.CenterOn(Player);
                         })
                         .OnLastFrame(() => {
+                            Systems.Action.ActorMoved.HandleOrThrow(e);
+                            var tpIn = Animation.TeleportIn(e.Actor)
+                                .OnLastFrame(() => {
+                                    e.Actor.Render.Hidden = false;
+                                    Systems.Render.Screen.CenterOn(Player);
+                                });
+                            if(e.Actor.IsPlayer()) {
+                                Systems.Floor.RecalculateFov(Player);
+                                Systems.Render.Screen.CenterOn(Player);
+                            }
                             if (Player.CanSee(e.NewPosition)) {
-                                var tpIn = Animation.TeleportIn(e.Actor)
-                                    .OnLastFrame(() => {
-                                        e.Actor.Render.Hidden = false;
-                                        Systems.Render.Screen.CenterOn(Player);
-                                    });
                                 Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
                                 Systems.Render.Screen.Animate(true, e.NewPosition, tpIn);
                             }
@@ -261,8 +261,11 @@ namespace Fiero.Business.Scenes
                         });
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
                     Systems.Render.Screen.Animate(true, e.OldPosition, tpOut);
+                    return true;
                 }
-                return true;
+                else {
+                    return Systems.Action.ActorMoved.Handle(e);
+                }
             });
             // ActionSystem.ActorMoved:
             // - Update actor position
@@ -300,23 +303,15 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ActorGainedEffect.SubscribeHandler(e => {
                 if (!Player.CanSee(e.Actor))
                     return;
-                var (isBuff, isDebuff) = e.Effect.Name switch {
-                    EffectName.Confusion => (false, true),
-                    EffectName.Sleep => (false, true),
-                    EffectName.Poison => (false, true),
-                    EffectName.Entrapment => (false, true),
-                    EffectName.Silence => (false, true),
-                    _ => (false, false)
-                };
-                var color = isBuff && isDebuff ? ColorName.LightYellow : isBuff ? ColorName.LightGreen : ColorName.LightRed;
+                var flags = e.Effect.Name.GetFlags();
                 Systems.Render.Screen.CenterOn(Player);
-                if (isBuff) {
+                if (flags.IsBuff) {
                     Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Buff(color));
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Buff(ColorName.LightCyan));
                 }
-                if (isDebuff) {
+                if (flags.IsDebuff) {
                     Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Debuff(color));
+                    Systems.Render.Screen.Animate(true, e.Actor.Position(), Animation.Debuff(ColorName.LightMagenta));
                 }
                 Systems.Render.Screen.CenterOn(Player);
             });
@@ -365,14 +360,12 @@ namespace Fiero.Business.Scenes
             // - Heal actor
             // - Show damage numbers
             yield return Systems.Action.ActorHealed.SubscribeResponse(e => {
-                var oldHealth = e.Victim.ActorProperties.Stats.Health;
-                var heal = -e.Damage;
-                e.Victim.ActorProperties.Stats.Health = Math.Min(
-                    e.Victim.ActorProperties.Stats.Health + heal,
-                    e.Victim.ActorProperties.Stats.MaximumHealth
-                );
-                heal = e.Victim.ActorProperties.Stats.Health - oldHealth;
-                Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(heal, ColorName.LightGreen));
+                if (Player.CanSee(e.Target)) {
+                    int oldHealth = e.Target.ActorProperties.Health;
+                    e.Target.ActorProperties.Health.V += e.Heal;
+                    var actualHeal = e.Target.ActorProperties.Health - oldHealth;
+                    Systems.Render.Screen.Animate(false, e.Target.Position(), Animation.DamageNumber(actualHeal, ColorName.LightGreen));
+                }
                 return true;
             });
             // ActionSystem.ActorDamaged 
@@ -380,9 +373,6 @@ namespace Fiero.Business.Scenes
             // - Handle aggro
             // - Show damage numbers
             yield return Systems.Action.ActorDamaged.SubscribeResponse(e => {
-                var oldHealth = e.Victim.ActorProperties.Stats.Health;
-                var damage = e.Damage;
-                e.Victim.ActorProperties.Stats.Health -= damage;
                 if (e.Source.TryCast<Actor>(out var attacker)) {
                     // make sure that neutrals aggro the attacker
                     if (e.Victim.Ai != null && e.Victim.Ai.Target == null) {
@@ -391,9 +381,13 @@ namespace Fiero.Business.Scenes
                     // make sure that people hold a grudge regardless of factions
                     Systems.Faction.SetUnilateralRelationship(e.Victim, attacker, StandingName.Hated);
                 }
-                damage = oldHealth - e.Victim.ActorProperties.Stats.Health;
-                var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(damage), color));
+                if (Player.CanSee(e.Victim)) {
+                    int oldHealth = e.Victim.ActorProperties.Health;
+                    e.Victim.ActorProperties.Health.V -= e.Damage;
+                    var actualDdamage = oldHealth - e.Victim.ActorProperties.Health;
+                    var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
+                    Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), color));
+                }
                 return true;
             });
             // ActionSystem.ActorDespawned:
@@ -414,6 +408,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorDied:
             // - Play death animation
+            // - Drop inventory contents
             yield return Systems.Action.ActorDied.SubscribeResponse(e => {
                 e.Actor.Log?.Write($"$Action.YouDie$.");
                 if (e.Actor.IsPlayer()) {
@@ -421,6 +416,11 @@ namespace Fiero.Business.Scenes
                 }
                 else {
                     Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
+                }
+                if (e.Actor.Inventory != null) {
+                    foreach (var item in e.Actor.Inventory.GetItems().ToList()) {
+                        Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
+                    }
                 }
                 e.Actor.Render.Hidden = true;
                 if (Player.CanSee(e.Actor)) {
@@ -437,25 +437,18 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ItemDropped:
-            // - Drop item (remove from actor's inventory and add to floor) or fail if there's no space
+            // - Drop item (remove from actor's inventory and add to floor)
             yield return Systems.Action.ItemDropped.SubscribeResponse(e => {
-                if (Systems.Floor.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var tile, 10,
-                        cell => !cell.Items.Any() && !cell.Features.Any())) {
-                    if (!e.Actor.Inventory.TryTake(e.Item)) {
-                        e.Actor.Log?.Write($"$Action.UnableToDrop$ {e.Item.DisplayName}.");
-                        return false;
-                    }
-                    else {
-                        e.Item.Physics.Position = tile.Position();
-                        Systems.Floor.AddItem(e.Actor.FloorId(), e.Item);
-                        e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
-                    }
+                if (e.Actor.Inventory.TryTake(e.Item)) {
+                    e.Item.Physics.Position = e.Actor.Position();
+                    Systems.Floor.AddItem(e.Actor.FloorId(), e.Item);
+                    e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
+                    return true;
                 }
                 else {
-                    e.Actor.Log?.Write($"$Action.NoSpaceToDrop$ {e.Item.DisplayName}.");
+                    e.Actor.Log?.Write($"$Action.UnableToDrop$ {e.Item.DisplayName}.");
                     return false;
                 }
-                return true;
             });
             // ActionSystem.ItemPickedUp:
             // - Store item in inventory or fail
@@ -509,8 +502,8 @@ namespace Fiero.Business.Scenes
                 Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
                     var anim = e.Item.ThrowableProperties.Throw switch {
-                        ThrowName.Arc => Animation.ArcingProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName),
-                        _ => Animation.StraightProjectile(e.Actor.Position(), e.Position, sprite: e.Item.Render.SpriteName)
+                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName)
                     };
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
@@ -539,7 +532,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Log?.Write($"$Action.YouZap{e.Wand.DisplayName}.");
                 Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
-                    var anim = Animation.StraightProjectile(e.Actor.Position(), e.Position, sprite: e.Wand.Render.SpriteName);
+                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.SpriteName);
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                 }
@@ -548,7 +541,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ItemConsumed:
             // - Use up item and remove it from the game when completely consumed
             yield return Systems.Action.ItemConsumed.SubscribeResponse(e => {
-                if (TryUseItem(e.Item, e.Actor, out var consumed)) {
+                if (e.Actor.TryUseItem(e.Item, out var consumed)) {
                     if (consumed) {
                         Entities.FlagEntityForRemoval(e.Item.Id);
                     }
@@ -706,45 +699,6 @@ namespace Fiero.Business.Scenes
                     return true;
                 }
             });
-        }
-
-        public bool TrySpawn(FloorId floorId, Actor actor, float maxDistance = 10)
-        {
-            if (!Systems.Floor.TryGetClosestFreeTile(floorId, actor.Position(), out var spawnTile, maxDistance)) {
-                return false;
-            }
-            actor.Physics.Position = spawnTile.Position();
-            Systems.Action.Track(actor.Id);
-            Systems.Action.Spawn(actor);
-            Systems.Floor.AddActor(floorId, actor);
-            return true;
-        }
-
-        public bool TryUseItem(Item item, Actor actor, out bool consumed)
-        {
-            var used = false;
-            consumed = false;
-            if (item.TryCast<Consumable>(out var consumable)) {
-                used = TryConsume(out consumed);
-            }
-            if (consumed) {
-                // Assumes item was used from inventory
-                _ = actor.Inventory.TryTake(item);
-            }
-            return used;
-
-            bool TryConsume(out bool consumed)
-            {
-                consumed = false;
-                if (consumable.ConsumableProperties.RemainingUses <= 0) {
-                    return false;
-                }
-                if (--consumable.ConsumableProperties.RemainingUses <= 0
-                 && consumable.ConsumableProperties.ConsumedWhenEmpty) {
-                    consumed = true;
-                }
-                return true;
-            }
         }
 
         public override void Update()

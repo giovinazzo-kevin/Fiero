@@ -32,13 +32,13 @@ namespace Fiero.Business
 
         public bool TryEquip(Weapon w)
         {
-            if (Weapon != null) return false;
+            if (Weapon != null) return UnequipWeapon() && TryEquip(w);
             Weapon = w; return true;
         }
 
         public bool TryEquip(Armor a)
         {
-            if (Armor != null) return false;
+            if (Armor != null) return UnequipArmor() && TryEquip(a);
             Armor = a; return true;
         }
 

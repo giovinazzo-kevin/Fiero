@@ -5,17 +5,17 @@ namespace Fiero.Core
     public class Knob<T>
         where T : IComparable<T>
     {
-        private readonly T _min, _max;
+        public readonly T Min, Max;
         private T _value;
         public T V {
             get => _value;
             set {
-                if(value.CompareTo(_min) < 0) {
-                    _value = _min;
+                if(value.CompareTo(Min) < 0) {
+                    _value = Min;
                     ValueChanged?.Invoke(_value);
                 }
-                else if(value.CompareTo(_max) > 0) {
-                    _value = _max;
+                else if(value.CompareTo(Max) > 0) {
+                    _value = Max;
                     ValueChanged?.Invoke(_value);
                 }
                 else {
@@ -29,8 +29,8 @@ namespace Fiero.Core
 
         public Knob(T min, T max, T init, Action<T> valueChanged = null)
         {
-            _min = min;
-            _max = max;
+            Min = min;
+            Max = max;
             if (valueChanged != null) {
                 ValueChanged += valueChanged;
             }

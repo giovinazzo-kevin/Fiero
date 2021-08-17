@@ -25,8 +25,6 @@ namespace Fiero.Business
                 direction = rel.Coord;
             else if (action is MoveRandomlyAction ran)
                 direction = new(Rng.Random.Next(-1, 2), Rng.Random.Next(-1, 2));
-            else if (action is MoveTowardsAction tow)
-                direction = tow.Follow.Position() - t.Actor.Position();
             else throw new NotSupportedException();
 
             var floorId = t.Actor.FloorId();

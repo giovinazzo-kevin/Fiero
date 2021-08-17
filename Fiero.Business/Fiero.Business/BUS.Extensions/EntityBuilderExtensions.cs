@@ -13,10 +13,12 @@ namespace Fiero.Business
             where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
         public static EntityBuilder<T> WithEffectTracking<T>(this EntityBuilder<T> builder)
             where T : Entity => builder.AddOrTweak<EffectComponent>();
-        public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, Func<Effect> getEffect)
+        public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, EffectDef def, Func<EffectDef, Effect> wrap = null)
             where T : Entity => builder.AddOrTweak<EffectComponent>(c => {
+                wrap ??= (e => e.Resolve());
+                c.Intrinsic.Add(def);
                 builder.Built += (b, e) => {
-                    getEffect().Start(b.ServiceFactory.GetInstance<GameSystems>(), e);
+                    wrap(def).Start(b.ServiceFactory.GetInstance<GameSystems>(), e);
                 };
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
@@ -40,20 +42,13 @@ namespace Fiero.Business
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>(c => {
                 c.Color = color;
             });
-        public static EntityBuilder<T> WithBlood<T>(this EntityBuilder<T> builder, ColorName color, int amount, int? maxAmount = null)
-            where T : DrawableEntity => builder.AddOrTweak<BloodComponent>(c => {
-                c.MaximumAmount = maxAmount ?? amount;
-                c.Color = color;
-                c.TryAdd(amount);
-            });
         public static EntityBuilder<T> WithActorInfo<T>(this EntityBuilder<T> builder, ActorName type)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
                 c.Type = type;
             });
         public static EntityBuilder<T> WithHealth<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c => {
-                c.Stats.MaximumHealth = maximum;
-                c.Stats.Health = current ?? maximum;
+                c.Health = new(0, maximum, current ?? maximum);
             });
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
@@ -100,6 +95,10 @@ namespace Fiero.Business
                 c.ActionProvider = new AiActionProvider(gameSystems);
             })
                 .AddOrTweak<AiComponent>();
+        public static EntityBuilder<T> WithLikedItems<T>(this EntityBuilder<T> builder, params Func<Item, bool>[] likedItems)
+            where T : Actor => builder.AddOrTweak<AiComponent>(c => {
+                    c.LikedItems.AddRange(likedItems);
+                });
         public static EntityBuilder<T> WithPlayerAi<T>(this EntityBuilder<T> builder, GameUI ui)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c => {
                 var gameSystems = (GameSystems)builder.ServiceFactory.GetInstance(typeof(GameSystems));

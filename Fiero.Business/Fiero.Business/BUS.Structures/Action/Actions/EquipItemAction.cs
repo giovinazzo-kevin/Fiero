@@ -8,6 +8,6 @@
             Item = item;
         }
         ActionName IAction.Name => ActionName.Organize;
-        int? IAction.Cost => 100;
+        int? IAction.Cost => 0;
     }
 }

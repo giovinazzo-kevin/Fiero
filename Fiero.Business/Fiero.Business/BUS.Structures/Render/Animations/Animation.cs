@@ -50,48 +50,46 @@ namespace Fiero.Business
         }
 
         public static Animation StraightProjectile(
-            Coord from,
             Coord to,
             string sprite = "Rock",
             TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
             Func<int, TimeSpan> frameDuration = null,
-            Vec? scale = null
+            Vec? scale = null,
+            Coord offset = default
         )
         {
-            var dir = (to - from).ToVec().Clamp(-1, 1);
+            var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(10));
             return new(
-            Shapes.Line(to, from)
+            Shapes.Line(new(), to)
                 .Skip(1).SkipLast(1)
-                .Reverse()
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
-                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, p - from, scale ?? new(1, 1))))
+                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1))))
                 .ToArray());
         }
 
         public static Animation ArcingProjectile(
-            Coord from,
             Coord to,
             string sprite = "Rock",
             TextureName texture = TextureName.Items,
             ColorName tint = ColorName.White,
             Func<int, TimeSpan> frameDuration = null,
-            Vec? scale = null
+            Vec? scale = null,
+            Coord offset = default
         )
         {
-            var dir = (from - to).ToVec().Clamp(-1, 1);
+            var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(30));
-            var line = Shapes.Line(to, from)
+            var line = Shapes.Line(new(), to)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
                 .Skip(1).SkipLast(1)
-                .Reverse()
                 .ToArray();
             return new(
                 line.Select((p, i) => {
-                    var v = p - from;
+                    var v = offset + p;
                     var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
                     v += new Vec(0, t);
                     return new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1)));
@@ -140,8 +138,7 @@ namespace Fiero.Business
             Actor actor
         )
             => StraightProjectile(
-                actor.Position(),
-                actor.Position() - new Coord(0, 25),
+                new(0, -25),
                 actor.Render.SpriteName,
                 actor.Render.TextureName,
                 actor.Render.Color,
@@ -152,12 +149,12 @@ namespace Fiero.Business
             Actor actor
         )
             => StraightProjectile(
-                actor.Position() - new Coord(0, 25),
-                actor.Position(),
+                new(0, 25),
                 actor.Render.SpriteName,
                 actor.Render.TextureName,
                 actor.Render.Color,
-                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4))
+                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
+                offset: new(0, -25)
             );
 
         public static Animation DamageNumber(

@@ -38,7 +38,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
         public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
         public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorDamaged;
-        public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorHealed;
+        public readonly SystemRequest<ActionSystem, ActorHealedEvent, EventResult> ActorHealed;
         public readonly SystemRequest<ActionSystem, SpellLearnedEvent, EventResult> SpellLearned;
         public readonly SystemRequest<ActionSystem, SpellForgottenEvent, EventResult> SpellForgotten;
         public readonly SystemRequest<ActionSystem, SpellCastEvent, EventResult> SpellCast;
@@ -118,11 +118,6 @@ namespace Fiero.Business
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
 
-            ActorTeleporting.ResponseReceived += (_, e, r) => {
-                if (r.All(x => x)) {
-                    ActorMoved.HandleOrThrow(e);
-                }
-            };
             ActorAttacked.ResponseReceived += (_, e, r) => {
                 if (r.All(x => x)) {
                     ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapon, e.Damage));
@@ -130,7 +125,7 @@ namespace Fiero.Business
             };
             ActorDamaged.ResponseReceived += (_, e, r) => {
                 if (r.All(x => x)) {
-                    if (e.Victim.ActorProperties.Stats.Health <= 0) {
+                    if (e.Victim.ActorProperties.Health <= 0) {
                         if (e.Source.TryCast<Actor>(out var killer)) {
                             ActorKilled.HandleOrThrow(new(killer, e.Victim));
                         }

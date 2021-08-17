@@ -9,19 +9,20 @@ namespace Fiero.Business
     public class PlayerActionProvider : ActionProvider
     {
         protected readonly GameUI UI;
-        protected readonly GameSystems Systems;
         protected readonly Queue<IAction> QueuedActions;
         protected readonly QuickSlotHelper QuickSlots;
 
         protected Modal CurrentModal { get; private set; }
 
         public PlayerActionProvider(GameUI ui, GameSystems systems, QuickSlotHelper slots)
+            : base(systems)
         {
             UI = ui;
-            Systems = systems;
             QueuedActions = new();
             QuickSlots = slots;
         }
+
+        public override bool TryTarget(Actor a, TargetingShape shape, bool _) => UI.Target(shape);
 
         public override IAction GetIntent(Actor a)
         {
@@ -85,10 +86,10 @@ namespace Fiero.Business
                         case InventoryActionName.Read when item.TryCast<Scroll>(out var scroll):
                             QueuedActions.Enqueue(new ReadScrollAction(scroll));
                             break;
-                        case InventoryActionName.Zap when item.TryCast<Wand>(out var wand) && TryZap(wand, out var zap):
+                        case InventoryActionName.Zap when item.TryCast<Wand>(out var wand) && TryZap(a, wand, out var zap):
                             QueuedActions.Enqueue(zap);
                             break;
-                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable) && TryThrow(throwable, out var @throw):
+                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable) && TryThrow(a, throwable, out var @throw):
                             QueuedActions.Enqueue(@throw);
                             break;
                         case InventoryActionName.Equip:
@@ -112,7 +113,7 @@ namespace Fiero.Business
                         UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, "Which action?").OptionChosen += (popup, choice) => {
                             if (choice == InventoryActionName.Throw) {
                                 QuickSlots.Set(slot, item, () => {
-                                    if(TryThrow(wand, out action)) {
+                                    if(TryThrow(a, wand, out action)) {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
@@ -120,7 +121,7 @@ namespace Fiero.Business
                                 });
                             }
                             else {
-                                QuickSlots.Set(slot, item, () => TryZap(wand, out var action) ? action : new FailAction());
+                                QuickSlots.Set(slot, item, () => TryZap(a, wand, out var action) ? action : new FailAction());
                             }
                         };
                     }
@@ -128,7 +129,7 @@ namespace Fiero.Business
                         UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, "Which action?").OptionChosen += (popup, choice) => {
                             if (choice == InventoryActionName.Throw) {
                                 QuickSlots.Set(slot, item, () => {
-                                    if (TryThrow(potion, out action)) {
+                                    if (TryThrow(a, potion, out action)) {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
@@ -147,7 +148,7 @@ namespace Fiero.Business
                         UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, "Which action?").OptionChosen += (popup, choice) => {
                             if (choice == InventoryActionName.Throw) {
                                 QuickSlots.Set(slot, item, () => {
-                                    if (TryThrow(scroll, out action)) {
+                                    if (TryThrow(a, scroll, out action)) {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
@@ -164,7 +165,7 @@ namespace Fiero.Business
                     }
                     else if (item.TryCast<Throwable>(out var throwable)) {
                         QuickSlots.Set(slot, item, () => {
-                            if(TryThrow(throwable, out action)) {
+                            if(TryThrow(a, throwable, out action)) {
                                 if(!throwable.ThrowableProperties.ThrowsUseCharges || throwable.ConsumableProperties.RemainingUses == 1) {
                                     QuickSlots.Unset(slot);
                                 }
@@ -175,65 +176,6 @@ namespace Fiero.Business
                     }
                 };
             }
-
-            bool TryZap(Wand wand, out IAction action)
-            {
-                floorId = a.FloorId();
-                // All wands use the same targeting shape and have "infinite" range
-                var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
-                var zapShape = new RayTargetingShape(a.Position(), 100);
-                zapShape.TryAutoTarget(
-                    p => Systems.Floor.GetActorsAt(floorId, p).Any(),
-                    p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
-                );
-                if (UI.Target(zapShape)) {
-                    var points = zapShape.GetPoints().ToArray();
-                    foreach (var p in points) {
-                        var target = Systems.Floor.GetActorsAt(floorId, p)
-                            .FirstOrDefault();
-                        if (target != null) {
-                            action = new ZapWandAtOtherAction(wand, target);
-                            return true;
-                        }
-                    }
-                    // Okay, then
-                    action = new ZapWandAtPointAction(wand, points.Last() - a.Position());
-                    return true;
-                }
-                action = default;
-                return false;
-            }
-
-            bool TryThrow(Throwable throwable, out IAction action)
-            {
-                floorId = a.FloorId();
-                var len = throwable.ThrowableProperties.MaximumRange + 1;
-                var line = Shapes.Line(new(0, 0), new(0, len))
-                    .Skip(1)
-                    .ToArray();
-                var throwShape = new RayTargetingShape(a.Position(), len);
-                throwShape.TryAutoTarget(
-                    p => Systems.Floor.GetActorsAt(floorId, p).Any(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile()),
-                    p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
-                );
-                if (UI.Target(throwShape)) {
-                    var points = throwShape.GetPoints().ToArray();
-                    foreach (var p in points) {
-                        var target = Systems.Floor.GetActorsAt(floorId, p)
-                            .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
-                        if (target != null) {
-                            action = new ThrowItemAtOtherAction(target, throwable);
-                            return true;
-                        }
-                    }
-                    // Okay, then
-                    action = new ThrowItemAtPointAction(points.Last() - a.Position(), throwable);
-                    return true;
-                }
-                action = default;
-                return false;
-            }
-
             IAction MoveOrAttack(Coord c)
             {
                 if (wantToAttack) {

@@ -1,20 +1,20 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    public class AiActionProvider : ActionProvider
+    public partial class AiActionProvider
     {
-        protected readonly GameSystems Systems;
-
-        public AiActionProvider(GameSystems systems)
+        public enum StateName
         {
-            Systems = systems;
+            Wandering,
+            Fighting,
+            Retreating
         }
+    }
+}
 
-        public override IAction GetIntent(Actor a)
-        {
+
+/*
+ 
+
             var floorId = a.FloorId();
             if (!Systems.Floor.TryGetFloor(floorId, out var floor))
                 throw new ArgumentException(nameof(floorId));
@@ -71,6 +71,5 @@ namespace Fiero.Business
                 }
             }
             return new MoveRandomlyAction();
-        }
-    }
-}
+ 
+ */

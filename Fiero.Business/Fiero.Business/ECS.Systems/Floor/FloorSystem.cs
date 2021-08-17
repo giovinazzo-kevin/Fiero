@@ -238,7 +238,7 @@ namespace Fiero.Business
             return false;
         }
 
-        public void RecalculateFov(Actor a)
+        public void RecalculateFov(Actor a, Coord? overridePosition = null)
         {
             var floorId = a.FloorId();
             if(a.Fov != null && TryGetFloor(floorId, out var floor)) {
@@ -249,7 +249,7 @@ namespace Fiero.Business
                     a.Fov.VisibleTiles[floorId] = visibleTiles = new();
                 }
                 visibleTiles.Clear();
-                visibleTiles.UnionWith(floor.CalculateFov(a.Position(), a.Fov.Radius));
+                visibleTiles.UnionWith(floor.CalculateFov(overridePosition ?? a.Position(), a.Fov.Radius));
                 knownTiles.UnionWith(visibleTiles);
             }
         }

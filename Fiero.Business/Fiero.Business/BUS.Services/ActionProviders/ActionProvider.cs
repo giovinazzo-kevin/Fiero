@@ -1,0 +1,99 @@
+﻿using Fiero.Core;
+using System.Linq;
+
+namespace Fiero.Business
+{
+    public abstract class ActionProvider
+    {
+        public readonly GameSystems Systems;
+
+        public ActionProvider(GameSystems sys)
+        {
+            Systems = sys;
+        }
+
+        public abstract IAction GetIntent(Actor actor);
+        public abstract bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful);
+
+        protected bool TryZap(Actor a, Wand wand, out IAction action)
+        {
+            var floorId = a.FloorId();
+            var flags = wand.GetEffectFlags();
+            // All wands use the same targeting shape and have "infinite" range
+            var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
+            var zapShape = new RayTargetingShape(a.Position(), 100);
+            var autoTarget = zapShape.TryAutoTarget(
+                p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
+                    if (!a.TryIdentify(wand))
+                        return true;
+                    var rel = Systems.Faction.GetRelationships(a, b);
+                    if (rel.Left.IsFriendly() && flags.IsBuff)
+                        return true;
+                    if (rel.Left.IsHostile() && flags.IsDebuff)
+                        return true;
+                    return false;
+                }),
+                p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+            );
+            if (TryTarget(a, zapShape, autoTarget)) {
+                var points = zapShape.GetPoints().ToArray();
+                foreach (var p in points) {
+                    var target = Systems.Floor.GetActorsAt(floorId, p)
+                        .FirstOrDefault();
+                    if (target != null) {
+                        action = new ZapWandAtOtherAction(wand, target);
+                        return true;
+                    }
+                }
+                // Okay, then
+                action = new ZapWandAtPointAction(wand, points.Last() - a.Position());
+                return true;
+            }
+            action = default;
+            return false;
+        }
+
+
+        protected bool TryThrow(Actor a, Throwable throwable, out IAction action)
+        {
+            var floorId = a.FloorId();
+            var len = throwable.ThrowableProperties.MaximumRange + 1;
+            var line = Shapes.Line(new(0, 0), new(0, len))
+                .Skip(1)
+                .ToArray();
+            var flags = throwable.GetEffectFlags();
+            var throwShape = new RayTargetingShape(a.Position(), len);
+            var autoTarget = throwShape.TryAutoTarget(
+                p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
+                    if (!a.TryIdentify(throwable))
+                        return true;
+                    var rel = Systems.Faction.GetRelationships(a, b);
+                    if (rel.Left.IsFriendly() && flags.IsBuff)
+                        return true;
+                    if (rel.Left.IsHostile() && flags.IsDebuff)
+                        return true;
+                    if (rel.Left.IsHostile() && throwable.ThrowableProperties.BaseDamage > 0)
+                        return true;
+                    return false;
+                }),
+                p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+            );
+            if (TryTarget(a, throwShape, autoTarget)) {
+                var points = throwShape.GetPoints().ToArray();
+                foreach (var p in points) {
+                    var target = Systems.Floor.GetActorsAt(floorId, p)
+                        .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
+                    if (target != null) {
+                        action = new ThrowItemAtOtherAction(target, throwable);
+                        return true;
+                    }
+                }
+                // Okay, then
+                action = new ThrowItemAtPointAction(points.Last() - a.Position(), throwable);
+                return true;
+            }
+            action = default;
+            return false;
+        }
+    }
+}

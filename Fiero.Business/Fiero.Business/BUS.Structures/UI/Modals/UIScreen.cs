@@ -12,6 +12,7 @@ namespace Fiero.Business
     {
         protected readonly GameLoop Loop;
         protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
+        protected Layout ViewportLayout { get; private set; }
         public Viewport Viewport { get; private set; }
         public Minimap Minimap { get; private set; }
         public Label Look { get; private set; }
@@ -26,6 +27,13 @@ namespace Fiero.Business
         public UIScreen(GameUI ui, GameResources resources, GameLoop loop) : base(ui, resources)
         {
             Loop = loop;
+            ViewportLayout = UI.CreateLayout().Build(new(), grid => grid
+                .Row()
+                    .Cell<Viewport>(x => {
+                        Viewport = x;
+                    })
+                .End()
+            );
         }
 
         public FloorId GetViewportFloor() => Viewport.Following.V?.FloorId() ?? default;
@@ -51,19 +59,13 @@ namespace Fiero.Business
             }
 
             PlayerName.Text.V = a.Info.Name;
-            PlayerHP.Progress.V = a.ActorProperties.Stats.HealthPercentage;
-            PlayerHPLabel.Text.V = $"HP: {a.ActorProperties.Stats.Health}/{a.ActorProperties.Stats.MaximumHealth}";
-            PlayerMP.Progress.V = a.ActorProperties.Stats.HealthPercentage;
-            PlayerMPLabel.Text.V = $"MP: {a.ActorProperties.Stats.Health}/{a.ActorProperties.Stats.MaximumHealth}";
+            PlayerHP.Progress.V = a.ActorProperties.Health.Percentage;
+            PlayerHPLabel.Text.V = $"HP: {a.ActorProperties.Health.V}/{a.ActorProperties.Health.Max}";
+            PlayerMP.Progress.V = a.ActorProperties.Health.Percentage;
+            PlayerMPLabel.Text.V = $"MP: {a.ActorProperties.Health.V}/{a.ActorProperties.Health.Max}";
 
             PlayerStats.Text.V = $"Floor: {a.FloorId()}";
 
-            Minimap.SetDirty();
-            Viewport.SetDirty();
-        }
-
-        public void SetDirty()
-        {
             Minimap.SetDirty();
             Viewport.SetDirty();
         }
@@ -72,6 +74,13 @@ namespace Fiero.Business
         {
             var viewSize = Viewport.ViewArea.V.Size();
             Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
+            Minimap.SetDirty();
+            Viewport.SetDirty();
+        }
+
+        public void SetDirty()
+        {
+            Minimap.SetDirty();
             Viewport.SetDirty();
         }
 
@@ -152,17 +161,17 @@ namespace Fiero.Business
             return base.RenderContent(layout)
                 .Col(w: 2 * 0.75f)
                     .Row()
-                        .Row(h: 3 * 0.75f, id: "viewport")
-                            .Cell<Viewport>(x => {
-                                Viewport = x;
-                                Viewport.ViewTileSize.V = new(32, 32);
-                            })
+                        .Row(h: 3 * 0.85f, id: "viewport")
+                            // This is empty space
                         .End()
                         .Row(h: 3 * 0.025f, id: "look-bar")
                             .Cell<Label>(x => Look = x)
                         .End()
-                        .Row(h: 3 * 0.225f, id: "logs")
-                            .Cell<Paragraph>(x => Logs = x)
+                        .Row(h: 3 * 0.125f, id: "logs")
+                            .Cell<Paragraph>(x => {
+                                Logs = x;
+                                Logs.MaxLines.V = 8;
+                            })
                         .End()
                     .End()
                 .End()
@@ -200,6 +209,7 @@ namespace Fiero.Business
         public override void Update()
         {
             base.Update();
+            ViewportLayout.Update();
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.ToggleZoom))) {
                 Viewport.ViewTileSize.V = Viewport.ViewTileSize.V == new Coord(32, 32)
                     ? new Coord(64, 64) : new Coord(32, 32);
@@ -208,6 +218,7 @@ namespace Fiero.Business
 
         public override void Draw()
         {
+            UI.Window.RenderWindow.Draw(ViewportLayout);
             base.Draw();
             var viewPos = Viewport.ViewArea.V.Position();
             foreach (var k in Vfx.Keys) {
@@ -233,6 +244,7 @@ namespace Fiero.Business
             base.OnWindowSizeChanged(args);
             var oldValue = Viewport.Size.V;
             Layout.Size.V = args.NewValue;
+            ViewportLayout.Size.V = args.NewValue;
             var newValue = Viewport.Size.V;
             var recenter = ((oldValue - newValue) / Viewport.ViewTileSize.V.ToVec() / 2).ToCoord();
             var viewPos = Viewport.ViewArea.V.Position() + recenter;

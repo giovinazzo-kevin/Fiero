@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Core
 {
@@ -12,6 +13,22 @@ namespace Fiero.Core
             for (int x = -side; x <= side; x++) {
                 for (int y = -side; y <= side; y++) {
                     yield return center + new Coord(x, y);
+                }
+            }
+        }
+
+        public static IEnumerable<Coord> Neighborhood(Coord center, int side)
+            => Box(center, side).Except(new[] { center });
+
+        public static IEnumerable<Coord> Disc(Coord center, int radius)
+        {
+            var rr = radius * radius;
+            for (int x = -radius; x <= radius; x++) {
+                for (int y = -radius; y <= radius; y++) {
+                    var p = center + new Coord(x, y);
+                    if(p.DistSq(center) <= rr) {
+                        yield return p;
+                    }
                 }
             }
         }

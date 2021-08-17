@@ -19,11 +19,12 @@ namespace Fiero.Business
         protected readonly GameColors<ColorName> Colors;
 
         public GameEntityBuilders(
-            GameEntities entities, 
+            GameEntities entities,
             GameGlossaries glossaries,
             GameUI ui,
             GameColors<ColorName> colors
-        ) {
+        )
+        {
             Entities = entities;
             Glossaries = glossaries;
             Colors = colors;
@@ -33,6 +34,7 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi(UI)
+            .WithHealth(20)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithName(nameof(Player))
             .WithSprite(TextureName.Creatures, nameof(Player), ColorName.White)
@@ -43,15 +45,15 @@ namespace Fiero.Business
             .WithSpellLibrary()
             .WithFieldOfView(7)
             .WithLogging()
-            .WithBlood(ColorName.Red, 100)
             .WithEffectTracking()
-            .WithIntrinsicEffect(() => new AutopickupEffect())
+            .WithIntrinsicEffect(new(EffectName.Autopickup))
             ;
 
-        private EntityBuilder<Actor> Enemy() 
+        private EntityBuilder<Actor> Enemy()
             => Entities.CreateBuilder<Actor>()
             .WithLogging()
             .WithEnemyAi()
+            .WithHealth(1)
             .WithName(nameof(Enemy))
             .WithSprite(TextureName.Creatures, "None", ColorName.White)
             .WithActorInfo(ActorName.None)
@@ -139,18 +141,18 @@ namespace Fiero.Business
                 damage: 1,
                 maxRange: 4,
                 mulchChance: 1,
-                unidentName: $"{potionColor.Adjective} potion", 
-                itemRarity: 1, 
-                remainingUses: 1, 
-                maxUses: 1, 
+                unidentName: $"{potionColor.Adjective} potion",
+                itemRarity: 1,
+                remainingUses: 1,
+                maxUses: 1,
                 consumedWhenEmpty: true,
                 throwsUseCharges: false
                 )
                .WithName($"Potion of {quaffEffect}")
                .WithSprite(TextureName.Items, nameof(Potion), potionColor.Color)
                .WithPotionInfo(quaffEffect, throwEffect)
-               .WithIntrinsicEffect(() => new GrantedOnQuaff(quaffEffect))
-               .WithIntrinsicEffect(() => new GrantedWhenHitByThrownItem(throwEffect))
+               .WithIntrinsicEffect(quaffEffect, e => new GrantedOnQuaff(e))
+               .WithIntrinsicEffect(throwEffect, e => new GrantedWhenHitByThrownItem(e))
                ;
         }
 
@@ -183,8 +185,8 @@ namespace Fiero.Business
                 maxRange: 7,
                 mulchChance: .75f,
                 unidentName: $"{wandColor.Adjective} wand",
-                itemRarity: 1, 
-                remainingUses: charges, 
+                itemRarity: 1,
+                remainingUses: charges,
                 maxUses: charges,
                 consumedWhenEmpty: false,
                 throwsUseCharges: false
@@ -192,8 +194,8 @@ namespace Fiero.Business
                .WithName($"Wand of {effect}")
                .WithSprite(TextureName.Items, nameof(Wand), wandColor.Color)
                .WithWandInfo(effect)
-               .WithIntrinsicEffect(() => new GrantedWhenHitByZappedWand(effect))
-               .WithIntrinsicEffect(() => new GrantedWhenHitByThrownItem(effect))
+               .WithIntrinsicEffect(effect, e => new GrantedWhenHitByZappedWand(e))
+               .WithIntrinsicEffect(effect, e => new GrantedWhenHitByThrownItem(e))
                ;
         }
 
@@ -203,21 +205,21 @@ namespace Fiero.Business
             var label = ScrollLabel();
             return Throwable<Scroll>(
                 @throw: ThrowName.Line,
-                name: ThrowableName.Misc, 
-                unidentName: $"scroll labelled '{label}'", 
-                damage: 1, 
-                maxRange: 10, 
+                name: ThrowableName.Misc,
+                unidentName: $"scroll labelled '{label}'",
+                damage: 1,
+                maxRange: 10,
                 mulchChance: 0,
                 itemRarity: 1,
                 remainingUses: 1,
-                maxUses: 1, 
+                maxUses: 1,
                 consumedWhenEmpty: true,
                 throwsUseCharges: false
             )
             .WithName($"Scroll of {effect}")
             .WithSprite(TextureName.Items, nameof(Scroll), ColorName.White)
             .WithScrollInfo(effect, modifier)
-            .WithIntrinsicEffect(() => new GrantedWhenTargetedByScroll(effect, modifier))
+            .WithIntrinsicEffect(effect, e => new GrantedWhenTargetedByScroll(e, modifier))
             ;
 
             string ScrollLabel()
@@ -226,21 +228,21 @@ namespace Fiero.Business
                 var consonants = "BDFGKLMRSTVZ".ToCharArray();
 
                 var label = rng.Choose(consonants.Concat(Vowels).ToArray()).ToString();
-                while(label.Length < 6) {
+                while (label.Length < 6) {
                     label += GetNextLetter(label);
                 }
 
                 return label;
                 char GetNextLetter(string previous)
                 {
-                    if(IsVowel(previous.Last())) {
+                    if (IsVowel(previous.Last())) {
                         var precedingVowels = 0;
                         foreach (var l in previous.Reverse()) {
                             if (!IsVowel(l)) break;
                             precedingVowels++;
                         }
                         var chanceOfAnotherVowel = Math.Pow(0.25 - previous.Length / 20d, precedingVowels + 1);
-                        if(rng.NextDouble() < chanceOfAnotherVowel) {
+                        if (rng.NextDouble() < chanceOfAnotherVowel) {
                             return rng.Choose(Vowels);
                         }
                         return rng.Choose(consonants);
@@ -280,76 +282,91 @@ namespace Fiero.Business
             ;
 
         #region NPCs
-        public EntityBuilder<Actor> NPC_Rat() 
+        public EntityBuilder<Actor> NPC_Rat()
             => Enemy()
+            .WithHealth(3)
             .WithName(nameof(ActorName.Rat))
             .WithActorInfo(ActorName.Rat)
             .WithFaction(FactionName.Rats)
             .WithSprite(TextureName.Creatures, nameof(ActorName.Rat), ColorName.White)
-            .WithBlood(ColorName.LightRed, 25)
             ;
 
-        public EntityBuilder<Actor> NPC_Snake() 
+        public EntityBuilder<Actor> NPC_Snake()
             => Enemy()
             .WithName(nameof(ActorName.Snake))
             .WithActorInfo(ActorName.Snake)
             .WithFaction(FactionName.Snakes)
             .WithSprite(TextureName.Creatures, nameof(ActorName.Snake), ColorName.White)
-            .WithBlood(ColorName.LightRed, 10)
-            ;
-
-        public EntityBuilder<Actor> NPC_Cat() 
-            => Enemy()
-            .WithName(nameof(ActorName.Cat))
-            .WithActorInfo(ActorName.Cat)
-            .WithFaction(FactionName.Cats)
-            .WithSprite(TextureName.Creatures, nameof(ActorName.Cat), ColorName.White)
-            .WithBlood(ColorName.LightRed, 50)
-            ;
-
-        public EntityBuilder<Actor> NPC_Dog() 
-            => Enemy()
-            .WithName(nameof(ActorName.Dog))
-            .WithActorInfo(ActorName.Dog)
-            .WithFaction(FactionName.Dogs)
-            .WithSprite(TextureName.Creatures, nameof(ActorName.Dog), ColorName.White)
-            .WithBlood(ColorName.LightRed, 80)
-            ;
-
-        public EntityBuilder<Actor> NPC_Boar() 
-            => Enemy()
-            .WithName(nameof(ActorName.Boar))
-            .WithActorInfo(ActorName.Boar)
-            .WithFaction(FactionName.Boars)
-            .WithSprite(TextureName.Creatures, nameof(ActorName.Boar), ColorName.White)
-            .WithBlood(ColorName.LightRed, 200)
             ;
         #endregion
+
+        protected Item[] Loadout<T>(params (EntityBuilder<T> Item, float Chance)[] chances)
+            where T : Item
+        {
+            return Inner().ToArray();
+            IEnumerable<T> Inner()
+            {
+                foreach (var chance in chances) {
+                    if (Rng.Random.NextDouble() < chance.Chance)
+                        yield return chance.Item.Build();
+                }
+            }
+        }
 
         #region Sentient NPCs
         public EntityBuilder<Actor> NPC_RatKnight()
             => NPC_Rat()
+            .WithHealth(20)
             .WithName("Rat Knight")
             .WithNpcInfo(NpcName.RatKnight)
             .WithDialogueTriggers(NpcName.RatKnight)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatKnight), ColorName.White)
+            .WithItems(Loadout(
+                (Weapon_Sword(), 1f)
+            ))
+            .WithLikedItems(
+                i => i.TryCast<Weapon>(out _),
+                i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
+            )
             ;
         public EntityBuilder<Actor> NPC_RatArcher()
             => NPC_Rat()
+            .WithHealth(15)
             .WithName("Rat Archer")
             .WithNpcInfo(NpcName.RatArcher)
             .WithDialogueTriggers(NpcName.RatArcher)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatArcher), ColorName.White)
+            .WithItems(Loadout(
+                (Throwable_Rock(Rng.Random.Between(4, 10)), 1f)
+            ))
+            .WithLikedItems(
+                i => i.TryCast<Throwable>(out _),
+                i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
+            )
             ;
         public EntityBuilder<Actor> NPC_RatWizard()
             => NPC_Rat()
+            .WithHealth(10)
             .WithName("Rat Wizard")
             .WithNpcInfo(NpcName.RatWizard)
             .WithDialogueTriggers(NpcName.RatWizard)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatWizard), ColorName.White)
+            .WithItems(Loadout(
+                Rng.Random.Choose(new[]{
+                    (Wand_OfConfusion(Rng.Random.Between(3, 7)), 1f),
+                    (Wand_OfEntrapment(Rng.Random.Between(3, 7)), 1f),
+                    (Wand_OfTeleport(Rng.Random.Between(3, 7)), 1f)
+                })
+            ))
+            .WithLikedItems(
+                i => i.TryCast<Wand>(out _),
+                i => i.TryCast<Scroll>(out _),
+                i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
+            )
             ;
         public EntityBuilder<Actor> NPC_RatMerchant()
             => NPC_Rat()
+            .WithHealth(10)
             .WithName("Rat Merchant")
             .WithNpcInfo(NpcName.RatMerchant)
             .WithDialogueTriggers(NpcName.RatMerchant)
@@ -357,6 +374,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_RatMonk()
             => NPC_Rat()
+            .WithHealth(10)
             .WithName("Rat Monk")
             .WithNpcInfo(NpcName.RatMonk)
             .WithDialogueTriggers(NpcName.RatMonk)
@@ -364,6 +382,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
+            .WithHealth(20)
             .WithName("Rat Pugilist")
             .WithNpcInfo(NpcName.RatPugilist)
             .WithDialogueTriggers(NpcName.RatPugilist)
@@ -371,6 +390,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_RatThief()
             => NPC_Rat()
+            .WithHealth(15)
             .WithName("Rat Thief")
             .WithNpcInfo(NpcName.RatThief)
             .WithDialogueTriggers(NpcName.RatThief)
@@ -378,6 +398,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_RatOutcast()
             => NPC_Rat()
+            .WithHealth(15)
             .WithName("Rat Outcast")
             .WithNpcInfo(NpcName.RatOutcast)
             .WithDialogueTriggers(NpcName.RatOutcast)
@@ -385,6 +406,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_RatArsonist()
             => NPC_Rat()
+            .WithHealth(15)
             .WithName("Rat Arsonist")
             .WithNpcInfo(NpcName.RatArsonist)
             .WithDialogueTriggers(NpcName.RatArsonist)
@@ -392,6 +414,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
+            .WithHealth(7)
             .WithName("Sand Snake")
             .WithNpcInfo(NpcName.SandSnake)
             .WithDialogueTriggers(NpcName.SandSnake)
@@ -399,6 +422,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_Cobra()
             => NPC_Snake()
+            .WithHealth(7)
             .WithName("Cobra")
             .WithNpcInfo(NpcName.Cobra)
             .WithDialogueTriggers(NpcName.Cobra)
@@ -406,6 +430,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Actor> NPC_Boa()
             => NPC_Snake()
+            .WithHealth(7)
             .WithName("Boa")
             .WithNpcInfo(NpcName.Boa)
             .WithDialogueTriggers(NpcName.Boa)
@@ -439,14 +464,14 @@ namespace Fiero.Business
         #region THROWABLES
         public EntityBuilder<Throwable> Throwable_Rock(int charges)
             => Throwable<Throwable>(
-                name: ThrowableName.Rock, 
-                itemRarity: 1, 
-                remainingUses: charges, 
-                maxUses: charges, 
-                damage: 4, 
-                maxRange: 3, 
-                mulchChance: 1/4f,
-                @throw: ThrowName.Arc, 
+                name: ThrowableName.Rock,
+                itemRarity: 1,
+                remainingUses: charges,
+                maxUses: charges,
+                damage: 4,
+                maxRange: 3,
+                mulchChance: 1 / 4f,
+                @throw: ThrowName.Arc,
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
@@ -462,6 +487,8 @@ namespace Fiero.Business
             => Potion(new(EffectName.Silence, 10), new(EffectName.Silence, 10));
         public EntityBuilder<Potion> Potion_OfEntrapment()
             => Potion(new(EffectName.Entrapment, 10), new(EffectName.Entrapment, 10));
+        public EntityBuilder<Potion> Potion_OfTeleportation()
+            => Potion(new(EffectName.UncontrolledTeleport), new(EffectName.UncontrolledTeleport));
         #endregion
 
         #region SCROLLS
@@ -513,7 +540,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
-            .WithIntrinsicEffect(() => new TrapEffect())
+            .WithIntrinsicEffect(new(EffectName.Trap))
             .Tweak<RenderComponent>(x => x.Hidden = true)
             ;
         public EntityBuilder<Feature> Feature_Door()
@@ -529,11 +556,6 @@ namespace Fiero.Business
             => Feature<Portal>(FeatureName.Upstairs)
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
-            ;
-        public EntityBuilder<BloodSplatter> Feature_BloodSplatter(int bloodAmount, ColorName bloodColor = ColorName.Red)
-            => Feature<BloodSplatter>(FeatureName.BloodSplatter)
-            .WithColor(bloodColor)
-            .WithBlood(bloodColor, Math.Min(100, bloodAmount), 100)
             ;
         #endregion
 

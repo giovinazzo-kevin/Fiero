@@ -371,6 +371,9 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatMerchant)
             .WithDialogueTriggers(NpcName.RatMerchant)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatMerchant), ColorName.White)
+            .WithLikedItems(
+                i => true
+            )
             ;
         public EntityBuilder<Actor> NPC_RatMonk()
             => NPC_Rat()
@@ -487,7 +490,7 @@ namespace Fiero.Business
             => Potion(new(EffectName.Silence, 10), new(EffectName.Silence, 10));
         public EntityBuilder<Potion> Potion_OfEntrapment()
             => Potion(new(EffectName.Entrapment, 10), new(EffectName.Entrapment, 10));
-        public EntityBuilder<Potion> Potion_OfTeleportation()
+        public EntityBuilder<Potion> Potion_OfTeleport()
             => Potion(new(EffectName.UncontrolledTeleport), new(EffectName.UncontrolledTeleport));
         #endregion
 

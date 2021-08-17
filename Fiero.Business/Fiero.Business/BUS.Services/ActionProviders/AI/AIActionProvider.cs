@@ -29,11 +29,12 @@ namespace Fiero.Business
         {
             Sensors = new() {
                 (MyHealth = new((sys, a) => new[] { a.ActorProperties.Health })),
-                (MyConsumables = new((sys, a) => a.Inventory.GetConsumables().Where(v => a.TryIdentify(v)))),
                 (MyWeapons = new((sys, a) => a.Inventory.GetWeapons()
                     .OrderByDescending(w => w.WeaponProperties.DamagePerTurn))),
+                (MyConsumables = new((sys, a) => a.Inventory.GetConsumables()
+                    .Where(v => v.ItemProperties.Identified))),
                 (MyUnidentifiedConsumables = new((sys, a) => a.Inventory.GetConsumables()
-                    .Where(v => !a.TryIdentify(v)))),
+                    .Where(v => !v.ItemProperties.Identified))),
                 (MyHelpfulConsumables = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.GetEffectFlags().IsHelpful()))),
                 (MyHarmfulConsumables = new((sys, a) => MyConsumables.AlertingValues
@@ -53,7 +54,7 @@ namespace Fiero.Business
                         && NearbyAllies.Values.Count(v => v.Ai.Target == b) < 3);
                 })),
                 (NearbyItems = new((sys, a) => {
-                    return Shapes.Neighborhood(a.Position(), 7)
+                    return Shapes.Box(a.Position(), 7)
                      .SelectMany(p => sys.Floor.GetItemsAt(a.FloorId(), p))
                      .OrderBy(i => i.SquaredDistanceFrom(a));
                 }))
@@ -159,6 +160,12 @@ namespace Fiero.Business
             }
             if(GetClosestHostile(a) is { } hostile) {
                 var dir = a.Position() - hostile.Position();
+                if(!Systems.Floor.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell)) {
+                    return Fight(a);
+                }
+                if(!cell.IsWalkable(null)) {
+                    return Fight(a);
+                }
                 return new MoveRelativeAction(dir);
             }
             return new WaitAction();

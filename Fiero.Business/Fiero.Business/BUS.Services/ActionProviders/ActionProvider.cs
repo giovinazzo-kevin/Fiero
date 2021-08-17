@@ -24,7 +24,7 @@ namespace Fiero.Business
             var zapShape = new RayTargetingShape(a.Position(), 100);
             var autoTarget = zapShape.TryAutoTarget(
                 p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
-                    if (!a.TryIdentify(wand))
+                    if (!wand.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
                     if (rel.Left.IsFriendly() && flags.IsBuff)
@@ -65,7 +65,7 @@ namespace Fiero.Business
             var throwShape = new RayTargetingShape(a.Position(), len);
             var autoTarget = throwShape.TryAutoTarget(
                 p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
-                    if (!a.TryIdentify(throwable))
+                    if (!throwable.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
                     if (rel.Left.IsFriendly() && flags.IsBuff)

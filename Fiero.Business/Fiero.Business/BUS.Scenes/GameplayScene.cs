@@ -152,7 +152,11 @@ namespace Fiero.Business.Scenes
                     .WithItems(
                         Resources.Entities.Weapon_Sword()
                             .WithIntrinsicEffect(new(EffectName.UncontrolledTeleport, chance: .25f), e => new GrantedWhenHitByMeleeWeapon(e)).Build(),
-                        Resources.Entities.Potion_OfTeleportation().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build()
                     )
                     //.WithSpells(

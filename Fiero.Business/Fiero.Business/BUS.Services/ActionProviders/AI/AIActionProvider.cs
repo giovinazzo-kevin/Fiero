@@ -21,6 +21,9 @@ namespace Fiero.Business
         protected readonly AiSensor<Actor> NearbyEnemies;
         protected readonly AiSensor<Actor> NearbyAllies;
 
+        protected int TurnsSinceSightingHostile { get; private set; }
+        protected int TurnsSinceSightingFriendly { get; private set; }
+
 
         private StateName _state = StateName.Wandering;
 
@@ -68,7 +71,7 @@ namespace Fiero.Business
 
         protected virtual StateName UpdateState(StateName state)
         {
-            if(MyHealth.RaisingAlert) {
+            if(MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10) {
                 return StateName.Retreating;
             }
             if (NearbyEnemies.Values.Count == 0) {
@@ -232,11 +235,28 @@ namespace Fiero.Business
             return new MoveRandomlyAction();
         }
 
+        protected virtual void UpdateCounters()
+        {
+            if (NearbyEnemies.Values.Count == 0) {
+                TurnsSinceSightingHostile++;
+            }
+            else {
+                TurnsSinceSightingHostile = 0;
+            }
+            if (NearbyAllies.Values.Count == 0) {
+                TurnsSinceSightingFriendly++;
+            }
+            else {
+                TurnsSinceSightingFriendly = 0;
+            }
+        }
+
         public override IAction GetIntent(Actor a)
         {
             foreach (var sensor in Sensors) {
                 sensor.Update(Systems, a);
             }
+            UpdateCounters();
             return (_state = UpdateState(_state)) switch {
                 StateName.Retreating => Retreat(a),
                 StateName.Fighting   => Fight(a),

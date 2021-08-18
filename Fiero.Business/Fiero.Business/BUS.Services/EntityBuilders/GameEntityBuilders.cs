@@ -486,7 +486,7 @@ namespace Fiero.Business
                 remainingUses: charges,
                 maxUses: charges,
                 damage: 0,
-                maxRange: 7,
+                maxRange: 4,
                 mulchChance: 1f,
                 @throw: ThrowName.Arc,
                 consumedWhenEmpty: true,

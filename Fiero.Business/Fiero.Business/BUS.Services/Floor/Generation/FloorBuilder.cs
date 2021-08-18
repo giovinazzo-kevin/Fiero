@@ -64,7 +64,7 @@ namespace Fiero.Business
             }
         }
 
-        private int CreateEntity(ObjectDef obj)
+        private int CreateEntity(FloorId id, ObjectDef obj)
         {
             var drawable = obj.Name switch {
                 DungeonObjectName.Door => CreateDoor(),
@@ -83,49 +83,49 @@ namespace Fiero.Business
             DrawableEntity CreateShrine()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Feature_Shrine().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Feature_Shrine().WithPosition(obj.Position, id).Build()
                 )();
             }
 
             DrawableEntity CreateDoor()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Feature_Door().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Feature_Door().WithPosition(obj.Position, id).Build()
                 )();
             }
 
             DrawableEntity CreateTrap()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Feature_Trap().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Feature_Trap().WithPosition(obj.Position, id).Build()
                 )();
             }
 
             DrawableEntity CreateChest()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Feature_Chest().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Feature_Chest().WithPosition(obj.Position, id).Build()
                 )();
             }
 
             DrawableEntity CreateConsumable()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                   () => _entityBuilders.Potion_OfConfusion().WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Potion_OfSleep().WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Wand_OfConfusion(Rng.Random.Between(4, 8)).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Wand_OfSleep(Rng.Random.Between(4, 8)).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll_OfMassConfusion().WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Scroll_OfMassSleep().WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Throwable_Rock(Rng.Random.Between(1, 10)).WithPosition(obj.Position).Build(),
-                   () => _entityBuilders.Resource_Gold(Rng.Random.Between(1, 100)).WithPosition(obj.Position).Build()
+                   () => _entityBuilders.Potion_OfConfusion().WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Potion_OfSleep().WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Wand_OfConfusion(Rng.Random.Between(4, 8)).WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Wand_OfSleep(Rng.Random.Between(4, 8)).WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Scroll_OfMassConfusion().WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Scroll_OfMassSleep().WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Throwable_Rock(Rng.Random.Between(1, 10)).WithPosition(obj.Position, id).Build(),
+                   () => _entityBuilders.Resource_Gold(Rng.Random.Between(1, 100)).WithPosition(obj.Position, id).Build()
                 )();
             }
 
             DrawableEntity CreateWeapon()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.Weapon_Sword().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.Weapon_Sword().WithPosition(obj.Position, id).Build()
                 )();
             }
 
@@ -138,29 +138,29 @@ namespace Fiero.Business
 
             DrawableEntity CreateBoss()
             {
-                return _entityBuilders.Boss_NpcGreatKingRat().WithPosition(obj.Position).Build();
+                return _entityBuilders.Boss_NpcGreatKingRat().WithPosition(obj.Position, id).Build();
             }
 
             DrawableEntity CreateEnemy()
             {
                 return Rng.Random.Choose<Func<DrawableEntity>>(
-                    () => _entityBuilders.NPC_Rat().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatKnight().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatArcher().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatWizard().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatMonk().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatPugilist().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatThief().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatOutcast().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatArsonist().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_RatMerchant().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_SandSnake().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Cobra().WithPosition(obj.Position).Build(),
-                    () => _entityBuilders.NPC_Boa().WithPosition(obj.Position).Build()
-                    //() => _entityBuilders.NPC_Snake().WithPosition(obj.Position).Build(),
-                    //() => _entityBuilders.NPC_Cat().WithPosition(obj.Position).Build(),
-                    //() => _entityBuilders.NPC_Dog().WithPosition(obj.Position).Build(),
-                    //() => _entityBuilders.NPC_Boar().WithPosition(obj.Position).Build()
+                    () => _entityBuilders.NPC_Rat().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatKnight().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatArcher().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatWizard().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatMonk().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatPugilist().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatThief().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatOutcast().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatArsonist().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_RatMerchant().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_SandSnake().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_Cobra().WithPosition(obj.Position, id).Build(),
+                    () => _entityBuilders.NPC_Boa().WithPosition(obj.Position, id).Build()
+                    //() => _entityBuilders.NPC_Snake().WithPosition(obj.Position, id).Build(),
+                    //() => _entityBuilders.NPC_Cat().WithPosition(obj.Position, id).Build(),
+                    //() => _entityBuilders.NPC_Dog().WithPosition(obj.Position, id).Build(),
+                    //() => _entityBuilders.NPC_Boar().WithPosition(obj.Position, id).Build()
                 )();
             }
         }
@@ -190,7 +190,7 @@ namespace Fiero.Business
             // Get all objects that were added to the context, but exclude portals and stairs which need special handling
             var objects = context.GetObjects()
                 .Where(o => !IsStairHint(o.Name))
-                .Select(o => CreateEntity(o))
+                .Select(o => CreateEntity(id, o))
                 .ToList();
             // Place all tiles that were set in the context, including objects that eventually resolve to tiles
             var tileObjects = objects.TrySelect(e => (_entities.TryGetProxy<Tile>(e, out var t), t))
@@ -203,7 +203,10 @@ namespace Fiero.Business
                     return;
                 if (item.Name != TileName.None) {
                     floor.SetTile(BuildTile(item)
-                        .Tweak<PhysicsComponent>(x => x.Position = item.Position)
+                        .Tweak<PhysicsComponent>(x => {
+                            x.Position = item.Position;
+                            x.FloorId = id;
+                        })
                     .Build());
                 }
             });

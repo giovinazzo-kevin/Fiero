@@ -16,7 +16,7 @@ namespace Fiero.Business
 
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
-            if (!owner.Effects.Active.Any(e => e.Name == Source.Name)) {
+            if (owner.Effects == null || !owner.Effects.Active.Any(e => e.Name == Source.Name)) {
                 Source.Resolve(null).Start(systems, owner);
             }
         }

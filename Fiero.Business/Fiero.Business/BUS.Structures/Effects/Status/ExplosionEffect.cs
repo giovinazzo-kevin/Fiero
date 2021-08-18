@@ -35,7 +35,7 @@ namespace Fiero.Business
                 systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, Shape.Select(s => s + pos).ToArray(), BaseDamage));
                 foreach (var p in Shape) {
                     foreach (var a in systems.Floor.GetActorsAt(floorId, p + pos)) {
-                        var damage = (int)(BaseDamage / a.SquaredDistanceFrom(pos));
+                        var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
                         systems.Action.ActorDamaged.HandleOrThrow(new(owner, a, owner, damage));
                     }
                 }

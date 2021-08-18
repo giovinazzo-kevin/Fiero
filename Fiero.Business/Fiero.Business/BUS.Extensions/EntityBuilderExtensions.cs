@@ -28,9 +28,12 @@ namespace Fiero.Business
                 c.BlocksLight = blocksLight;
                 c.CanMove = canMove;
             });
-        public static EntityBuilder<T> WithPosition<T>(this EntityBuilder<T> builder, Coord pos)
+        public static EntityBuilder<T> WithPosition<T>(this EntityBuilder<T> builder, Coord pos, FloorId? floorId = null)
             where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>(c => {
                 c.Position = pos;
+                if(floorId.HasValue) {
+                    c.FloorId = floorId.Value;
+                }
             });
         public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, TextureName texture, string sprite, ColorName color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>(c => {

@@ -11,13 +11,18 @@ namespace Fiero.Business
     {
         public override Floor GenerateFloor(FloorId floorId, Coord size, FloorBuilder builder)
         {
-            var subdivisions = new Coord(2, 2);
-            var sectors = new IntRect(new(), size).Subdivide(subdivisions).ToList();
+            var subdivisions = floorId.Depth switch {
+                var x when x < 2 => new Coord(1, 1),
+                var x when x < 5 => new Coord(2, 2),
+                var x when x < 10 => new Coord(3, 3),
+                _ => new Coord(4, 4),
+            };
+            var sectors = new IntRect(new(), size - new Coord(1, 1)).Subdivide(subdivisions).ToList();
 
             var info = (
                 ShrineRoomChance: 0.05f, 
-                MonstersChance: 0.66f,
-                MonstersPerRoll: (Min: 1, Max: 2),
+                MonstersChance: 0.22f,
+                MonstersPerRoll: (Min: 1, Max: 1),
                 ConsumablesChance: 0.20f,
                 ConsumablesPerRoll: (Min: 1, Max: 2),
                 ItemsChance: 0.15f,

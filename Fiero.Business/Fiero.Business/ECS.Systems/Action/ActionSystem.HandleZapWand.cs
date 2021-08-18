@@ -15,13 +15,20 @@ namespace Fiero.Business
             else if (action is ZapWandAtPointAction rDir) {
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Position() + rDir.Point;
-                if(TryFindVictim(newPos, t.Actor, out var victim)) {
+                var victim = Shapes.Line(t.Actor.Position(), newPos)
+                    .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(null) ?? false)
+                    .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
+                    .LastOrDefault();
+                if (victim is { }) {
                     return ItemConsumed.Handle(new(t.Actor, rDir.Wand))
                         && HandleMagicAttack(t.Actor, victim, ref cost, rDir.Wand);
                 }
                 else {
+                    var lastNonWall = Shapes.Line(t.Actor.Position(), newPos)
+                        .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(null) ?? false)
+                        .Last();
                     return ItemConsumed.Handle(new(t.Actor, rDir.Wand)) 
-                        && WandZapped.Handle(new(t.Actor, null, newPos, rDir.Wand));
+                        && WandZapped.Handle(new(t.Actor, null, lastNonWall, rDir.Wand));
                 }
             }
             else throw new NotSupportedException(action.GetType().Name);

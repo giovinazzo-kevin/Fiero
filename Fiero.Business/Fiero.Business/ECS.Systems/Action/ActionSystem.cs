@@ -302,7 +302,9 @@ namespace Fiero.Business
             if (HandleAction(next, ref intent) is { } cost) {
                 if(_invalidate) {
                     _invalidate = false;
-                    _actorQueue.Add(next);
+                    if(!_actorQueue.Any(a => a.ActorId == next.ActorId)) {
+                        _actorQueue.Add(next);
+                    }
                     return cost;
                 }
                 OnTurnEnded(next.ActorId);

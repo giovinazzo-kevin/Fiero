@@ -49,7 +49,7 @@ namespace Fiero.Business
                 EffectName.Entrapment => new EntrapEffect(source),
                 EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(source),
                 EffectName.Heal => new HealEffect(source, Magnitude * 10),
-                EffectName.Explosion => new ExplosionEffect(source, Magnitude * 10, Shapes.Disc(Coord.Zero, Magnitude * 2 - 1)),
+                EffectName.Explosion => new ExplosionEffect(source, Magnitude * 5, Shapes.Disc(Coord.Zero, Magnitude * 3 - 1)),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.Autopickup => new AutopickupEffect(),
                 _ => throw new NotSupportedException(Name.ToString()),

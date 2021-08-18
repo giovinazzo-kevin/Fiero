@@ -140,7 +140,7 @@ namespace Fiero.Business
         public bool TryGetClosestFreeTile(FloorId id, Coord pos, out Tile closest, float maxDistance = 10, Func<MapCell, bool> pred = null)
         {
             closest = default;
-            pred ??= cell => !cell.Items.Any() && !cell.Features.Any() && !cell.Actors.Any();
+            pred ??= cell => !cell.Items.Any() && !cell.Features.Any(f => f.Physics.BlocksMovement) && !cell.Actors.Any();
 
             if (TryGetCellAt(id, pos, out var closestCell) && pred(closestCell)) {
                 closest = closestCell.Tile;

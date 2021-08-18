@@ -62,8 +62,8 @@ namespace Fiero.Business
                         continue;
 
                     var known = Following.V.Fov.KnownTiles[floorId].Contains(coord);
-                    var seen = true || Following.V.Fov.VisibleTiles[floorId].Contains(coord);
-                    if (false && !known)
+                    var seen = Following.V.Fov.VisibleTiles[floorId].Contains(coord);
+                    if (!known)
                         continue;
                     if (
                            coord.X < 0 || coord.X >= Size.V.X
@@ -76,13 +76,15 @@ namespace Fiero.Business
                             continue;
                         using var sprite = new Sprite(whitePixel.Texture);
                         sprite.Color = Colors.Get(drawable switch {
-                            Tile x when x.TileProperties.Name == TileName.Corridor => x.Render.Color,
+                            Tile x when x.TileProperties.Name == TileName.Corridor && seen => ColorName.LightMagenta,
+                            Tile x when x.TileProperties.Name == TileName.Corridor => ColorName.Magenta,
                             Tile x when x.Physics.BlocksMovement => ColorName.White,
+                            Tile x when !x.Physics.BlocksMovement && seen => ColorName.LightBlue,
                             Tile x when !x.Physics.BlocksMovement => ColorName.Blue,
                             Item x => ColorName.LightCyan,
-                            Feature x when x.FeatureProperties.Name == FeatureName.Trap => ColorName.LightGreen,
-                            Feature x when x.FeatureProperties.Name == FeatureName.Downstairs => ColorName.LightMagenta,
-                            Feature x when x.FeatureProperties.Name == FeatureName.Upstairs => ColorName.Magenta,
+                            Feature x when x.FeatureProperties.Name == FeatureName.Trap => ColorName.Black,
+                            Feature x when x.FeatureProperties.Name == FeatureName.Downstairs => ColorName.LightGreen,
+                            Feature x when x.FeatureProperties.Name == FeatureName.Upstairs => ColorName.Green,
                             Actor x when x == Following.V => ColorName.White,
                             Actor x when FactionSystem.GetRelationships(x, Following).Left.IsFriendly() => ColorName.LightYellow,
                             Actor x when FactionSystem.GetRelationships(x, Following).Left.IsHostile() => ColorName.LightRed,

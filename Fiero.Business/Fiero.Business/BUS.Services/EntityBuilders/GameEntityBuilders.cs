@@ -481,7 +481,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Throwable> Throwable_MercuryFulminate(int charges)
             => Throwable<Throwable>(
-                name: ThrowableName.Rock,
+                name: ThrowableName.Bomb,
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: charges,
@@ -492,7 +492,7 @@ namespace Fiero.Business
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Explosion, chance: 1f, magnitude: 2), e => new GrantedWhenHitByThrownItem(e))
+            .WithIntrinsicEffect(new(EffectName.Explosion, chance: 1f, magnitude: 1), e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion
 

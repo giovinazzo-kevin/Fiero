@@ -12,7 +12,6 @@ namespace Fiero.Business
 
         public UnorderedPair<Coord> Start { get; private set; }
         public UnorderedPair<Coord> End { get; private set; }
-        public int Thickness { get; set; }
         public ColorName Color { get; set; }
 
         public readonly Coord[] Points;
@@ -20,12 +19,11 @@ namespace Fiero.Business
         protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
         protected virtual TileDef GroundTile(Coord c) => new(TileName.Corridor, c, Color);
 
-        public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, ColorName color = ColorName.White, int thickness = 1)
+        public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, ColorName color = ColorName.White)
         {
             Start = a;
             End = b;
             Color = color;
-            Thickness = thickness;
             Points = Generate().ToArray();
         }
 

@@ -35,7 +35,7 @@ namespace Fiero.Business
             if(id == conn.To) {
                 pos = hints.FirstOrDefault(h => h.Name == DungeonObjectName.Upstairs) is { } hint 
                     ? UseHint(hint)
-                    : GetRandomPosition();
+                    : GetRandomPosition(DungeonObjectName.Upstairs);
                 return _entityBuilders.Feature_Upstairs(conn)
                     .WithPosition(pos)
                     .Build().Id;
@@ -43,7 +43,7 @@ namespace Fiero.Business
             else {
                 pos = hints.FirstOrDefault(h => h.Name == DungeonObjectName.Downstairs) is { } hint 
                     ? UseHint(hint)
-                    : GetRandomPosition();
+                    : GetRandomPosition(DungeonObjectName.Downstairs);
                 return _entityBuilders.Feature_Downstairs(conn)
                     .WithPosition(pos)
                     .Build().Id;
@@ -55,12 +55,14 @@ namespace Fiero.Business
                 return hint.Position;
             }
 
-            Coord GetRandomPosition()
+            Coord GetRandomPosition(DungeonObjectName obj)
             {
                 var validTiles = context.GetAllTiles()
                     .Where(t => t.Name == TileName.Room && !context.GetObjects().Any(o => o.Position == t.Position))
                     .ToArray();
-                return Rng.Random.Choose(validTiles).Position;
+                var pos = Rng.Random.Choose(validTiles).Position;
+                context.AddObject(obj, pos);
+                return pos;
             }
         }
 

@@ -166,7 +166,13 @@ namespace Fiero.Business.Scenes
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
                 Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
-                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 2, i => new Coord(100, 100));
+                    // BIG TODO: Once serialization is a thing, generate and load levels one at a time
+                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch {
+                        var x when x < 2 => new Coord(25, 25),
+                        var x when x < 5 => new Coord(50, 50),
+                        var x when x < 10 => new Coord(75, 75),
+                        _ => new Coord(100, 100),
+                    });
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
                 }));
@@ -695,23 +701,25 @@ namespace Fiero.Business.Scenes
                     var stairs = Systems.Floor.GetAllFeatures(next)
                         .TrySelect(f => (f.TryCast<Portal>(out var portal), portal))
                         .Single(f => f.PortalProperties.Connects(current, next));
+                    Systems.Action.StopTracking(e.Actor.Id);
+                    if (e.Actor.IsPlayer()) {
+                        foreach (var actor in Systems.Floor.GetAllActors(current)) {
+                            Systems.Action.StopTracking(actor.Id);
+                        }
+                    }
                     currentFloor.RemoveActor(e.Actor);
                     e.Actor.Physics.Position = stairs.Position();
                     e.Actor.Physics.FloorId = next;
                     nextFloor.AddActor(e.Actor);
                     e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
-
                     if (e.Actor.IsPlayer()) {
-                        foreach (var actor in Systems.Floor.GetAllActors(current)) {
-                            Systems.Action.StopTracking(actor.Id);
-                        }
                         foreach (var actor in Systems.Floor.GetAllActors(next)) {
                             Systems.Action.Track(actor.Id);
                         }
                         // Abruptly stop the current turn so that the actor queue is flushed completely
                         Systems.Action.AbortCurrentTurn();
                     }
-
+                    Systems.Action.StopTracking(e.Actor.Id);
                     return true;
                 }
             });

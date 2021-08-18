@@ -20,12 +20,14 @@ namespace Fiero.Business
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {
             if (owner.TryCast<Feature>(out var feature)) {
-                if(IsTrap) {
+                if (IsTrap) {
                     systems.Action.ActorSteppedOnTrap.Raise(new(target, feature));
                 }
                 if(AutoRemove) {
-                    // Removing the feature automatically ends all of its effects, so there's no need to call End()
-                    systems.Floor.RemoveFeature(feature);
+                    Subscriptions.Add(systems.Action.TurnEnded.SubscribeHandler(e => {
+                        // Removing the feature automatically ends all of its effects, so there's no need to call End()
+                        systems.Floor.RemoveFeature(feature);
+                    }));
                 }
             }
             Source.Resolve(owner).Start(systems, target);

@@ -75,7 +75,7 @@ namespace Fiero.Business
                 var bestPair = connectorPairs
                     .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
                     .First();
-                var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.Red);
+                var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
                 if(!rooms.Any(r => r.GetRects().Any(r => corridor.Points.Skip(1).SkipLast(1).Any(p => r.Contains(p.X, p.Y))))) {
                     connectedRooms.Add(rp);
                     yield return corridor;
@@ -105,7 +105,7 @@ namespace Fiero.Business
                         continue;
                     }
                     connected.Add(conn);
-                    yield return new(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.Green);
+                    yield return new(bestPair.Left.Edge, bestPair.Right.Edge);
                 }
             }
         }

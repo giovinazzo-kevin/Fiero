@@ -24,23 +24,44 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            yield return systems.Action.ActorTurnEnded.SubscribeHandler(e => {
-                if (e.Actor != Source)
-                    return;
-                if(!owner.TryCast<PhysicalEntity>(out var phys)) {
+            // When an explosion is caused by an actor, it happens at the end of that actor's turn
+            // When an explosion is caused by the environment and targets an actor, it happens at the end of that actor's turn
+            // When an explosion is caused by the environment and targets no actor, it happens at the end of the turn
+            var sourceIsActor = Source.TryCast<Actor>(out _);
+            var ownerIsActor = owner.TryCast<Actor>(out _);
+            if(sourceIsActor || ownerIsActor) {
+                yield return systems.Action.ActorTurnEnded.SubscribeHandler(e => {
+                    if (sourceIsActor && e.Actor != Source
+                    || !sourceIsActor && e.Actor != owner)
+                        return;
+                    Inner();
+                });
+            }
+            else {
+                yield return systems.Action.TurnEnded.SubscribeHandler(e => {
+                    Inner();
+                });
+            }
+
+            void Inner()
+            {
+                if (!owner.TryCast<PhysicalEntity>(out var phys)) {
                     return;
                 }
                 var floorId = phys.FloorId();
                 var pos = phys.Position();
-                systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, Shape.Select(s => s + pos).ToArray(), BaseDamage));
-                foreach (var p in Shape) {
+                var actualShape = Shape
+                    .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Floor.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(null)))
+                    .ToArray();
+                systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
+                foreach (var p in actualShape) {
                     foreach (var a in systems.Floor.GetActorsAt(floorId, p + pos)) {
                         var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
                         systems.Action.ActorDamaged.HandleOrThrow(new(owner, a, owner, damage));
                     }
                 }
                 End();
-            });
+            }
         }
 
         protected override void Apply(GameSystems systems, Actor target) { }

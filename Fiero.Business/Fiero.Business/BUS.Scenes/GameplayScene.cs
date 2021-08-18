@@ -95,6 +95,7 @@ namespace Fiero.Business.Scenes
                             var friends = Enumerable.Range(5, 10)
                                 .Select(i => Resources.Entities
                                     .NPC_Rat()
+                                    .WithFaction(FactionName.Players)
                                     .WithPosition(player.Position())
                                     .Build());
                             foreach (var f in friends) {
@@ -153,7 +154,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Weapon_Sword().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfHealing().Build(),
-                        Resources.Entities.Throwable_MercuryFulminate(10).Build(),
+                        Resources.Entities.Throwable_Bomb(10).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
                     )
@@ -250,29 +251,38 @@ namespace Fiero.Business.Scenes
                         })
                         .OnLastFrame(() => {
                             Systems.Action.ActorMoved.HandleOrThrow(e);
-                            var tpIn = Animation.TeleportIn(e.Actor)
-                                .OnLastFrame(() => {
-                                    e.Actor.Render.Hidden = false;
-                                    Systems.Render.Screen.CenterOn(Player);
-                                });
-                            if(e.Actor.IsPlayer()) {
-                                Systems.Floor.RecalculateFov(Player);
-                                Systems.Render.Screen.CenterOn(Player);
-                            }
-                            if (Player.CanSee(e.NewPosition)) {
-                                Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
-                                Systems.Render.Screen.Animate(true, e.NewPosition, tpIn);
-                            }
-                            else {
-                                e.Actor.Render.Hidden = false;
-                            }
+                            TpIn();
                         });
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
                     Systems.Render.Screen.Animate(true, e.OldPosition, tpOut);
                     return true;
                 }
-                else {
-                    return Systems.Action.ActorMoved.Handle(e);
+                else if(Systems.Action.ActorMoved.Handle(e)) {
+                    if(Player.CanSee(e.NewPosition)) {
+                        TpIn();
+                    }
+                    return true;
+                }
+                return false;
+
+                void TpIn()
+                {
+                    var tpIn = Animation.TeleportIn(e.Actor)
+                        .OnLastFrame(() => {
+                            e.Actor.Render.Hidden = false;
+                            Systems.Render.Screen.CenterOn(Player);
+                        });
+                    if (e.Actor.IsPlayer()) {
+                        Systems.Floor.RecalculateFov(Player);
+                        Systems.Render.Screen.CenterOn(Player);
+                    }
+                    if (Player.CanSee(e.NewPosition)) {
+                        Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
+                        Systems.Render.Screen.Animate(true, e.NewPosition, tpIn);
+                    }
+                    else {
+                        e.Actor.Render.Hidden = false;
+                    }
                 }
             });
             // ActionSystem.ActorMoved:

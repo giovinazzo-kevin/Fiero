@@ -314,12 +314,14 @@ namespace Fiero.Business
                 return null;
             }
             next = next.WithTime(next.Time + cost);
-            var index = _actorQueue.FindIndex(t => t.Time > next.Time);
-            if(index < 0) {
-                _actorQueue.Add(next);
-            }
-            else {
-                _actorQueue.Insert(index, next);
+            if(next.ActorId == TURN_ACTOR_ID || next.Actor.IsAlive()) {
+                var index = _actorQueue.FindIndex(t => t.Time > next.Time);
+                if (index < 0) {
+                    _actorQueue.Add(next);
+                }
+                else {
+                    _actorQueue.Insert(index, next);
+                }
             }
             return cost;
 

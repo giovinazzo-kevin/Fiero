@@ -33,8 +33,6 @@ namespace Fiero.Business
                         return true;
                     if (rel.Left.IsHostile() && flags.IsOffensive)
                         return true;
-                    if (flags.IsPanicButton)
-                        return true;
                     return false;
                 }),
                 p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
@@ -79,8 +77,6 @@ namespace Fiero.Business
                     if (rel.Left.IsHostile() && flags.IsOffensive)
                         return true;
                     if (rel.Left.IsHostile() && throwable.ThrowableProperties.BaseDamage > 0)
-                        return true;
-                    if (flags.IsPanicButton)
                         return true;
                     return false;
                 }),

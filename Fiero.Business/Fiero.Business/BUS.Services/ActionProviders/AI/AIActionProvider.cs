@@ -24,6 +24,8 @@ namespace Fiero.Business
         protected int TurnsSinceSightingHostile { get; private set; }
         protected int TurnsSinceSightingFriendly { get; private set; }
 
+        protected bool Panic => MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10;
+
 
         private StateName _state = StateName.Wandering;
 
@@ -71,7 +73,7 @@ namespace Fiero.Business
 
         protected virtual StateName UpdateState(StateName state)
         {
-            if (MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10) {
+            if (Panic) {
                 return StateName.Retreating;
             }
             if (NearbyEnemies.Values.Count == 0) {
@@ -94,7 +96,7 @@ namespace Fiero.Business
         {
             action = default;
             var flags = item.GetEffectFlags();
-            if (item.TryCast<Potion>(out var potion) && flags.IsBuff) {
+            if (item.TryCast<Potion>(out var potion) && flags.IsDefensive && Panic) {
                 action = new QuaffPotionAction(potion);
                 return true;
             }
@@ -180,35 +182,37 @@ namespace Fiero.Business
         protected virtual IAction Fight(Actor a)
         {
             IAction action;
-            if (MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon) {
-                return new EquipItemAction(betterWeapon);
-            }
-            if (NearbyEnemies.Values.Count > 0 && MyHarmfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(2, 3)) {
-                foreach (var item in MyHarmfulConsumables.Values.Shuffle(Rng.Random)) {
-                    if (TryUseItem(a, item, out action)) {
-                        return action;
-                    }
-                }
-            }
-            if (NearbyAllies.Values.Count > 0 && MyHelpfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 2)) {
-                foreach (var item in MyHelpfulConsumables.Values.Shuffle(Rng.Random)) {
-                    if (TryUseItem(a, item, out action)) {
-                        return action;
-                    }
-                }
-            }
-            if (MyUnidentifiedConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 4)) {
-                foreach (var item in MyUnidentifiedConsumables.Values.Shuffle(Rng.Random)) {
-                    if (TryUseItem(a, item, out action)) {
-                        return action;
-                    }
-                }
-            }
             if (GetClosestHostile(a) is { } hostile) {
                 SetTarget(a, hostile);
                 if (a.IsInMeleeRange(hostile)) {
                     return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
                 }
+
+                if (MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon) {
+                    return new EquipItemAction(betterWeapon);
+                }
+                if (NearbyEnemies.Values.Count > 0 && MyHarmfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(2, 3)) {
+                    foreach (var item in MyHarmfulConsumables.Values.Shuffle(Rng.Random)) {
+                        if (TryUseItem(a, item, out action)) {
+                            return action;
+                        }
+                    }
+                }
+                if (NearbyAllies.Values.Count > 0 && MyHelpfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 2)) {
+                    foreach (var item in MyHelpfulConsumables.Values.Shuffle(Rng.Random)) {
+                        if (TryUseItem(a, item, out action)) {
+                            return action;
+                        }
+                    }
+                }
+                if (MyUnidentifiedConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 4)) {
+                    foreach (var item in MyUnidentifiedConsumables.Values.Shuffle(Rng.Random)) {
+                        if (TryUseItem(a, item, out action)) {
+                            return action;
+                        }
+                    }
+                }
+
                 if (TryFollowPath(a, out action)) {
                     return action;
                 }

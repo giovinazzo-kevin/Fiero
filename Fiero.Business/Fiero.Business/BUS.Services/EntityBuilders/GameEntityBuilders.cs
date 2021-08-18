@@ -34,7 +34,7 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi(UI)
-            .WithHealth(20)
+            .WithHealth(50)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithName(nameof(Player))
             .WithSprite(TextureName.Creatures, nameof(Player), ColorName.White)
@@ -340,7 +340,7 @@ namespace Fiero.Business
                 (Throwable_Rock(Rng.Random.Between(4, 10)), 1f)
             ))
             .WithLikedItems(
-                i => i.TryCast<Throwable>(out _),
+                i => i.TryCast<Throwable>(out var throwable) && throwable.ThrowableProperties.ThrowsUseCharges,
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
             ;
@@ -382,6 +382,12 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatMonk)
             .WithDialogueTriggers(NpcName.RatMonk)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
+            .WithItems(Loadout(
+                (Potion_OfHealing(), 1f)
+            ))
+            .WithLikedItems(
+                i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
+            )
             ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
@@ -398,6 +404,9 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatThief)
             .WithDialogueTriggers(NpcName.RatThief)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatThief), ColorName.White)
+            .WithLikedItems(
+                i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
+            )
             ;
         public EntityBuilder<Actor> NPC_RatOutcast()
             => NPC_Rat()
@@ -414,6 +423,12 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatArsonist)
             .WithDialogueTriggers(NpcName.RatArsonist)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatArsonist), ColorName.White)
+            .WithItems(Loadout(
+                (Throwable_Bomb(Rng.Random.Between(1, 3)), 1f)
+            ))
+            .WithLikedItems(
+                i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Explosion) ?? false
+            )
             ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
@@ -471,7 +486,7 @@ namespace Fiero.Business
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: charges,
-                damage: 4,
+                damage: 2,
                 maxRange: 3,
                 mulchChance: 1 / 4f,
                 @throw: ThrowName.Arc,
@@ -479,7 +494,7 @@ namespace Fiero.Business
                 throwsUseCharges: true
             )
             ;
-        public EntityBuilder<Throwable> Throwable_MercuryFulminate(int charges)
+        public EntityBuilder<Throwable> Throwable_Bomb(int charges)
             => Throwable<Throwable>(
                 name: ThrowableName.Bomb,
                 itemRarity: 1,

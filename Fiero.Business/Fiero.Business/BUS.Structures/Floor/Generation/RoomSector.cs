@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public readonly struct RoomSector : IFloorGenerationPrefab
+    public class RoomSector : IFloorGenerationPrefab
     {
         public readonly bool[] Cells;
         public readonly IntRect Sector;
@@ -44,54 +44,70 @@ namespace Fiero.Business
                 .Select(s => {
                     var room = makeRoom();
                     foreach (var i in s) {
-                        room.AddRect(rects[i]);
+                        room.AddRect(i, rects[i]);
                     }
                     return room;
                 })
                 .ToArray();
-
-            var corridors = new List<Corridor>();
-            for (int i = 1; i < Rooms.Length; i++) {
-                var prev = Rooms[i - 1];
-                var pairs = Rooms[i].GetConnectors()
-                    .SelectMany(c => prev.GetConnectors().Select(d => new UnorderedPair<UnorderedPair<Coord>>(c, d)));
-                var bestPair = pairs
-                    .Where(p => new Line(p.Left.Left, p.Left.Right).IsParallel(new Line(p.Right.Left, p.Right.Right)))
-                    .OrderBy(p => ((p.Left.Left + p.Left.Right) / 2).DistSq((p.Right.Left + p.Right.Right) / 2))
-                    .First();
-                corridors.Add(new(bestPair.Left, bestPair.Right));
-            }
-            Corridors = corridors.ToArray();
-
+            Corridors = GenerateIntraSectorCorridors(Rooms).ToArray();
             Console.WriteLine($"Rooms: {Rooms.Length}; Corridors: {Corridors.Length}");
         }
 
-        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IEnumerable<RoomSector> sectors)
+        public static IEnumerable<Corridor> GenerateIntraSectorCorridors(IList<Room> rooms)
         {
-            var ret = new List<Corridor>();
-            var roomSectors = sectors.Select((s, i) => (Index: i, Sector: s)).ToList();
-            for (int i = 0; i < roomSectors.Count; i++) {
-                var neighbors = roomSectors.Where(x => 
-                    CardinallyAdjacent(new[] { x.Index }, roomSectors[i].Index))
+            var connectedRooms = new HashSet<UnorderedPair<Room>>();
+            var roomPairs = rooms.SelectMany(r => rooms.Where(s => s != r).Select(s => new UnorderedPair<Room>(r, s)))
+                .OrderBy(p => p.Left.Position.DistSq(p.Right.Position))
+                .ToList();
+            foreach (var rp in roomPairs) {
+                if(connectedRooms.Contains(rp)
+                    || connectedRooms.Any(c => c.Left == rp.Left && connectedRooms.Contains(new(c.Right, rp.Right)))
+                    || connectedRooms.Any(c => c.Right == rp.Left && connectedRooms.Contains(new(c.Left, rp.Right)))
+                    || connectedRooms.Any(c => c.Left == rp.Right && connectedRooms.Contains(new(c.Right, rp.Left)))
+                    || connectedRooms.Any(c => c.Right == rp.Right && connectedRooms.Contains(new(c.Left, rp.Left)))) {
+                    continue;
+                }
+                var connectorPairs = rp.Left.GetConnectors()
+                    .SelectMany(c => rp.Right.GetConnectors()
+                        .Select(d => new UnorderedPair<RoomConnector>(c, d)))
+                    .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right).IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
                     .ToList();
-                // Make a connection towards 1 to 3 neighbors
-                var connections = Rng.Random.Between(1, 3);
-                for (int j = 0; j < connections && neighbors.Count > 0; j++) {
-                    var n = Rng.Random.Next(neighbors.Count);
-                    var neighbor = neighbors[n];
-                    neighbors.RemoveAt(n);
-
-                    var pairs = roomSectors[i].Sector.Rooms.SelectMany(r => r.GetConnectors())
-                        .SelectMany(c => neighbor.Sector.Rooms.SelectMany(r => r.GetConnectors())
-                            .Select(d => new UnorderedPair<UnorderedPair<Coord>>(c, d)));
-                    var bestPair = pairs
-                        .Where(p => new Line(p.Left.Left, p.Left.Right).IsParallel(new Line(p.Right.Left, p.Right.Right)))
-                        .OrderBy(p => ((p.Left.Left + p.Left.Right) / 2).DistSq((p.Right.Left + p.Right.Right) / 2))
-                        .First();
-                    ret.Add(new(bestPair.Left, bestPair.Right));
+                var bestPair = connectorPairs
+                    .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
+                    .First();
+                var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.Red);
+                if(!rooms.Any(r => r.GetRects().Any(r => corridor.Points.Skip(1).SkipLast(1).Any(p => r.Contains(p.X, p.Y))))) {
+                    connectedRooms.Add(rp);
+                    yield return corridor;
                 }
             }
-            return ret;
+        }
+
+        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors)
+        {
+            var indexed = sectors.Select((s, i) => (Sector: s, Index: i))
+                .ToList();
+            var side = (int)Math.Sqrt(indexed.Count);
+            var connected = new HashSet<UnorderedPair<Room>>();
+            foreach (var s in indexed) {
+                var c = new Coord(s.Index % side, s.Index / side);
+                foreach (var S in indexed.Where(x => new Coord(x.Index % side, x.Index / side).DistSq(c) == 1)) {
+                    var availableConnectors = S.Sector.Rooms.SelectMany(r => r.GetConnectors());
+                    var myConnectors = s.Sector.Rooms
+                        .SelectMany(r => r.GetConnectors());
+                    var pairs = myConnectors.SelectMany(c => availableConnectors.Select(d => new UnorderedPair<RoomConnector>(c, d)))
+                        .ToList();
+                    var bestPair = pairs
+                        .OrderBy(p => p.Right.Center.Dist(p.Left.Center))
+                        .First();
+                    var conn = new UnorderedPair<Room>(bestPair.Left.Owner, bestPair.Right.Owner);
+                    if(connected.Contains(conn)) {
+                        continue;
+                    }
+                    connected.Add(conn);
+                    yield return new(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.Green);
+                }
+            }
         }
 
         public static RoomSector Create(IntRect sector, Func<Room> makeRoom)
@@ -117,7 +133,9 @@ namespace Fiero.Business
         public static bool CardinallyAdjacent(IEnumerable<int> candidates, int a)
         {
             var p = ToCoord(a);
-            return candidates.Select(c => ToCoord(c))
+            var x = candidates.Select(c => ToCoord(c))
+                .ToList();
+            return x
                 .Any(q => p.DistSq(q) == 1);
         }
 

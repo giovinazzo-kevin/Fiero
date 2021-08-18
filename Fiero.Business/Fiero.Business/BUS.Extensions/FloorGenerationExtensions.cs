@@ -6,6 +6,12 @@ namespace Fiero.Business
 
     public static class FloorGenerationExtensions
     {
+        public static void Draw(this FloorGenerationContext ctx, Coord p, Func<Coord, TileDef> makeTile)
+        {
+            var tile = makeTile(p);
+            ctx.SetTile(p, tile.Name, tile.Color);
+        }
+
         public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, Func<Coord, TileDef> makeTile)
         {
             foreach (var p in Shapes.Line(start, end)) {

@@ -71,7 +71,7 @@ namespace Fiero.Business
 
         protected virtual StateName UpdateState(StateName state)
         {
-            if(MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10) {
+            if (MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10) {
                 return StateName.Retreating;
             }
             if (NearbyEnemies.Values.Count == 0) {
@@ -110,7 +110,7 @@ namespace Fiero.Business
             }
             return false;
         }
-        
+
         public override bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful)
         {
             return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Floor.GetActorsAt(a.FloorId(), p).Any());
@@ -142,10 +142,13 @@ namespace Fiero.Business
                 a.Ai.Path.RemoveFirst();
                 if (diff > 0 && diff <= 2) {
                     // one tile ahead
-                    action = new MoveRelativeAction(dir);
-                    return true;
+                    if (Systems.Floor.TryGetCellAt(a.FloorId(), pos, out var cell)
+                        && cell.IsWalkable(null) && !cell.Actors.Any()) {
+                        action = new MoveRelativeAction(dir);
+                        return true;
+                    }
                 }
-        }
+            }
             // Path recalculation is necessary
             a.Ai.Path = null;
             a.Ai.Target = null;
@@ -154,19 +157,19 @@ namespace Fiero.Business
 
         protected virtual IAction Retreat(Actor a)
         {
-            if(MyPanicButtons.Values.Count > 0) {
+            if (MyPanicButtons.Values.Count > 0) {
                 foreach (var item in MyPanicButtons.Values.Shuffle(Rng.Random)) {
                     if (TryUseItem(a, item, out var action)) {
                         return action;
                     }
                 }
             }
-            if(GetClosestHostile(a) is { } hostile) {
+            if (GetClosestHostile(a) is { } hostile) {
                 var dir = a.Position() - hostile.Position();
-                if(!Systems.Floor.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell)) {
+                if (!Systems.Floor.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell)) {
                     return Fight(a);
                 }
-                if(!cell.IsWalkable(null)) {
+                if (!cell.IsWalkable(null)) {
                     return Fight(a);
                 }
                 return new MoveRelativeAction(dir);
@@ -177,10 +180,10 @@ namespace Fiero.Business
         protected virtual IAction Fight(Actor a)
         {
             IAction action;
-            if(MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon) {
+            if (MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon) {
                 return new EquipItemAction(betterWeapon);
             }
-            if(NearbyEnemies.Values.Count > 0 && MyHarmfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(2, 3)) {
+            if (NearbyEnemies.Values.Count > 0 && MyHarmfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(2, 3)) {
                 foreach (var item in MyHarmfulConsumables.Values.Shuffle(Rng.Random)) {
                     if (TryUseItem(a, item, out action)) {
                         return action;
@@ -194,7 +197,7 @@ namespace Fiero.Business
                     }
                 }
             }
-            if(MyUnidentifiedConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 4)) {
+            if (MyUnidentifiedConsumables.Values.Count > 0 && Rng.Random.NChancesIn(1, 4)) {
                 foreach (var item in MyUnidentifiedConsumables.Values.Shuffle(Rng.Random)) {
                     if (TryUseItem(a, item, out action)) {
                         return action;
@@ -206,7 +209,7 @@ namespace Fiero.Business
                 if (a.IsInMeleeRange(hostile)) {
                     return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
                 }
-                if(TryFollowPath(a, out action)) {
+                if (TryFollowPath(a, out action)) {
                     return action;
                 }
             }
@@ -215,9 +218,9 @@ namespace Fiero.Business
 
         protected virtual IAction Wander(Actor a)
         {
-            if(NearbyItems.AlertingValues.Count > 0) {
+            if (NearbyItems.AlertingValues.Count > 0) {
                 var closestItem = NearbyItems.AlertingValues.First();
-                if(a.Position() == closestItem.Position()) {
+                if (a.Position() == closestItem.Position()) {
                     return new PickUpItemAction(closestItem);
                 }
                 SetTarget(a, closestItem);
@@ -259,8 +262,8 @@ namespace Fiero.Business
             UpdateCounters();
             return (_state = UpdateState(_state)) switch {
                 StateName.Retreating => Retreat(a),
-                StateName.Fighting   => Fight(a),
-                StateName.Wandering  => Wander(a),
+                StateName.Fighting => Fight(a),
+                StateName.Wandering => Wander(a),
                 _ => throw new NotSupportedException(_state.ToString()),
             };
         }

@@ -6,9 +6,11 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public abstract class Room : IFloorGenerationPrefab
     {
         protected readonly HashSet<IntRect> Rects;
+        protected readonly HashSet<int> Indices;
 
         public event Action<Room, FloorGenerationContext> Drawn;
 
@@ -19,26 +21,30 @@ namespace Fiero.Business
         protected virtual TileDef GroundTile(Coord c) => new(TileName.Room, c);
 
         public IEnumerable<IntRect> GetRects() => Rects;
+        public IEnumerable<int> GetIndices() => Indices;
         public IEnumerable<Coord> GetPointCloud() => Rects.SelectMany(r => r.Enumerate());
 
         public Room()
         {
             Rects = new();
+            Indices = new();
         }
 
-        public void AddRect(IntRect rect)
+        public void AddRect(int index, IntRect rect)
         {
+            Indices.Add(index);
             Rects.Add(rect);
             Position = Rects.Min(r => r.Position());
             Size = Rects.Max(r => r.Position() + r.Size() - Position);
         }
 
-        public virtual IEnumerable<UnorderedPair<Coord>> GetConnectors()
+        public virtual IEnumerable<RoomConnector> GetConnectors()
         {
             var openEdges = Rects.SelectMany(r => r.GetEdges())
                 .ToLookup(r => r)
                 .Where(l => l.Count() == 1)
-                .SelectMany(l => l);
+                .SelectMany(l => l)
+                .Select(l => new RoomConnector(this, l));
             foreach (var edge in openEdges) {
                 yield return edge;
             }
@@ -48,8 +54,8 @@ namespace Fiero.Business
             foreach (var rect in Rects) {
                 ctx.FillBox(rect.Position(), rect.Size(), GroundTile);
             }
-            foreach (var edge in GetConnectors()) {
-                ctx.DrawLine(edge.Left, edge.Right, WallTile);
+            foreach (var conn in GetConnectors()) {
+                ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, WallTile);
             }
             Drawn?.Invoke(this, ctx);
         }

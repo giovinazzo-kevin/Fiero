@@ -76,7 +76,7 @@ namespace Fiero.Business
                             continue;
                         using var sprite = new Sprite(whitePixel.Texture);
                         sprite.Color = Colors.Get(drawable switch {
-                            Tile x when x.TileProperties.Name == TileName.Corridor => ColorName.Magenta,
+                            Tile x when x.TileProperties.Name == TileName.Corridor => x.Render.Color,
                             Tile x when x.Physics.BlocksMovement => ColorName.White,
                             Tile x when !x.Physics.BlocksMovement => ColorName.Blue,
                             Item x => ColorName.LightCyan,

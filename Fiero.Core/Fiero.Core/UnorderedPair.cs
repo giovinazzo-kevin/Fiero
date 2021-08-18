@@ -7,6 +7,8 @@ namespace Fiero.Core
         public readonly T Left;
         public readonly T Right;
 
+        public bool Contains(T v) => Equals(Left, v) || Equals(Right, v);
+
         public UnorderedPair(T l, T r)
         {
             Left = l;

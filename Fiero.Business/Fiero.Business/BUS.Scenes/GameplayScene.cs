@@ -362,10 +362,10 @@ namespace Fiero.Business.Scenes
             // - Heal actor
             // - Show damage numbers
             yield return Systems.Action.ActorHealed.SubscribeResponse(e => {
+                int oldHealth = e.Target.ActorProperties.Health;
+                e.Target.ActorProperties.Health.V += e.Heal;
+                var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target)) {
-                    int oldHealth = e.Target.ActorProperties.Health;
-                    e.Target.ActorProperties.Health.V += e.Heal;
-                    var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                     Systems.Render.Screen.Animate(false, e.Target.Position(), Animation.DamageNumber(actualHeal, ColorName.LightGreen));
                 }
                 return true;
@@ -383,10 +383,10 @@ namespace Fiero.Business.Scenes
                     // make sure that people hold a grudge regardless of factions
                     Systems.Faction.SetUnilateralRelationship(e.Victim, attacker, StandingName.Hated);
                 }
+                int oldHealth = e.Victim.ActorProperties.Health;
+                e.Victim.ActorProperties.Health.V -= e.Damage;
+                var actualDdamage = oldHealth - e.Victim.ActorProperties.Health;
                 if (Player.CanSee(e.Victim)) {
-                    int oldHealth = e.Victim.ActorProperties.Health;
-                    e.Victim.ActorProperties.Health.V -= e.Damage;
-                    var actualDdamage = oldHealth - e.Victim.ActorProperties.Health;
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
                     Systems.Render.Screen.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), color));
                 }

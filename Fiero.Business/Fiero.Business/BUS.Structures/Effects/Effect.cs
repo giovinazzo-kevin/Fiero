@@ -21,6 +21,7 @@ namespace Fiero.Business
         protected virtual void OnStarted(GameSystems systems, Entity owner) { }
         public void Start(GameSystems systems, Entity owner)
         {
+            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(); }));
             if(!(this is ModifierEffect)) {
                 Started += e => owner.Effects?.Active.Add(e);
                 Ended += e => owner.Effects?.Active.Remove(e);

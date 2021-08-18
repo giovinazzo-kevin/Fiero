@@ -7,6 +7,13 @@
     /// </summary>
     public abstract class StatusEffect : Effect
     {
+        public readonly Entity Source;
+
+        public StatusEffect(Entity source)
+        {
+            Source = source;
+        }
+
         protected abstract void Apply(GameSystems systems, Actor target);
 
         protected override void OnStarted(GameSystems systems, Entity owner)

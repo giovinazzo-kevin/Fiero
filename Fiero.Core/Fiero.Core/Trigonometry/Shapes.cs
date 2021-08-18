@@ -20,8 +20,9 @@ namespace Fiero.Core
         public static IEnumerable<Coord> Neighborhood(Coord center, int side)
             => Box(center, side).Except(new[] { center });
 
-        public static IEnumerable<Coord> Disc(Coord center, int radius)
+        public static IEnumerable<Coord> Disc(Coord center, int diameter)
         {
+            var radius = diameter / 2;
             var rr = radius * radius;
             for (int x = -radius; x <= radius; x++) {
                 for (int y = -radius; y <= radius; y++) {

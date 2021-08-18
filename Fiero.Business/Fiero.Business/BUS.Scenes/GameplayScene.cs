@@ -150,14 +150,12 @@ namespace Fiero.Business.Scenes
                 Player = Resources.Entities.Player
                     .WithName(playerName)
                     .WithItems(
-                        Resources.Entities.Weapon_Sword()
-                            .WithIntrinsicEffect(new(EffectName.UncontrolledTeleport, chance: .25f), e => new GrantedWhenHitByMeleeWeapon(e)).Build(),
+                        Resources.Entities.Weapon_Sword().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build()
+                        Resources.Entities.Potion_OfHealing().Build(),
+                        Resources.Entities.Throwable_MercuryFulminate(10).Build(),
+                        Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
+                        Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
                     )
                     //.WithSpells(
                     //    Resources.Entities.Spell_CrimsonLance().Build(),
@@ -398,15 +396,14 @@ namespace Fiero.Business.Scenes
             // - Handle game over when the player dies
             // - Remove entity from floor and action systems and handle cleanup
             yield return Systems.Action.ActorDespawned.SubscribeResponse(e => {
-                if (e.Actor.IsPlayer()) {
+                var wasPlayer = e.Actor.IsPlayer();
+                Systems.Action.StopTracking(e.Actor.Id);
+                Systems.Floor.RemoveActor(e.Actor);
+                Entities.FlagEntityForRemoval(e.Actor.Id);
+                e.Actor.TryRefresh(0);
+                Entities.RemoveFlagged(true);
+                if (wasPlayer) {
                     TrySetState(SceneState.Main);
-                }
-                else {
-                    Systems.Action.StopTracking(e.Actor.Id);
-                    Systems.Floor.RemoveActor(e.Actor);
-                    Entities.FlagEntityForRemoval(e.Actor.Id);
-                    e.Actor.TryRefresh(0);
-                    Entities.RemoveFlagged(true);
                 }
                 return true;
             });
@@ -445,6 +442,10 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ItemDropped.SubscribeResponse(e => {
                 if (e.Actor.Inventory.TryTake(e.Item)) {
                     e.Item.Physics.Position = e.Actor.Position();
+                    if (Systems.Floor.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var freeTile, maxDistance: 10,
+                        pred: c => !c.Items.Any())) {
+                        e.Item.Physics.Position = freeTile.Position();
+                    }
                     Systems.Floor.AddItem(e.Actor.FloorId(), e.Item);
                     e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
                     return true;
@@ -505,6 +506,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
                 Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
+                    Systems.Render.Screen.CenterOn(Player);
                     var anim = e.Item.ThrowableProperties.Throw switch {
                         ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName),
                         _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName)
@@ -636,6 +638,16 @@ namespace Fiero.Business.Scenes
                     Resources.Sounds.Get(SoundName.TrapSpotted, pos - Player.Position()).Play();
                     Systems.Render.Screen.Animate(false, pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }
+            });
+            // ActionSystem.ExplosionHappened:
+            // - Show an animation and play sound
+            // - Damage all affected entities
+            yield return Systems.Action.ExplosionHappened.SubscribeResponse(e => {
+                Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
+                if (Player.CanSee(e.Center)) {
+                    Systems.Render.Screen.Animate(true, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p-e.Center).ToVec())).ToArray());
+                }
+                return true;
             });
             // ActionSystem.FeatureInteractedWith:
             // - Open/close doors

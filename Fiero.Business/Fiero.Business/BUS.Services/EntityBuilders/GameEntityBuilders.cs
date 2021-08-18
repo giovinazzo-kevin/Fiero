@@ -479,41 +479,58 @@ namespace Fiero.Business
                 throwsUseCharges: true
             )
             ;
+        public EntityBuilder<Throwable> Throwable_MercuryFulminate(int charges)
+            => Throwable<Throwable>(
+                name: ThrowableName.Rock,
+                itemRarity: 1,
+                remainingUses: charges,
+                maxUses: charges,
+                damage: 0,
+                maxRange: 7,
+                mulchChance: 1f,
+                @throw: ThrowName.Arc,
+                consumedWhenEmpty: true,
+                throwsUseCharges: true
+            )
+            .WithIntrinsicEffect(new(EffectName.Explosion, chance: 1f, magnitude: 2), e => new GrantedWhenHitByThrownItem(e))
+            ;
         #endregion
 
         #region POTIONS
         public EntityBuilder<Potion> Potion_OfConfusion()
-            => Potion(new(EffectName.Confusion, 10), new(EffectName.Confusion, 10));
+            => Potion(new(EffectName.Confusion, duration: 10), new(EffectName.Confusion, duration: 10));
         public EntityBuilder<Potion> Potion_OfSleep()
-            => Potion(new(EffectName.Sleep, 10), new(EffectName.Sleep, 10));
+            => Potion(new(EffectName.Sleep, duration: 10), new(EffectName.Sleep, duration: 10));
         public EntityBuilder<Potion> Potion_OfSilence()
-            => Potion(new(EffectName.Silence, 10), new(EffectName.Silence, 10));
+            => Potion(new(EffectName.Silence, duration: 10), new(EffectName.Silence, duration: 10));
         public EntityBuilder<Potion> Potion_OfEntrapment()
-            => Potion(new(EffectName.Entrapment, 10), new(EffectName.Entrapment, 10));
+            => Potion(new(EffectName.Entrapment, duration: 10), new(EffectName.Entrapment, duration: 10));
         public EntityBuilder<Potion> Potion_OfTeleport()
             => Potion(new(EffectName.UncontrolledTeleport), new(EffectName.UncontrolledTeleport));
+        public EntityBuilder<Potion> Potion_OfHealing()
+            => Potion(new(EffectName.Heal, magnitude: 2), new(EffectName.Heal, magnitude: 2));
         #endregion
 
         #region SCROLLS
         public EntityBuilder<Scroll> Scroll_OfMassConfusion()
-            => Scroll(new(EffectName.Confusion, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Confusion, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSleep()
-            => Scroll(new(EffectName.Sleep, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Sleep, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSilence()
-            => Scroll(new(EffectName.Silence, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Silence, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassEntrapment()
-            => Scroll(new(EffectName.Entrapment, 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Entrapment, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         #endregion
 
         #region WANDS
         public EntityBuilder<Wand> Wand_OfConfusion(int charges)
-            => Wand(new(EffectName.Confusion, 10), charges);
+            => Wand(new(EffectName.Confusion, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfSleep(int charges)
-            => Wand(new(EffectName.Sleep, 10), charges);
+            => Wand(new(EffectName.Sleep, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfSilence(int charges)
-            => Wand(new(EffectName.Silence, 10), charges);
+            => Wand(new(EffectName.Silence, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfEntrapment(int charges)
-            => Wand(new(EffectName.Entrapment, 10), charges);
+            => Wand(new(EffectName.Entrapment, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfTeleport(int charges)
             => Wand(new(EffectName.UncontrolledTeleport), charges);
         #endregion

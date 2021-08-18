@@ -20,7 +20,8 @@ namespace Fiero.Business
 
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
-            var effect = Source.Resolve();
+            base.OnStarted(systems, owner);
+            var effect = Source.Resolve(null);
             Ended += Temporary_Ended;
             effect.Start(systems, owner);
 

@@ -6,14 +6,16 @@
         Sleep,
         Silence,
         Entrapment,
-        Bleed,
         Poison,
-        Berserk,
-        Hardening,
-        Evasion,
+
+        Heal,
+        Regenerate,
+
         Vampirism,
 
         UncontrolledTeleport,
+
+        Explosion,
 
         Trap,
         Autopickup

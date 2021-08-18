@@ -17,5 +17,6 @@
         MagicAttack,
         EnemyDeath,
         PlayerDeath,
+        Explosion
     }
 }

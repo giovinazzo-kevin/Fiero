@@ -12,7 +12,7 @@
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {
-            Source.Resolve().Start(systems, target);
+            Source.Resolve(owner).Start(systems, target);
         }
     }
 }

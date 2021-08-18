@@ -53,6 +53,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ScrollReadEvent, EventResult> ScrollRead;
         public readonly SystemRequest<ActionSystem, PotionQuaffedEvent, EventResult> PotionQuaffed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
+        public readonly SystemRequest<ActionSystem, ExplosionHappenedEvent, EventResult> ExplosionHappened;
 
         public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
         public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
@@ -79,7 +80,6 @@ namespace Fiero.Business
             _entities = entities;
             _floorSystem = floorSystem;
             _factionSystem = factionSystem;
-
             GameStarted = new(this, nameof(GameStarted));
             TurnStarted = new(this, nameof(TurnStarted));
             TurnEnded = new(this, nameof(TurnEnded));
@@ -109,7 +109,7 @@ namespace Fiero.Business
             ItemUnequipped = new(this, nameof(ItemUnequipped));
             ItemConsumed = new(this, nameof(ItemConsumed));
             FeatureInteractedWith = new(this, nameof(FeatureInteractedWith));
-
+            ExplosionHappened = new(this, nameof(ExplosionHappened));
             ActorSteppedOnTrap = new(this, nameof(ActorSteppedOnTrap));
             ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
             ActorGainedEffect = new(this, nameof(ActorGainedEffect));
@@ -202,6 +202,7 @@ namespace Fiero.Business
         
         public void Reset()
         {
+            AbortCurrentTurn();
             _actorQueue.Clear();
             _actorQueue.Add(new ActorTime(TURN_ACTOR_ID, null, () => new WaitAction(), 0));
             GameStarted.Raise(new());
@@ -219,7 +220,7 @@ namespace Fiero.Business
 
         private bool MayTarget(Actor attacker, Actor victim)
         {
-            return attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelationships(attacker, victim).Left.IsHostile();
+            return victim.IsAlive() && attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelationships(attacker, victim).Left.IsHostile();
         }
 
         private bool TryFindVictim(Coord p, Actor attacker, out Actor victim)
@@ -301,6 +302,7 @@ namespace Fiero.Business
             if (HandleAction(next, ref intent) is { } cost) {
                 if(_invalidate) {
                     _invalidate = false;
+                    _actorQueue.Add(next);
                     return cost;
                 }
                 OnTurnEnded(next.ActorId);

@@ -28,7 +28,7 @@ namespace Fiero.Business
                     systems.Floor.RemoveFeature(feature);
                 }
             }
-            Source.Resolve().Start(systems, target);
+            Source.Resolve(owner).Start(systems, target);
         }
 
         protected override void OnRemoved(GameSystems systems, Entity owner, Actor target)

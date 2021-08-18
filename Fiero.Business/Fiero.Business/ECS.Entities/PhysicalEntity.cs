@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public abstract class PhysicalEntity : DrawableEntity
+    public class PhysicalEntity : DrawableEntity
     {
         [RequiredComponent]
         public PhysicsComponent Physics { get; private set; }

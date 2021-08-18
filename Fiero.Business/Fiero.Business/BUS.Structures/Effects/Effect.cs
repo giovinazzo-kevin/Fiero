@@ -21,13 +21,6 @@ namespace Fiero.Business
         protected virtual void OnStarted(GameSystems systems, Entity owner) { }
         public void Start(GameSystems systems, Entity owner)
         {
-            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => {
-                // Force cleanup of old effects when a new game is started
-                try {
-                    End();
-                }
-                catch (ObjectDisposedException) { }
-            }));
             if(!(this is ModifierEffect)) {
                 Started += e => owner.Effects?.Active.Add(e);
                 Ended += e => owner.Effects?.Active.Remove(e);

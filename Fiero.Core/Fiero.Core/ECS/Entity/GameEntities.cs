@@ -84,6 +84,8 @@ namespace Fiero.Core
                 FlagEntityForRemoval(e.Id);
             }
             RemoveFlagged(propagate);
+            _lastComponentId = 0;
+            _lastEntityId = 0;
         }
 
         public int CreateEntity()
@@ -269,6 +271,9 @@ namespace Fiero.Core
                     throw new InvalidOperationException($"Component cache is in an invalid state");
                 }
                 Entities.Remove(trackedEntity);
+                foreach (var key in ProxyCache.Keys.Where(k => k.Left == entityId).ToArray()) {
+                    ProxyCache.Remove(key);
+                }
             }
             if(propagate) {
                 Parent?.RemoveFlagged();

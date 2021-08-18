@@ -10,6 +10,8 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Root.Desc$";
         public override EffectName Name => EffectName.Entrapment;
 
+        public EntrapEffect(Entity source) : base(source) { }
+
         protected override void Apply(GameSystems systems, Actor target)
         {
             target.TryRoot();

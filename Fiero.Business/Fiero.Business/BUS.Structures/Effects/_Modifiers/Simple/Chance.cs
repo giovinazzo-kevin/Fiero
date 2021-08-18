@@ -20,7 +20,7 @@ namespace Fiero.Business
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
             if(Rng.Random.NextDouble() < Probability) {
-                Source.Resolve().Start(systems, owner);
+                Source.Resolve(null).Start(systems, owner);
             }
         }
 

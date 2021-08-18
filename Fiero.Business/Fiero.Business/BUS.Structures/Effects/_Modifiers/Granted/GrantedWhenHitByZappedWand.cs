@@ -12,12 +12,12 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.GrantedWhenHitByZappedWand$";
         public override EffectName Name => Source.Name;
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
+        protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target)
         {
-            Source.Resolve().Start(systems, target);
+            Source.Resolve(source).Start(systems, target);
         }
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Coord location)
+        protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Coord location)
         {
 
         }

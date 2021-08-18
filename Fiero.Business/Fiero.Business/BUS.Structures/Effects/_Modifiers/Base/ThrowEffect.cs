@@ -15,8 +15,8 @@ namespace Fiero.Business
         {
         }
 
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Coord location);
+        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target);
+        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor source, Coord location);
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
@@ -24,10 +24,10 @@ namespace Fiero.Business
                 yield return systems.Action.ItemThrown.SubscribeHandler(e => {
                     if (e.Item == owner) {
                         if (e.Victim != null) {
-                            OnApplied(systems, owner, e.Victim);
+                            OnApplied(systems, owner, e.Actor, e.Victim);
                         }
                         else {
-                            OnApplied(systems, owner, e.Position);
+                            OnApplied(systems, owner, e.Actor, e.Position);
                         }
                     }
                 });

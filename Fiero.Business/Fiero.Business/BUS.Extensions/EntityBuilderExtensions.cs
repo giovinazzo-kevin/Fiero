@@ -15,10 +15,10 @@ namespace Fiero.Business
             where T : Entity => builder.AddOrTweak<EffectComponent>();
         public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, EffectDef def, Func<EffectDef, Effect> wrap = null)
             where T : Entity => builder.AddOrTweak<EffectComponent>(c => {
-                wrap ??= (e => e.Resolve());
                 c.Intrinsic.Add(def);
-                builder.Built += (b, e) => {
-                    wrap(def).Start(b.ServiceFactory.GetInstance<GameSystems>(), e);
+                builder.Built += (b, o) => {
+                    wrap ??= (e => e.Resolve(o));
+                    wrap(def).Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
                 };
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)

@@ -19,7 +19,7 @@ namespace Fiero.Business
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {
             if(Modifier == ScrollModifierName.Self) {
-                Source.Resolve().Start(systems, target);
+                Source.Resolve(target).Start(systems, target);
                 return;
             }
             var floorId = target.FloorId();
@@ -33,7 +33,7 @@ namespace Fiero.Business
                         _ => throw new NotSupportedException(Modifier.ToString())
                     });
                 foreach (var otherTarget in validTargets) {
-                    Source.Resolve().Start(systems, otherTarget);
+                    Source.Resolve(target).Start(systems, otherTarget);
                 }
             }
         }

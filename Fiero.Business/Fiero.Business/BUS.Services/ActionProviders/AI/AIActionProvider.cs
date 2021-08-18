@@ -36,10 +36,10 @@ namespace Fiero.Business
                 (MyUnidentifiedConsumables = new((sys, a) => a.Inventory.GetConsumables()
                     .Where(v => !v.ItemProperties.Identified))),
                 (MyHelpfulConsumables = new((sys, a) => MyConsumables.AlertingValues
-                    .Where(v => v.GetEffectFlags().IsHelpful()))),
+                    .Where(v => v.GetEffectFlags().IsDefensive))),
                 (MyHarmfulConsumables = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.TryCast<Throwable>(out var t) && t.ThrowableProperties.BaseDamage > 0
-                             || v.GetEffectFlags().IsHarmful()))),
+                             || v.GetEffectFlags().IsOffensive))),
                 (MyPanicButtons = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.GetEffectFlags().IsPanicButton))),
                 (NearbyAllies = new((sys, a) => {

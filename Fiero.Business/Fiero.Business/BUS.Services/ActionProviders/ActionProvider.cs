@@ -27,10 +27,12 @@ namespace Fiero.Business
                     if (!wand.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
-                    if (rel.Left.IsFriendly() && flags.IsBuff)
+                    if (rel.Left.IsFriendly() && flags.IsDefensive)
                         return true;
-                    if (rel.Left.IsHostile() && flags.IsDebuff)
+                    if (rel.Left.IsHostile() && flags.IsOffensive)
                         return true;
+                    if (wand.Effects != null && wand.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
+                        return false;
                     return false;
                 }),
                 p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
@@ -68,12 +70,14 @@ namespace Fiero.Business
                     if (!throwable.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
-                    if (rel.Left.IsFriendly() && flags.IsBuff)
+                    if (rel.Left.IsFriendly() && flags.IsDefensive)
                         return true;
-                    if (rel.Left.IsHostile() && flags.IsDebuff)
+                    if (rel.Left.IsHostile() && flags.IsOffensive)
                         return true;
                     if (rel.Left.IsHostile() && throwable.ThrowableProperties.BaseDamage > 0)
                         return true;
+                    if (throwable.Effects != null && throwable.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
+                        return false;
                     return false;
                 }),
                 p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true

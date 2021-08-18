@@ -7,6 +7,7 @@ namespace Fiero.Business
 {
     public class UncontrolledTeleportEffect : StatusEffect
     {
+        public UncontrolledTeleportEffect(Entity source) : base(source) { }
         public override string DisplayName => "$Effect.UncontrolledTeleport.Name$";
         public override string DisplayDescription => "$Effect.UncontrolledTeleport.Desc$";
         public override EffectName Name => EffectName.UncontrolledTeleport;

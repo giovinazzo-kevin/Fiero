@@ -62,8 +62,8 @@ namespace Fiero.Business
                         continue;
 
                     var known = Following.V.Fov.KnownTiles[floorId].Contains(coord);
-                    var seen = Following.V.Fov.VisibleTiles[floorId].Contains(coord);
-                    if (!known)
+                    var seen = true || Following.V.Fov.VisibleTiles[floorId].Contains(coord);
+                    if (false && !known)
                         continue;
                     if (
                            coord.X < 0 || coord.X >= Size.V.X

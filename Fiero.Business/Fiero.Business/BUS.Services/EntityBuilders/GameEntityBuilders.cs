@@ -383,7 +383,7 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.RatMonk)
             .WithSprite(TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
             .WithItems(Loadout(
-                (Potion_OfHealing(), 1f)
+                (Potion_OfHealing().Tweak<ItemComponent>(c => c.Identified = true), 1f)
             ))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false

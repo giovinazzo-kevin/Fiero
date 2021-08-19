@@ -16,6 +16,7 @@ namespace Fiero.Business
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Position() + rDir.Point;
                 var victim = Shapes.Line(t.Actor.Position(), newPos)
+                    .Skip(1)
                     .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(null) ?? false)
                     .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
                     .LastOrDefault();

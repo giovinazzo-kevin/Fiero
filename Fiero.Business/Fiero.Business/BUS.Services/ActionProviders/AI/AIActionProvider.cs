@@ -56,7 +56,7 @@ namespace Fiero.Business
                     return Shapes.Neighborhood(a.Position(), 7)
                      .SelectMany(p => sys.Floor.GetActorsAt(a.FloorId(), p))
                      .Where(b => sys.Faction.GetRelationships(a, b).Right.IsHostile()
-                        && NearbyAllies.Values.Count(v => v.Ai.Target == b) < 3);
+                        && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
                 })),
                 (NearbyItems = new((sys, a) => {
                     return Shapes.Box(a.Position(), 7)

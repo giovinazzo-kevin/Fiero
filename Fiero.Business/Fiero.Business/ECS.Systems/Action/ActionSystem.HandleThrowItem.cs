@@ -24,6 +24,7 @@ namespace Fiero.Business
                         break;
                     case ThrowName.Line:
                         victim = Shapes.Line(t.Actor.Position(), newPos)
+                            .Skip(1)
                             .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(null) ?? false)
                             .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
                             .LastOrDefault();

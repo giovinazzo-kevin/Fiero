@@ -14,7 +14,8 @@ namespace Fiero.Business
                 if(e.Actor == target) {
                     var itemsHere = systems.Floor.GetItemsAt(target.FloorId(), target.Position());
                     if(itemsHere.FirstOrDefault() is { } item) {
-                        systems.Action.ItemPickedUp.HandleOrThrow(new(target, item));
+                        // TODO: Re-use HandleOrThrow
+                        systems.Action.ItemPickedUp.Handle(new(target, item));
                     }
                 }
             }));

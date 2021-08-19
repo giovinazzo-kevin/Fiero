@@ -65,7 +65,7 @@ namespace Fiero.Business
                 return new InteractRelativeAction();
             }
             if (IsKeyPressed(Data.Hotkeys.Look)) {
-                UI.Look();
+                UI.Look(a);
             }
             if (QuickSlots.TryGetAction(out var action)) {
                 return action;

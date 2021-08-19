@@ -32,9 +32,10 @@ namespace Fiero.Business
             foreach (var x in Actors.Where(x => !x.Render.Hidden)) yield return x;
         }
 
-        public override string ToString()
+        public override string ToString() => ToString(true);
+        public string ToString(bool seen)
         {
-            return $"{String.Join(", ", GetDrawables())}.";
+            return $"{String.Join(", ", GetDrawables(seen))}.";
         }
     }
 }

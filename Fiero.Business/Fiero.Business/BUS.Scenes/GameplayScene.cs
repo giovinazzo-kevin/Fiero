@@ -94,7 +94,7 @@ namespace Fiero.Business.Scenes
                         foreach (var player in eh.DialogueListeners.Players()) {
                             var friends = Enumerable.Range(5, 10)
                                 .Select(i => Resources.Entities
-                                    .NPC_Rat()
+                                    .NPC_RatKnight()
                                     .WithFaction(FactionName.Players)
                                     .WithPosition(player.Position())
                                     .Build());
@@ -169,9 +169,9 @@ namespace Fiero.Business.Scenes
                 Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
                     ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch {
-                        var x when x < 2 => new Coord(25, 25),
-                        var x when x < 5 => new Coord(50, 50),
-                        var x when x < 10 => new Coord(75, 75),
+                        var x when x < 2 => new Coord(40, 40),
+                        var x when x < 5 => new Coord(75, 75),
+                        var x when x < 10 => new Coord(125, 125),
                         _ => new Coord(100, 100),
                     });
                     // Connect branches at semi-random depths

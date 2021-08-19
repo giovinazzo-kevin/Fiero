@@ -112,18 +112,25 @@ namespace Fiero.Business
             }
         }
 
-        public static bool Look(this GameUI ui)
+        public static bool Look(this GameUI ui, Actor a)
         {
             var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var shape = new PointTargetingShape(renderSystem.Screen.GetViewportCenter(), 1000);
             var result = ui.FreeCursor(shape, cursorMoved: c => {
                 var floorId = renderSystem.Screen.GetViewportFloor();
-                if (floorSystem.TryGetCellAt(floorId, c.GetPoints().Single(), out var cell)) {
-                    renderSystem.Screen.SetLookText(cell.ToString());
+                var pos = c.GetPoints().Single();
+                renderSystem.Screen.CenterOn(pos);
+                if(a.Fov is null || a.Fov.KnownTiles[floorId].Contains(pos)) {
+                    if (floorSystem.TryGetCellAt(floorId, pos, out var cell)) {
+                        renderSystem.Screen.SetLookText(cell.ToString(a.Fov is null || a.Fov.VisibleTiles[floorId].Contains(pos)));
+                    }
+                    else {
+                        renderSystem.Screen.SetLookText(String.Empty);
+                    }
                 }
                 else {
-                    renderSystem.Screen.SetLookText(String.Empty);
+                    renderSystem.Screen.SetLookText("???");
                 }
             });
             renderSystem.Screen.SetLookText(String.Empty);

@@ -1,6 +1,8 @@
 ﻿{
   "None": "0 0 0 0",
 
+  "AllegianceCircle":  "0 16 16 16",
+
   "Star": "0 0 8 8",
   "Sleep": "8 0 8 8",
   "Silence": "16 0 8 8",

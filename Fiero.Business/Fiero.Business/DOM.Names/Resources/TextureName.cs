@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Business
 {
+
     public enum TextureName
     {
         Creatures,

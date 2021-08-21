@@ -524,8 +524,8 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
                     Systems.Render.Screen.CenterOn(Player);
                     var anim = e.Item.ThrowableProperties.Throw switch {
-                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName),
-                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.SpriteName)
+                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite)
                     };
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
@@ -554,7 +554,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Log?.Write($"$Action.YouZap{e.Wand.DisplayName}.");
                 Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim)) {
-                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.SpriteName);
+                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite);
                     Systems.Render.Screen.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                 }

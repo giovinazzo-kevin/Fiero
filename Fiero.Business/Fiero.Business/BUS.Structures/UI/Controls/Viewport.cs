@@ -12,6 +12,7 @@ namespace Fiero.Business
     public class Viewport : UIControl
     {
         protected readonly FloorSystem FloorSystem;
+        protected readonly FactionSystem FactionSystem;
         protected readonly GameResources Resources;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
@@ -24,12 +25,14 @@ namespace Fiero.Business
         private bool _dirty = true;
 
         public Viewport(
-            GameInput input, 
+            GameInput input,
             FloorSystem floor,
+            FactionSystem faction,
             GameResources res
         ) : base(input)
         {
             FloorSystem = floor;
+            FactionSystem = faction;
             Resources = res;
             Size.ValueChanged += (_, __) => {
                 _renderTexture?.Dispose();
@@ -48,7 +51,7 @@ namespace Fiero.Business
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if(_dirty) {
+            if (_dirty) {
                 if (!Bake())
                     return;
             }
@@ -81,6 +84,10 @@ namespace Fiero.Business
             }
             bool Bake()
             {
+                var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
+                foreach (var key in Enum.GetValues<RenderLayerName>()) {
+                    layers[key] = _ => { };
+                }
                 var floorId = Following.V.FloorId();
                 if (!FloorSystem.TryGetFloor(floorId, out var floor))
                     return false;
@@ -108,43 +115,70 @@ namespace Fiero.Business
                     foreach (var drawable in cell.GetDrawables(seen)) {
                         if (drawable.Render.Hidden)
                             continue;
+                        var asActor = drawable as Actor;
                         var rngSeed = drawable.Render.GetHashCode();
-                        if (!Resources.Sprites.TryGet(drawable.Render.TextureName, drawable.Render.SpriteName, drawable.Render.Color, out var spriteDef, rngSeed)) {
-                            continue;
+                        // Draw allegiance circle
+                        if (asActor != null && drawable != Following.V) {
+                            layers[RenderLayerName.BackgroundEffects] += tex => {
+                                var color = FactionSystem.GetRelationships(Following.V, asActor).Left switch {
+                                    var x when x.IsHostile() => ColorName.Red,
+                                    var x when x.IsFriendly() => ColorName.Green,
+                                    _ => ColorName.Yellow
+                                };
+                                if (!Resources.Sprites.TryGet(TextureName.Icons, "AllegianceCircle", color, out var circleDef, rngSeed))
+                                    return;
+                                using var sprite = new Sprite(circleDef);
+                                var spriteSize = sprite.GetLocalBounds().Size();
+                                sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                                sprite.Scale = ViewTileSize.V / spriteSize;
+                                sprite.Position = screenPos + spriteSize * new Vec(0f, 0.25f) * sprite.Scale.ToVec();
+                                tex.Draw(sprite, states);
+                            };
                         }
-                        using var sprite = new Sprite(spriteDef);
-                        var spriteSize = sprite.GetLocalBounds().Size();
-                        sprite.Position = screenPos;
-                        sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                        sprite.Scale = ViewTileSize.V / spriteSize;
-                        if (!seen) {
-                            sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
-                        }
-                        _renderTexture.Draw(sprite, states);
-                        if (drawable is Actor actor && actor.Effects != null) {
+                        // Draw sprite
+                        layers[drawable.Render.Layer] += tex => {
+                            if (Resources.Sprites.TryGet(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color, out var spriteDef, rngSeed)) {
+                                using var sprite = new Sprite(spriteDef);
+                                var spriteSize = sprite.GetLocalBounds().Size();
+                                sprite.Position = screenPos;
+                                sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                                sprite.Scale = ViewTileSize.V / spriteSize;
+                                if (!seen) {
+                                    sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
+                                }
+                                tex.Draw(sprite, states);
+                            }
+                        };
+                        // Draw active effects
+                        if (asActor != null && asActor.Effects != null) {
                             var offs = Coord.Zero;
                             int _i = 0;
-                            foreach (var effect in actor.Effects.Active) {
+                            foreach (var effect in asActor.Effects.Active) {
                                 var icon = effect.Name.ToString();
-                                if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed)) {
-                                    using var iconSprite = new Sprite(iconDef);
-                                    var iconSize = iconSprite.GetLocalBounds().Size();
-                                    var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
-                                    iconSprite.Position = screenPos + offs - iconSize * scale;
-                                    iconSprite.Origin = new Vec(1f, 1f) * iconSize;
-                                    if (_i++ % 4 == 3) {
-                                        offs += iconSize.ToCoord() * scale * new Coord(0, 1);
-                                        offs *= new Coord(0, 1);
+                                layers[RenderLayerName.ForegroundEffects] += tex => {
+                                    if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed)) {
+                                        using var iconSprite = new Sprite(iconDef);
+                                        var iconSize = iconSprite.GetLocalBounds().Size();
+                                        var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
+                                        iconSprite.Position = screenPos + offs - iconSize * scale;
+                                        iconSprite.Origin = new Vec(1f, 1f) * iconSize;
+                                        if (_i++ % 4 == 3) {
+                                            offs += iconSize.ToCoord() * scale * new Coord(0, 1);
+                                            offs *= new Coord(0, 1);
+                                        }
+                                        else {
+                                            offs += iconSize.ToCoord() * scale * new Coord(1, 0);
+                                        }
+                                        tex.Draw(iconSprite, states);
                                     }
-                                    else {
-                                        offs += iconSize.ToCoord() * scale * new Coord(1, 0);
-                                    }
-                                    _renderTexture.Draw(iconSprite, states);
-                                }
+                                };
 
                             }
                         }
                     }
+                }
+                foreach (var key in Enum.GetValues<RenderLayerName>()) {
+                    layers[key](_renderTexture);
                 }
                 _renderTexture.Display();
                 _dirty = false;

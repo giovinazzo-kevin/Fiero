@@ -170,7 +170,7 @@ namespace Fiero.Business
                     p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None", ColorName.White);
                 }
                 else {
-                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, Items[i].Render.SpriteName, Items[i].Render.Color);
+                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, Items[i].Render.Sprite, Items[i].Render.Color);
                 }
             }
 

@@ -35,10 +35,11 @@ namespace Fiero.Business
                     c.FloorId = floorId.Value;
                 }
             });
-        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, TextureName texture, string sprite, ColorName color)
+        public static EntityBuilder<T> WithSprite<T>(this EntityBuilder<T> builder, RenderLayerName layer, TextureName texture, string sprite, ColorName color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>(c => {
-                c.TextureName = texture;
-                c.SpriteName = sprite;
+                c.Layer = layer;
+                c.Texture = texture;
+                c.Sprite = sprite;
                 c.Color = color;
             });
         public static EntityBuilder<T> WithColor<T>(this EntityBuilder<T> builder, ColorName color)

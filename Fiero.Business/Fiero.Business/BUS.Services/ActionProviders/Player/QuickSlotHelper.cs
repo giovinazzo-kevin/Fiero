@@ -77,8 +77,8 @@ namespace Fiero.Business
                 var key = Store.Get(Keys[i]);
                 if (Map.TryGetValue(key, out var getter)) {
                     yield return new(i + 1, new(
-                        getter.Left.Render.TextureName,
-                        getter.Left.Render.SpriteName,
+                        getter.Left.Render.Texture,
+                        getter.Left.Render.Sprite,
                         getter.Left.Render.Color,
                         new(),
                         new(1, 1)

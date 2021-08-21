@@ -104,7 +104,7 @@ namespace Fiero.Business
             TimeSpan? frameDuration = null
         )
         {
-            var sprite = new SpriteDef(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, new(), new(1, 1));
+            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, new(), new(1, 1));
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(32);
             return new(Enumerable.Range(0, 6).SelectMany(i => new[] {
                 new AnimationFrame(frameDur, sprite),
@@ -131,7 +131,7 @@ namespace Fiero.Business
             });
 
             SpriteDef MakeSprite(Vec ofs) =>
-                new(actor.Render.TextureName, actor.Render.SpriteName, actor.Render.Color, ofs, new(1, 1));
+                new(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, ofs, new(1, 1));
         }
 
         public static Animation TeleportOut(
@@ -139,8 +139,8 @@ namespace Fiero.Business
         )
             => StraightProjectile(
                 new(0, -25),
-                actor.Render.SpriteName,
-                actor.Render.TextureName,
+                actor.Render.Sprite,
+                actor.Render.Texture,
                 actor.Render.Color,
                 i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4))
             );
@@ -150,8 +150,8 @@ namespace Fiero.Business
         )
             => StraightProjectile(
                 new(0, 25),
-                actor.Render.SpriteName,
-                actor.Render.TextureName,
+                actor.Render.Sprite,
+                actor.Render.Texture,
                 actor.Render.Color,
                 i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
                 offset: new(0, -25)

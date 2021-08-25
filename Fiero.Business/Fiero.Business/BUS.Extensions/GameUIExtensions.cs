@@ -17,6 +17,14 @@ namespace Fiero.Business
                 title != null ? ModalWindowStyles.Default
                               : ModalWindowStyles.Default & ~ModalWindowStyles.Title
             );
+        public static ChestModal Chest(this GameUI ui, Feature feature, bool canTake, string title = null)
+            => ui.ShowModal(
+                new ChestModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), feature, canTake),
+                title,
+                new[] { ModalWindowButton.Close },
+                title != null ? ModalWindowStyles.Default
+                              : ModalWindowStyles.Default & ~ModalWindowStyles.Title
+            );
         public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, DrawableEntity speaker, params DrawableEntity[] listeners)
             => ui.ShowModal(
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),

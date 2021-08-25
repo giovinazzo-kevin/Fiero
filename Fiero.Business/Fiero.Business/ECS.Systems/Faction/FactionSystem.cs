@@ -30,7 +30,7 @@ namespace Fiero.Business
             SetBilateralRelationship(FactionName.Players, FactionName.Dogs, StandingName.DisapprovenOf);
             SetBilateralRelationship(FactionName.Players, FactionName.Snakes, StandingName.DisapprovenOf);
             SetBilateralRelationship(FactionName.Players, FactionName.Boars, StandingName.DisapprovenOf);
-            SetBilateralRelationship(FactionName.Players, FactionName.BeastGod, StandingName.DisapprovenOf);
+            SetBilateralRelationship(FactionName.Players, FactionName.Monsters, StandingName.DisapprovenOf);
         }
 
         public void SetUnilateralRelationship(FactionName a, FactionName b, StandingName standing)

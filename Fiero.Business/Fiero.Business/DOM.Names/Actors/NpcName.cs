@@ -17,6 +17,8 @@
         KingSerpent,
         SandSnake,
         Cobra,
-        Boa
+        Boa,
+        // MISC
+        Mimic
     }
 }

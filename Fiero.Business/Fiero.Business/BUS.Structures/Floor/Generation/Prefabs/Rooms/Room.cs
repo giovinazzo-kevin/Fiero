@@ -17,6 +17,10 @@ namespace Fiero.Business
         public Coord Position { get; private set; }
         public Coord Size { get; private set; }
 
+        public bool AllowMonsters { get; protected set; } = true;
+        public bool AllowItems { get; protected set; } = true;
+        public bool AllowFeatures { get; protected set; } = true;
+
         protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
         protected virtual TileDef GroundTile(Coord c) => new(TileName.Room, c);
 

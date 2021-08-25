@@ -4,7 +4,6 @@
 
   "Player": "32 32 16 16",
 
-
   "GreatKingRat": "0 0 16 16",
   "RatKnight": "0 16 16 16",
   "RatArcher": "0 32 16 16",
@@ -21,5 +20,7 @@
   "KingSerpent": "16 0 16 16",
   "SandSnake": "16 16 16 16",
   "Cobra": "16 32 16 16",
-  "Boa": "16 48 16 16"
+  "Boa": "16 48 16 16",
+
+  "Mimic": "96 0 16 16"
 }

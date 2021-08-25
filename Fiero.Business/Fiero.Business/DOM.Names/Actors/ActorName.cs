@@ -8,6 +8,7 @@
         Snake,
         Dog,
         Cat,
-        Boar
+        Boar,
+        Monster
     }
 }

@@ -51,6 +51,7 @@ namespace Fiero.Business
 
         private EntityBuilder<Actor> Enemy()
             => Entities.CreateBuilder<Actor>()
+            .WithInventory(0)
             .WithLogging()
             .WithEnemyAi()
             .WithHealth(1)
@@ -59,7 +60,6 @@ namespace Fiero.Business
             .WithActorInfo(ActorName.None)
             .WithFaction(FactionName.None)
             .WithPhysics(Coord.Zero, canMove: true)
-            .WithInventory(5)
             .WithEquipment()
             .WithFieldOfView(7)
             .WithEffectTracking()
@@ -153,6 +153,27 @@ namespace Fiero.Business
                .WithPotionInfo(quaffEffect, throwEffect)
                .WithIntrinsicEffect(quaffEffect, e => new GrantedOnQuaff(e))
                .WithIntrinsicEffect(throwEffect, e => new GrantedWhenHitByThrownItem(e))
+               ;
+        }
+
+        public EntityBuilder<Food> Food(FoodName name, EffectDef eatEffect)
+        {
+            return Throwable<Food>(
+                @throw: ThrowName.Line,
+                name: ThrowableName.Misc,
+                damage: 0,
+                maxRange: 4,
+                mulchChance: 0.75f,
+                itemRarity: 1,
+                remainingUses: 1,
+                maxUses: 1,
+                consumedWhenEmpty: true,
+                throwsUseCharges: false
+                )
+               .WithName($"{name}")
+               .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
+               .WithFoodInfo(eatEffect)
+               .WithIntrinsicEffect(eatEffect, e => new GrantedOnQuaff(e))
                ;
         }
 
@@ -284,6 +305,7 @@ namespace Fiero.Business
         #region NPCs
         public EntityBuilder<Actor> NPC_Rat()
             => Enemy()
+            .WithInventory(5)
             .WithHealth(3)
             .WithName(nameof(ActorName.Rat))
             .WithActorInfo(ActorName.Rat)
@@ -454,6 +476,18 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.Boa)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Boa), ColorName.White)
             ;
+        public EntityBuilder<Actor> NPC_Mimic()
+            => Enemy()
+            .WithName(nameof(ActorName.Monster))
+            .WithActorInfo(ActorName.Monster)
+            .WithFaction(FactionName.Monsters)
+            .WithInventory(5)
+            .WithHealth(10)
+            .WithName("Mimic")
+            .WithNpcInfo(NpcName.Mimic)
+            .WithDialogueTriggers(NpcName.Mimic)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Mimic), ColorName.White)
+            ;
         #endregion
 
         #region BOSSES
@@ -511,6 +545,9 @@ namespace Fiero.Business
             ;
         #endregion
 
+        #region FOOD
+        #endregion
+
         #region POTIONS
         public EntityBuilder<Potion> Potion_OfConfusion()
             => Potion(new(EffectName.Confusion, duration: 10), new(EffectName.Confusion, duration: 10));
@@ -564,9 +601,31 @@ namespace Fiero.Business
             _ => ColorName.White
         };
 
+        private IEnumerable<(Item[] Item, float Weight)> ChestLootTable()
+        {
+            // COMMON CHESTS: Consumables; some thematic, some mixed bags
+            yield return (Loadout(
+                RandomPotion()
+            ), 1000);
+            yield return (Loadout(
+                (Throwable_Rock(Rng.Random.Between(4, 10)), 1f)
+            ), 1000);
+
+            (EntityBuilder<Potion> Item, float Chance) RandomPotion() => Rng.Random.Choose(
+                (Potion_OfConfusion(), 1f),
+                (Potion_OfHealing(), 1f),
+                (Potion_OfSleep(), 1f),
+                (Potion_OfTeleport(), 1f),
+                (Potion_OfSilence(), 1f),
+                (Potion_OfEntrapment(), 1f)
+
+            );
+        }
+
         public EntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
+            .WithItems(Rng.Random.ChooseWeighted(ChestLootTable().ToArray()))
             ;
         public EntityBuilder<Feature> Feature_Shrine()
             => Feature<Feature>(FeatureName.Shrine)

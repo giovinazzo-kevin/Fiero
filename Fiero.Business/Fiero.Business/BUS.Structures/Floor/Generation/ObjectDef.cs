@@ -1,11 +1,14 @@
 ﻿using Fiero.Core;
+using System;
 
 namespace Fiero.Business
 {
     public class ObjectDef
     {
-        public readonly DungeonObjectName Name;
+        public readonly string Name;
         public readonly Coord Position;
-        public ObjectDef(DungeonObjectName name, Coord pos) => (Name, Position) = (name, pos);
+        public readonly Func<FloorId, PhysicalEntity> Build;
+        public ObjectDef(string name, Coord pos, Func<FloorId, PhysicalEntity> build)
+            => (Build, Name, Position) = (build, name, pos);
     }
 }

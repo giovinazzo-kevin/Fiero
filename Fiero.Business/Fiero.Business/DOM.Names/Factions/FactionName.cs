@@ -9,6 +9,6 @@
         Dogs,
         Cats,
         Boars,
-        BeastGod
+        Monsters
     }
 }

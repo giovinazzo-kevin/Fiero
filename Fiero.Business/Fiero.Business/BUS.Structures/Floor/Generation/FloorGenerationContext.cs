@@ -9,44 +9,48 @@ namespace Fiero.Business
 {
     public class FloorGenerationContext
     {
-
         public readonly Coord Size;
-        protected readonly TileDef[,] Tiles;
-        protected readonly HashSet<ObjectDef> Objects;
+
+        protected readonly GameEntityBuilders EntityBuilders;
+        protected readonly Dictionary<Coord, HashSet<ObjectDef>> Objects;
+        protected readonly Dictionary<Coord, TileDef> Tiles;
         protected readonly HashSet<FloorConnection> Connections;
 
-        public TileDef GetTile(Coord c) => Tiles[c.X, c.Y];
-        public IEnumerable<TileDef> GetAllTiles() => Enumerable.Range(0, Size.X)
-            .SelectMany(x => Enumerable.Range(0, Size.Y)
-                .Select(y => Tiles[x, y]));
-        public void SetTile(Coord c, TileName value, ColorName? color = null)
-        {
-            if(c.X >= 0 && c.Y >= 0 && c.X < Size.X && c.Y < Size.Y) {
-                var tile = new TileDef(value, c, color);
-                Tiles[c.X, c.Y] = tile;
-            }
-        }
 
-        public void AddObject(DungeonObjectName obj, Coord pos) => Objects.Add(new ObjectDef(obj, pos));
-        public void AddConnection(FloorConnection c) => Connections.Add(c);
-        public void AddConnections(IEnumerable<FloorConnection> c) => Connections.UnionWith(c);
-        public IEnumerable<ObjectDef> GetObjects() => Objects;
-        public IEnumerable<FloorConnection> GetConnections() => Connections;
-
-        public void ForEach(Action<TileDef> xy)
+        public FloorGenerationContext(GameEntityBuilders builders, Coord size)
         {
-            for (var y = 0; y < Size.Y; y++) {
-                for (var x = 0; x < Size.X; x++) {
-                    xy(Tiles[x, y]);
-                }
-            }
-        }
-        public FloorGenerationContext(int width, int height)
-        {
-            Size = new Coord(width, height);
-            Tiles = new TileDef[width, height];
+            Size = size;
+            EntityBuilders = builders;
             Objects = new();
+            Tiles = new();
             Connections = new();
         }
+
+        public void SetTile(Coord pos, TileDef tile)
+        {
+            if (pos.X < 0 || pos.Y < 0 || pos.X >= Size.X || pos.Y >= Size.Y)
+                throw new ArgumentOutOfRangeException(nameof(pos));
+            Tiles[pos] = tile.WithPosition(pos);
+        }
+
+        public void AddObject<T>(string name, Coord pos, Func<GameEntityBuilders, EntityBuilder<T>> build)
+            where T : PhysicalEntity
+        {
+            if (pos.X < 0 || pos.Y < 0 || pos.X >= Size.X || pos.Y >= Size.Y)
+                throw new ArgumentOutOfRangeException(nameof(pos));
+            if (!Objects.TryGetValue(pos, out var list)) {
+                list = Objects[pos] = new();
+            }
+            list.Add(new(name, pos, id => build(EntityBuilders).WithPosition(pos, id).Build()));
+        }
+
+        public void AddConnections(params FloorConnection[] c) => Connections.UnionWith(c);
+
+        public IEnumerable<ObjectDef> GetObjects() => Objects.Values.SelectMany(v => v);
+        public IEnumerable<TileDef> GetTiles() => Tiles.Values;
+        public TileDef GetTile(Coord p) => Tiles[p];
+        public TileDef GetRandomTile(Func<TileDef, bool> match) => Tiles.Values.Shuffle(Rng.Random).First(match);
+        public IEnumerable<FloorConnection> GetConnections() => Connections;
+
     }
 }

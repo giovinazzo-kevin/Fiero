@@ -6,5 +6,6 @@ namespace Fiero.Business
     {
         [RequiredComponent]
         public PhysicsComponent Physics { get; private set; }
+        public InventoryComponent Inventory { get; private set; }
     }
 }

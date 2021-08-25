@@ -15,6 +15,7 @@ namespace Fiero.Business
         public int Count => Items.Count;
         public int Capacity { get; set; } = 0;
         public bool Full => Capacity > 0 && Count == Capacity;
+        public bool Empty => Count == 0;
 
         public void AddIdentificationRule(Func<Item, bool> rule)
         {

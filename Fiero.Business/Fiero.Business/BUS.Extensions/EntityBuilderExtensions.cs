@@ -57,7 +57,7 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
         public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
-            where T : Actor => builder.AddOrTweak<InventoryComponent>(c => {
+            where T : PhysicalEntity => builder.AddOrTweak<InventoryComponent>(c => {
                 c.Capacity = Math.Max(c.Capacity, items.Length);
                 // Delegate the actual adding of each item to when the owner of the inventory is spawned
                 builder.Built += (b, e) => {
@@ -168,6 +168,10 @@ namespace Fiero.Business
             where T : Potion => builder.AddOrTweak<PotionComponent>(c => {
                 c.QuaffEffect = quaffEffect;
                 c.ThrowEffect = throwEffect;
+            });
+        public static EntityBuilder<T> WithFoodInfo<T>(this EntityBuilder<T> builder, EffectDef eatEffect)
+            where T : Food => builder.AddOrTweak<FoodComponent>(c => {
+                c.EatEffect = eatEffect;
             });
         public static EntityBuilder<T> WithWandInfo<T>(this EntityBuilder<T> builder, EffectDef effect)
             where T : Wand => builder.AddOrTweak<WandComponent>(c => {

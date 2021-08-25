@@ -13,5 +13,14 @@
             systems.Floor.AddActor(floorId, actor);
             return true;
         }
+        public static bool TryPlace(this GameSystems systems, FloorId floorId, Item item, float maxDistance = 10)
+        {
+            if (!systems.Floor.TryGetClosestFreeTile(floorId, item.Position(), out var spawnTile, maxDistance)) {
+                return false;
+            }
+            item.Physics.Position = spawnTile.Position();
+            systems.Floor.AddItem(floorId, item);
+            return true;
+        }
     }
 }

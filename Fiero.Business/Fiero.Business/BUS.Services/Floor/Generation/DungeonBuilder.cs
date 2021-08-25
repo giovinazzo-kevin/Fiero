@@ -2,6 +2,7 @@
 using LightInject;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -32,7 +33,7 @@ namespace Fiero.Business
             }
             foreach (var node in context.GetFloors()) {
                 var builder = _serviceFactory.GetInstance<FloorBuilder>()
-                    .WithStep(ctx => ctx.AddConnections(node.Connections));
+                    .WithStep(ctx => ctx.AddConnections(node.Connections.ToArray()));
                 var generator = (BranchGenerator)_serviceFactory.GetInstance(node.Builder);
                 var floor = generator.GenerateFloor(node.Id, node.Size, builder);
                 yield return floor;

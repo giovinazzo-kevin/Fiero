@@ -77,10 +77,10 @@ namespace Fiero.Business
             var startMiddle = (Start.Left + Start.Right) / 2;
             var endMiddle = (End.Left + End.Right) / 2;
             if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle)) {
-                ctx.AddObject(DungeonObjectName.Door, startMiddle);
+                ctx.AddObject(nameof(FeatureName.Door), startMiddle, e => e.Feature_Door());
             }
             if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle)) {
-                ctx.AddObject(DungeonObjectName.Door, endMiddle);
+                ctx.AddObject(nameof(FeatureName.Door), endMiddle, e => e.Feature_Door());
             }
         }
     }

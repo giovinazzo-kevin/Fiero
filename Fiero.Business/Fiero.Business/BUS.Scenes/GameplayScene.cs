@@ -168,7 +168,7 @@ namespace Fiero.Business.Scenes
                 var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
                 Systems.Floor.AddDungeon(d => d.WithStep(ctx => {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
-                    ctx.AddBranch<DungeonBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch {
+                    ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch {
                         var x when x < 2 => new Coord(40, 40),
                         var x when x < 5 => new Coord(75, 75),
                         var x when x < 10 => new Coord(125, 125),
@@ -689,8 +689,7 @@ namespace Fiero.Business.Scenes
                     return true;
                 }
                 if (e.Feature.FeatureProperties.Name == FeatureName.Chest) {
-                    e.Actor.Log?.Write($"$Action.YouOpenThe$ {e.Feature.Info.Name}.");
-                    return true;
+                    return HandleChest();
                 }
                 if (e.Feature.TryCast<Portal>(out var portal)) {
                     if (e.Feature.FeatureProperties.Name == FeatureName.Upstairs) {
@@ -701,6 +700,52 @@ namespace Fiero.Business.Scenes
                     }
                 }
                 return false;
+
+                bool HandleChest()
+                {
+                    if (!e.Actor.IsPlayer()) {
+                        return false; // Sorry monsters
+                    }
+                    var chestRng = Rng.Seeded(e.Feature.Id);
+                    if(chestRng.OneChanceIn(10)) {
+                        // Spawn a mimic, log a message and play a sound
+                        var enemy = EntityBuilders.NPC_Mimic()
+                            .WithPosition(e.Feature.Position())
+                            .Build();
+                        var items = e.Feature.Inventory.GetItems().ToList();
+                        RemoveFeature();
+                        if(Systems.TrySpawn(e.Feature.FloorId(), enemy)) {
+                            foreach (var item in items) {
+                                enemy.Inventory.TryPut(item, out _);
+                            }
+                            e.Actor.Log?.Write($"$Action.TheChestWasAMimic$");
+                        }
+                    }
+                    // Show inventory modal of chest contents
+                    var canPutItemsInInventory = !e.Actor.Inventory?.Full ?? false;
+                    var chest = UI.Chest(e.Feature, canPutItemsInInventory, e.Feature.Info.Name);
+                    chest.ActionPerformed += (item, action) => {
+                        switch(action) {
+                            case ChestActionName.Drop:
+                                Systems.TryPlace(e.Feature.FloorId(), item);
+                                break;
+                            case ChestActionName.Take:
+                                e.Actor.Inventory.TryPut(item, out var fullyMerged);
+                                break;
+                        }
+                        if(e.Feature.Inventory.Empty) {
+                            RemoveFeature();
+                        }
+                    };
+                    return true;
+
+                    void RemoveFeature()
+                    {
+                        Systems.Floor.RemoveFeature(e.Feature);
+                        Entities.FlagEntityForRemoval(e.Feature.Id);
+                    }
+                }
+
                 bool HandleStairs(FloorId current, FloorId next)
                 {
                     var currentFloor = Systems.Floor.GetFloor(current);

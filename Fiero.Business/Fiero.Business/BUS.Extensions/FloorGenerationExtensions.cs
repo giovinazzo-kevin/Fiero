@@ -9,14 +9,14 @@ namespace Fiero.Business
         public static void Draw(this FloorGenerationContext ctx, Coord p, Func<Coord, TileDef> makeTile)
         {
             var tile = makeTile(p);
-            ctx.SetTile(p, tile.Name, tile.Color);
+            ctx.SetTile(p, tile);
         }
 
         public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, Func<Coord, TileDef> makeTile)
         {
             foreach (var p in Shapes.Line(start, end)) {
                 var tile = makeTile(p);
-                ctx.SetTile(p, tile.Name, tile.Color);
+                ctx.SetTile(p, tile);
             }
         }
 
@@ -24,7 +24,7 @@ namespace Fiero.Business
         {
             foreach (var p in Shapes.Circle(center, radius)) {
                 var tile = makeTile(p);
-                ctx.SetTile(p, tile.Name, tile.Color);
+                ctx.SetTile(p, tile);
             }
         }
 
@@ -43,7 +43,7 @@ namespace Fiero.Business
                 for (int y = 0; y < size.Y; y++) {
                     var p = new Coord(x, y);
                     var tile = makeTile(p);
-                    ctx.SetTile(p + topLeft, tile.Name, tile.Color);
+                    ctx.SetTile(p + topLeft, tile);
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace Fiero.Business
             void SetTile(Coord xy)
             {
                 var tile = makeTile(xy);
-                ctx.SetTile(xy, tile.Name, tile.Color);
+                ctx.SetTile(xy, tile);
             }
         }
 

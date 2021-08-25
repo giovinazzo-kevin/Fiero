@@ -14,7 +14,6 @@ namespace Fiero.Business
         public FactionComponent Faction { get; private set; }
         public NpcComponent Npc { get; private set; }
         public LogComponent Log { get; private set; }
-        public InventoryComponent Inventory { get; private set; }
         public EquipmentComponent Equipment { get; private set; }
         public DialogueComponent Dialogue { get; private set; }
         public AiComponent Ai { get; private set; }

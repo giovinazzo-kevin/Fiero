@@ -13,7 +13,7 @@ namespace Fiero.Business
         public readonly Room[] Rooms;
         public readonly Corridor[] Corridors;
 
-        public RoomSector(IntRect sector, bool[] cells, Func<Room> makeRoom)
+        public RoomSector(IntRect sector, bool[] cells, Func<Room> makeRoom, int nBestCorridors)
         {
             if (cells.Length != 16)
                 throw new ArgumentOutOfRangeException(nameof(cells));
@@ -49,11 +49,11 @@ namespace Fiero.Business
                     return room;
                 })
                 .ToArray();
-            Corridors = GenerateIntraSectorCorridors(Rooms).ToArray();
+            Corridors = GenerateIntraSectorCorridors(Rooms, nBestCorridors).ToArray();
             Console.WriteLine($"Rooms: {Rooms.Length}; Corridors: {Corridors.Length}");
         }
 
-        public static IEnumerable<Corridor> GenerateIntraSectorCorridors(IList<Room> rooms)
+        public static IEnumerable<Corridor> GenerateIntraSectorCorridors(IList<Room> rooms, int nBest = 1)
         {
             var connectedRooms = new HashSet<UnorderedPair<Room>>();
             var roomPairs = rooms.SelectMany(r => rooms.Where(s => s != r).Select(s => new UnorderedPair<Room>(r, s)))
@@ -72,23 +72,24 @@ namespace Fiero.Business
                         .Select(d => new UnorderedPair<RoomConnector>(c, d)))
                     .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right).IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
                     .ToList();
-                var bestPair = connectorPairs
+                foreach(var bestPair in connectorPairs
                     .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
-                    .First();
-                var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
-                if(!rooms.Any(r => r.GetRects().Any(r => corridor.Points.Skip(1).SkipLast(1).Any(p => r.Contains(p.X, p.Y))))) {
-                    connectedRooms.Add(rp);
-                    yield return corridor;
+                    .Take(nBest)) {
+                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
+                    if (!rooms.Any(r => r.GetRects().Any(r => corridor.Points.Skip(1).SkipLast(1).Any(p => r.Contains(p.X, p.Y))))) {
+                        connectedRooms.Add(rp);
+                        yield return corridor;
+                    }
                 }
             }
         }
 
-        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors)
+        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors, int nBest = 1)
         {
             var indexed = sectors.Select((s, i) => (Sector: s, Index: i))
                 .ToList();
             var side = (int)Math.Sqrt(indexed.Count);
-            var connected = new HashSet<UnorderedPair<Room>>();
+            var connected = new List<UnorderedPair<Room>>();
             foreach (var s in indexed) {
                 var c = new Coord(s.Index % side, s.Index / side);
                 foreach (var S in indexed.Where(x => new Coord(x.Index % side, x.Index / side).DistSq(c) == 1)) {
@@ -97,20 +98,21 @@ namespace Fiero.Business
                         .SelectMany(r => r.GetConnectors());
                     var pairs = myConnectors.SelectMany(c => availableConnectors.Select(d => new UnorderedPair<RoomConnector>(c, d)))
                         .ToList();
-                    var bestPair = pairs
+                    foreach(var bestPair in pairs
                         .OrderBy(p => p.Right.Center.Dist(p.Left.Center))
-                        .First();
-                    var conn = new UnorderedPair<Room>(bestPair.Left.Owner, bestPair.Right.Owner);
-                    if(connected.Contains(conn)) {
-                        continue;
+                        .Take(nBest)) {
+                        var conn = new UnorderedPair<Room>(bestPair.Left.Owner, bestPair.Right.Owner);
+                        if (connected.Count(x => x == conn) >= nBest) {
+                            continue;
+                        }
+                        connected.Add(conn);
+                        yield return new(bestPair.Left.Edge, bestPair.Right.Edge);
                     }
-                    connected.Add(conn);
-                    yield return new(bestPair.Left.Edge, bestPair.Right.Edge);
                 }
             }
         }
 
-        public static RoomSector Create(IntRect sector, Func<Room> makeRoom)
+        public static RoomSector Create(IntRect sector, Func<Room> makeRoom, int nBestCorridors = 1)
         {
             var mat = new bool[16];
             var candidates = new HashSet<int>();
@@ -125,7 +127,7 @@ namespace Fiero.Business
             foreach (var index in candidates) {
                 mat[index] = true;
             }
-            return new(sector, mat, makeRoom);
+            return new(sector, mat, makeRoom, nBestCorridors);
         }
 
         static Coord ToCoord(int a) => new(a % 4, a / 4);

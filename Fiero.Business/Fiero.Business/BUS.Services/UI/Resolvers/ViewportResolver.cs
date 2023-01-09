@@ -5,10 +5,10 @@ namespace Fiero.Business
     [SingletonDependency(typeof(IUIControlResolver<Viewport>))]
     public class ViewportResolver : UIControlResolver<Viewport>
     {
-        protected readonly FloorSystem FloorSystem;
+        protected readonly DungeonSystem FloorSystem;
         protected readonly FactionSystem FactionSystem;
 
-        public ViewportResolver(GameUI ui, GameResources resources, FactionSystem fac, FloorSystem floorSystem)
+        public ViewportResolver(GameUI ui, GameResources resources, FactionSystem fac, DungeonSystem floorSystem)
             : base(ui, resources)
         {
             FloorSystem = floorSystem;

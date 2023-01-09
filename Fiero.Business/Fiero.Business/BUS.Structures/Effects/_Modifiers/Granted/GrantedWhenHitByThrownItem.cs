@@ -19,7 +19,7 @@ namespace Fiero.Business
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Coord location)
         {
-            var target = systems.Floor.GetTileAt(source.FloorId(), location);
+            var target = systems.Dungeon.GetTileAt(source.FloorId(), location);
             Source.Resolve(source).Start(systems, target);
         }
     }

@@ -28,7 +28,8 @@ namespace Fiero.Core
 
             public SpritesheetBuilder WithSprite(string name, Func<Texture, Sprite> build)
             {
-                if(!Sprites.TryGetValue(name, out var hash)) {
+                if (!Sprites.TryGetValue(name, out var hash))
+                {
                     hash = Sprites[name] = new();
                 }
                 hash.Add(build(Textures.Get(Key)));
@@ -53,7 +54,8 @@ namespace Fiero.Core
 
         public void AddSpritesheet(TTextures texture, Action<SpritesheetBuilder> build)
         {
-            if(Sprites.ContainsKey(texture)) {
+            if (Sprites.ContainsKey(texture))
+            {
                 throw new InvalidOperationException($"A spritesheet for texture {texture} already exists");
             }
             var builder = new SpritesheetBuilder(Textures, texture);
@@ -63,21 +65,26 @@ namespace Fiero.Core
 
         public async Task LoadJsonAsync(TTextures texture, string fileName)
         {
-            if (!File.Exists(fileName)) {
+            if (!File.Exists(fileName))
+            {
                 throw new FileNotFoundException(fileName);
             }
             using var fs = new FileStream(fileName, FileMode.Open);
             var dict = await JsonSerializer.DeserializeAsync<Dictionary<string, string>>(fs);
-            AddSpritesheet(texture, builder => {
-                foreach (var kv in dict) {
+            AddSpritesheet(texture, builder =>
+            {
+                foreach (var kv in dict)
+                {
                     var rect = kv.Value.Split(' ')
                         .Select(x => Int32.TryParse(x.Trim(), out var i) ? i : -1)
                         .ToArray();
-                    if(rect.Length % 4 != 0) {
+                    if (rect.Length % 4 != 0)
+                    {
                         // TODO: log warning
                         continue;
                     }
-                    for (int i = 0; i < rect.Length / 4; i++) {
+                    for (int i = 0; i < rect.Length / 4; i++)
+                    {
                         builder.WithSprite(kv.Key, tex => new Sprite(tex,
                             new(rect[i * 4], rect[i * 4 + 1], rect[i * 4 + 2], rect[i * 4 + 3])))
                         ;
@@ -91,32 +98,39 @@ namespace Fiero.Core
             sprite = default;
             if (key is null)
                 return false;
-            if(!ProceduralSprites.TryGetValue(texture, out var procDict)) {
+            if (!ProceduralSprites.TryGetValue(texture, out var procDict))
+            {
                 ProceduralSprites[texture] = procDict = new();
             }
             var procKey = new OrderedPair<string, TColors>(key, color);
-            if (procDict.TryGetValue(procKey, out sprite)) {
+            if (procDict.TryGetValue(procKey, out sprite))
+            {
                 return true;
             }
-            if (!Sprites.TryGetValue(texture, out var dict)) {
+            if (!Sprites.TryGetValue(texture, out var dict))
+            {
                 throw new InvalidOperationException($"A spritesheet for texture {texture} does not exist");
             }
-            if (!dict.TryGetValue(key, out var sprites)) {
+            if (!dict.TryGetValue(key, out var sprites))
+            {
                 return false;
             }
             var rng = rngSeed is { } seed ? Rng.Seeded(seed) : new Random();
             sprite = sprites.Shuffle(rng).First();
-            if (dict.TryGetValue($"{key}_Mask", out var masks)) {
+            if (dict.TryGetValue($"{key}_Mask", out var masks))
+            {
                 var mask = masks.Shuffle(rng).First();
                 sprite.Color = Color.White;
                 mask.Color = Color.White;
 
                 var renderTarget = Textures.GetScratchTexture();
-                while(!renderTarget.SetActive(true)) {
+                while (!renderTarget.SetActive(true))
+                {
                     continue;
                 }
 
-                using var shape = new RectangleShape(sprite.TextureRect.Size()) {
+                using var shape = new RectangleShape(sprite.TextureRect.Size())
+                {
                     FillColor = Colors.Get(color),
                     OutlineThickness = 0
                 };
@@ -126,7 +140,7 @@ namespace Fiero.Core
                 renderTarget.Draw(sprite);
                 renderTarget.Display();
                 using var image = renderTarget.Texture.CopyToImage();
-                image.SaveToFile(@"E:\Repos\Fiero\Fiero.Business\Fiero.Business\Resources\Textures\hmm.png");
+                // image.SaveToFile(@"E:\Repos\Fiero\Fiero.Business\Fiero.Business\Resources\Textures\hmm.png");
                 var tex = new Texture(image);
                 Textures.StoreProceduralTexture(tex);
                 procDict[procKey] = sprite = new(tex, new(0, 0, sprite.TextureRect.Width, sprite.TextureRect.Height));
@@ -136,11 +150,12 @@ namespace Fiero.Core
             return true;
         }
 
-        public Sprite Get(TTextures texture, string key, TColors color) => TryGet(texture, key, color, out var s) ? s : null; 
+        public Sprite Get(TTextures texture, string key, TColors color) => TryGet(texture, key, color, out var s) ? s : null;
 
         public void ClearProceduralSprites()
         {
-            foreach (var sprite in ProceduralSprites.Values.SelectMany(v => v.Values)) {
+            foreach (var sprite in ProceduralSprites.Values.SelectMany(v => v.Values))
+            {
                 sprite.Dispose();
             }
             ProceduralSprites.Clear();

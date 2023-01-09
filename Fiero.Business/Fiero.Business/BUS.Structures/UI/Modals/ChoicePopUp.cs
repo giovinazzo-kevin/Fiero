@@ -15,7 +15,8 @@ namespace Fiero.Business
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
-        public ChoicePopUp(GameUI ui, GameResources resources, params T[] options) : base(ui, resources)
+        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default) 
+            : base(ui, resources, buttons, styles)
         {
             Options = options;
             Confirmed += (_, __) => {

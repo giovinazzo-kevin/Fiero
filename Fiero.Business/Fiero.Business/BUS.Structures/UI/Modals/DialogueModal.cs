@@ -19,7 +19,7 @@ namespace Fiero.Business
             DialogueNode node,
             DrawableEntity speaker,
             params DrawableEntity[] listeners
-        ) : base(ui, resources)
+        ) : base(ui, resources, new[] { ModalWindowButton.Ok }, ModalWindowStyles.None)
         {
             Trigger = trigger;
             Node = node;
@@ -27,10 +27,10 @@ namespace Fiero.Business
             Listeners = listeners;
         }
 
-        public override void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = default)
+        public override void Open(string title)
         {
             Node.Trigger(Trigger, Speaker, Listeners);
-            base.Open(title, buttons, styles);
+            base.Open(title);
             if (Node.Choices.Count > 0) {
                 var keys = Node.Choices.Keys.ToArray();
                 if (Node.Cancellable) {

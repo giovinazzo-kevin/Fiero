@@ -14,7 +14,7 @@ namespace Fiero.Business
 
         protected override void Apply(GameSystems systems, Actor target) 
         {
-            var randomPos = systems.Floor.GetFloor(target.FloorId())
+            var randomPos = systems.Dungeon.GetFloor(target.FloorId())
                 .Cells.Shuffle(Rng.Random)
                 .First(x => x.Value.IsWalkable(null))
                 .Key;

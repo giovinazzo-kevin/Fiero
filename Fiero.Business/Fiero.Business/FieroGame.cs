@@ -1,14 +1,11 @@
 ﻿using Fiero.Business.Scenes;
 using Fiero.Core;
-using Newtonsoft.Json;
 using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Unconcern.Common;
 
@@ -27,7 +24,7 @@ namespace Fiero.Business
             EventBus bus,
             OffButton off,
             GameLoop loop,
-            GameInput input, 
+            GameInput input,
             GameDirector director,
             GameGlossaries glossary,
             GameDialogues dialogues,
@@ -35,7 +32,7 @@ namespace Fiero.Business
             GameUI ui,
             GameWindow win,
             GameTextures<TextureName> textures,
-            GameSprites<TextureName, ColorName> sprites, 
+            GameSprites<TextureName, ColorName> sprites,
             GameFonts<FontName> fonts,
             GameSounds<SoundName> sounds,
             GameColors<ColorName> colors,
@@ -55,12 +52,15 @@ namespace Fiero.Business
         protected override void InitializeWindow(RenderWindow win)
         {
             base.InitializeWindow(win);
-            win.Resized += (s, e) => {
+            win.Resized += (s, e) =>
+            {
                 var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(min: 800);
-                if (newSize != new Coord((int)e.Width, (int)e.Height)) {
+                if (newSize != new Coord((int)e.Width, (int)e.Height))
+                {
                     win.Size = newSize;
                 }
-                else {
+                else
+                {
                     Store.SetValue(Data.UI.WindowSize, newSize);
                 }
             };
@@ -80,11 +80,11 @@ namespace Fiero.Business
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
-            
+
             Fonts.Add(FontName.Bold, new(8, 8), Textures.Get(TextureName.FontBold));
             Fonts.Add(FontName.Light, new(8, 8), Textures.Get(TextureName.FontLight));
 
-            Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
+            //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
             Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
             Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/00_start1.wav"));
@@ -165,21 +165,26 @@ namespace Fiero.Business
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
-            // Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
+            //Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
 
 #if DEBUG
             // Start logging everything that passes through the global event bus
             var sieve = Bus.Filter<object>();
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 var logPath = "log.txt";
-                if(File.Exists(logPath)) {
+                if (File.Exists(logPath))
+                {
                     File.Delete(logPath);
                 }
-                while (true) {
-                    while (sieve.Messages.TryDequeue(out var msg)) {
+                while (true)
+                {
+                    while (sieve.Messages.TryDequeue(out var msg))
+                    {
                         var log = msg.ToString();
-                        if(log.Contains("Player")) {
+                        if (log.Contains("Player"))
+                        {
                             Console.WriteLine(log);
                         }
                     }

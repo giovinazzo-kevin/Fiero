@@ -24,7 +24,7 @@ namespace Fiero.Business
             }
             var floorId = target.FloorId();
             foreach (var p in target.Fov.VisibleTiles[floorId]) {
-                var validTargets = systems.Floor.GetActorsAt(floorId, p)
+                var validTargets = systems.Dungeon.GetActorsAt(floorId, p)
                     .Where(a => Modifier switch {
                         ScrollModifierName.AreaAffectsAllies => systems.Faction.GetRelationships(target, a).Left.IsFriendly(),
                         ScrollModifierName.AreaAffectsEnemies => systems.Faction.GetRelationships(target, a).Left.IsHostile(),

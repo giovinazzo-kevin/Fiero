@@ -1,6 +1,4 @@
 ﻿using Fiero.Core;
-using System.Collections.Generic;
-using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -10,22 +8,25 @@ namespace Fiero.Business
         public readonly ActionSystem Action;
         public readonly DialogueSystem Dialogue;
         public readonly FactionSystem Faction;
-        public readonly FloorSystem Floor;
+        public readonly DungeonSystem Dungeon;
         public readonly RenderSystem Render;
+        public readonly InterfaceSystem Interface;
 
         public GameSystems(
             ActionSystem action,
             DialogueSystem dialogue,
             FactionSystem faction,
-            FloorSystem floor,
-            RenderSystem render
+            DungeonSystem dungeon,
+            RenderSystem render,
+            InterfaceSystem @interface
         )
         {
             Action = action;
             Dialogue = dialogue;
             Faction = faction;
-            Floor = floor;
+            Dungeon = dungeon;
             Render = render;
+            Interface = @interface;
         }
     }
 }

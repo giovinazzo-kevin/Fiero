@@ -2,7 +2,6 @@
 using SFML.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -11,7 +10,7 @@ namespace Fiero.Business
     /// </summary>
     public class Viewport : UIControl
     {
-        protected readonly FloorSystem FloorSystem;
+        protected readonly DungeonSystem FloorSystem;
         protected readonly FactionSystem FactionSystem;
         protected readonly GameResources Resources;
 
@@ -26,7 +25,7 @@ namespace Fiero.Business
 
         public Viewport(
             GameInput input,
-            FloorSystem floor,
+            DungeonSystem floor,
             FactionSystem faction,
             GameResources res
         ) : base(input)
@@ -34,7 +33,8 @@ namespace Fiero.Business
             FloorSystem = floor;
             FactionSystem = faction;
             Resources = res;
-            Size.ValueChanged += (_, __) => {
+            Size.ValueChanged += (_, __) =>
+            {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
                 _renderTexture = new((uint)Size.V.X, (uint)Size.V.Y) { Smooth = false };
@@ -51,24 +51,29 @@ namespace Fiero.Business
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if (_dirty) {
+            if (_dirty)
+            {
                 if (!Bake())
                     return;
             }
-            if (TargetingShape.V is { } shape) {
+            if (TargetingShape.V is { } shape)
+            {
                 using var darkerSprite = new Sprite(_renderSprite);
                 darkerSprite.Color = new(128, 128, 128);
                 target.Draw(darkerSprite);
 
-                foreach (var point in shape.GetPoints()) {
+                foreach (var point in shape.GetPoints())
+                {
                     var pos = (point - new Coord(ViewArea.V.Left, ViewArea.V.Top)) * ViewTileSize.V + Position.V;
                     var origin = new Vec(0.5f, 0.5f) * ViewTileSize.V;
                     var spriteRect = new IntRect(pos.X - (int)origin.X, pos.Y - (int)origin.Y, ViewTileSize.V.X, ViewTileSize.V.Y);
-                    using var sprite = new Sprite(_renderSprite.Texture, spriteRect) {
+                    using var sprite = new Sprite(_renderSprite.Texture, spriteRect)
+                    {
                         Position = pos,
                         Origin = origin
                     };
-                    using var highlight = new RectangleShape(ViewTileSize.V) {
+                    using var highlight = new RectangleShape(ViewTileSize.V)
+                    {
                         Position = pos,
                         Origin = origin,
                         FillColor = new(0, 0, 0, 0),
@@ -79,13 +84,15 @@ namespace Fiero.Business
                     target.Draw(highlight);
                 }
             }
-            else {
+            else
+            {
                 target.Draw(_renderSprite);
             }
             bool Bake()
             {
                 var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
-                foreach (var key in Enum.GetValues<RenderLayerName>()) {
+                foreach (var key in Enum.GetValues<RenderLayerName>())
+                {
                     layers[key] = _ => { };
                 }
                 var floorId = Following.V.FloorId();
@@ -94,7 +101,8 @@ namespace Fiero.Business
                 _renderTexture.Clear(Background.V);
                 var screenBounds = Position.V + Size.V;
                 var area = new IntRect(ViewArea.V.Left, ViewArea.V.Top, ViewArea.V.Width + 1, ViewArea.V.Height + 1);
-                foreach (var coord in area.Enumerate()) {
+                foreach (var coord in area.Enumerate())
+                {
                     if (!floor.Cells.TryGetValue(coord, out var cell))
                         continue;
 
@@ -108,19 +116,24 @@ namespace Fiero.Business
                     var screenPos = relativePos * ViewTileSize.V + Position.V;
                     if (
                            screenPos.X < -ViewTileSize.V.X || screenPos.X >= screenBounds.X + ViewTileSize.V.X
-                        || screenPos.Y < -ViewTileSize.V.Y || screenPos.Y >= screenBounds.Y + ViewTileSize.V.Y) {
+                        || screenPos.Y < -ViewTileSize.V.Y || screenPos.Y >= screenBounds.Y + ViewTileSize.V.Y)
+                    {
                         continue;
                     }
 
-                    foreach (var drawable in cell.GetDrawables(seen)) {
+                    foreach (var drawable in cell.GetDrawables(seen))
+                    {
                         if (drawable.Render.Hidden)
                             continue;
                         var asActor = drawable as Actor;
                         var rngSeed = drawable.Render.GetHashCode();
                         // Draw allegiance circle
-                        if (asActor != null && drawable != Following.V) {
-                            layers[RenderLayerName.BackgroundEffects] += tex => {
-                                var color = FactionSystem.GetRelationships(Following.V, asActor).Left switch {
+                        if (asActor != null && drawable != Following.V)
+                        {
+                            layers[RenderLayerName.BackgroundEffects] += tex =>
+                            {
+                                var color = FactionSystem.GetRelationships(Following.V, asActor).Left switch
+                                {
                                     var x when x.IsHostile() => ColorName.Red,
                                     var x when x.IsFriendly() => ColorName.Green,
                                     _ => ColorName.Yellow
@@ -136,37 +149,46 @@ namespace Fiero.Business
                             };
                         }
                         // Draw sprite
-                        layers[drawable.Render.Layer] += tex => {
-                            if (Resources.Sprites.TryGet(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color, out var spriteDef, rngSeed)) {
+                        layers[drawable.Render.Layer] += tex =>
+                        {
+                            if (Resources.Sprites.TryGet(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color, out var spriteDef, rngSeed))
+                            {
                                 using var sprite = new Sprite(spriteDef);
                                 var spriteSize = sprite.GetLocalBounds().Size();
                                 sprite.Position = screenPos;
                                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                                 sprite.Scale = ViewTileSize.V / spriteSize;
-                                if (!seen) {
+                                if (!seen)
+                                {
                                     sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
                                 }
                                 tex.Draw(sprite, states);
                             }
                         };
                         // Draw active effects
-                        if (asActor != null && asActor.Effects != null) {
+                        if (asActor != null && asActor.Effects != null)
+                        {
                             var offs = Coord.Zero;
                             int _i = 0;
-                            foreach (var effect in asActor.Effects.Active) {
+                            foreach (var effect in asActor.Effects.Active)
+                            {
                                 var icon = effect.Name.ToString();
-                                layers[RenderLayerName.ForegroundEffects] += tex => {
-                                    if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed)) {
+                                layers[RenderLayerName.ForegroundEffects] += tex =>
+                                {
+                                    if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed))
+                                    {
                                         using var iconSprite = new Sprite(iconDef);
                                         var iconSize = iconSprite.GetLocalBounds().Size();
                                         var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
                                         iconSprite.Position = screenPos + offs - iconSize * scale;
                                         iconSprite.Origin = new Vec(1f, 1f) * iconSize;
-                                        if (_i++ % 4 == 3) {
+                                        if (_i++ % 4 == 3)
+                                        {
                                             offs += iconSize.ToCoord() * scale * new Coord(0, 1);
                                             offs *= new Coord(0, 1);
                                         }
-                                        else {
+                                        else
+                                        {
                                             offs += iconSize.ToCoord() * scale * new Coord(1, 0);
                                         }
                                         tex.Draw(iconSprite, states);
@@ -177,7 +199,8 @@ namespace Fiero.Business
                         }
                     }
                 }
-                foreach (var key in Enum.GetValues<RenderLayerName>()) {
+                foreach (var key in Enum.GetValues<RenderLayerName>())
+                {
                     layers[key](_renderTexture);
                 }
                 _renderTexture.Display();

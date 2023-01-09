@@ -49,18 +49,18 @@ namespace Fiero.Business
                     .Where(v => v.GetEffectFlags().IsPanicButton))),
                 (NearbyAllies = new((sys, a) => {
                     return Shapes.Neighborhood(a.Position(), 7)
-                     .SelectMany(p => sys.Floor.GetActorsAt(a.FloorId(), p))
+                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
                      .Where(b => sys.Faction.GetRelationships(a, b).Right.IsFriendly());
                 })),
                 (NearbyEnemies = new((sys, a) => {
                     return Shapes.Neighborhood(a.Position(), 7)
-                     .SelectMany(p => sys.Floor.GetActorsAt(a.FloorId(), p))
+                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
                      .Where(b => sys.Faction.GetRelationships(a, b).Right.IsHostile()
                         && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
                 })),
                 (NearbyItems = new((sys, a) => {
                     return Shapes.Box(a.Position(), 7)
-                     .SelectMany(p => sys.Floor.GetItemsAt(a.FloorId(), p))
+                     .SelectMany(p => sys.Dungeon.GetItemsAt(a.FloorId(), p))
                      .OrderBy(i => i.SquaredDistanceFrom(a));
                 }))
             };
@@ -115,7 +115,7 @@ namespace Fiero.Business
 
         public override bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful)
         {
-            return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Floor.GetActorsAt(a.FloorId(), p).Any());
+            return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Dungeon.GetActorsAt(a.FloorId(), p).Any());
         }
 
         protected virtual void SetTarget(Actor a, PhysicalEntity target)
@@ -128,7 +128,7 @@ namespace Fiero.Business
         {
             if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
                 return false;
-            var floor = Systems.Floor.GetFloor(a.FloorId());
+            var floor = Systems.Dungeon.GetFloor(a.FloorId());
             a.Ai.Path = floor.Pathfinder.Search(a.Position(), a.Ai.Target.Position(), default);
             a.Ai.Path?.RemoveFirst();
             return true;
@@ -144,7 +144,7 @@ namespace Fiero.Business
                 a.Ai.Path.RemoveFirst();
                 if (diff > 0 && diff <= 2) {
                     // one tile ahead
-                    if (Systems.Floor.TryGetCellAt(a.FloorId(), pos, out var cell)
+                    if (Systems.Dungeon.TryGetCellAt(a.FloorId(), pos, out var cell)
                         && cell.IsWalkable(null) && !cell.Actors.Any()) {
                         action = new MoveRelativeAction(dir);
                         return true;
@@ -168,7 +168,7 @@ namespace Fiero.Business
             }
             if (GetClosestHostile(a) is { } hostile) {
                 var dir = a.Position() - hostile.Position();
-                if (!Systems.Floor.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell)) {
+                if (!Systems.Dungeon.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell)) {
                     return Fight(a);
                 }
                 if (!cell.IsWalkable(null)) {
@@ -230,7 +230,7 @@ namespace Fiero.Business
                 SetTarget(a, closestItem);
             }
             if (a.Ai.Target == null && Rng.Random.NChancesIn(1, 25)) {
-                var randomTile = Systems.Floor.GetFloor(a.FloorId())
+                var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
                     .Cells.Values.Where(c => c.IsWalkable(null))
                     .Shuffle(Rng.Random)
                     .First().Tile;

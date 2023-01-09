@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Core
 {
@@ -11,9 +12,10 @@ namespace Fiero.Core
         public readonly GameInput Input;
         public readonly GameWindow Window;
         public readonly IServiceFactory ServiceProvider;
-        protected readonly List<ModalWindow> OpenModals;
+        protected readonly List<UIWindow> OpenWindows;
 
-        public IEnumerable<ModalWindow> GetOpenModals() => OpenModals;
+        public IEnumerable<UIWindow> GetOpenWindows() => OpenWindows.Except(GetOpenModals());
+        public IEnumerable<ModalWindow> GetOpenModals() => OpenWindows.OfType<ModalWindow>();
 
         public GameUI(IServiceFactory sp, GameInput input, GameDataStore store, GameWindow window)
         {
@@ -21,15 +23,15 @@ namespace Fiero.Core
             Store = store;
             Input = input;
             Window = window;
-            OpenModals = new List<ModalWindow>();
+            OpenWindows = new List<UIWindow>();
         }
 
-        public T ShowModal<T>(T wnd, string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            where T : ModalWindow
+        public T Show<T>(T wnd, string title = null)
+            where T : UIWindow
         {
-            OpenModals.Add(wnd);
-            wnd.Closed += (_, __) => OpenModals.Remove(wnd);
-            wnd.Open(title, buttons, styles);
+            OpenWindows.Add(wnd);
+            wnd.Closed += (_, __) => OpenWindows.Remove(wnd);
+            wnd.Open(title);
             return wnd;
         }
 

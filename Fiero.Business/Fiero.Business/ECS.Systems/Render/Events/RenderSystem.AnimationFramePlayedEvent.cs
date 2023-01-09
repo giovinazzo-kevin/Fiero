@@ -6,7 +6,7 @@
         {
             public readonly Animation Animation;
             public readonly int FrameIndex;
-            public AnimationFramePlayedEvent(Animation a, int f) 
+            public AnimationFramePlayedEvent(Animation a, int f)
                 => (Animation, FrameIndex) = (a, f);
         }
     }

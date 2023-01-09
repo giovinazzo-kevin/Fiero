@@ -1,14 +1,11 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
-    public class Minimap : UIControl
+    public class Minimap : Widget
     {
-        protected readonly FloorSystem FloorSystem;
+        protected readonly DungeonSystem FloorSystem;
         protected readonly FactionSystem FactionSystem;
         protected readonly GameColors<ColorName> Colors;
 
@@ -19,63 +16,82 @@ namespace Fiero.Business
         private bool _dirty = true;
 
         public Minimap(
-            GameInput input,
-            FloorSystem floor,
+            GameUI ui,
+            DungeonSystem floor,
             FactionSystem faction,
             GameColors<ColorName> colors
-        ) : base(input)
+        ) : base(ui)
         {
             FloorSystem = floor;
             FactionSystem = faction;
             Colors = colors;
-            Size.ValueChanged += (_, __) => {
+            Following.ValueChanged += (_, __) => SetDirty();
+            Dragged += (_, __) => SetDirty();
+            Dropped += (_, __) => SetDirty();
+        }
+
+        public override void Open(string title)
+        {
+            base.Open(title);
+            Layout.Size.ValueChanged += (_, __) =>
+            {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
-                _renderTexture = new((uint)Size.V.X, (uint)Size.V.Y) { Smooth = false };
+                Repaint();
+            };
+            Repaint();
+
+            void Repaint()
+            {
+                _renderTexture = new((uint)Layout.Size.V.X, (uint)Layout.Size.V.Y) { Smooth = false };
                 _renderSprite = new(_renderTexture.Texture);
                 SetDirty();
-            };
-            Following.ValueChanged += (_, __) => SetDirty();
+            }
         }
 
         public void SetDirty() => _dirty = true;
 
-        public override void Draw(RenderTarget target, RenderStates states)
+        public override void Draw()
         {
-            base.Draw(target, states);
-            if (_dirty && Following.V != null) {
+            base.Draw();
+            if (_dirty && Following.V != null)
+            {
                 if (!Bake())
                     return;
             }
-            target.Draw(_renderSprite);
+            UI.Window.RenderWindow.Draw(_renderSprite);
             bool Bake()
             {
                 var floorId = Following.V.FloorId();
                 if (!FloorSystem.TryGetFloor(floorId, out var floor))
                     return false;
-                _renderTexture.Clear(Background.V);
+                _renderTexture.Clear(Color.Transparent);
                 using var whitePixel = new RenderTexture(1, 1);
                 whitePixel.Clear(Color.White);
                 whitePixel.Display();
-                foreach (var coord in floor.Size.ToRect().Enumerate()) {
+                foreach (var coord in floor.Size.ToRect().Enumerate())
+                {
                     if (!floor.Cells.TryGetValue(coord, out var cell))
                         continue;
 
-                    var known = Following.V.Fov.KnownTiles[floorId].Contains(coord);
-                    var seen = Following.V.Fov.VisibleTiles[floorId].Contains(coord);
-                   // if (!known)
-                   //     continue;
+                    var known = Following.V.Fov.KnownTiles.TryGetValue(floorId, out var coords) && coords.Contains(coord);
+                    var seen = Following.V.Fov.VisibleTiles.TryGetValue(floorId, out coords) && coords.Contains(coord);
+                    // if (!known)
+                    //     continue;
                     if (
-                           coord.X < 0 || coord.X >= Size.V.X
-                        || coord.Y < 0 || coord.Y >= Size.V.Y) {
+                           coord.X < 0 || coord.X >= Layout.Size.V.X
+                        || coord.Y < 0 || coord.Y >= Layout.Size.V.Y)
+                    {
                         continue;
                     }
 
-                    foreach (var drawable in cell.GetDrawables(seen)) {
+                    foreach (var drawable in cell.GetDrawables(seen))
+                    {
                         if (drawable.Render.Hidden)
                             continue;
                         using var sprite = new Sprite(whitePixel.Texture);
-                        sprite.Color = Colors.Get(drawable switch {
+                        sprite.Color = Colors.Get(drawable switch
+                        {
                             Tile x when x.TileProperties.Name == TileName.Corridor && seen => ColorName.LightMagenta,
                             Tile x when x.TileProperties.Name == TileName.Corridor => ColorName.Magenta,
                             Tile x when x.Physics.BlocksMovement => ColorName.White,
@@ -96,12 +112,12 @@ namespace Fiero.Business
                         var spriteSize = sprite.GetLocalBounds().Size();
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                         sprite.Scale = Coord.PositiveOne / spriteSize;
-                        _renderTexture.Draw(sprite, states);
+                        _renderTexture.Draw(sprite);
                     }
                 }
                 _renderTexture.Display();
-                _renderSprite.Position = Position.V;
-                _renderSprite.Scale = Size.V / floor.Size;
+                _renderSprite.Position = Layout.Position.V;
+                _renderSprite.Scale = Layout.Size.V / floor.Size;
                 _dirty = false;
                 return true;
             }

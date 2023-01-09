@@ -21,7 +21,7 @@ namespace Fiero.Business
         public int CurrentTurn { get; private set; }
 
         private readonly GameEntities _entities;
-        private readonly FloorSystem _floorSystem;
+        private readonly DungeonSystem _floorSystem;
         private readonly FactionSystem _factionSystem;
 
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> GameStarted;
@@ -74,7 +74,7 @@ namespace Fiero.Business
         public ActionSystem(
             EventBus bus,
             GameEntities entities, 
-            FloorSystem floorSystem,
+            DungeonSystem floorSystem,
             FactionSystem factionSystem
         ) : base(bus) {
             _entities = entities;

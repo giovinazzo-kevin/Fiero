@@ -1,7 +1,5 @@
 ﻿using LightInject;
-using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,7 +32,8 @@ namespace Fiero.Core
                 var resolverType = typeof(IUIControlResolver<>).MakeGenericType(controlType);
                 var resolver = ServiceProvider.GetInstance(resolverType);
                 var resolveMethod = resolver.GetType().GetMethod(nameof(IUIControlResolver<UIControl>.Resolve));
-                return () => {
+                return () =>
+                {
                     var control = resolveMethod.Invoke(resolver, new object[] { grid });
                     return (UIControl)control;
                 };
@@ -42,26 +41,39 @@ namespace Fiero.Core
 
             IEnumerable<UIControl> CreateRecursive(LayoutGrid grid)
             {
-                if (grid.IsCell) {
-                    var resolver = GetResolver(grid.ControlType);
-                    var control = resolver();
-                    if(control != null) {
-                        grid.InitializeControl?.Invoke(grid.ControlInstance = control);
+                if (grid.IsCell)
+                {
+                    foreach (var c in grid.Controls)
+                    {
+                        var resolver = GetResolver(c.Type);
+                        var control = resolver();
+                        if (control != null)
+                        {
+                            c.Initialize?.Invoke(c.Instance = control);
+                        }
                     }
                 }
 
                 var enumerator = grid.GetEnumerator();
-                for (int i = 0; i < grid.Cols + 1; i++) {
-                    for (int j = 0; j < grid.Rows + 1; j++) {
-                        if(!enumerator.MoveNext()) {
+                for (int i = 0; i < grid.Cols + 1; i++)
+                {
+                    for (int j = 0; j < grid.Rows + 1; j++)
+                    {
+                        if (!enumerator.MoveNext())
+                        {
                             yield break;
                         }
                         var child = enumerator.Current;
-                        foreach (var inner in CreateRecursive(child)) {
+                        foreach (var inner in CreateRecursive(child))
+                        {
                             yield return inner;
                         }
-                        if(child.IsCell && child.ControlInstance != null) {
-                            yield return child.ControlInstance;
+                        if (child.IsCell)
+                        {
+                            foreach (var c in child.Controls)
+                            {
+                                yield return c.Instance;
+                            }
                         }
                     }
                 }
@@ -71,14 +83,20 @@ namespace Fiero.Core
             {
                 var screenSize = size.ToVec();
                 var divisions = grid.Subdivisions.Clamp(min: 1);
-                foreach (var child in grid) {
+                foreach (var child in grid)
+                {
                     var cPos = p + child.Position * s / divisions;
                     var cSize = child.Size * s / divisions;
-                    if(child.IsCell && child.ControlInstance != null) {
-                        child.ControlInstance.Position.V = layout.Position + (cPos * screenSize).ToCoord() - new Coord(1, 1);
-                        child.ControlInstance.Size.V = (cSize * screenSize).ToCoord() + new Coord(1, 1);
-                        foreach (var rule in grid.GetStyles(child.ControlType)) {
-                            rule(child.ControlInstance);
+                    if (child.IsCell)
+                    {
+                        foreach (var c in child.Controls)
+                        {
+                            c.Instance.Position.V = layout.Position + (cPos * screenSize).ToCoord() - new Coord(1, 1);
+                            c.Instance.Size.V = (cSize * screenSize).ToCoord() + new Coord(1, 1);
+                            foreach (var rule in grid.GetStyles(c.Type))
+                            {
+                                rule(c.Instance);
+                            }
                         }
                     }
                     ResizeRecursive(size, child, cPos, cSize);

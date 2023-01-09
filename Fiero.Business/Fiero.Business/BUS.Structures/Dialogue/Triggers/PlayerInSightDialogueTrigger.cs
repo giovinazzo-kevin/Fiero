@@ -17,7 +17,7 @@ namespace Fiero.Business
 
         public override bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners)
         {
-            listeners = Systems.Floor.GetAllActors(floorId)
+            listeners = Systems.Dungeon.GetAllActors(floorId)
                 .Where(a => a.IsPlayer() 
                     && a.DistanceFrom(speaker) < DistanceThreshold
                     && a.CanSee(speaker));

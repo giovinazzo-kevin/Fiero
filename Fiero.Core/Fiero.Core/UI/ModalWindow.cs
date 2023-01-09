@@ -4,31 +4,27 @@ using System.Linq;
 
 namespace Fiero.Core
 {
-    public abstract class ModalWindow
+    public abstract class ModalWindow : UIWindow
     {
-        public readonly GameUI UI;
-
-        public Layout Layout { get; private set; }
-        public UIControlProperty<string> Title { get; private set; }
-
-        public event Action<ModalWindow, ModalWindowButton> Closed;
         public event Action<ModalWindow, ModalWindowButton> Confirmed;
         public event Action<ModalWindow, ModalWindowButton> Cancelled;
-        public event Action Updated;
 
+        protected readonly ModalWindowButton[] Buttons;
+        protected readonly ModalWindowStyles Styles;
 
-        public virtual void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+        public ModalWindow(GameUI ui, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+            : base(ui)
         {
-            Layout = UI.CreateLayout()
-                .Build(new(), grid => CreateLayout(grid, title, buttons, styles));
+            Buttons = buttons;
+            Styles = styles;
         }
 
-        public virtual LayoutGrid CreateLayout(LayoutGrid grid, string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+        public override LayoutGrid CreateLayout(LayoutGrid grid, string title)
         {
-            var hasTitle = styles.HasFlag(ModalWindowStyles.Title);
-            var hasButtons = styles.HasFlag(ModalWindowStyles.Buttons);
+            var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
+            var hasButtons = Styles.HasFlag(ModalWindowStyles.Buttons);
 
-            var titleHeight =  hasTitle ? 0.20f : 0f;
+            var titleHeight = hasTitle ? 0.20f : 0f;
             var buttonsHeight = hasButtons ? 0.20f : 0f;
             var contentHeight = hasTitle && hasButtons ? 2.60f : hasTitle ^ hasButtons ? 1.80f : 1f;
 
@@ -38,20 +34,22 @@ namespace Fiero.Core
                         .Cell<Label>(l => {
                             l.Text.V = title;
                             l.CenterContentH.V = true;
-                            Title = l.Text;
+                            if(Title != null) {
+                                Title.V = l.Text.V;
+                            }
                         })
                     .End())
                     .Row(h: contentHeight, @class: "modal-content")
                         .Repeat(1, (i, g) => RenderContent(g))
                     .End()
                     .If(hasButtons, g => g.Row(h: buttonsHeight, @class: "modal-controls")
-                        .Repeat(buttons.Length, (i, grid) => grid
+                        .Repeat(Buttons.Length, (i, grid) => grid
                             .Col()
                                 .Cell<Button>(b => {
-                                    b.Text.V = buttons[i].ToString();
+                                    b.Text.V = Buttons[i].ToString();
                                     b.CenterContentH.V = true;
                                     b.Clicked += (_, __, ___) => {
-                                        Close(buttons[i]);
+                                        Close(Buttons[i]);
                                         return false;
                                     };
                                 })
@@ -61,34 +59,9 @@ namespace Fiero.Core
                 .End();
         }
 
-        public ModalWindow(GameUI ui) 
+        public override void Close(ModalWindowButton buttonPressed)
         {
-            UI = ui;
-        }
-
-        private LayoutGrid ApplyStyles(LayoutGrid grid)
-        {
-            var styleBuilder = DefineStyles(new LayoutStyleBuilder());
-            var styles = styleBuilder.Build();
-            foreach (var s in styles) {
-                grid = grid.Style(s);
-            }
-            return grid;
-        }
-
-        protected virtual LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder)
-        {
-            return builder;
-        }
-
-        protected virtual LayoutGrid RenderContent(LayoutGrid layout)
-        {
-            return layout;
-        }
-
-        public virtual void Close(ModalWindowButton buttonPressed)
-        {
-            Closed?.Invoke(this, buttonPressed);
+            base.Close(buttonPressed);
             // ResultType is nullable
             if (buttonPressed.ResultType == true) {
                 Confirmed?.Invoke(this, buttonPressed);
@@ -96,17 +69,6 @@ namespace Fiero.Core
             else if (buttonPressed.ResultType == false) {
                 Cancelled?.Invoke(this, buttonPressed);
             }
-        }
-
-        public virtual void Update()
-        {
-            Layout.Update();
-            Updated?.Invoke();
-        }
-
-        public virtual void Draw()
-        {
-            UI.Window.RenderWindow.Draw(Layout);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Fiero.Business
             var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
             var zapShape = new RayTargetingShape(a.Position(), 100);
             var autoTarget = zapShape.TryAutoTarget(
-                p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
+                p => Systems.Dungeon.GetActorsAt(floorId, p).Any(b => {
                     if (!wand.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
@@ -35,12 +35,12 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
             );
             if (TryTarget(a, zapShape, autoTarget)) {
                 var points = zapShape.GetPoints().ToArray();
                 foreach (var p in points) {
-                    var target = Systems.Floor.GetActorsAt(floorId, p)
+                    var target = Systems.Dungeon.GetActorsAt(floorId, p)
                         .FirstOrDefault();
                     if (target != null) {
                         action = new ZapWandAtOtherAction(wand, target);
@@ -66,7 +66,7 @@ namespace Fiero.Business
             var flags = throwable.GetEffectFlags();
             var throwShape = new RayTargetingShape(a.Position(), len);
             var autoTarget = throwShape.TryAutoTarget(
-                p => Systems.Floor.GetActorsAt(floorId, p).Any(b => {
+                p => Systems.Dungeon.GetActorsAt(floorId, p).Any(b => {
                     if (!throwable.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelationships(a, b);
@@ -80,12 +80,12 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Floor.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
             );
             if (TryTarget(a, throwShape, autoTarget)) {
                 var points = throwShape.GetPoints().ToArray();
                 foreach (var p in points) {
-                    var target = Systems.Floor.GetActorsAt(floorId, p)
+                    var target = Systems.Dungeon.GetActorsAt(floorId, p)
                         .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
                     if (target != null) {
                         action = new ThrowItemAtOtherAction(target, throwable);

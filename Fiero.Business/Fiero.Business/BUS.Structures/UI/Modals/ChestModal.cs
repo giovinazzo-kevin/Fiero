@@ -10,7 +10,7 @@ namespace Fiero.Business
         public readonly bool CanTake;
 
         public ChestModal(GameUI ui, GameResources resources, Feature ft, bool canTake)
-            : base(ui, resources, ft) 
+            : base(ui, resources, ft, new[] { ModalWindowButton.Close }, ModalWindowStyles.Default) 
         {
             CanTake = canTake;
         }

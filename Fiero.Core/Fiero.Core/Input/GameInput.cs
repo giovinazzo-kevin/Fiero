@@ -104,6 +104,6 @@ namespace Fiero.Core
             .Where(i => !_m1[i] && !_m0[i])
             .Select(i => (Mouse.Button)i);
 
-        public Vector2i GetMousePosition() => _mouse;
+        public Coord GetMousePosition() => _mouse.ToCoord();
     }
 }

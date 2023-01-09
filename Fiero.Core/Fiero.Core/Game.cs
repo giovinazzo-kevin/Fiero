@@ -128,9 +128,15 @@ namespace Fiero.Core
         {
             if(Window.HasFocus()) {
                 Input.Update(Window.GetMousePosition());
+                // Update all non-modal windows
+                foreach (var wnd in UI.GetOpenWindows()) {
+                    wnd.Update();
+                }
+                // Then update the topmost modal
                 if (UI.GetOpenModals().LastOrDefault() is { } modal) {
                     modal.Update();
                 }
+                // If no modal is open, just update the current scene
                 else {
                     Director.Update();
                 }
@@ -140,8 +146,8 @@ namespace Fiero.Core
         public virtual void Draw()
         {
             Director.Draw();
-            foreach (var modal in UI.GetOpenModals()) {
-                modal.Draw();
+            foreach (var win in UI.GetOpenModals().Union(UI.GetOpenWindows())) {
+                win.Draw();
             }
             Window.Display();
         }

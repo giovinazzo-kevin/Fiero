@@ -1,7 +1,4 @@
-﻿using SFML.Graphics;
-using SFML.Window;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,7 +17,7 @@ namespace Fiero.Core
         {
             if (!match(this))
                 return Enumerable.Empty<UIControl>();
-            return Dom.Query(select).Select(x => x.ControlInstance);
+            return Dom.Query(select).SelectMany(x => x.Controls.Select(x => x.Instance));
         }
 
         public IEnumerable<T> Query<T>(Func<Layout, bool> match, Func<LayoutGrid, bool> select = null)
@@ -29,13 +26,17 @@ namespace Fiero.Core
 
         public override void Update()
         {
-            var preventDefault = TrackMouse(Input.GetMousePosition().ToCoord(), out var clickedControl, out var clickedButton);
-            if(!preventDefault) {
-                if (clickedControl != null) {
-                    foreach (var c in Children) {
+            var preventDefault = TrackMouse(Input.GetMousePosition(), out var clickedControl, out var clickedButton);
+            if (!preventDefault)
+            {
+                if (clickedControl != null)
+                {
+                    foreach (var c in Children)
+                    {
                         c.IsActive.V = false;
                     }
-                    if (clickedControl != this && clickedControl.IsInteractive) {
+                    if (clickedControl != this && clickedControl.IsInteractive)
+                    {
                         clickedControl.IsActive.V = true;
                     }
                 }

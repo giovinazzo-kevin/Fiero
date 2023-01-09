@@ -2,15 +2,13 @@
 using LightInject;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using Unconcern.Common;
 
 namespace Fiero.Business
 {
 
-    public partial class FloorSystem : EcsSystem
+    public partial class DungeonSystem : EcsSystem
     {
         protected readonly Dictionary<FloorId, Floor> Floors;
 
@@ -19,15 +17,15 @@ namespace Fiero.Business
         public readonly GameEntityBuilders EntityBuilders;
         public readonly GameDataStore Store;
 
-        public readonly SystemEvent<FloorSystem, TileChangedEvent> TileChanged;
-        public readonly SystemEvent<FloorSystem, ActorChangedEvent> ActorAdded;
-        public readonly SystemEvent<FloorSystem, ActorChangedEvent> ActorRemoved;
-        public readonly SystemEvent<FloorSystem, ItemChangedEvent> ItemAdded;
-        public readonly SystemEvent<FloorSystem, ItemChangedEvent> ItemRemoved;
-        public readonly SystemEvent<FloorSystem, FeatureChangedEvent> FeatureAdded;
-        public readonly SystemEvent<FloorSystem, FeatureChangedEvent> FeatureRemoved;
+        public readonly SystemEvent<DungeonSystem, TileChangedEvent> TileChanged;
+        public readonly SystemEvent<DungeonSystem, ActorChangedEvent> ActorAdded;
+        public readonly SystemEvent<DungeonSystem, ActorChangedEvent> ActorRemoved;
+        public readonly SystemEvent<DungeonSystem, ItemChangedEvent> ItemAdded;
+        public readonly SystemEvent<DungeonSystem, ItemChangedEvent> ItemRemoved;
+        public readonly SystemEvent<DungeonSystem, FeatureChangedEvent> FeatureAdded;
+        public readonly SystemEvent<DungeonSystem, FeatureChangedEvent> FeatureRemoved;
 
-        public FloorSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store, IServiceFactory sp)
+        public DungeonSystem(EventBus bus, GameEntities entities, GameEntityBuilders entityBuilders, GameDataStore store, IServiceFactory sp)
             : base(bus)
         {
             Entities = entities;
@@ -47,10 +45,13 @@ namespace Fiero.Business
 
         public void Reset()
         {
-            foreach (var floor in Floors.Values) {
-                foreach (var cell in floor.Cells.Values) {
+            foreach (var floor in Floors.Values)
+            {
+                foreach (var cell in floor.Cells.Values)
+                {
                     Entities.FlagEntityForRemoval(cell.Tile.Id);
-                    foreach (var actor in cell.Actors) {
+                    foreach (var actor in cell.Actors)
+                    {
                         Entities.FlagEntityForRemoval(actor.Id);
                     }
                 }
@@ -85,7 +86,8 @@ namespace Fiero.Business
         public void AddDungeon(Func<DungeonBuilder, DungeonBuilder> configure)
         {
             var builder = configure(ServiceProvider.GetInstance<DungeonBuilder>());
-            foreach(var floor in builder.Build()) {
+            foreach (var floor in builder.Build())
+            {
                 RouteEvents(floor);
                 Floors.Add(floor.Id, floor);
             }
@@ -107,7 +109,8 @@ namespace Fiero.Business
         public bool TryGetTileAt(FloorId id, Coord pos, out Tile tile)
         {
             tile = default;
-            if(TryGetCellAt(id, pos, out var cell)) {
+            if (TryGetCellAt(id, pos, out var cell))
+            {
                 tile = cell.Tile;
                 return true;
             }
@@ -116,8 +119,10 @@ namespace Fiero.Business
         public Tile GetTileAt(FloorId id, Coord pos) => TryGetCellAt(id, pos, out var cell) ? cell.Tile : null;
         public void SetTileAt(FloorId id, Coord pos, Tile tile)
         {
-            if (TryGetFloor(id, out var floor)) {
-                if (TryGetCellAt(id, pos, out var old)) {
+            if (TryGetFloor(id, out var floor))
+            {
+                if (TryGetCellAt(id, pos, out var old))
+                {
                     Entities.FlagEntityForRemoval(old.Tile.Id);
                 }
                 tile.Physics.FloorId = id;
@@ -129,8 +134,10 @@ namespace Fiero.Business
         public IEnumerable<MapCell> GetNeighborhood(FloorId id, Coord pos, int size = 3)
         {
             size /= 2;
-            for (int x = -size; x < size; x++) {
-                for (int y = -size; y < size; y++) {
+            for (int x = -size; x < size; x++)
+            {
+                for (int y = -size; y < size; y++)
+                {
                     if (TryGetCellAt(id, new(pos.X + x, pos.Y + y), out var n))
                         yield return n;
                 }
@@ -142,7 +149,8 @@ namespace Fiero.Business
             closest = default;
             pred ??= cell => !cell.Items.Any() && !cell.Features.Any(f => f.Physics.BlocksMovement) && !cell.Actors.Any();
 
-            if (TryGetCellAt(id, pos, out var closestCell) && pred(closestCell)) {
+            if (TryGetCellAt(id, pos, out var closestCell) && pred(closestCell))
+            {
                 closest = closestCell.Tile;
                 return true;
             }
@@ -156,8 +164,10 @@ namespace Fiero.Business
             var maxDistanceSquared = maxDistance * maxDistance;
             if (neighbors.All(n => n.SquaredDistanceFrom(pos) > maxDistanceSquared))
                 return false;
-            foreach (var n in neighbors) {
-                if (TryGetClosestFreeTile(id, n.Position(), out closest, maxDistance, pred)) {
+            foreach (var n in neighbors)
+            {
+                if (TryGetClosestFreeTile(id, n.Position(), out closest, maxDistance, pred))
+                {
                     return true;
                 }
             }
@@ -173,7 +183,8 @@ namespace Fiero.Business
             : Enumerable.Empty<Actor>();
         public bool AddActor(FloorId id, Actor actor)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(id, out var floor))
+            {
                 floor.AddActor(actor);
                 return true;
             }
@@ -181,7 +192,8 @@ namespace Fiero.Business
         }
         public bool RemoveActor(Actor actor)
         {
-            if (TryGetFloor(actor.FloorId(), out var floor)) {
+            if (TryGetFloor(actor.FloorId(), out var floor))
+            {
                 floor.RemoveActor(actor);
                 return true;
             }
@@ -198,7 +210,8 @@ namespace Fiero.Business
             : Enumerable.Empty<Item>();
         public bool AddItem(FloorId id, Item item)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(id, out var floor))
+            {
                 floor.AddItem(item);
                 return true;
             }
@@ -206,7 +219,8 @@ namespace Fiero.Business
         }
         public bool RemoveItem(Item item)
         {
-            if (TryGetFloor(item.FloorId(), out var floor)) {
+            if (TryGetFloor(item.FloorId(), out var floor))
+            {
                 floor.RemoveItem(item);
                 return true;
             }
@@ -223,7 +237,8 @@ namespace Fiero.Business
             : Enumerable.Empty<Feature>();
         public bool AddFeature(FloorId id, Feature feature)
         {
-            if (TryGetFloor(id, out var floor)) {
+            if (TryGetFloor(id, out var floor))
+            {
                 floor.AddFeature(feature);
                 return true;
             }
@@ -231,7 +246,8 @@ namespace Fiero.Business
         }
         public bool RemoveFeature(Feature feature)
         {
-            if (TryGetFloor(feature.FloorId(), out var floor)) {
+            if (TryGetFloor(feature.FloorId(), out var floor))
+            {
                 floor.RemoveFeature(feature);
                 return true;
             }
@@ -241,11 +257,14 @@ namespace Fiero.Business
         public void RecalculateFov(Actor a, Coord? overridePosition = null)
         {
             var floorId = a.FloorId();
-            if(a.Fov != null && TryGetFloor(floorId, out var floor)) {
-                if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles)) {
+            if (a.Fov != null && TryGetFloor(floorId, out var floor))
+            {
+                if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles))
+                {
                     a.Fov.KnownTiles[floorId] = knownTiles = new();
                 }
-                if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var visibleTiles)) {
+                if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var visibleTiles))
+                {
                     a.Fov.VisibleTiles[floorId] = visibleTiles = new();
                 }
                 visibleTiles.Clear();
@@ -255,7 +274,7 @@ namespace Fiero.Business
         }
 
         public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
-            => !TryGetFloor(id, out var floor) 
+            => !TryGetFloor(id, out var floor)
                 || Shapes.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
     }
 }

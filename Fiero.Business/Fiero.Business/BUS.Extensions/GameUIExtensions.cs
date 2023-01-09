@@ -1,5 +1,6 @@
 ﻿using Fiero.Core;
 using LightInject;
+using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Linq;
@@ -9,44 +10,45 @@ namespace Fiero.Business
 {
     public static class GameUIExtensions
     {
+        public static Color GetColor(this GameUI ui, ColorName name) =>
+            ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
+
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
-            => ui.ShowModal(
+            => ui.Show(
                 new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),
-                title,
-                new[] { ModalWindowButton.Close },
-                title != null ? ModalWindowStyles.Default
-                              : ModalWindowStyles.Default & ~ModalWindowStyles.Title
+                title
             );
         public static ChestModal Chest(this GameUI ui, Feature feature, bool canTake, string title = null)
-            => ui.ShowModal(
+            => ui.Show(
                 new ChestModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), feature, canTake),
-                title,
-                new[] { ModalWindowButton.Close },
-                title != null ? ModalWindowStyles.Default
-                              : ModalWindowStyles.Default & ~ModalWindowStyles.Title
+                title
             );
         public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, DrawableEntity speaker, params DrawableEntity[] listeners)
-            => ui.ShowModal(
+            => ui.Show(
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
-                null,
-                new[] { ModalWindowButton.Ok },
-                ModalWindowStyles.None
+                null
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
-            => ui.ShowModal(
-                new ChoicePopUp<T>(ui, ui.ServiceProvider.GetInstance<GameResources>(), choices), 
-                title, 
-                new[] { ModalWindowButton.Ok },
-                title != null ? ModalWindowStyles.Default
-                              : ModalWindowStyles.Default & ~ModalWindowStyles.Title
+            => ui.Show(
+                new ChoicePopUp<T>(
+                    ui,
+                    ui.ServiceProvider.GetInstance<GameResources>(),
+                    choices,
+                    new[] { ModalWindowButton.Ok },
+                    ModalWindowStyles.Default
+                ),
+                title
             );
         public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string title = null)
-            => ui.ShowModal(
-                new ChoicePopUp<T>(ui, ui.ServiceProvider.GetInstance<GameResources>(), choices), 
-                title, 
-                new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
-                title != null ? ModalWindowStyles.Default
-                              : ModalWindowStyles.Default & ~ModalWindowStyles.Title
+            => ui.Show(
+                new ChoicePopUp<T>(
+                    ui, 
+                    ui.ServiceProvider.GetInstance<GameResources>(), 
+                    choices,
+                    new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
+                    ModalWindowStyles.Default
+                ),
+                title
             );
 
         internal static bool FreeCursor(this GameUI ui,
@@ -57,8 +59,8 @@ namespace Fiero.Business
             var gameLoop = (GameLoop)ui.ServiceProvider.GetInstance(typeof(GameLoop));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var result = false;
-            renderSystem.Screen.ShowTargetingShape(shape);
-            cursorMoved?.Invoke(renderSystem.Screen.GetTargetingShape());
+            renderSystem.ShowTargetingShape(shape);
+            cursorMoved?.Invoke(renderSystem.GetTargetingShape());
             gameLoop.LoopAndDraw(() => {
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
                     result = false;
@@ -95,7 +97,7 @@ namespace Fiero.Business
                     || shape.CanRotateWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
                     RotateCCw();
             });
-            renderSystem.Screen.HideTargetingShape();
+            renderSystem.HideTargetingShape();
             return result;
 
             void Move(Coord c)
@@ -122,26 +124,26 @@ namespace Fiero.Business
 
         public static bool Look(this GameUI ui, Actor a)
         {
-            var floorSystem = (FloorSystem)ui.ServiceProvider.GetInstance(typeof(FloorSystem));
+            var floorSystem = (DungeonSystem)ui.ServiceProvider.GetInstance(typeof(DungeonSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
-            var shape = new PointTargetingShape(renderSystem.Screen.GetViewportCenter(), 1000);
+            var shape = new PointTargetingShape(renderSystem.GetViewportCenter(), 1000);
             var result = ui.FreeCursor(shape, cursorMoved: c => {
-                var floorId = renderSystem.Screen.GetViewportFloor();
+                var floorId = renderSystem.GetViewportFloor();
                 var pos = c.GetPoints().Single();
-                renderSystem.Screen.CenterOn(pos);
+                renderSystem.CenterOn(pos);
                 if(a.Fov is null || a.Fov.KnownTiles[floorId].Contains(pos)) {
                     if (floorSystem.TryGetCellAt(floorId, pos, out var cell)) {
-                        renderSystem.Screen.SetLookText(cell.ToString(a.Fov is null || a.Fov.VisibleTiles[floorId].Contains(pos)));
+                        //renderSystem.SetLookText(cell.ToString(a.Fov is null || a.Fov.VisibleTiles[floorId].Contains(pos)));
                     }
                     else {
-                        renderSystem.Screen.SetLookText(String.Empty);
+                        //renderSystem.SetLookText(String.Empty);
                     }
                 }
                 else {
-                    renderSystem.Screen.SetLookText("???");
+                    //renderSystem.SetLookText("???");
                 }
             });
-            renderSystem.Screen.SetLookText(String.Empty);
+            //renderSystem.SetLookText(String.Empty);
             return result;
         }
 

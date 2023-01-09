@@ -32,7 +32,7 @@ namespace Fiero.Business
                     }
                 });
                 // End the effect when this tile is removed or destroyed for any reason
-                yield return systems.Floor.TileChanged.SubscribeHandler(e => {
+                yield return systems.Dungeon.TileChanged.SubscribeHandler(e => {
                     if (e.OldState == tile) {
                         End();
                     }
@@ -51,7 +51,7 @@ namespace Fiero.Business
                     }
                 });
                 // End the effect when this feature is removed or destroyed for any reason
-                yield return systems.Floor.FeatureRemoved.SubscribeHandler(e => {
+                yield return systems.Dungeon.FeatureRemoved.SubscribeHandler(e => {
                     if (e.OldState == feature) {
                         End();
                     }

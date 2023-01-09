@@ -19,7 +19,8 @@ namespace Fiero.Business
         public UIControlProperty<int> PageSize { get; private set; } = new(nameof(PageSize), 20);
         protected int NumPages => (Items.Count - 1) / PageSize.V + 1;
 
-        public ContainerModal(GameUI ui, GameResources resources, TContainer cont) : base(ui, resources)
+        public ContainerModal(GameUI ui, GameResources resources, TContainer cont, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+            : base(ui, resources, buttons, styles)
         {
             Container = cont;
             Items.AddRange(cont.Inventory?.GetItems() ?? Enumerable.Empty<Item>());

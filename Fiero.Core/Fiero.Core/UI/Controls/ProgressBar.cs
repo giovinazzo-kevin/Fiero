@@ -1,6 +1,4 @@
-﻿using LightInject;
-using SFML.Graphics;
-using System;
+﻿using SFML.Graphics;
 
 namespace Fiero.Core
 {
@@ -32,22 +30,33 @@ namespace Fiero.Core
         {
             if (IsHidden)
                 return;
-            Size.V = new((Length - 1) * TileSize, TileSize);
+            if (Length.V != 0)
+            {
+                Size.V = new((Length - 1) * TileSize, TileSize);
+            }
+            else
+            {
+                Length.V = (int)(Size.V.X / (TileSize * Scale.V.X)) + 2;
+            }
             base.Draw(target, states);
-            for (var i = 0; i < Length; i++) {
+            for (var i = 0; i < Length; i++)
+            {
                 var full = i < Length * Progress;
                 var half = (i + 1) > Length * Progress;
                 var piece = full ? half ? MiddleHalf : MiddleFull : MiddleEmpty;
-                if (Capped.V && i == 0) {
+                if (Capped.V && i == 0)
+                {
                     piece = full ? half ? LeftHalf : LeftFull : LeftEmpty;
                 }
-                else if (Capped.V && i == Length - 1) {
+                else if (Capped.V && i == Length - 1)
+                {
                     piece = full ? half ? RightHalf : RightFull : RightEmpty;
                 }
                 piece.Color = Foreground;
                 piece.Scale = Scale.V;
                 piece.Position = new(ContentRenderPos.X + i * TileSize * Scale.V.X, ContentRenderPos.Y);
-                if(Center.V) {
+                if (Center.V)
+                {
                     piece.Position += new Coord(1, 0) * (piece.GetLocalBounds().Size() * Length.V - Size.V) / 2;
                 }
                 piece.Origin = new Coord(TileSize / 2, 0) - Origin.V * new Coord(TileSize, TileSize);

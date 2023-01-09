@@ -12,7 +12,7 @@ namespace Fiero.Business
         {
             Subscriptions.Add(systems.Action.ActorMoved.SubscribeHandler(e => {
                 if(e.Actor == target) {
-                    var itemsHere = systems.Floor.GetItemsAt(target.FloorId(), target.Position());
+                    var itemsHere = systems.Dungeon.GetItemsAt(target.FloorId(), target.Position());
                     if(itemsHere.FirstOrDefault() is { } item) {
                         // TODO: Re-use HandleOrThrow
                         systems.Action.ItemPickedUp.Handle(new(target, item));

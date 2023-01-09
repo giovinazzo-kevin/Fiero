@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public partial class FloorSystem
+    public partial class DungeonSystem
     {
         public readonly struct FeatureChangedEvent
         {

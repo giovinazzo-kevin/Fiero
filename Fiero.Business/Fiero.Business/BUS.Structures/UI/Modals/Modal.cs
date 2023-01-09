@@ -14,7 +14,8 @@ namespace Fiero.Business
         protected event Action Invalidated;
         private bool _dirty;
 
-        protected Modal(GameUI ui, GameResources resources) : base(ui)
+        protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+            : base(ui, buttons, styles)
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
@@ -42,11 +43,11 @@ namespace Fiero.Business
         }
 
 
-        public override void Open(string title, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+        public override void Open(string title)
         {
             Hotkeys.Clear();
-            RegisterHotkeys(buttons);
-            base.Open(title, buttons, styles);
+            RegisterHotkeys(Buttons);
+            base.Open(title);
             BeforePresentation();
             Invalidate();
         }

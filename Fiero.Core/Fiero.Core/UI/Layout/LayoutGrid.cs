@@ -2,14 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Xml.Linq;
 
 namespace Fiero.Core
 {
 
     public class LayoutGrid : IEnumerable<LayoutGrid>
     {
+        public record class CellControl(Type Type, Action<UIControl> Initialize)
+        {
+            public UIControl Instance { get; set; }
+        }
+
         protected readonly LayoutGrid Parent;
         protected readonly List<LayoutGrid> Children = new();
 
@@ -24,22 +27,25 @@ namespace Fiero.Core
         public Vec Size => new(Width, Height);
         public Vec Position => new(X, Y);
         public bool IsCell => Cols == 0 && Rows == 0;
-        public Type ControlType { get; protected set; } = typeof(Layout);
-        public UIControl ControlInstance { get; internal set; } = null;
-        internal Action<UIControl> InitializeControl { get; private set; } = null;
+        public List<CellControl> Controls { get; private set; } = new();
+        //public Type ControlType { get; protected set; } = typeof(Layout);
+        //public UIControl ControlInstance { get; internal set; } = null;
+        //internal Action<UIControl> InitializeControl { get; private set; } = null;
         protected List<LayoutRule> Styles { get; private set; }
 
-        public bool Is<T>() => IsCell && typeof(T).IsAssignableTo(ControlType);
+        public bool Is<T>() => IsCell && Controls.Any(c => typeof(T).IsAssignableTo(c.Type));
         public bool HasClass(string cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(cls);
         public bool HasAnyClass(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Any();
         public bool HasAllClasses(params string[] cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Intersect(cls).Count() == cls.Length;
 
         public IEnumerable<UIControl> GetAllControlInstances()
         {
-            if (ControlInstance != null)
-                yield return ControlInstance;
-            foreach (var c in Children) {
-                foreach (var control in c.GetAllControlInstances()) {
+            foreach (var c in Controls)
+                yield return c.Instance;
+            foreach (var c in Children)
+            {
+                foreach (var control in c.GetAllControlInstances())
+                {
                     yield return control;
                 }
             }
@@ -51,8 +57,10 @@ namespace Fiero.Core
             var myStyles = Styles
                 .Where(x => x.ControlType.IsAssignableFrom(typeof(T)))
                 .OrderByDescending(x => x.Priority)
-                .Select<LayoutRule, Action<UIControl>>(s => control => {
-                    if(Query(c => c.ControlInstance == control).FirstOrDefault() is { } c && s.Match(c)) {
+                .Select<LayoutRule, Action<UIControl>>(s => control =>
+                {
+                    if (Query(l => l.Controls.Any(c => c.Instance == control)).FirstOrDefault() is { } l && s.Match(l))
+                    {
                         s.Apply(control);
                     }
                 })
@@ -65,8 +73,10 @@ namespace Fiero.Core
         {
             if (pred(this))
                 yield return this;
-            foreach (var c in Children) {
-                foreach (var q in c.Query(pred)) {
+            foreach (var c in Children)
+            {
+                foreach (var q in c.Query(pred))
+                {
                     yield return q;
                 }
             }
@@ -74,7 +84,7 @@ namespace Fiero.Core
 
         public IEnumerable<Action<UIControl>> GetStyles(Type controlType)
         {
-            return ((IEnumerable)typeof(LayoutGrid).GetMethod(nameof(GetStyles), 1, new Type[] {  })
+            return ((IEnumerable)typeof(LayoutGrid).GetMethod(nameof(GetStyles), 1, new Type[] { })
                 .MakeGenericMethod(controlType)
                 .Invoke(this, null))
                 .Cast<Action<UIControl>>();
@@ -107,7 +117,8 @@ namespace Fiero.Core
             if (Parent == null)
                 return this;
             var top = Parent;
-            while(top.Parent != null) {
+            while (top.Parent != null)
+            {
                 top = top.Parent;
             }
             return top;
@@ -115,7 +126,8 @@ namespace Fiero.Core
         public LayoutGrid End() => Parent ?? this;
         public LayoutGrid Col(float w = 1, float h = 1, string @class = null, string @id = null)
         {
-            var ret = new LayoutGrid(this, w, h) {
+            var ret = new LayoutGrid(this, w, h)
+            {
                 Class = @class == null ? Class : @class + " " + (Class ?? ""),
                 Id = id,
                 X = _c,
@@ -128,7 +140,8 @@ namespace Fiero.Core
         }
         public LayoutGrid Row(float w = 1, float h = 1, string @class = null, string @id = null)
         {
-            var ret = new LayoutGrid(this, w, h) {
+            var ret = new LayoutGrid(this, w, h)
+            {
                 Class = @class == null ? Class : Class + " " + @class,
                 Id = id,
                 X = _c,
@@ -143,18 +156,19 @@ namespace Fiero.Core
         public LayoutGrid Cell<T>(Action<T> initialize = null)
             where T : UIControl
         {
-            if (!IsCell) {
+            if (!IsCell)
+            {
                 throw new ArgumentException();
             }
-            ControlType = typeof(T);
-            InitializeControl = x => initialize?.Invoke((T)x);
+            Controls.Add(new(typeof(T), x => initialize?.Invoke((T)x)));
             return this;
         }
 
         public LayoutGrid Repeat(int count, Func<int, LayoutGrid, LayoutGrid> action)
         {
             var ret = this;
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 ret = action(i, ret);
             }
             return ret;

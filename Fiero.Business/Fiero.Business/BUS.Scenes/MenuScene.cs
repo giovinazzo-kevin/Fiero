@@ -1,18 +1,13 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
-using SFML.System;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fiero.Business.Scenes
 {
     public class MenuScene : GameScene<MenuScene.SceneState>
     {
-        public enum SceneState  
+        public enum SceneState
         {
             [EntryState]
             Main,
@@ -30,7 +25,7 @@ namespace Fiero.Business.Scenes
             Settings,
             Tracker,
             QuitGame,
-            
+
         }
 
         protected readonly GameUI UI;
@@ -38,14 +33,15 @@ namespace Fiero.Business.Scenes
         protected readonly GameDataStore Store;
         protected readonly OffButton OffButton;
 
-        protected UIControl UI_Layout { get; private set; }
+        protected UIControl Layout { get; private set; }
 
         public MenuScene(
             GameResources resources,
-            GameDataStore store, 
-            GameUI ui, 
+            GameDataStore store,
+            GameUI ui,
             OffButton off
-        ) {
+        )
+        {
             UI = ui;
             Resources = resources;
             Store = store;
@@ -55,7 +51,7 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            UI_Layout = UI.CreateLayout()
+            Layout = UI.CreateLayout()
                 .Build(UI.Store.Get(Data.UI.PopUpSize), grid => grid
                     .Style<Label>(s => s
                         .Match(x => x.HasClass("ng"))
@@ -79,16 +75,20 @@ namespace Fiero.Business.Scenes
                     .End()
                 );
 
-            Data.UI.WindowSize.ValueChanged += e => {
-                if (State == SceneState.Main) {
-                    UI_Layout.Position.V = e.NewValue / 4;
-                    UI_Layout.Size.V = e.NewValue / 2;
+            Data.UI.WindowSize.ValueChanged += e =>
+            {
+                if (State == SceneState.Main)
+                {
+                    Layout.Position.V = e.NewValue / 4;
+                    Layout.Size.V = e.NewValue / 2;
                 }
             };
 
-            Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l => {
+            Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l =>
+            {
                 l.Text.V = Resources.Localizations.Get($"Menu.{option}");
-                l.Clicked += (_, __, ___) => {
+                l.Clicked += (_, __, ___) =>
+                {
                     TrySetState(state);
                     return true;
                 };
@@ -97,20 +97,21 @@ namespace Fiero.Business.Scenes
 
         public override void Update()
         {
-            UI_Layout.Update();
+            Layout.Update();
         }
 
         public override void Draw()
         {
             UI.Window.Clear(Color.Black);
-            UI.Window.Draw(UI_Layout);
+            UI.Window.Draw(Layout);
         }
 
         protected override bool CanChangeState(SceneState newState) => true;
         protected override void OnStateChanged(SceneState oldState)
         {
             base.OnStateChanged(oldState);
-            switch (State) {
+            switch (State)
+            {
                 // Initialize
                 case SceneState.Main:
                     break;

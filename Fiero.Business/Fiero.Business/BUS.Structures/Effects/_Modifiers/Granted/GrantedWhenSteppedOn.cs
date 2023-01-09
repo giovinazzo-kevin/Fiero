@@ -26,7 +26,7 @@ namespace Fiero.Business
                 if(AutoRemove) {
                     Subscriptions.Add(systems.Action.TurnEnded.SubscribeHandler(e => {
                         // Removing the feature automatically ends all of its effects, so there's no need to call End()
-                        systems.Floor.RemoveFeature(feature);
+                        systems.Dungeon.RemoveFeature(feature);
                     }));
                 }
             }

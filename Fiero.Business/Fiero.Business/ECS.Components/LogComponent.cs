@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Fiero.Business
@@ -14,7 +13,7 @@ namespace Fiero.Business
 
         public IEnumerable<string> GetMessages() => Messages;
         public event Action<LogComponent, string> LogAdded;
-        public event Action<LogComponent, string> LogRemoved;
+        public event Action<LogComponent, string> LogPruned;
 
         public LogComponent(GameLocalizations<LocaleName> localizations)
         {
@@ -25,25 +24,30 @@ namespace Fiero.Business
         public void Write(string message)
         {
             var last = Messages.LastOrDefault();
-            foreach (var match in Regex.Matches(message, "\\$(?<key>.*?)\\$").Cast<Match>()) {
+            foreach (var match in Regex.Matches(message, "\\$(?<key>.*?)\\$").Cast<Match>())
+            {
                 var translated = Localizations.Get(match.Groups["key"].Value);
                 message = message.Replace(match.Value, translated);
             }
-            if(last != null) {
+            if (last != null)
+            {
                 var repeatMatch = Regex.Match(last, "x(\\d+)$");
                 var repeatCount = 1;
-                if (repeatMatch.Success) {
+                if (repeatMatch.Success)
+                {
                     repeatCount = int.Parse(repeatMatch.Groups[1].Value);
                 }
-                if(message.Equals(Regex.Replace(last, " x(\\d+)$", String.Empty))) {
+                if (message.Equals(Regex.Replace(last, " x(\\d+)$", String.Empty)))
+                {
                     Messages.RemoveAt(Messages.Count - 1);
                     message += $" x{repeatCount + 1}";
                 }
             }
             LogAdded?.Invoke(this, message);
             Messages.Add(message);
-            if (Messages.Count >= 100) {
-                LogRemoved?.Invoke(this, Messages[0]);
+            if (Messages.Count >= 100)
+            {
+                LogPruned?.Invoke(this, Messages[0]);
                 Messages.RemoveAt(0);
             }
         }

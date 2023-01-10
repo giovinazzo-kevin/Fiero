@@ -15,11 +15,17 @@ namespace Fiero.Core
 
         public virtual void Open(string title)
         {
-            Layout = UI.CreateLayout()
-                .Build(new(), grid => CreateLayout(grid, title));
-            if (Title == null && title != null) {
+            if (Title == null && title != null)
+            {
                 Title = new(nameof(Title), title);
             }
+            RebuildLayout();
+        }
+
+        protected virtual void RebuildLayout()
+        {
+            Layout = UI.CreateLayout()
+                .Build(new(), grid => CreateLayout(grid, Title ?? "Untitled"));
         }
 
         public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);
@@ -33,7 +39,8 @@ namespace Fiero.Core
         {
             var styleBuilder = DefineStyles(new LayoutStyleBuilder());
             var styles = styleBuilder.Build();
-            foreach (var s in styles) {
+            foreach (var s in styles)
+            {
                 grid = grid.Style(s);
             }
             return grid;

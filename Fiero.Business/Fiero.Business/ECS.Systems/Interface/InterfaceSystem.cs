@@ -18,6 +18,7 @@ namespace Fiero.Business
         public StatBar HPBar { get; private set; }
         public StatBar MPBar { get; private set; }
         public Minimap Minimap { get; private set; }
+        public LogBox Logs { get; private set; }
 
         public readonly SystemRequest<InterfaceSystem, ActorSelectedEvent, EventResult> ActorSelected;
         public readonly SystemRequest<InterfaceSystem, ActorDeselectedEvent, EventResult> ActorDeselected;
@@ -40,6 +41,7 @@ namespace Fiero.Business
                 {
                     Minimap.SetDirty();
                     Minimap.Following.V = evt.Actor;
+                    Logs.Following.V = evt.Actor;
                     HPBar.Value.V = Minimap.Following.V.ActorProperties.Health.V;
                     HPBar.MaxValue.V = Minimap.Following.V.ActorProperties.Health.Max;
                     MPBar.Value.V = Minimap.Following.V.ActorProperties.Health.V;
@@ -52,6 +54,7 @@ namespace Fiero.Business
                 if (res.All(x => x))
                 {
                     Minimap.Following.V = null;
+                    Logs.Following.V = null;
                 }
             };
         }
@@ -61,6 +64,7 @@ namespace Fiero.Business
             UI.Show(HPBar);
             UI.Show(MPBar);
             UI.Show(Minimap);
+            UI.Show(Logs);
             Invalidate(UI.Store.Get(Data.UI.WindowSize));
         }
 
@@ -68,6 +72,7 @@ namespace Fiero.Business
         {
             var barSize = new Coord(200, 100);
             var mapSize = new Coord(256, 256);
+            var logSize = new Coord(256, 128);
             if (HPBar.Layout != null)
             {
                 HPBar.Layout.Size.V = barSize;
@@ -83,6 +88,11 @@ namespace Fiero.Business
                 Minimap.Layout.Position.V = new(newSize.X - mapSize.X, 0);
                 Minimap.Layout.Size.V = mapSize;
             }
+            if (Logs.Layout != null)
+            {
+                Logs.Layout.Position.V = new(0, newSize.Y - logSize.Y);
+                Logs.Layout.Size.V = logSize;
+            }
 
             Layout.Position.V = new();
             Layout.Size.V = newSize;
@@ -97,6 +107,7 @@ namespace Fiero.Business
             HPBar = new(UI, "HP", ColorName.LightRed);
             MPBar = new(UI, "MP", ColorName.LightBlue);
             Minimap = new(UI, DungeonSystem, FactionSystem, Colors);
+            Logs = new(UI, Colors);
             Data.UI.WindowSize.ValueChanged += (args) =>
             {
                 Invalidate(args.NewValue);

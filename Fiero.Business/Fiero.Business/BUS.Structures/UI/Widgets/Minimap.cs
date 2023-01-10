@@ -3,6 +3,7 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
+
     public class Minimap : Widget
     {
         protected readonly DungeonSystem FloorSystem;
@@ -76,8 +77,8 @@ namespace Fiero.Business
 
                     var known = Following.V.Fov.KnownTiles.TryGetValue(floorId, out var coords) && coords.Contains(coord);
                     var seen = Following.V.Fov.VisibleTiles.TryGetValue(floorId, out coords) && coords.Contains(coord);
-                    // if (!known)
-                    //     continue;
+                    if (!known)
+                        continue;
                     if (
                            coord.X < 0 || coord.X >= Layout.Size.V.X
                         || coord.Y < 0 || coord.Y >= Layout.Size.V.Y)

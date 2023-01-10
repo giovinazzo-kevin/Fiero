@@ -27,27 +27,29 @@ namespace Fiero.Business
 
                 void LogAdded(LogComponent component, string newLog)
                 {
-                    var labels = Layout.Query(x => true, x => x.HasClass("log-row"))
-                        .Cast<Label>();
+                    var paragraph = Layout.Query(x => true, x => "log-text".Equals(x.Id))
+                        .Cast<Paragraph>()
+                        .Single();
                     var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
-                    foreach (var (l, m) in labels.Zip(messages))
-                    {
-                        l.Text.V = m;
-                    }
+                    paragraph.Text.V = string.Join("\n", messages);
                 }
             };
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Label>(r => r.Apply(p => p.CenterContentH.V = false))
+            .AddRule<Paragraph>(r => r.Apply(p =>
+            {
+                var ts = UI.Store.Get(Data.UI.TileSize);
+                p.CenterContentH.V = false;
+                p.Background.V = Colors.Get(ColorName.UIBackground).AddAlpha(-128);
+                p.Padding.V = new(ts, ts);
+            }))
             ;
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
-                .Repeat(NumRowsDisplayed.V, (i, g) => g
-                    .Row(@class: "log-row", id: $"log-row-{i}")
-                        .Cell<Label>()
-                    .End()
-                )
+                .Row(id: "log-text")
+                    .Cell<Paragraph>()
+                .End()
             ;
     }
 }

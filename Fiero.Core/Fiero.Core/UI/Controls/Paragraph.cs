@@ -19,16 +19,27 @@ namespace Fiero.Core
         public Paragraph(GameInput input, Func<string, BitmapText> getText) : base(input)
         {
             GetText = getText;
-            Size.ValueChanged += (owner, old) => {
+            Size.ValueChanged += (owner, old) =>
+            {
                 OnTextInvalidated();
             };
-            Position.ValueChanged += (owner, old) => {
+            Position.ValueChanged += (owner, old) =>
+            {
+                var labels = Children.OfType<Label>();
+                var lines =
+                    ContentAwareScale ? labels.Count()
+                                      : MaxLines;
+                foreach (var (c, i) in labels.Select((c, i) => (c, i)))
+                {
+                    c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / lines);
+                }
+            };
+            FontSize.ValueChanged += (owner, old) =>
+            {
                 OnTextInvalidated();
             };
-            FontSize.ValueChanged += (owner, old) => {
-                OnTextInvalidated();
-            };
-            Text.ValueChanged += (owner, old) => {
+            Text.ValueChanged += (owner, old) =>
+            {
                 OnTextInvalidated();
             };
         }
@@ -40,7 +51,8 @@ namespace Fiero.Core
                 ContentAwareScale ? Children.OfType<Label>().Count()
                                   : MaxLines;
             Children.RemoveAll(x => x is Label);
-            foreach (var line in text.Split('\n')) {
+            foreach (var line in text.Split('\n'))
+            {
                 var label = new Label(Input, GetText);
                 label.CopyProperties(this);
                 label.Background.V = Color.Transparent;
@@ -48,7 +60,8 @@ namespace Fiero.Core
                 label.Text.V = line;
                 label.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / lines);
                 Children.Add(label);
-                if (Children.Count > MaxLines) {
+                if (Children.Count > MaxLines)
+                {
                     break;
                 }
             }

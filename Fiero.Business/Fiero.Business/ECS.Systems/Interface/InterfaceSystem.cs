@@ -72,7 +72,7 @@ namespace Fiero.Business
         {
             var barSize = new Coord(200, 100);
             var mapSize = new Coord(256, 256);
-            var logSize = new Coord(256, 128);
+            var logSize = new Coord(newSize.X, 128);
             if (HPBar.Layout != null)
             {
                 HPBar.Layout.Size.V = barSize;

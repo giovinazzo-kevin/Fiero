@@ -165,7 +165,6 @@ namespace Fiero.Business
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
-            //Director.MapTransition(MenuScene.SceneState.Exit_Tracker, TrackerScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
 
 #if DEBUG

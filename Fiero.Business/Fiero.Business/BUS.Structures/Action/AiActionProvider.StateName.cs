@@ -27,12 +27,12 @@
                 if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var fov)) {
                     return new MoveRandomlyAction();
                 }
-                var target = Systems.Faction.GetRelationships(a)
+                var target = Systems.Faction.GetRelations(a)
                     .Where(r => r.Standing.IsHostile() && fov.Contains(r.Actor.Position()))
                     .Select(r => r.Actor)
                     .FirstOrDefault()
                     ?? fov.SelectMany(c => Systems.Floor.GetActorsAt(floorId, c))
-                    .FirstOrDefault(b => Systems.Faction.GetRelationships(a, b).Left.IsHostile());
+                    .FirstOrDefault(b => Systems.Faction.GetRelations(a, b).Left.IsHostile());
                 if (target != null) {
                     a.Ai.Target = target;
                 }

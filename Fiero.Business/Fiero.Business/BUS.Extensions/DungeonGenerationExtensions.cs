@@ -4,7 +4,7 @@ using System;
 namespace Fiero.Business
 {
 
-    public static class FloorGenerationExtensions
+    public static class DungeonGenerationExtensions
     {
         public static void Draw(this FloorGenerationContext ctx, Coord p, Func<Coord, TileDef> makeTile)
         {
@@ -14,7 +14,8 @@ namespace Fiero.Business
 
         public static void DrawLine(this FloorGenerationContext ctx, Coord start, Coord end, Func<Coord, TileDef> makeTile)
         {
-            foreach (var p in Shapes.Line(start, end)) {
+            foreach (var p in Shapes.Line(start, end))
+            {
                 var tile = makeTile(p);
                 ctx.SetTile(p, tile);
             }
@@ -22,7 +23,8 @@ namespace Fiero.Business
 
         public static void DrawCircle(this FloorGenerationContext ctx, Coord center, int radius, Func<Coord, TileDef> makeTile)
         {
-            foreach (var p in Shapes.Circle(center, radius)) {
+            foreach (var p in Shapes.Circle(center, radius))
+            {
                 var tile = makeTile(p);
                 ctx.SetTile(p, tile);
             }
@@ -39,8 +41,10 @@ namespace Fiero.Business
 
         public static void FillBox(this FloorGenerationContext ctx, Coord topLeft, Coord size, Func<Coord, TileDef> makeTile)
         {
-            for (int x = 0; x < size.X; x++) {
-                for (int y = 0; y < size.Y; y++) {
+            for (int x = 0; x < size.X; x++)
+            {
+                for (int y = 0; y < size.Y; y++)
+                {
                     var p = new Coord(x, y);
                     var tile = makeTile(p);
                     ctx.SetTile(p + topLeft, tile);
@@ -50,10 +54,13 @@ namespace Fiero.Business
 
         public static void FillCircle(this FloorGenerationContext ctx, Coord center, int radius, Func<Coord, TileDef> makeTile)
         {
-            for (var x = center.X - radius; x <= center.X; x++) {
-                for (var y = center.Y - radius; y <= center.Y; y++) {
+            for (var x = center.X - radius; x <= center.X; x++)
+            {
+                for (var y = center.Y - radius; y <= center.Y; y++)
+                {
                     // we don't have to take the square root, it's slow
-                    if ((x - center.X) * (x - center.X) + (y - center.Y) * (y - center.Y) <= radius * radius) {
+                    if ((x - center.X) * (x - center.X) + (y - center.Y) * (y - center.Y) <= radius * radius)
+                    {
                         var xSym = center.X - (x - center.X);
                         var ySym = center.Y - (y - center.Y);
                         // (x, y), (x, ySym), (xSym , y), (xSym, ySym) are in the circle

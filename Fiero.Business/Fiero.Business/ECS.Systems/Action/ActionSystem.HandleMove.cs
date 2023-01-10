@@ -52,7 +52,7 @@ namespace Fiero.Business
                     }
                     else {
                         var target = actorsHere.Single();
-                        var relationship = _factionSystem.GetRelationships(t.Actor, target).Left;
+                        var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack()) {
                             // attack-bump is a free "combo"
                             action = new MeleeAttackOtherAction(target, t.Actor.Equipment.Weapon);

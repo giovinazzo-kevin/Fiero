@@ -103,8 +103,8 @@ namespace Fiero.Business
                             Feature x when x.FeatureProperties.Name == FeatureName.Downstairs => ColorName.LightGreen,
                             Feature x when x.FeatureProperties.Name == FeatureName.Upstairs => ColorName.Green,
                             Actor x when x == Following.V => ColorName.White,
-                            Actor x when FactionSystem.GetRelationships(x, Following).Left.IsFriendly() => ColorName.LightYellow,
-                            Actor x when FactionSystem.GetRelationships(x, Following).Left.IsHostile() => ColorName.LightRed,
+                            Actor x when FactionSystem.GetRelations(x, Following).Left.IsFriendly() => ColorName.LightYellow,
+                            Actor x when FactionSystem.GetRelations(x, Following).Left.IsHostile() => ColorName.LightRed,
                             Actor x => ColorName.LightGray,
                             PhysicalEntity x when x.Physics.BlocksMovement => ColorName.Gray,
                             _ => ColorName.Black

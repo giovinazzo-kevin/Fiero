@@ -220,7 +220,7 @@ namespace Fiero.Business
 
         private bool MayTarget(Actor attacker, Actor victim)
         {
-            return victim.IsAlive() && attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelationships(attacker, victim).Left.IsHostile();
+            return victim.IsAlive() && attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelations(attacker, victim).Left.IsHostile();
         }
 
         private bool TryFindVictim(Coord p, Actor attacker, out Actor victim)

@@ -1,12 +1,7 @@
 ﻿using Fiero.Core;
-using Microsoft.Extensions.Configuration;
-using SFML.Graphics;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace Fiero.Business
 {
@@ -141,7 +136,7 @@ namespace Fiero.Business
                 damage: 1,
                 maxRange: 4,
                 mulchChance: 1,
-                unidentName: $"{potionColor.Adjective} potion",
+                unidentName: $"{potionColor.Adjective} {potionColor.Color.Describe()} potion",
                 itemRarity: 1,
                 remainingUses: 1,
                 maxUses: 1,
@@ -183,9 +178,11 @@ namespace Fiero.Business
             var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
 
             var adjectives = new[] {
-                "crooked", "rotten", "decorated", "carved", "gnarled", "twisted", "long",
-                "short", "chipped", "magic", "humming", "simple", "heavy",
-                "plain", "straight", "curved"
+                "crooked", "rotten", "engraved", "carved", "gnarled", "twisted", "long",
+                "short", "chipped", "simple", "heavy", "knobbly", "rough", "smooth",
+                "plain", "straight", "curved", "knotty", "fibrous", "rigid", "flexible",
+                "bifurcated", "telescopic", "ergonomic", "ribbed"
+
             };
             var colors = new[] {
                 ColorName.LightRed,
@@ -205,7 +202,7 @@ namespace Fiero.Business
                 damage: 1,
                 maxRange: 7,
                 mulchChance: .75f,
-                unidentName: $"{wandColor.Adjective} wand",
+                unidentName: $"{wandColor.Adjective} {wandColor.Color.Describe()} wand",
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: charges,
@@ -249,33 +246,40 @@ namespace Fiero.Business
                 var consonants = "BDFGKLMRSTVZ".ToCharArray();
 
                 var label = rng.Choose(consonants.Concat(Vowels).ToArray()).ToString();
-                while (label.Length < 6) {
+                while (label.Length < 6)
+                {
                     label += GetNextLetter(label);
                 }
 
                 return label;
                 char GetNextLetter(string previous)
                 {
-                    if (IsVowel(previous.Last())) {
+                    if (IsVowel(previous.Last()))
+                    {
                         var precedingVowels = 0;
-                        foreach (var l in previous.Reverse()) {
+                        foreach (var l in previous.Reverse())
+                        {
                             if (!IsVowel(l)) break;
                             precedingVowels++;
                         }
                         var chanceOfAnotherVowel = Math.Pow(0.25 - previous.Length / 20d, precedingVowels + 1);
-                        if (rng.NextDouble() < chanceOfAnotherVowel) {
+                        if (rng.NextDouble() < chanceOfAnotherVowel)
+                        {
                             return rng.Choose(Vowels);
                         }
                         return rng.Choose(consonants);
                     }
-                    else {
+                    else
+                    {
                         var precedingConsonants = 0;
-                        foreach (var l in previous.Reverse()) {
+                        foreach (var l in previous.Reverse())
+                        {
                             if (IsVowel(l)) break;
                             precedingConsonants++;
                         }
                         var chanceOfAnotherConsonant = Math.Pow(0.25 + previous.Length / 20d, precedingConsonants + 1);
-                        if (rng.NextDouble() < chanceOfAnotherConsonant) {
+                        if (rng.NextDouble() < chanceOfAnotherConsonant)
+                        {
                             return rng.Choose(consonants);
                         }
                         return rng.Choose(Vowels);
@@ -328,7 +332,8 @@ namespace Fiero.Business
             return Inner().ToArray();
             IEnumerable<T> Inner()
             {
-                foreach (var chance in chances) {
+                foreach (var chance in chances)
+                {
                     if (Rng.Random.NextDouble() < chance.Chance)
                         yield return chance.Item.Build();
                 }
@@ -594,7 +599,8 @@ namespace Fiero.Business
         #endregion
 
         #region FEATURES
-        private ColorName GetBranchColor(DungeonBranchName branch) => branch switch {
+        private ColorName GetBranchColor(DungeonBranchName branch) => branch switch
+        {
             DungeonBranchName.Dungeon => ColorName.Gray,
             DungeonBranchName.Sewers => ColorName.Green,
             DungeonBranchName.Kennels => ColorName.Red,

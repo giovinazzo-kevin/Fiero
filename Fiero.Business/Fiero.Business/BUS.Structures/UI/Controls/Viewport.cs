@@ -132,7 +132,7 @@ namespace Fiero.Business
                         {
                             layers[RenderLayerName.BackgroundEffects] += tex =>
                             {
-                                var color = FactionSystem.GetRelationships(Following.V, asActor).Left switch
+                                var color = FactionSystem.GetRelations(Following.V, asActor).Left switch
                                 {
                                     var x when x.IsHostile() => ColorName.Red,
                                     var x when x.IsFriendly() => ColorName.Green,

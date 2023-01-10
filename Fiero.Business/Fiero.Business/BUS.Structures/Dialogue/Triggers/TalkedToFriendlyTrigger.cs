@@ -22,7 +22,7 @@ namespace Fiero.Business
 
             if (base.TryTrigger(floorId, speaker, out listeners)) {
                 listeners = listeners
-                    .Where(l => l is Actor a && Systems.Faction.GetRelationships(s, a).Left.IsFriendly());
+                    .Where(l => l is Actor a && Systems.Faction.GetRelations(s, a).Left.IsFriendly());
                 return listeners.Any();
             }
             return false;

@@ -70,7 +70,7 @@ namespace Fiero.Business.Scenes
                     {
                         foreach (var player in eh.DialogueListeners.Players())
                         {
-                            Systems.Faction.SetBilateralRelationship(FactionName.Rats, FactionName.Players, StandingName.Loved);
+                            Systems.Faction.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Loved);
                         }
                     };
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
@@ -79,8 +79,8 @@ namespace Fiero.Business.Scenes
                         var gkr = (Actor)eh.DialogueStarter;
                         foreach (var player in eh.DialogueListeners.Players())
                         {
-                            Systems.Faction.SetBilateralRelationship(FactionName.Rats, FactionName.Players, StandingName.Hated);
-                            Systems.Faction.SetBilateralRelationship(player, gkr, StandingName.Hated);
+                            Systems.Faction.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Hated);
+                            Systems.Faction.SetBilateralRelation(player, gkr, StandingName.Hated);
                         }
                     };
                 Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
@@ -98,7 +98,7 @@ namespace Fiero.Business.Scenes
                             {
                                 if (Systems.TrySpawn(player.FloorId(), f))
                                 {
-                                    Systems.Faction.SetBilateralRelationship(player, f, StandingName.Loved);
+                                    Systems.Faction.SetBilateralRelation(player, f, StandingName.Loved);
                                 }
                             }
                         }
@@ -187,7 +187,7 @@ namespace Fiero.Business.Scenes
             // - Generate a new RNG seed
             // - Generate map
             // - Create and spawn player
-            // - Set faction relationships to default values
+            // - Set faction Relations to default values
             // - Track player visually in the interface
             yield return Systems.Action.GameStarted.SubscribeResponse(e =>
             {
@@ -226,8 +226,8 @@ namespace Fiero.Business.Scenes
                     ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch
                     {
                         < 2 => new Coord(40, 40),
-                        < 5 => new Coord(75, 75),
-                        < 10 => new Coord(125, 125),
+                        < 5 => new Coord(60, 60),
+                        < 10 => new Coord(80, 80),
                         _ => new Coord(100, 100),
                     });
                     // Connect branches at semi-random depths
@@ -259,7 +259,7 @@ namespace Fiero.Business.Scenes
                 }
 
                 // Set faction defaults
-                Systems.Faction.SetDefaultRelationships();
+                Systems.Faction.SetDefaultRelations();
                 Systems.Dungeon.RecalculateFov(Player);
                 Systems.Render.CenterOn(Player);
                 return true;
@@ -500,7 +500,7 @@ namespace Fiero.Business.Scenes
                         e.Victim.Ai.Target = attacker;
                     }
                     // make sure that people hold a grudge regardless of factions
-                    Systems.Faction.SetUnilateralRelationship(e.Victim, attacker, StandingName.Hated);
+                    Systems.Faction.SetUnilateralRelation(e.Victim, attacker, StandingName.Hated);
                 }
                 int oldHealth = e.Victim.ActorProperties.Health;
                 e.Victim.ActorProperties.Health.V -= e.Damage;
@@ -894,6 +894,7 @@ namespace Fiero.Business.Scenes
                             }
                             e.Actor.Log?.Write($"$Action.TheChestWasAMimic$");
                         }
+                        return true;
                     }
                     // Show inventory modal of chest contents
                     var canPutItemsInInventory = !e.Actor.Inventory?.Full ?? false;
@@ -955,6 +956,8 @@ namespace Fiero.Business.Scenes
                         }
                         // Abruptly stop the current turn so that the actor queue is flushed completely
                         Systems.Action.AbortCurrentTurn();
+                        Systems.Dungeon.RecalculateFov(Player);
+                        Systems.Render.CenterOn(Player);
                     }
                     Systems.Action.StopTracking(e.Actor.Id);
                     return true;

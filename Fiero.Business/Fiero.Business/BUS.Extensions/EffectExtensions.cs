@@ -2,11 +2,13 @@
 
 namespace Fiero.Business
 {
+
     public static class EffectExtensions
     {
         public static EffectFlags GetFlags(this EffectName e)
         {
-            return e switch {
+            return e switch
+            {
                 EffectName.Confusion => new(false, true, false, true, false),
                 EffectName.Sleep => new(false, true, false, true, false),
                 EffectName.Poison => new(false, true, false, true, false),

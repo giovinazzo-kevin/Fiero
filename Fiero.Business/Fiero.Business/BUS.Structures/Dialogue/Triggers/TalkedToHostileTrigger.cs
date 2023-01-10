@@ -16,13 +16,15 @@ namespace Fiero.Business
         public override bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners)
         {
             listeners = Enumerable.Empty<DrawableEntity>();
-            if (!(speaker is Actor s)) {
+            if (!(speaker is Actor s))
+            {
                 return false;
             }
 
-            if (base.TryTrigger(floorId, speaker, out listeners)) {
+            if (base.TryTrigger(floorId, speaker, out listeners))
+            {
                 listeners = listeners
-                    .Where(l => l is Actor a && Systems.Faction.GetRelationships(s, a).Left.IsHostile());
+                    .Where(l => l is Actor a && Systems.Faction.GetRelations(s, a).Left.IsHostile());
                 return listeners.Any();
             }
             return false;

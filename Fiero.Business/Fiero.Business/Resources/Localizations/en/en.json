@@ -49,7 +49,7 @@
       },
       "JustMet_Enemy": {
         "Face": "GreatKingRatSmirk",
-        "Lines": [ "Ha! A ***REMOVED*** such as yourself,", "declaring themselves enemy of the Rats?", "Very well. We'll see about that." ],
+        "Lines": [ "Ha! A CAT such as yourself,", "declaring themselves enemy of the Rats?", "Very well. We'll see about that." ],
         "Next": ""
       },
       "JustMet_Friend": {

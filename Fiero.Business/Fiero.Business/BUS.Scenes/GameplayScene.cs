@@ -207,15 +207,15 @@ namespace Fiero.Business.Scenes
                     .WithItems(
                         Resources.Entities.Weapon_Sword().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfHealing().Build(),
                         Resources.Entities.Throwable_Bomb(10).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
                     )
-                    //.WithSpells(
-                    //    Resources.Entities.Spell_CrimsonLance().Build(),
-                    //    Resources.Entities.Spell_Bloodbath().Build(),
-                    //    Resources.Entities.Spell_ClotBlock().Build())
                     .Build();
 
                 // Generate map

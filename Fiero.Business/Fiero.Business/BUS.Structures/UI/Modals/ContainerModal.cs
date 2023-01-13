@@ -31,7 +31,7 @@ namespace Fiero.Business
 
         protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
-            var modalSize = UI.Store.Get(Data.UI.PopUpSize) * 2;
+            var modalSize = UI.Store.Get(Data.UI.PopUpSize) * 4;
             Layout.Size.V = modalSize;
             Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
         }
@@ -50,20 +50,24 @@ namespace Fiero.Business
 
         protected virtual bool OnItemClicked(Button b, int index, Mouse.Button mouseButton)
         {
-            if (mouseButton != Mouse.Button.Left) {
+            if (mouseButton != Mouse.Button.Left)
+            {
                 return false;
             }
             var i = CurrentPage.V * PageSize.V + index;
-            if (i >= Items.Count) {
+            if (i >= Items.Count)
+            {
                 return false;
             }
             var modal = UI.OptionalChoice(
                 GetAvailableActions(Items[i]).Distinct().ToArray(),
                 Items[i].DisplayName
             );
-            modal.Confirmed += (_, __) => {
+            modal.Confirmed += (_, __) =>
+            {
                 ActionPerformed?.Invoke(Items[i], modal.SelectedOption);
-                if(ShouldRemoveItem(Items[i], modal.SelectedOption)) {
+                if (ShouldRemoveItem(Items[i], modal.SelectedOption))
+                {
                     Items.RemoveAt(i);
                 }
                 Invalidate();
@@ -77,13 +81,15 @@ namespace Fiero.Business
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
-                .Apply(x => {
+                .Apply(x =>
+                {
                     x.HorizontalAlignment.V = HorizontalAlignment.Right;
                     x.LockAspectRatio.V = true;
                 }))
             .AddRule<Button>(s => s
                 .Match(x => x.HasClass("item-name"))
-                .Apply(x => {
+                .Apply(x =>
+                {
                     x.CenterContentH.V = false;
                     x.FontSize.V = 18;
                     x.Padding.V = new(16, 0);
@@ -97,12 +103,14 @@ namespace Fiero.Business
                 .Repeat(PageSize.V, (index, grid) => grid
                 .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
                     .Col(w: 0.08f, @class: "item-sprite")
-                        .Cell<Picture>(p => {
+                        .Cell<Picture>(p =>
+                        {
                             Invalidated += () => RefreshItemSprite(p, index);
                         })
                     .End()
                     .Col(w: 1.94f, @class: "item-name")
-                        .Cell<Button>(b => {
+                        .Cell<Button>(b =>
+                        {
                             Invalidated += () => RefreshItemButton(b, index);
                             b.Clicked += (_, __, button) => OnItemClicked(b, index, button);
                         })
@@ -110,23 +118,28 @@ namespace Fiero.Business
                 .End())
                 .Row()
                     .Col(w: 0.25f, @class: "paginator paginator-prev")
-                        .Cell<Button>(b => {
+                        .Cell<Button>(b =>
+                        {
                             b.Text.V = "<";
-                            b.Clicked += (_, __, ___) => {
+                            b.Clicked += (_, __, ___) =>
+                            {
                                 CurrentPage.V = (CurrentPage.V - 1).Mod(NumPages);
                                 return false;
                             };
                         })
                     .End()
                     .Col(w: 2.50f, @class: "paginator paginator-current")
-                        .Cell<Label>(l => {
+                        .Cell<Label>(l =>
+                        {
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
                     .Col(w: 0.25f, @class: "paginator paginator-next")
-                        .Cell<Button>(b => {
+                        .Cell<Button>(b =>
+                        {
                             b.Text.V = ">";
-                            b.Clicked += (_, __, ___) => {
+                            b.Clicked += (_, __, ___) =>
+                            {
                                 CurrentPage.V = (CurrentPage.V + 1).Mod(NumPages);
                                 return false;
                             };
@@ -137,10 +150,12 @@ namespace Fiero.Business
             void RefreshItemSprite(Picture p, int index)
             {
                 var i = CurrentPage.V * PageSize.V + index;
-                if (i >= Items.Count) {
+                if (i >= Items.Count)
+                {
                     p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None", ColorName.White);
                 }
-                else {
+                else
+                {
                     p.Sprite.V = Resources.Sprites.Get(TextureName.Items, Items[i].Render.Sprite, Items[i].Render.Color);
                 }
             }
@@ -148,12 +163,14 @@ namespace Fiero.Business
             void RefreshItemButton(Button b, int index)
             {
                 var i = CurrentPage.V * PageSize.V + index;
-                if (i >= Items.Count) {
+                if (i >= Items.Count)
+                {
                     b.Text.V = String.Empty;
                     return;
                 }
 
-                if(Container.TryCast<Actor>(out var actor)) {
+                if (Container.TryCast<Actor>(out var actor))
+                {
                     b.Foreground.V = actor.Equipment.IsEquipped(Items[i])
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultForeground);

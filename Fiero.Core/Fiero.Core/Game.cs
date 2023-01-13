@@ -1,11 +1,8 @@
 ﻿using SFML.Graphics;
-using SFML.System;
 using SFML.Window;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,13 +32,13 @@ namespace Fiero.Core
         public readonly GameLocalizations<TLocales> Localization;
 
         public Game(
-            OffButton off, 
-            GameLoop loop, 
-            GameInput input, 
-            GameTextures<TTextures> resources, 
+            OffButton off,
+            GameLoop loop,
+            GameInput input,
+            GameTextures<TTextures> resources,
             GameSprites<TTextures, TColors> sprites,
-            GameFonts<TFonts> fonts, 
-            GameSounds<TSounds> sounds, 
+            GameFonts<TFonts> fonts,
+            GameSounds<TSounds> sounds,
             GameColors<TColors> colors,
             GameShaders<TShaders> shaders,
             GameLocalizations<TLocales> localization,
@@ -73,22 +70,28 @@ namespace Fiero.Core
 
         protected virtual void ValidateResources()
         {
-            if (!ValidateResources<TFonts>(f => Fonts.Get(f) != null, out var missingFonts)) {
+            if (!ValidateResources<TFonts>(f => Fonts.Get(f) != null, out var missingFonts))
+            {
                 throw new AggregateException(missingFonts.Select(x => new ResourceNotFoundException<TFonts>(x)));
             }
-            if (!ValidateResources<TTextures>(f => Textures.Get(f) != null, out var missingTextures)) {
+            if (!ValidateResources<TTextures>(f => Textures.Get(f) != null, out var missingTextures))
+            {
                 throw new AggregateException(missingTextures.Select(x => new ResourceNotFoundException<TTextures>(x)));
             }
-            if (!ValidateResources<TColors>(f => Colors.TryGet(f, out _), out var missingColors)) {
+            if (!ValidateResources<TColors>(f => Colors.TryGet(f, out _), out var missingColors))
+            {
                 throw new AggregateException(missingColors.Select(x => new ResourceNotFoundException<TColors>(x)));
             }
-            if (!ValidateResources<TSounds>(f => Sounds.Get(f) != null, out var missingSounds)) {
+            if (!ValidateResources<TSounds>(f => Sounds.Get(f) != null, out var missingSounds))
+            {
                 throw new AggregateException(missingSounds.Select(x => new ResourceNotFoundException<TSounds>(x)));
             }
-            if (!ValidateResources<TShaders>(f => Shaders.Get(f) != null, out var missingShaders)) {
+            if (!ValidateResources<TShaders>(f => Shaders.Get(f) != null, out var missingShaders))
+            {
                 throw new AggregateException(missingShaders.Select(x => new ResourceNotFoundException<TShaders>(x)));
             }
-            if (!ValidateResources<TLocales>(f => Localization.HasLocale(f), out var missingLocales)) {
+            if (!ValidateResources<TLocales>(f => Localization.HasLocale(f), out var missingLocales))
+            {
                 throw new AggregateException(missingLocales.Select(x => new ResourceNotFoundException<TLocales>(x)));
             }
         }
@@ -98,7 +101,8 @@ namespace Fiero.Core
             win.SetFramerateLimit(144);
             win.SetKeyRepeatEnabled(true);
             win.SetActive(true);
-            win.Resized += (e, eh) => {
+            win.Resized += (e, eh) =>
+            {
                 win.GetView()?.Dispose();
                 win.SetView(new(new FloatRect(0, 0, eh.Width, eh.Height)));
             };
@@ -108,16 +112,20 @@ namespace Fiero.Core
         {
             await InitializeAsync();
             ValidateResources();
-            using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty)) {
+            using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty))
+            {
                 InitializeWindow(Window.RenderWindow);
-                Loop.Tick += (t, dt) => {
+                Loop.Tick += (t, dt) =>
+                {
                     Window.DispatchEvents();
                 };
-                Loop.Update += (t, dt) => {
+                Loop.Update += (t, dt) =>
+                {
                     Update();
                 };
                 // Always called once per frame before the window is drawn
-                Loop.Render += (t, dt) => {
+                Loop.Render += (t, dt) =>
+                {
                     Draw();
                 };
                 Loop.Run(ct: token);
@@ -126,18 +134,22 @@ namespace Fiero.Core
 
         public virtual void Update()
         {
-            if(Window.HasFocus()) {
+            if (Window.HasFocus())
+            {
                 Input.Update(Window.GetMousePosition());
                 // Update all non-modal windows
-                foreach (var wnd in UI.GetOpenWindows()) {
+                foreach (var wnd in UI.GetOpenWindows())
+                {
                     wnd.Update();
                 }
                 // Then update the topmost modal
-                if (UI.GetOpenModals().LastOrDefault() is { } modal) {
+                if (UI.GetOpenModals().LastOrDefault() is { } modal)
+                {
                     modal.Update();
                 }
                 // If no modal is open, just update the current scene
-                else {
+                else
+                {
                     Director.Update();
                 }
             }
@@ -146,7 +158,9 @@ namespace Fiero.Core
         public virtual void Draw()
         {
             Director.Draw();
-            foreach (var win in UI.GetOpenModals().Union(UI.GetOpenWindows())) {
+            // Windows are drawn before modals
+            foreach (var win in UI.GetOpenWindows().Union(UI.GetOpenModals()))
+            {
                 win.Draw();
             }
             Window.Display();

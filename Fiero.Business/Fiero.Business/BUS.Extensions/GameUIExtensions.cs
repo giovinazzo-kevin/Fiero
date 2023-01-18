@@ -1,10 +1,8 @@
 ﻿using Fiero.Core;
 using LightInject;
 using SFML.Graphics;
-using SFML.Window;
 using System;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Fiero.Business
 {
@@ -26,7 +24,7 @@ namespace Fiero.Business
         public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, DrawableEntity speaker, params DrawableEntity[] listeners)
             => ui.Show(
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
-                null
+                node.Title
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.Show(
@@ -42,8 +40,8 @@ namespace Fiero.Business
         public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string title = null)
             => ui.Show(
                 new ChoicePopUp<T>(
-                    ui, 
-                    ui.ServiceProvider.GetInstance<GameResources>(), 
+                    ui,
+                    ui.ServiceProvider.GetInstance<GameResources>(),
                     choices,
                     new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
                     ModalWindowStyles.Default
@@ -61,17 +59,21 @@ namespace Fiero.Business
             var result = false;
             renderSystem.ShowTargetingShape(shape);
             cursorMoved?.Invoke(renderSystem.GetTargetingShape());
-            gameLoop.LoopAndDraw(() => {
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel))) {
+            gameLoop.LoopAndDraw(() =>
+            {
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Cancel)))
+                {
                     result = false;
                     return true;
                 }
-                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Confirm))) {
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.Confirm)))
+                {
                     result = true;
                     return true;
                 }
                 return false;
-            }, (t, dt) => {
+            }, (t, dt) =>
+            {
                 ui.Window.DispatchEvents();
                 ui.Input.Update(ui.Window.GetMousePosition());
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveN)))
@@ -102,21 +104,24 @@ namespace Fiero.Business
 
             void Move(Coord c)
             {
-                if (shape.TryOffset(c)) {
+                if (shape.TryOffset(c))
+                {
                     cursorMoved?.Invoke(shape);
                 }
             }
 
             void RotateCw()
             {
-                if (shape.TryRotateCw()) {
+                if (shape.TryRotateCw())
+                {
                     cursorMoved?.Invoke(shape);
                 }
             }
 
             void RotateCCw()
             {
-                if (shape.TryRotateCCw()) {
+                if (shape.TryRotateCCw())
+                {
                     cursorMoved?.Invoke(shape);
                 }
             }
@@ -127,19 +132,24 @@ namespace Fiero.Business
             var floorSystem = (DungeonSystem)ui.ServiceProvider.GetInstance(typeof(DungeonSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var shape = new PointTargetingShape(renderSystem.GetViewportCenter(), 1000);
-            var result = ui.FreeCursor(shape, cursorMoved: c => {
+            var result = ui.FreeCursor(shape, cursorMoved: c =>
+            {
                 var floorId = renderSystem.GetViewportFloor();
                 var pos = c.GetPoints().Single();
                 renderSystem.CenterOn(pos);
-                if(a.Fov is null || a.Fov.KnownTiles[floorId].Contains(pos)) {
-                    if (floorSystem.TryGetCellAt(floorId, pos, out var cell)) {
+                if (a.Fov is null || a.Fov.KnownTiles[floorId].Contains(pos))
+                {
+                    if (floorSystem.TryGetCellAt(floorId, pos, out var cell))
+                    {
                         //renderSystem.SetLookText(cell.ToString(a.Fov is null || a.Fov.VisibleTiles[floorId].Contains(pos)));
                     }
-                    else {
+                    else
+                    {
                         //renderSystem.SetLookText(String.Empty);
                     }
                 }
-                else {
+                else
+                {
                     //renderSystem.SetLookText("???");
                 }
             });

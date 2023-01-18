@@ -8,9 +8,17 @@ namespace Fiero.Business
 {
     public class SewersBranchGenerator : BranchGenerator
     {
+        static bool GKRAdded = false;
+
         protected virtual EntityBuilder<Actor> GenerateMonster(FloorId floorId, GameEntityBuilders builder)
         {
             var D = floorId.Depth;
+            if (!GKRAdded)
+            {
+                GKRAdded = true;
+                return builder.Boss_NpcGreatKingRat();
+            }
+
             return Rng.Random.ChooseWeighted(new[] {
                 (builder.NPC_Rat(), D * 0 + 100f)
             });
@@ -47,14 +55,19 @@ namespace Fiero.Business
                     foreach (var conn in ctx.GetConnections())
                     {
                         // Add upstairs and downstairs to respective floors
-                        var tile = ctx.GetRandomTile(t => t.Name == TileName.Room);
+                        var emptyTiles = ctx.GetEmptyTiles()
+                            .Where(t => t.Name == TileName.Room)
+                            .Select(x => x.Position)
+                            .Shuffle(Rng.Random);
+                        if (!emptyTiles.Any())
+                            throw new InvalidOperationException("No empty tiles on which to place stairs");
                         if (conn.From == floorId)
                         {
-                            ctx.AddObject("Downstairs", tile.Position, e => e.Feature_Downstairs(conn));
+                            ctx.TryAddFeature("Downstairs", emptyTiles, e => e.Feature_Downstairs(conn), out _);
                         }
                         else
                         {
-                            ctx.AddObject("Upstairs", tile.Position, e => e.Feature_Upstairs(conn));
+                            ctx.TryAddFeature("Upstairs", emptyTiles, e => e.Feature_Upstairs(conn), out _);
                         }
                     }
                 })

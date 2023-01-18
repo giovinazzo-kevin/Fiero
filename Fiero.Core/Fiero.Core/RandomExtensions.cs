@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Fiero.Core
@@ -11,7 +10,8 @@ namespace Fiero.Core
         public static T ChooseWeighted<T>(this Random rng, params (T Item, float Weight)[] source)
         {
             var dist = rng.NextDouble() * source.Sum(s => s.Weight);
-            for (int i = 0; i < source.Length; i++) {
+            for (int i = 0; i < source.Length; i++)
+            {
                 dist -= source[i].Weight;
                 if (dist < 0)
                     return source[i].Item;
@@ -25,6 +25,8 @@ namespace Fiero.Core
         }
         public static bool NChancesIn(this Random rng, float numerator, float denominator)
         {
+            if (numerator == denominator)
+                return true;
             return rng.NextDouble() < numerator / denominator;
         }
         public static int Between(this Random rng, int min, int max)
@@ -34,7 +36,8 @@ namespace Fiero.Core
         public static void Roll(this Random rng, int min, int max, Action<int> a)
         {
             var roll = rng.Between(min, max);
-            for (int i = 0; i < roll; i++) {
+            for (int i = 0; i < roll; i++)
+            {
                 a(i);
             }
         }
@@ -43,7 +46,8 @@ namespace Fiero.Core
         {
             T[] elements = source.ToArray();
             // Note i > 0 to avoid final pointless iteration
-            for (int i = elements.Length - 1; i > 0; i--) {
+            for (int i = elements.Length - 1; i > 0; i--)
+            {
                 // Swap element "i" with a random earlier element it (or itself)
                 int swapIndex = rng.Next(i + 1);
                 yield return elements[swapIndex];

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public partial class AiActionProvider : ActionProvider
     {
         protected readonly List<IAISensor> Sensors;
@@ -23,6 +24,8 @@ namespace Fiero.Business
 
         protected int TurnsSinceSightingHostile { get; private set; }
         protected int TurnsSinceSightingFriendly { get; private set; }
+
+        protected int RepathOneTimeIn { get; set; } = 25;
 
         protected bool Panic => MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10;
 
@@ -50,12 +53,12 @@ namespace Fiero.Business
                 (NearbyAllies = new((sys, a) => {
                     return Shapes.Neighborhood(a.Position(), 7)
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly());
+                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b));
                 })),
                 (NearbyEnemies = new((sys, a) => {
                     return Shapes.Neighborhood(a.Position(), 7)
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile()
+                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
                         && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
                 })),
                 (NearbyItems = new((sys, a) => {
@@ -259,11 +262,12 @@ namespace Fiero.Business
                 }
                 SetTarget(a, closestItem);
             }
-            if (a.Ai.Target == null && Rng.Random.NChancesIn(1, 25))
+            if (a.Ai.Target == null && Rng.Random.NChancesIn(1, RepathOneTimeIn))
             {
                 var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
                     .Cells.Values.Where(c => c.IsWalkable(null))
                     .Shuffle(Rng.Random)
+                    .OrderBy(c => !a.Knows(c.Tile.Position()) ? -100 : a.CanSee(c.Tile.Position()) ? 10 : 0)
                     .First().Tile;
                 SetTarget(a, randomTile);
             }

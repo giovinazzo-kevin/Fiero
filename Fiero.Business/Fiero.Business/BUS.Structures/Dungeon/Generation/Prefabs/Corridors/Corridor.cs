@@ -1,8 +1,6 @@
 ﻿using Fiero.Core;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace Fiero.Business
@@ -40,13 +38,15 @@ namespace Fiero.Business
             var middle = (startMiddle + endMiddle) / 2;
             var l1 = new Line(startMiddle, startMiddle + new Coord(v1.Y, v1.X));
             var l2 = new Line(endMiddle, endMiddle + new Coord(v2.Y, v2.X));
-            if (!l1.IsParallel(l2)) {
+            if (!l1.IsParallel(l2))
+            {
                 middle = new(
                     (l1.B * l2.C - l2.B * l1.C) / (l1.A * l2.B - l2.A * l1.B),
                     (l1.C * l2.A - l2.C * l1.A) / (l1.A * l2.B - l2.A * l1.B)
                 );
             }
-            switch (d1.Mod(360)) {
+            switch (d1.Mod(360))
+            {
                 case 0:
                 case 180:
                     foreach (var p in Shapes.Line(startMiddle, connectStart = new(startMiddle.X, middle.Y))) yield return p;
@@ -56,7 +56,8 @@ namespace Fiero.Business
                     foreach (var p in Shapes.Line(startMiddle, connectStart = new(middle.X, startMiddle.Y))) yield return p;
                     break;
             }
-            switch (d2.Mod(360)) {
+            switch (d2.Mod(360))
+            {
                 case 0:
                 case 180:
                     foreach (var p in Shapes.Line(endMiddle, connectEnd = new(endMiddle.X, middle.Y))) yield return p;
@@ -71,16 +72,19 @@ namespace Fiero.Business
 
         public virtual void Draw(FloorGenerationContext ctx)
         {
-            foreach (var p in Points) {
+            foreach (var p in Points)
+            {
                 ctx.Draw(p, GroundTile);
             }
             var startMiddle = (Start.Left + Start.Right) / 2;
             var endMiddle = (End.Left + End.Right) / 2;
-            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle)) {
-                ctx.AddObject(nameof(FeatureName.Door), startMiddle, e => e.Feature_Door());
+            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
+            {
+                ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => e.Feature_Door());
             }
-            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle)) {
-                ctx.AddObject(nameof(FeatureName.Door), endMiddle, e => e.Feature_Door());
+            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
+            {
+                ctx.TryAddFeature(nameof(FeatureName.Door), endMiddle, e => e.Feature_Door());
             }
         }
     }

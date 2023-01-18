@@ -59,7 +59,7 @@ namespace Fiero.Core
                 .OrderByDescending(x => x.Priority)
                 .Select<LayoutRule, Action<UIControl>>(s => control =>
                 {
-                    if (Query(l => l.Controls.Any(c => c.Instance == control)).FirstOrDefault() is { } l && s.Match(l))
+                    if (Query(l => l.Controls.Any(c => c.Instance == control)).SingleOrDefault() is { } l && s.Match(l))
                     {
                         s.Apply(control);
                     }

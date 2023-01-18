@@ -38,16 +38,20 @@ namespace Fiero.Business
             {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
-                Repaint();
-            };
-            Repaint();
-
-            void Repaint()
-            {
-                _renderTexture = new((uint)Layout.Size.V.X, (uint)Layout.Size.V.Y) { Smooth = false };
-                _renderSprite = new(_renderTexture.Texture);
                 SetDirty();
-            }
+            };
+            SetDirty();
+        }
+
+        protected void Repaint()
+        {
+            if (Following.V == null)
+                return;
+            var floorId = Following.V.FloorId();
+            if (!FloorSystem.TryGetFloor(floorId, out var floor))
+                return;
+            _renderTexture = new((uint)floor.Size.X, (uint)floor.Size.Y) { Smooth = false };
+            _renderSprite = new(_renderTexture.Texture);
         }
 
         public void SetDirty() => _dirty = true;
@@ -57,6 +61,7 @@ namespace Fiero.Business
             base.Draw();
             if (_dirty && Following.V != null)
             {
+                Repaint();
                 if (!Bake())
                     return;
             }
@@ -112,7 +117,6 @@ namespace Fiero.Business
                         sprite.Position = coord + Coord.PositiveOne;
                         var spriteSize = sprite.GetLocalBounds().Size();
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                        sprite.Scale = Coord.PositiveOne / spriteSize;
                         _renderTexture.Draw(sprite);
                     }
                 }

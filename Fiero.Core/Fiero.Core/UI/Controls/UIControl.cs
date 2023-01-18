@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using SFML.Graphics;
-using SFML.System;
+﻿using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -26,8 +24,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255));
         public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0));
         public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0));
-        public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagate = true };
-        public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagate = true };
+        public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagated = true };
+        public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagated = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
         public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255));
@@ -41,10 +39,13 @@ namespace Fiero.Core
         public Coord BorderRenderSize => (Size.V - Margin.V * 2).Align(Snap);
         public Coord ContentRenderSize => (Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap);
 
-        public void CopyProperties(UIControl from)
+        // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
+        public void InheritProperties(UIControl from)
         {
-            foreach (var fromProp in from.Properties) {
-                if(Properties.SingleOrDefault(x => x.Name.Equals(fromProp.Name)) is { } myProp) {
+            foreach (var fromProp in from.Properties)
+            {
+                if (Properties.SingleOrDefault(x => x.Name.Equals(fromProp.Name)) is { } myProp && fromProp.Inherited)
+                {
                     myProp.Value = fromProp.Value;
                 }
             }
@@ -63,7 +64,8 @@ namespace Fiero.Core
 
             var registerInvalidationEvents = typeof(UIControl)
                 .GetMethod(nameof(RegisterInvalidationEvents), BindingFlags.Instance | BindingFlags.NonPublic);
-            foreach (var prop in Properties) {
+            foreach (var prop in Properties)
+            {
                 prop.SetOwner(this);
                 registerInvalidationEvents.MakeGenericMethod(prop.PropertyType)
                     .Invoke(this, new object[] { prop });
@@ -80,10 +82,13 @@ namespace Fiero.Core
             owner = default;
             if (point.X >= BorderRenderPos.X * Scale.V.X
                 && point.X <= BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
-                && point.Y >= BorderRenderPos.Y * Scale.V.Y 
-                && point.Y <= BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y) {
-                foreach (var child in Children.Where(c => c.IsInteractive && !c.IsHidden)) {
-                    if (child.Contains(point, out owner)) {
+                && point.Y >= BorderRenderPos.Y * Scale.V.Y
+                && point.Y <= BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y)
+            {
+                foreach (var child in Children.Where(c => c.IsInteractive && !c.IsHidden))
+                {
+                    if (child.Contains(point, out owner))
+                    {
                         return true;
                     }
                 }
@@ -110,36 +115,48 @@ namespace Fiero.Core
             var rightClick = Input.IsButtonPressed(Mouse.Button.Right);
             var click = leftClick || rightClick;
             var preventDefault = false;
-            if (!wasInside && isInside) {
+            if (!wasInside && isInside)
+            {
                 MouseEntered?.Invoke(this, mousePos);
                 OnMouseEntered(mousePos);
-                if (!click) {
-                    foreach (var child in Children) {
+                if (!click)
+                {
+                    foreach (var child in Children)
+                    {
                         child.TrackMouse(mousePos, out _, out _);
                     }
                 }
             }
-            else if (wasInside && !isInside) {
+            else if (wasInside && !isInside)
+            {
                 MouseLeft?.Invoke(this, mousePos);
                 OnMouseLeft(mousePos);
-                if (!click) {
-                    foreach (var child in Children) {
+                if (!click)
+                {
+                    foreach (var child in Children)
+                    {
                         child.TrackMouse(mousePos, out _, out _);
                     }
                 }
             }
-            else if (wasInside && isInside) {
+            else if (wasInside && isInside)
+            {
                 MouseMoved?.Invoke(this, mousePos);
                 OnMouseMoved(mousePos);
-                if (!click) {
-                    foreach (var child in Children) {
+                if (!click)
+                {
+                    foreach (var child in Children)
+                    {
                         child.TrackMouse(mousePos, out _, out _);
                     }
                 }
             }
-            if (isInside && click) {
-                foreach (var child in Children) {
-                    if (child.Contains(mousePos, out clickedControl)) {
+            if (isInside && click)
+            {
+                foreach (var child in Children)
+                {
+                    if (child.Contains(mousePos, out clickedControl))
+                    {
                         break;
                     }
                 }
@@ -153,14 +170,16 @@ namespace Fiero.Core
 
         public virtual void Update()
         {
-            foreach (var child in Children) {
+            foreach (var child in Children)
+            {
                 child.Update();
             }
         }
 
         protected virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
-            var rect = new RectangleShape(BorderRenderSize.ToVector2f()) {
+            var rect = new RectangleShape(BorderRenderSize.ToVector2f())
+            {
                 Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background,
                 OutlineThickness = OutlineThickness.V,
@@ -174,7 +193,8 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             DrawBackground(target, states);
-            foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1)) {
+            foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1))
+            {
                 child.Draw(target, states);
             }
         }

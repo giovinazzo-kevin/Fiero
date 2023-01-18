@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +29,8 @@ namespace Fiero.Business
 
         public void SetTriggers(GameSystems systems, NpcName type, DialogueComponent component)
         {
-            switch (type) {
+            switch (type)
+            {
                 case NpcName.GreatKingRat:
                     foreach (var t in GreatKingRat()) component.Triggers.Add(t);
                     break;
@@ -45,7 +45,8 @@ namespace Fiero.Business
 
         public void SetTriggers(GameSystems systems, FeatureName type, DialogueComponent component)
         {
-            switch (type) {
+            switch (type)
+            {
                 case FeatureName.Shrine:
                     foreach (var t in Shrine()) component.Triggers.Add(t);
                     break;
@@ -66,28 +67,35 @@ namespace Fiero.Business
 
         public void CheckTriggers()
         {
-            foreach (var comp in Entities.GetComponents<DialogueComponent>()) {
+            foreach (var comp in Entities.GetComponents<DialogueComponent>())
+            {
                 var dialogueKey = default(string);
                 var speaker = default(PhysicalEntity);
                 var floorId = default(FloorId);
-                if (!Entities.TryGetProxy<Actor>(comp.EntityId, out var actorSpeaker)) {
+                if (!Entities.TryGetProxy<Actor>(comp.EntityId, out var actorSpeaker))
+                {
                     // This is a dialogue that was triggered by a dungeon feature
-                    if (!Entities.TryGetProxy<Feature>(comp.EntityId, out var featureSpeaker)) {
+                    if (!Entities.TryGetProxy<Feature>(comp.EntityId, out var featureSpeaker))
+                    {
                         throw new ArgumentException();
                     }
                     floorId = featureSpeaker.Physics.FloorId;
                     dialogueKey = featureSpeaker.FeatureProperties.Name.ToString();
                     speaker = featureSpeaker;
                 }
-                else {
+                else
+                {
                     floorId = actorSpeaker.FloorId();
                     dialogueKey = actorSpeaker.Npc?.Type.ToString() ?? actorSpeaker.ActorProperties.Type.ToString();
                     speaker = actorSpeaker;
                 }
-                foreach (var trigger in comp.Triggers) {
-                    if (trigger.TryTrigger(floorId, speaker, out var listeners)) {
+                foreach (var trigger in comp.Triggers)
+                {
+                    if (trigger.TryTrigger(floorId, speaker, out var listeners))
+                    {
                         var node = Dialogues.GetDialogue(dialogueKey, trigger.DialogueNode);
-                        if (!trigger.Repeatable) {
+                        if (!trigger.Repeatable)
+                        {
                             comp.Triggers.Remove(trigger);
                         }
                         trigger.OnTrigger();

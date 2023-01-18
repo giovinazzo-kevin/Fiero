@@ -37,6 +37,10 @@ namespace Fiero.Core
             => new Coord(self.X * other, self.Y * other);
         public static Coord operator /(Coord self, int other)
             => new Coord(self.X / other, self.Y / other);
+        public static Vector2f operator /(Coord self, float other)
+            => new Vector2f(self.X / other, self.Y / other);
+        public static Vector2f operator *(Coord self, float other)
+            => new Vector2f(self.X * other, self.Y * other);
         public static bool operator ==(Coord self, Coord other)
             => self.X == other.X && self.Y == other.Y;
         public static bool operator !=(Coord self, Coord other)
@@ -68,7 +72,7 @@ namespace Fiero.Core
         public static implicit operator Vector2i(Coord v) => new(v.X, v.Y);
         public static implicit operator Vector2u(Coord v) => new((uint)v.X, (uint)v.Y);
         public static implicit operator Point(Coord v) => new(v.X, v.Y);
-        
+
         public Coord Clamp(int min = int.MinValue, int max = int.MaxValue) => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
 
         public Coord Clamp(int minX = int.MinValue, int maxX = int.MaxValue, int minY = int.MinValue, int maxY = int.MaxValue)

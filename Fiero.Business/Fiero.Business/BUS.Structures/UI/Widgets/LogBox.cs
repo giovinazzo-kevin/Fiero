@@ -16,7 +16,7 @@ namespace Fiero.Business
             NumRowsDisplayed.ValueChanged += (_, __) => RebuildLayout();
             Following.ValueChanged += (f, old) =>
             {
-                if (old != null)
+                if (old?.Log != null)
                 {
                     old.Log.LogAdded -= LogAdded;
                 }
@@ -43,6 +43,7 @@ namespace Fiero.Business
                 p.CenterContentH.V = false;
                 p.Background.V = Colors.Get(ColorName.UIBackground).AddAlpha(-128);
                 p.Padding.V = new(ts, ts);
+                p.Margin.V = new(ts, ts);
             }))
             ;
 

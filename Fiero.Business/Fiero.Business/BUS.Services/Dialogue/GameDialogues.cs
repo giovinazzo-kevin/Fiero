@@ -1,10 +1,8 @@
 ﻿using Fiero.Core;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Fiero.Business
 {
@@ -14,7 +12,7 @@ namespace Fiero.Business
         protected GameLocalizations<LocaleName> Localizations;
         protected readonly Dictionary<string, Dictionary<string, DialogueNode>> DialogueNodes;
 
-        public DialogueNode GetDialogue(string owner, string id) => DialogueNodes.TryGetValue(owner, out var dict) 
+        public DialogueNode GetDialogue(string owner, string id) => DialogueNodes.TryGetValue(owner, out var dict)
             && dict.TryGetValue(id, out var node) ? node : null;
 
         public DialogueNode GetDialogue<T>(NpcName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
@@ -28,55 +26,75 @@ namespace Fiero.Business
 
         protected void LoadDialogues(string actor)
         {
-            if (!Localizations.TryGet<JsonElement>($"Dialogue.{actor}", out var elem)) {
+            if (!Localizations.TryGet<JsonElement>($"Dialogue.{actor}", out var elem))
+            {
                 throw new ArgumentException(nameof(actor));
             }
             var definitions = elem.EnumerateObject()
-                .Select(prop => {
+                .Select(prop =>
+                {
                     if (!(prop.Value.TryGetProperty("Face", out var faceProp)
-                        && faceProp.GetString() is { } face)) {
+                        && faceProp.GetString() is { } face))
+                    {
                         face = "GKR_Calm";
                     }
                     if (!(prop.Value.TryGetProperty("Lines", out var linesProp)
-                        && linesProp.EnumerateArray().Select(x => x.GetString()) is { } lines)) {
+                        && linesProp.EnumerateArray().Select(x => x.GetString()) is { } lines))
+                    {
                         lines = Enumerable.Empty<string>();
                     }
                     if (!(prop.Value.TryGetProperty("Cancellable", out var cancellableProp)
-                        && cancellableProp.GetBoolean() is { } cancellable)) {
+                        && cancellableProp.GetBoolean() is { } cancellable))
+                    {
                         cancellable = false;
                     }
                     if (!(prop.Value.TryGetProperty("Choices", out var choicesProp)
-                        && choicesProp.EnumerateArray().Select(x => {
+                        && choicesProp.EnumerateArray().Select(x =>
+                        {
                             if (!(x.TryGetProperty("Line", out var lineProp)
-                                && lineProp.GetString() is { } line)) {
+                                && lineProp.GetString() is { } line))
+                            {
                                 line = String.Empty;
                             }
                             if (!(x.TryGetProperty("Next", out var nextProp)
-                                && nextProp.GetString() is { } next)) {
+                                && nextProp.GetString() is { } next))
+                            {
                                 next = String.Empty;
                             }
                             return (Line: line, Next: next);
-                        }) is { } choices)) {
+                        }) is { } choices))
+                    {
                         choices = Enumerable.Empty<(string, string)>();
                     }
                     if (!(prop.Value.TryGetProperty("Next", out var nextProp)
-                        && nextProp.GetString() is { } next)) {
+                        && nextProp.GetString() is { } next))
+                    {
                         next = String.Empty;
                     }
-                    return new DialogueNodeDefinition(prop.Name, face, lines.ToArray(), cancellable, choices.ToArray(), next);
+                    if (!(prop.Value.TryGetProperty("Title", out var titleProp)
+                        && titleProp.GetString() is { } title))
+                    {
+                        title = String.Empty;
+                    }
+                    return new DialogueNodeDefinition(prop.Name, face, title, lines.ToArray(), cancellable, choices.ToArray(), next);
                 })
                 .ToDictionary(x => x.Id);
-            var nodes = definitions.Values.Select(d => new DialogueNode(d.Id, d.Face, d.Lines, d.Cancellable))
+            var nodes = definitions.Values.Select(d => new DialogueNode(d.Id, d.Face, d.Title, d.Lines, d.Cancellable))
                 .ToDictionary(x => x.Id);
-            foreach (var node in nodes.Values) {
-                if (!String.IsNullOrWhiteSpace(definitions[node.Id].Next)) {
+            foreach (var node in nodes.Values)
+            {
+                if (!String.IsNullOrWhiteSpace(definitions[node.Id].Next))
+                {
                     node.Next = nodes[definitions[node.Id].Next];
                 }
-                foreach (var choice in definitions[node.Id].Choices) {
-                    if (!String.IsNullOrWhiteSpace(choice.Next)) {
+                foreach (var choice in definitions[node.Id].Choices)
+                {
+                    if (!String.IsNullOrWhiteSpace(choice.Next))
+                    {
                         node.Choices[choice.Line] = nodes[choice.Next];
                     }
-                    else {
+                    else
+                    {
                         node.Choices[choice.Line] = null;
                     }
                 }

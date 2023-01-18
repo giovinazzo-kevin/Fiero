@@ -63,6 +63,19 @@ namespace Fiero.Core
             Sprites[texture] = builder.Build();
         }
 
+        public void BuildIndex(TTextures atlas, Coord tileSize)
+        {
+            AddSpritesheet(atlas, builder =>
+            {
+                var size = Textures.Get(atlas).Size;
+                for (int x = 0; x < size.X; x++)
+                    for (int y = 0; y < size.Y; y++)
+                        builder.WithSprite(
+                            (y * size.X + x).ToString(),
+                            tex => new Sprite(tex, new(x * tileSize.X, y * tileSize.Y, tileSize.X, tileSize.Y)));
+            });
+        }
+
         public async Task LoadJsonAsync(TTextures texture, string fileName)
         {
             if (!File.Exists(fileName))

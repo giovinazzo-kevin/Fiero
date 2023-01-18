@@ -15,8 +15,8 @@ namespace Fiero.Business
         protected readonly int TileSize;
 
         protected UIControlResolver(
-            GameUI ui, 
-            GameResources resources) 
+            GameUI ui,
+            GameResources resources)
             : base(ui)
         {
             Resources = resources;
@@ -28,7 +28,7 @@ namespace Fiero.Business
 
         protected virtual BitmapFont GetFont()
         {
-            return Resources.Fonts.Get(FontName.Bold);
+            return Resources.Fonts.Get(FontName.Light);
         }
 
         protected virtual BitmapText GetText(string str)

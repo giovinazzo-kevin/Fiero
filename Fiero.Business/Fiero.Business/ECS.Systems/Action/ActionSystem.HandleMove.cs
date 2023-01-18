@@ -1,13 +1,6 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
-using SFML.System;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
-using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -15,7 +8,8 @@ namespace Fiero.Business
     {
         private bool HandleMove(ActorTime t, ref IAction action, ref int? cost)
         {
-            if(t.Actor.IsImmobile()) {
+            if (t.Actor.IsImmobile())
+            {
                 action = new WaitAction();
                 cost = HandleAction(t, ref action);
                 return true;
@@ -30,48 +24,59 @@ namespace Fiero.Business
             var floorId = t.Actor.FloorId();
             var oldPos = t.Actor.Position();
             var newPos = t.Actor.Position() + direction;
-            if (newPos == t.Actor.Position()) {
+            if (newPos == t.Actor.Position())
+            {
                 action = new WaitAction();
                 cost = HandleAction(t, ref action);
             }
-            else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile)) {
-                if (!tile.Physics.BlocksMovement) {
+            else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile))
+            {
+                if (!tile.Physics.BlocksPathingOrMovement)
+                {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
-                    if (!actorsHere.Any()) {
-                        if (!featuresHere.Any(f => f.Physics.BlocksMovement)) {
+                    if (!actorsHere.Any())
+                    {
+                        if (!featuresHere.Any(f => f.Physics.BlocksPathingOrMovement))
+                        {
                             return ActorMoved.Handle(new(t.Actor, oldPos, newPos));
                         }
-                        else {
+                        else
+                        {
                             var feature = featuresHere.Single();
                             ActorBumpedObstacle.Raise(new(t.Actor, feature));
                             // you can bump shrines and chests to interact with them
-                            action = new InteractWithFeatureAction(feature); 
+                            action = new InteractWithFeatureAction(feature);
                             cost = HandleAction(t, ref action);
                         }
                     }
-                    else {
+                    else
+                    {
                         var target = actorsHere.Single();
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
-                        if (relationship.MayAttack()) {
+                        if (relationship.MayAttack())
+                        {
                             // attack-bump is a free "combo"
                             action = new MeleeAttackOtherAction(target, t.Actor.Equipment.Weapon);
                             cost = HandleAction(t, ref action);
                         }
-                        else if (relationship.IsFriendly()) {
+                        else if (relationship.IsFriendly())
+                        {
                             // you can swap position with allies in twice the amount of time it takes to move
                             cost *= 2;
-                            return    ActorMoved.Handle(new(t.Actor, oldPos, newPos))
+                            return ActorMoved.Handle(new(t.Actor, oldPos, newPos))
                                    && ActorMoved.Handle(new(target, newPos, oldPos));
                         }
                     }
                 }
-                else {
+                else
+                {
                     ActorBumpedObstacle.Raise(new(t.Actor, tile));
                     return false;
                 }
             }
-            else {
+            else
+            {
                 // Bumped "nothingness"
                 ActorBumpedObstacle.Raise(new(t.Actor, null));
                 return false;

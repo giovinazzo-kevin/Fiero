@@ -54,7 +54,8 @@ namespace Fiero.Business
             base.InitializeWindow(win);
             win.Resized += (s, e) =>
             {
-                var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(min: 800);
+                var minSize = Store.Get(Data.UI.MinWindowSize);
+                var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(minX: minSize.X, minY: minSize.Y);
                 if (newSize != new Coord((int)e.Width, (int)e.Height))
                 {
                     win.Size = newSize;
@@ -78,11 +79,11 @@ namespace Fiero.Business
             Textures.Add(TextureName.Animations, new Texture("Resources/Textures/16x16_animations.png"));
             Textures.Add(TextureName.Icons, new Texture("Resources/Textures/16x16_icons.png"));
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
-            Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/CGA8x8thick.png"));
-            Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/CGA8x8thin.png"));
+            Textures.Add(TextureName.FontBold, new Texture("Resources/Fonts/Terminus_8x12.png"));
+            Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/Terminus_8x12.png"));
 
-            Fonts.Add(FontName.Bold, new(8, 8), Textures.Get(TextureName.FontBold));
-            Fonts.Add(FontName.Light, new(8, 8), Textures.Get(TextureName.FontLight));
+            Fonts.Add(FontName.Bold, new(8, 12), Textures.Get(TextureName.FontBold));
+            Fonts.Add(FontName.Light, new(8, 12), Textures.Get(TextureName.FontLight));
 
             //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
@@ -114,8 +115,8 @@ namespace Fiero.Business
             await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/animations.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
             await Sprites.LoadJsonAsync(TextureName.Icons, "Resources/Spritesheets/icons.json");
-            await Sprites.LoadJsonAsync(TextureName.FontBold, "Resources/Spritesheets/index.json");
-            await Sprites.LoadJsonAsync(TextureName.FontLight, "Resources/Spritesheets/index.json");
+            Sprites.BuildIndex(TextureName.FontBold, new(8, 12));
+            Sprites.BuildIndex(TextureName.FontLight, new(8, 12));
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
 
@@ -129,8 +130,9 @@ namespace Fiero.Business
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
             Store.SetValue(Data.UI.TileSize, 8);
-            Store.SetValue(Data.UI.WindowSize, new(640, 480));
-            Store.SetValue(Data.UI.PopUpSize, new(200, 200));
+            Store.SetValue(Data.UI.MinWindowSize, new(800, 800));
+            Store.SetValue(Data.UI.WindowSize, new(800, 800));
+            Store.SetValue(Data.UI.PopUpSize, new(400, 400));
             Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
             Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
             Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
@@ -187,7 +189,7 @@ namespace Fiero.Business
                             Console.WriteLine(log);
                         }
                     }
-                    await Task.Delay(10);
+                    await Task.Delay(100);
                 }
             }, OffButton.Token);
             OffButton.Pressed += _ => sieve.Dispose();

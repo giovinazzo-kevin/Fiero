@@ -1,5 +1,6 @@
 ﻿using SFML.Graphics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Fiero.Core
@@ -11,28 +12,24 @@ namespace Fiero.Core
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
-        public readonly UIControlProperty<int> MaxLines = new(nameof(MaxLines), 16);
-        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
+        public readonly UIControlProperty<int> MaxLines = new(nameof(MaxLines), 10);
+        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false) { Inherited = false };
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
+
+        protected IEnumerable<Label> Labels => Children.OfType<Label>();
 
         public Paragraph(GameInput input, Func<string, BitmapText> getText) : base(input)
         {
             GetText = getText;
             Size.ValueChanged += (owner, old) =>
             {
-                OnTextInvalidated();
+                OnSizeInvalidated();
+                OnPositionInvalidated();
             };
             Position.ValueChanged += (owner, old) =>
             {
-                var labels = Children.OfType<Label>();
-                var lines =
-                    ContentAwareScale ? labels.Count()
-                                      : MaxLines;
-                foreach (var (c, i) in labels.Select((c, i) => (c, i)))
-                {
-                    c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / lines);
-                }
+                OnPositionInvalidated();
             };
             FontSize.ValueChanged += (owner, old) =>
             {
@@ -42,28 +39,57 @@ namespace Fiero.Core
             {
                 OnTextInvalidated();
             };
+            MaxLines.ValueChanged += (owner, old) =>
+            {
+                OnMaxLinesInvalidated(MaxLines - old);
+            };
+            OnMaxLinesInvalidated(MaxLines); // also calls OnTextInvalidated()
+        }
+
+        protected virtual void OnSizeInvalidated()
+        {
+            foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
+            {
+                c.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / MaxLines);
+            }
+        }
+
+        protected virtual void OnPositionInvalidated()
+        {
+            foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
+            {
+                c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / MaxLines);
+            }
+        }
+
+        protected virtual void OnMaxLinesInvalidated(int delta)
+        {
+            if (delta < 0)
+            {
+                for (int i = Children.Count - 1; i >= 0 && delta++ < 0; i--)
+                {
+                    if (Children[i] is Label)
+                        Children.RemoveAt(i);
+                }
+            }
+            else
+            {
+                for (; delta-- > 0;)
+                {
+                    var label = new Label(Input, GetText);
+                    label.InheritProperties(this);
+                    label.Background.V = Color.Transparent;
+                    Children.Add(label);
+                }
+                OnTextInvalidated();
+            }
         }
 
         protected virtual void OnTextInvalidated()
         {
-            var text = Text.V;
-            var lines =
-                ContentAwareScale ? Children.OfType<Label>().Count()
-                                  : MaxLines;
-            Children.RemoveAll(x => x is Label);
-            foreach (var line in text.Split('\n'))
+            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(MaxLines)))
             {
-                var label = new Label(Input, GetText);
-                label.CopyProperties(this);
-                label.Background.V = Color.Transparent;
-                label.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + Children.Count * ContentRenderSize.Y / lines);
-                label.Text.V = line;
-                label.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / lines);
-                Children.Add(label);
-                if (Children.Count > MaxLines)
-                {
-                    break;
-                }
+                c.Text.V = t;
             }
         }
     }

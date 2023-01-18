@@ -1,7 +1,5 @@
 ﻿using Fiero.Core;
-using System;
 using System.Linq;
-using System.Threading;
 
 namespace Fiero.Business
 {
@@ -20,8 +18,9 @@ namespace Fiero.Business
         public override void Draw(FloorGenerationContext ctx)
         {
             base.Draw(ctx);
-            var pos = this.Rects.Shuffle(Rng.Random).First().Center();
-            ctx.AddObject(nameof(FeatureName.Shrine), pos, e => e.Feature_Shrine());
+            var pos = Rects.Shuffle(Rng.Random).First().Center();
+            if (!ctx.TryAddFeature(nameof(FeatureName.Shrine), Shapes.SquareSpiral(pos, 24), e => e.Feature_Shrine(), out _))
+                ctx.Log.Write($"Could not add {nameof(FeatureName.Shrine)} near {pos}!");
         }
     }
 }

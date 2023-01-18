@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using System;
 using System.Linq;
 
@@ -13,9 +12,9 @@ namespace Fiero.Business
         public readonly DrawableEntity[] Listeners;
 
         public DialogueModal(
-            GameUI ui, 
+            GameUI ui,
             GameResources resources,
-            IDialogueTrigger trigger, 
+            IDialogueTrigger trigger,
             DialogueNode node,
             DrawableEntity speaker,
             params DrawableEntity[] listeners
@@ -31,15 +30,18 @@ namespace Fiero.Business
         {
             Node.Trigger(Trigger, Speaker, Listeners);
             base.Open(title);
-            if (Node.Choices.Count > 0) {
+            if (Node.Choices.Count > 0)
+            {
                 var keys = Node.Choices.Keys.ToArray();
-                if (Node.Cancellable) {
-                    var modal = UI.OptionalChoice(keys);
+                if (Node.Cancellable)
+                {
+                    var modal = UI.OptionalChoice(keys, title);
                     modal.Cancelled += (_, btn) => Close(btn);
                     modal.OptionChosen += DialogueModal_OptionChosen;
                 }
-                else {
-                    UI.NecessaryChoice(keys).OptionChosen += DialogueModal_OptionChosen;
+                else
+                {
+                    UI.NecessaryChoice(keys, title).OptionChosen += DialogueModal_OptionChosen;
                 }
             }
         }
@@ -47,7 +49,8 @@ namespace Fiero.Business
         private void DialogueModal_OptionChosen(ChoicePopUp<string> popUp, string option)
         {
             Close(ModalWindowButton.ImplicitYes);
-            if (Node.Choices.TryGetValue(option, out var next) && next != null) {
+            if (Node.Choices.TryGetValue(option, out var next) && next != null)
+            {
                 UI.Dialogue(Trigger, next, Speaker, Listeners);
             }
         }
@@ -55,7 +58,7 @@ namespace Fiero.Business
         protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
-            Layout.Size.V = new(popupSize.X * 2, popupSize.Y / 2);
+            Layout.Size.V = new(popupSize.X, popupSize.Y / 2);
             Layout.Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
         }
 
@@ -67,12 +70,15 @@ namespace Fiero.Business
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<UIControl>(s => s
-                .Apply(x => {
+                .Apply(x =>
+                {
+                    x.Background.V = Resources.Colors.Get(ColorName.Yellow);
                 })
             )
             .AddRule<Picture>(s => s
                 .Match(x => x.HasClass("portrait"))
-                .Apply(x => {
+                .Apply(x =>
+                {
                     x.HorizontalAlignment.V = HorizontalAlignment.Center;
                     x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}", ColorName.White);
                     x.LockAspectRatio.V = true;
@@ -80,9 +86,11 @@ namespace Fiero.Business
                 }))
             .AddRule<Paragraph>(s => s
                 .Match(x => x.HasClass("content"))
-                .Apply(x => {
+                .Apply(x =>
+                {
                     x.MaxLines.V = 5;
                     x.Text.V = String.Join('\n', Node.Lines);
+                    x.ContentAwareScale.V = false;
                 }))
             ;
 

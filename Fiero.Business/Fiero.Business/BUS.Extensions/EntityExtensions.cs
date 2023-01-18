@@ -1,10 +1,6 @@
 ﻿using Fiero.Core;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Net.Http.Headers;
 
 namespace Fiero.Business
 {
@@ -25,7 +21,8 @@ namespace Fiero.Business
         public static bool TryRoot(this PhysicalEntity a)
         {
             var ret = a.IsAlive() && !a.IsRooted();
-            if(ret) {
+            if (ret)
+            {
                 ++a.Physics.Roots;
             }
             return ret;
@@ -33,7 +30,8 @@ namespace Fiero.Business
         public static bool TryFree(this PhysicalEntity a)
         {
             var ret = a.IsAlive() && a.IsRooted();
-            if (ret) {
+            if (ret)
+            {
                 --a.Physics.Roots;
             }
             return ret;
@@ -43,6 +41,7 @@ namespace Fiero.Business
         public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && a.Physics.Roots > 0;
         public static bool IsImmobile(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove || a.Physics.Roots > 0;
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
+        public static bool Knows(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position());
         public static bool IsAffectedBy(this Actor a, EffectName effect) => a.IsAlive() && a.Effects != null && a.Effects.Active.Any(e => e.Name == effect);
@@ -51,10 +50,12 @@ namespace Fiero.Business
         {
             var used = false;
             consumed = false;
-            if (item.TryCast<Consumable>(out var consumable)) {
+            if (item.TryCast<Consumable>(out var consumable))
+            {
                 used = TryConsume(out consumed);
             }
-            if (consumed) {
+            if (consumed)
+            {
                 // Assumes item was used from inventory
                 _ = actor.Inventory.TryTake(item);
             }
@@ -63,11 +64,13 @@ namespace Fiero.Business
             bool TryConsume(out bool consumed)
             {
                 consumed = false;
-                if (consumable.ConsumableProperties.RemainingUses <= 0) {
+                if (consumable.ConsumableProperties.RemainingUses <= 0)
+                {
                     return false;
                 }
                 if (--consumable.ConsumableProperties.RemainingUses <= 0
-                 && consumable.ConsumableProperties.ConsumedWhenEmpty) {
+                 && consumable.ConsumableProperties.ConsumedWhenEmpty)
+                {
                     consumed = true;
                 }
                 return true;
@@ -78,9 +81,11 @@ namespace Fiero.Business
         {
             if (!rule(i))
                 throw new ArgumentException(nameof(rule));
-            if(!a.TryIdentify(i)) {
+            if (!a.TryIdentify(i))
+            {
                 a.Inventory.AddIdentificationRule(i => i is T _t && rule(_t) || i.TryCast<T>(out var t) && rule(t));
-                foreach (var other in a.Inventory.GetItems().Where(i => !i.ItemProperties.Identified)) {
+                foreach (var other in a.Inventory.GetItems().Where(i => !i.ItemProperties.Identified))
+                {
                     a.TryIdentify(other);
                 }
                 return a.TryIdentify(i);

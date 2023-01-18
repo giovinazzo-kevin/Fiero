@@ -54,7 +54,7 @@ namespace Fiero.Core
             var control = BuildItem();
             Children.Add(control);
             Options.Add(new Option(label, value, control));
-            control.CopyProperties(this);
+            control.InheritProperties(this);
             control.Text.V = label;
             control.IsHidden.V = true;
             control.Position.V = new(Position.V.X, Position.V.Y + Options.Count * (Size.V.Y + 4));

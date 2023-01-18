@@ -28,6 +28,7 @@
     "GreatKingRat": {
       "JustMet": {
         "Face": "GreatKingRatCalm",
+        "Title": "The Great King Rat says 'Hello'",
         "Lines": [ "...?", "And who might you be?" ],
         "Choices": [
           {

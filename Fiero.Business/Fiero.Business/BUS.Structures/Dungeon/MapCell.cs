@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Fiero.Business
 {
@@ -21,7 +20,7 @@ namespace Fiero.Business
         }
 
         public bool IsWalkable(object inContext) => ((IPathNode<object>)Tile).IsWalkable(inContext)
-            && !Features.Any(f => f.Physics.BlocksMovement);
+            && !Features.Any(f => f.Physics.BlocksPathing);
         public IEnumerable<PhysicalEntity> GetDrawables(bool seen = true)
         {
             yield return Tile;

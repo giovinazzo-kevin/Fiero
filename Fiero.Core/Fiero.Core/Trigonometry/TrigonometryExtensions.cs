@@ -1,5 +1,4 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.System;
 using System;
 using System.Collections.Generic;
@@ -23,6 +22,7 @@ namespace Fiero.Core
         public static Coord ToCoord(this Vector2u v) => new((int)v.X, (int)v.Y);
         public static Coord ToCoord(this Vector2i v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vector2f v) => new((int)v.X, (int)v.Y);
+        public static Vector2f Round(this Vector2f v, int digits = 0) => new((float)Math.Round(v.X, digits), (float)Math.Round(v.Y, digits));
         public static Coord ToCoord(this Point v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vec v) => new((int)v.X, (int)v.Y);
         public static Vec RotateAround(this Vec v, Vec pivot, float theta)
@@ -51,8 +51,10 @@ namespace Fiero.Core
         public static Coord Align(this Coord c, Coord to) => new(c.X - (c.X % to.X), c.Y - (c.Y % to.Y));
         public static IEnumerable<Coord> Enumerate(this IntRect rect)
         {
-            for (int x = 0; x < rect.Width; x++) {
-                for (int y = 0; y < rect.Height; y++) {
+            for (int x = 0; x < rect.Width; x++)
+            {
+                for (int y = 0; y < rect.Height; y++)
+                {
                     yield return new(rect.Left + x, rect.Top + y);
                 }
             }
@@ -68,13 +70,15 @@ namespace Fiero.Core
         {
             var cellSize = rect.Size() / subdivisions.ToVec();
             var cumX = 0;
-            for (int i = 0; i < subdivisions.X; i++) {
+            for (int i = 0; i < subdivisions.X; i++)
+            {
                 var xmod = rect.Width % cellSize.X;
                 var x = xmod == 0
                     ? (int)cellSize.X
                     : (int)cellSize.X + (int)(xmod * (i % 2));
                 var cumY = 0;
-                for (int j = 0; j < subdivisions.Y; j++) {
+                for (int j = 0; j < subdivisions.Y; j++)
+                {
                     var ymod = rect.Height % cellSize.Y;
                     var y = ymod == 0
                         ? (int)cellSize.Y

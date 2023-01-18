@@ -210,7 +210,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Scroll_OfMassConfusion().Build(),
                         Resources.Entities.Potion_OfHealing().Build(),
                         Resources.Entities.Throwable_Bomb(10).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
@@ -994,6 +994,7 @@ namespace Fiero.Business.Scenes
             {
                 Systems.Interface.Reset();
                 Systems.Action.Reset();
+                Systems.Render.CenterOn(Player);
             }
         }
     }

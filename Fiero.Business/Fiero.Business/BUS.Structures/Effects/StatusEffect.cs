@@ -1,7 +1,7 @@
 ﻿namespace Fiero.Business
 {
     /// <summary>
-    /// Intrinsic effects can be applied to:
+    /// Status effects can be applied to:
     /// - Actors:
     ///     - The effect is applied to the actor when the effect starts, and is removed when the effect ends.
     /// </summary>
@@ -19,7 +19,8 @@
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
             base.OnStarted(systems, owner);
-            if(owner.TryCast<Actor>(out var target)) {
+            if (owner.TryCast<Actor>(out var target))
+            {
                 Apply(systems, target);
             }
         }

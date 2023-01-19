@@ -49,16 +49,20 @@ namespace Fiero.Business
                 .Where(l => l.Count() == 1)
                 .SelectMany(l => l)
                 .Select(l => new RoomConnector(this, l));
-            foreach (var edge in openEdges) {
+            foreach (var edge in openEdges)
+            {
                 yield return edge;
             }
         }
 
-        public virtual void Draw(FloorGenerationContext ctx) {
-            foreach (var rect in Rects) {
+        public virtual void Draw(FloorGenerationContext ctx)
+        {
+            foreach (var rect in Rects)
+            {
                 ctx.FillBox(rect.Position(), rect.Size(), GroundTile);
             }
-            foreach (var conn in GetConnectors()) {
+            foreach (var conn in GetConnectors())
+            {
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, WallTile);
             }
             Drawn?.Invoke(this, ctx);

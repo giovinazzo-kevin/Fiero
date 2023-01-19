@@ -28,6 +28,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
+            //.WithAutoPlayerAi()
             .WithPlayerAi(UI)
             .WithHealth(50)
             .WithPhysics(Coord.Zero, canMove: true)

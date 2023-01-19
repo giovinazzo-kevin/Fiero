@@ -92,13 +92,34 @@ namespace Fiero.Business
                             TryAddObject("Monster", e => GenerateMonster(floorId, e));
                         });
                     }
+                    if (r.AllowFeatures)
+                    {
+                        Rng.Random.Roll(1, (floorId.Depth / 10 + 1) * area, i =>
+                        {
+                            TryAddFeature("Trap", e => e.Feature_Trap());
+                        });
+                    }
                     bool TryAddObject<T>(string name, Func<GameEntityBuilders, EntityBuilder<T>> build)
                         where T : PhysicalEntity
                     {
-                        if (pointCloud.TryDequeue(out var c))
+                        while (pointCloud.TryDequeue(out var c))
                         {
+                            if (ctx.GetTile(c).Name != TileName.Room)
+                                continue;
                             ctx.AddObject(name, c, build);
                             return true;
+                        }
+                        return false;
+                    }
+                    bool TryAddFeature<T>(string name, Func<GameEntityBuilders, EntityBuilder<T>> build)
+                        where T : Feature
+                    {
+                        while (pointCloud.TryDequeue(out var c))
+                        {
+                            if (ctx.GetTile(c).Name != TileName.Room)
+                                continue;
+                            if (ctx.TryAddFeature(name, c, build))
+                                return true;
                         }
                         return false;
                     }

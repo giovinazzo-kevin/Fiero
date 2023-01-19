@@ -128,41 +128,6 @@ namespace Fiero.Business.Scenes
             // Update the interface to show info about the actor we are currently watching
             yield return Systems.Render.ActorSelected.SubscribeHandler(e => Systems.Interface.ActorSelected.Handle(new(e.Actor)));
             yield return Systems.Render.ActorDeselected.SubscribeHandler(e => Systems.Interface.ActorDeselected.Handle(new()));
-
-            var playerHP = new StatBar(UI, "HP", ColorName.LightRed);
-            //var playerMP = new StatBar(UI, "MP", ColorName.LightBlue);
-
-            //yield return Systems.Interface.InterfaceReset.SubscribeHandler(e =>
-            //{
-            //    var barSize = new Coord(200, 100);
-
-            //    UI.Show(playerHP, nameof(playerHP));
-            //    UI.Show(playerMP, nameof(playerMP));
-
-            //    Invalidate(barSize);
-            //    Data.UI.WindowSize.ValueChanged += args =>
-            //    {
-            //        Invalidate(barSize);
-            //    };
-
-            //    void Invalidate(Coord newSize)
-            //    {
-            //        playerHP.Layout.Size.V = newSize;
-            //        playerMP.Layout.Size.V = newSize;
-            //        playerHP.Layout.Position.V = new(0, 0);
-            //        playerMP.Layout.Position.V = new(0, 100);
-            //    }
-            //});
-
-            //yield return Systems.Render.ActorSelected.SubscribeHandler(e =>
-            //{
-            //    playerHP.Value.V = e.Actor.ActorProperties.Health.V;
-            //    playerHP.MaxValue.V = e.Actor.ActorProperties.Health.Max;
-            //    playerMP.Value.V = e.Actor.ActorProperties.Health.V;
-            //    playerMP.MaxValue.V = e.Actor.ActorProperties.Health.Max;
-            //});
-
-            yield break;
         }
         private IEnumerable<Subscription> RouteFloorSystemEvents()
         {
@@ -205,6 +170,7 @@ namespace Fiero.Business.Scenes
                 Player = Resources.Entities.Player
                     .WithName(playerName)
                     .WithItems(
+                        Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),

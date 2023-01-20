@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Fiero.Core\Fiero.Core\Fiero.Core.csproj" />
+    <ProjectReference Include="F:\Ergo\Ergo\Ergo.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +47,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Palettes\default.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\fiero.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\test\test.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Shaders\test.frag">
@@ -393,11 +400,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="BUS.Services\Scripting\" />
     <Folder Include="BUS.Services\Spells\" />
     <Folder Include="BUS.Structures\Effects\Cast\" />
     <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
+    <Folder Include="ECS.Systems\Scripting\Ergo\Libraries\" />
+    <Folder Include="ECS.Systems\Scripting\Ergo\Built-Ins\" />
   </ItemGroup>
 
 </Project>

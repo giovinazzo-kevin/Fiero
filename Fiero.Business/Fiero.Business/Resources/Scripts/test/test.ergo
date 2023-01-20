@@ -1,0 +1,6 @@
+:- module(test, []).
+
+:- subscribe([culo]).
+
+culo(I) :-
+   write(I), nl.

@@ -26,6 +26,13 @@ namespace Fiero.Business
             UI = ui;
         }
 
+        public EntityBuilder<Script> Script(string scriptPath, string name = null)
+            => Entities.CreateBuilder<Script>()
+            .WithName(name ?? scriptPath)
+            .WithScriptInfo(scriptPath)
+            .WithEffectTracking()
+            ;
+
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             //.WithAutoPlayerAi()

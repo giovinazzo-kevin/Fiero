@@ -18,9 +18,12 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Potion>(out var wand)) {
-                yield return systems.Action.PotionQuaffed.SubscribeHandler(e => {
-                    if (e.Potion == owner) {
+            if (owner.TryCast<Potion>(out var wand))
+            {
+                yield return systems.Action.PotionQuaffed.SubscribeHandler(e =>
+                {
+                    if (e.Potion == owner)
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });

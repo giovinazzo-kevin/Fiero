@@ -1,0 +1,6 @@
+:- module(fiero, []).
+
+% This file manages the integration between the game and the Ergo interpreter.
+% Do not modify unless you know what you are doing.
+
+fact.

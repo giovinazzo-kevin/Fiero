@@ -11,6 +11,7 @@ namespace Fiero.Business
         public readonly DungeonSystem Dungeon;
         public readonly RenderSystem Render;
         public readonly InterfaceSystem Interface;
+        public readonly ErgoScriptingSystem Scripting;
 
         public GameSystems(
             ActionSystem action,
@@ -18,7 +19,9 @@ namespace Fiero.Business
             FactionSystem faction,
             DungeonSystem dungeon,
             RenderSystem render,
-            InterfaceSystem @interface
+            InterfaceSystem @interface,
+            ErgoScriptingSystem scripting
+
         )
         {
             Action = action;
@@ -27,6 +30,7 @@ namespace Fiero.Business
             Dungeon = dungeon;
             Render = render;
             Interface = @interface;
+            Scripting = scripting;
         }
     }
 }

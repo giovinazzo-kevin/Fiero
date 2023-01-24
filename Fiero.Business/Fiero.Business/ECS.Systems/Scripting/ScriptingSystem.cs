@@ -75,6 +75,10 @@ namespace Fiero.Business
                 // TODO: watch https://github.com/G3Kappa/Ergo/issues/60 and then implement the necessary changes
                 script.ScriptProperties.Stdout = new DataSink<Script.Stdout>(new Atom("stdout"));
                 solver.BindDataSink(script.ScriptProperties.Stdout);
+                // All write_* predicates are routed to the script's stdout via the io:portray/1 hook (except write_raw/1 which skips the hook)
+                // TODO: watch https://github.com/G3Kappa/Ergo/issues/60 and then implement the necessary changes
+                script.ScriptProperties.Stdout = new DataSink<Script.Stdout>(new Atom("stdout"));
+                solver.BindDataSink(script.ScriptProperties.Stdout);
                 ScriptLoaded.Handle(new(script));
                 return true;
             }

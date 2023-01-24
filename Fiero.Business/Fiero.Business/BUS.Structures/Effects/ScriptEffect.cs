@@ -40,7 +40,7 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            /* Ergo scripts can subscribe to Fiero events via the subscribe/1 directive.
+            /* Ergo scripts can subscribe to Fiero events via the subscribe/2 directive.
                All the directive does is prepare a list for this method, which is
                called whenever an effect that is tied to a script resolves. The list
                contains the signatures of the events that the script is handling.

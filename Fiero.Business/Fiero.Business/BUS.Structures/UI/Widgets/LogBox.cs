@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public class LogBox : Widget
     {
         protected readonly GameColors<ColorName> Colors;

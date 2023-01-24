@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Unconcern;
 using Unconcern.Common;
 using Unconcern.Delegation;
@@ -12,7 +11,7 @@ namespace Fiero.Core
         : SystemEvent<TSys, TArgs>
         where TSys : EcsSystem
     {
-        public event Action<SystemRequest<TSys, TArgs, TResponseArgs>, TArgs, IEnumerable<TResponseArgs>> ResponseReceived;   
+        public event Action<SystemRequest<TSys, TArgs, TResponseArgs>, TArgs, IEnumerable<TResponseArgs>> ResponseReceived;
 
         public SystemRequest(TSys owner, string name)
             : base(owner, name)
@@ -34,7 +33,8 @@ namespace Fiero.Core
                 .When<SystemMessage<TSys, TArgs>>
                     (msg => Name.Equals(msg.Content.Sender))
                 .Reply<SystemMessage<TSys, TArgs>, TResponseArgs>
-                    (msg => {
+                    (msg =>
+                    {
                         var data = transform(msg.Content.Data);
                         var ret = msg.WithContent(data).From(Name).To(msg.Sender);
                         return ret;

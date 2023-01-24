@@ -2,7 +2,9 @@
 using Ergo.Interpreter;
 using Ergo.Lang.Ast;
 using Ergo.Solver;
+using Ergo.Solver.DataBindings;
 using Fiero.Core;
+using System;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -26,14 +28,17 @@ namespace Fiero.Business
             Interpreter = Facade.BuildInterpreter(
                 InterpreterFlags.Default
             );
-            Scope = Interpreter.CreateScope(stdlib => stdlib
-                    .WithModule(new Module(FieroModule, runtime: true)
-                        .WithLinkedLibrary(FieroLib))
-                    .WithModule(stdlib.EntryModule
-                        .WithImport(FieroModule)))
+            Scope = Interpreter.CreateScope(stdlib => stdlib)
                 .WithSearchDirectory(@".\Resources\Scripts\")
                 .WithRuntime(true)
                 ;
+            var fiero = Interpreter.Load(ref Scope, FieroModule)
+                .GetOrThrow(new InvalidOperationException())
+                .WithLinkedLibrary(FieroLib);
+            Scope = Scope
+                .WithModule(fiero)
+                .WithModule(Scope.Modules[WellKnown.Modules.Stdlib]
+                    .WithImport(FieroModule));
 
             ScriptLoaded = new(this, nameof(ScriptLoaded));
         }
@@ -60,18 +65,19 @@ namespace Fiero.Business
                 var solverScope = solver.CreateScope(localScope);
                 script.ScriptProperties.Solver = solver;
                 script.ScriptProperties.Scope = solverScope;
-                // TODO: Define directive to declare events that the script listens for
-                // Parse it here and forward those declarations to the GameplayScene
-                // which will connect each event to the matching SystemRequest in the target system
-                // by notifying the script whenever the request is handled
+                // Scripts subscribe to events via the subscribe/1 directive
                 if (!FieroLib.GetScriptSubscriptions(script).TryGetValue(out var subbedEvents))
                     subbedEvents = List.Empty;
+                // Effects can then read this list and bind the subbed events
                 script.ScriptProperties.SubscribedEvents = subbedEvents;
+                // All write_* predicates are routed to the script's stdout via the io:portray/1 hook (except write_raw/1 which skips the hook)
+                // TODO: watch https://github.com/G3Kappa/Ergo/issues/60 and then implement the necessary changes
+                script.ScriptProperties.Stdout = new DataSink<Script.Stdout>(new Atom("stdout"));
+                solver.BindDataSink(script.ScriptProperties.Stdout);
                 ScriptLoaded.Handle(new(script));
                 return true;
             }
             return false;
         }
-
     }
 }

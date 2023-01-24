@@ -36,10 +36,10 @@ namespace Fiero.Business
             {
                 switch (sub)
                 {
-                    case Atom { Value: "culo" }:
+                    case Atom { Value: "actor_turn_started" }:
                         yield return systems.Action.ActorTurnStarted.SubscribeHandler(a =>
                         {
-                            Script.Solve(new(new Complex(new Atom("culo"), new Atom(a.TurnId))))
+                            Script.Solve(new(new Complex(new Atom("actor_turn_started"), new Atom(a.Actor.Id), new Atom(a.TurnId))))
                                 .ToList();
                         });
                         break;

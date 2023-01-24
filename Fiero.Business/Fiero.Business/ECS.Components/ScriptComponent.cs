@@ -1,5 +1,6 @@
 ﻿using Ergo.Lang.Ast;
 using Ergo.Solver;
+using Ergo.Solver.DataBindings;
 using Fiero.Core;
 
 namespace Fiero.Business
@@ -10,5 +11,6 @@ namespace Fiero.Business
         public SolverScope Scope { get; set; }
         public ErgoSolver Solver { get; set; }
         public List SubscribedEvents { get; set; }
+        public DataSink<Script.Stdout> Stdout { get; set; }
     }
 }

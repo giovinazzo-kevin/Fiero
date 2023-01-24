@@ -11,8 +11,8 @@ namespace Fiero.Core
 
         public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
-        public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
-        public readonly UIControlProperty<int> MaxLines = new(nameof(MaxLines), 10);
+        public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255);
+        public readonly UIControlProperty<int> Rows = new(nameof(Rows), 10);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false) { Inherited = false };
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
@@ -39,18 +39,18 @@ namespace Fiero.Core
             {
                 OnTextInvalidated();
             };
-            MaxLines.ValueChanged += (owner, old) =>
+            Rows.ValueChanged += (owner, old) =>
             {
-                OnMaxLinesInvalidated(MaxLines - old);
+                OnMaxLinesInvalidated(Rows - old);
             };
-            OnMaxLinesInvalidated(MaxLines); // also calls OnTextInvalidated()
+            OnMaxLinesInvalidated(Rows); // also calls OnTextInvalidated()
         }
 
         protected virtual void OnSizeInvalidated()
         {
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
             {
-                c.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / MaxLines);
+                c.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / Rows);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Fiero.Core
         {
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
             {
-                c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / MaxLines);
+                c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / Rows);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Fiero.Core
 
         protected virtual void OnTextInvalidated()
         {
-            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(MaxLines)))
+            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(Rows)))
             {
                 c.Text.V = t;
             }

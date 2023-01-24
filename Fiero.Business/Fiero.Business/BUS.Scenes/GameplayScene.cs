@@ -147,7 +147,15 @@ namespace Fiero.Business.Scenes
         }
         private IEnumerable<Subscription> RouteScriptingSystemEvents()
         {
-            yield break;
+            // ScriptingSystem.ScriptLoaded:
+            // - Track script in console
+            var scriptLoaded = new Subscription();
+            scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
+            {
+                scriptLoaded.Add(Systems.Interface.TrackScript(e.Script));
+                return true;
+            }));
+            yield return scriptLoaded;
         }
         private IEnumerable<Subscription> RouteActionSystemEvents()
         {
@@ -188,7 +196,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
                     )
                     .WithIntrinsicEffect(
-                        new EffectDef(EffectName.Script, duration: 10, script: Resources.Entities.Script(@"test").Build())
+                        new EffectDef(EffectName.Script, script: Resources.Entities.Script(@"test").Build())
                     )
                     .Build();
 

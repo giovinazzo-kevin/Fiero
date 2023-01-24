@@ -1,6 +1,10 @@
-:- module(fiero, []).
+:- module(fiero, [io:portray/1]).
 
 % This file manages the integration between the game and the Ergo interpreter.
 % Do not modify unless you know what you are doing.
 
-fact.
+%%% Intercepts all calls to the write_* predicates (except write_raw).
+%%% Instead of writing to the console, messages will be routed to the script's stdout.
+%%% This lets the game display them in their own window, bypassing the shell and keeping them separate.
+io:portray(X) :- 
+	push_data(stdout(X)).

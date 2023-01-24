@@ -2,11 +2,6 @@
 {
     public partial class ActionSystem
     {
-        public readonly struct ActorDiedEvent
-        {
-            public readonly Actor Actor;
-            public ActorDiedEvent(Actor actor)
-                => (Actor) = (actor);
-        }
+        public readonly record struct ActorDiedEvent(Actor Actor);
     }
 }

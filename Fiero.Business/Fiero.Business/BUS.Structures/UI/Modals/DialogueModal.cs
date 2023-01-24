@@ -88,7 +88,7 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("content"))
                 .Apply(x =>
                 {
-                    x.MaxLines.V = 5;
+                    x.Rows.V = 5;
                     x.Text.V = String.Join('\n', Node.Lines);
                     x.ContentAwareScale.V = false;
                 }))

@@ -19,6 +19,7 @@ namespace Fiero.Business
         public StatBar MPBar { get; private set; }
         public Minimap Minimap { get; private set; }
         public LogBox Logs { get; private set; }
+        public ConsoleBox Console { get; private set; }
 
         public readonly SystemRequest<InterfaceSystem, ActorSelectedEvent, EventResult> ActorSelected;
         public readonly SystemRequest<InterfaceSystem, ActorDeselectedEvent, EventResult> ActorDeselected;
@@ -65,7 +66,13 @@ namespace Fiero.Business
             UI.Show(MPBar);
             UI.Show(Minimap);
             UI.Show(Logs);
+            UI.Show(Console);
             Invalidate(UI.Store.Get(Data.UI.WindowSize));
+        }
+
+        public virtual Subscription TrackScript(Script s)
+        {
+            return Console.TrackScript(s);
         }
 
         protected virtual void Invalidate(Coord newSize)
@@ -73,6 +80,7 @@ namespace Fiero.Business
             var barSize = new Coord(200, 100);
             var mapSize = new Coord(256, 256);
             var logSize = new Coord(newSize.X, 126);
+            var conSize = new Coord(newSize.X / 2, 256);
             if (HPBar.Layout != null)
             {
                 HPBar.Layout.Size.V = barSize;
@@ -93,6 +101,11 @@ namespace Fiero.Business
                 Logs.Layout.Position.V = new(0, newSize.Y - logSize.Y);
                 Logs.Layout.Size.V = logSize;
             }
+            if (Console.Layout != null)
+            {
+                Console.Layout.Position.V = new(0, barSize.Y);
+                Console.Layout.Size.V = conSize;
+            }
 
             Layout.Position.V = new();
             Layout.Size.V = newSize;
@@ -108,6 +121,7 @@ namespace Fiero.Business
             MPBar = new(UI, "MP", ColorName.LightBlue);
             Minimap = new(UI, DungeonSystem, FactionSystem, Colors);
             Logs = new(UI, Colors);
+            Console = new(EventBus, UI, Colors);
             Data.UI.WindowSize.ValueChanged += (args) =>
             {
                 Invalidate(args.NewValue);

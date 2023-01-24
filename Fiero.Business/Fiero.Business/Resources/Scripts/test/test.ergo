@@ -1,6 +1,11 @@
 :- module(test, []).
 
-:- subscribe([culo]).
+:- subscribe(action, [actor_turn_started]).
 
-culo(I) :-
-   write(I), nl.
+action:actor_turn_started(E) :-
+   write('Turn: '),
+   write(E$turn_id),
+   write(' Actor: '),
+   write(E$actor_id), 
+   nl.
+   

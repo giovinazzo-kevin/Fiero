@@ -2,12 +2,6 @@
 {
     public partial class ActionSystem
     {
-        public readonly struct SpellTargetedEvent
-        {
-            public readonly Actor Actor;
-            public readonly Spell Spell;
-            public SpellTargetedEvent(Actor actor, Spell spell)
-                => (Actor, Spell) = (actor, spell);
-        }
+        public readonly record struct SpellTargetedEvent(Actor Actor, Spell Spell);
     }
 }

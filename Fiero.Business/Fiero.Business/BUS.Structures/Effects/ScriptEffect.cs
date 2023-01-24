@@ -1,10 +1,16 @@
-﻿using Ergo.Lang.Ast;
+﻿using Ergo.Lang;
+using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
+using Fiero.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     /// <summary>
     /// Script effects can be applied to:
     /// - Entities:
@@ -14,6 +20,8 @@ namespace Fiero.Business
     {
         public readonly Script Script;
         public readonly string Description;
+
+        protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes = GetRoutes();
 
         public ScriptEffect(Script script, string description = null)
         {
@@ -32,18 +40,63 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            foreach (var sub in Script.ScriptProperties.SubscribedEvents.Contents)
+            /* Ergo scripts can subscribe to Fiero events via the subscribe/1 directive.
+               All the directive does is prepare a list for this method, which is
+               called whenever an effect that is tied to a script resolves. The list
+               contains the signatures of the events that the script is handling.
+
+               By wiring each event to a call to the script's solver, we can interpret
+               the result of that call as the EventResult to pass to the owning system.
+            */
+            foreach (var sig in Script.ScriptProperties.SubscribedEvents)
             {
-                switch (sub)
+                if (CachedRoutes.TryGetValue(sig, out var sub))
                 {
-                    case Atom { Value: "culo" }:
-                        yield return systems.Action.ActorTurnStarted.SubscribeHandler(a =>
-                        {
-                            Script.Solve(new(new Complex(new Atom("culo"), new Atom(a.TurnId))))
-                                .ToList();
-                        });
-                        break;
+                    yield return sub(this, systems);
                 }
+                else
+                {
+                    // TODO: Warn script?
+                }
+            }
+        }
+
+        static Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> GetRoutes()
+        {
+            var finalDict = new Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>>();
+
+            foreach (var sys in typeof(GameSystems).GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .Where(f => f.FieldType.IsAssignableTo(typeof(EcsSystem))))
+            {
+                var sysName = new Atom(sys.Name.Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .ToErgoCase());
+
+                foreach (var req in sys.FieldType.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(f => f.FieldType.IsAssignableTo(typeof(ISystemRequest))))
+                {
+                    var evtName = new Atom(req.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .ToErgoCase());
+
+                    finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
+                    {
+                        return ((ISystemRequest)req.GetValue(sys.GetValue(systems)))
+                            .SubscribeResponse(evt => Respond(self, evt, sysName));
+                    });
+                }
+            }
+            return finalDict;
+
+
+            static EventResult Respond(ScriptEffect self, object evt, Atom module)
+            {
+                var term = TermMarshall.ToTerm(evt, mode: TermMarshalling.Named);
+#pragma warning disable CA1827 // Do not use Count() or LongCount() when Any() can be used
+                // BECAUSE we actually want to enumerate all solutions
+
+                // Qualify term with module so that the declaration needs to match, e.g. action:actor_turn_started/1
+                var query = new Query(term.Qualified(module));
+                return self.Script.Solve(query).Count() > 0;
+#pragma warning restore CA1827 // Do not use Count() or LongCount() when Any() can be used
             }
         }
     }

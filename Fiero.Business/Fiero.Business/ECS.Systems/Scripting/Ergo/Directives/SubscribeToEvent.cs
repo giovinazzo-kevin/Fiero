@@ -10,18 +10,29 @@ namespace Fiero.Business;
 public class SubscribeToEvent : InterpreterDirective
 {
     public SubscribeToEvent()
-        : base("", new("subscribe"), 1, 200)
+        : base("", new("subscribe"), 2, 200)
     {
     }
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
         var lib = scope.GetLibrary<FieroLib>(ErgoScriptingSystem.FieroModule);
-        if (!args[0].IsAbstract<List>().TryGetValue(out var list))
+        if (args[0] is not Atom module)
         {
-            throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[0].Explain());
+            throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, args[0].Explain());
         }
-        lib.SubscribeScriptToEvents(scope.Entry, list);
+        if (!args[1].IsAbstract<List>().TryGetValue(out var list))
+        {
+            throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[1].Explain());
+        }
+        foreach (var item in list.Contents)
+        {
+            if (item is not Atom atom)
+            {
+                throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, item.Explain());
+            }
+            lib.SubscribeScriptToEvent(scope.Entry, module, atom);
+        }
         return true;
     }
 }

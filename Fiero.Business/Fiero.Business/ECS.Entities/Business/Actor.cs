@@ -1,6 +1,4 @@
 ﻿using Fiero.Core;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
 
 namespace Fiero.Business
 {

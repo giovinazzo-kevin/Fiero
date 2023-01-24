@@ -12,7 +12,7 @@ public class FieroLib : Library
 {
     public override Atom Module => ErgoScriptingSystem.FieroModule;
 
-    protected readonly Dictionary<Atom, List> Subscribptions = new();
+    protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
 
     public FieroLib()
     {
@@ -29,15 +29,17 @@ public class FieroLib : Library
         base.OnErgoEvent(evt);
     }
 
-    public void SubscribeScriptToEvents(Atom scriptModule, List events)
+    public void SubscribeScriptToEvent(Atom scriptModule, Atom eventModule, Atom @event)
     {
-        Subscribptions[scriptModule] = events;
+        if (!Subscribptions.TryGetValue(scriptModule, out var set))
+            set = Subscribptions[scriptModule] = new();
+        set.Add(new(@event, 1, eventModule, default));
     }
 
-    public Ergo.Lang.Maybe<List> GetScriptSubscriptions(Script script)
+    public Ergo.Lang.Maybe<IEnumerable<Signature>> GetScriptSubscriptions(Script script)
     {
-        if (Subscribptions.TryGetValue(script.ScriptProperties.Scope.InterpreterScope.Entry, out var list))
-            return list;
+        if (Subscribptions.TryGetValue(script.ScriptProperties.Scope.InterpreterScope.Entry, out var set))
+            return set;
         return default;
     }
 }

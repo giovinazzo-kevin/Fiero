@@ -6,5 +6,6 @@
 %%% Intercepts all calls to the write_* predicates (except write_raw).
 %%% Instead of writing to the console, messages will be routed to the script's stdout.
 %%% This lets the game display them in their own window, bypassing the shell and keeping them separate.
-io:portray(X) :- 
-	push_data(stdout(X)).
+io:portray(X) :-
+	explain(X, S),
+	push_data(stdout(S)).

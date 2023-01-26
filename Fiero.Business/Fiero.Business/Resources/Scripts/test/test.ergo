@@ -1,11 +1,15 @@
 :- module(test, []).
 
-:- subscribe(action, [actor_turn_started]).
+:- subscribe(action, [actor_killed]).
 
-action:actor_turn_started(E) :-
-   write('Turn: '),
-   write(E$turn_id),
-   write(' Actor: '),
-   write(E$actor_id), 
+% Example event:
+% actor_turn_event{actor : actor{id : 13},time : 22,turn_id : 1}
+
+
+action:actor_killed(_{ killer: K, victim: V }) :-
+   write('Killer: '),
+   write(K),
+   write(' Victim: '),
+   write(V),
    nl.
    

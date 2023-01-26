@@ -76,25 +76,25 @@ namespace Fiero.Business
                 {
                     var evtName = new Atom(req.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
-
+                    var evtType = req.FieldType.GetGenericArguments()[1];
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemRequest)req.GetValue(sys.GetValue(systems)))
-                            .SubscribeResponse(evt => Respond(self, evt, sysName));
+                            .SubscribeResponse(evt => Respond(self, evt, evtType, evtName, sysName));
                     });
                 }
             }
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Atom module)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, Atom evtName, Atom sysName)
             {
-                var term = TermMarshall.ToTerm(evt, mode: TermMarshalling.Named);
+                var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named);
 #pragma warning disable CA1827 // Do not use Count() or LongCount() when Any() can be used
                 // BECAUSE we actually want to enumerate all solutions
 
                 // Qualify term with module so that the declaration needs to match, e.g. action:actor_turn_started/1
-                var query = new Query(term.Qualified(module));
+                var query = new Query(((ITerm)new Complex(evtName, term)).Qualified(sysName));
                 return self.Script.Solve(query).Count() > 0;
 #pragma warning restore CA1827 // Do not use Count() or LongCount() when Any() can be used
             }

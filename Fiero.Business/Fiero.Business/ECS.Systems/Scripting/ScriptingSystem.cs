@@ -79,6 +79,7 @@ namespace Fiero.Business
                 // TODO: watch https://github.com/G3Kappa/Ergo/issues/60 and then implement the necessary changes
                 script.ScriptProperties.Stdout = new DataSink<Script.Stdout>(new Atom("stdout"));
                 solver.BindDataSink(script.ScriptProperties.Stdout);
+                solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
                 return true;
             }

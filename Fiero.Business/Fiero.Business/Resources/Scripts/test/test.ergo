@@ -1,11 +1,14 @@
 :- module(test, []).
 
-:- subscribe(action, [actor_turn_started]).
+:- subscribe(action, [actor_killed]).
+:- dynamic(num_killed/1).
 
-action:actor_turn_started(E) :-
-   write('Turn: '),
-   write(E$turn_id),
-   write(' Actor: '),
-   write(E$actor_id), 
-   nl.
+action:actor_killed(_{killer: @player(_)}) :- 
+	( num_killed(K) 
+	-> retract(num_killed(K))
+	 ; K = 0
+	),
+	K1 := K + 1,
+	assertz(num_killed(K1)),
+	write(K1), write(' kills'), nl.
    

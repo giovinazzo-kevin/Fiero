@@ -196,7 +196,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
                     )
                     .WithIntrinsicEffect(
-                        new EffectDef(EffectName.Script, script: Resources.Entities.Script(@"test").Build())
+                        new EffectDef(EffectName.Script, canStack: true, script: Resources.Entities.Script(@"test").Build())
                     )
                     .Build();
 

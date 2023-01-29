@@ -1,5 +1,6 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Fiero.Core;
 using System;
@@ -48,6 +49,7 @@ namespace Fiero.Business
                By wiring each event to a call to the script's solver, we can interpret
                the result of that call as the EventResult to pass to the owning system.
             */
+
             foreach (var sig in Script.ScriptProperties.SubscribedEvents)
             {
                 if (CachedRoutes.TryGetValue(sig, out var sub))
@@ -95,7 +97,18 @@ namespace Fiero.Business
 
                 // Qualify term with module so that the declaration needs to match, e.g. action:actor_turn_started/1
                 var query = new Query(((ITerm)new Complex(evtName, term)).Qualified(sysName));
-                return self.Script.Solve(query).Count() > 0;
+                // Return true only when at least one predicate succeeded
+                try
+                {
+                    return self.Script.Solve(query).Count() > 0;
+                }
+                catch (ErgoException ex)
+                {
+                    // TODO: Log in the in-game console
+                    Console.WriteLine(ex);
+                    return false;
+                }
+
 #pragma warning restore CA1827 // Do not use Count() or LongCount() when Any() can be used
             }
         }

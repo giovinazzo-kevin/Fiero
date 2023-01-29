@@ -56,7 +56,17 @@ namespace Fiero.Business
 
         public bool LoadScript(Script script)
         {
-            var localScope = Scope;
+            var localScope = Scope
+                .WithExceptionHandler(new(
+                    @catch: ex =>
+                    {
+                        script.ScriptProperties.LastError = ex;
+                        Console.WriteLine(ex);
+                    },
+                    @finally: () =>
+                    {
+
+                    }));
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath)).TryGetValue(out var module))
             {
                 var solver = Facade.BuildSolver(

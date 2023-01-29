@@ -11,4 +11,6 @@ action:actor_killed(_{killer: @player(_)}) :-
 	K1 := K + 1,
 	assertz(num_killed(K1)),
 	write(K1), write(' kills'), nl.
+
+fiero(X).
    

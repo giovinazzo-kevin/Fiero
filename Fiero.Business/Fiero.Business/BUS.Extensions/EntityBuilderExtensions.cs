@@ -17,7 +17,14 @@ namespace Fiero.Business
                 builder.Built += (b, o) =>
                 {
                     wrap ??= (e => e.Resolve(o));
-                    wrap(def).Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
+                    var fx = wrap(def);
+                    if (fx is ScriptEffect se && se.Script.ScriptProperties.LastError != null)
+                    {
+                        // If a script errored out during initialization, for instance by failing to load,
+                        // then don't start it. Error messages are handled by the WithScriptInfo method.
+                        return;
+                    }
+                    fx.Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
                 };
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
@@ -273,6 +280,7 @@ namespace Fiero.Business
                     {
                         // TODO: Log to the in-game console that doesn't exist yet
                     }
+
                 };
             });
     }

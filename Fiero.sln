@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31004.235
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32721.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{CE67812D-CA4A-41AC-B4FD-1EC1BB884567}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Business", "Fiero.Business\Fiero.Business\Fiero.Business.csproj", "{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unconcern", "Unconcern\Unconcern.csproj", "{74BBE421-14EE-48FD-AE59-AADB7BEF531D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ergo", "F:\Ergo\Ergo\Ergo.csproj", "{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{79B85F42-0F77-41F5-B91A-539920D0C8F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +33,18 @@ Global
 		{74BBE421-14EE-48FD-AE59-AADB7BEF531D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74BBE421-14EE-48FD-AE59-AADB7BEF531D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74BBE421-14EE-48FD-AE59-AADB7BEF531D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0} = {CE67812D-CA4A-41AC-B4FD-1EC1BB884567}
+		{74BBE421-14EE-48FD-AE59-AADB7BEF531D} = {79B85F42-0F77-41F5-B91A-539920D0C8F7}
+		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3} = {79B85F42-0F77-41F5-B91A-539920D0C8F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {02158A3C-B34C-402B-89CC-FE2356D9D8B7}

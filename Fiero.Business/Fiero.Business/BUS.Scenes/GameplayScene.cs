@@ -120,6 +120,7 @@ namespace Fiero.Business.Scenes
             return RouteActionSystemEvents()
                 .Concat(RouteFloorSystemEvents())
                 .Concat(RouteRenderSystemEvents())
+                .Concat(RouteScriptingSystemEvents())
                 ;
         }
 
@@ -143,6 +144,18 @@ namespace Fiero.Business.Scenes
             {
                 Entities.FlagEntityForRemoval(e.OldState.Id);
             });
+        }
+        private IEnumerable<Subscription> RouteScriptingSystemEvents()
+        {
+            // ScriptingSystem.ScriptLoaded:
+            // - Track script in console
+            var scriptLoaded = new Subscription();
+            scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
+            {
+                scriptLoaded.Add(Systems.Interface.TrackScript(e.Script));
+                return true;
+            }));
+            yield return scriptLoaded;
         }
         private IEnumerable<Subscription> RouteActionSystemEvents()
         {
@@ -181,6 +194,9 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Throwable_Bomb(10).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
+                    )
+                    .WithIntrinsicEffect(
+                        new EffectDef(EffectName.Script, canStack: true, script: Resources.Entities.Script(@"test").Build())
                     )
                     .Build();
 

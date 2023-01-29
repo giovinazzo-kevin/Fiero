@@ -1,13 +1,7 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -73,10 +67,11 @@ namespace Fiero.Business
 
         public ActionSystem(
             EventBus bus,
-            GameEntities entities, 
+            GameEntities entities,
             DungeonSystem floorSystem,
             FactionSystem factionSystem
-        ) : base(bus) {
+        ) : base(bus)
+        {
             _entities = entities;
             _floorSystem = floorSystem;
             _factionSystem = factionSystem;
@@ -118,30 +113,41 @@ namespace Fiero.Business
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
 
-            ActorAttacked.ResponseReceived += (_, e, r) => {
-                if (r.All(x => x)) {
+            ActorAttacked.ResponseReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
                     ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapon, e.Damage));
                 }
             };
-            ActorDamaged.ResponseReceived += (_, e, r) => {
-                if (r.All(x => x)) {
-                    if (e.Victim.ActorProperties.Health <= 0) {
-                        if (e.Source.TryCast<Actor>(out var killer)) {
+            ActorDamaged.ResponseReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
+                    if (e.Victim.ActorProperties.Health <= 0)
+                    {
+                        if (e.Source.TryCast<Actor>(out var killer))
+                        {
                             ActorKilled.HandleOrThrow(new(killer, e.Victim));
                         }
-                        else {
+                        else
+                        {
                             ActorDied.HandleOrThrow(new(e.Victim));
                         }
                     }
                 }
             };
-            ActorKilled.ResponseReceived += (_, e, r) => {
-                if (r.All(x => x)) {
+            ActorKilled.ResponseReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
                     ActorDied.HandleOrThrow(new(e.Victim));
                 }
             };
-            ActorDied.ResponseReceived += (_, e, r) => {
-                if (r.All(x => x)) {
+            ActorDied.ResponseReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
                     ActorDespawned.HandleOrThrow(new(e.Actor));
                 }
             };
@@ -155,7 +161,8 @@ namespace Fiero.Business
             if (t.ActorId == TURN_ACTOR_ID)
                 return cost;
 
-            switch(action.Name) {
+            switch (action.Name)
+            {
                 case ActionName.Wait:
                     ret = HandleWait(t, ref action, ref cost);
                     break;
@@ -191,15 +198,17 @@ namespace Fiero.Business
                     break;
             }
             t.Actor.Action.LastAction = action;
-            if (ret == true) {
+            if (ret == true)
+            {
                 ActorIntentEvaluated.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
-            else if(ret == false) {
+            else if (ret == false)
+            {
                 ActorIntentFailed.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
             return cost;
         }
-        
+
         public void Reset()
         {
             AbortCurrentTurn();
@@ -227,7 +236,8 @@ namespace Fiero.Business
         {
             victim = default;
             var actorsHere = _floorSystem.GetActorsAt(attacker.FloorId(), p);
-            if (!actorsHere.Any(a => MayTarget(attacker, a))) {
+            if (!actorsHere.Any(a => MayTarget(attacker, a)))
+            {
                 return false;
             }
             victim = actorsHere.Single();
@@ -236,7 +246,8 @@ namespace Fiero.Business
 
         private bool HandleAttack(AttackName type, Actor attacker, Actor victim, ref int? cost, Entity weapon, out int damage, out int swingDelay)
         {
-            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapon)) {
+            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapon))
+            {
                 cost += swingDelay;
                 return true;
             }
@@ -246,19 +257,24 @@ namespace Fiero.Business
         public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor victim, Entity attackWith)
         {
             damage = 1; swingDelay = 0;
-            if(attackWith != null) {
-                if (type == AttackName.Melee && attackWith.TryCast<Weapon>(out var w)) {
+            if (attackWith != null)
+            {
+                if (type == AttackName.Melee && attackWith.TryCast<Weapon>(out var w))
+                {
                     swingDelay = w.WeaponProperties.SwingDelay;
                     damage += w.WeaponProperties.BaseDamage;
                 }
-                else if (type == AttackName.Ranged && attackWith.TryCast<Throwable>(out var t)) {
+                else if (type == AttackName.Ranged && attackWith.TryCast<Throwable>(out var t))
+                {
                     damage += t.ThrowableProperties.BaseDamage;
                 }
-                else if (type == AttackName.Magic && attackWith.TryCast<Spell>(out var s)) {
+                else if (type == AttackName.Magic && attackWith.TryCast<Spell>(out var s))
+                {
                     swingDelay = s.SpellProperties.CastDelay;
                     damage += s.SpellProperties.BaseDamage;
                 }
-                else if (type == AttackName.Magic && attackWith.TryCast<Wand>(out _)) {
+                else if (type == AttackName.Magic && attackWith.TryCast<Wand>(out _))
+                {
                     damage = 0;
                 }
             }
@@ -267,14 +283,16 @@ namespace Fiero.Business
 
         public void Track(int actorId)
         {
-            if (_actorQueue.Any(x => x.ActorId == actorId)) {
+            if (_actorQueue.Any(x => x.ActorId == actorId))
+            {
                 return;
             }
             // Actors have their energy randomized when spawning, to distribute them better across turns
             var time = _actorQueue.Single(x => x.ActorId == TURN_ACTOR_ID).Time;
             var proxy = _entities.GetProxy<Actor>(actorId);
             var currentTurn = CurrentTurn;
-            _actorQueue.Add(new ActorTime(actorId, proxy, () => {
+            _actorQueue.Add(new ActorTime(actorId, proxy, () =>
+            {
                 return proxy.Action.ActionProvider.GetIntent(proxy);
             }, time + Rng.Random.Next(0, 100)));
         }
@@ -290,36 +308,45 @@ namespace Fiero.Business
             OnTurnStarted(next.ActorId);
             next = next.WithLastActedTime(next.Time);
             var intent = next.GetIntent();
-            if(intent.Name != ActionName.None) {
+            if (intent.Name != ActionName.None)
+            {
                 // Some effects might want to hook into this request to change the intent of an actor right before it's evaluated
                 var altIntents = ActorIntentSelected.Request(new(next.Actor, intent, CurrentTurn, next.Time))
                     .Where(i => i.Result)
                     .OrderByDescending(i => i.Priority);
-                if (altIntents.FirstOrDefault() is { } altIntent) {
+                if (altIntents.FirstOrDefault() is { } altIntent)
+                {
                     intent = altIntent.NewIntent;
                 }
             }
-            if (HandleAction(next, ref intent) is { } cost) {
-                if(_invalidate) {
+            if (HandleAction(next, ref intent) is { } cost)
+            {
+                if (_invalidate)
+                {
                     _invalidate = false;
-                    if(!_actorQueue.Any(a => a.ActorId == next.ActorId)) {
+                    if (!_actorQueue.Any(a => a.ActorId == next.ActorId))
+                    {
                         _actorQueue.Add(next);
                     }
                     return cost;
                 }
                 OnTurnEnded(next.ActorId);
             }
-            else {
+            else
+            {
                 _actorQueue.Insert(0, next);
                 return null;
             }
             next = next.WithTime(next.Time + cost);
-            if(next.ActorId == TURN_ACTOR_ID || next.Actor.IsAlive()) {
+            if (next.ActorId == TURN_ACTOR_ID || next.Actor.IsAlive())
+            {
                 var index = _actorQueue.FindIndex(t => t.Time > next.Time);
-                if (index < 0) {
+                if (index < 0)
+                {
                     _actorQueue.Add(next);
                 }
-                else {
+                else
+                {
                     _actorQueue.Insert(index, next);
                 }
             }
@@ -334,20 +361,24 @@ namespace Fiero.Business
 
             void OnTurnStarted(int actorId)
             {
-                if (actorId == TURN_ACTOR_ID) {
+                if (actorId == TURN_ACTOR_ID)
+                {
                     TurnStarted.Raise(new(++CurrentTurn));
                 }
-                else if(next.LastActedTime < next.Time) {
+                else if (next.LastActedTime < next.Time)
+                {
                     ActorTurnStarted.Raise(new(next.Actor, CurrentTurn, next.Time));
                 }
             }
 
             void OnTurnEnded(int actorId)
             {
-                if (actorId == TURN_ACTOR_ID) {
+                if (actorId == TURN_ACTOR_ID)
+                {
                     TurnEnded.Raise(new(CurrentTurn));
                 }
-                else {
+                else
+                {
                     ActorTurnEnded.Raise(new(next.Actor, CurrentTurn, next.Time));
                 }
             }
@@ -355,7 +386,8 @@ namespace Fiero.Business
 
         public void Update(int playerId)
         {
-            do {
+            do
+            {
                 _entities.RemoveFlagged(true);
                 ElapseTick();
             }

@@ -1,20 +1,15 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ergo.Lang;
+using Fiero.Core;
 
 namespace Fiero.Business
 {
     public class Entity : EcsEntity
     {
+        [NonTerm]
         [RequiredComponent]
         public InfoComponent Info { get; private set; }
-        public EffectComponent Effects { get; private set; }
+        [NonTerm]
+        public EffectsComponent Effects { get; private set; }
         public override string ToString() => Info?.Name;
     }
 }

@@ -1,0 +1,16 @@
+:- module(test, []).
+
+:- subscribe(action, [actor_killed, actor_gained_effect]).
+:- dynamic(num_killed/1).
+
+action:actor_killed(_{killer: @player(_)}) :- 
+	( num_killed(K) 
+	-> retract(num_killed(K))
+	 ; K = 0
+	),
+	K1 := K + 1,
+	assertz(num_killed(K1)),
+	write(K1), write(' kills'), nl.
+
+action:actor_gained_effect(_{effect:X}) :-
+	write(X), nl.

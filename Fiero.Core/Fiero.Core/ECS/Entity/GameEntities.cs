@@ -26,7 +26,7 @@ namespace Fiero.Core
                 Components.AddRange(components);
             }
 
-            public override bool Equals(object obj) =>  Equals(obj as TrackedEntity);
+            public override bool Equals(object obj) => Equals(obj as TrackedEntity);
             public bool Equals(TrackedEntity other) => Id == other?.Id;
             public override int GetHashCode() => Id;
         }
@@ -42,7 +42,7 @@ namespace Fiero.Core
         protected readonly Dictionary<Type, HashSet<TrackedEntity>> Components;
         protected readonly Dictionary<Type, HashSet<PropertyInfo>> ProxyablePropertyCache;
         protected readonly Dictionary<OrderedPair<int, Type>, EcsEntity> ProxyCache;
-        protected readonly Queue<int> EntityRemovalQueue; 
+        protected readonly Queue<int> EntityRemovalQueue;
         protected readonly Queue<(int Entity, int Component)> ComponentRemovalQueue;
         protected readonly HashSet<int> ProtectedEntities;
 
@@ -54,7 +54,7 @@ namespace Fiero.Core
             return new GameEntities(ServiceFactory, this);
         }
 
-        private GameEntities(IServiceFactory factory, GameEntities parent) 
+        private GameEntities(IServiceFactory factory, GameEntities parent)
             : this(factory)
         {
             Parent = parent;
@@ -80,7 +80,8 @@ namespace Fiero.Core
 
         public void Clear(bool propagate = true)
         {
-            foreach (var e in Entities) {
+            foreach (var e in Entities)
+            {
                 FlagEntityForRemoval(e.Id);
             }
             RemoveFlagged(propagate);
@@ -90,7 +91,7 @@ namespace Fiero.Core
 
         public int CreateEntity()
         {
-            var entity = Parent != null 
+            var entity = Parent != null
                 ? (_lastEntityId = Interlocked.Increment(ref Parent._lastEntityId))
                 : Interlocked.Increment(ref _lastEntityId);
             var trackedEntity = new TrackedEntity(entity);
@@ -102,16 +103,18 @@ namespace Fiero.Core
         public T GetProxy<T>(int entityId)
             where T : EcsEntity
         {
-            if(!TryGetProxy<T>(entityId, out var entity)) {
+            if (!TryGetProxy<T>(entityId, out var entity))
+            {
                 throw new ArgumentException($"A proxy for type {typeof(T).Name} could not be created");
             }
             return entity;
         }
 
         public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
-            where T: EcsEntity
+            where T : EcsEntity
         {
-            if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props)) {
+            if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props))
+            {
                 ProxyablePropertyCache[typeof(T)] = props = typeof(T).GetProperties()
                     .Where(p => p.PropertyType.IsAssignableTo(typeof(EcsComponent)))
                     .Select(p => p.DeclaringType.GetProperty(p.Name))
@@ -130,52 +133,64 @@ namespace Fiero.Core
                 return false;
             var equalEntity = new TrackedEntity(entityId);
             var cacheKey = new OrderedPair<int, Type>(entityId, typeof(T));
-            if (ProxyCache.TryGetValue(cacheKey, out var proxy)) {
-                if (!Entities.TryGetValue(equalEntity, out _)) {
+            if (ProxyCache.TryGetValue(cacheKey, out var proxy))
+            {
+                if (!Entities.TryGetValue(equalEntity, out _))
+                {
                     ProxyCache.Remove(cacheKey);
                     return false;
                 }
                 entity = (T)proxy;
                 return true;
             }
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+            {
                 return false;
             }
             var props = GetProxyableProperties<T>();
             entity = ServiceFactory.GetInstance<T>();
-            entity._refresh = (entity, entityId) => {
+            entity._refresh = (entity, entityId) =>
+            {
                 entity.Id = entityId <= 0 ? 0 : entityId;
-                if (EntityRemovalQueue.Contains(entityId)) {
+                if (EntityRemovalQueue.Contains(entityId))
+                {
                     return false;
                 }
-                foreach (var p in props) {
+                foreach (var p in props)
+                {
                     var comp = trackedEntity.Components.FirstOrDefault(c => c.GetType() == p.PropertyType);
-                    if (comp == null && p.GetCustomAttribute<RequiredComponentAttribute>() is { }) {
+                    if (comp == null && p.GetCustomAttribute<RequiredComponentAttribute>() is { })
+                    {
                         return false;
                     }
-                    if (entityId > 0) {
+                    if (entityId > 0)
+                    {
                         p.SetValue(entity, comp, BindingFlags.NonPublic | BindingFlags.Instance, null, null, null);
                     }
-                    else {
+                    else
+                    {
                         p.SetValue(entity, null, BindingFlags.NonPublic | BindingFlags.Instance, null, null, null);
                     }
                 }
                 return true;
             };
-            entity._cast = (entity, type) => {
+            entity._cast = (entity, type) =>
+            {
                 var tryGetProxy = typeof(GameEntities)
                     .GetMethod(nameof(TryGetProxy))
                     .MakeGenericMethod(type);
                 var proxiedEntity = Activator.CreateInstance(type); proxiedEntity = null;
                 object[] args = new object[] { entity.Id, proxiedEntity };
                 var ret = (bool)tryGetProxy.Invoke(this, args);
-                if(ret) {
+                if (ret)
+                {
                     var retEnt = (EcsEntity)args[1];
                     return retEnt;
                 }
                 return null;
             };
-            if(entity.TryRefresh(entityId)) {
+            if (entity.TryRefresh(entityId))
+            {
                 ProxyCache[cacheKey] = entity;
                 return true;
             }
@@ -185,18 +200,26 @@ namespace Fiero.Core
 
         public IEnumerable<int> GetEntities() => Entities.Select(e => e.Id);
 
+        public bool IsEntityFlaggedForRemoval(int entityId)
+        {
+            return EntityRemovalQueue.Contains(entityId);
+        }
+
         public bool FlagEntityForRemoval(int entityId)
         {
             if (ProtectedEntities.Contains(entityId))
                 return false;
 
             var equalEntity = new TrackedEntity(entityId);
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id))
+            {
                 return false;
             }
             EntityRemovalQueue.Enqueue(equalEntity.Id);
-            foreach (var component in trackedEntity.Components) {
-                if(!FlagComponentForRemoval(trackedEntity.Id, component.Id)) {
+            foreach (var component in trackedEntity.Components)
+            {
+                if (!FlagComponentForRemoval(trackedEntity.Id, component.Id))
+                {
                     throw new InvalidOperationException($"Component cache is in an invalid state");
                 }
             }
@@ -206,22 +229,26 @@ namespace Fiero.Core
             where TComponent : EcsComponent
         {
             var equalEntity = new TrackedEntity(entityId);
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+            {
                 throw new ArgumentOutOfRangeException($"An entity with id {entityId} is not being tracked");
             }
             var component = ServiceFactory.GetInstance<TComponent>();
-            component.Id = Parent != null 
+            component.Id = Parent != null
                 ? (_lastComponentId = Interlocked.Increment(ref _lastComponentId))
                 : Interlocked.Increment(ref _lastComponentId);
             component.EntityId = entityId;
             initialize?.Invoke(component);
             trackedEntity.Components.Add(component);
             var tComponent = typeof(TComponent);
-            if(!Components.TryGetValue(tComponent, out var hashSet)) {
+            if (!Components.TryGetValue(tComponent, out var hashSet))
+            {
                 Components[tComponent] = hashSet = new HashSet<TrackedEntity>();
             }
-            if(Parent != null) {
-                if (!Parent.Components.TryGetValue(tComponent, out var parentHashSet)) {
+            if (Parent != null)
+            {
+                if (!Parent.Components.TryGetValue(tComponent, out var parentHashSet))
+                {
                     Parent.Components[tComponent] = parentHashSet = new HashSet<TrackedEntity>();
                 }
                 parentHashSet.Add(trackedEntity);
@@ -232,10 +259,12 @@ namespace Fiero.Core
         public bool FlagComponentForRemoval(int entityId, int componentId)
         {
             var equalEntity = new TrackedEntity(entityId);
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+            {
                 return false;
             }
-            if (!trackedEntity.Components.Exists(c => c.Id == componentId)) {
+            if (!trackedEntity.Components.Exists(c => c.Id == componentId))
+            {
                 return false;
             }
             ComponentRemovalQueue.Enqueue((entityId, componentId));
@@ -244,38 +273,48 @@ namespace Fiero.Core
 
         public void RemoveFlagged(bool propagate = true) // Don't call while enumerating, obviously
         {
-            while(ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup)) {
+            while (ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup))
+            {
                 var equalEntity = new TrackedEntity(tup.EntityId);
-                if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+                if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+                {
                     continue;
                 }
-                if (!(trackedEntity.Components.FirstOrDefault(c => c.Id == tup.ComponentId) is { } component)) {
+                if (!(trackedEntity.Components.FirstOrDefault(c => c.Id == tup.ComponentId) is { } component))
+                {
                     continue;
                 }
                 var tComponent = component.GetType();
-                if (!Components.TryGetValue(tComponent, out var hashSet)) {
+                if (!Components.TryGetValue(tComponent, out var hashSet))
+                {
                     throw new InvalidOperationException($"Component cache is in an invalid state");
                 }
                 trackedEntity.Components.Remove(component);
                 hashSet.Remove(trackedEntity);
-                if (hashSet.Count == 0) {
+                if (hashSet.Count == 0)
+                {
                     Components.Remove(tComponent);
                 }
             }
-            while (EntityRemovalQueue.TryDequeue(out var entityId)) {
+            while (EntityRemovalQueue.TryDequeue(out var entityId))
+            {
                 var equalEntity = new TrackedEntity(entityId);
-                if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id)) {
+                if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id))
+                {
                     continue;
                 }
-                if (trackedEntity.Components.Count > 0) {
+                if (trackedEntity.Components.Count > 0)
+                {
                     throw new InvalidOperationException($"Component cache is in an invalid state");
                 }
                 Entities.Remove(trackedEntity);
-                foreach (var key in ProxyCache.Keys.Where(k => k.Left == entityId).ToArray()) {
+                foreach (var key in ProxyCache.Keys.Where(k => k.Left == entityId).ToArray())
+                {
                     ProxyCache.Remove(key);
                 }
             }
-            if(propagate) {
+            if (propagate)
+            {
                 Parent?.RemoveFlagged();
             }
         }
@@ -287,10 +326,12 @@ namespace Fiero.Core
                 return;
             // Components being tracked by parent containers are automatically updated due to them being reference types
             var equalEntity = new TrackedEntity(entityId);
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+            {
                 throw new ArgumentOutOfRangeException($"An entity with id {entityId} is not being tracked");
             }
-            foreach (var comp in trackedEntity.Components.OfType<TComponent>()) {
+            foreach (var comp in trackedEntity.Components.OfType<TComponent>())
+            {
                 update(comp);
             }
         }
@@ -298,7 +339,8 @@ namespace Fiero.Core
         public IEnumerable<TComponent> GetComponents<TComponent>()
         {
             var tComponent = typeof(TComponent);
-            if (Components.TryGetValue(tComponent, out var entities)) {
+            if (Components.TryGetValue(tComponent, out var entities))
+            {
                 return entities.SelectMany(e => e.Components.OfType<TComponent>());
             }
             return Enumerable.Empty<TComponent>();
@@ -308,7 +350,8 @@ namespace Fiero.Core
 
         public bool TryGetFirstComponent<TComponent>(int entityId, out TComponent component)
         {
-            if(GetComponents(entityId).OfType<TComponent>().FirstOrDefault() is { } c) {
+            if (GetComponents(entityId).OfType<TComponent>().FirstOrDefault() is { } c)
+            {
                 component = c;
                 return true;
             }
@@ -327,7 +370,8 @@ namespace Fiero.Core
             if (EntityRemovalQueue.Contains(entityId))
                 return Enumerable.Empty<EcsComponent>();
             var equalEntity = new TrackedEntity(entityId);
-            if (!Entities.TryGetValue(equalEntity, out var trackedEntity)) {
+            if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+            {
                 throw new ArgumentOutOfRangeException($"An entity with id {entityId} is not being tracked");
             }
             return trackedEntity.Components;
@@ -336,13 +380,16 @@ namespace Fiero.Core
         private volatile bool _diposed;
         public void Dispose()
         {
-            if(_diposed) {
+            if (_diposed)
+            {
                 throw new ObjectDisposedException(nameof(GameEntities));
             }
-            if(ProtectedEntities.Any()) {
+            if (ProtectedEntities.Any())
+            {
                 throw new InvalidOperationException("Cannot dispose GameEntities while protected entities still exist");
             }
-            foreach (var e in Entities) {
+            foreach (var e in Entities)
+            {
                 FlagEntityForRemoval(e.Id);
             }
             RemoveFlagged(propagate: true);

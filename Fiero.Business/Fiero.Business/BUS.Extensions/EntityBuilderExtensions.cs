@@ -9,15 +9,22 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
         public static EntityBuilder<T> WithEffectTracking<T>(this EntityBuilder<T> builder)
-            where T : Entity => builder.AddOrTweak<EffectComponent>();
+            where T : Entity => builder.AddOrTweak<EffectsComponent>();
         public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, EffectDef def, Func<EffectDef, Effect> wrap = null)
-            where T : Entity => builder.AddOrTweak<EffectComponent>(c =>
+            where T : Entity => builder.AddOrTweak<EffectsComponent>(c =>
             {
                 c.Intrinsic.Add(def);
                 builder.Built += (b, o) =>
                 {
                     wrap ??= (e => e.Resolve(o));
-                    wrap(def).Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
+                    var fx = wrap(def);
+                    if (fx is ScriptEffect se && se.Script.ScriptProperties.LastError != null)
+                    {
+                        // If a script errored out during initialization, for instance by failing to load,
+                        // then don't start it. Error messages are handled by the WithScriptInfo method.
+                        return;
+                    }
+                    fx.Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
                 };
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
@@ -101,7 +108,7 @@ namespace Fiero.Business
                         }
                         foreach (var spell in spells)
                         {
-                            actionSystem.SpellLearned.Raise(new(e.Actor, spell));
+                            actionSystem.SpellLearned.Handle(new(e.Actor, spell));
                         }
                         return true;
                     });
@@ -260,6 +267,21 @@ namespace Fiero.Business
                 c.Rarity = rarity;
                 c.UnidentifiedName = unidentName;
                 c.Identified = String.IsNullOrEmpty(unidentName);
+            });
+        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName)
+            where T : Script => builder.AddOrTweak<ErgoScriptComponent>(c =>
+            {
+                c.ScriptPath = fileName;
+                // Delegate the actual loading of the script to when the entity is built
+                builder.Built += (b, e) =>
+                {
+                    var scriptSystem = b.ServiceFactory.GetInstance<ErgoScriptingSystem>();
+                    if (!scriptSystem.LoadScript(e))
+                    {
+                        // TODO: Log to the in-game console that doesn't exist yet
+                    }
+
+                };
             });
     }
 }

@@ -1,0 +1,19 @@
+% This module is imported implicitly by all game scripts.
+% Do not modify unless you know what you are doing.
+
+:- module(fiero, [io:portray/1]).
+
+%%% Used as a prefix for game-related macros to make them stand out more
+:- op(50, fx, ['@']).
+%%% Shorthand macro for matching the player and retrieving the PId
+:- expand([O] >> (
+	@player(Id) :- 
+		O = actor{actor_properties: _{type: player}, id: Id}
+)).
+
+%%% Intercepts all calls to the write_* predicates (except write_raw).
+%%% Instead of writing to the console, messages will be routed to the script's stdout.
+%%% This lets the game display them in their own window, bypassing the shell and keeping them separate.
+io:portray(X) :-
+	explain(X, S),
+	<#- stdout(S).

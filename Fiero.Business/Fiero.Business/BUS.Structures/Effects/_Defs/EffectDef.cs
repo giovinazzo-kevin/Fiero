@@ -1,8 +1,5 @@
 ﻿using Fiero.Core;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Fiero.Business
 {
@@ -14,8 +11,9 @@ namespace Fiero.Business
         public readonly float? Chance;
         public readonly bool Stacking;
         public readonly Entity Source;
+        public readonly Script Script;
 
-        public EffectDef(EffectName name, int magnitude = 1, int? duration = null, float? chance = null, bool canStack = false, Entity source = null)
+        public EffectDef(EffectName name, int magnitude = 1, int? duration = null, float? chance = null, bool canStack = false, Entity source = null, Script script = null)
         {
             Name = name;
             Magnitude = magnitude;
@@ -23,26 +21,31 @@ namespace Fiero.Business
             Chance = chance;
             Stacking = canStack;
             Source = source;
+            Script = script;
         }
 
-        public EffectDef AsNonTemporary() => new(Name, Magnitude, null, Chance, Stacking, Source);
-        public EffectDef AsNonProbabilistic() => new(Name, Magnitude, Duration, null, Stacking, Source);
-        public EffectDef AsStacking() => new(Name, Magnitude, Duration, Chance, true, Source);
-        public EffectDef WithSource(Entity source) => new(Name, Magnitude, Duration, Chance, Stacking, source);
+        public EffectDef AsNonTemporary() => new(Name, Magnitude, null, Chance, Stacking, Source, Script);
+        public EffectDef AsNonProbabilistic() => new(Name, Magnitude, Duration, null, Stacking, Source, Script);
+        public EffectDef AsStacking() => new(Name, Magnitude, Duration, Chance, true, Source, Script);
+        public EffectDef WithSource(Entity source) => new(Name, Magnitude, Duration, Chance, Stacking, source, Script);
 
         public Effect Resolve(Entity source)
         {
             source = source ?? Source;
-            if (!Stacking) {
+            if (!Stacking)
+            {
                 return new NonStacking(WithSource(source).AsStacking());
             }
-            if (Chance.HasValue) {
+            if (Chance.HasValue)
+            {
                 return new Chance(WithSource(source).AsNonProbabilistic(), Chance.Value);
             }
-            if (Duration.HasValue) {
+            if (Duration.HasValue)
+            {
                 return new Temporary(WithSource(source).AsNonTemporary(), Duration.Value);
             }
-            return Name switch {
+            return Name switch
+            {
                 EffectName.Confusion => new ConfusionEffect(source),
                 EffectName.Sleep => new SleepEffect(source),
                 EffectName.Silence => new SilenceEffect(source),
@@ -52,6 +55,8 @@ namespace Fiero.Business
                 EffectName.Explosion => new ExplosionEffect(source, Magnitude * 5, Shapes.Disc(Coord.Zero, Magnitude * 3 - 1)),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.Autopickup => new AutopickupEffect(),
+                EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
+                EffectName.Script => new ScriptEffect(Script),
                 _ => throw new NotSupportedException(Name.ToString()),
             };
         }

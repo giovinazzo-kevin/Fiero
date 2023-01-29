@@ -2,13 +2,6 @@
 {
     public partial class ActionSystem
     {
-        public readonly struct SpellCastEvent
-        {
-            public readonly Actor Actor;
-            public readonly Spell Spell;
-            public readonly PhysicalEntity[] Targets;
-            public SpellCastEvent(Actor actor, Spell spell, PhysicalEntity[] targets)
-                => (Actor, Spell, Targets) = (actor, spell, targets);
-        }
+        public readonly record struct SpellCastEvent(Actor Actor, Spell Spell, PhysicalEntity[] Targets);
     }
 }

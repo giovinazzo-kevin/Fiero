@@ -34,11 +34,6 @@ namespace Fiero.Business
         public override string DisplayName => Script.Info.Name;
         public override string DisplayDescription => Description;
 
-        protected override void OnStarted(GameSystems systems, Entity owner)
-        {
-            base.OnStarted(systems, owner);
-        }
-
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
             /* Ergo scripts can subscribe to Fiero events via the subscribe/2 directive.
@@ -63,6 +58,12 @@ namespace Fiero.Business
             }
         }
 
+        /// <summary>
+        /// Maps every SystemRequest and SystemEvent defined in all systems to a wrapper that
+        /// calls an Ergo script automatically and parses its result as an EventResult for Fiero,
+        /// returning a subscription that will be disposed when this effect ends.
+        /// </summary>
+        /// <returns>All routes indexed by signature.</returns>
         static Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> GetRoutes()
         {
             var finalDict = new Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>>();
@@ -72,17 +73,30 @@ namespace Fiero.Business
             {
                 var sysName = new Atom(sys.Name.Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase)
                     .ToErgoCase());
-
+                // Requests
                 foreach (var req in sys.FieldType.GetFields(BindingFlags.Public | BindingFlags.Instance)
                     .Where(f => f.FieldType.IsAssignableTo(typeof(ISystemRequest))))
                 {
-                    var evtName = new Atom(req.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    var reqName = new Atom(req.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
-                    var evtType = req.FieldType.GetGenericArguments()[1];
-                    finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
+                    var reqType = req.FieldType.GetGenericArguments()[1];
+                    finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemRequest)req.GetValue(sys.GetValue(systems)))
-                            .SubscribeResponse(evt => Respond(self, evt, evtType, evtName, sysName));
+                            .SubscribeResponse(evt => Respond(self, evt, reqType, reqName, sysName));
+                    });
+                }
+                // Events
+                foreach (var evt in sys.FieldType.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(f => !f.FieldType.IsAssignableTo(typeof(ISystemRequest)) && f.FieldType.IsAssignableTo(typeof(ISystemEvent))))
+                {
+                    var evtName = new Atom(evt.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
+                        .ToErgoCase());
+                    var evtType = evt.FieldType.GetGenericArguments()[1];
+                    finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
+                    {
+                        return ((ISystemEvent)evt.GetValue(sys.GetValue(systems)))
+                            .SubscribeHandler(evt => Respond(self, evt, evtType, evtName, sysName));
                     });
                 }
             }
@@ -100,16 +114,17 @@ namespace Fiero.Business
                 // Return true only when at least one predicate succeeded
                 try
                 {
+                    // TODO: Figure out a way for scripts to return complex EventResults?
                     return self.Script.Solve(query).Count() > 0;
                 }
                 catch (ErgoException ex)
                 {
-                    // TODO: Log in the in-game console
+                    // TODO: Log to the in-game console
                     Console.WriteLine(ex);
                     return false;
                 }
 
-#pragma warning restore CA1827 // Do not use Count() or LongCount() when Any() can be used
+#pragma warning restore CA1827
             }
         }
     }

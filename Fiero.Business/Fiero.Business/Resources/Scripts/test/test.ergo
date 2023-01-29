@@ -1,6 +1,6 @@
 :- module(test, []).
 
-:- subscribe(action, [actor_killed]).
+:- subscribe(action, [actor_killed, actor_gained_effect]).
 :- dynamic(num_killed/1).
 
 action:actor_killed(_{killer: @player(_)}) :- 
@@ -12,5 +12,5 @@ action:actor_killed(_{killer: @player(_)}) :-
 	assertz(num_killed(K1)),
 	write(K1), write(' kills'), nl.
 
-fiero(X).
-   
+action:actor_gained_effect(_{effect:X}) :-
+	write(X), nl.

@@ -1,9 +1,6 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Shapes = Fiero.Core.Shapes;
 
 namespace Fiero.Business
@@ -88,7 +85,8 @@ namespace Fiero.Business
                 .Skip(1).SkipLast(1)
                 .ToArray();
             return new(
-                line.Select((p, i) => {
+                line.Select((p, i) =>
+                {
                     var v = offset + p;
                     var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
                     v += new Vec(0, t);
@@ -134,6 +132,15 @@ namespace Fiero.Business
                 new(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, ofs, new(1, 1));
         }
 
+        public static Animation Wait(
+            TimeSpan duration
+        )
+        {
+            return new(new[] {
+                new AnimationFrame(duration),
+            });
+        }
+
         public static Animation TeleportOut(
             Actor actor
         )
@@ -173,15 +180,15 @@ namespace Fiero.Business
                 new AnimationFrame(TimeSpan.FromMilliseconds(4 * 16), GetSprites(new(0, -0.25f), ColorName.White, str)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetSprites(new(0, +0.00f), ColorName.White, str)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetSprites(new(0, +0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 *  8), GetSprites(new(0, +0.50f), tint, str))
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 8), GetSprites(new(0, +0.50f), tint, str))
             );
 
             SpriteDef[] GetSprites(Vec ofs, ColorName tint, string text)
             {
                 return text.Select((c, i) => new SpriteDef(
-                        TextureName.FontLight, 
-                        ((int)c).ToString(), 
-                        tint, 
+                        TextureName.FontLight,
+                        ((int)c).ToString(),
+                        tint,
                         ofs + new Vec(i * s.X - text.Length * s.X / 4, 0),
                         s
                     ))

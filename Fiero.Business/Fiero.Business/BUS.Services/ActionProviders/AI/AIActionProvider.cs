@@ -127,9 +127,10 @@ namespace Fiero.Business
             return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Dungeon.GetActorsAt(a.FloorId(), p).Any());
         }
 
-        protected virtual void SetTarget(Actor a, PhysicalEntity target)
+        protected virtual void SetTarget(Actor a, PhysicalEntity target, Func<IAction> goal = null)
         {
             a.Ai.Target = target;
+            a.Ai.Goal = goal;
             TryRecalculatePath(a);
         }
 
@@ -163,10 +164,23 @@ namespace Fiero.Business
                     }
                 }
             }
+            // Destination was reached
+            else if (a.Ai.Path != null && a.Ai.Path.First == null && a.Ai.Goal is { } goal)
+            {
+                Clear();
+                action = goal();
+                return true;
+            }
             // Path recalculation is necessary
-            a.Ai.Path = null;
-            a.Ai.Target = null;
+            Clear();
             return false;
+
+            void Clear()
+            {
+                a.Ai.Path = null;
+                a.Ai.Target = null;
+                a.Ai.Goal = null;
+            }
         }
 
         protected virtual IAction Retreat(Actor a)
@@ -262,18 +276,18 @@ namespace Fiero.Business
                 }
                 SetTarget(a, closestItem);
             }
-            if (a.Ai.Target == null && Rng.Random.NChancesIn(1, RepathOneTimeIn))
-            {
-                var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
-                    .Cells.Values.Where(c => c.IsWalkable(null))
-                    .Shuffle(Rng.Random)
-                    .OrderBy(c => !a.Knows(c.Tile.Position()) ? -100 : a.CanSee(c.Tile.Position()) ? 10 : 0)
-                    .First().Tile;
-                SetTarget(a, randomTile);
-            }
             if (TryFollowPath(a, out var action))
             {
                 return action;
+            }
+            if (a.Ai.Target == null && Rng.Random.NChancesIn(1, RepathOneTimeIn))
+            {
+                var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
+                    .Cells.Values.Where(c => c.IsWalkable(null) && !a.Knows(c.Tile.Position()));
+                if (randomTile.Any())
+                {
+                    SetTarget(a, randomTile.Shuffle(Rng.Random).First().Tile);
+                }
             }
             return new MoveRandomlyAction();
         }

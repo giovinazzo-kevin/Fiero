@@ -349,6 +349,7 @@ namespace Fiero.Business.Scenes
             // - Update actor position
             // - Update FloorSystem positional caches
             // - Log stuff that was stepped over
+            // - Play animation if enabled in the settings or if this is the AutoPlayer
             yield return Systems.Action.ActorMoved.SubscribeResponse(e =>
             {
                 var floor = Systems.Dungeon.GetFloor(e.Actor.FloorId());
@@ -379,6 +380,11 @@ namespace Fiero.Business.Scenes
                     {
                         e.Actor.Log?.Write($"$Action.YouStepOverSeveral$ {count} {features.Key}.");
                     }
+                }
+                // TODO: This is ugly and there should be an actual animation for walking, optional of course
+                if (e.Actor.IsPlayer() && e.Actor.Action.ActionProvider is AutoPlayerActionProvider)
+                {
+                    Systems.Render.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(20)));
                 }
                 e.Actor.Physics.Position = e.NewPosition;
                 return true;

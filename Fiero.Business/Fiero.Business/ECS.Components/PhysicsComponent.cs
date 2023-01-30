@@ -9,8 +9,6 @@ namespace Fiero.Business
         public int Roots { get; set; }
         public bool CanMove { get; set; }
         public bool BlocksMovement { get; set; }
-        public bool BlocksPathing { get; set; }
-        public bool BlocksPathingOrMovement => BlocksPathing || BlocksMovement;
         public bool BlocksLight { get; set; }
     }
 }

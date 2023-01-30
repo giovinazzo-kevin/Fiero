@@ -17,33 +17,27 @@ namespace Fiero.Business
             RepathOneTimeIn = 1;
         }
 
-        public override IAction GetIntent(Actor a)
-        {
-            var intent = base.GetIntent(a);
-            if (EnemiesOnFloor.Values.Count == 0)
-            {
-                var downstairs = Systems.Dungeon.GetFeaturesAt(a.FloorId(), a.Position())
-                    .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
-                    .FirstOrDefault();
-                if (downstairs != null)
-                {
-                    return new InteractWithFeatureAction(downstairs);
-                }
-            }
-            return intent;
-        }
-
         protected override IAction Wander(Actor a)
         {
-            if (EnemiesOnFloor.Values.Count == 0 && a.Ai.Target == null)
+            if (a.Ai.Target == null)
             {
-                var floorId = a.FloorId();
-                var downstairs = Systems.Dungeon.GetAllFeatures(floorId)
-                    .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
+                var features = Systems.Dungeon.GetAllFeatures(a.FloorId());
+                var door = features
+                    .Where(f => f.FeatureProperties.Name == FeatureName.Door && a.Knows(f.Physics.Position) && f.Physics.BlocksMovement)
                     .FirstOrDefault();
-                if (downstairs != null)
+                if (door != null)
                 {
-                    SetTarget(a, downstairs);
+                    SetTarget(a, door, () => new InteractWithFeatureAction(door));
+                }
+                else if (EnemiesOnFloor.Values.Count == 0)
+                {
+                    var downstairs = features
+                        .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
+                        .FirstOrDefault();
+                    if (downstairs != null)
+                    {
+                        SetTarget(a, downstairs, () => new InteractWithFeatureAction(downstairs));
+                    }
                 }
             }
 

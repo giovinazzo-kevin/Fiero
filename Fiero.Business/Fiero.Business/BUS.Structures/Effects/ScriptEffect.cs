@@ -106,16 +106,17 @@ namespace Fiero.Business
             static EventResult Respond(ScriptEffect self, object evt, Type type, Atom evtName, Atom sysName)
             {
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named);
-#pragma warning disable CA1827 // Do not use Count() or LongCount() when Any() can be used
-                // BECAUSE we actually want to enumerate all solutions
-
                 // Qualify term with module so that the declaration needs to match, e.g. action:actor_turn_started/1
                 var query = new Query(((ITerm)new Complex(evtName, term)).Qualified(sysName));
-                // Return true only when at least one predicate succeeded
                 try
                 {
                     // TODO: Figure out a way for scripts to return complex EventResults?
-                    return self.Script.Solve(query).Count() > 0;
+                    foreach (var _ in self.Script.Solve(query))
+                    {
+                        if (self.Script.ScriptProperties.LastError != null)
+                            return false;
+                    }
+                    return true;
                 }
                 catch (ErgoException ex)
                 {
@@ -123,8 +124,6 @@ namespace Fiero.Business
                     Console.WriteLine(ex);
                     return false;
                 }
-
-#pragma warning restore CA1827
             }
         }
     }

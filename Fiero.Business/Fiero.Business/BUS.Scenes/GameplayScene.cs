@@ -384,7 +384,7 @@ namespace Fiero.Business.Scenes
                 // TODO: This is ugly and there should be an actual animation for walking, optional of course
                 if (e.Actor.IsPlayer() && e.Actor.Action.ActionProvider is AutoPlayerActionProvider)
                 {
-                    Systems.Render.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(20)));
+                    Systems.Render.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(10)));
                 }
                 e.Actor.Physics.Position = e.NewPosition;
                 return true;

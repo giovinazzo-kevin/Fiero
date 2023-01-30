@@ -273,8 +273,8 @@ namespace Fiero.Business
             }
         }
 
-        public bool IsLineOfSightBlocked(FloorId id, Coord a, Coord b)
-            => !TryGetFloor(id, out var floor)
-                || Shapes.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(null));
+        public bool IsLineOfSightBlocked(PhysicalEntity e, Coord a, Coord b)
+            => !TryGetFloor(e.FloorId(), out var floor)
+                || Shapes.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(e));
     }
 }

@@ -31,13 +31,13 @@ namespace Fiero.Business
             }
             else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile))
             {
-                if (!tile.Physics.BlocksMovement)
+                if (t.Actor.Physics.Phasing || !tile.Physics.BlocksMovement)
                 {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
                     if (!actorsHere.Any())
                     {
-                        if (!featuresHere.Any(f => f.Physics.BlocksMovement))
+                        if (t.Actor.Physics.Phasing || !featuresHere.Any(f => f.Physics.BlocksMovement))
                         {
                             return ActorMoved.Handle(new(t.Actor, oldPos, newPos));
                         }

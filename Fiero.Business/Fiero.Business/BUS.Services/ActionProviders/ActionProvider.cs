@@ -36,7 +36,7 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(a) ?? true
             );
             if (TryTarget(a, zapShape, autoTarget))
             {
@@ -85,7 +85,7 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(null) ?? true
+                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(a) ?? true
             );
             if (TryTarget(a, throwShape, autoTarget))
             {

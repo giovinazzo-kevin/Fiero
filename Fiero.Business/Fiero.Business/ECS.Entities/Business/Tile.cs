@@ -3,11 +3,11 @@
 namespace Fiero.Business
 {
 
-    public class Tile : PhysicalEntity, IPathNode<object>
+    public class Tile : PhysicalEntity, IPathNode<PhysicalEntity>
     {
         [RequiredComponent]
         public TileComponent TileProperties { get; private set; }
 
-        public bool IsWalkable(object inContext) => !Physics.BlocksMovement;
+        public bool IsWalkable(PhysicalEntity actor) => actor.Physics.Phasing || !Physics.BlocksMovement;
     }
 }

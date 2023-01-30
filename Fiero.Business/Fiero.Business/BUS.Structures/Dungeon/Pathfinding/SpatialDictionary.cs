@@ -2,13 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.Linq;
 
 namespace Fiero.Business
 {
-    internal class SpatialDictionary<V> : IReadOnlyDictionary<Coord, V>
-        where V : IPathNode<object>
+    internal class SpatialDictionary<V, K> : IReadOnlyDictionary<Coord, V>
+        where V : IPathNode<K>
     {
         private readonly V[,] _values;
         private readonly HashSet<Coord> _keys;
@@ -17,15 +16,19 @@ namespace Fiero.Business
         public IEnumerable<Coord> Keys => _keys;
         public IEnumerable<V> Values => _keys.Select(k => _values[k.X, k.Y]);
         public int Count => Size.X * Size.Y;
-        public V this[Coord key] {
+        public V this[Coord key]
+        {
             get => _values[key.X, key.Y];
-            set {
+            set
+            {
                 var contains = _keys.Contains(key);
                 var isNull = value == null;
-                if (contains && isNull) {
+                if (contains && isNull)
+                {
                     _keys.Remove(key);
                 }
-                else if(!contains && !isNull) {
+                else if (!contains && !isNull)
+                {
                     _keys.Add(key);
                 }
                 _values[key.X, key.Y] = value;
@@ -42,7 +45,8 @@ namespace Fiero.Business
         public bool ContainsKey(Coord key) => _keys.Contains(key);
         public bool TryGetValue(Coord key, [MaybeNullWhen(false)] out V value)
         {
-            if(ContainsKey(key)) {
+            if (ContainsKey(key))
+            {
                 value = _values[key.X, key.Y];
                 return true;
             }
@@ -55,6 +59,6 @@ namespace Fiero.Business
                 .GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public SpatialAStar<V, object> GetPathfinder() => new(_values);
+        public SpatialAStar<V, K> GetPathfinder() => new(_values);
     }
 }

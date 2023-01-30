@@ -1,7 +1,6 @@
 ﻿using Fiero.Core;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace Fiero.Business
@@ -12,9 +11,9 @@ namespace Fiero.Business
         public readonly FloorId Id;
         public readonly Coord Size;
 
-        private readonly SpatialDictionary<MapCell> _cells;
+        private readonly SpatialDictionary<MapCell, PhysicalEntity> _cells;
         public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
-        public readonly SpatialAStar<MapCell, object> Pathfinder;
+        public readonly SpatialAStar<MapCell, PhysicalEntity> Pathfinder;
 
         public event Action<Floor, Tile, Tile> TileChanged;
         public event Action<Floor, Feature> FeatureAdded;
@@ -28,22 +27,24 @@ namespace Fiero.Business
         {
             Id = id;
             Size = size;
-            _cells = new SpatialDictionary<MapCell>(size);
+            _cells = new(size);
             Pathfinder = _cells.GetPathfinder();
         }
 
-        public IEnumerable<PhysicalEntity> GetDrawables() 
+        public IEnumerable<PhysicalEntity> GetDrawables()
             => Cells.Values.SelectMany(c => c.GetDrawables());
 
         public void SetTile(Tile tile)
         {
-            if (!_cells.TryGetValue(tile.Position(), out var cell)) {
+            if (!_cells.TryGetValue(tile.Position(), out var cell))
+            {
                 cell = _cells[tile.Position()] = new(tile);
             }
             var oldTile = cell.Tile;
             cell.Tile = tile;
             TileChanged?.Invoke(this, oldTile, tile);
-            if (Pathfinder != null) {
+            if (Pathfinder != null)
+            {
                 Pathfinder.Update(tile.Position(), cell, out var old);
                 old?.Tile?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
             }
@@ -52,7 +53,8 @@ namespace Fiero.Business
         public void AddActor(Actor actor)
         {
             actor.Physics.FloorId = Id;
-            if(_cells.TryGetValue(actor.Position(), out var cell)) {
+            if (_cells.TryGetValue(actor.Position(), out var cell))
+            {
                 cell.Actors.Add(actor);
                 ActorAdded?.Invoke(this, actor);
             }
@@ -60,7 +62,8 @@ namespace Fiero.Business
 
         public void RemoveActor(Actor actor)
         {
-            if (_cells.TryGetValue(actor.Position(), out var cell)) {
+            if (_cells.TryGetValue(actor.Position(), out var cell))
+            {
                 cell.Actors.Remove(actor);
                 ActorRemoved?.Invoke(this, actor);
             }
@@ -69,7 +72,8 @@ namespace Fiero.Business
         public void AddItem(Item item)
         {
             item.Physics.FloorId = Id;
-            if (_cells.TryGetValue(item.Position(), out var cell)) {
+            if (_cells.TryGetValue(item.Position(), out var cell))
+            {
                 cell.Items.Add(item);
                 ItemAdded?.Invoke(this, item);
             }
@@ -77,7 +81,8 @@ namespace Fiero.Business
 
         public void RemoveItem(Item item)
         {
-            if (_cells.TryGetValue(item.Position(), out var cell)) {
+            if (_cells.TryGetValue(item.Position(), out var cell))
+            {
                 cell.Items.Remove(item);
                 ItemRemoved?.Invoke(this, item);
             }
@@ -86,7 +91,8 @@ namespace Fiero.Business
         public void AddFeature(Feature feature)
         {
             feature.Physics.FloorId = Id;
-            if (_cells.TryGetValue(feature.Position(), out var cell)) {
+            if (_cells.TryGetValue(feature.Position(), out var cell))
+            {
                 cell.Features.Add(feature);
                 Pathfinder.Update(feature.Position(), cell, out _);
                 FeatureAdded?.Invoke(this, feature);
@@ -95,7 +101,8 @@ namespace Fiero.Business
 
         public void RemoveFeature(Feature feature)
         {
-            if (_cells.TryGetValue(feature.Position(), out var cell)) {
+            if (_cells.TryGetValue(feature.Position(), out var cell))
+            {
                 cell.Features.Remove(feature);
                 Pathfinder.Update(feature.Position(), cell, out _);
                 FeatureRemoved?.Invoke(this, feature);

@@ -638,13 +638,13 @@ namespace Fiero.Business
 
         public EntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .WithItems(Rng.Random.ChooseWeighted(ChestLootTable().ToArray()))
             ;
         public EntityBuilder<Feature> Feature_Shrine()
             => Feature<Feature>(FeatureName.Shrine)
             .WithDialogueTriggers(FeatureName.Shrine)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = true)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             ;
         public EntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
@@ -653,7 +653,7 @@ namespace Fiero.Business
             ;
         public EntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             ;
         public EntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
             => Feature<Portal>(FeatureName.Downstairs)
@@ -670,7 +670,7 @@ namespace Fiero.Business
         #region TILES
         public EntityBuilder<Tile> Tile_Wall()
             => Tile(TileName.Wall, ColorName.Gray)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = true)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Wall)
             ;
         public EntityBuilder<Tile> Tile_Room()

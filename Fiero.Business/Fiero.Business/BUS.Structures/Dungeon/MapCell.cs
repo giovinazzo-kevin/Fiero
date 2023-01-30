@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-    public class MapCell : IPathNode<object>
+    public class MapCell : IPathNode<PhysicalEntity>
     {
         public Tile Tile { get; set; }
         public readonly HashSet<Actor> Actors;
@@ -19,8 +19,12 @@ namespace Fiero.Business
             Features = new();
         }
 
-        public bool IsWalkable(object inContext) => ((IPathNode<object>)Tile).IsWalkable(inContext)
-            && !Features.Any(f => f.Physics.BlocksMovement);
+        public bool IsWalkable(PhysicalEntity e) => e.Physics.Phasing || ((IPathNode<PhysicalEntity>)Tile).IsWalkable(e)
+            && !Features.Any(f => e.TryCast<Actor>(out var a) && a.IsPlayer() switch
+            {
+                true => f.Physics.BlocksPlayerPathing,
+                false => f.Physics.BlocksNpcPathing
+            });
         public IEnumerable<PhysicalEntity> GetDrawables(bool seen = true)
         {
             yield return Tile;

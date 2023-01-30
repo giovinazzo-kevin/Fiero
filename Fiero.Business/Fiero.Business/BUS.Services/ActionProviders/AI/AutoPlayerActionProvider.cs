@@ -22,22 +22,12 @@ namespace Fiero.Business
             if (a.Ai.Target == null)
             {
                 var features = Systems.Dungeon.GetAllFeatures(a.FloorId());
-                var door = features
-                    .Where(f => f.FeatureProperties.Name == FeatureName.Door && a.Knows(f.Physics.Position) && f.Physics.BlocksMovement)
+                var downstairs = features
+                    .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
                     .FirstOrDefault();
-                if (door != null)
+                if (downstairs != null)
                 {
-                    SetTarget(a, door, () => new InteractWithFeatureAction(door));
-                }
-                else if (EnemiesOnFloor.Values.Count == 0)
-                {
-                    var downstairs = features
-                        .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
-                        .FirstOrDefault();
-                    if (downstairs != null)
-                    {
-                        SetTarget(a, downstairs, () => new InteractWithFeatureAction(downstairs));
-                    }
+                    SetTarget(a, downstairs, () => new InteractWithFeatureAction(downstairs));
                 }
             }
 

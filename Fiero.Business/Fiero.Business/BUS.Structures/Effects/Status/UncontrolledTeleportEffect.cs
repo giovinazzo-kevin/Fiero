@@ -12,11 +12,11 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.UncontrolledTeleport.Desc$";
         public override EffectName Name => EffectName.UncontrolledTeleport;
 
-        protected override void Apply(GameSystems systems, Actor target) 
+        protected override void Apply(GameSystems systems, Actor target)
         {
             var randomPos = systems.Dungeon.GetFloor(target.FloorId())
                 .Cells.Shuffle(Rng.Random)
-                .First(x => x.Value.IsWalkable(null))
+                .First(x => x.Value.IsWalkable(target))
                 .Key;
             systems.Action.ActorTeleporting.HandleOrThrow(new(target, target.Position(), randomPos));
             End();

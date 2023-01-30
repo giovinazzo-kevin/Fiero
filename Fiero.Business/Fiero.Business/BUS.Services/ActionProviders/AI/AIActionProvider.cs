@@ -139,7 +139,7 @@ namespace Fiero.Business
             if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
                 return false;
             var floor = Systems.Dungeon.GetFloor(a.FloorId());
-            a.Ai.Path = floor.Pathfinder.Search(a.Position(), a.Ai.Target.Position(), default);
+            a.Ai.Path = floor.Pathfinder.Search(a.Position(), a.Ai.Target.Position(), a);
             a.Ai.Path?.RemoveFirst();
             return true;
         }
@@ -157,7 +157,7 @@ namespace Fiero.Business
                 {
                     // one tile ahead
                     if (Systems.Dungeon.TryGetCellAt(a.FloorId(), pos, out var cell)
-                        && cell.IsWalkable(null) && !cell.Actors.Any())
+                        && cell.IsWalkable(a) && !cell.Actors.Any())
                     {
                         action = new MoveRelativeAction(dir);
                         return true;
@@ -202,7 +202,7 @@ namespace Fiero.Business
                 {
                     return Fight(a);
                 }
-                if (!cell.IsWalkable(null))
+                if (!cell.IsWalkable(a))
                 {
                     return Fight(a);
                 }
@@ -283,7 +283,7 @@ namespace Fiero.Business
             if (a.Ai.Target == null && Rng.Random.NChancesIn(1, RepathOneTimeIn))
             {
                 var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
-                    .Cells.Values.Where(c => c.IsWalkable(null) && !a.Knows(c.Tile.Position()));
+                    .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));
                 if (randomTile.Any())
                 {
                     SetTarget(a, randomTile.Shuffle(Rng.Random).First().Tile);

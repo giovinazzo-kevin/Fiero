@@ -10,19 +10,16 @@ namespace Fiero.Business
     public class GameEntityBuilders
     {
         protected readonly GameEntities Entities;
-        protected readonly GameGlossaries Glossaries;
         protected readonly GameUI UI;
         protected readonly GameColors<ColorName> Colors;
 
         public GameEntityBuilders(
             GameEntities entities,
-            GameGlossaries glossaries,
             GameUI ui,
             GameColors<ColorName> colors
         )
         {
             Entities = entities;
-            Glossaries = glossaries;
             Colors = colors;
             UI = ui;
         }

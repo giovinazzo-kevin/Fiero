@@ -32,6 +32,7 @@ namespace Fiero.Core
             public override int GetHashCode() => Id;
         }
 
+
         // Must: create/destroy entities, store them in an indexed collection HashSet<Entity>
         //       add/remove components to entities, store them in another indexed collection Dict<TComponent, HashSet<Entity>>
 

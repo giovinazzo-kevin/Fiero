@@ -12,7 +12,6 @@ namespace Fiero.Business
         public readonly GameSprites<TextureName, ColorName> Sprites;
         public readonly GameTextures<TextureName> Textures;
         public readonly GameFonts<FontName> Fonts;
-        public readonly GameGlossaries Glossaries;
         public readonly GameDialogues Dialogues;
         public readonly GameEntityBuilders Entities;
 
@@ -24,7 +23,6 @@ namespace Fiero.Business
             GameSprites<TextureName, ColorName> sprites,
             GameTextures<TextureName> textures,
             GameFonts<FontName> fonts,
-            GameGlossaries glossaries,
             GameDialogues dialogues,
             GameEntityBuilders entities
         )
@@ -36,7 +34,6 @@ namespace Fiero.Business
             Sprites = sprites;
             Textures = textures;
             Fonts = fonts;
-            Glossaries = glossaries;
             Dialogues = dialogues;
             Entities = entities;
         }

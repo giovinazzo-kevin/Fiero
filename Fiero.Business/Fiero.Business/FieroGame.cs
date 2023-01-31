@@ -18,7 +18,6 @@ namespace Fiero.Business
 
         protected readonly EventBus Bus;
         protected readonly GameDataStore Store;
-        protected readonly GameGlossaries Glossary;
         protected readonly GameDialogues Dialogues;
 
         public FieroGame(
@@ -27,7 +26,6 @@ namespace Fiero.Business
             GameLoop loop,
             GameInput input,
             GameDirector director,
-            GameGlossaries glossary,
             GameDialogues dialogues,
             GameDataStore store,
             GameUI ui,
@@ -44,7 +42,6 @@ namespace Fiero.Business
         {
             Bus = bus;
             Dialogues = dialogues;
-            Glossary = glossary;
             Scenes = gameScenes;
             Store = store;
             loop.TimeStep = 1f / 1000;
@@ -120,12 +117,6 @@ namespace Fiero.Business
             Sprites.BuildIndex(TextureName.FontLight, new(8, 12));
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
-
-            Glossary.LoadFactionGlossary(FactionName.Rats);
-            Glossary.LoadFactionGlossary(FactionName.Snakes);
-            Glossary.LoadFactionGlossary(FactionName.Cats);
-            Glossary.LoadFactionGlossary(FactionName.Dogs);
-            Glossary.LoadFactionGlossary(FactionName.Boars);
 
             Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);

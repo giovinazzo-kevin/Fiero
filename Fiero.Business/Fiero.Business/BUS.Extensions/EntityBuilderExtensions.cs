@@ -280,7 +280,6 @@ namespace Fiero.Business
                     {
                         // TODO: Log to the in-game console that doesn't exist yet
                     }
-
                 };
             });
     }

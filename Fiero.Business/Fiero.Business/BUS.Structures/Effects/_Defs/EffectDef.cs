@@ -24,8 +24,8 @@ namespace Fiero.Business
             Script = script;
         }
 
-        public EffectDef AsNonTemporary() => new(Name, Magnitude, null, Chance, Stacking, Source, Script);
-        public EffectDef AsNonProbabilistic() => new(Name, Magnitude, Duration, null, Stacking, Source, Script);
+        public EffectDef AsPermanent() => new(Name, Magnitude, null, Chance, Stacking, Source, Script);
+        public EffectDef AsCertain() => new(Name, Magnitude, Duration, null, Stacking, Source, Script);
         public EffectDef AsStacking() => new(Name, Magnitude, Duration, Chance, true, Source, Script);
         public EffectDef WithSource(Entity source) => new(Name, Magnitude, Duration, Chance, Stacking, source, Script);
 
@@ -38,11 +38,11 @@ namespace Fiero.Business
             }
             if (Chance.HasValue)
             {
-                return new Chance(WithSource(source).AsNonProbabilistic(), Chance.Value);
+                return new Chance(WithSource(source).AsCertain(), Chance.Value);
             }
             if (Duration.HasValue)
             {
-                return new Temporary(WithSource(source).AsNonTemporary(), Duration.Value);
+                return new Temporary(WithSource(source).AsPermanent(), Duration.Value);
             }
             return Name switch
             {

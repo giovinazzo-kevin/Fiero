@@ -56,6 +56,8 @@ namespace Fiero.Business
 
         public bool LoadScript(Script script)
         {
+            if (script.IsInvalid())
+                return false;
             var localScope = Scope
                 .WithExceptionHandler(new(
                     @catch: ex =>

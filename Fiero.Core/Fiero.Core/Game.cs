@@ -1,4 +1,6 @@
-﻿using SFML.Graphics;
+﻿using Fiero.Core.Exceptions;
+using Fiero.Core.Structures;
+using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;

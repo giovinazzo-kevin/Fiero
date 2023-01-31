@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using Fiero.Core.Extensions;
 
 namespace Fiero.Business
 {

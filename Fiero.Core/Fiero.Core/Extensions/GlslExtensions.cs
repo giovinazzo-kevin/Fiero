@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using SFML.Graphics.Glsl;
 
-namespace Fiero.Core
+namespace Fiero.Core.Extensions
 {
     public static class GlslExtensions
     {

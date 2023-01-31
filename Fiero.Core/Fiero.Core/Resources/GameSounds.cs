@@ -1,4 +1,5 @@
-﻿using SFML.Audio;
+﻿using Fiero.Core.Structures;
+using SFML.Audio;
 using SFML.System;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿using Fiero.Business.Scenes;
 using Fiero.Core;
+using Fiero.Core.Structures;
 using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;

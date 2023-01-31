@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using Fiero.Core.Structures;
 using System;
 using System.Collections.Generic;
 using System.Linq;

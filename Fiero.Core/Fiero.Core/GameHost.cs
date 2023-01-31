@@ -1,4 +1,5 @@
-﻿using LightInject;
+﻿using Fiero.Core.Structures;
+using LightInject;
 using System;
 using System.Collections.Generic;
 using System.Linq;

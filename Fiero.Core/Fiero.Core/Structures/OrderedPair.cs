@@ -1,4 +1,4 @@
-﻿namespace Fiero.Core
+﻿namespace Fiero.Core.Structures
 {
 
     public readonly struct OrderedPair<T1, T2>
@@ -15,7 +15,8 @@
         public override int GetHashCode() => Left.GetHashCode() - Right.GetHashCode();
         public override bool Equals(object obj)
         {
-            if (obj is OrderedPair<T1, T2> other) {
+            if (obj is OrderedPair<T1, T2> other)
+            {
                 return Equals(other.Left, Left) && Equals(other.Right, Right);
             }
             return false;
@@ -48,7 +49,8 @@
         public override int GetHashCode() => Left.GetHashCode() - Right.GetHashCode();
         public override bool Equals(object obj)
         {
-            if (obj is OrderedPair<T> other) {
+            if (obj is OrderedPair<T> other)
+            {
                 return Equals(other.Left, Left) && Equals(other.Right, Right);
             }
             return false;

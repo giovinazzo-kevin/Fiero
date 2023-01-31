@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core.Structures
 {
     public readonly struct UnorderedPair<T>
     {
@@ -18,7 +16,8 @@ namespace Fiero.Core
         public override int GetHashCode() => Left.GetHashCode() * Right.GetHashCode();
         public override bool Equals(object obj)
         {
-            if (obj is UnorderedPair<T> other) {
+            if (obj is UnorderedPair<T> other)
+            {
                 return Equals(other.Left, Left) && Equals(other.Right, Right)
                     || Equals(other.Right, Left) && Equals(other.Left, Right);
             }

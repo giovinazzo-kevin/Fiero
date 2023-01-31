@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
-using Unconcern.Common;
 
-namespace Fiero.Core
+namespace Fiero.Core.Structures
 {
     public sealed class OffButton
     {

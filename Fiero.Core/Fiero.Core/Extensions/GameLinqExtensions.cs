@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Fiero.Core
+namespace Fiero.Core.Extensions
 {
     public static class GameLinqExtensions
     {

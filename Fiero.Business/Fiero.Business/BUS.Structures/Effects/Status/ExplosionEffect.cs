@@ -5,7 +5,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class ExplosionEffect : StatusEffect
+    public class ExplosionEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.Explosion.Name$";
         public override string DisplayDescription => "$Effect.Explosion.Desc$";

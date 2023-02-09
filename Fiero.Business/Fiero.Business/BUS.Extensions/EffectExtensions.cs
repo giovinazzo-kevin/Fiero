@@ -17,6 +17,7 @@ namespace Fiero.Business
                 EffectName.UncontrolledTeleport => new(false, false, true, false, true),
                 EffectName.Heal => new(true, false, false, false, true),
                 EffectName.Explosion => new(false, false, true, true, false),
+                EffectName.RaiseUndead => new(false, false, true, true, true),
                 _ => new(false, false, false, false, false)
             };
         }

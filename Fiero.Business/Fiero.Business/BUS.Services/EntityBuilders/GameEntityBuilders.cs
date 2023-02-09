@@ -115,7 +115,7 @@ namespace Fiero.Business
             .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
-        public EntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay)
+        public EntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay, EffectDef castEffect)
             => Entities.CreateBuilder<Spell>()
             .WithName(type.ToString())
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
@@ -489,6 +489,22 @@ namespace Fiero.Business
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Explosion) ?? false
             )
             ;
+        public EntityBuilder<Actor> NPC_RatZombie()
+            => NPC_Rat()
+            .WithHealth(30)
+            .WithName("Rat Zombie")
+            .WithNpcInfo(NpcName.RatZombie)
+            .WithDialogueTriggers(NpcName.RatZombie)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatZombie), ColorName.White)
+            ;
+        public EntityBuilder<Actor> NPC_RatSkeleton()
+            => NPC_Rat()
+            .WithHealth(15)
+            .WithName("Rat Skeleton")
+            .WithNpcInfo(NpcName.RatSkeleton)
+            .WithDialogueTriggers(NpcName.RatSkeleton)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatSkeleton), ColorName.White)
+            ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
             .WithHealth(7)
@@ -603,6 +619,8 @@ namespace Fiero.Business
         #region SCROLLS
         public EntityBuilder<Scroll> Scroll_OfMassConfusion()
             => Scroll(new(EffectName.Confusion, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMassSpookiness()
+            => Scroll(new(EffectName.RaiseUndead, duration: 10, magnitude: 1), ScrollModifierName.AreaAffectsEveryone);
         public EntityBuilder<Scroll> Scroll_OfMassSleep()
             => Scroll(new(EffectName.Sleep, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSilence()

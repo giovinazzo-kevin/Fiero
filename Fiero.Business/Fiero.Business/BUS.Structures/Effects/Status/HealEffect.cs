@@ -7,7 +7,7 @@ namespace Fiero.Business
 {
 
     // Heal a fixed amount of HP 
-    public class HealEffect : StatusEffect
+    public class HealEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.Heal.Name$";
         public override string DisplayDescription => "$Effect.Heal.Desc$";

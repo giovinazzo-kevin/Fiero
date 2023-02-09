@@ -408,6 +408,7 @@
     <Folder Include="BUS.Structures\Spells\" />
     <Folder Include="ECS.Systems\Scripting\Ergo\Libraries\" />
     <Folder Include="ECS.Systems\Scripting\Ergo\Built-Ins\" />
+    <Folder Include="Resources\Scripts\effects\" />
   </ItemGroup>
 
 </Project>

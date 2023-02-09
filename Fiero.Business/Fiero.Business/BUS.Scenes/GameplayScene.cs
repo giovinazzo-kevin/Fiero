@@ -580,7 +580,7 @@ namespace Fiero.Business.Scenes
                     return false;
                 }
             });
-            // ActionSystem.CorpseDropped:
+            // ActionSystem.CorpseCreated:
             // - Create corpse item
             yield return Systems.Action.CorpseCreated.SubscribeResponse(e =>
             {
@@ -592,6 +592,32 @@ namespace Fiero.Business.Scenes
                 }
                 Systems.Dungeon.AddItem(e.Actor.FloorId(), e.Corpse);
                 e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
+                return true;
+            });
+            // ActionSystem.CorpseRaised:
+            // - Spawn undead
+            // - Destroy leftover corpse
+            yield return Systems.Action.CorpseRaised.SubscribeResponse(e =>
+            {
+                var actorBuilder = e.Corpse.CorpseProperties.Type switch
+                {
+                    CorpseName.RatCorpse => e.RaisedAsZombie
+                        ? EntityBuilders.NPC_RatZombie() : EntityBuilders.NPC_RatSkeleton(),
+                    _ => throw new NotImplementedException()
+                };
+                var actor = actorBuilder.Build();
+                actor.Physics.Position = e.Corpse.Position();
+                actor.Faction.Name = e.Source.TryCast<Actor>(out var necro)
+                    ? necro.Faction.Name : FactionName.Monsters;
+                return Systems.Action.ActorSpawned.Handle(new(actor))
+                    && Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
+            });
+            // ActionSystem.CorpseDestroyed:
+            // - Destroy corpse item
+            yield return Systems.Action.CorpseDestroyed.SubscribeResponse(e =>
+            {
+                Entities.FlagEntityForRemoval(e.Corpse.Id);
+                e.Corpse.TryRefresh(0);
                 return true;
             });
             // ActionSystem.ItemPickedUp:

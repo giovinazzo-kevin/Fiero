@@ -4,7 +4,7 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     // Heal a fixed % of your max HP 
-    public class RegenerateEffect : StatusEffect
+    public class RegenerateEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.Regenerate.Name$";
         public override string DisplayDescription => "$Effect.Regenerate.Desc$";

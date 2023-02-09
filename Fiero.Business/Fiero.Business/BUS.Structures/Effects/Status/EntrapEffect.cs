@@ -4,7 +4,7 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     // Unable to move, wears off on its own.
-    public class EntrapEffect : StatusEffect
+    public class EntrapEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.Root.Name$";
         public override string DisplayDescription => "$Effect.Root.Desc$";

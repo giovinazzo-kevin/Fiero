@@ -6,7 +6,7 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     // Unable to cast spells and read scrolls, but can still zap wands. 
-    public class SilenceEffect : StatusEffect
+    public class SilenceEffect : TypedEffect<Actor>
     {
         public SilenceEffect(Entity source) : base(source) { }
         public override string DisplayName => "$Effect.Silence.Name$";

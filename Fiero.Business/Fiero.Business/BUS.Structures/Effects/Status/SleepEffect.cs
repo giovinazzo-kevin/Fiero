@@ -7,7 +7,7 @@ namespace Fiero.Business
 {
 
     // Unable to act, but you slowly restore your HP. Woken up after several turns; increasing chance of waking up when taking heavy damage.
-    public class SleepEffect : StatusEffect
+    public class SleepEffect : TypedEffect<Actor>
     {
         public SleepEffect(Entity source) : base(source) { }
         public override string DisplayName => "$Effect.Sleep.Name$";

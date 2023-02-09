@@ -6,7 +6,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class UncontrolledTeleportEffect : StatusEffect
+    public class UncontrolledTeleportEffect : TypedEffect<Actor>
     {
         public UncontrolledTeleportEffect(Entity source) : base(source) { }
         public override string DisplayName => "$Effect.UncontrolledTeleport.Name$";

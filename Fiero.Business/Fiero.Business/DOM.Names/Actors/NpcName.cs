@@ -3,16 +3,25 @@
     public enum NpcName
     {
         // RATS
-        GreatKingRat,
+        Rat,
+        LabRat,
         RatKnight,
+        RatWarrior,
         RatArcher,
+        RatRebel,
         RatWizard,
         RatMonk,
+        RatCultist,
         RatPugilist,
-        RatThief,
-        RatOutcast,
-        RatMerchant,
         RatArsonist,
+        RatAdventurer,
+        RatThief,
+        RatCheese,
+        RatMerchant,
+        RatZombie,
+        RatSkeleton,
+
+        GreatKingRat,
         // SNAKES
         KingSerpent,
         SandSnake,

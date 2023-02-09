@@ -48,6 +48,7 @@ namespace Fiero.Business
             .WithLogging()
             .WithEffectTracking()
             .WithIntrinsicEffect(new(EffectName.Autopickup))
+            .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             ;
 
         private EntityBuilder<Actor> Enemy()
@@ -64,6 +65,7 @@ namespace Fiero.Business
             .WithEquipment()
             .WithFieldOfView(7)
             .WithEffectTracking()
+            .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             ;
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity)
@@ -73,6 +75,15 @@ namespace Fiero.Business
             .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, baseDamage, swingDelay)
             .WithItemInfo(itemRarity, unidentName)
+            ;
+
+        private EntityBuilder<Corpse> Corpse(CorpseName type)
+            => Entities.CreateBuilder<Corpse>()
+            .WithPhysics(Coord.Zero)
+            .WithName(type.ToString())
+            .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
+            .WithCorpseInfo(type)
+            .WithItemInfo(0)
             ;
 
         private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, string unidentName = null)
@@ -320,6 +331,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Rat))
             .WithActorInfo(ActorName.Rat)
             .WithFaction(FactionName.Rats)
+            .WithCorpse(Corpse(CorpseName.RatCorpse).Build())
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(ActorName.Rat), ColorName.White)
             ;
 
@@ -422,6 +434,20 @@ namespace Fiero.Business
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
             )
             ;
+        public EntityBuilder<Actor> NPC_RatCultist()
+            => NPC_Rat()
+            .WithHealth(10)
+            .WithName("Rat Cultist")
+            .WithNpcInfo(NpcName.RatCultist)
+            .WithDialogueTriggers(NpcName.RatCultist)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCultist), ColorName.White)
+            //.WithItems(Loadout(
+
+            //))
+            .WithLikedItems(
+                i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
+            )
+            ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
             .WithHealth(20)
@@ -441,13 +467,13 @@ namespace Fiero.Business
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
             ;
-        public EntityBuilder<Actor> NPC_RatOutcast()
+        public EntityBuilder<Actor> NPC_RatCheese()
             => NPC_Rat()
             .WithHealth(15)
-            .WithName("Rat Outcast")
-            .WithNpcInfo(NpcName.RatOutcast)
-            .WithDialogueTriggers(NpcName.RatOutcast)
-            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatOutcast), ColorName.White)
+            .WithName("Cheese Enjoyer")
+            .WithNpcInfo(NpcName.RatCheese)
+            .WithDialogueTriggers(NpcName.RatCheese)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCheese), ColorName.White)
             ;
         public EntityBuilder<Actor> NPC_RatArsonist()
             => NPC_Rat()

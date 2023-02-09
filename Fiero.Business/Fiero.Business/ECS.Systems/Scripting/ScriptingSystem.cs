@@ -94,6 +94,7 @@ namespace Fiero.Business
             return false;
         }
 
+        // TODO: Figure out script lifetime and call this method!!
         public bool UnloadScript(Script script)
         {
             if (script.IsInvalid())

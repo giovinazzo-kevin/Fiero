@@ -21,7 +21,15 @@ namespace Fiero.Business
             }
 
             return Rng.Random.ChooseWeighted(new[] {
-                (builder.NPC_Rat(), D * 0 + 100f)
+                (builder.NPC_RatMerchant(), D * 0 + 1f),
+                (builder.NPC_Rat(), D * 0 + 100f),
+                (builder.NPC_RatCheese(), D * 0 + 10f),
+                (builder.NPC_RatArcher(), D * 1 + 50f),
+                (builder.NPC_RatThief(), D * 1 + 25f),
+                (builder.NPC_RatMonk(), D * 2 + 30f),
+                (builder.NPC_RatPugilist(), D * 2 + 20f),
+                (builder.NPC_RatWizard(), D * 3 + 40f),
+                (builder.NPC_RatArsonist(), D * 5 + 10f),
             });
         }
 
@@ -29,10 +37,7 @@ namespace Fiero.Business
         {
             var subdivisions = floorId.Depth switch
             {
-                var x when x < 2 => new Coord(1, 1),
-                var x when x < 5 => new Coord(2, 2),
-                var x when x < 10 => new Coord(4, 4),
-                _ => new Coord(4, 4),
+                _ => new Coord(2, 2),
             };
             var sectors = new IntRect(new(), size - new Coord(1, 1)).Subdivide(subdivisions).ToList();
 
@@ -77,9 +82,9 @@ namespace Fiero.Business
             Room CreateRoom()
             {
                 Room room = Rng.Random.ChooseWeighted(new (Func<Room>, float)[] {
-                    (() => new ShrineRoom(),    2.5f),
-                    (() => new TreasureRoom(),  50.0f),
-                    (() => new EmptyRoom() ,   92.5f)
+                    (() => new ShrineRoom(),    0.5f),
+                    (() => new TreasureRoom(),  1.0f),
+                    (() => new EmptyRoom() ,   98.5f)
                 })();
 
                 room.Drawn += (r, ctx) =>
@@ -88,14 +93,14 @@ namespace Fiero.Business
                     var pointCloud = new Queue<Coord>(r.GetPointCloud().Shuffle(Rng.Random));
                     if (r.AllowMonsters)
                     {
-                        Rng.Random.Roll(1, (floorId.Depth / 10 + 1) * area, i =>
+                        Rng.Random.Roll(1, 1, i =>
                         {
                             TryAddObject("Monster", e => GenerateMonster(floorId, e));
                         });
                     }
                     if (r.AllowFeatures)
                     {
-                        Rng.Random.Roll(1, (floorId.Depth / 10 + 1) * area, i =>
+                        Rng.Random.Roll(1, area, i =>
                         {
                             TryAddFeature("Trap", e => e.Feature_Trap());
                         });

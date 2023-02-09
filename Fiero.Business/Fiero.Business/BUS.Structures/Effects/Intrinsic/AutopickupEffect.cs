@@ -15,10 +15,10 @@ namespace Fiero.Business
                 if (e.Actor == target)
                 {
                     var itemsHere = systems.Dungeon.GetItemsAt(target.FloorId(), target.Position());
-                    if (itemsHere.FirstOrDefault() is { } item)
+                    if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item)))
                     {
                         // TODO: Re-use HandleOrThrow
-                        systems.Action.ItemPickedUp.Handle(new(target, item));
+                        systems.Action.ItemPickedUp.HandleOrThrow(new(target, item));
                     }
                 }
             }));

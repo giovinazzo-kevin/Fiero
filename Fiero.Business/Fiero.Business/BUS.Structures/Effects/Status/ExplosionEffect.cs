@@ -58,12 +58,13 @@ namespace Fiero.Business
                     .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
                     .ToArray();
                 systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
+                // TODO: Make this a handelr of ExplosionHappened?
                 foreach (var p in actualShape)
                 {
                     foreach (var a in systems.Dungeon.GetActorsAt(floorId, p + pos))
                     {
                         var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
-                        systems.Action.ActorDamaged.HandleOrThrow(new(owner, a, owner, damage));
+                        systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, owner, damage));
                     }
                 }
                 End();

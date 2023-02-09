@@ -67,6 +67,11 @@ namespace Fiero.Business
             {
                 c.Health = new(0, maximum, current ?? maximum);
             });
+        public static EntityBuilder<T> WithCorpse<T>(this EntityBuilder<T> builder, Corpse corpse)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
+            {
+                c.Corpse = corpse;
+            });
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);
         public static EntityBuilder<T> WithItems<T>(this EntityBuilder<T> builder, params Item[] items)
@@ -85,7 +90,7 @@ namespace Fiero.Business
                         }
                         foreach (var item in items)
                         {
-                            actionSystem.ItemPickedUp.Raise(new(e.Actor, item));
+                            actionSystem.ItemPickedUp.HandleOrThrow(new(e.Actor, item));
                         }
                         return true;
                     });
@@ -134,6 +139,11 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<AiComponent>(c =>
             {
                 c.LikedItems.AddRange(likedItems);
+            });
+        public static EntityBuilder<T> WithDislikedItems<T>(this EntityBuilder<T> builder, params Func<Item, bool>[] dislikedItems)
+            where T : Actor => builder.AddOrTweak<AiComponent>(c =>
+            {
+                c.DislikedItems.AddRange(dislikedItems);
             });
         public static EntityBuilder<T> WithPlayerAi<T>(this EntityBuilder<T> builder, GameUI ui)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c =>
@@ -256,8 +266,8 @@ namespace Fiero.Business
                 c.BaseDamage = baseDamage;
                 c.SwingDelay = swingDelay;
             });
-        public static EntityBuilder<T> WithArmorInfo<T>(this EntityBuilder<T> builder, ArmorName type)
-            where T : Armor => builder.AddOrTweak<ArmorComponent>(c =>
+        public static EntityBuilder<T> WithCorpseInfo<T>(this EntityBuilder<T> builder, CorpseName type)
+            where T : Corpse => builder.AddOrTweak<CorpseComponent>(c =>
             {
                 c.Type = type;
             });

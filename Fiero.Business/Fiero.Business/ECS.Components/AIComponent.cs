@@ -11,5 +11,6 @@ namespace Fiero.Business
 
         public PhysicalEntity Target { get; set; }
         public List<Func<Item, bool>> LikedItems { get; set; } = new();
+        public List<Func<Item, bool>> DislikedItems { get; set; } = new();
     }
 }

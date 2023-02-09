@@ -72,7 +72,7 @@ namespace Fiero.Business
             MyHealth.ConfigureAlert((s, a, v) => v.Percentage <= 0.25f);
             MyConsumables.ConfigureAlert((s, a, v) => v.ConsumableProperties.RemainingUses > 0);
             MyWeapons.ConfigureAlert((s, a, v) => a.Equipment.Weapon is null || v.WeaponProperties.DamagePerTurn > a.Equipment.Weapon.WeaponProperties.DamagePerTurn);
-            NearbyItems.ConfigureAlert((s, a, v) => !a.Inventory.Full && a.Ai.LikedItems.Any(f => f(v)));
+            NearbyItems.ConfigureAlert((s, a, v) => !a.Inventory.Full && a.Ai.LikedItems.Any(f => f(v)) && !a.Ai.DislikedItems.Any(f => f(v)));
         }
 
         protected virtual StateName UpdateState(StateName state)

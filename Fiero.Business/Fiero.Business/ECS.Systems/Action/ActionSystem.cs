@@ -39,6 +39,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, SpellTargetedEvent, EventResult> SpellTargeted;
         public readonly SystemRequest<ActionSystem, ItemPickedUpEvent, EventResult> ItemPickedUp;
         public readonly SystemRequest<ActionSystem, ItemDroppedEvent, EventResult> ItemDropped;
+        public readonly SystemRequest<ActionSystem, CorpseDroppedEvent, EventResult> CorpseCreated;
         public readonly SystemRequest<ActionSystem, ItemThrownEvent, EventResult> ItemThrown;
         public readonly SystemRequest<ActionSystem, WandZappedEvent, EventResult> WandZapped;
         public readonly SystemRequest<ActionSystem, ItemEquippedEvent, EventResult> ItemEquipped;
@@ -96,6 +97,7 @@ namespace Fiero.Business
             SpellTargeted = new(this, nameof(SpellTargeted));
             ItemPickedUp = new(this, nameof(ItemPickedUp));
             ItemDropped = new(this, nameof(ItemDropped));
+            CorpseCreated = new(this, nameof(CorpseCreated));
             ItemThrown = new(this, nameof(ItemThrown));
             WandZapped = new(this, nameof(WandZapped));
             ScrollRead = new(this, nameof(ScrollRead));

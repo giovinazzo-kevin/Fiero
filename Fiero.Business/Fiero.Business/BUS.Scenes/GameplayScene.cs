@@ -209,10 +209,7 @@ namespace Fiero.Business.Scenes
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
                     ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch
                     {
-                        < 2 => new Coord(40, 40),
-                        < 5 => new Coord(60, 60),
-                        < 10 => new Coord(80, 80),
-                        _ => new Coord(100, 100),
+                        _ => new Coord(40, 40),
                     });
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
@@ -522,6 +519,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorDied:
             // - Play death animation
             // - Drop inventory contents
+            // - Spawn corpses
             yield return Systems.Action.ActorDied.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouDie$.");
@@ -539,6 +537,10 @@ namespace Fiero.Business.Scenes
                     {
                         Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
                     }
+                }
+                if (!e.Actor.ActorProperties.Corpse.IsInvalid())
+                {
+                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, e.Actor.ActorProperties.Corpse));
                 }
                 e.Actor.Render.Hidden = true;
                 if (Player.CanSee(e.Actor))
@@ -577,6 +579,20 @@ namespace Fiero.Business.Scenes
                     e.Actor.Log?.Write($"$Action.UnableToDrop$ {e.Item.DisplayName}.");
                     return false;
                 }
+            });
+            // ActionSystem.CorpseDropped:
+            // - Create corpse item
+            yield return Systems.Action.CorpseCreated.SubscribeResponse(e =>
+            {
+                e.Corpse.Physics.Position = e.Actor.Position();
+                if (Systems.Dungeon.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var freeTile, maxDistance: 10,
+                    pred: c => !c.Items.Any()))
+                {
+                    e.Corpse.Physics.Position = freeTile.Position();
+                }
+                Systems.Dungeon.AddItem(e.Actor.FloorId(), e.Corpse);
+                e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
+                return true;
             });
             // ActionSystem.ItemPickedUp:
             // - Store item in inventory or fail

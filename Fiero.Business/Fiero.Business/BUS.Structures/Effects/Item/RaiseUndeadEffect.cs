@@ -3,15 +3,14 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    // Corpses on the target tile are raised as undead.
+    // The target corpse is raised as either a zombie or a skeleton.
     public class RaiseUndeadEffect : TypedEffect<Corpse>
     {
-        // If true raises a zombie, otherwise a skeleton
-        public readonly bool RaiseAsZombie;
+        public readonly UndeadRaisingName Mode;
 
-        public RaiseUndeadEffect(Entity source, bool raiseAsZombie) : base(source)
+        public RaiseUndeadEffect(Entity source, UndeadRaisingName mode) : base(source)
         {
-            RaiseAsZombie = raiseAsZombie;
+            Mode = mode;
         }
 
         public override string DisplayName => "$Effect.RaiseUndead.Name$";
@@ -20,7 +19,7 @@ namespace Fiero.Business
 
         protected override void Apply(GameSystems systems, Corpse target)
         {
-            systems.Action.CorpseRaised.HandleOrThrow(new(Source, target, RaiseAsZombie));
+            systems.Action.CorpseRaised.HandleOrThrow(new(Source, target, Mode));
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

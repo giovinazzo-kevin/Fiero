@@ -44,7 +44,8 @@ namespace Fiero.Core.Extensions
                 // we don't actually perform the swap, we can forget about the
                 // swapped element because we already returned it.
             }
-
+            if (elements.Length == 0)
+                yield break;
             // there is one item remaining that was not returned - we return it now
             yield return elements[0];
         }

@@ -100,7 +100,7 @@ namespace Fiero.Business.Scenes
                             {
                                 if (Systems.TrySpawn(player.FloorId(), f))
                                 {
-                                    Systems.Faction.SetBilateralRelation(player, f, StandingName.Loved);
+                                    //Systems.Faction.SetBilateralRelation(player, f, StandingName.Loved);
                                 }
                             }
                         }
@@ -183,10 +183,12 @@ namespace Fiero.Business.Scenes
                 // Create player
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 Player = Resources.Entities.Player
+                    //.WithAutoPlayerAi()
                     .WithName(playerName)
                     .WithItems(
                         Resources.Entities.Resource_Gold(5000).Build(),
-                        Resources.Entities.Weapon_Sword().Build(),
+                        Resources.Entities.Weapon_Sword()
+                            .Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
                         Resources.Entities.Potion_OfTeleport().Build(),
@@ -195,7 +197,21 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Potion_OfHealing().Build(),
                         Resources.Entities.Throwable_Bomb(10).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
-                        Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build()
+                        Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build(),
+                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
+                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
+                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
+                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
+                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
+                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build()
                     )
                     .WithIntrinsicEffect(
                         new EffectDef(EffectName.Script, canStack: true, script: Resources.Entities.Script(@"test").Build())
@@ -531,26 +547,26 @@ namespace Fiero.Business.Scenes
                 {
                     Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
                 }
-                var corpseDef = e.Actor.ActorProperties.Corpse;
-                if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
-                {
-                    var corpse = EntityBuilders.Corpse(corpseDef.Type)
-                        .Build();
-                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
-                }
-                if (e.Actor.Inventory != null)
-                {
-                    foreach (var item in e.Actor.Inventory.GetItems().ToList())
-                    {
-                        Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
-                    }
-                }
                 e.Actor.Render.Hidden = true;
                 if (Player.CanSee(e.Actor))
                 {
                     // Since this is a blocking animation and we just hid the victim, we need to refresh the viewport before showing it
                     Systems.Render.CenterOn(Player);
                     Systems.Render.Animate(true, e.Actor.Position(), Animation.Death(e.Actor));
+                }
+                var corpseDef = e.Actor.ActorProperties.Corpse;
+                if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
+                {
+                    var corpse = EntityBuilders.Corpse(corpseDef.Type).Build();
+                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                }
+
+                if (e.Actor.Inventory != null)
+                {
+                    foreach (var item in e.Actor.Inventory.GetItems().ToList())
+                    {
+                        Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
+                    }
                 }
                 return true;
             });
@@ -568,13 +584,10 @@ namespace Fiero.Business.Scenes
                 if (e.Actor.Inventory.TryTake(e.Item))
                 {
                     e.Item.Physics.Position = e.Actor.Position();
-                    if (Systems.Dungeon.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var freeTile, maxDistance: 10,
-                        pred: c => !c.Items.Any()))
+                    if (Systems.TryPlace(e.Actor.FloorId(), e.Item))
                     {
-                        e.Item.Physics.Position = freeTile.Position();
+                        e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
                     }
-                    Systems.Dungeon.AddItem(e.Actor.FloorId(), e.Item);
-                    e.Actor.Log?.Write($"$Action.YouDrop$ {e.Item.DisplayName}.");
                     return true;
                 }
                 else
@@ -588,13 +601,10 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.CorpseCreated.SubscribeResponse(e =>
             {
                 e.Corpse.Physics.Position = e.Actor.Position();
-                if (Systems.Dungeon.TryGetClosestFreeTile(e.Actor.FloorId(), e.Actor.Position(), out var freeTile, maxDistance: 10,
-                    pred: c => !c.Items.Any()))
+                if (Systems.TryPlace(e.Actor.FloorId(), e.Corpse))
                 {
-                    e.Corpse.Physics.Position = freeTile.Position();
+                    e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
                 }
-                Systems.Dungeon.AddItem(e.Actor.FloorId(), e.Corpse);
-                e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
                 return true;
             });
             // ActionSystem.CorpseRaised:
@@ -602,25 +612,42 @@ namespace Fiero.Business.Scenes
             // - Destroy leftover corpse
             yield return Systems.Action.CorpseRaised.SubscribeResponse(e =>
             {
+                var faction = e.Source.TryCast<Actor>(out var necro)
+                    ? necro.Faction.Name : FactionName.Monsters;
                 var actorBuilder = e.Corpse.CorpseProperties.Type switch
                 {
-                    CorpseName.RatCorpse => e.RaisedAsZombie
-                        ? EntityBuilders.NPC_RatZombie() : EntityBuilders.NPC_RatSkeleton(),
+                    CorpseName.RatCorpse => Raise(Resources.Entities.NPC_RatZombie(), Resources.Entities.NPC_RatSkeleton(), e.Mode),
                     _ => throw new NotImplementedException()
                 };
-                var actor = actorBuilder.Build();
-                actor.Physics.Position = e.Corpse.Position();
-                actor.Faction.Name = e.Source.TryCast<Actor>(out var necro)
-                    ? necro.Faction.Name : FactionName.Monsters;
-                return Systems.Action.ActorSpawned.Handle(new(actor))
-                    && Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
+                var undead = actorBuilder
+                    .WithFaction(faction)
+                    .Build();
+                undead.Physics.Position = e.Corpse.Position();
+                // TODO: Dedicated sound + blocking animation
+                if (!Systems.TrySpawn(e.Corpse.FloorId(), undead))
+                {
+                    necro?.Log?.Write($"$Action.NoRoomToRaiseUndead$.");
+                    Entities.FlagEntityForRemoval(undead.Id);
+                }
+                return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
+
+                EntityBuilder<Actor> Raise(EntityBuilder<Actor> zombie, EntityBuilder<Actor> skeleton, UndeadRaisingName mode)
+                {
+                    return mode switch
+                    {
+                        UndeadRaisingName.Zombie => zombie,
+                        UndeadRaisingName.Skeleton => skeleton,
+                        UndeadRaisingName.Random => Rng.Random.Choose(zombie, skeleton),
+                        _ => throw new NotImplementedException()
+                    };
+                }
             });
             // ActionSystem.CorpseDestroyed:
             // - Destroy corpse item
             yield return Systems.Action.CorpseDestroyed.SubscribeResponse(e =>
             {
+                Systems.Dungeon.RemoveItem(e.Corpse);
                 Entities.FlagEntityForRemoval(e.Corpse.Id);
-                e.Corpse.TryRefresh(0);
                 return true;
             });
             // ActionSystem.ItemPickedUp:

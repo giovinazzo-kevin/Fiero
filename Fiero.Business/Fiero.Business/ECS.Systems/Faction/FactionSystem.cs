@@ -15,17 +15,26 @@ namespace Fiero.Business
 
         public void SetDefaultRelations()
         {
+            SetBilateralRelation(FactionName.Rats, FactionName.Rats, StandingName.Loved);
             SetBilateralRelation(FactionName.Rats, FactionName.Cats, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Rats, FactionName.Dogs, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Rats, FactionName.Snakes, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Rats, FactionName.Boars, StandingName.Tolerated);
+
+            SetBilateralRelation(FactionName.Cats, FactionName.Cats, StandingName.Loved);
             SetBilateralRelation(FactionName.Cats, FactionName.Dogs, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Cats, FactionName.Snakes, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Cats, FactionName.Boars, StandingName.Tolerated);
+
+            SetBilateralRelation(FactionName.Dogs, FactionName.Dogs, StandingName.Loved);
             SetBilateralRelation(FactionName.Dogs, FactionName.Snakes, StandingName.Tolerated);
             SetBilateralRelation(FactionName.Dogs, FactionName.Boars, StandingName.Tolerated);
+
+            SetBilateralRelation(FactionName.Snakes, FactionName.Snakes, StandingName.Loved);
+            SetBilateralRelation(FactionName.Boars, FactionName.Boars, StandingName.Loved);
             SetBilateralRelation(FactionName.Snakes, FactionName.Boars, StandingName.Tolerated);
 
+            SetBilateralRelation(FactionName.Players, FactionName.Players, StandingName.Loved);
             SetBilateralRelation(FactionName.Players, FactionName.Rats, StandingName.DisapprovenOf);
             SetBilateralRelation(FactionName.Players, FactionName.Cats, StandingName.DisapprovenOf);
             SetBilateralRelation(FactionName.Players, FactionName.Dogs, StandingName.DisapprovenOf);

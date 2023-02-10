@@ -145,33 +145,34 @@ namespace Fiero.Business
             }
         }
 
-        public bool TryGetClosestFreeTile(FloorId id, Coord pos, out Tile closest, float maxDistance = 10, Func<MapCell, bool> pred = null)
+        public bool TryGetClosestFreeTile(FloorId id, Coord pos, out MapCell closest, float maxDistance = 10, Func<MapCell, bool> pred = null)
         {
             closest = default;
-            pred ??= cell => !cell.Items.Any() && !cell.Features.Any(f => f.Physics.BlocksMovement) && !cell.Actors.Any();
+            pred ??= cell => !cell.Items.Any() && !cell.Actors.Any();
 
-            if (TryGetCellAt(id, pos, out var closestCell) && pred(closestCell))
-            {
-                closest = closestCell.Tile;
-                return true;
-            }
-            if (--maxDistance <= 0)
+            var openSet = new Queue<MapCell>();
+            var closedSet = new HashSet<MapCell>();
+
+            if (!TryGetCellAt(id, pos, out var origin) || origin.BlocksMovement())
                 return false;
-            var neighbors = GetNeighborhood(id, pos)
-                .Select(c => c.Tile)
-                .Where(n => !n.Physics.BlocksMovement)
-                .Shuffle(Rng.Random)
-                .ToList();
-            var maxDistanceSquared = maxDistance * maxDistance;
-            if (neighbors.All(n => n.SquaredDistanceFrom(pos) > maxDistanceSquared))
-                return false;
-            foreach (var n in neighbors)
+
+            openSet.Enqueue(origin);
+            closedSet.Add(closest);
+            while (openSet.TryDequeue(out closest))
             {
-                if (TryGetClosestFreeTile(id, n.Position(), out closest, maxDistance, pred))
-                {
+                if (pred(closest))
                     return true;
+                if (closest.Tile.DistanceFrom(origin.Tile) > maxDistance)
+                    continue;
+                foreach (var n in GetNeighborhood(id, closest.Tile.Position(), size: 3)
+                    .Where(n => !closedSet.Contains(n) && !n.BlocksMovement())
+                    .Shuffle(Rng.Random))
+                {
+                    openSet.Enqueue(n);
+                    closedSet.Add(n);
                 }
             }
+
             return false;
         }
         public IEnumerable<Actor> GetAllActors(FloorId id) => TryGetFloor(id, out var floor)

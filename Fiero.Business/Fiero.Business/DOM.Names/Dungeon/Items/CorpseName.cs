@@ -2,6 +2,7 @@
 {
     public enum CorpseName
     {
+        None,
         RatCorpse
     }
 }

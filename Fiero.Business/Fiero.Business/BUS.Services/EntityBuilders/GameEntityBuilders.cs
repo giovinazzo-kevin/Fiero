@@ -77,7 +77,7 @@ namespace Fiero.Business
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<Corpse> Corpse(CorpseName type)
+        public EntityBuilder<Corpse> Corpse(CorpseName type)
             => Entities.CreateBuilder<Corpse>()
             .WithPhysics(Coord.Zero)
             .WithName(type.ToString())
@@ -331,7 +331,7 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Rat))
             .WithActorInfo(ActorName.Rat)
             .WithFaction(FactionName.Rats)
-            .WithCorpse(Corpse(CorpseName.RatCorpse).Build())
+            .WithCorpse(CorpseName.RatCorpse, chance: Chance.FiftyFifty)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(ActorName.Rat), ColorName.White)
             ;
 
@@ -344,16 +344,16 @@ namespace Fiero.Business
             ;
         #endregion
 
-        protected Item[] Loadout<T>(params (EntityBuilder<T> Item, float Chance)[] chances)
+        protected Item[] Loadout<T>(params (EntityBuilder<T> Item, Chance Chance)[] options)
             where T : Item
         {
             return Inner().ToArray();
             IEnumerable<T> Inner()
             {
-                foreach (var chance in chances)
+                foreach (var (item, chance) in options)
                 {
-                    if (Rng.Random.NextDouble() < chance.Chance)
-                        yield return chance.Item.Build();
+                    if (chance.Check())
+                        yield return item.Build();
                 }
             }
         }
@@ -367,7 +367,7 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.RatKnight)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatKnight), ColorName.White)
             .WithItems(Loadout(
-                (Weapon_Sword(), 1f)
+                (Weapon_Sword(), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.TryCast<Weapon>(out _),
@@ -382,7 +382,7 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.RatArcher)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArcher), ColorName.White)
             .WithItems(Loadout(
-                (Throwable_Rock(Rng.Random.Between(4, 10)), 1f)
+                (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.TryCast<Throwable>(out var throwable) && throwable.ThrowableProperties.ThrowsUseCharges,
@@ -398,9 +398,9 @@ namespace Fiero.Business
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatWizard), ColorName.White)
             .WithItems(Loadout(
                 Rng.Random.Choose(new[]{
-                    (Wand_OfConfusion(Rng.Random.Between(3, 7)), 1f),
-                    (Wand_OfEntrapment(Rng.Random.Between(3, 7)), 1f),
-                    (Wand_OfTeleport(Rng.Random.Between(3, 7)), 1f)
+                    (Wand_OfConfusion(Rng.Random.Between(3, 7)), Chance.Always),
+                    (Wand_OfEntrapment(Rng.Random.Between(3, 7)), Chance.Always),
+                    (Wand_OfTeleport(Rng.Random.Between(3, 7)), Chance.Always)
                 })
             ))
             .WithLikedItems(
@@ -428,7 +428,7 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.RatMonk)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
             .WithItems(Loadout(
-                (Potion_OfHealing().Tweak<ItemComponent>(c => c.Identified = true), 1f)
+                (Potion_OfHealing().Tweak<ItemComponent>(c => c.Identified = true), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
@@ -483,7 +483,7 @@ namespace Fiero.Business
             .WithDialogueTriggers(NpcName.RatArsonist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArsonist), ColorName.White)
             .WithItems(Loadout(
-                (Throwable_Bomb(Rng.Random.Between(1, 3)), 1f)
+                (Throwable_Bomb(Rng.Random.Between(1, 3)), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Explosion) ?? false
@@ -664,17 +664,16 @@ namespace Fiero.Business
                 RandomPotion()
             ), 1000);
             yield return (Loadout(
-                (Throwable_Rock(Rng.Random.Between(4, 10)), 1f)
+                (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
-            (EntityBuilder<Potion> Item, float Chance) RandomPotion() => Rng.Random.Choose(
-                (Potion_OfConfusion(), 1f),
-                (Potion_OfHealing(), 1f),
-                (Potion_OfSleep(), 1f),
-                (Potion_OfTeleport(), 1f),
-                (Potion_OfSilence(), 1f),
-                (Potion_OfEntrapment(), 1f)
-
+            (EntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(
+                (Potion_OfConfusion(), Chance.Always),
+                (Potion_OfHealing(), Chance.Always),
+                (Potion_OfSleep(), Chance.Always),
+                (Potion_OfTeleport(), Chance.Always),
+                (Potion_OfSilence(), Chance.Always),
+                (Potion_OfEntrapment(), Chance.Always)
             );
         }
 

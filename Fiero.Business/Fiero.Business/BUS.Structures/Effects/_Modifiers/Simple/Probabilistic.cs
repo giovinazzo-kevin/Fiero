@@ -4,11 +4,11 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class Chance : ModifierEffect
+    public class Probabilistic : ModifierEffect
     {
         public readonly float Probability;
 
-        public Chance(EffectDef source, float chance) : base(source)
+        public Probabilistic(EffectDef source, float chance) : base(source)
         {
             Probability = chance;
         }
@@ -19,7 +19,8 @@ namespace Fiero.Business
 
         protected override void OnStarted(GameSystems systems, Entity owner)
         {
-            if(Rng.Random.NextDouble() < Probability) {
+            if (Rng.Random.NextDouble() < Probability)
+            {
                 Source.Resolve(null).Start(systems, owner);
             }
         }

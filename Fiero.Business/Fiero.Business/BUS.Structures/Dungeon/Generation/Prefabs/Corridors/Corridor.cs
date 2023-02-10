@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using Fiero.Core.Extensions;
 using Fiero.Core.Structures;
 using System;
 using System.Collections.Generic;
@@ -80,11 +79,11 @@ namespace Fiero.Business
             }
             var startMiddle = (Start.Left + Start.Right) / 2;
             var endMiddle = (End.Left + End.Right) / 2;
-            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
+            if (Chance.OneIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
             {
                 ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => e.Feature_Door());
             }
-            if (Rng.Random.OneChanceIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
+            if (Chance.OneIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
             {
                 ctx.TryAddFeature(nameof(FeatureName.Door), endMiddle, e => e.Feature_Door());
             }

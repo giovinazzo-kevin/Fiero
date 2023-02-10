@@ -6,6 +6,6 @@ namespace Fiero.Business
     {
         public ActorName Type { get; set; }
         public Stat Health { get; set; }
-        public Corpse Corpse { get; set; }
+        public CorpseDef Corpse { get; set; }
     }
 }

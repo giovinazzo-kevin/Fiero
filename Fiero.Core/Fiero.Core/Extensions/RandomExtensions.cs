@@ -18,13 +18,10 @@ namespace Fiero.Core.Extensions
             }
             throw new InvalidOperationException();
         }
-
-        public static bool OneChanceIn(this Random rng, float denominator)
-        {
-            return rng.NextDouble() < 1f / denominator;
-        }
         public static bool NChancesIn(this Random rng, float numerator, float denominator)
         {
+            if (numerator == 0 || denominator == 0)
+                return false;
             if (numerator == denominator)
                 return true;
             return rng.NextDouble() < numerator / denominator;
@@ -33,14 +30,6 @@ namespace Fiero.Core.Extensions
             => rng.Next(min, max + 1);
         public static double Between(this Random rng, double min, double max)
             => min + rng.NextDouble() * (max - min);
-        public static void Roll(this Random rng, int min, int max, Action<int> a)
-        {
-            var roll = rng.Between(min, max);
-            for (int i = 0; i < roll; i++)
-            {
-                a(i);
-            }
-        }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
         {

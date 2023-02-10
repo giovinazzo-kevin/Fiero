@@ -93,14 +93,16 @@ namespace Fiero.Business
                     var pointCloud = new Queue<Coord>(r.GetPointCloud().Shuffle(Rng.Random));
                     if (r.AllowMonsters)
                     {
-                        Rng.Random.Roll(1, 1, i =>
+                        var roll = new Dice(1, 1);
+                        roll.Do(i =>
                         {
                             TryAddObject("Monster", e => GenerateMonster(floorId, e));
                         });
                     }
                     if (r.AllowFeatures)
                     {
-                        Rng.Random.Roll(1, area, i =>
+                        var roll = new Dice(1, 1);
+                        roll.Do(i =>
                         {
                             TryAddFeature("Trap", e => e.Feature_Trap());
                         });

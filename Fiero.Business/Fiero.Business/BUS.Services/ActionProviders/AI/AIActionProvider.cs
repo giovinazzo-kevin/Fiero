@@ -26,7 +26,7 @@ namespace Fiero.Business
         protected int TurnsSinceSightingHostile { get; private set; }
         protected int TurnsSinceSightingFriendly { get; private set; }
 
-        protected int RepathOneTimeIn { get; set; } = 25;
+        protected Chance RepathChance { get; set; } = new(1, 25);
 
         protected bool Panic => MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10;
 
@@ -281,7 +281,7 @@ namespace Fiero.Business
             {
                 return action;
             }
-            if (a.Ai.Target == null && Rng.Random.NChancesIn(1, RepathOneTimeIn))
+            if (a.Ai.Target == null && RepathChance.Check(Rng.Random))
             {
                 var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
                     .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));

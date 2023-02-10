@@ -14,7 +14,7 @@ namespace Fiero.Business
                     return sys.Dungeon.GetAllActors(a.FloorId())
                          .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile());
                 }));
-            RepathOneTimeIn = 1;
+            RepathChance = Chance.Always;
         }
 
         protected override IAction Wander(Actor a)

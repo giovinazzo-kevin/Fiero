@@ -7,7 +7,7 @@ namespace Fiero.Business
     {
         public float Percentage => V / (float)Max;
 
-        public Stat(int min, int max, int init, Action<int> valueChanged = null) 
+        public Stat(int min, int max, int init, Action<int> valueChanged = null)
             : base(min, max, init, valueChanged)
         {
 

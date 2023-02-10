@@ -100,6 +100,7 @@ namespace Fiero.Business
             ItemPickedUp = new(this, nameof(ItemPickedUp));
             ItemDropped = new(this, nameof(ItemDropped));
             CorpseCreated = new(this, nameof(CorpseCreated));
+            CorpseRaised = new(this, nameof(CorpseRaised));
             CorpseDestroyed = new(this, nameof(CorpseDestroyed));
             ItemThrown = new(this, nameof(ItemThrown));
             WandZapped = new(this, nameof(WandZapped));

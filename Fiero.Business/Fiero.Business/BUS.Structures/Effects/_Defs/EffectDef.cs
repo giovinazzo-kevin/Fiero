@@ -38,7 +38,7 @@ namespace Fiero.Business
             }
             if (Chance.HasValue)
             {
-                return new Chance(WithSource(source).AsCertain(), Chance.Value);
+                return new Probabilistic(WithSource(source).AsCertain(), Chance.Value);
             }
             if (Duration.HasValue)
             {

@@ -531,16 +531,19 @@ namespace Fiero.Business.Scenes
                 {
                     Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
                 }
+                var corpseDef = e.Actor.ActorProperties.Corpse;
+                if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
+                {
+                    var corpse = EntityBuilders.Corpse(corpseDef.Type)
+                        .Build();
+                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                }
                 if (e.Actor.Inventory != null)
                 {
                     foreach (var item in e.Actor.Inventory.GetItems().ToList())
                     {
                         Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
                     }
-                }
-                if (!e.Actor.ActorProperties.Corpse.IsInvalid())
-                {
-                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, e.Actor.ActorProperties.Corpse));
                 }
                 e.Actor.Render.Hidden = true;
                 if (Player.CanSee(e.Actor))
@@ -910,7 +913,7 @@ namespace Fiero.Business.Scenes
                         return false; // Sorry monsters
                     }
                     var chestRng = Rng.Seeded(e.Feature.Id);
-                    if (chestRng.OneChanceIn(10))
+                    if (Chance.Check(chestRng, 1, 10))
                     {
                         // Spawn a mimic, log a message and play a sound
                         var enemy = EntityBuilders.NPC_Mimic()

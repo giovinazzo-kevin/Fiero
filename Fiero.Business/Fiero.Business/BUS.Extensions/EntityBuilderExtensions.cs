@@ -67,10 +67,10 @@ namespace Fiero.Business
             {
                 c.Health = new(0, maximum, current ?? maximum);
             });
-        public static EntityBuilder<T> WithCorpse<T>(this EntityBuilder<T> builder, Corpse corpse)
+        public static EntityBuilder<T> WithCorpse<T>(this EntityBuilder<T> builder, CorpseName type, Chance chance)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
             {
-                c.Corpse = corpse;
+                c.Corpse = new(type, chance);
             });
         public static EntityBuilder<T> WithInventory<T>(this EntityBuilder<T> builder, int capacity)
             where T : Actor => builder.AddOrTweak<InventoryComponent>(c => c.Capacity = capacity);

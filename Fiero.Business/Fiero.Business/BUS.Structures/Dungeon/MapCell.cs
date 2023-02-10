@@ -20,11 +20,12 @@ namespace Fiero.Business
         }
 
         public bool IsWalkable(PhysicalEntity e) => e.Physics.Phasing || ((IPathNode<PhysicalEntity>)Tile).IsWalkable(e)
-            && !Features.Any(f => e.TryCast<Actor>(out var a) && a.IsPlayer() switch
+            && !BlocksMovement() && !Features.Any(f => e.TryCast<Actor>(out var a) && a.IsPlayer() switch
             {
                 true => f.Physics.BlocksPlayerPathing,
                 false => f.Physics.BlocksNpcPathing
             });
+        public bool BlocksMovement() => Features.Any(f => f.Physics.BlocksMovement) || Tile.Physics.BlocksMovement;
         public IEnumerable<PhysicalEntity> GetDrawables(bool seen = true)
         {
             yield return Tile;

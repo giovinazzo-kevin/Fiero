@@ -18,21 +18,31 @@ namespace Fiero.Business
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {
-            if(Modifier == ScrollModifierName.Self) {
+            if (Modifier == ScrollModifierName.Self)
+            {
                 Source.Resolve(target).Start(systems, target);
                 return;
             }
             var floorId = target.FloorId();
-            foreach (var p in target.Fov.VisibleTiles[floorId]) {
-                var validTargets = systems.Dungeon.GetActorsAt(floorId, p)
-                    .Where(a => Modifier switch {
-                        ScrollModifierName.AreaAffectsAllies => systems.Faction.GetRelations(target, a).Left.IsFriendly(),
-                        ScrollModifierName.AreaAffectsEnemies => systems.Faction.GetRelations(target, a).Left.IsHostile(),
-                        ScrollModifierName.AreaAffectsEveryoneButTarget => a != target,
-                        ScrollModifierName.AreaAffectsEveryone => true,
-                        _ => throw new NotSupportedException(Modifier.ToString())
-                    });
-                foreach (var otherTarget in validTargets) {
+            foreach (var p in target.Fov.VisibleTiles[floorId])
+            {
+                var validTargets = Modifier switch
+                {
+                    ScrollModifierName.AreaAffectsItems => systems.Dungeon.GetItemsAt(floorId, p)
+                        .Cast<Entity>(),
+                    _ => systems.Dungeon.GetActorsAt(floorId, p)
+                        .Where(a => Modifier switch
+                        {
+                            ScrollModifierName.AreaAffectsAllies => systems.Faction.GetRelations(target, a).Left.IsFriendly(),
+                            ScrollModifierName.AreaAffectsEnemies => systems.Faction.GetRelations(target, a).Left.IsHostile(),
+                            ScrollModifierName.AreaAffectsEveryoneButTarget => a != target,
+                            ScrollModifierName.AreaAffectsEveryone => true,
+                            _ => throw new NotSupportedException(Modifier.ToString())
+                        })
+                };
+
+                foreach (var otherTarget in validTargets)
+                {
                     Source.Resolve(target).Start(systems, otherTarget);
                 }
             }

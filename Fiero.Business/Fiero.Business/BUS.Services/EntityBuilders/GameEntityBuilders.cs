@@ -34,7 +34,6 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Player
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi(UI)
-            .WithAutoPlayerAi()
             .WithHealth(50)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithName(nameof(Player))
@@ -617,10 +616,10 @@ namespace Fiero.Business
         #endregion
 
         #region SCROLLS
+        public EntityBuilder<Scroll> Scroll_OfRaiseUndead()
+            => Scroll(new(EffectName.RaiseUndead, magnitude: (int)UndeadRaisingName.Random), ScrollModifierName.AreaAffectsItems);
         public EntityBuilder<Scroll> Scroll_OfMassConfusion()
             => Scroll(new(EffectName.Confusion, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMassSpookiness()
-            => Scroll(new(EffectName.RaiseUndead, duration: 10, magnitude: 1), ScrollModifierName.AreaAffectsEveryone);
         public EntityBuilder<Scroll> Scroll_OfMassSleep()
             => Scroll(new(EffectName.Sleep, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSilence()

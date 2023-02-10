@@ -6,6 +6,7 @@
         AreaAffectsAllies,
         AreaAffectsEnemies,
         AreaAffectsEveryoneButTarget,
-        AreaAffectsEveryone
+        AreaAffectsEveryone,
+        AreaAffectsItems
     }
 }

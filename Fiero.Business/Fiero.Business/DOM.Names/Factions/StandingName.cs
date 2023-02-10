@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Business
 {
+
     public enum StandingName : int
     {
         Hated = -3,

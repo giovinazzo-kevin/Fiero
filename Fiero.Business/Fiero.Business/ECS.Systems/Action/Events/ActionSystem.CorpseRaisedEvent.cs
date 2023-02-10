@@ -2,6 +2,6 @@
 {
     public partial class ActionSystem
     {
-        public readonly record struct CorpseRaisedEvent(Entity Source, Corpse Corpse, bool RaisedAsZombie);
+        public readonly record struct CorpseRaisedEvent(Entity Source, Corpse Corpse, UndeadRaisingName Mode);
     }
 }

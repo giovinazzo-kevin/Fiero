@@ -495,6 +495,7 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatZombie)
             .WithDialogueTriggers(NpcName.RatZombie)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatZombie), ColorName.White)
+            .WithCorpse(CorpseName.None, Chance.Never)
             ;
         public EntityBuilder<Actor> NPC_RatSkeleton()
             => NPC_Rat()
@@ -503,6 +504,7 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatSkeleton)
             .WithDialogueTriggers(NpcName.RatSkeleton)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatSkeleton), ColorName.White)
+            .WithCorpse(CorpseName.None, Chance.Never)
             ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()

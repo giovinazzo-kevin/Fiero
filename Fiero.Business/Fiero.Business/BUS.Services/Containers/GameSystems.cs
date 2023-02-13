@@ -12,6 +12,7 @@ namespace Fiero.Business
         public readonly RenderSystem Render;
         public readonly InterfaceSystem Interface;
         public readonly ErgoScriptingSystem Scripting;
+        public readonly MetaSystem Meta;
 
         public GameSystems(
             ActionSystem action,
@@ -20,7 +21,8 @@ namespace Fiero.Business
             DungeonSystem dungeon,
             RenderSystem render,
             InterfaceSystem @interface,
-            ErgoScriptingSystem scripting
+            ErgoScriptingSystem scripting,
+            MetaSystem meta
 
         )
         {
@@ -31,6 +33,7 @@ namespace Fiero.Business
             Render = render;
             Interface = @interface;
             Scripting = scripting;
+            Meta = meta;
         }
     }
 }

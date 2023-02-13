@@ -5,8 +5,6 @@ using Ergo.Lang.Extensions;
 using Fiero.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -64,38 +62,32 @@ namespace Fiero.Business
         /// returning a subscription that will be disposed when this effect ends.
         /// </summary>
         /// <returns>All routes indexed by signature.</returns>
-        static Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> GetRoutes()
+        public static Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> GetRoutes()
         {
             var finalDict = new Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>>();
-
-            foreach (var sys in typeof(GameSystems).GetFields(BindingFlags.Public | BindingFlags.Instance)
-                .Where(f => f.FieldType.IsAssignableTo(typeof(EcsSystem))))
+            foreach (var (sys, field, isReq) in MetaSystem.GetSystemEventFields())
             {
                 var sysName = new Atom(sys.Name.Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase)
                     .ToErgoCase());
-                // Requests
-                foreach (var req in sys.FieldType.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(f => f.FieldType.IsAssignableTo(typeof(ISystemRequest))))
+                if (isReq)
                 {
-                    var reqName = new Atom(req.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    var reqName = new Atom(field.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
-                    var reqType = req.FieldType.GetGenericArguments()[1];
+                    var reqType = field.FieldType.GetGenericArguments()[1];
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
-                        return ((ISystemRequest)req.GetValue(sys.GetValue(systems)))
+                        return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
                             .SubscribeResponse(evt => Respond(self, evt, reqType, reqName, sysName));
                     });
                 }
-                // Events
-                foreach (var evt in sys.FieldType.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(f => !f.FieldType.IsAssignableTo(typeof(ISystemRequest)) && f.FieldType.IsAssignableTo(typeof(ISystemEvent))))
+                else
                 {
-                    var evtName = new Atom(evt.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    var evtName = new Atom(field.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
-                    var evtType = evt.FieldType.GetGenericArguments()[1];
+                    var evtType = field.FieldType.GetGenericArguments()[1];
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
-                        return ((ISystemEvent)evt.GetValue(sys.GetValue(systems)))
+                        return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
                             .SubscribeHandler(evt => Respond(self, evt, evtType, evtName, sysName));
                     });
                 }

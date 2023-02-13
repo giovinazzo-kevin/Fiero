@@ -49,6 +49,9 @@
     <None Update="Resources\Palettes\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\core\serializer.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\fiero.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

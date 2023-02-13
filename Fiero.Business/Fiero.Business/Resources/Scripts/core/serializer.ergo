@@ -1,4 +1,4 @@
-:- module(test, []).
+:- module(serializer, []).
 
 :- subscribe(action, [actor_killed]).
 :- dynamic(num_killed/1).

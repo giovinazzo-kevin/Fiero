@@ -216,6 +216,7 @@ namespace Fiero.Business.Scenes
                     //.WithIntrinsicEffect(
                     //    new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"core/serializer").Build())
                     //)
+                    .Tweak<ActorComponent>(c => c.Sight = c.Sight | VisibilityName.Hidden)
                     .Build();
 
                 // Generate map

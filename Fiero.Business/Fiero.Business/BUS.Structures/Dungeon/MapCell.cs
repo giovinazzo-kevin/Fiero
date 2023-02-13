@@ -26,20 +26,20 @@ namespace Fiero.Business
                 false => f.Physics.BlocksNpcPathing
             });
         public bool BlocksMovement() => Features.Any(f => f.Physics.BlocksMovement) || Tile.Physics.BlocksMovement;
-        public IEnumerable<PhysicalEntity> GetDrawables(bool seen = true)
+        public IEnumerable<PhysicalEntity> GetDrawables(VisibilityName visibility = VisibilityName.Visible, bool seen = true)
         {
             yield return Tile;
-            foreach (var x in Features.Where(x => !x.Render.Hidden)) yield return x;
-            foreach (var x in Items.Where(x => !x.Render.Hidden)) yield return x;
+            foreach (var x in Features.Where(x => visibility.HasFlag(x.Render.Visibility))) yield return x;
+            foreach (var x in Items.Where(x => visibility.HasFlag(x.Render.Visibility))) yield return x;
             if (!seen)
                 yield break;
-            foreach (var x in Actors.Where(x => !x.Render.Hidden)) yield return x;
+            foreach (var x in Actors.Where(x => visibility.HasFlag(x.Render.Visibility))) yield return x;
         }
 
-        public override string ToString() => ToString(true);
-        public string ToString(bool seen)
+        public override string ToString() => ToString(VisibilityName.Visible, true);
+        public string ToString(VisibilityName visibility, bool seen)
         {
-            return $"{String.Join(", ", GetDrawables(seen))}.";
+            return $"{String.Join(", ", GetDrawables(visibility, seen))}.";
         }
     }
 }

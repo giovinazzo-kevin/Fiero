@@ -691,7 +691,7 @@ namespace Fiero.Business
         public EntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
             .WithIntrinsicEffect(new(EffectName.Trap))
-            .Tweak<RenderComponent>(x => x.Hidden = true)
+            .Tweak<RenderComponent>(x => x.Visibility = VisibilityName.Hidden)
             ;
         public EntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)

@@ -91,7 +91,7 @@ namespace Fiero.Business
                         continue;
                     }
 
-                    foreach (var drawable in cell.GetDrawables(seen))
+                    foreach (var drawable in cell.GetDrawables(Following.V.ActorProperties.Sight, seen))
                     {
                         if (drawable.Render.Hidden)
                             continue;

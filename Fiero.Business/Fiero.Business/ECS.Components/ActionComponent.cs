@@ -1,7 +1,4 @@
 ﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 
 namespace Fiero.Business
 {

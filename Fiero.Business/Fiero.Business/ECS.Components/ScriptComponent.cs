@@ -13,7 +13,7 @@ namespace Fiero.Business
         public string ScriptPath { get; set; }
         public SolverScope Scope { get; set; }
         public ErgoSolver Solver { get; set; }
-        public List<Signature> SubscribedEvents { get; set; }
+        public List<Signature> SubscribedEvents { get; set; } = new();
         public DataSink<Script.Stdout> Stdout { get; set; }
     }
 }

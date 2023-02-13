@@ -56,9 +56,9 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            SubscribeDialogueHandlers();
             Systems.Render.Initialize();
             Systems.Interface.Initialize();
+            SubscribeDialogueHandlers();
 
             void SubscribeDialogueHandlers()
             {
@@ -213,9 +213,9 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
                         Resources.Entities.Corpse(CorpseName.RatCorpse).Build()
                     )
-                    .WithIntrinsicEffect(
-                        new EffectDef(EffectName.Script, canStack: true, script: Resources.Entities.Script(@"test").Build())
-                    )
+                    //.WithIntrinsicEffect(
+                    //    new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"core/serializer").Build())
+                    //)
                     .Build();
 
                 // Generate map

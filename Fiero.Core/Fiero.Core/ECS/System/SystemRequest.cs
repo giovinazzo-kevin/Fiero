@@ -7,7 +7,7 @@ using Unconcern.Delegation;
 
 namespace Fiero.Core
 {
-    public interface ISystemRequest
+    public interface ISystemRequest : ISystemEvent
     {
         Subscription SubscribeResponse(Func<object, object> transform);
     }

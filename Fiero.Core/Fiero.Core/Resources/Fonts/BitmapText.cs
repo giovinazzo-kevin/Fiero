@@ -5,21 +5,28 @@ namespace Fiero.Core
 {
     public class BitmapText : Drawable
     {
-        private readonly HashSet<Sprite> Sprites = new();
+        private List<Sprite> Sprites = new();
 
         public readonly BitmapFont Font;
 
         private string _text;
-        public string Text {
+        public string Text
+        {
             get => _text;
-            set {
-                if(!string.Equals(value, _text)) {
+            set
+            {
+                if (!string.Equals(value, _text))
+                {
                     _text = value;
-                    foreach (var sprite in Sprites) {
-                        sprite.Dispose();
+                    lock (Sprites)
+                    {
+                        foreach (var sprite in Sprites)
+                        {
+                            sprite.Dispose();
+                        }
+                        Sprites.Clear();
+                        Sprites.AddRange(Font.Write(_text));
                     }
-                    Sprites.Clear();
-                    Sprites.UnionWith(Font.Write(_text));
                 }
             }
         }
@@ -38,12 +45,16 @@ namespace Fiero.Core
 
         public void Draw(RenderTarget target, RenderStates states)
         {
-            foreach (var sprite in Sprites) {
-                sprite.Scale = Scale;
-                sprite.Color = FillColor;
-                sprite.Position += Position;
-                target.Draw(sprite);
-                sprite.Position -= Position;
+            lock (Sprites)
+            {
+                foreach (var sprite in Sprites)
+                {
+                    sprite.Scale = Scale;
+                    sprite.Color = FillColor;
+                    sprite.Position += Position;
+                    target.Draw(sprite);
+                    sprite.Position -= Position;
+                }
             }
         }
     }

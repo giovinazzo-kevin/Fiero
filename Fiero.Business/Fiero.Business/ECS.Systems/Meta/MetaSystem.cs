@@ -10,11 +10,8 @@ namespace Fiero.Business
     {
         public record struct SystemEventField(FieldInfo System, FieldInfo Field, bool IsRequest);
 
-        public readonly SystemRequest<MetaSystem, EventRaisedEvent, EventResult> EventRaised;
-
         public MetaSystem(EventBus bus) : base(bus)
         {
-            EventRaised = new(this, nameof(EventRaised));
         }
 
         public static IEnumerable<SystemEventField> GetSystemEventFields()

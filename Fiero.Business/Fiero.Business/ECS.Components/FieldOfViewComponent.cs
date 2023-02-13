@@ -8,5 +8,6 @@ namespace Fiero.Business
         public int Radius { get; set; }
         public Dictionary<FloorId, HashSet<Coord>> KnownTiles { get; private set; } = new();
         public Dictionary<FloorId, HashSet<Coord>> VisibleTiles { get; private set; } = new();
+        public VisibilityName Sight { get; set; } = VisibilityName.Visible;
     }
 }

@@ -7,6 +7,5 @@ namespace Fiero.Business
         public ActorName Type { get; set; }
         public Stat Health { get; set; }
         public CorpseDef Corpse { get; set; }
-        public VisibilityName Sight { get; set; } = VisibilityName.Visible;
     }
 }

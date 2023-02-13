@@ -43,7 +43,7 @@ namespace Fiero.Business
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
         public static bool Knows(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
-        public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position()) && a.ActorProperties.Sight.HasFlag(e.Render.Visibility);
+        public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position()) && a.Fov.Sight.HasFlag(e.Render.Visibility);
         public static bool IsAffectedBy(this Actor a, EffectName effect) => a.IsAlive() && a.Effects != null && a.Effects.Active.Any(e => e.Name == effect);
         public static bool TryIdentify(this Actor a, Item i) => a.Inventory != null && a.Inventory.TryIdentify(i);
         public static bool TryUseItem(this Actor actor, Item item, out bool consumed)

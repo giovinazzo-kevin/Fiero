@@ -80,7 +80,8 @@ namespace Fiero.Business
                     if (!floor.Cells.TryGetValue(coord, out var cell))
                         continue;
 
-                    var known = Following.V.Fov.KnownTiles.TryGetValue(floorId, out var coords) && coords.Contains(coord);
+                    var allseeing = Following.V.Fov.Sight.HasFlag(VisibilityName.TrueSight);
+                    var known = allseeing || Following.V.Fov.KnownTiles.TryGetValue(floorId, out var coords) && coords.Contains(coord);
                     var seen = Following.V.Fov.VisibleTiles.TryGetValue(floorId, out coords) && coords.Contains(coord);
                     if (!known)
                         continue;

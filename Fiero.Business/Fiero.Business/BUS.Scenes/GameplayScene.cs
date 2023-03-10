@@ -26,7 +26,6 @@ namespace Fiero.Business.Scenes
         protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly GameEntities Entities;
-        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly OffButton OffButton;
         protected readonly QuickSlotHelper QuickSlots;
         protected readonly GameUI UI;
@@ -38,7 +37,6 @@ namespace Fiero.Business.Scenes
             GameEntities entities,
             GameSystems systems,
             GameResources resources,
-            GameEntityBuilders entityBuilders,
             QuickSlotHelper quickSlots,
             GameUI ui,
             OffButton off)
@@ -46,7 +44,6 @@ namespace Fiero.Business.Scenes
             Store = store;
             Entities = entities;
             Systems = systems;
-            EntityBuilders = entityBuilders;
             Resources = resources;
             QuickSlots = quickSlots;
             UI = ui;
@@ -60,6 +57,7 @@ namespace Fiero.Business.Scenes
             Systems.Interface.Initialize();
             SubscribeDialogueHandlers();
 
+            // TODO: Move dialogue handlers to Ergo scripts!
             void SubscribeDialogueHandlers()
             {
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
@@ -140,11 +138,14 @@ namespace Fiero.Business.Scenes
             {
                 Entities.FlagEntityForRemoval(e.OldState.Id);
             });
-            // FloorSystem.TileRemoved:
-            // - Mark tile for deletion
+            // FloorSystem.TileChanged:
+            // - Mark old tile for deletion
             yield return Systems.Dungeon.TileChanged.SubscribeHandler(e =>
             {
-                Entities.FlagEntityForRemoval(e.OldState.Id);
+                if (e.OldState.Id != e.NewState.Id)
+                {
+                    Entities.FlagEntityForRemoval(e.OldState.Id);
+                }
             });
         }
         private IEnumerable<Subscription> RouteScriptingSystemEvents()
@@ -202,21 +203,12 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
-                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build(),
-                        Resources.Entities.Corpse(CorpseName.RatCorpse).Build()
+                        Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
                     //.WithIntrinsicEffect(
                     //    new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"core/serializer").Build())
                     //)
-                    .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.All)
+                    .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
 
                 // Generate map
@@ -224,9 +216,9 @@ namespace Fiero.Business.Scenes
                 Systems.Dungeon.AddDungeon(d => d.WithStep(ctx =>
                 {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
-                    ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 10, i => i switch
+                    ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 1, i => i switch
                     {
-                        _ => new Coord(40, 40),
+                        _ => new Coord(36, 36),
                     });
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
@@ -558,7 +550,7 @@ namespace Fiero.Business.Scenes
                 var corpseDef = e.Actor.ActorProperties.Corpse;
                 if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
                 {
-                    var corpse = EntityBuilders.Corpse(corpseDef.Type).Build();
+                    var corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
                     Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
                 }
 
@@ -944,7 +936,7 @@ namespace Fiero.Business.Scenes
                     if (Chance.Check(chestRng, 1, 10))
                     {
                         // Spawn a mimic, log a message and play a sound
-                        var enemy = EntityBuilders.NPC_Mimic()
+                        var enemy = Resources.Entities.NPC_Mimic()
                             .WithPosition(e.Feature.Position())
                             .Build();
                         var items = e.Feature.Inventory.GetItems().ToList();

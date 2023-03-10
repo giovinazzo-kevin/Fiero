@@ -9,11 +9,13 @@ namespace Fiero.Business
         Blind = 0,
         // Can see things that are visible
         Visible = 1,
-        // Can see things that are invisible
+        // Can see things that are magically invisible
         Invisible = 2,
         // Can see things that are hidden (like traps and fake walls)
         Hidden = 4,
+        // Can see things that are obscured by darkness (night vision)
+        Obscured = 8,
         // Can see everything
-        All = Visible | Invisible | Hidden
+        TrueSight = Visible | Invisible | Hidden | Obscured
     }
 }

@@ -17,6 +17,16 @@ namespace Fiero.Core
                 }
             }
         }
+        public static IEnumerable<Coord> Rect(Coord topLeft, Coord size)
+        {
+            for (int x = 0; x <= size.X; x++)
+            {
+                for (int y = 0; y <= size.Y; y++)
+                {
+                    yield return topLeft + new Coord(x, y);
+                }
+            }
+        }
 
         public static IEnumerable<Coord> Neighborhood(Coord center, int side)
             => Box(center, side).Except(new[] { center });

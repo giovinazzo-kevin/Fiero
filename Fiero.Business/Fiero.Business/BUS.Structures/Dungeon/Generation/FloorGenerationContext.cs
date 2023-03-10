@@ -35,7 +35,7 @@ namespace Fiero.Business
         public void SetTile(Coord pos, TileDef tile)
         {
             if (!IsPointInBounds(pos))
-                throw new ArgumentOutOfRangeException(nameof(pos));
+                throw new ArgumentOutOfRangeException($"{nameof(pos)}: {pos}/{Size}");
             Tiles[pos] = tile.WithPosition(pos);
         }
 

@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using Fiero.Core.Extensions;
-using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,11 +36,9 @@ namespace Fiero.Business
         {
             var subdivisions = floorId.Depth switch
             {
-                _ => new Coord(2, 2),
+                _ => new Coord(1, 1),
             };
-            var sectors = new IntRect(new(), size - new Coord(1, 1)).Subdivide(subdivisions).ToList();
-
-            var roomSectors = sectors.Select(s => RoomSector.Create(s, CreateRoom, 1)).ToList();
+            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, 1).ToList();
             var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, 1).ToList();
 
             return builder
@@ -93,10 +90,13 @@ namespace Fiero.Business
                     var pointCloud = new Queue<Coord>(r.GetPointCloud().Shuffle(Rng.Random));
                     if (r.AllowMonsters)
                     {
-                        var roll = new Dice(1, 1);
+                        var roll = new Dice(1, 3);
                         roll.Do(i =>
                         {
-                            TryAddObject("Monster", e => GenerateMonster(floorId, e));
+                            if (Chance.OneIn(10))
+                            {
+                                TryAddObject("Monster", e => GenerateMonster(floorId, e));
+                            }
                         });
                     }
                     if (r.AllowFeatures)

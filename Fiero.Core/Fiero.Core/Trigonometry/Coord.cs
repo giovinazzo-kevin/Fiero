@@ -63,6 +63,10 @@ namespace Fiero.Core
 
         public static Coord Zero { get; } = new Coord(0, 0);
         public static Coord PositiveOne { get; } = new Coord(+1, +1);
+        public static Coord PositiveX { get; } = new Coord(+1, +0);
+        public static Coord PositiveY { get; } = new Coord(+0, +1);
+        public static Coord NegativeX { get; } = new Coord(-1, +0);
+        public static Coord NegativeY { get; } = new Coord(+0, -1);
         public static Coord NegativeOne { get; } = new Coord(-1, -1);
 
         public override bool Equals(object obj)

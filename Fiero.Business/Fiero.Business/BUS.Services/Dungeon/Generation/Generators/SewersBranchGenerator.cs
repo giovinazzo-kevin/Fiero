@@ -32,11 +32,11 @@ namespace Fiero.Business
             });
         }
 
-        public override Floor GenerateFloor(FloorId floorId, Coord size, FloorBuilder builder)
+        public override Floor GenerateFloor(FloorId floorId, FloorBuilder builder)
         {
-            var subdivisions = floorId.Depth switch
+            var (size, subdivisions) = floorId.Depth switch
             {
-                _ => new Coord(4, 4),
+                _ => (new Coord(50, 50), new Coord(2, 2)),
             };
             var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2)).ToList();
             var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2)).ToList();

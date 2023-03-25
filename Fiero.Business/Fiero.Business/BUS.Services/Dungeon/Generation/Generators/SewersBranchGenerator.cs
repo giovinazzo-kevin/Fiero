@@ -41,6 +41,13 @@ namespace Fiero.Business
             var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2)).ToList();
             var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2)).ToList();
 
+            var numSecrets = new Dice(2, 2);
+            foreach (var n in numSecrets.Roll())
+            {
+                var sector = Rng.Random.Choose(roomSectors);
+                sector.MarkSecretCorridors(n);
+            }
+
             return builder
                 .WithStep(ctx =>
                 {

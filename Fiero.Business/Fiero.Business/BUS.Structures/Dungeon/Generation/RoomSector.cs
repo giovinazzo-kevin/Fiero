@@ -82,6 +82,18 @@ namespace Fiero.Business
             return true;
         }
 
+        public void MarkSecretCorridors(int roll, ColorName wallColor = ColorName.Gray)
+        {
+            var secrets = Enumerable.Range(0, Corridors.Length)
+                .Shuffle(Rng.Random)
+                .Take(roll)
+                .ToArray();
+            foreach (var i in secrets)
+            {
+                Corridors[i] = new SecretCorridor(Corridors[i].Start, Corridors[i].End, wallColor);
+            }
+        }
+
         public static IEnumerable<Corridor> GenerateIntraSectorCorridors(RoomSector sector, Dice nBest)
         {
             var connectedRooms = new HashSet<UnorderedPair<Room>>();
@@ -109,7 +121,7 @@ namespace Fiero.Business
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
                 {
-                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
+                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.White);
                     if (!IsCorridorOverlapping(new[] { sector }, corridor, workingSet))
                     {
                         connectedRooms.Add(rp);
@@ -148,7 +160,7 @@ namespace Fiero.Business
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
                 {
-                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
+                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.LightGray);
                     if (!IsCorridorOverlapping(sectors, corridor, workingSet))
                     {
                         connectedSectors.Add(sp);

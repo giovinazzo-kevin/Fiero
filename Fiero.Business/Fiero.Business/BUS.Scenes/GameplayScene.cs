@@ -627,7 +627,7 @@ namespace Fiero.Business.Scenes
                     {
                         UndeadRaisingName.Zombie => zombie,
                         UndeadRaisingName.Skeleton => skeleton,
-                        UndeadRaisingName.Random => Rng.Random.Choose(zombie, skeleton),
+                        UndeadRaisingName.Random => Rng.Random.Choose(new[] { zombie, skeleton }),
                         _ => throw new NotImplementedException()
                     };
                 }

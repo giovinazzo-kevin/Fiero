@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public class Corridor : IFloorGenerationPrefab
     {
-
         public UnorderedPair<Coord> Start { get; private set; }
         public UnorderedPair<Coord> End { get; private set; }
         public ColorName Color { get; set; }
@@ -17,8 +17,10 @@ namespace Fiero.Business
 
         protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
         protected virtual TileDef GroundTile(Coord c) => new(TileName.Corridor, c, Color);
+        protected virtual EntityBuilder<Feature> DoorFeature(GameEntityBuilders e, Coord c) => e.Feature_Door();
+        protected virtual Chance DoorChance() => new(1, 3);
 
-        public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, ColorName color = ColorName.White)
+        public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, ColorName color)
         {
             Start = a;
             End = b;
@@ -79,13 +81,13 @@ namespace Fiero.Business
             }
             var startMiddle = (Start.Left + Start.Right) / 2;
             var endMiddle = (End.Left + End.Right) / 2;
-            if (Chance.OneIn(3) && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
+            if (DoorChance().Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
             {
-                ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => e.Feature_Door());
+                ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => DoorFeature(e, startMiddle));
             }
-            if (Chance.OneIn(3) && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
+            if (DoorChance().Check() && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
             {
-                ctx.TryAddFeature(nameof(FeatureName.Door), endMiddle, e => e.Feature_Door());
+                ctx.TryAddFeature(nameof(FeatureName.Door), endMiddle, e => DoorFeature(e, endMiddle));
             }
         }
     }

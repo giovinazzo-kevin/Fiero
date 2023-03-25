@@ -54,9 +54,9 @@ namespace Fiero.Business
             }
             IEnumerable<IDialogueTrigger> Shrine()
             {
-                return Rng.Random.Choose(
+                return Rng.Random.Choose(new[] {
                     Smintheus()
-                );
+                });
 
                 IEnumerable<IDialogueTrigger> Smintheus()
                 {

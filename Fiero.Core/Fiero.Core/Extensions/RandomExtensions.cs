@@ -6,7 +6,7 @@ namespace Fiero.Core.Extensions
 {
     public static class RandomExtensions
     {
-        public static T Choose<T>(this Random rng, params T[] source) => source.Shuffle(rng).First();
+        public static T Choose<T>(this Random rng, IList<T> source) => source.Shuffle(rng).First();
         public static T ChooseWeighted<T>(this Random rng, params (T Item, float Weight)[] source)
         {
             var dist = rng.NextDouble() * source.Sum(s => s.Weight);

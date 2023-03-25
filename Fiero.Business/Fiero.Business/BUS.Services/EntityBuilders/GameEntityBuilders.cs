@@ -668,14 +668,14 @@ namespace Fiero.Business
                 (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
-            (EntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(
+            (EntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(new[] {
                 (Potion_OfConfusion(), Chance.Always),
                 (Potion_OfHealing(), Chance.Always),
                 (Potion_OfSleep(), Chance.Always),
                 (Potion_OfTeleport(), Chance.Always),
                 (Potion_OfSilence(), Chance.Always),
                 (Potion_OfEntrapment(), Chance.Always)
-            );
+            });
         }
 
         public EntityBuilder<Feature> Feature_Chest()
@@ -696,6 +696,12 @@ namespace Fiero.Business
         public EntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
+            ;
+        public EntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
+            => Feature<Feature>(FeatureName.Door)
+            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Wall)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
+            .WithSprite(RenderLayerName.Ground, TextureName.Tiles, TileName.Wall.ToString(), color)
             ;
         public EntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
             => Feature<Portal>(FeatureName.Downstairs)

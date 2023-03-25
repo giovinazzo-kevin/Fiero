@@ -8,9 +8,14 @@ namespace Fiero.Business
     {
         public IEnumerable<int> Roll(Random rng)
         {
+            if (NumberOfDice <= 0 || NumberOfSides <= 0)
+            {
+                yield return 0;
+                yield break;
+            }
             for (int i = 0; i < NumberOfDice; i++)
             {
-                yield return rng.Next(NumberOfSides);
+                yield return rng.Next(1, NumberOfSides);
             }
         }
         public IEnumerable<int> Roll() => Roll(Rng.Random);

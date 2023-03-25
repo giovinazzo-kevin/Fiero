@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="README.md">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Fonts\Amatic-Bold.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

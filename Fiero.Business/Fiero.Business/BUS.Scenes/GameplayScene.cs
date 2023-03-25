@@ -218,7 +218,7 @@ namespace Fiero.Business.Scenes
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
                     ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 1, i => i switch
                     {
-                        _ => new Coord(36, 36),
+                        _ => new Coord(100, 100),
                     });
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);

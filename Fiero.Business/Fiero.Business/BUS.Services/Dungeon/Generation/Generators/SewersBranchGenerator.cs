@@ -36,10 +36,10 @@ namespace Fiero.Business
         {
             var subdivisions = floorId.Depth switch
             {
-                _ => new Coord(1, 1),
+                _ => new Coord(4, 4),
             };
-            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, 1).ToList();
-            var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, 1).ToList();
+            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2)).ToList();
+            var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2)).ToList();
 
             return builder
                 .WithStep(ctx =>

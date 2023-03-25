@@ -16,7 +16,7 @@ namespace Fiero.Business
         public readonly Room[] Rooms;
         public readonly Corridor[] Corridors;
 
-        public RoomSector(IntRect sector, bool[] cells, Func<Room> makeRoom, int nBestCorridors)
+        public RoomSector(IntRect sector, bool[] cells, Func<Room> makeRoom, Dice nBestCorridors)
         {
             if (cells.Length != 16)
                 throw new ArgumentOutOfRangeException(nameof(cells));
@@ -73,14 +73,19 @@ namespace Fiero.Business
                     return room;
                 })
                 .ToArray();
-            Corridors = GenerateIntraSectorCorridors(Rooms, nBestCorridors).ToArray();
+            Corridors = GenerateIntraSectorCorridors(this, nBestCorridors).ToArray();
             Console.WriteLine($"Rooms: {Rooms.Length}; Corridors: {Corridors.Length}");
         }
 
-        public static IEnumerable<Corridor> GenerateIntraSectorCorridors(IList<Room> rooms, int nBest = 1)
+        static bool IsConnectorPlacementValid(UnorderedPair<RoomConnector> pair)
+        {
+            return true;
+        }
+
+        public static IEnumerable<Corridor> GenerateIntraSectorCorridors(RoomSector sector, Dice nBest)
         {
             var connectedRooms = new HashSet<UnorderedPair<Room>>();
-            var roomPairs = rooms.SelectMany(r => rooms.Where(s => s != r).Select(s => new UnorderedPair<Room>(r, s)))
+            var roomPairs = sector.Rooms.SelectMany(r => sector.Rooms.Where(s => s != r).Select(s => new UnorderedPair<Room>(r, s)))
                 .OrderBy(p => p.Left.Position.DistSq(p.Right.Position))
                 .ToList();
             foreach (var rp in roomPairs)
@@ -98,61 +103,86 @@ namespace Fiero.Business
                         .Select(d => new UnorderedPair<RoomConnector>(c, d)))
                     .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right)
                         .IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
-                    .ToList();
-                foreach (var bestPair in connectorPairs
+                    .Where(IsConnectorPlacementValid)
                     .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
-                    .Take(nBest))
+                    .ToList();
+                var workingSet = new HashSet<Corridor>();
+                foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
                 {
                     var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
-                    if (!rooms.Any(r => r.GetRects().Any(r => corridor.Points.Skip(1).SkipLast(1).Any(p => r.Contains(p.X, p.Y)))))
+                    if (!IsCorridorOverlapping(new[] { sector }, corridor, workingSet))
                     {
                         connectedRooms.Add(rp);
+                        workingSet.Add(corridor);
                         yield return corridor;
                     }
                 }
             }
         }
 
-        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors, int nBest = 1)
+        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors, Dice nBest)
         {
-            var indexed = sectors.Select((s, i) => (Sector: s, Index: i))
-                .ToList();
-            var side = (int)Math.Sqrt(indexed.Count);
-            var connected = new List<UnorderedPair<Room>>();
-            foreach (var s in indexed)
+            var connectedSectors = new HashSet<UnorderedPair<RoomSector>>();
+            var sectorPairs = sectors.SelectMany(r => sectors.Where(s => s != r).Select(s => new UnorderedPair<RoomSector>(r, s)))
+                .OrderBy(p => p.Left.Sector.Position().DistSq(p.Right.Sector.Position()))
+                .ToList()
+                ;
+            foreach (var sp in sectorPairs)
             {
-                var c = new Coord(s.Index % side, s.Index / side);
-                foreach (var S in indexed.Where(x => new Coord(x.Index % side, x.Index / side).DistSq(c) == 1))
+                if (connectedSectors.Contains(sp)
+                    || connectedSectors.Any(c => c.Left == sp.Left && connectedSectors.Contains(new(c.Right, sp.Right)))
+                    || connectedSectors.Any(c => c.Right == sp.Left && connectedSectors.Contains(new(c.Left, sp.Right)))
+                    || connectedSectors.Any(c => c.Left == sp.Right && connectedSectors.Contains(new(c.Right, sp.Left)))
+                    || connectedSectors.Any(c => c.Right == sp.Right && connectedSectors.Contains(new(c.Left, sp.Left))))
                 {
-                    var availableConnectors = S.Sector.Rooms.SelectMany(r => r.GetConnectors());
-                    var myConnectors = s.Sector.Rooms
-                        .SelectMany(r => r.GetConnectors());
-                    var pairs = myConnectors.SelectMany(c => availableConnectors.Select(d => new UnorderedPair<RoomConnector>(c, d)))
-                        .ToList();
-                    foreach (var bestPair in pairs
-                        .OrderBy(p => p.Right.Center.Dist(p.Left.Center))
-                        .Take(nBest))
+                    continue;
+                }
+                var connectorPairs = sp.Left.Rooms.SelectMany(r => r.GetConnectors())
+                    .SelectMany(c => sp.Right.Rooms.SelectMany(r => r.GetConnectors())
+                        .Select(d => new UnorderedPair<RoomConnector>(c, d)))
+                    .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right)
+                        .IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
+                    .Where(IsConnectorPlacementValid)
+                    .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
+                    .ToList();
+                var workingSet = new HashSet<Corridor>();
+                foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
+                {
+                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge);
+                    if (!IsCorridorOverlapping(sectors, corridor, workingSet))
                     {
-                        var conn = new UnorderedPair<Room>(bestPair.Left.Owner, bestPair.Right.Owner);
-                        if (connected.Count(x => x == conn) >= nBest)
-                        {
-                            continue;
-                        }
-                        connected.Add(conn);
-                        yield return new(bestPair.Left.Edge, bestPair.Right.Edge);
+                        connectedSectors.Add(sp);
+                        workingSet.Add(corridor);
+                        yield return corridor;
                     }
                 }
             }
         }
 
+        private static bool IsCorridorOverlapping(IEnumerable<RoomSector> sectors, Corridor corridor, HashSet<Corridor> workingSet)
+        {
+            var allRects = sectors.SelectMany(s => s.Rooms.SelectMany(r => r.GetRects()))
+                .ToHashSet();
+            var allCorridors = sectors.SelectMany(s => (s.Corridors ?? workingSet.AsEnumerable())?.SelectMany(c => c.Points))
+                .ToHashSet();
+            foreach (var p in corridor.Points.Skip(2).SkipLast(2))
+            {
+                if (allRects.Any(r => r.Inflate(1).Contains(p.X, p.Y)))
+                    return true;
+                if (allCorridors.Contains(p))
+                    return true;
+            }
+            return false;
+        }
+
         record class Node(Coord G, RoomSector Item, Node Right = null, Node Bottom = null)
         {
-            public static int[] TopEdge = new[] { 0, 1, 2, 3 };
-            public static int[] LeftEdge = new[] { 0, 4, 8, 12 };
-            public static int[] RightEdge = new[] { 3, 7, 11, 15 };
-            public static int[] BottomEdge = new[] { 12, 13, 14, 15 };
+            public static int[] LeftEdge = new[] { 0, 1, 2, 3 };
+            public static int[] TopEdge = new[] { 0, 4, 8, 12 };
+            public static int[] BottomEdge = new[] { 3, 7, 11, 15 };
+            public static int[] RightEdge = new[] { 12, 13, 14, 15 };
         };
-        public static IEnumerable<RoomSector> CreateTiling(Coord sectorScale, Coord gridSize, Func<Room> makeRoom, int nBestCorridors = 1)
+        public static IEnumerable<RoomSector> CreateTiling(Coord sectorScale, Coord gridSize, Func<Room> makeRoom, Dice nBestCorridors)
         {
             // Create a grid of sectors such that:
             // - There are no diagonal gaps between rooms of adjacent sectors
@@ -173,31 +203,30 @@ namespace Fiero.Business
 
             bool Constrain(Node n, int i)
             {
-                var p = Coord.FromIndex(i, 4);
-                if (n.Right is { Item: { Cells: var R }, Bottom: var bot })
+                var k = true;
+                if (n.Right is { Item: var right })
                 {
-                    var q = p - Coord.PositiveX * 2;
-                    if (q.X == 1 && DiagonallyAdjacent(Node.LeftEdge.Where(i => R[i]), q.ToIndex(4)))
-                        return false;
-                    if (bot?.Right is { Item: { Cells: var BR } })
-                    {
-                        q -= Coord.PositiveY * 2;
-                        if (q.Y == 1 && DiagonallyAdjacent(BR[0] ? new int[] { 0 } : Enumerable.Empty<int>(), q.ToIndex(4)))
-                            return false;
-                    }
+                    var indices = Node.LeftEdge
+                        .Select((x, i) => (x, i))
+                        .Where(a => right.Cells[a.x]);
+                    var invalid = Node.RightEdge.Except(indices
+                        .Select(a => Node.RightEdge[a.i]));
+                    k &= !invalid.Contains(i);
                 }
-                if (n.Bottom is { Item: { Cells: var B } })
+                if (n.Bottom is { Item: var bottom })
                 {
-                    var q = p - Coord.PositiveY * 2;
-                    if (q.Y == 1 && DiagonallyAdjacent(Node.TopEdge.Where(i => B[i]), q.ToIndex(4)))
-                        return false;
+                    var indices = Node.TopEdge
+                        .Select((x, i) => (x, i))
+                        .Where(a => bottom.Cells[a.x]);
+                    var invalid = Node.BottomEdge.Except(indices
+                        .Select(a => Node.BottomEdge[a.i]));
+                    k &= !invalid.Contains(i);
                 }
-
-                return true;
+                return k;
             }
         }
 
-        public static RoomSector Create(IntRect sector, Func<Room> makeRoom, Func<int, bool> constrain = null, int nBestCorridors = 1)
+        public static RoomSector Create(IntRect sector, Func<Room> makeRoom, Func<int, bool> constrain, Dice nBestCorridors)
         {
             constrain ??= _ => true;
             var mat = new bool[16];
@@ -216,7 +245,7 @@ namespace Fiero.Business
                 {
                     candidates.Add(index);
                     mat[index] = true;
-                    Print();
+                    // Print();
                     break;
                 }
 

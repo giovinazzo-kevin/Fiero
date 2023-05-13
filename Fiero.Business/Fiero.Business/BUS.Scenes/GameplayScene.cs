@@ -205,10 +205,10 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
-                    //.WithIntrinsicEffect(
-                    //    new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"core/serializer").Build())
-                    //)
-                    .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
+                    .WithIntrinsicEffect(
+                        new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"test").Build())
+                    )
+                    //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
 
                 // Generate map

@@ -9,12 +9,13 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     public class RoomSector : IFloorGenerationPrefab
     {
         public readonly bool[] Cells;
         public readonly IntRect Sector;
-        public readonly Room[] Rooms;
-        public readonly Corridor[] Corridors;
+        public readonly List<Room> Rooms;
+        public readonly List<Corridor> Corridors;
 
         public RoomSector(IntRect sector, bool[] cells, Func<Room> makeRoom, Dice nBestCorridors)
         {
@@ -72,9 +73,9 @@ namespace Fiero.Business
                     }
                     return room;
                 })
-                .ToArray();
-            Corridors = GenerateIntraSectorCorridors(this, nBestCorridors).ToArray();
-            Console.WriteLine($"Rooms: {Rooms.Length}; Corridors: {Corridors.Length}");
+                .ToList();
+            Corridors = GenerateIntraSectorCorridors(this, nBestCorridors).ToList();
+            Console.WriteLine($"Rooms: {Rooms.Count}; Corridors: {Corridors.Count}");
         }
 
         static bool IsConnectorPlacementValid(UnorderedPair<RoomConnector> pair)
@@ -84,7 +85,7 @@ namespace Fiero.Business
 
         public void MarkSecretCorridors(int roll, ColorName wallColor = ColorName.Gray)
         {
-            var secrets = Enumerable.Range(0, Corridors.Length)
+            var secrets = Enumerable.Range(0, Corridors.Count)
                 .Shuffle(Rng.Random)
                 .Take(roll)
                 .ToArray();
@@ -121,7 +122,7 @@ namespace Fiero.Business
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
                 {
-                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.White);
+                    var corridor = new Corridor(bestPair.Left, bestPair.Right, ColorName.White);
                     if (!IsCorridorOverlapping(new[] { sector }, corridor, workingSet))
                     {
                         connectedRooms.Add(rp);
@@ -160,7 +161,7 @@ namespace Fiero.Business
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
                 {
-                    var corridor = new Corridor(bestPair.Left.Edge, bestPair.Right.Edge, ColorName.LightGray);
+                    var corridor = new Corridor(bestPair.Left, bestPair.Right, ColorName.LightGray);
                     if (!IsCorridorOverlapping(sectors, corridor, workingSet))
                     {
                         connectedSectors.Add(sp);

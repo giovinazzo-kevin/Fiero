@@ -5,7 +5,6 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
-using Ergo.Solver.DataBindings;
 using Fiero.Core;
 using System;
 using System.Collections.Generic;
@@ -20,10 +19,10 @@ namespace Fiero.Business
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 
-        protected readonly ErgoFacade Facade;
-        protected readonly ErgoInterpreter Interpreter;
-        protected readonly FieroLib FieroLib;
-        protected InterpreterScope Scope;
+        public readonly ErgoFacade Facade;
+        public readonly ErgoInterpreter Interpreter;
+        public readonly FieroLib FieroLib;
+        public InterpreterScope Scope;
 
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
 
@@ -68,6 +67,7 @@ namespace Fiero.Business
                     @catch: ex =>
                     {
                         script.ScriptProperties.LastError = ex;
+                        // TODO: Use script's stderr!!
                         Console.WriteLine(ex);
                     },
                     @finally: () =>
@@ -83,15 +83,11 @@ namespace Fiero.Business
                 var solverScope = solver.CreateScope(localScope);
                 script.ScriptProperties.Solver = solver;
                 script.ScriptProperties.Scope = solverScope;
-                // Scripts subscribe to events via the subscribe/1 directive
+                // Scripts subscribe to events via the subscribe/2 directive
                 if (!FieroLib.GetScriptSubscriptions(script).TryGetValue(out var subbedEvents))
                     subbedEvents = Enumerable.Empty<Signature>();
                 // Effects can then read this list and bind the subbed events
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
-                // All write_* predicates are routed to the script's stdout via the io:portray/1 hook (except write_raw/1 which skips the hook)
-                // TODO: watch https://github.com/G3Kappa/Ergo/issues/60 and then implement the necessary changes
-                script.ScriptProperties.Stdout = new DataSink<Script.Stdout>(new Atom("stdout"));
-                solver.BindDataSink(script.ScriptProperties.Stdout);
                 solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
                 return true;
@@ -105,9 +101,7 @@ namespace Fiero.Business
             if (script.IsInvalid())
                 return false;
             script.ScriptProperties.Solver?.Dispose();
-            script.ScriptProperties.Stdout?.Dispose();
             script.ScriptProperties.Solver = default;
-            script.ScriptProperties.Stdout = default;
             return true;
         }
 

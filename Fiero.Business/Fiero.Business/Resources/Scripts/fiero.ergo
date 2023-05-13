@@ -10,10 +10,3 @@
 	@player(Id) :- 
 		O = actor{actor_properties: _{type: player}, id: Id}
 )).
-
-%%% Intercepts all calls to the write_* predicates (except write_raw).
-%%% Instead of writing to the console, messages will be routed to the script's stdout.
-%%% This lets the game display them in their own window, bypassing the shell and keeping them separate.
-io:portray(X) :-
-	explain(X, S),
-	<#- stdout(S).

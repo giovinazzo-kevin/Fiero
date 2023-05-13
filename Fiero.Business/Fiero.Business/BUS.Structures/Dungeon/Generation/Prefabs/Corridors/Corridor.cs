@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using Fiero.Core.Structures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +8,8 @@ namespace Fiero.Business
 
     public class Corridor : IFloorGenerationPrefab
     {
-        public UnorderedPair<Coord> Start { get; private set; }
-        public UnorderedPair<Coord> End { get; private set; }
+        public RoomConnector Start { get; private set; }
+        public RoomConnector End { get; private set; }
         public ColorName Color { get; set; }
 
         public readonly Coord[] Points;
@@ -20,7 +19,7 @@ namespace Fiero.Business
         protected virtual EntityBuilder<Feature> DoorFeature(GameEntityBuilders e, Coord c) => e.Feature_Door();
         protected virtual Chance DoorChance() => new(1, 3);
 
-        public Corridor(UnorderedPair<Coord> a, UnorderedPair<Coord> b, ColorName color)
+        public Corridor(RoomConnector a, RoomConnector b, ColorName color)
         {
             Start = a;
             End = b;
@@ -30,11 +29,11 @@ namespace Fiero.Business
 
         IEnumerable<Coord> Generate()
         {
-            var startMiddle = (Start.Left + Start.Right) / 2;
-            var endMiddle = (End.Left + End.Right) / 2;
-            var v1 = (Start.Left - Start.Right).Clamp(-1, 1);
+            var startMiddle = (Start.Edge.Left + Start.Edge.Right) / 2;
+            var endMiddle = (End.Edge.Left + End.Edge.Right) / 2;
+            var v1 = (Start.Edge.Left - Start.Edge.Right).Clamp(-1, 1);
             var d1 = (int)(Math.Atan2(v1.Y, v1.X) * 180f / Math.PI);
-            var v2 = (End.Left - End.Right).Clamp(-1, 1);
+            var v2 = (End.Edge.Left - End.Edge.Right).Clamp(-1, 1);
             var d2 = (int)(Math.Atan2(v2.Y, v2.X) * 180f / Math.PI);
             var connectStart = startMiddle;
             var connectEnd = endMiddle;
@@ -79,8 +78,8 @@ namespace Fiero.Business
             {
                 ctx.Draw(p, GroundTile);
             }
-            var startMiddle = (Start.Left + Start.Right) / 2;
-            var endMiddle = (End.Left + End.Right) / 2;
+            var startMiddle = (Start.Edge.Left + Start.Edge.Right) / 2;
+            var endMiddle = (End.Edge.Left + End.Edge.Right) / 2;
             if (DoorChance().Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
             {
                 ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => DoorFeature(e, startMiddle));

@@ -1,9 +1,9 @@
 ﻿using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Solver;
-using Ergo.Solver.DataBindings;
 using Fiero.Core;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Fiero.Business
 {
@@ -14,6 +14,13 @@ namespace Fiero.Business
         public SolverScope Scope { get; set; }
         public ErgoSolver Solver { get; set; }
         public List<Signature> SubscribedEvents { get; set; } = new();
-        public DataSink<Script.Stdout> Stdout { get; set; }
+        /// <summary>
+        /// Output pipe for the Solver's Out stream. You read here what is written there.
+        /// </summary>
+        public TextReader Out { get; set; }
+        /// <summary>
+        /// Input pipe for the Solver's In stream. You write here what the solver reads there.
+        /// </summary>
+        public TextWriter In { get; set; }
     }
 }

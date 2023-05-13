@@ -36,28 +36,36 @@ namespace Fiero.Business
         {
             var (size, subdivisions) = floorId.Depth switch
             {
-                _ => (new Coord(50, 50), new Coord(2, 2)),
+                _ => (new Coord(51, 51), new Coord(2, 2)),
             };
-            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2)).ToList();
-            var interCorridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2)).ToList();
+            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2))
+                .ToList();
+            var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2))
+                .ToList();
 
-            var numSecrets = new Dice(2, 2);
-            foreach (var n in numSecrets.Roll())
-            {
-                var sector = Rng.Random.Choose(roomSectors);
-                sector.MarkSecretCorridors(n);
-            }
+            //var numSecrets = new Dice(2, 2);
+            //foreach (var n in numSecrets.Roll())
+            //{
+            //    var sector = Rng.Random.Choose(roomSectors);
+            //    sector.MarkSecretCorridors(n);
+            //}
+
+            var tree = RoomTree.Build(
+                roomSectors.SelectMany(s => s.Rooms).ToArray(),
+                corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
+            );
 
             return builder
                 .WithStep(ctx =>
                 {
-                    foreach (var sector in roomSectors)
+                    tree.Draw(ctx);
+                    foreach (var r in roomSectors)
                     {
-                        ctx.Draw(sector);
+                        r.Draw(ctx);
                     }
-                    foreach (var corridor in interCorridors)
+                    foreach (var c in corridors)
                     {
-                        ctx.Draw(corridor);
+                        c.Draw(ctx);
                     }
                 })
                 .WithStep(ctx =>
@@ -97,10 +105,10 @@ namespace Fiero.Business
                     var pointCloud = new Queue<Coord>(r.GetPointCloud().Shuffle(Rng.Random));
                     if (r.AllowMonsters)
                     {
-                        var roll = new Dice(1, 3);
+                        var roll = new Dice(3, 7);
                         roll.Do(i =>
                         {
-                            if (Chance.OneIn(10))
+                            if (Chance.OneIn(2))
                             {
                                 TryAddObject("Monster", e => GenerateMonster(floorId, e));
                             }

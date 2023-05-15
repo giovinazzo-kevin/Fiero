@@ -49,7 +49,7 @@ namespace Fiero.Business.Scenes
         {
             await base.InitializeAsync();
             Layout = UI.CreateLayout()
-                .Build(UI.Store.Get(Data.UI.PopUpSize), grid => grid
+                .Build(new(), grid => grid
                     .Style<Label>(s => s
                         .Match(x => x.HasClass("ng"))
                         .Apply(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }))
@@ -57,13 +57,13 @@ namespace Fiero.Business.Scenes
                         .Match(x => !x.HasClass("ng"))
                         .Apply(l => { l.FontSize.V = 24; }))
                     .Col()
-                        .Row(h: 2, @class: "ng")
+                        .Row(@class: "ng")
                             .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
                         .End()
-                        .Row(h: 0.66f)
+                        .Row()
                             .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
                         .End()
-                        .Row(h: 0.66f)
+                        .Row()
                             .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
                         .End()
                     .End()

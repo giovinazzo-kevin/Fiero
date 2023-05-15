@@ -13,6 +13,7 @@ namespace Fiero.Core
         public UIControl Owner { get; private set; }
         public bool Propagated { get; set; }
         public bool Inherited { get; set; }
+        public bool Invalidating { get; set; }
         public Type PropertyType { get; } = typeof(T);
 
         public event Action<UIControlProperty<T>, T> ValueChanged;
@@ -31,6 +32,7 @@ namespace Fiero.Core
             _propagate = propagate ?? ((a, b, _) => a.V);
             Propagated = propagate != null;
             Inherited = true;
+            Invalidating = invalidate;
             _get = get ?? (a => a);
             _set = set ?? (a => a);
         }

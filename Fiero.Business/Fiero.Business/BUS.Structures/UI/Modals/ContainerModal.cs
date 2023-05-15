@@ -102,13 +102,13 @@ namespace Fiero.Business
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
                 .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
-                    .Col(w: 0.08f, @class: "item-sprite")
+                    .Col(w: 16, px: true, @class: "item-sprite")
                         .Cell<Picture>(p =>
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
                         })
                     .End()
-                    .Col(w: 1.94f, @class: "item-name")
+                    .Col(w: 1f, @class: "item-name")
                         .Cell<Button>(b =>
                         {
                             Invalidated += () => RefreshItemButton(b, index);
@@ -117,7 +117,7 @@ namespace Fiero.Business
                     .End()
                 .End())
                 .Row()
-                    .Col(w: 0.25f, @class: "paginator paginator-prev")
+                    .Col(w: 20, px: true, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = "<";
@@ -128,13 +128,13 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                    .Col(w: 2.50f, @class: "paginator paginator-current")
+                    .Col(w: 1f, @class: "paginator paginator-current")
                         .Cell<Label>(l =>
                         {
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
-                    .Col(w: 0.25f, @class: "paginator paginator-next")
+                    .Col(w: 20, px: true, @class: "paginator paginator-next")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = ">";

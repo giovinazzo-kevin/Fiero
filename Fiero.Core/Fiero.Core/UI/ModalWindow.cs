@@ -1,6 +1,4 @@
-﻿using SFML.Graphics;
-using System;
-using System.Linq;
+﻿using System;
 
 namespace Fiero.Core
 {
@@ -24,31 +22,34 @@ namespace Fiero.Core
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
             var hasButtons = Styles.HasFlag(ModalWindowStyles.Buttons);
 
-            var titleHeight = hasTitle ? 0.20f : 0f;
-            var buttonsHeight = hasButtons ? 0.20f : 0f;
-            var contentHeight = hasTitle && hasButtons ? 2.60f : hasTitle ^ hasButtons ? 1.80f : 1f;
+            var titleHeight = hasTitle ? 20 : 0f;
+            var buttonsHeight = hasButtons ? 50f : 0f;
 
             return ApplyStyles(grid)
                 .Col(@class: "modal")
-                    .If(hasTitle, g => g.Row(h: titleHeight, @class: "modal-title")
-                        .Cell<Label>(l => {
+                    .If(hasTitle, g => g.Row(h: titleHeight, px: true, @class: "modal-title")
+                        .Cell<Label>(l =>
+                        {
                             l.Text.V = title;
                             l.CenterContentH.V = true;
-                            if(Title != null) {
+                            if (Title != null)
+                            {
                                 Title.V = l.Text.V;
                             }
                         })
                     .End())
-                    .Row(h: contentHeight, @class: "modal-content")
+                    .Row(h: 1f, @class: "modal-content")
                         .Repeat(1, (i, g) => RenderContent(g))
                     .End()
-                    .If(hasButtons, g => g.Row(h: buttonsHeight, @class: "modal-controls")
+                    .If(hasButtons, g => g.Row(h: buttonsHeight, px: true, @class: "modal-controls")
                         .Repeat(Buttons.Length, (i, grid) => grid
                             .Col()
-                                .Cell<Button>(b => {
+                                .Cell<Button>(b =>
+                                {
                                     b.Text.V = Buttons[i].ToString();
                                     b.CenterContentH.V = true;
-                                    b.Clicked += (_, __, ___) => {
+                                    b.Clicked += (_, __, ___) =>
+                                    {
                                         Close(Buttons[i]);
                                         return false;
                                     };
@@ -63,10 +64,12 @@ namespace Fiero.Core
         {
             base.Close(buttonPressed);
             // ResultType is nullable
-            if (buttonPressed.ResultType == true) {
+            if (buttonPressed.ResultType == true)
+            {
                 Confirmed?.Invoke(this, buttonPressed);
             }
-            else if (buttonPressed.ResultType == false) {
+            else if (buttonPressed.ResultType == false)
+            {
                 Cancelled?.Invoke(this, buttonPressed);
             }
         }

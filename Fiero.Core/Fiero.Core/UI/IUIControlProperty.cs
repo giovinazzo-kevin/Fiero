@@ -10,6 +10,7 @@ namespace Fiero.Core
         UIControl Owner { get; }
         bool Propagated { get; }
         bool Inherited { get; }
+        bool Invalidating { get; }
 
         void SetOwner(UIControl newOwner);
     }

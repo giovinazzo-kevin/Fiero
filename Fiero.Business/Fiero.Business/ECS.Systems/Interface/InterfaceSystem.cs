@@ -114,7 +114,7 @@ namespace Fiero.Business
         public void Initialize()
         {
             Layout = UI.CreateLayout().Build(new(), grid => grid
-                .Row(w: 0.5f, h: 0.5f)
+                .Row(h: 0.5f)
                 .End()
             );
             HPBar = new(UI, "HP", ColorName.LightRed);
@@ -130,12 +130,12 @@ namespace Fiero.Business
 
         public void Update()
         {
-            Layout.Update();
+            //Layout.Update();
         }
 
         public void Draw()
         {
-            UI.Window.RenderWindow.Draw(Layout);
+            //UI.Window.RenderWindow.Draw(Layout);
         }
     }
 }

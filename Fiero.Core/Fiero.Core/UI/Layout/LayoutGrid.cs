@@ -13,19 +13,17 @@ namespace Fiero.Core
             public UIControl Instance { get; set; }
         }
 
-        protected readonly LayoutGrid Parent;
+        public readonly LayoutGrid Parent;
         protected readonly List<LayoutGrid> Children = new();
 
-        private float _c = 0, _r = 0;
+        private LayoutPoint _offset;
         public int Cols = 0, Rows = 0;
-        public float X = 0, Y = 0;
-        public readonly float Width = 1, Height = 1;
+        public LayoutPoint Position { get; set; }
+        public readonly LayoutPoint Size = new(new(0, 1), new(0, 1));
 
         public string Id { get; set; }
         public string Class { get; set; }
         public Coord Subdivisions => new(Cols, Rows);
-        public Vec Size => new(Width, Height);
-        public Vec Position => new(X, Y);
         public bool IsCell => Cols == 0 && Rows == 0;
         public List<CellControl> Controls { get; private set; } = new();
         //public Type ControlType { get; protected set; } = typeof(Layout);
@@ -90,12 +88,11 @@ namespace Fiero.Core
                 .Cast<Action<UIControl>>();
         }
 
-        public LayoutGrid(LayoutGrid parent = null, float w = 1, float h = 1)
+        public LayoutGrid(LayoutPoint size, LayoutGrid parent = null)
         {
             Parent = parent;
             Styles = new List<LayoutRule>();
-            Width = w;
-            Height = h;
+            Size = size;
         }
 
         public LayoutGrid Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
@@ -124,30 +121,30 @@ namespace Fiero.Core
             return top;
         }
         public LayoutGrid End() => Parent ?? this;
-        public LayoutGrid Col(float w = 1, float h = 1, string @class = null, string @id = null)
+        public LayoutGrid Col(float w = 1, bool px = false, string @class = null, string @id = null)
         {
-            var ret = new LayoutGrid(this, w, h)
+            var unit = LayoutUnit.FromBool(w, px);
+            var ret = new LayoutGrid(size: new(unit, LayoutUnit.FromBool(0, false)), parent: this)
             {
                 Class = @class == null ? Class : @class + " " + (Class ?? ""),
                 Id = id,
-                X = _c,
-                Y = _r,
+                Position = _offset
             };
-            _c += w;
+            _offset = _offset with { X = _offset.X + unit };
             Cols++;
             Children.Add(ret);
             return ret;
         }
-        public LayoutGrid Row(float w = 1, float h = 1, string @class = null, string @id = null)
+        public LayoutGrid Row(float h = 1, bool px = false, string @class = null, string @id = null)
         {
-            var ret = new LayoutGrid(this, w, h)
+            var unit = LayoutUnit.FromBool(h, px);
+            var ret = new LayoutGrid(size: new(LayoutUnit.FromBool(0, false), unit), parent: this)
             {
-                Class = @class == null ? Class : Class + " " + @class,
+                Class = @class == null ? Class : @class + " " + (Class ?? ""),
                 Id = id,
-                X = _c,
-                Y = _r,
+                Position = _offset
             };
-            _r += h;
+            _offset = _offset with { Y = _offset.Y + unit };
             Rows++;
             Children.Add(ret);
             return ret;

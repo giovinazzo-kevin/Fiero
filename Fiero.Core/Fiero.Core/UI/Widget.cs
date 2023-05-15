@@ -24,14 +24,17 @@ namespace Fiero.Core
             var mousePos = UI.Input.GetMousePosition();
             var leftClick = UI.Input.IsButtonPressed(Mouse.Button.Left);
             var leftDown = UI.Input.IsButtonDown(Mouse.Button.Left);
-            if(_dragStart.HasValue && leftDown) {
+            if (_dragStart.HasValue && leftDown)
+            {
                 Layout.Position.V = (mousePos - _dragStart.Value);
                 Dragged?.Invoke(this, Layout.Position.V);
             }
-            if (Layout.Contains(mousePos, out _) && !_dragStart.HasValue && leftClick) {
+            else if (Layout.Contains(mousePos, out _) && !_dragStart.HasValue && leftClick)
+            {
                 _dragStart = mousePos - Layout.Position.V;
             }
-            else if(!leftDown) {
+            else if (!leftDown && _dragStart.HasValue)
+            {
                 _dragStart = null;
                 Dropped?.Invoke(this, Layout.Position.V);
             }

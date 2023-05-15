@@ -40,6 +40,7 @@ namespace Fiero.Business
                 _renderSprite?.Dispose();
                 SetDirty();
             };
+            Layout.Invalidated += (_) => SetDirty();
             SetDirty();
         }
 

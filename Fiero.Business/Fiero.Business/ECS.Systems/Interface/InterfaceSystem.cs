@@ -13,7 +13,6 @@ namespace Fiero.Business
         protected readonly DungeonSystem DungeonSystem;
         protected readonly FactionSystem FactionSystem;
         protected readonly GameColors<ColorName> Colors;
-        protected Layout Layout { get; private set; }
 
         public StatBar HPBar { get; private set; }
         public StatBar MPBar { get; private set; }
@@ -62,11 +61,11 @@ namespace Fiero.Business
 
         public void Reset()
         {
-            //UI.Show(HPBar);
-            //UI.Show(MPBar);
-            //UI.Show(Minimap);
-            //UI.Show(Logs);
-            //UI.Show(Console);
+            UI.Show(HPBar);
+            UI.Show(MPBar);
+            UI.Show(Minimap);
+            UI.Show(Logs);
+            UI.Show(Console);
             Invalidate(UI.Store.Get(Data.UI.WindowSize));
         }
 
@@ -106,17 +105,10 @@ namespace Fiero.Business
                 Console.Layout.Position.V = new(0, barSize.Y);
                 Console.Layout.Size.V = conSize;
             }
-
-            Layout.Position.V = new();
-            Layout.Size.V = newSize;
         }
 
         public void Initialize()
         {
-            Layout = UI.CreateLayout().Build(new(), grid => grid
-                .Row(h: 0.5f)
-                .End()
-            );
             HPBar = new(UI, "HP", ColorName.LightRed);
             MPBar = new(UI, "MP", ColorName.LightBlue);
             Minimap = new(UI, DungeonSystem, FactionSystem, Colors);
@@ -130,12 +122,12 @@ namespace Fiero.Business
 
         public void Update()
         {
-            Layout.Update();
+
         }
 
         public void Draw()
         {
-            UI.Window.RenderWindow.Draw(Layout);
+
         }
     }
 }

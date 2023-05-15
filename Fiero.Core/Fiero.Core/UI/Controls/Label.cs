@@ -14,7 +14,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
-        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), true);
+        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
 
         public string DisplayText => String.IsNullOrEmpty(Text.V)

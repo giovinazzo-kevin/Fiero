@@ -14,13 +14,9 @@ namespace Fiero.Core
         {
         }
 
-        public override void Open(string title)
-        {
-            base.Open(title);
-        }
-
         public override void Update()
         {
+            base.Update();
             var mousePos = UI.Input.GetMousePosition();
             var leftClick = UI.Input.IsButtonPressed(Mouse.Button.Left);
             var leftDown = UI.Input.IsButtonDown(Mouse.Button.Left);

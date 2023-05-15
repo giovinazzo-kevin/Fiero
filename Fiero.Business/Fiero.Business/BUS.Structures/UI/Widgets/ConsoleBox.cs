@@ -41,7 +41,7 @@ namespace Fiero.Business
             InputAvailable?.Invoke(this, s);
         }
 
-        public void WritLine(string s)
+        public void WriteLine(string s)
         {
             Write(s + Environment.NewLine);
         }
@@ -123,26 +123,27 @@ namespace Fiero.Business
             .AddRule<Paragraph>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
-                p.CenterContentH.V = false;
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Padding.V = new(ts, ts);
                 p.Margin.V = new(ts, ts);
+                p.Cols.V = Cols.V;
+                p.Rows.V = Rows.V;
+            }))
+            .AddRule<Textbox>(r => r.Apply(t =>
+            {
+                t.Text.V = "Type here";
+                t.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
+                t.Foreground.V = Colors.Get(ColorName.White);
             }))
             ;
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
                 .Row(id: "output")
-                    .Cell<Paragraph>(p =>
-                    {
-                        p.Cols.V = Cols.V;
-                        p.Rows.V = Rows.V;
-                    })
+                    .Cell<Paragraph>()
                 .End()
-                .Row(id: "input")
-                    .Cell<Label>(l =>
-                    {
-                    })
+                .Row(h: 20, px: true, id: "input")
+                    .Cell<Textbox>()
                 .End()
             ;
     }

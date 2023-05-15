@@ -62,6 +62,8 @@ namespace Fiero.Business.Scenes
                     .Style<Button>(s => s
                         .Match(x => !x.HasClass("ng"))
                         .Apply(l => { l.FontSize.V = 8; }))
+                    .Style<Button>(s => s
+                        .Apply(l => { l.CenterContentH.V = true; }))
                     .Col()
                         .Row()
                             .Col()

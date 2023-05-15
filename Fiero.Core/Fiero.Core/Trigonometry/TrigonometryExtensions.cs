@@ -24,6 +24,7 @@ namespace Fiero.Core
         public static Coord ToCoord(this Vector2i v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vector2f v) => new((int)v.X, (int)v.Y);
         public static Vector2f Round(this Vector2f v, int digits = 0) => new((float)Math.Round(v.X, digits), (float)Math.Round(v.Y, digits));
+        public static Vec Round(this Vec v, int digits = 0) => new((float)Math.Round(v.X, digits), (float)Math.Round(v.Y, digits));
         public static Coord ToCoord(this Point v) => new(v.X, v.Y);
         public static Coord ToCoord(this Vec v) => new((int)v.X, (int)v.Y);
         public static Vec RotateAround(this Vec v, Vec pivot, float theta)

@@ -22,13 +22,13 @@ namespace Fiero.Core
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
             var hasButtons = Styles.HasFlag(ModalWindowStyles.Buttons);
 
-            var titleHeight = hasTitle ? 0.20f : 0f;
+            var titleHeight = hasTitle ? 20f : 0f;
             var buttonsHeight = hasButtons ? 0.20f : 0f;
             var contentHeight = hasTitle && hasButtons ? 2.60f : hasTitle ^ hasButtons ? 1.80f : 1f;
 
             return ApplyStyles(grid)
                 .Col(@class: "modal")
-                    .If(hasTitle, g => g.Row(h: titleHeight, @class: "modal-title")
+                    .If(hasTitle, g => g.Row(h: titleHeight, px: true, @class: "modal-title")
                         .Cell<Label>(l =>
                         {
                             l.Text.V = title;

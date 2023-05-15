@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -21,7 +20,7 @@ namespace Fiero.Business
             Hotkeys = new Dictionary<Hotkey, Action>();
             Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
         }
-        
+
         protected virtual void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
             Layout.Size.V = obj.NewValue;
@@ -35,6 +34,9 @@ namespace Fiero.Business
             .AddRule<UIControl>(style => style
                 .Match(x => x.HasClass("row-even"))
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
+            .AddRule<UIControl>(style => style
+                .Match(x => x.HasClass("row-odd"))
+                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(-16, -16, -16)))
             ;
 
         protected void Invalidate()
@@ -54,10 +56,12 @@ namespace Fiero.Business
 
         protected virtual void RegisterHotkeys(ModalWindowButton[] buttons)
         {
-            if (buttons.Any(b => b.ResultType == true)) {
+            if (buttons.Any(b => b.ResultType == true))
+            {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButton.ImplicitYes));
             }
-            if (buttons.Any(b => b.ResultType == false)) {
+            if (buttons.Any(b => b.ResultType == false))
+            {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButton.ImplicitNo));
             }
         }
@@ -75,7 +79,8 @@ namespace Fiero.Business
 
         public override void Draw()
         {
-            if (_dirty) {
+            if (_dirty)
+            {
                 Invalidated?.Invoke();
                 Layout.Invalidate();
                 _dirty = false;
@@ -87,11 +92,12 @@ namespace Fiero.Business
         {
             var shift = UI.Input.IsKeyPressed(Keyboard.Key.LShift)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RShift);
-            var ctrl  = UI.Input.IsKeyPressed(Keyboard.Key.LControl)
+            var ctrl = UI.Input.IsKeyPressed(Keyboard.Key.LControl)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RControl);
-            var alt   = UI.Input.IsKeyPressed(Keyboard.Key.LAlt)
+            var alt = UI.Input.IsKeyPressed(Keyboard.Key.LAlt)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RAlt);
-            foreach (var pair in Hotkeys) {
+            foreach (var pair in Hotkeys)
+            {
                 if (!UI.Input.IsKeyPressed(pair.Key.Key))
                     continue;
                 if (pair.Key.Shift && !shift)

@@ -21,6 +21,9 @@ namespace Fiero.Core
         public LayoutPoint Position { get; set; }
         public LayoutPoint Size { get; internal set; } = new(new(0, 1), new(0, 1));
 
+        public Coord ComputedPosition { get; internal set; }
+        public Coord ComputedSize { get; internal set; }
+
         public string Id { get; set; }
         public string Class { get; set; }
         public Coord Subdivisions => new(Cols, Rows);

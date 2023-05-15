@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Fiero.Core
 {
-    public abstract partial class UIControl : Drawable
+    public abstract partial class UIControl : Drawable, IDisposable
     {
         protected readonly GameInput Input;
         public readonly List<UIControl> Children;
@@ -201,5 +201,7 @@ namespace Fiero.Core
                 child.Draw(target, states);
             }
         }
+
+        public virtual void Dispose() { }
     }
 }

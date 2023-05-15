@@ -7,7 +7,6 @@ namespace Fiero.Core
     public class Label : UIControl
     {
         private BitmapText _drawable;
-        private double _knownTextSize;
 
         protected readonly Func<string, BitmapText> GetText;
 

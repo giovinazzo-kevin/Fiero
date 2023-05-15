@@ -25,7 +25,7 @@ namespace Fiero.Core
         protected virtual void RebuildLayout()
         {
             Layout = UI.CreateLayout()
-                .Build(new(), grid => CreateLayout(grid, Title ?? "Untitled"));
+                .Build(Layout?.Size.V ?? new(), grid => CreateLayout(grid, Title ?? "Untitled"));
         }
 
         public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);

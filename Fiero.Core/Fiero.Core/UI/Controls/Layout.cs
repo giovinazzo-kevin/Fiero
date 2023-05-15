@@ -49,5 +49,13 @@ namespace Fiero.Core
             Dom = dom;
             Children.AddRange(controls);
         }
+
+        public override void Dispose()
+        {
+            foreach (var item in Children)
+            {
+                item.Dispose();
+            }
+        }
     }
 }

@@ -10,13 +10,15 @@ namespace Fiero.Business
         where TContainer : PhysicalEntity
         where TActions : struct, Enum
     {
+        public const int RowHeight = 32; // px
+
         public readonly TContainer Container;
         public event Action<Item, TActions> ActionPerformed;
 
 
         protected readonly List<Item> Items = new();
-        public UIControlProperty<int> CurrentPage { get; private set; } = new(nameof(CurrentPage), 0);
-        public UIControlProperty<int> PageSize { get; private set; } = new(nameof(PageSize), 20);
+        public UIControlProperty<int> CurrentPage { get; private set; } = new(nameof(CurrentPage), 0, invalidate: true);
+        public UIControlProperty<int> PageSize { get; private set; } = new(nameof(PageSize), 20, invalidate: true);
         protected int NumPages => (Items.Count - 1) / PageSize.V + 1;
 
         public ContainerModal(GameUI ui, GameResources resources, TContainer cont, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
@@ -34,6 +36,16 @@ namespace Fiero.Business
             var modalSize = UI.Store.Get(Data.UI.WindowSize);
             Layout.Size.V = modalSize;
             Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
+            // Update PageSize dynamically
+            var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
+            var availableSpace = contentElem.ComputedSize.Y;
+            var newPageSize = availableSpace / RowHeight - 2;
+            if (newPageSize != PageSize.V)
+            {
+                PageSize.V = newPageSize;
+                RebuildLayout();
+                Invalidate();
+            }
         }
 
         protected override void BeforePresentation()
@@ -83,7 +95,7 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("item-sprite"))
                 .Apply(x =>
                 {
-                    x.HorizontalAlignment.V = HorizontalAlignment.Right;
+                    x.VerticalAlignment.V = VerticalAlignment.Middle;
                     x.LockAspectRatio.V = true;
                 }))
             .AddRule<Button>(s => s
@@ -91,7 +103,7 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.CenterContentH.V = false;
-                    x.Padding.V = new(16, 0);
+                    x.Padding.V = new(8, 0);
                 }))
             ;
 
@@ -100,8 +112,8 @@ namespace Fiero.Business
         {
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
-                .Row(h: 1f, @class: index % 2 == 0 ? "row-even" : "row-odd")
-                    .Col(w: 0.08f, @class: "item-sprite")
+                .Row(h: RowHeight, px: true, @class: index % 2 == 0 ? "row-even" : "row-odd")
+                    .Col(w: RowHeight, px: true, @class: "item-sprite")
                         .Cell<Picture>(p =>
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
@@ -115,8 +127,9 @@ namespace Fiero.Business
                         })
                     .End()
                 .End())
-                .Row()
-                    .Col(w: 0.25f, @class: "paginator paginator-prev")
+                .Row(h: 48, px: true)
+                    .Col().Cell<Label>().End()
+                    .Col(w: 16, px: true, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = "<";
@@ -127,13 +140,13 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                    .Col(w: 2.50f, @class: "paginator paginator-current")
+                    .Col(w: 0.25f, @class: "paginator paginator-current")
                         .Cell<Label>(l =>
                         {
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
-                    .Col(w: 0.25f, @class: "paginator paginator-next")
+                    .Col(w: 16, px: true, @class: "paginator paginator-next")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = ">";
@@ -144,6 +157,7 @@ namespace Fiero.Business
                             };
                         })
                     .End()
+                    .Col().Cell<Label>().End()
                 .End();
 
             void RefreshItemSprite(Picture p, int index)

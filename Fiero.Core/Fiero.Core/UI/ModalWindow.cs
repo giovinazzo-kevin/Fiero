@@ -19,13 +19,13 @@ namespace Fiero.Core
 
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title)
         {
+            Layout?.Dispose();
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
             var hasButtons = Styles.HasFlag(ModalWindowStyles.Buttons);
 
             var titleHeight = hasTitle ? 24 : 0f;
             var buttonsHeight = hasButtons ? 48f : 0f;
             var contentHeight = 1f;
-
             return ApplyStyles(grid)
                 .Col(@class: "modal")
                     .If(hasTitle, g => g.Row(h: titleHeight, px: true, @class: "modal-title")
@@ -39,7 +39,7 @@ namespace Fiero.Core
                             }
                         })
                     .End())
-                    .Row(h: contentHeight, @class: "modal-content")
+                    .Row(h: contentHeight, @class: "modal-content", id: "modal-content")
                         .Repeat(1, (i, g) => RenderContent(g))
                     .End()
                     .If(hasButtons, g => g.Row(h: buttonsHeight, px: true, @class: "modal-controls")

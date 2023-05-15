@@ -105,9 +105,9 @@ namespace Fiero.Core
                         // Compute relative part of child size and normalize by totalRel, then apply auto sizing
                         var rSize = ApplyAutoSizing(child.Size / totalRel);
                         // Compute actual child position by summing global offset, child absolute position and calculated relative offset
-                        var computedChildPos = (p + child.Position.AbsolutePart + (rPos * unclaimedArea).Floor()).ToCoord();
+                        var computedChildPos = child.ComputedPosition = (p + child.Position.AbsolutePart + (rPos * unclaimedArea).Floor()).ToCoord();
                         // Compute actual child size by summing child absolute size and calculated relative size
-                        var computedChildSize = (child.Size.AbsolutePart + (rSize * unclaimedArea).Ceiling()).ToCoord();
+                        var computedChildSize = child.ComputedSize = (child.Size.AbsolutePart + (rSize * unclaimedArea).Ceiling()).ToCoord();
                         if (child.IsCell)
                         {
                             foreach (var c in child.Controls)

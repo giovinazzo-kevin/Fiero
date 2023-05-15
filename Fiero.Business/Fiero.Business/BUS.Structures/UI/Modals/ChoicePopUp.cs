@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using SFML.Window;
 using System;
 
@@ -15,11 +14,12 @@ namespace Fiero.Business
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
-        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default) 
+        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
             : base(ui, resources, buttons, styles)
         {
             Options = options;
-            Confirmed += (_, __) => {
+            Confirmed += (_, __) =>
+            {
                 OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
         }
@@ -28,11 +28,13 @@ namespace Fiero.Business
         {
             base.Update();
 
-            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))) {
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN)))
+            {
                 SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
                 Invalidate();
             }
-            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS))) {
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS)))
+            {
                 SelectedIndex = (SelectedIndex + 1).Mod(Options.Length);
                 Invalidate();
             }
@@ -49,11 +51,14 @@ namespace Fiero.Business
 
             void SelectNumber(Keyboard.Key key, int index)
             {
-                if(index < 0 || index >= Options.Length) {
+                if (index < 0 || index >= Options.Length)
+                {
                     return;
                 }
-                if (UI.Input.IsKeyPressed(key)) {
-                    if(SelectedIndex == index) {
+                if (UI.Input.IsKeyPressed(key))
+                {
+                    if (SelectedIndex == index)
+                    {
                         Close(ModalWindowButton.ImplicitYes);
                         return;
                     }
@@ -66,8 +71,9 @@ namespace Fiero.Business
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<Button>(s => s
                 .Match(x => x.HasClass("choice"))
-                .Apply(x => {
-                    x.FontSize.V = 16;
+                .Apply(x =>
+                {
+                    x.FontSize.V = 8;
                     x.Background.V = SelectedIndex == x.ZOrder.V
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultBackground);
@@ -78,11 +84,14 @@ namespace Fiero.Business
             .Col()
                 .Repeat(Options.Length, (i, layout) => layout
                 .Row(@class: "choice")
-                    .Cell<Button>(b => {
+                    .Cell<Button>(b =>
+                    {
                         b.ZOrder.V = i;
-                        b.Text.V = $"{i+1}) " + Options[i]?.ToString() ?? "(ERROR)";
-                        b.Clicked += (_, __, ___) => {
-                            if(SelectedIndex == i) {
+                        b.Text.V = $"{i + 1}) " + Options[i]?.ToString() ?? "(ERROR)";
+                        b.Clicked += (_, __, ___) =>
+                        {
+                            if (SelectedIndex == i)
+                            {
                                 Close(ModalWindowButton.ImplicitYes);
                                 return false;
                             }

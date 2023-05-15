@@ -13,14 +13,20 @@ namespace Fiero.Business.Scenes
             [EntryState]
             Main,
             [ExitState]
+            Exit_Continue,
+            [ExitState]
             Exit_NewGame,
+            [ExitState]
+            Exit_LoadGame,
             [ExitState]
             Exit_QuitGame
         }
 
         public enum MenuOptions
         {
+            Continue,
             NewGame,
+            LoadGame,
             Settings,
             QuitGame,
         }
@@ -50,15 +56,23 @@ namespace Fiero.Business.Scenes
             await base.InitializeAsync();
             Layout = UI.CreateLayout()
                 .Build(new(), grid => grid
-                    .Style<Label>(s => s
+                    .Style<Button>(s => s
                         .Match(x => x.HasClass("ng"))
-                        .Apply(l => { l.FontSize.V = 48; l.Foreground.V = Color.Yellow; }))
-                    .Style<Label>(s => s
+                        .Apply(l => { l.FontSize.V = 16; l.Foreground.V = Color.Yellow; }))
+                    .Style<Button>(s => s
                         .Match(x => !x.HasClass("ng"))
-                        .Apply(l => { l.FontSize.V = 24; }))
+                        .Apply(l => { l.FontSize.V = 8; }))
                     .Col()
-                        .Row(@class: "ng")
-                            .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
+                        .Row()
+                            .Col()
+                                .Cell(MakeMenuButton(MenuOptions.Continue, SceneState.Exit_Continue))
+                            .End()
+                            .Col(@class: "ng")
+                                .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
+                            .End()
+                            .Col()
+                                .Cell(MakeMenuButton(MenuOptions.LoadGame, SceneState.Exit_LoadGame))
+                            .End()
                         .End()
                         .Row()
                             .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
@@ -106,14 +120,14 @@ namespace Fiero.Business.Scenes
             base.OnStateChanged(oldState);
             switch (State)
             {
-                // Initialize
                 case SceneState.Main:
                     break;
-                // New game
                 case SceneState.Exit_NewGame:
                     Store.TrySetValue(Data.Player.Name, "Player", "Player");
                     break;
-                // Quit game
+                case SceneState.Exit_LoadGame:
+                    // TODO: Save/load
+                    break;
                 case SceneState.Exit_QuitGame:
                     // TODO: Are you sure?
                     OffButton.Press();

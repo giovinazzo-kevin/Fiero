@@ -35,7 +35,11 @@ namespace Fiero.Core
         public Color FillColor { get; set; } = Color.White;
 
         public IntRect GetGlobalBounds() => new(Position.X, Position.Y, Font.Size.X * _text.Length, Font.Size.Y);
-        public IntRect GetLocalBounds() => new(0, 0, Font.Size.X * _text.Length, Font.Size.Y);
+        public IntRect GetLocalBounds()
+        {
+            var global = GetGlobalBounds();
+            return new(0, 0, global.Width, global.Height);
+        }
 
         public BitmapText(BitmapFont font, string text)
         {
@@ -47,14 +51,23 @@ namespace Fiero.Core
         {
             lock (Sprites)
             {
+                var bounds = GetLocalBounds().Size();
+                if (bounds.X == 0 || bounds.Y == 0)
+                    return;
+
+                using var tex = new RenderTexture((uint)bounds.X, (uint)bounds.Y);
+                tex.Clear(Color.Transparent);
                 foreach (var sprite in Sprites)
                 {
-                    sprite.Scale = Scale;
                     sprite.Color = FillColor;
-                    sprite.Position += Position;
-                    target.Draw(sprite);
-                    sprite.Position -= Position;
+                    tex.Draw(sprite);
                 }
+                tex.Display();
+                using var texSprite = new Sprite(tex.Texture);
+                texSprite.Scale = Scale;
+                var delta = texSprite.Texture.Size.ToVec() * Scale - texSprite.Texture.Size.ToVec();
+                texSprite.Position = Position - delta / 2;
+                target.Draw(texSprite, states);
             }
         }
     }

@@ -91,7 +91,7 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.CenterContentH.V = false;
-                    x.FontSize.V = 18;
+                    x.FontSize.V = 8;
                     x.Padding.V = new(16, 0);
                 }))
             ;

@@ -31,26 +31,15 @@ namespace Fiero.Core
             }
             if (ContentAwareScale)
             {
-                const int testFontSize = 8;
-                if (_drawable.Text != text)
-                {
-                    // Calculate font size by extrapolating from a known size
-                    _drawable.Text = text;
-                    _knownTextSize = _drawable.GetLocalBounds().Size().ToVec().Magnitude();
-                }
-                FontSize.V = (uint)(ContentRenderSize.ToVec().Magnitude() * testFontSize / _knownTextSize);
-                FontSize.V -= FontSize.V % 4;
-                if (FontSize.V <= 4)
-                {
-                    FontSize.V = 4;
-                }
                 // Correct for error and warp to fit by rescaling
                 _drawable.Scale = Scale * ContentRenderSize.ToVec() / _drawable.GetLocalBounds().Size();
             }
             else
             {
+                // Calculate scale as a proportion of font size
+                var factor = FontSize.V / (float)_drawable.Font.Size.X;
                 _drawable.Text = text;
-                _drawable.Scale = Scale.V;
+                _drawable.Scale = Scale.V * factor;
             }
         }
 
@@ -62,6 +51,10 @@ namespace Fiero.Core
                 OnTextInvalidated();
             };
             Size.ValueChanged += (owner, old) =>
+            {
+                OnTextInvalidated();
+            };
+            ContentAwareScale.ValueChanged += (owner, old) =>
             {
                 OnTextInvalidated();
             };

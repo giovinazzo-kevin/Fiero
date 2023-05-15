@@ -37,10 +37,10 @@ namespace Fiero.Core
             => new Coord(self.X * other, self.Y * other);
         public static Coord operator /(Coord self, int other)
             => new Coord(self.X / other, self.Y / other);
-        public static Vector2f operator /(Coord self, float other)
-            => new Vector2f(self.X / other, self.Y / other);
-        public static Vector2f operator *(Coord self, float other)
-            => new Vector2f(self.X * other, self.Y * other);
+        public static Vec operator /(Coord self, float other)
+            => new Vec(self.X / other, self.Y / other);
+        public static Vec operator *(Coord self, float other)
+            => new Vec(self.X * other, self.Y * other);
         public static bool operator ==(Coord self, Coord other)
             => self.X == other.X && self.Y == other.Y;
         public static bool operator !=(Coord self, Coord other)

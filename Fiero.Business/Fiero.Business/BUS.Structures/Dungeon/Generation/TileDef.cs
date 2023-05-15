@@ -1,6 +1,4 @@
 ﻿using Fiero.Core;
-using System;
-using System.Runtime.CompilerServices;
 
 namespace Fiero.Business
 {
@@ -18,18 +16,21 @@ namespace Fiero.Business
 
         private EntityBuilder<Tile> Decorate(EntityBuilder<Tile> builder, FloorId id)
         {
-            if (Color.HasValue) {
+            if (Color.HasValue)
+            {
                 builder = builder.WithColor(Color.Value);
             }
             builder = builder.WithPosition(Position, id);
             return builder;
         }
 
-        public EntityBuilder<Tile> Resolve(GameEntityBuilders entities, FloorId id) => Name switch {
+        public EntityBuilder<Tile> Resolve(GameEntityBuilders entities, FloorId id) => Name switch
+        {
             TileName.Room => Decorate(entities.Tile_Room(), id),
             TileName.Corridor => Decorate(entities.Tile_Corridor(), id),
             TileName.Wall => Decorate(entities.Tile_Wall(), id),
-            _ => throw new NotSupportedException(Name.ToString())
+            TileName.Water => Decorate(entities.Tile_Water(), id),
+            _ => Decorate(entities.Tile_Unimplemented(), id),
         };
     }
 }

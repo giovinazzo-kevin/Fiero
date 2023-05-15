@@ -6,6 +6,7 @@
         Room,
         Corridor,
         Wall,
+        Water,
         Error
     }
 }

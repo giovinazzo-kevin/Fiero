@@ -190,10 +190,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
                             .Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
-                        Resources.Entities.Potion_OfTeleport().Build(),
+                        Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),
                         Resources.Entities.Potion_OfHealing().Build(),
                         Resources.Entities.Throwable_Bomb(10).Build(),

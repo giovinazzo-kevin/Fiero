@@ -50,6 +50,7 @@ namespace Fiero.Business
                 EffectName.Sleep => new SleepEffect(source),
                 EffectName.Silence => new SilenceEffect(source),
                 EffectName.Entrapment => new EntrapEffect(source),
+                EffectName.Poison => new PoisonEffect(source, Magnitude * 2),
                 EffectName.RaiseUndead => new RaiseUndeadEffect(source, (UndeadRaisingName)Magnitude),
                 EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(source),
                 EffectName.Heal => new HealEffect(source, Magnitude * 10),

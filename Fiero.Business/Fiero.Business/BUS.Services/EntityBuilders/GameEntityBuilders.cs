@@ -732,6 +732,11 @@ namespace Fiero.Business
         public EntityBuilder<Tile> Tile_Unimplemented()
             => Tile(TileName.Error, ColorName.LightMagenta)
             ;
+        public EntityBuilder<Tile> Tile_Water()
+            => Tile(TileName.Water, ColorName.LightBlue)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Ground)
+            ;
         #endregion
     }
 }

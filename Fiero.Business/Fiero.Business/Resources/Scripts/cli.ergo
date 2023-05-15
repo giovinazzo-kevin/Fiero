@@ -9,13 +9,13 @@ scripting:input_available(_) :-
 	% Execute commands
 	(command(L) ; true).
 	
+%%% Attempts to spawn a known entity
 command(Spawn) :-
 	str_fmt('spawn {0}', [Thing], Spawn) -> (
 	spawn(Thing) -> (write('spawned: '), write(Thing), nl)
 				  ; (write('unknown entity: '), write(Thing), nl)
-	)
-	.
-
+	).
+%%% Lists all spawnable entities
 command(spawn) :-
 	spawn(Thing),
 	write(Thing), nl.

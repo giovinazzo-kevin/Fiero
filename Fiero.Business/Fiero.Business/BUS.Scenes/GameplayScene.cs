@@ -210,7 +210,7 @@ namespace Fiero.Business.Scenes
                     .WithIntrinsicEffect(
                         new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"test").Build())
                     )
-                    //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
+                    .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
 
                 // Generate map

@@ -1,4 +1,10 @@
-﻿namespace Fiero.Business
+﻿using Fiero.Core;
+using Fiero.Core.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameEntityBuilders

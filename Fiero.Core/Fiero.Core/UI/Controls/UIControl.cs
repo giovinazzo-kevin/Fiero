@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Fiero.Core
 {
-    public abstract partial class UIControl : Drawable
+    public abstract partial class UIControl : Drawable, IDisposable
     {
         protected readonly GameInput Input;
         public readonly List<UIControl> Children;
@@ -19,8 +19,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new());
         public readonly UIControlProperty<Coord> Position = new(nameof(Position), new(), invalidate: true);
         public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
-        public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new(), invalidate: true);
-        public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1));
+        public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new());
+        public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1), invalidate: true);
         public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255));
         public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0));
         public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0));
@@ -67,8 +67,11 @@ namespace Fiero.Core
             foreach (var prop in Properties)
             {
                 prop.SetOwner(this);
-                registerInvalidationEvents.MakeGenericMethod(prop.PropertyType)
-                    .Invoke(this, new object[] { prop });
+                if (prop.Invalidating)
+                {
+                    registerInvalidationEvents.MakeGenericMethod(prop.PropertyType)
+                        .Invoke(this, new object[] { prop });
+                }
             }
         }
 
@@ -198,5 +201,7 @@ namespace Fiero.Core
                 child.Draw(target, states);
             }
         }
+
+        public virtual void Dispose() { }
     }
 }

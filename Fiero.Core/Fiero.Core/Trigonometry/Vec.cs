@@ -62,8 +62,12 @@ namespace Fiero.Core
             => new(Math.Clamp(X, min, max), Math.Clamp(Y, min, max));
         public Vec Clamp(float minX = float.MinValue, float maxX = float.MaxValue, float minY = float.MinValue, float maxY = float.MaxValue)
             => new(Math.Clamp(X, minX, maxX), Math.Clamp(Y, minY, maxY));
-        public Vec Round(int places = 0) 
+        public Vec Round(int places = 0)
             => new((float)Math.Round(X, places), (float)Math.Round(Y, places));
+        public Vec Floor()
+            => this.ToCoord().ToVec();
+        public Vec Ceiling()
+            => new((int)Math.Ceiling(X), (int)Math.Ceiling(Y));
 
 
         public override int GetHashCode()

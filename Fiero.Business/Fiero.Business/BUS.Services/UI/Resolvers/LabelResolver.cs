@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
-using System;
 
 namespace Fiero.Business
 {
@@ -18,7 +17,7 @@ namespace Fiero.Business
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;
-            x.FontSize.V = 24;
+            x.FontSize.V = 8;
             return x;
         }
     }

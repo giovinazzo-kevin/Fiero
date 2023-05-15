@@ -18,7 +18,7 @@ namespace Fiero.Business
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;
             x.CenterContentH.V = false;
-            x.FontSize.V = 16;
+            x.FontSize.V = 8;
             return x;
         }
     }

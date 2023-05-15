@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -15,17 +14,10 @@ namespace Fiero.Business
         private bool _dirty;
 
         protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, buttons, styles)
+            : base(ui, Data.UI.WindowSize, buttons, styles)
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
-        }
-        
-        protected virtual void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            Layout.Size.V = obj.NewValue;
-            Invalidate();
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
@@ -36,6 +28,12 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("row-even"))
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
             ;
+
+        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        {
+            base.OnGameWindowSizeChanged(obj);
+            Invalidate();
+        }
 
         protected void Invalidate()
         {
@@ -48,34 +46,30 @@ namespace Fiero.Business
             Hotkeys.Clear();
             RegisterHotkeys(Buttons);
             base.Open(title);
-            BeforePresentation();
             Invalidate();
         }
 
         protected virtual void RegisterHotkeys(ModalWindowButton[] buttons)
         {
-            if (buttons.Any(b => b.ResultType == true)) {
+            if (buttons.Any(b => b.ResultType == true))
+            {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButton.ImplicitYes));
             }
-            if (buttons.Any(b => b.ResultType == false)) {
+            if (buttons.Any(b => b.ResultType == false))
+            {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButton.ImplicitNo));
             }
         }
 
-        protected virtual void BeforePresentation()
-        {
-            Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
-        }
-
         public override void Close(ModalWindowButton buttonPressed)
         {
-            Data.UI.WindowSize.ValueChanged -= OnWindowSizeChanged;
             base.Close(buttonPressed);
         }
 
         public override void Draw()
         {
-            if (_dirty) {
+            if (_dirty)
+            {
                 Invalidated?.Invoke();
                 Layout.Invalidate();
                 _dirty = false;
@@ -87,11 +81,12 @@ namespace Fiero.Business
         {
             var shift = UI.Input.IsKeyPressed(Keyboard.Key.LShift)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RShift);
-            var ctrl  = UI.Input.IsKeyPressed(Keyboard.Key.LControl)
+            var ctrl = UI.Input.IsKeyPressed(Keyboard.Key.LControl)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RControl);
-            var alt   = UI.Input.IsKeyPressed(Keyboard.Key.LAlt)
+            var alt = UI.Input.IsKeyPressed(Keyboard.Key.LAlt)
                       ^ UI.Input.IsKeyPressed(Keyboard.Key.RAlt);
-            foreach (var pair in Hotkeys) {
+            foreach (var pair in Hotkeys)
+            {
                 if (!UI.Input.IsKeyPressed(pair.Key.Key))
                     continue;
                 if (pair.Key.Shift && !shift)

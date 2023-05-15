@@ -4,21 +4,16 @@ namespace Fiero.Business
 {
     public abstract class PopUp : Modal
     {
-        public PopUp(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default) 
+        public PopUp(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
             : base(ui, resources, buttons, styles)
         {
         }
 
-        protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
-            Layout.Position.V = obj.NewValue / 2 - Layout.Size.V / 2;
-        }
-
-        protected override void BeforePresentation()
-        {
-            var windowSize = UI.Store.Get(Data.UI.WindowSize);
-            OnWindowSizeChanged(new(Data.UI.WindowSize, windowSize, windowSize));
+            Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Position.V = obj.NewValue / 2 - Layout.Size.V / 2;
+            Invalidate();
         }
     }
 }

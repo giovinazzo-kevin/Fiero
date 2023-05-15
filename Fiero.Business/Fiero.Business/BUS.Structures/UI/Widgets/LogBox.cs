@@ -11,7 +11,8 @@ namespace Fiero.Business
 
         public readonly UIControlProperty<int> NumRowsDisplayed = new(nameof(NumRowsDisplayed), 10);
 
-        public LogBox(GameUI ui, GameColors<ColorName> colors) : base(ui)
+        public LogBox(GameUI ui, GameColors<ColorName> colors)
+            : base(ui, Data.UI.WindowSize)
         {
             Colors = colors;
             NumRowsDisplayed.ValueChanged += (_, __) => RebuildLayout();
@@ -28,9 +29,10 @@ namespace Fiero.Business
 
                 void LogAdded(LogComponent component, string newLog)
                 {
-                    var paragraph = Layout.Query(x => true, x => "log-text".Equals(x.Id))
+                    var paragraph = Layout?.Query(x => true, x => "log-text".Equals(x.Id))
                         .Cast<Paragraph>()
-                        .Single();
+                        .SingleOrDefault();
+                    if (paragraph == null) return;
                     var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
                     paragraph.Text.V = string.Join("\n", messages);
                 }

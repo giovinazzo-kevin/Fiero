@@ -18,13 +18,14 @@ namespace Fiero.Core
 
         public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
         {
-            var p = new Vec(0f, 0f);
-            var s = new Vec(1f, 1f);
-            var grid = build(new());
+            var grid = build(new(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size)));
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
-            layout.Invalidated += _ => ResizeRecursive(layout.Size.V, grid, p, s);
-            ResizeRecursive(size, grid, p, s);
+            layout.Invalidated += _ =>
+            {
+                ResizeRecursive(layout.Size.V, layout.Position.V, grid);
+            };
+            ResizeRecursive(size, layout.Position.V, grid);
             return layout;
 
             Func<UIControl> GetResolver(Type controlType)
@@ -78,28 +79,59 @@ namespace Fiero.Core
                     }
                 }
             }
-
-            void ResizeRecursive(Coord size, LayoutGrid grid, Vec p, Vec s)
+            void ResizeRecursive(Coord screenSize, Coord offset, LayoutGrid grid, int i = 0)
             {
-                var screenSize = size.ToVec();
-                var divisions = grid.Subdivisions.Clamp(min: 1);
-                foreach (var child in grid)
+                if (screenSize == Coord.Zero)
+                    return;
+                // The outer grid should have (1,1) as its relative size. Therefore this line should change nothing if removed.
+                // However leaving it lets users quickly check the absolute size of their top-level grids.
+                grid.Size = LayoutPoint.FromAbsolute(screenSize);
+                Inner(screenSize, grid, offset, i);
+                void Inner(Coord screenSize, LayoutGrid grid, Coord p, int i = 0)
                 {
-                    var cPos = p + child.Position * s / divisions;
-                    var cSize = child.Size * s / divisions;
-                    if (child.IsCell)
+                    // Get the total relative size of the children, in order to normalize them later
+                    // NOTE: Rows have a relative size of 0 in their width, and cols have 0 for their height.
+                    // Semantically, this means "auto". Therefore, these values are normalized by changing each 0 into a 1.
+                    // What this means is that rows have 100% of the width of their parent, and columns have 100% of the height of their parent.
+                    var totalRel = grid.Select(x => x.Size.RelativePart).DefaultIfEmpty(new()).Aggregate((a, b) => a + b);
+                    totalRel = ApplyAutoSizing(LayoutPoint.FromRelative(totalRel));
+                    // Get the total absolute value, in order to calculate how much space is left for the relative part
+                    var totalAbs = grid.Select(x => x.Size.AbsolutePart).DefaultIfEmpty(new()).Aggregate((a, b) => a + b);
+                    var unclaimedArea = screenSize - totalAbs;
+                    foreach (var child in grid)
                     {
-                        foreach (var c in child.Controls)
+                        // Compute relative part of child position and normalize by totalRel
+                        var rPos = child.Position.RelativePart / totalRel;
+                        // Compute relative part of child size and normalize by totalRel, then apply auto sizing
+                        var rSize = ApplyAutoSizing(child.Size / totalRel);
+                        // Compute actual child position by summing global offset, child absolute position and calculated relative offset
+                        var computedChildPos = child.ComputedPosition = (p + child.Position.AbsolutePart + (rPos * unclaimedArea).Floor()).ToCoord();
+                        // Compute actual child size by summing child absolute size and calculated relative size
+                        var computedChildSize = child.ComputedSize = (child.Size.AbsolutePart + (rSize * unclaimedArea).Ceiling()).ToCoord();
+                        if (child.IsCell)
                         {
-                            c.Instance.Position.V = layout.Position + (cPos * screenSize).ToCoord() - new Coord(1, 1);
-                            c.Instance.Size.V = (cSize * screenSize).ToCoord() + new Coord(1, 1);
-                            foreach (var rule in grid.GetStyles(c.Type))
+                            foreach (var c in child.Controls)
                             {
-                                rule(c.Instance);
+                                c.Instance.Position.V = computedChildPos;
+                                c.Instance.Size.V = computedChildSize;
+                                foreach (var rule in grid.GetStyles(c.Type))
+                                {
+                                    rule(c.Instance);
+                                }
                             }
                         }
+                        Inner(computedChildSize, child, computedChildPos, i + 1);
                     }
-                    ResizeRecursive(size, child, cPos, cSize);
+                }
+
+                Vec ApplyAutoSizing(LayoutPoint p)
+                {
+                    var (x, y) = p.RelativePart;
+                    if (x == 0) x = 1f;
+                    if (y == 0) y = 1f;
+                    if (p.AbsolutePart.X != 0) x = 0f;
+                    if (p.AbsolutePart.Y != 0) y = 0f;
+                    return new Vec(x, y);
                 }
             }
         }

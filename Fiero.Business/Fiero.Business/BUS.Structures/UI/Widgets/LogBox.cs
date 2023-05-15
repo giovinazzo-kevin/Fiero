@@ -28,9 +28,10 @@ namespace Fiero.Business
 
                 void LogAdded(LogComponent component, string newLog)
                 {
-                    var paragraph = Layout.Query(x => true, x => "log-text".Equals(x.Id))
+                    var paragraph = Layout?.Query(x => true, x => "log-text".Equals(x.Id))
                         .Cast<Paragraph>()
-                        .Single();
+                        .SingleOrDefault();
+                    if (paragraph == null) return;
                     var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
                     paragraph.Text.V = string.Join("\n", messages);
                 }

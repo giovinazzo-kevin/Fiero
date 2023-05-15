@@ -19,7 +19,7 @@ namespace Fiero.Core
         private LayoutPoint _offset;
         public int Cols = 0, Rows = 0;
         public LayoutPoint Position { get; set; }
-        public readonly LayoutPoint Size = new(new(0, 1), new(0, 1));
+        public LayoutPoint Size { get; internal set; } = new(new(0, 1), new(0, 1));
 
         public string Id { get; set; }
         public string Class { get; set; }

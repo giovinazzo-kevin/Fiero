@@ -91,7 +91,6 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.CenterContentH.V = false;
-                    x.FontSize.V = 18;
                     x.Padding.V = new(16, 0);
                 }))
             ;
@@ -101,7 +100,7 @@ namespace Fiero.Business
         {
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
-                .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
+                .Row(h: 1f, @class: index % 2 == 0 ? "row-even" : "row-odd")
                     .Col(w: 0.08f, @class: "item-sprite")
                         .Cell<Picture>(p =>
                         {

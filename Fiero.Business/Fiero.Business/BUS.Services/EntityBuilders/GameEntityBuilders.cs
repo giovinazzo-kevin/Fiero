@@ -628,6 +628,8 @@ namespace Fiero.Business
             => Scroll(new(EffectName.Silence, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassEntrapment()
             => Scroll(new(EffectName.Entrapment, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMassExplosion()
+            => Scroll(new(EffectName.Explosion, magnitude: 2), ScrollModifierName.AreaAffectsEveryoneButTarget);
         #endregion
 
         #region WANDS

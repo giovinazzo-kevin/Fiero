@@ -1,11 +1,8 @@
-﻿using SFML.Graphics;
-using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class ComboItem : Label
     {
-        public ComboItem(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
+        public ComboItem(GameInput input) : base(input)
         {
             IsInteractive.V = true;
         }

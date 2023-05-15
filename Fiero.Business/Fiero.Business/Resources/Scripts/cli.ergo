@@ -1,0 +1,8 @@
+:- module(cli, []).
+:- subscribe(scripting, [input_available]).
+
+%%% This script has its input stream redirected to the game console, so calls to read* won't block
+scripting:input_available(_) :-
+	read_line(L),
+	% Echo the user's prompt
+	write('> '), write(L), nl.

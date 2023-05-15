@@ -1,7 +1,6 @@
 :- module(test, []).
 
 :- subscribe(action, [actor_killed]).
-:- subscribe(scripting, [input_available]).
 
 :- dynamic(num_killed/1).
 
@@ -13,6 +12,3 @@ action:actor_killed(_{killer: @player(_)}) :-
 	K1 := K + 1,
 	assertz(num_killed(K1)),
 	write(K1), write(' kills'), nl.
-	
-scripting:input_available(Text) :-
-	write(Text).

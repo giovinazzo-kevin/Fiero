@@ -72,7 +72,7 @@ namespace Fiero.Business
 
         public virtual Subscription TrackScript(Script s)
         {
-            return Console.TrackScript(s);
+            return Console.TrackScript(s, routeStdin: "cli".Equals(s.ScriptProperties.ScriptPath));
         }
 
         protected virtual void Invalidate(Coord newSize)

@@ -210,6 +210,9 @@ namespace Fiero.Business.Scenes
                     .WithIntrinsicEffect(
                         new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"test").Build())
                     )
+                    .WithIntrinsicEffect(
+                        new EffectDef(EffectName.Script, canStack: false, script: Resources.Entities.Script(@"cli").Build())
+                    )
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
 
@@ -1023,7 +1026,7 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
-            if (UI.Input.IsKeyPressed(Key.R))
+            if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(Key.R))
             {
                 TrySetState(SceneState.Main);
             }

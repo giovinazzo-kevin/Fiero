@@ -15,7 +15,7 @@ namespace Fiero.Core
 
         public event Action<Textbox> EnterPressed;
 
-        public Textbox(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
+        public Textbox(GameInput input) : base(input)
         {
             IsInteractive.V = true;
             IsActive.ValueChanged += (_, old) =>
@@ -120,7 +120,7 @@ namespace Fiero.Core
             }
             else if (!_caretShown && _caretStopwatch.ElapsedMilliseconds > CaretBlinkIntervalMs)
             {
-                _caret = GetText("|");
+                _caret = new BitmapText(Font.V, "|");
                 _caretShown = true;
             }
             Text.V = text.ToString();

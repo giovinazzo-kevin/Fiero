@@ -7,9 +7,8 @@ namespace Fiero.Core
 {
     public class Paragraph : UIControl
     {
-        protected readonly Func<string, BitmapText> GetText;
-
-        public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8);
+        public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
+        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12)) { Propagated = true, Inherited = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
         public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255);
         public readonly UIControlProperty<int> Rows = new(nameof(Rows), 10);
@@ -19,9 +18,8 @@ namespace Fiero.Core
 
         protected IEnumerable<Label> Labels => Children.OfType<Label>();
 
-        public Paragraph(GameInput input, Func<string, BitmapText> getText) : base(input)
+        public Paragraph(GameInput input) : base(input)
         {
-            GetText = getText;
             Size.ValueChanged += (owner, old) =>
             {
                 OnSizeInvalidated();
@@ -42,6 +40,10 @@ namespace Fiero.Core
             Rows.ValueChanged += (owner, old) =>
             {
                 OnMaxLinesInvalidated(Rows - old);
+            };
+            Cols.ValueChanged += (owner, old) =>
+            {
+                OnTextInvalidated();
             };
             OnMaxLinesInvalidated(Rows); // also calls OnTextInvalidated()
         }
@@ -76,7 +78,7 @@ namespace Fiero.Core
             {
                 for (; delta-- > 0;)
                 {
-                    var label = new Label(Input, GetText);
+                    var label = new Label(Input);
                     label.InheritProperties(this);
                     label.Background.V = Color.Transparent;
                     Children.Add(label);
@@ -87,7 +89,7 @@ namespace Fiero.Core
 
         protected virtual void OnTextInvalidated()
         {
-            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(Rows)))
+            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(Rows).Select(x => string.Join(string.Empty, x.Take(Cols)))))
             {
                 c.Text.V = t;
             }

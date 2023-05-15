@@ -13,11 +13,12 @@ namespace Fiero.Business
 
         public override Label Resolve(LayoutGrid dom)
         {
-            var x = new Label(UI.Input, GetText);
+            var x = new Label(UI.Input);
+            x.Font.V = GetFont();
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;
-            x.FontSize.V = 8;
+            x.FontSize.V = x.Font.V.Size;
             return x;
         }
     }

@@ -12,11 +12,12 @@ namespace Fiero.Business
 
         public override Button Resolve(LayoutGrid dom)
         {
-            var x = new Button(UI.Input, GetText);
+            var x = new Button(UI.Input);
+            x.Font.V = GetFont();
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.ContentAwareScale.V = false;
-            x.FontSize.V = 8;
+            x.FontSize.V = x.Font.V.Size;
             return x;
         }
     }

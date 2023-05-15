@@ -12,7 +12,8 @@ namespace Fiero.Business
 
         public override Combobox Resolve(LayoutGrid dom)
         {
-            var x = new Combobox(UI.Input, GetText, () => new(UI.Input, GetText));
+            var x = new Combobox(UI.Input, () => new(UI.Input));
+            x.Font.V = GetFont();
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.Accent.V = Accent;

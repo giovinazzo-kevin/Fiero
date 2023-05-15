@@ -8,9 +8,8 @@ namespace Fiero.Core
     {
         protected BitmapText LabelDrawable;
 
-        protected readonly Func<string, BitmapText> GetText;
-
-        public readonly UIControlProperty<uint> FontSize = new(nameof(FontSize), 8) { Propagated = true };
+        public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
+        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12)) { Propagated = true, Inherited = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
@@ -23,10 +22,11 @@ namespace Fiero.Core
 
         protected virtual void OnTextInvalidated()
         {
+            if (Font.V == null) return;
             var text = DisplayText;
             if (LabelDrawable is null)
             {
-                LabelDrawable = GetText(text);
+                LabelDrawable = new BitmapText(Font.V, text);
             }
             if (ContentAwareScale)
             {
@@ -36,15 +36,14 @@ namespace Fiero.Core
             else
             {
                 // Calculate scale as a proportion of font size
-                var factor = FontSize.V / (float)LabelDrawable.Font.Size.X;
+                var factor = FontSize.V / Font.V.Size;
                 LabelDrawable.Text = text;
                 LabelDrawable.Scale = Scale.V * factor;
             }
         }
 
-        public Label(GameInput input, Func<string, BitmapText> getText) : base(input)
+        public Label(GameInput input) : base(input)
         {
-            GetText = getText;
             Text.ValueChanged += (owner, old) =>
             {
                 OnTextInvalidated();

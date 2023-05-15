@@ -73,7 +73,7 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("choice"))
                 .Apply(x =>
                 {
-                    x.FontSize.V = 8;
+                    x.FontSize.V = x.Font.V.Size;
                     x.Padding.V = new(8, 0);
                     x.CenterContentH.V = false;
                     x.Background.V = SelectedIndex == x.ZOrder.V

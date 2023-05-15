@@ -1,6 +1,4 @@
-﻿using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
+﻿using SFML.Window;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,10 +59,12 @@ namespace Fiero.Core
             control.Clicked += Control_Clicked;
             Control_Clicked(control, new(), Mouse.Button.Left);
 
-            Position.ValueChanged += (_, __) => {
+            Position.ValueChanged += (_, __) =>
+            {
                 Resize();
             };
-            Size.ValueChanged += (_, __) => {
+            Size.ValueChanged += (_, __) =>
+            {
                 Resize();
             };
             return this;
@@ -81,11 +81,13 @@ namespace Fiero.Core
             var toRemove = Options.Where(o => predicate(o.Value));
             Children.RemoveAll(c => toRemove.Select(r => r.Control).Contains(c));
             Options.RemoveAll(o => toRemove.Select(r => r.Value).Contains(o.Value));
-            foreach (var remove in toRemove) {
+            foreach (var remove in toRemove)
+            {
                 remove.Control.Clicked -= Control_Clicked;
             }
             // Recalculate positons
-            var i = 0; foreach (var option in Options) { 
+            var i = 0; foreach (var option in Options)
+            {
                 option.Control.Position.V = new(Position.V.X, Position.V.Y + ++i * (Size.V.Y + 4));
             }
             return this;
@@ -93,17 +95,19 @@ namespace Fiero.Core
 
         public override void Update()
         {
-            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Up)) {
+            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Up))
+            {
                 var i = Options.IndexOf(SelectedOption);
                 SelectOption(x => x.Control == Options[(i + 1) % Options.Count].Control);
             }
-            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Down)) {
+            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Down))
+            {
                 var i = Options.IndexOf(SelectedOption);
                 SelectOption(x => x.Control == Options[((i - 1 + Options.Count) % Options.Count) % Options.Count].Control);
             }
         }
 
-        public Combobox(GameInput input, Func<string, BitmapText> getText, Func<ComboItem> buildItem) : base(input, getText)
+        public Combobox(GameInput input, Func<ComboItem> buildItem) : base(input)
         {
             BuildItem = buildItem;
             Options = new List<Option>();

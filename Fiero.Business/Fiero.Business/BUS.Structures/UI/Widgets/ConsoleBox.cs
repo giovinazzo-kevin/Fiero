@@ -16,12 +16,10 @@ namespace Fiero.Business
     [TransientDependency]
     public class ConsoleBox : Widget
     {
-        public const double ScriptUpdateRate = 0.5;
+        public const double ScriptUpdateRate = 0.15;
 
         protected readonly GameColors<ColorName> Colors;
         public readonly EventBus EventBus;
-        public readonly UIControlProperty<int> Cols = new(nameof(Cols), 80);
-        public readonly UIControlProperty<int> Rows = new(nameof(Rows), 20);
 
         private DelayedDebounce _delay = new(TimeSpan.FromSeconds(ScriptUpdateRate), 1);
         private readonly StringBuilder _outputBuffer = new();
@@ -36,8 +34,6 @@ namespace Fiero.Business
             EventBus = bus;
             Colors = colors;
             ScriptingSystem = systems.Scripting;
-            Rows.ValueChanged += (_, __) => RebuildLayout();
-            Cols.ValueChanged += (_, __) => RebuildLayout();
             OutputAvailable += OnOutputAvailable;
         }
 
@@ -68,15 +64,15 @@ namespace Fiero.Business
                         .Single();
                 paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
                     .Replace("\r", string.Empty)
-                    .Split("\n", StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => s.Take(Cols.V).Join(string.Empty))
-                    .TakeLast(Rows.V)
+                    .Split("\n")
+                    .Select(s => s.Take(paragraph.Cols.V).Join(string.Empty))
+                    .TakeLast(paragraph.Rows.V)
                     .Join("\n");
                 _outputBuffer.Clear();
             }
         }
 
-        public Subscription TrackScript(Script s)
+        public Subscription TrackScript(Script s, bool routeStdin = false)
         {
             var outPipe = new Pipe();
             var inPipe = new Pipe();
@@ -113,13 +109,12 @@ namespace Fiero.Business
                 .Build();
 
             _ = Concern.Deferral.LoopForever(expr, cts.Token);
-            InputAvailable += OnInputAvailable;
-
+            if (routeStdin) InputAvailable += OnInputAvailable;
             return new(new[] { () => {
                 cts.Cancel();
                 outPipe.Reader.Complete();
                 outPipe.Writer.Complete();
-                InputAvailable -= OnInputAvailable;
+                if(routeStdin) InputAvailable -= OnInputAvailable;
             } });
 
             void OnInputAvailable(ConsoleBox arg1, string arg2)
@@ -136,16 +131,21 @@ namespace Fiero.Business
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Padding.V = new(ts, ts);
-                p.Margin.V = new(ts, ts);
-                p.Cols.V = Cols.V;
-                p.Rows.V = Rows.V;
+                p.Cols.V = p.ContentRenderSize.X / p.FontSize.V.X;
+                p.Rows.V = p.ContentRenderSize.Y / p.FontSize.V.Y;
             }))
             .AddRule<Textbox>(r => r.Apply(t =>
             {
-                t.Padding.V = new(4, 0);
-                t.MaxLength.V = t.ContentRenderSize.X / (int)t.FontSize.V;
+                var ts = UI.Store.Get(Data.UI.TileSize);
+                t.Padding.V = new(ts / 2, 0);
+                t.MaxLength.V = t.ContentRenderSize.X / t.FontSize.V.X;
                 t.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
                 t.Foreground.V = Colors.Get(ColorName.White);
+            }))
+            .AddRule<UIControl>(r => r.Apply(x =>
+            {
+                x.OutlineColor.V = Colors.Get(ColorName.White).AddAlpha(-128);
+                x.OutlineThickness.V = 1;
             }))
             ;
 
@@ -158,8 +158,9 @@ namespace Fiero.Business
                     {
                         t.EnterPressed += obj =>
                         {
-                            WriteLine(obj.Text.V);
+                            var text = obj.Text.V;
                             obj.Text.V = string.Empty;
+                            WriteLine(text);
                         };
                     })
                 .End()

@@ -14,17 +14,10 @@ namespace Fiero.Business
         private bool _dirty;
 
         protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, buttons, styles)
+            : base(ui, Data.UI.WindowSize, buttons, styles)
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Data.UI.WindowSize.ValueChanged += OnWindowSizeChanged;
-        }
-
-        protected virtual void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            Layout.Size.V = obj.NewValue;
-            Invalidate();
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
@@ -34,10 +27,13 @@ namespace Fiero.Business
             .AddRule<UIControl>(style => style
                 .Match(x => x.HasClass("row-even"))
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
-            .AddRule<UIControl>(style => style
-                .Match(x => x.HasClass("row-odd"))
-                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(-16, -16, -16)))
             ;
+
+        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        {
+            base.OnGameWindowSizeChanged(obj);
+            Invalidate();
+        }
 
         protected void Invalidate()
         {
@@ -50,7 +46,6 @@ namespace Fiero.Business
             Hotkeys.Clear();
             RegisterHotkeys(Buttons);
             base.Open(title);
-            BeforePresentation();
             Invalidate();
         }
 
@@ -66,14 +61,8 @@ namespace Fiero.Business
             }
         }
 
-        protected virtual void BeforePresentation()
-        {
-            Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
-        }
-
         public override void Close(ModalWindowButton buttonPressed)
         {
-            Data.UI.WindowSize.ValueChanged -= OnWindowSizeChanged;
             base.Close(buttonPressed);
         }
 

@@ -10,7 +10,7 @@ namespace Fiero.Core
         public event Action<Widget, Coord> Dragged;
         public event Action<Widget, Coord> Dropped;
 
-        protected Widget(GameUI ui) : base(ui)
+        protected Widget(GameUI ui, GameDatum<Coord> gameWindowSize) : base(ui, gameWindowSize)
         {
         }
 

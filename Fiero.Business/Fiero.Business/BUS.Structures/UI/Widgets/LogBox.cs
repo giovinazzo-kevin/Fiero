@@ -11,7 +11,8 @@ namespace Fiero.Business
 
         public readonly UIControlProperty<int> NumRowsDisplayed = new(nameof(NumRowsDisplayed), 10);
 
-        public LogBox(GameUI ui, GameColors<ColorName> colors) : base(ui)
+        public LogBox(GameUI ui, GameColors<ColorName> colors)
+            : base(ui, Data.UI.WindowSize)
         {
             Colors = colors;
             NumRowsDisplayed.ValueChanged += (_, __) => RebuildLayout();

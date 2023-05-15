@@ -16,6 +16,7 @@ namespace Fiero.Core
         public bool Invalidating { get; set; }
         public Type PropertyType { get; } = typeof(T);
 
+        public event Action<UIControlProperty<T>, T> ValueUpdated;
         public event Action<UIControlProperty<T>, T> ValueChanged;
         public event Action<UIControlProperty<T>, UIControl> OwnerChanged;
 
@@ -45,6 +46,7 @@ namespace Fiero.Core
             {
                 var old = _value;
                 _value = _set(value);
+                ValueUpdated?.Invoke(this, old);
                 if (Equals(old, _value))
                 {
                     return;

@@ -55,17 +55,11 @@ namespace Fiero.Business
             }
         }
 
-        protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
             Layout.Size.V = new(popupSize.X, popupSize.Y / 2);
             Layout.Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
-        }
-
-        protected override void BeforePresentation()
-        {
-            var windowSize = UI.Store.Get(Data.UI.WindowSize);
-            OnWindowSizeChanged(new(Data.UI.WindowSize, windowSize, windowSize));
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)

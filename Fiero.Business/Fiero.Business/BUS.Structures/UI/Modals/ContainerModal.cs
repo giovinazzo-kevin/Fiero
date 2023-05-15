@@ -31,11 +31,10 @@ namespace Fiero.Business
 
         protected abstract bool ShouldRemoveItem(Item i, TActions a);
 
-        protected override void OnWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
+        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
-            var modalSize = UI.Store.Get(Data.UI.WindowSize);
-            Layout.Size.V = modalSize;
-            Layout.Position.V = obj.NewValue / 2 - modalSize / 2;
+            Size.V = obj.NewValue / 2;
+            Position.V = obj.NewValue / 2 - Size.V / 2;
             // Update PageSize dynamically
             var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
             var availableSpace = contentElem.ComputedSize.Y;
@@ -44,14 +43,8 @@ namespace Fiero.Business
             {
                 PageSize.V = newPageSize;
                 RebuildLayout();
-                Invalidate();
             }
-        }
-
-        protected override void BeforePresentation()
-        {
-            var windowSize = UI.Store.Get(Data.UI.WindowSize);
-            OnWindowSizeChanged(new(Data.UI.WindowSize, windowSize, windowSize));
+            Invalidate();
         }
 
         protected override void RegisterHotkeys(ModalWindowButton[] buttons)
@@ -128,7 +121,9 @@ namespace Fiero.Business
                     .End()
                 .End())
                 .Row(h: 48, px: true)
-                    .Col().Cell<Label>().End()
+                    .Col(@class: "spacer")
+                        .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
+                    .End()
                     .Col(w: 16, px: true, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
                         {
@@ -157,7 +152,9 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                    .Col().Cell<Label>().End()
+                    .Col(@class: "spacer")
+                        .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
+                    .End()
                 .End();
 
             void RefreshItemSprite(Picture p, int index)

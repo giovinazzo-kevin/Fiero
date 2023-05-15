@@ -74,6 +74,8 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.FontSize.V = 8;
+                    x.Padding.V = new(8, 0);
+                    x.CenterContentH.V = false;
                     x.Background.V = SelectedIndex == x.ZOrder.V
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultBackground);

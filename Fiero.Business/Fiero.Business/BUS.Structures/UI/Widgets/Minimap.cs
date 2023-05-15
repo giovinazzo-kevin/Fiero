@@ -21,7 +21,7 @@ namespace Fiero.Business
             DungeonSystem floor,
             FactionSystem faction,
             GameColors<ColorName> colors
-        ) : base(ui)
+        ) : base(ui, Data.UI.WindowSize)
         {
             FloorSystem = floor;
             FactionSystem = faction;

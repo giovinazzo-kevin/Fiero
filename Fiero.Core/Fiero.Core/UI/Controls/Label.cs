@@ -77,10 +77,12 @@ namespace Fiero.Core
                 var drawableBounds = _drawable.GetGlobalBounds();
                 var drawablePos = drawableBounds.Position();
                 var drawableSize = drawableBounds.Size();
-                var delta = ContentRenderPos - drawablePos - drawableSize / 2f + ContentRenderSize / 2f;
+                var subDelta = drawableSize * _drawable.Scale - drawableSize;
+                var delta = ContentRenderPos - drawablePos - drawableSize / 2f + ContentRenderSize / 2f - subDelta / 2;
                 var deltaCoord = delta.Round().ToCoord();
                 if (CenterContentH)
                 {
+
                     _drawable.Position += deltaCoord * new Coord(1, 0);
                 }
                 if (CenterContentV)

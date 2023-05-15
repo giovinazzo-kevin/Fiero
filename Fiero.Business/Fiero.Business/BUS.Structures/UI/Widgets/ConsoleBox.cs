@@ -26,7 +26,8 @@ namespace Fiero.Business
         public event Action<ConsoleBox, string> OutputAvailable;
         public event Action<ConsoleBox, string> InputAvailable;
 
-        public ConsoleBox(EventBus bus, GameUI ui, GameColors<ColorName> colors) : base(ui)
+        public ConsoleBox(EventBus bus, GameUI ui, GameColors<ColorName> colors)
+            : base(ui, Data.UI.WindowSize)
         {
             EventBus = bus;
             Colors = colors;

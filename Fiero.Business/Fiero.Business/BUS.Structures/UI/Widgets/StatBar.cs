@@ -12,7 +12,7 @@ namespace Fiero.Business
         public readonly Label Label;
 
         public StatBar(GameUI ui, string stat, ColorName color)
-            : base(ui)
+            : base(ui, Data.UI.WindowSize)
         {
             Stat = stat;
             Color = color;

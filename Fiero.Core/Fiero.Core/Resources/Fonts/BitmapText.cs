@@ -65,8 +65,7 @@ namespace Fiero.Core
                 tex.Display();
                 using var texSprite = new Sprite(tex.Texture);
                 texSprite.Scale = Scale;
-                var delta = texSprite.Texture.Size.ToVec() * Scale - texSprite.Texture.Size.ToVec();
-                texSprite.Position = Position - delta / 2;
+                texSprite.Position = Position;
                 target.Draw(texSprite, states);
             }
         }

@@ -11,6 +11,7 @@ namespace Fiero.Business
         where TActions : struct, Enum
     {
         public const int RowHeight = 32; // px
+        public const int PaginatorHeight = 48; // px
 
         public readonly TContainer Container;
         public event Action<Item, TActions> ActionPerformed;
@@ -37,8 +38,8 @@ namespace Fiero.Business
             Position.V = obj.NewValue / 2 - Size.V / 2;
             // Update PageSize dynamically
             var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
-            var availableSpace = contentElem.ComputedSize.Y;
-            var newPageSize = availableSpace / RowHeight - 2;
+            var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
+            var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
             if (newPageSize != PageSize.V)
             {
                 PageSize.V = newPageSize;
@@ -120,7 +121,7 @@ namespace Fiero.Business
                         })
                     .End()
                 .End())
-                .Row(h: 48, px: true)
+                .Row(h: PaginatorHeight, px: true)
                     .Col(@class: "spacer")
                         .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
                     .End()

@@ -58,8 +58,8 @@ namespace Fiero.Business
         protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
         {
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
-            Layout.Size.V = new(popupSize.X, popupSize.Y / 2);
-            Layout.Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
+            Size.V = new(popupSize.X, popupSize.Y / 4);
+            Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
@@ -74,14 +74,15 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.HorizontalAlignment.V = HorizontalAlignment.Center;
+                    x.VerticalAlignment.V = VerticalAlignment.Middle;
                     x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}", ColorName.White);
                     x.LockAspectRatio.V = true;
-                    x.Scale.V = new Vec(0.5f, 0.5f);
                 }))
             .AddRule<Paragraph>(s => s
                 .Match(x => x.HasClass("content"))
                 .Apply(x =>
                 {
+                    x.Padding.V = new(16, 0);
                     x.Rows.V = 5;
                     x.Text.V = String.Join('\n', Node.Lines);
                     x.ContentAwareScale.V = false;
@@ -90,10 +91,10 @@ namespace Fiero.Business
 
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
             .Row()
-                .Col(@class: "portrait", w: 0.25f)
+                .Col(@class: "portrait", w: 64, px: true)
                     .Cell<Picture>()
                 .End()
-                .Col(@class: "content", w: 1.75f)
+                .Col(@class: "content")
                     .Cell<Paragraph>()
                 .End()
             .End()

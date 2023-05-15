@@ -25,6 +25,7 @@ namespace Fiero.Business
         public InterpreterScope Scope;
 
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
+        public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
         public ErgoScriptingSystem(EventBus bus) : base(bus)
         {
@@ -46,6 +47,7 @@ namespace Fiero.Business
                     .WithImport(FieroModule));
 
             ScriptLoaded = new(this, nameof(ScriptLoaded));
+            InputAvailable = new(this, nameof(InputAvailable));
         }
 
         /// <summary>

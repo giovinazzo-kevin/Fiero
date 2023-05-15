@@ -1,8 +1,6 @@
 ﻿using Fiero.Core;
 using SFML.Window;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -26,57 +24,72 @@ namespace Fiero.Business
 
         public override IAction GetIntent(Actor a)
         {
-            if (CurrentModal != null)
+            if (CurrentModal != null || !UI.Input.IsKeyboardFocusAvailable)
                 return new NoAction();
-            if (QueuedActions.TryDequeue(out var backedUp)) {
+            if (QueuedActions.TryDequeue(out var backedUp))
+            {
                 return backedUp;
             }
             var floorId = a.FloorId();
             var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
-
-            if (IsKeyPressed(Data.Hotkeys.MoveNW)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveNW))
+            {
                 return MoveOrAttack(new(-1, -1));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveN)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveN))
+            {
                 return MoveOrAttack(new(0, -1));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveNE)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveNE))
+            {
                 return MoveOrAttack(new(1, -1));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveW)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveW))
+            {
                 return MoveOrAttack(new(-1, 0));
             }
-            if (IsKeyPressed(Data.Hotkeys.Wait)) {
+            if (IsKeyPressed(Data.Hotkeys.Wait))
+            {
                 return new WaitAction();
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveE)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveE))
+            {
                 return MoveOrAttack(new(1, 0));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveSW)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveSW))
+            {
                 return MoveOrAttack(new(-1, 1));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveS)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveS))
+            {
                 return MoveOrAttack(new(0, 1));
             }
-            if (IsKeyPressed(Data.Hotkeys.MoveSE)) {
+            if (IsKeyPressed(Data.Hotkeys.MoveSE))
+            {
                 return MoveOrAttack(new(1, 1));
             }
-            if (IsKeyPressed(Data.Hotkeys.Interact)) {
+            if (IsKeyPressed(Data.Hotkeys.Interact))
+            {
                 return new InteractRelativeAction();
             }
-            if (IsKeyPressed(Data.Hotkeys.Look)) {
+            if (IsKeyPressed(Data.Hotkeys.Look))
+            {
                 UI.Look(a);
             }
-            if (QuickSlots.TryGetAction(out var action)) {
+            if (QuickSlots.TryGetAction(out var action))
+            {
                 return action;
             }
-            if (IsKeyPressed(Data.Hotkeys.Inventory)) {
+            if (IsKeyPressed(Data.Hotkeys.Inventory))
+            {
                 var inventoryModal = UI.Inventory(a, "Bag");
                 CurrentModal = inventoryModal;
                 inventoryModal.Closed += (_, __) => CurrentModal = null;
-                inventoryModal.ActionPerformed += (item, action) => {
+                inventoryModal.ActionPerformed += (item, action) =>
+                {
                     inventoryModal.Close(ModalWindowButton.None);
-                    switch (action) {
+                    switch (action)
+                    {
                         case InventoryActionName.Set:
                             Set(item);
                             break;
@@ -108,65 +121,90 @@ namespace Fiero.Business
 
             void Set(Item item)
             {
-                UI.NecessaryChoice(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, "Which quick slot?").OptionChosen += (popup, slot) => {
-                    if (item.TryCast<Wand>(out var wand)) {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, "Which action?").OptionChosen += (popup, choice) => {
-                            if (choice == InventoryActionName.Throw) {
-                                QuickSlots.Set(slot, item, () => {
-                                    if(TryThrow(a, wand, out action)) {
+                UI.NecessaryChoice(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, "Which quick slot?").OptionChosen += (popup, slot) =>
+                {
+                    if (item.TryCast<Wand>(out var wand))
+                    {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, "Which action?").OptionChosen += (popup, choice) =>
+                        {
+                            if (choice == InventoryActionName.Throw)
+                            {
+                                QuickSlots.Set(slot, item, () =>
+                                {
+                                    if (TryThrow(a, wand, out action))
+                                    {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
                                     return new FailAction();
                                 });
                             }
-                            else {
+                            else
+                            {
                                 QuickSlots.Set(slot, item, () => TryZap(a, wand, out var action) ? action : new FailAction());
                             }
                         };
                     }
-                    else if (item.TryCast<Potion>(out var potion)) {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, "Which action?").OptionChosen += (popup, choice) => {
-                            if (choice == InventoryActionName.Throw) {
-                                QuickSlots.Set(slot, item, () => {
-                                    if (TryThrow(a, potion, out action)) {
+                    else if (item.TryCast<Potion>(out var potion))
+                    {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, "Which action?").OptionChosen += (popup, choice) =>
+                        {
+                            if (choice == InventoryActionName.Throw)
+                            {
+                                QuickSlots.Set(slot, item, () =>
+                                {
+                                    if (TryThrow(a, potion, out action))
+                                    {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
                                     return new FailAction();
                                 });
                             }
-                            else {
-                                QuickSlots.Set(slot, item, () => {
+                            else
+                            {
+                                QuickSlots.Set(slot, item, () =>
+                                {
                                     QuickSlots.Unset(slot);
                                     return new QuaffPotionAction(potion);
                                 });
                             }
                         };
                     }
-                    else if (item.TryCast<Scroll>(out var scroll)) {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, "Which action?").OptionChosen += (popup, choice) => {
-                            if (choice == InventoryActionName.Throw) {
-                                QuickSlots.Set(slot, item, () => {
-                                    if (TryThrow(a, scroll, out action)) {
+                    else if (item.TryCast<Scroll>(out var scroll))
+                    {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, "Which action?").OptionChosen += (popup, choice) =>
+                        {
+                            if (choice == InventoryActionName.Throw)
+                            {
+                                QuickSlots.Set(slot, item, () =>
+                                {
+                                    if (TryThrow(a, scroll, out action))
+                                    {
                                         QuickSlots.Unset(slot);
                                         return action;
                                     }
                                     return new FailAction();
                                 });
                             }
-                            else {
-                                QuickSlots.Set(slot, item, () => {
+                            else
+                            {
+                                QuickSlots.Set(slot, item, () =>
+                                {
                                     QuickSlots.Unset(slot);
                                     return new ReadScrollAction(scroll);
                                 });
                             }
                         };
                     }
-                    else if (item.TryCast<Throwable>(out var throwable)) {
-                        QuickSlots.Set(slot, item, () => {
-                            if(TryThrow(a, throwable, out action)) {
-                                if(!throwable.ThrowableProperties.ThrowsUseCharges || throwable.ConsumableProperties.RemainingUses == 1) {
+                    else if (item.TryCast<Throwable>(out var throwable))
+                    {
+                        QuickSlots.Set(slot, item, () =>
+                        {
+                            if (TryThrow(a, throwable, out action))
+                            {
+                                if (!throwable.ThrowableProperties.ThrowsUseCharges || throwable.ConsumableProperties.RemainingUses == 1)
+                                {
                                     QuickSlots.Unset(slot);
                                 }
                                 return action;
@@ -178,7 +216,8 @@ namespace Fiero.Business
             }
             IAction MoveOrAttack(Coord c)
             {
-                if (wantToAttack) {
+                if (wantToAttack)
+                {
                     return new MeleeAttackPointAction(c, a.Equipment.Weapon);
                 }
                 return new MoveRelativeAction(c);

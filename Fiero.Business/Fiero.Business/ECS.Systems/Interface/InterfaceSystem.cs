@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using LightInject;
 using System.Linq;
 using Unconcern.Common;
 
@@ -113,7 +114,7 @@ namespace Fiero.Business
             MPBar = new(UI, "MP", ColorName.LightBlue);
             Minimap = new(UI, DungeonSystem, FactionSystem, Colors);
             Logs = new(UI, Colors);
-            Console = new(EventBus, UI, Colors);
+            Console = UI.ServiceProvider.GetInstance<ConsoleBox>();
             Data.UI.WindowSize.ValueChanged += (args) =>
             {
                 Invalidate(args.NewValue);

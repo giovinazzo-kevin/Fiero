@@ -13,6 +13,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+    [TransientDependency]
     public class ConsoleBox : Widget
     {
         public const double ScriptUpdateRate = 0.5;
@@ -23,14 +24,18 @@ namespace Fiero.Business
         public readonly UIControlProperty<int> Rows = new(nameof(Rows), 20);
 
         private DelayedDebounce _delay = new(TimeSpan.FromSeconds(ScriptUpdateRate), 1);
+        private readonly StringBuilder _outputBuffer = new();
+
+        public readonly ErgoScriptingSystem ScriptingSystem;
         public event Action<ConsoleBox, string> OutputAvailable;
         public event Action<ConsoleBox, string> InputAvailable;
 
-        public ConsoleBox(EventBus bus, GameUI ui, GameColors<ColorName> colors)
+        public ConsoleBox(GameSystems systems, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui, Data.UI.WindowSize)
         {
             EventBus = bus;
             Colors = colors;
+            ScriptingSystem = systems.Scripting;
             Rows.ValueChanged += (_, __) => RebuildLayout();
             Cols.ValueChanged += (_, __) => RebuildLayout();
             OutputAvailable += OnOutputAvailable;
@@ -39,6 +44,7 @@ namespace Fiero.Business
         public void Write(string s)
         {
             InputAvailable?.Invoke(this, s);
+            ScriptingSystem.InputAvailable.Raise(new(s));
         }
 
         public void WriteLine(string s)
@@ -48,6 +54,7 @@ namespace Fiero.Business
 
         protected virtual void OnOutputAvailable(ConsoleBox self, string chunk)
         {
+            _outputBuffer.Append(chunk);
             if (!_delay.IsDebouncing)
             {
                 _delay.Fire += _delay_Fire;
@@ -59,13 +66,16 @@ namespace Fiero.Business
                 var paragraph = Layout.Query(x => true, x => "output".Equals(x.Id))
                     .Cast<Paragraph>()
                         .Single();
-                paragraph.Text.V = (paragraph.Text.V + chunk)
-                    .Split("\n")
+                paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
+                    .Replace("\r", string.Empty)
+                    .Split("\n", StringSplitOptions.RemoveEmptyEntries)
                     .Select(s => s.Take(Cols.V).Join(string.Empty))
                     .TakeLast(Rows.V)
                     .Join("\n");
+                _outputBuffer.Clear();
             }
         }
+
         public Subscription TrackScript(Script s)
         {
             var outPipe = new Pipe();
@@ -132,7 +142,8 @@ namespace Fiero.Business
             }))
             .AddRule<Textbox>(r => r.Apply(t =>
             {
-                t.Text.V = "Type here";
+                t.Padding.V = new(4, 0);
+                t.MaxLength.V = t.ContentRenderSize.X / (int)t.FontSize.V;
                 t.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
                 t.Foreground.V = Colors.Get(ColorName.White);
             }))
@@ -143,7 +154,14 @@ namespace Fiero.Business
                     .Cell<Paragraph>()
                 .End()
                 .Row(h: 20, px: true, id: "input")
-                    .Cell<Textbox>()
+                    .Cell<Textbox>(t =>
+                    {
+                        t.EnterPressed += obj =>
+                        {
+                            WriteLine(obj.Text.V);
+                            obj.Text.V = string.Empty;
+                        };
+                    })
                 .End()
             ;
     }

@@ -43,7 +43,9 @@ namespace Fiero.Business
                 }
                 else
                 {
-                    // TODO: Warn script?
+                    Script.ScriptProperties.Solver.Out
+                        .WriteLine($"ERR: Unknown route: {sig.Explain()}");
+                    Script.ScriptProperties.Solver.Out.Flush();
                 }
             }
         }

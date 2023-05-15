@@ -1,16 +1,31 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
 using System;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
 
 namespace Fiero.Core
 {
     public class Textbox : Label
     {
+        public const int CaretBlinkIntervalMs = 500;
+        private readonly Stopwatch _caretStopwatch = new();
+        private volatile bool _caretShown = false;
+        private BitmapText _caret;
+
+        public event Action<Textbox> EnterPressed;
+
         public Textbox(GameInput input, Func<string, BitmapText> getText) : base(input, getText)
         {
             IsInteractive.V = true;
+            IsActive.ValueChanged += (_, old) =>
+            {
+                if (IsActive.V)
+                    Input.TryStealFocus(this);
+                else
+                    Input.TryRestoreFocus(this);
+            };
+            _caretStopwatch.Start();
         }
 
         protected bool IsPrintable(Keyboard.Key k, out char representation)
@@ -20,20 +35,23 @@ namespace Fiero.Core
             var i = (int)k;
             var shift = Input.IsKeyDown(Keyboard.Key.LShift) || Input.IsKeyDown(Keyboard.Key.RShift);
 
-            if (i >= (int)Keyboard.Key.A && i <= (int)Keyboard.Key.Z) {
-                representation = shift 
-                    ? (char)('A' + (i - (int)Keyboard.Key.A)) 
+            if (i >= (int)Keyboard.Key.A && i <= (int)Keyboard.Key.Z)
+            {
+                representation = shift
+                    ? (char)('A' + (i - (int)Keyboard.Key.A))
                     : (char)('a' + (i - (int)Keyboard.Key.A));
                 return true;
             }
-            if (i >= (int)Keyboard.Key.Num0 && i <= (int)Keyboard.Key.Num9) {
-                representation = shift 
-                    ? symbols[(i - (int)Keyboard.Key.Num0)] 
+            if (i >= (int)Keyboard.Key.Num0 && i <= (int)Keyboard.Key.Num9)
+            {
+                representation = shift
+                    ? symbols[(i - (int)Keyboard.Key.Num0)]
                     : (char)('0' + (i - (int)Keyboard.Key.Num0));
                 return true;
             }
 
-            switch(k) {
+            switch (k)
+            {
                 case Keyboard.Key.LBracket: representation = '['; return true;
                 case Keyboard.Key.RBracket: representation = ']'; return true;
                 case Keyboard.Key.Backslash: representation = '\\'; return true;
@@ -51,26 +69,42 @@ namespace Fiero.Core
                 case Keyboard.Key.Divide: representation = '/'; return true;
                 case Keyboard.Key.Space: representation = ' '; return true;
             }
-            
+
             representation = default;
             return false;
         }
 
         public override void Update()
         {
+            base.Update();
+            if (!IsActive)
+            {
+                _caretShown = false;
+                _caret = null;
+                _caretStopwatch.Restart();
+                return;
+            }
             var text = new StringBuilder(Text);
-            foreach (var key in Input.KeysPressed()) {
-                if(IsPrintable(key, out var ch)) {
+            bool enterPressed = false;
+            foreach (var key in Input.KeysPressed())
+            {
+                if (IsPrintable(key, out var ch) && text.Length < MaxLength.V)
+                {
                     text.Append(ch);
                 }
-                else {
-                    switch(key) {
+                else
+                {
+                    switch (key)
+                    {
                         case Keyboard.Key.Backspace:
-                            if(text.Length > 0) {
+                            if (text.Length > 0)
+                            {
                                 text.Remove(text.Length - 1, 1);
                             }
                             break;
                         case Keyboard.Key.Enter:
+                            enterPressed = true;
+                            break;
                         case Keyboard.Key.Escape:
                         case Keyboard.Key.Tab:
                             // These keys are reserved
@@ -78,7 +112,32 @@ namespace Fiero.Core
                     }
                 }
             }
+            if (_caretStopwatch.ElapsedMilliseconds > 2 * CaretBlinkIntervalMs)
+            {
+                _caretShown = false;
+                _caret = null;
+                _caretStopwatch.Restart();
+            }
+            else if (!_caretShown && _caretStopwatch.ElapsedMilliseconds > CaretBlinkIntervalMs)
+            {
+                _caret = GetText("|");
+                _caretShown = true;
+            }
             Text.V = text.ToString();
+            if (enterPressed)
+                EnterPressed?.Invoke(this);
+        }
+
+        public override void Draw(RenderTarget target, RenderStates states)
+        {
+            if (IsHidden)
+                return;
+            base.Draw(target, states);
+            if (LabelDrawable != null && _caretShown)
+            {
+                var drawableSize = LabelDrawable.GetLocalBounds().Size();
+                DrawText(this, _caret, new(drawableSize.X, 0), target, states);
+            }
         }
     }
 }

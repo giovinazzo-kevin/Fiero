@@ -102,7 +102,7 @@ namespace Fiero.Business
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
                 .Row(@class: index % 2 == 0 ? "row-even" : "row-odd")
-                    .Col(w: 16, px: true, @class: "item-sprite")
+                    .Col(w: 32, px: true, @class: "item-sprite")
                         .Cell<Picture>(p =>
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
@@ -117,7 +117,7 @@ namespace Fiero.Business
                     .End()
                 .End())
                 .Row()
-                    .Col(w: 20, px: true, @class: "paginator paginator-prev")
+                    .Col(w: 1f, px: false, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = "<";
@@ -134,7 +134,7 @@ namespace Fiero.Business
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
-                    .Col(w: 20, px: true, @class: "paginator paginator-next")
+                    .Col(w: 1f, px: false, @class: "paginator paginator-next")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = ">";

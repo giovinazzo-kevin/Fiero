@@ -18,7 +18,6 @@ namespace Fiero.Core
 
         public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
         {
-            var p = new Vec();
             var s = new Vec(1, 1);
             var grid = build(new(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size)));
             var controls = CreateRecursive(grid).ToArray();
@@ -26,9 +25,9 @@ namespace Fiero.Core
             layout.Invalidated += _ =>
             {
                 Console.WriteLine("inv");
-                ResizeRecursive(layout.Size.V, grid, p, s);
+                ResizeRecursive(layout.Size.V, grid, layout.Position.V, s);
             };
-            ResizeRecursive(size, grid, p, s);
+            ResizeRecursive(size, grid, layout.Position.V, s);
             return layout;
 
             Func<UIControl> GetResolver(Type controlType)
@@ -82,39 +81,50 @@ namespace Fiero.Core
                     }
                 }
             }
-            void ResizeRecursive(Coord screenSize, LayoutGrid grid, Vec p, Vec s)
+            void ResizeRecursive(Coord screenSize, LayoutGrid grid, Coord p, Vec s, int i = 0)
             {
                 if (screenSize == Coord.Zero)
                     return;
-                var divisions = grid.Subdivisions.Clamp(min: 1).ToVec();
-
-                var total = Normalize(grid.Select(x => x.Size.RelativePart).DefaultIfEmpty(new()).Aggregate((a, b) => a + b));
+                var totalRel = Normalize(grid.Select(x => x.Size.RelativePart).DefaultIfEmpty(new()).Aggregate((a, b) => a + b));
                 // If the size of the grid is 0 in either dimension, it's because this is either a row or a column
                 // Therefore the size of the other dimension is dictated by the parent
                 var relGrid = Normalize(grid.Size.RelativePart);
-                var gridSize = grid.Size.AbsolutePart + screenSize * relGrid * s;
-                Console.WriteLine($"Size: {screenSize}; p: {p}; s: {s}; total: {total}; gridSize: {gridSize}");
+                var gridSize = grid.Size.AbsolutePart + (screenSize - grid.Size.AbsolutePart) * relGrid * s;
+                var availableGridSpace = gridSize - grid.Select(x => x.Size.AbsolutePart).DefaultIfEmpty(new()).Aggregate((a, b) => a + b);
+
+                #region debugging
+                Console.Write(new string(' ', i));
+                var _x = grid.Size.RelativePart.X + grid.Size.AbsolutePart.X;
+                var _y = grid.Size.RelativePart.Y + grid.Size.AbsolutePart.Y;
+                if (_x == 0 && _y != 0)
+                    Console.WriteLine($"ROW: {grid.Size.AbsolutePart}px + {grid.Size.RelativePart}*");
+                else if (_x != 0 && _y == 0)
+                    Console.WriteLine($"COL: {grid.Size.AbsolutePart}px + {grid.Size.RelativePart}*");
+                else
+                    Console.WriteLine($"GRD: {grid.Size.AbsolutePart}px + {grid.Size.RelativePart}*");
+                #endregion 
 
                 foreach (var child in grid)
                 {
-                    var cPos = p + child.Position.AbsolutePart + gridSize * child.Position.RelativePart / total;
+                    var rPos = relGrid * child.Position.RelativePart / totalRel;
                     // If the size of the child is 0 in either dimension, yadda yadda
                     var relChild = Normalize(child.Size.RelativePart);
-                    var cSize = child.Size.AbsolutePart + gridSize * relChild / total;
-
+                    var rSize = relGrid * relChild / totalRel;
+                    var computedChildPos = (p + child.Position.AbsolutePart + rPos * gridSize).ToCoord();
+                    var computedChildSize = (child.Size.AbsolutePart + rSize * (availableGridSpace - child.Size.AbsolutePart)).ToCoord();
                     if (child.IsCell)
                     {
                         foreach (var c in child.Controls)
                         {
-                            c.Instance.Position.V = layout.Position + cPos.ToCoord();
-                            c.Instance.Size.V = cSize.ToCoord();
+                            c.Instance.Position.V = computedChildPos;
+                            c.Instance.Size.V = computedChildSize;
                             foreach (var rule in grid.GetStyles(c.Type))
                             {
                                 rule(c.Instance);
                             }
                         }
                     }
-                    ResizeRecursive(screenSize, child, cPos, cSize / screenSize);
+                    ResizeRecursive(screenSize, child, computedChildPos, rSize, i + 1);
                 }
 
                 Vec Normalize(Vec v)

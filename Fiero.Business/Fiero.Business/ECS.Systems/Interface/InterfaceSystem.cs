@@ -62,11 +62,11 @@ namespace Fiero.Business
 
         public void Reset()
         {
-            UI.Show(HPBar);
-            UI.Show(MPBar);
-            UI.Show(Minimap);
-            UI.Show(Logs);
-            UI.Show(Console);
+            //UI.Show(HPBar);
+            //UI.Show(MPBar);
+            //UI.Show(Minimap);
+            //UI.Show(Logs);
+            //UI.Show(Console);
             Invalidate(UI.Store.Get(Data.UI.WindowSize));
         }
 
@@ -130,12 +130,12 @@ namespace Fiero.Business
 
         public void Update()
         {
-            //Layout.Update();
+            Layout.Update();
         }
 
         public void Draw()
         {
-            //UI.Window.RenderWindow.Draw(Layout);
+            UI.Window.RenderWindow.Draw(Layout);
         }
     }
 }

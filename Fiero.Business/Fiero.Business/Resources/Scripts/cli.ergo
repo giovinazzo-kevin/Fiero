@@ -9,6 +9,12 @@ scripting:input_available(_) :-
 	% Execute commands
 	(command(L) ; true).
 	
+%%% Repeats the next command N times
+command(Repeat) :-
+	str_fmt('repeat {0} {1}', [Num, Thing], Repeat) -> (
+		number_string(N, Num),
+		repeat(N, command(Thing))
+	).
 %%% Attempts to spawn a known entity
 command(Spawn) :-
 	str_fmt('spawn {0}', [Thing], Spawn) -> (

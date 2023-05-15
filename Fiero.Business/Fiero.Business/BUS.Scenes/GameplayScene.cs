@@ -183,7 +183,7 @@ namespace Fiero.Business.Scenes
 
                 // Create player
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
-                Player = Resources.Entities.Player
+                Player = Resources.Entities.Player()
                     //.WithAutoPlayerAi()
                     .WithName(playerName)
                     .WithItems(
@@ -1026,6 +1026,7 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
+            Systems.Interface.Update();
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(Key.R))
             {
                 TrySetState(SceneState.Main);

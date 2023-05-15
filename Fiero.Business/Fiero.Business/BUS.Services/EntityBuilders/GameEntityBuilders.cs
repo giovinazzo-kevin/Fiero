@@ -31,7 +31,7 @@ namespace Fiero.Business
             .WithEffectTracking()
             ;
 
-        public EntityBuilder<Actor> Player
+        public EntityBuilder<Actor> Player()
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi(UI)
             .WithHealth(50)
@@ -568,7 +568,7 @@ namespace Fiero.Business
         #endregion
 
         #region THROWABLES
-        public EntityBuilder<Throwable> Throwable_Rock(int charges)
+        public EntityBuilder<Throwable> Throwable_Rock(int charges = 1)
             => Throwable<Throwable>(
                 name: ThrowableName.Rock,
                 itemRarity: 1,
@@ -582,7 +582,7 @@ namespace Fiero.Business
                 throwsUseCharges: true
             )
             ;
-        public EntityBuilder<Throwable> Throwable_Bomb(int charges)
+        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1)
             => Throwable<Throwable>(
                 name: ThrowableName.Bomb,
                 itemRarity: 1,
@@ -633,15 +633,15 @@ namespace Fiero.Business
         #endregion
 
         #region WANDS
-        public EntityBuilder<Wand> Wand_OfConfusion(int charges)
+        public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1)
             => Wand(new(EffectName.Confusion, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfSleep(int charges)
+        public EntityBuilder<Wand> Wand_OfSleep(int charges = 1)
             => Wand(new(EffectName.Sleep, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfSilence(int charges)
+        public EntityBuilder<Wand> Wand_OfSilence(int charges = 1)
             => Wand(new(EffectName.Silence, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfEntrapment(int charges)
+        public EntityBuilder<Wand> Wand_OfEntrapment(int charges = 1)
             => Wand(new(EffectName.Entrapment, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfTeleport(int charges)
+        public EntityBuilder<Wand> Wand_OfTeleport(int charges = 1)
             => Wand(new(EffectName.UncontrolledTeleport), charges);
         #endregion
 

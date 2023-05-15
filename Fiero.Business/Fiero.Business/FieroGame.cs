@@ -156,6 +156,7 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.QuickSlot8, Keyboard.Key.Num8);
             Store.SetValue(Data.Hotkeys.QuickSlot9, Keyboard.Key.Num9);
             Store.SetValue(Data.Hotkeys.ToggleZoom, Keyboard.Key.Z);
+            Store.SetValue(Data.Hotkeys.DeveloperConsole, Keyboard.Key.F1);
 
             await Director.AddScenes(Scenes);
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);

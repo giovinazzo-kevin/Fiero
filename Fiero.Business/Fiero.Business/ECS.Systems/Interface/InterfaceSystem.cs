@@ -2,6 +2,7 @@
 using LightInject;
 using System.Linq;
 using Unconcern.Common;
+using static Fiero.Business.Data;
 
 namespace Fiero.Business
 {
@@ -80,7 +81,7 @@ namespace Fiero.Business
             var barSize = new Coord(200, 100);
             var mapSize = new Coord(256, 256);
             var logSize = new Coord(newSize.X, 126);
-            var conSize = new Coord(newSize.X / 2, 256);
+            var conSize = new Vec(newSize.X * 0.8f, newSize.Y * 0.8f).ToCoord();
             if (HPBar.Layout != null)
             {
                 HPBar.Layout.Size.V = barSize;
@@ -120,10 +121,12 @@ namespace Fiero.Business
                 Invalidate(args.NewValue);
             };
         }
-
         public void Update()
         {
-
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Hotkeys.DeveloperConsole)))
+            {
+                Console.Layout.IsHidden.V = !Console.Layout.IsHidden.V;
+            }
         }
 
         public void Draw()

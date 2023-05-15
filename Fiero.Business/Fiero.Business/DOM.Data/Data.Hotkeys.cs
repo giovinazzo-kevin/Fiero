@@ -34,6 +34,7 @@ namespace Fiero.Business
             public static readonly GameDatum<Keyboard.Key> RotateTargetCCw = new(nameof(Hotkeys) + nameof(RotateTargetCCw));
             public static readonly GameDatum<Keyboard.Key> Wait = new(nameof(Hotkeys) + nameof(Wait));
             public static readonly GameDatum<Keyboard.Key> ToggleZoom = new(nameof(Hotkeys) + nameof(ToggleZoom));
+            public static readonly GameDatum<Keyboard.Key> DeveloperConsole = new(nameof(Hotkeys) + nameof(DeveloperConsole));
         }
 
     }

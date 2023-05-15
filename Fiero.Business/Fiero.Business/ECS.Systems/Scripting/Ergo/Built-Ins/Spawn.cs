@@ -26,7 +26,7 @@ public sealed class Spawn : SolverBuiltIn
         Builders = builders;
         BuilderMethods = Builders.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(EntityBuilder<>) && m.GetParameters().Length == 0)
+            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(EntityBuilder<>) && m.GetParameters().Where(x => !x.HasDefaultValue).Count() == 0)
             .ToDictionary(m => m.Name.ToErgoCase());
     }
 
@@ -81,6 +81,7 @@ public sealed class Spawn : SolverBuiltIn
                 systems.Dungeon.SetTileAt(floorId, t.Position(), t);
                 yield return True();
             }
+            systems.Render.CenterOn(player);
         }
         else
         {

@@ -8,7 +8,6 @@ scripting:input_available(_) :-
 	write('> '), write(L), nl,
 	% Execute commands
 	(command(L) ; true).
-	
 %%% Repeats the next command N times
 command(Repeat) :-
 	str_fmt('repeat {0} {1}', [Num, Thing], Repeat) -> (
@@ -19,7 +18,7 @@ command(Repeat) :-
 command(Spawn) :-
 	str_fmt('spawn {0}', [Thing], Spawn) -> (
 	spawn(Thing) -> (write('spawned: '), write(Thing), nl)
-				  ; (write('unknown entity: '), write(Thing), nl)
+				  ; (write('couldn\'t spawn: '), write(Thing), nl)
 	).
 %%% Lists all spawnable entities
 command(spawn) :-

@@ -4,8 +4,8 @@ using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
 using Ergo.Solver.BuiltIns;
+using LightInject;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business;
 public class FieroLib : Library
@@ -14,16 +14,21 @@ public class FieroLib : Library
 
     protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
 
-    public FieroLib()
+    public readonly IServiceFactory ServiceFactory;
+
+    private readonly List<SolverBuiltIn> _exportedBuiltIns = new();
+    private readonly List<InterpreterDirective> _exportedDirectives = new();
+
+    public FieroLib(IServiceFactory sp)
     {
+        ServiceFactory = sp;
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<Spawn>());
+        _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }
 
 
-    public override IEnumerable<SolverBuiltIn> GetExportedBuiltins() => Enumerable.Empty<SolverBuiltIn>()
-        ;
-    public override IEnumerable<InterpreterDirective> GetExportedDirectives() => Enumerable.Empty<InterpreterDirective>()
-        .Append(new SubscribeToEvent())
-        ;
+    public override IEnumerable<SolverBuiltIn> GetExportedBuiltins() => _exportedBuiltIns;
+    public override IEnumerable<InterpreterDirective> GetExportedDirectives() => _exportedDirectives;
     public override void OnErgoEvent(ErgoEvent evt)
     {
         base.OnErgoEvent(evt);

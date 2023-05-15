@@ -5,8 +5,11 @@ using Ergo.Interpreter.Directives;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
+using Fiero.Core;
 
 namespace Fiero.Business;
+
+[SingletonDependency]
 public class SubscribeToEvent : InterpreterDirective
 {
     public SubscribeToEvent()

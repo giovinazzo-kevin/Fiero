@@ -5,4 +5,18 @@
 scripting:input_available(_) :-
 	read_line(L),
 	% Echo the user's prompt
-	write('> '), write(L), nl.
+	write('> '), write(L), nl,
+	% Execute commands
+	(command(L) ; true).
+	
+command(Spawn) :-
+	str_fmt('spawn {0}', [Thing], Spawn) -> (
+	spawn(Thing) -> (write('spawned: '), write(Thing), nl)
+				  ; (write('unknown entity: '), write(Thing), nl)
+	)
+	.
+
+command(spawn) :-
+	spawn(Thing),
+	write(Thing), nl.
+	

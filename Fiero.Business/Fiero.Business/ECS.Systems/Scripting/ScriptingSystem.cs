@@ -6,6 +6,7 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Fiero.Core;
+using LightInject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +28,9 @@ namespace Fiero.Business
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
-        public ErgoScriptingSystem(EventBus bus) : base(bus)
+        public ErgoScriptingSystem(EventBus bus, IServiceFactory sp) : base(bus)
         {
-            FieroLib = new();
+            FieroLib = new(sp);
             Facade = GetErgoFacade();
             Interpreter = Facade.BuildInterpreter(
                 InterpreterFlags.Default

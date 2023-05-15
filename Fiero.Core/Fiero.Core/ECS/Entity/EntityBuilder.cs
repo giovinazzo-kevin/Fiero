@@ -6,7 +6,12 @@ using System.Linq;
 
 namespace Fiero.Core
 {
-    public sealed class EntityBuilder<TProxy>
+    public interface IEntityBuilder
+    {
+        EcsEntity Build();
+    }
+
+    public sealed class EntityBuilder<TProxy> : IEntityBuilder
         where TProxy : EcsEntity
     {
         private readonly ImmutableHashSet<Type> _componentTypes;
@@ -102,5 +107,6 @@ namespace Fiero.Core
             return proxy;
         }
 
+        EcsEntity IEntityBuilder.Build() => Build();
     }
 }

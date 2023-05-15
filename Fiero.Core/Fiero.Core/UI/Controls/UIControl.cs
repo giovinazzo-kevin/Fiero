@@ -28,8 +28,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagated = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
-        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255));
-        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0);
+        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255)) { Inherited = false };
+        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
         public void Invalidate() => Invalidated?.Invoke(this);

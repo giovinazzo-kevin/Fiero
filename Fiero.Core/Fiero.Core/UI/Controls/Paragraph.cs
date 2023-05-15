@@ -15,6 +15,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false) { Inherited = false };
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
+        public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true);
 
         protected IEnumerable<Label> Labels => Children.OfType<Label>();
 
@@ -78,21 +79,48 @@ namespace Fiero.Core
             {
                 for (; delta-- > 0;)
                 {
-                    var label = new Label(Input);
-                    label.InheritProperties(this);
-                    label.Background.V = Color.Transparent;
-                    Children.Add(label);
+                    Children.Add(CreateLabel());
                 }
                 OnTextInvalidated();
             }
         }
 
+        protected Label CreateLabel()
+        {
+            var label = new Label(Input);
+            label.InheritProperties(this);
+            label.Background.V = Color.Transparent;
+            return label;
+        }
+
         protected virtual void OnTextInvalidated()
         {
-            foreach (var (c, t) in Labels.Zip(Text.V.Split('\n').TakeLast(Rows).Select(x => string.Join(string.Empty, x.Take(Cols)))))
+            var lines = Text.V.Split('\n').ToList();
+            if (WrapContent)
             {
-                c.Text.V = t;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    if (lines[i].Length <= Cols) continue;
+                    var rest = lines[i];
+                    var newLines = new List<string>();
+                    do
+                    {
+                        var len = Math.Min(rest.Length, Cols);
+                        newLines.Add(rest[..len]);
+                        rest = rest.Remove(0, len);
+                    }
+                    while (rest.Length > 0);
+                    lines[i] = newLines[0];
+                    lines.InsertRange(i + 1, newLines.Skip(1));
+                }
             }
+            foreach (var (c, l) in Labels.Zip(lines.Take(Rows)))
+            {
+                var len = Math.Min(l.Length, Cols);
+                c.Text.V = l[..len];
+            }
+            OnSizeInvalidated();
+            OnPositionInvalidated();
         }
     }
 }

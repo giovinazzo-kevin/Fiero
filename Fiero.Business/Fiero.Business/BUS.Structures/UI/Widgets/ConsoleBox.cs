@@ -1,5 +1,4 @@
-﻿using Ergo.Lang.Extensions;
-using Ergo.Shell;
+﻿using Ergo.Shell;
 using Fiero.Business.Utils;
 using Fiero.Core;
 using System;
@@ -63,11 +62,7 @@ namespace Fiero.Business
                     .Cast<Paragraph>()
                         .Single();
                 paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
-                    .Replace("\r", string.Empty)
-                    .Split("\n")
-                    .Select(s => s.Take(paragraph.Cols.V).Join(string.Empty))
-                    .TakeLast(paragraph.Rows.V)
-                    .Join("\n");
+                    .Replace("\r", string.Empty);
                 _outputBuffer.Clear();
             }
         }

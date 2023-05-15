@@ -17,6 +17,6 @@ command(Spawn) :-
 	).
 %%% Lists all spawnable entities
 command(spawn) :-
-	spawn(Thing),
-	write(Thing), nl.
+	bagof(Thing, spawn(Thing), Things),
+	write(Things), nl.
 	

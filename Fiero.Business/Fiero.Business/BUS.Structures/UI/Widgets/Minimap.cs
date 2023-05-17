@@ -67,7 +67,7 @@ namespace Fiero.Business
                 if (!Bake())
                     return;
             }
-            UI.Window.RenderWindow.Draw(_renderSprite);
+            UI.Window.Draw(_renderSprite);
             bool Bake()
             {
                 var floorId = Following.V.FloorId();
@@ -130,8 +130,8 @@ namespace Fiero.Business
                 // has unevenly-sized pixels. However, since at this scale the minimap won't use all available
                 // space, we also need to re-center it by half the difference between its scaled and original size
                 _renderSprite.Scale = Layout.Size.V / floor.Size;
-                var delta = _renderSprite.TextureRect.Size() - _renderSprite.TextureRect.Size() * _renderSprite.Scale.ToVec();
-                _renderSprite.Position -= (delta / 2).ToCoord();
+                var delta = _renderSprite.TextureRect.Size() * _renderSprite.Scale.ToVec() - _renderSprite.TextureRect.Size();
+                _renderSprite.Position += (delta / 2).Abs().ToCoord();
                 _dirty = false;
                 return true;
             }

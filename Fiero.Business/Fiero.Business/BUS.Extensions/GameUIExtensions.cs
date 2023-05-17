@@ -12,22 +12,22 @@ namespace Fiero.Business
             ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
 
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
-            => ui.Show(
+            => ui.Open(
                 new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),
                 title
             );
         public static ChestModal Chest(this GameUI ui, Feature feature, bool canTake, string title = null)
-            => ui.Show(
+            => ui.Open(
                 new ChestModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), feature, canTake),
                 title
             );
         public static DialogueModal Dialogue(this GameUI ui, IDialogueTrigger trigger, DialogueNode node, DrawableEntity speaker, params DrawableEntity[] listeners)
-            => ui.Show(
+            => ui.Open(
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
                 node.Title
             );
         public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
-            => ui.Show(
+            => ui.Open(
                 new ChoicePopUp<T>(
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),
@@ -38,7 +38,7 @@ namespace Fiero.Business
                 title
             );
         public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string title = null)
-            => ui.Show(
+            => ui.Open(
                 new ChoicePopUp<T>(
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),

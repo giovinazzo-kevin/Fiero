@@ -29,6 +29,12 @@ namespace Fiero.Business
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
             ;
 
+        protected override void SetDefaultSize()
+        {
+            Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Position.V = Size.V / 2;
+        }
+
         protected void Invalidate()
         {
             _dirty = true;

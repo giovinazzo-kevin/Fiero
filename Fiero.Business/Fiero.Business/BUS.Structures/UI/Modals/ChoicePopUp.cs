@@ -22,6 +22,17 @@ namespace Fiero.Business
             {
                 OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
+            Data.UI.WindowSize.ValueChanged += e =>
+            {
+                SetDefaultSize();
+            };
+        }
+
+        protected override void SetDefaultSize()
+        {
+            var windowSize = UI.Store.Get(Data.UI.WindowSize);
+            Size.V = new(windowSize.X, 200);
+            Position.V = new(0, windowSize.Y - 200);
         }
 
         public override void Update()
@@ -75,7 +86,7 @@ namespace Fiero.Business
                 {
                     x.FontSize.V = x.Font.V.Size;
                     x.Padding.V = new(8, 0);
-                    x.CenterContentH.V = false;
+                    x.HorizontalAlignment.V = HorizontalAlignment.Left;
                     x.Background.V = SelectedIndex == x.ZOrder.V
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultBackground);

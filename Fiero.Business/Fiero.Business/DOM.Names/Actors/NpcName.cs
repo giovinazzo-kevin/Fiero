@@ -23,11 +23,14 @@
 
         GreatKingRat,
         // SNAKES
+        Snake,
         KingSerpent,
         SandSnake,
         Cobra,
         Boa,
         // MISC
-        Mimic
+        Mimic,
+        Monster
     }
+
 }

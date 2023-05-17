@@ -220,6 +220,12 @@ namespace Fiero.Business
                 {
                     return new MeleeAttackPointAction(c, a.Equipment.Weapon);
                 }
+                if (!Systems.Dungeon.TryGetCellAt(a.FloorId(), a.Position() + c, out var cell))
+                    return new FailAction();
+                // don't check features, we want to bump those
+                // don't check pathing, that's for autoexplore
+                if (cell.Tile.Physics.BlocksMovement)
+                    return new FailAction();
                 return new MoveRelativeAction(c);
             }
             bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));

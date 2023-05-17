@@ -2,13 +2,8 @@
 {
     public enum ActorName
     {
-        None,
-        Player,
-        Rat,
-        Snake,
-        Dog,
-        Cat,
-        Boar,
-        Monster
+        None = 0,
+        Player = 1,
+        Monster = 2
     }
 }

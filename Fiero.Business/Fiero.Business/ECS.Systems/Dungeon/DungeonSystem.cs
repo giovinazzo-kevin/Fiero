@@ -135,9 +135,9 @@ namespace Fiero.Business
         public IEnumerable<MapCell> GetNeighborhood(FloorId id, Coord pos, int size = 3)
         {
             size /= 2;
-            for (int x = -size; x < size; x++)
+            for (int x = -size; x <= size; x++)
             {
-                for (int y = -size; y < size; y++)
+                for (int y = -size; y <= size; y++)
                 {
                     if (TryGetCellAt(id, new(pos.X + x, pos.Y + y), out var n))
                         yield return n;
@@ -153,13 +153,13 @@ namespace Fiero.Business
             var openSet = new Queue<MapCell>();
             var closedSet = new HashSet<MapCell>();
 
-            if (!TryGetCellAt(id, pos, out var origin) || origin.BlocksMovement())
+            if (!TryGetCellAt(id, pos, out var origin))
                 return false;
 
             openSet.Enqueue(origin);
-            closedSet.Add(closest);
             while (openSet.TryDequeue(out closest))
             {
+                closedSet.Add(closest);
                 if (pred(closest))
                     return true;
                 if (closest.Tile.DistanceFrom(origin.Tile) > maxDistance)
@@ -169,7 +169,6 @@ namespace Fiero.Business
                     .Shuffle(Rng.Random))
                 {
                     openSet.Enqueue(n);
-                    closedSet.Add(n);
                 }
             }
 

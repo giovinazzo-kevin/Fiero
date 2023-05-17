@@ -29,15 +29,15 @@ namespace Fiero.Business
             if (prop.V != null)
             {
                 prop.V.Log.LogAdded += LogAdded;
-                LogAdded(prop.V.Log, prop.V.Log.GetMessages().Last());
+                LogAdded(prop.V.Log, string.Empty); // Refresh p text
             }
-            void LogAdded(LogComponent component, string newLog)
+            void LogAdded(LogComponent component, string _)
             {
                 var paragraph = Layout?.Query(x => true, x => "log-text".Equals(x.Id))
                     .Cast<Paragraph>()
                     .SingleOrDefault();
                 if (paragraph == null) return;
-                var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
+                var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V);
                 paragraph.Text.V = string.Join("\n", messages);
             }
         }

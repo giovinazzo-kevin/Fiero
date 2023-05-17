@@ -68,6 +68,8 @@ namespace Fiero.Core
             => this.ToCoord().ToVec();
         public Vec Ceiling()
             => new((int)Math.Ceiling(X), (int)Math.Ceiling(Y));
+        public Vec Abs()
+            => new(Math.Abs(X), Math.Abs(Y));
 
 
         public override int GetHashCode()

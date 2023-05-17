@@ -13,13 +13,20 @@ namespace Fiero.Business
         public readonly MiniMap MiniMap;
         public readonly Viewport Viewport;
 
-        public MainSceneWindow(GameUI ui, LogBox logs, MiniMap miniMap, GameResources res, FactionSystem fac, DungeonSystem floor)
+        protected Label PlayerNameLabel { get; private set; }
+        protected Label PlayerDescLabel { get; private set; }
+        protected Label CurrentTurnLabel { get; private set; }
+        protected Label CurrentPlaceLabel { get; private set; }
+
+        protected readonly ActionSystem ActionSystem;
+
+        public MainSceneWindow(GameUI ui, LogBox logs, MiniMap miniMap, GameResources res, FactionSystem fac, DungeonSystem floor, ActionSystem act, GameLoop loop)
             : base(ui)
         {
             LogBox = logs;
             MiniMap = miniMap;
-            Viewport = new Viewport(ui.Input, floor, fac, res);
-
+            Viewport = new Viewport(ui.Input, floor, fac, res, loop);
+            ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency
             LogBox.EnableDragging = false;
             MiniMap.EnableDragging = false;
 
@@ -64,31 +71,75 @@ namespace Fiero.Business
             LogBox.Open(string.Empty);
         }
 
+        public override void Draw()
+        {
+            if (!IsOpen)
+                return;
+            if (Viewport.Following.V != null)
+            {
+                var floorId = Viewport.Following.V.FloorId();
+                PlayerNameLabel.Text.V = Viewport.Following.V.Info.Name;
+                PlayerDescLabel.Text.V = Viewport.Following.V.ActorProperties.Type.ToString();
+                CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
+                CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+            }
+            base.Draw();
+        }
+
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+            .AddRule<Label>(x => x
+                .Apply(l =>
+                {
+                    l.Background.V = UI.GetColor(ColorName.UIBackground);
+                    l.Padding.V = new(5, 0);
+                }))
+            .AddRule<Label>(x => x
+                .Match(x => x.HasClass("center"))
+                .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center))
+            .AddRule<Label>(x => x
+                .Match(x => x.HasClass("right"))
+                .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;
 
-        public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => grid
+        public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
                 .Col(w: 200, px: true, @class: "stat-panel")
-                    .Row(h: 32, px: true, id: "hp-bar")
+                    .Row(h: 24, px: true, id: "name", @class: "center")
+                        .Cell<Label>(x => PlayerNameLabel = x)
+                    .End()
+                    .Row(h: 24, px: true, id: "hp-bar")
                         .Cell<Layout>(x => x.Background.V = Color.Red)
                     .End()
-                    .Row(h: 32, px: true, id: "mp-bar")
+                    .Row(h: 24, px: true, id: "mp-bar")
                         .Cell<Layout>(x => x.Background.V = Color.Blue)
                     .End()
-                    .Row()
-                        .Cell<Layout>(x => x.Background.V = Color.Green)
+                    .Row(h: 24, px: true, id: "xp-bar")
+                        .Cell<Layout>(x => x.Background.V = Color.Yellow)
+                    .End()
+                    .Row(h: 24, px: true, id: "desc", @class: "center")
+                        .Cell<Label>(x => PlayerDescLabel = x)
+                    .End()
+                    .Row(@class: "spacer")
+                        .Cell<Layout>()
+                    .End()
+                    .Row(h: 24, px: true)
+                        .Col(id: "time")
+                            .Cell<Label>(x => CurrentTurnLabel = x)
+                        .End()
+                        .Col(id: "place", @class: "right")
+                            .Cell<Label>(x => CurrentPlaceLabel = x)
+                        .End()
                     .End()
                     .Row(h: 200, px: true, id: "mini-map")
-                        .Cell<UIWindowControl>(x => x.Window.V = MiniMap)
+                        .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
                 .End()
             .End()
             .Row(h: 200, px: true, id: "log-panel")
-                .Cell<UIWindowControl>(x => x.Window.V = LogBox)
+                .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
     }
 }

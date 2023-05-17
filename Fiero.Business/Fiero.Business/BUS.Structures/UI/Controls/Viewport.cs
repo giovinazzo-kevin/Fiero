@@ -1,7 +1,11 @@
 ﻿using Fiero.Core;
+using Fiero.Core.Structures;
 using SFML.Graphics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fiero.Business
 {
@@ -13,6 +17,7 @@ namespace Fiero.Business
         protected readonly DungeonSystem FloorSystem;
         protected readonly FactionSystem FactionSystem;
         protected readonly GameResources Resources;
+        protected readonly GameLoop Loop;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
@@ -24,16 +29,20 @@ namespace Fiero.Business
         private Sprite _renderSprite;
         private bool _dirty = true;
 
+        protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
+
         public Viewport(
             GameInput input,
             DungeonSystem floor,
             FactionSystem faction,
-            GameResources res
+            GameResources res,
+            GameLoop loop
         ) : base(input)
         {
             FloorSystem = floor;
             FactionSystem = faction;
             Resources = res;
+            Loop = loop;
             Size.ValueChanged += (_, __) =>
             {
                 _renderTexture?.Dispose();
@@ -75,6 +84,40 @@ namespace Fiero.Business
                 darkerSprite.Color = new(128, 128, 128);
                 target.Draw(darkerSprite);
 
+                DrawTargetingShape(shape);
+            }
+            else
+            {
+                target.Draw(_renderSprite);
+            }
+            DrawVFX();
+
+            void DrawVFX()
+            {
+                var viewPos = ViewArea.V.Position();
+                foreach (var k in Vfx.Keys)
+                {
+                    if (!Vfx.TryGetValue(k, out var anim))
+                    {
+                        continue;
+                    }
+                    for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++)
+                    {
+                        var (worldPos, spriteDef) = (pair.Left, pair.Right);
+                        using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
+                        var spriteSize = sprite.GetLocalBounds().Size();
+                        sprite.Position = (spriteDef.Offset + worldPos - viewPos) * ViewTileSize.V + Position.V;
+                        sprite.Scale = ViewTileSize.V / spriteSize * spriteDef.Scale;
+                        sprite.Color = Resources.Colors.Get(spriteDef.Color);
+                        sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                        target.Draw(sprite, states);
+                        anim.Enqueue(pair);
+                    }
+                }
+            }
+
+            void DrawTargetingShape(TargetingShape shape)
+            {
                 foreach (var point in shape.GetPoints())
                 {
                     var pos = (point - new Coord(ViewArea.V.Left, ViewArea.V.Top)) * ViewTileSize.V + Position.V;
@@ -97,10 +140,7 @@ namespace Fiero.Business
                     target.Draw(highlight);
                 }
             }
-            else
-            {
-                target.Draw(_renderSprite);
-            }
+
             bool Bake()
             {
                 var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
@@ -219,6 +259,70 @@ namespace Fiero.Business
                 _renderTexture.Display();
                 _dirty = false;
                 return true;
+            }
+        }
+
+        public void Animate(bool blocking, Coord worldPos, params Animation[] animations)
+        {
+            if (blocking)
+            {
+                Impl();
+            }
+            else
+            {
+                Task.Run(Impl);
+            }
+            void Impl()
+            {
+                var time = TimeSpan.Zero;
+                var increment = TimeSpan.FromMilliseconds(4);
+                var timeline = animations.SelectMany(Timeline)
+                    .OrderBy(x => x.Time)
+                    .ToList();
+                var viewPos = ViewArea.V.Position();
+                var myVfx = new ConcurrentQueue<OrderedPair<Coord, SpriteDef>>();
+                var k = Vfx.Keys.LastOrDefault() + 1;
+                Vfx[k] = myVfx;
+                while (timeline.Count > 0)
+                {
+                    for (int i = timeline.Count - 1; i >= 0; i--)
+                    {
+                        var t = timeline[i];
+                        if (time <= t.Time + t.Frame.Duration && time > t.Time)
+                        {
+                            foreach (var spriteDef in t.Frame.Sprites)
+                            {
+                                myVfx.Enqueue(new(worldPos, spriteDef));
+                            }
+                            t.Anim.OnFramePlaying(t.Index);
+                        }
+                        else if (time > t.Time + t.Frame.Duration)
+                        {
+                            timeline.RemoveAt(i);
+                        }
+                    }
+                    if (blocking)
+                    {
+                        Loop.WaitAndDraw(increment);
+                    }
+                    else
+                    {
+                        new GameLoop().Run(increment);
+                    }
+                    time += increment;
+                    myVfx.Clear();
+                }
+                Vfx.Remove(k, out _);
+            }
+
+            IEnumerable<(int Index, Animation Anim, TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
+            {
+                var time = TimeSpan.Zero;
+                for (int i = 0; i < anim.Frames.Length; ++i)
+                {
+                    yield return (i, anim, time, anim.Frames[i]);
+                    time += anim.Frames[i].Duration;
+                }
             }
         }
     }

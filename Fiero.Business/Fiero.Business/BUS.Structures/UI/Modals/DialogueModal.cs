@@ -26,6 +26,12 @@ namespace Fiero.Business
             Listeners = listeners;
         }
 
+        protected override void SetDefaultSize()
+        {
+            Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Position.V = Size.V / 2 * new Coord(1, 0);
+        }
+
         public override void Open(string title)
         {
             Node.Trigger(Trigger, Speaker, Listeners);

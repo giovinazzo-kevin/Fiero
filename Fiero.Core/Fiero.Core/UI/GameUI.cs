@@ -29,7 +29,7 @@ namespace Fiero.Core
             OpenWindows = new List<UIWindow>();
         }
 
-        public T Show<T>(T wnd, string title = null)
+        public T Open<T>(T wnd, string title = null)
             where T : UIWindow
         {
             if (wnd.IsOpen)

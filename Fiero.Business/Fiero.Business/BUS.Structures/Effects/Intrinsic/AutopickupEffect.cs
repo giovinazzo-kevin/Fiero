@@ -17,7 +17,7 @@ namespace Fiero.Business
                     var itemsHere = systems.Dungeon.GetItemsAt(target.FloorId(), target.Position());
                     if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item)))
                     {
-                        systems.Action.ItemPickedUp.HandleOrThrow(new(target, item));
+                        systems.Action.ItemPickedUp.Handle(new(target, item));
                     }
                 }
             }));

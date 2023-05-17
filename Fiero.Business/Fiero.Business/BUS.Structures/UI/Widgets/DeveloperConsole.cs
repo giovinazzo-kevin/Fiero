@@ -26,12 +26,13 @@ namespace Fiero.Business
 
         public const double ScriptUpdateRate = 0.15;
 
-        protected readonly GameColors<ColorName> Colors;
-        public readonly EventBus EventBus;
-
         private DelayedDebounce _delay = new(TimeSpan.FromSeconds(ScriptUpdateRate), 1);
         private readonly StringBuilder _outputBuffer = new();
 
+        protected readonly GameColors<ColorName> Colors;
+        protected Textbox InputTextbox { get; private set; }
+
+        public readonly EventBus EventBus;
         public readonly ErgoScriptingSystem ScriptingSystem;
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, string> InputAvailable;
@@ -54,6 +55,18 @@ namespace Fiero.Business
         public void WriteLine(string s)
         {
             Write(s + Environment.NewLine);
+        }
+
+        public void Show()
+        {
+            Layout.IsHidden.V = false;
+            Layout.Focus(InputTextbox);
+        }
+
+        public void Hide()
+        {
+            Layout.IsHidden.V = true;
+            InputTextbox.IsActive.V = false;
         }
 
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
@@ -155,6 +168,7 @@ namespace Fiero.Business
                 .Row(h: 20, px: true, id: "input")
                     .Cell<Textbox>(t =>
                     {
+                        InputTextbox = t;
                         t.EnterPressed += obj =>
                         {
                             var text = obj.Text.V;

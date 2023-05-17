@@ -164,8 +164,12 @@ namespace Fiero.Business
             });
         public static EntityBuilder<T> WithLogging<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<LogComponent>(_ => { });
-        public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type)
-            where T : Actor => builder.AddOrTweak<NpcComponent>(c => c.Type = type);
+        public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type, RaceName race)
+            where T : Actor => builder.AddOrTweak<NpcComponent>(c =>
+            {
+                c.Type = type;
+                c.Race = race;
+            });
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, NpcName type)
             where T : Actor => builder.AddOrTweak<DialogueComponent>(c =>
             {

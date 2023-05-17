@@ -30,18 +30,29 @@ namespace Fiero.Business
             CurrentPage.ValueChanged += (_, __) => Invalidate();
             Size.ValueChanged += (_, __) =>
             {
-                if (Layout is null) return;
-                // Update PageSize dynamically
-                var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
-                var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
-                var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
-                if (newPageSize != PageSize.V)
-                {
-                    PageSize.V = newPageSize;
-                    RebuildLayout();
-                }
-                Invalidate();
+                UpdatePageSize();
             };
+        }
+
+        public override void Open(string title)
+        {
+            base.Open(title);
+            UpdatePageSize();
+        }
+
+        protected virtual void UpdatePageSize()
+        {
+            if (Layout is null) return;
+            // Update PageSize dynamically
+            var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
+            var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
+            var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
+            if (newPageSize != PageSize.V)
+            {
+                PageSize.V = newPageSize;
+                RebuildLayout();
+            }
+            Invalidate();
         }
 
         protected abstract bool ShouldRemoveItem(Item i, TActions a);
@@ -94,7 +105,7 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("item-name"))
                 .Apply(x =>
                 {
-                    x.CenterContentH.V = false;
+                    x.HorizontalAlignment.V = HorizontalAlignment.Left;
                     x.Padding.V = new(8, 0);
                 }))
             ;

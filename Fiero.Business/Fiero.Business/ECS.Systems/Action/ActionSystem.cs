@@ -220,6 +220,7 @@ namespace Fiero.Business
             AbortCurrentTurn();
             _actorQueue.Clear();
             _actorQueue.Add(new ActorTime(TURN_ACTOR_ID, null, () => new WaitAction(), 0));
+            CurrentTurn = 0;
             GameStarted.Raise(new());
         }
 

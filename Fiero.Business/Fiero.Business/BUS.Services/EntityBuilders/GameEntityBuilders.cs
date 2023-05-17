@@ -58,7 +58,8 @@ namespace Fiero.Business
             .WithHealth(1)
             .WithName(nameof(Enemy))
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, "None", ColorName.White)
-            .WithActorInfo(ActorName.None)
+            .WithActorInfo(ActorName.Monster)
+            .WithNpcInfo(NpcName.Monster, RaceName.Monster)
             .WithFaction(FactionName.None)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithEquipment()
@@ -327,19 +328,19 @@ namespace Fiero.Business
             => Enemy()
             .WithInventory(5)
             .WithHealth(3)
-            .WithName(nameof(ActorName.Rat))
-            .WithActorInfo(ActorName.Rat)
+            .WithName(nameof(NpcName.Rat))
+            .WithNpcInfo(NpcName.Rat, RaceName.Rat)
             .WithFaction(FactionName.Rats)
             .WithCorpse(CorpseName.RatCorpse, chance: Chance.FiftyFifty)
-            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(ActorName.Rat), ColorName.White)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Rat), ColorName.White)
             ;
 
         public EntityBuilder<Actor> NPC_Snake()
             => Enemy()
-            .WithName(nameof(ActorName.Snake))
-            .WithActorInfo(ActorName.Snake)
+            .WithName(nameof(NpcName.Snake))
+            .WithNpcInfo(NpcName.Snake, RaceName.Snake)
             .WithFaction(FactionName.Snakes)
-            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(ActorName.Snake), ColorName.White)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Snake), ColorName.White)
             ;
         #endregion
 
@@ -362,7 +363,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(20)
             .WithName("Rat Knight")
-            .WithNpcInfo(NpcName.RatKnight)
+            .WithNpcInfo(NpcName.RatKnight, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatKnight)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatKnight), ColorName.White)
             .WithItems(Loadout(
@@ -377,7 +378,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Archer")
-            .WithNpcInfo(NpcName.RatArcher)
+            .WithNpcInfo(NpcName.RatArcher, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatArcher)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArcher), ColorName.White)
             .WithItems(Loadout(
@@ -392,7 +393,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Wizard")
-            .WithNpcInfo(NpcName.RatWizard)
+            .WithNpcInfo(NpcName.RatWizard, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatWizard)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatWizard), ColorName.White)
             .WithItems(Loadout(
@@ -412,7 +413,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Merchant")
-            .WithNpcInfo(NpcName.RatMerchant)
+            .WithNpcInfo(NpcName.RatMerchant, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatMerchant)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatMerchant), ColorName.White)
             .WithLikedItems(
@@ -423,7 +424,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Monk")
-            .WithNpcInfo(NpcName.RatMonk)
+            .WithNpcInfo(NpcName.RatMonk, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatMonk)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
             .WithItems(Loadout(
@@ -437,7 +438,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Cultist")
-            .WithNpcInfo(NpcName.RatCultist)
+            .WithNpcInfo(NpcName.RatCultist, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatCultist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCultist), ColorName.White)
             //.WithItems(Loadout(
@@ -451,7 +452,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(20)
             .WithName("Rat Pugilist")
-            .WithNpcInfo(NpcName.RatPugilist)
+            .WithNpcInfo(NpcName.RatPugilist, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatPugilist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatPugilist), ColorName.White)
             ;
@@ -459,7 +460,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Thief")
-            .WithNpcInfo(NpcName.RatThief)
+            .WithNpcInfo(NpcName.RatThief, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatThief)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatThief), ColorName.White)
             .WithLikedItems(
@@ -470,7 +471,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Cheese Enjoyer")
-            .WithNpcInfo(NpcName.RatCheese)
+            .WithNpcInfo(NpcName.RatCheese, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatCheese)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCheese), ColorName.White)
             ;
@@ -478,7 +479,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Arsonist")
-            .WithNpcInfo(NpcName.RatArsonist)
+            .WithNpcInfo(NpcName.RatArsonist, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatArsonist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArsonist), ColorName.White)
             .WithItems(Loadout(
@@ -492,7 +493,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(30)
             .WithName("Rat Zombie")
-            .WithNpcInfo(NpcName.RatZombie)
+            .WithNpcInfo(NpcName.RatZombie, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatZombie)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatZombie), ColorName.White)
             .WithCorpse(CorpseName.None, Chance.Never)
@@ -501,7 +502,7 @@ namespace Fiero.Business
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Skeleton")
-            .WithNpcInfo(NpcName.RatSkeleton)
+            .WithNpcInfo(NpcName.RatSkeleton, RaceName.Rat)
             .WithDialogueTriggers(NpcName.RatSkeleton)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatSkeleton), ColorName.White)
             .WithCorpse(CorpseName.None, Chance.Never)
@@ -510,7 +511,7 @@ namespace Fiero.Business
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Sand Snake")
-            .WithNpcInfo(NpcName.SandSnake)
+            .WithNpcInfo(NpcName.SandSnake, RaceName.Snake)
             .WithDialogueTriggers(NpcName.SandSnake)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.SandSnake), ColorName.White)
             ;
@@ -518,7 +519,7 @@ namespace Fiero.Business
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Cobra")
-            .WithNpcInfo(NpcName.Cobra)
+            .WithNpcInfo(NpcName.Cobra, RaceName.Snake)
             .WithDialogueTriggers(NpcName.Cobra)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Cobra), ColorName.White)
             ;
@@ -526,7 +527,7 @@ namespace Fiero.Business
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Boa")
-            .WithNpcInfo(NpcName.Boa)
+            .WithNpcInfo(NpcName.Boa, RaceName.Snake)
             .WithDialogueTriggers(NpcName.Boa)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Boa), ColorName.White)
             ;
@@ -535,10 +536,10 @@ namespace Fiero.Business
             .WithName(nameof(ActorName.Monster))
             .WithActorInfo(ActorName.Monster)
             .WithFaction(FactionName.Monsters)
-            .WithInventory(5)
+            .WithInventory(10)
             .WithHealth(10)
             .WithName("Mimic")
-            .WithNpcInfo(NpcName.Mimic)
+            .WithNpcInfo(NpcName.Mimic, RaceName.Monster)
             .WithDialogueTriggers(NpcName.Mimic)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Mimic), ColorName.White)
             ;
@@ -548,14 +549,14 @@ namespace Fiero.Business
         public EntityBuilder<Actor> Boss_NpcGreatKingRat()
             => NPC_Rat()
             .WithName("Great King Rat")
-            .WithNpcInfo(NpcName.GreatKingRat)
+            .WithNpcInfo(NpcName.GreatKingRat, RaceName.Rat)
             .WithDialogueTriggers(NpcName.GreatKingRat)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.GreatKingRat), ColorName.White)
             ;
         public EntityBuilder<Actor> Boss_NpcKingSerpent()
             => NPC_Rat()
             .WithName("Serpentine King")
-            .WithNpcInfo(NpcName.KingSerpent)
+            .WithNpcInfo(NpcName.KingSerpent, RaceName.Snake)
             .WithDialogueTriggers(NpcName.KingSerpent)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.KingSerpent), ColorName.White)
             ;

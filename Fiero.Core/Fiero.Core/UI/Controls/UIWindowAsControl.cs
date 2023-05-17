@@ -3,13 +3,13 @@
 namespace Fiero.Core
 {
     /// <summary>
-    /// Encapsulate a UIWindow into a control, in order to create nested layouts.
+    /// Wraps a UIWindow into a control, in order to create nested layouts.
     /// </summary>
-    public class UIWindowControl : UIControl
+    public class UIWindowAsControl : UIControl
     {
         public readonly UIControlProperty<UIWindow> Window = new(nameof(Window), null);
 
-        public UIWindowControl(GameInput input) : base(input)
+        public UIWindowAsControl(GameInput input) : base(input)
         {
             Size.ValueUpdated += (_, __) =>
             {

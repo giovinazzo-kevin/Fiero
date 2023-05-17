@@ -13,8 +13,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
-        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
-        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
+        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
+        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
         public string DisplayText => String.IsNullOrEmpty(Text.V)
             ? String.Empty
@@ -82,15 +82,25 @@ namespace Fiero.Core
                 var drawablePos = drawableBounds.Position();
                 var drawableSize = drawableBounds.Size();
                 var subDelta = drawableSize * text.Scale - drawableSize;
-                var delta = label.ContentRenderPos - drawablePos - drawableSize / 2f + label.ContentRenderSize / 2f - subDelta / 2;
+                var delta = label.ContentRenderPos - drawablePos - drawableSize / 2f + label.ContentRenderSize / 2f - subDelta / 2f;
                 var deltaCoord = delta.Round().ToCoord();
-                if (label.CenterContentH)
+                switch (label.HorizontalAlignment.V)
                 {
-                    text.Position += deltaCoord * new Coord(1, 0);
+                    case Core.HorizontalAlignment.Center:
+                        text.Position += deltaCoord * new Coord(1, 0);
+                        break;
+                    case Core.HorizontalAlignment.Right:
+                        text.Position += deltaCoord * new Coord(1, 0) * 2;
+                        break;
                 }
-                if (label.CenterContentV)
+                switch (label.VerticalAlignment.V)
                 {
-                    text.Position += deltaCoord * new Coord(0, 1);
+                    case Core.VerticalAlignment.Middle:
+                        text.Position += deltaCoord * new Coord(0, 1);
+                        break;
+                    case Core.VerticalAlignment.Bottom:
+                        text.Position += deltaCoord * new Coord(0, 1) * 2;
+                        break;
                 }
                 text.FillColor = label.Foreground;
                 target.Draw(text, states);

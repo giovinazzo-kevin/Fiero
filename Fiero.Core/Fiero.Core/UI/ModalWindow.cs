@@ -32,7 +32,7 @@ namespace Fiero.Core
                         .Cell<Label>(l =>
                         {
                             l.Text.V = title;
-                            l.CenterContentH.V = true;
+                            l.HorizontalAlignment.V = HorizontalAlignment.Center;
                             if (Title != null)
                             {
                                 Title.V = l.Text.V;
@@ -48,7 +48,7 @@ namespace Fiero.Core
                                 .Cell<Button>(b =>
                                 {
                                     b.Text.V = Buttons[i].ToString();
-                                    b.CenterContentH.V = true;
+                                    b.HorizontalAlignment.V = HorizontalAlignment.Center;
                                     b.Clicked += (_, __, ___) =>
                                     {
                                         Close(Buttons[i]);

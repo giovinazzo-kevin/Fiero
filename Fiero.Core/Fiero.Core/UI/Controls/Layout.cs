@@ -24,6 +24,18 @@ namespace Fiero.Core
             where T : UIControl
             => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).Cast<T>();
 
+        public virtual void Focus(UIControl control)
+        {
+            foreach (var c in Children)
+            {
+                c.IsActive.V = false;
+            }
+            if (control != this && control.IsInteractive)
+            {
+                control.IsActive.V = true;
+            }
+        }
+
         public override void Update()
         {
             var preventDefault = TrackMouse(Input.GetMousePosition(), out var clickedControl, out var clickedButton);
@@ -31,14 +43,7 @@ namespace Fiero.Core
             {
                 if (clickedControl != null)
                 {
-                    foreach (var c in Children)
-                    {
-                        c.IsActive.V = false;
-                    }
-                    if (clickedControl != this && clickedControl.IsInteractive)
-                    {
-                        clickedControl.IsActive.V = true;
-                    }
+                    Focus(clickedControl);
                 }
             }
             base.Update();

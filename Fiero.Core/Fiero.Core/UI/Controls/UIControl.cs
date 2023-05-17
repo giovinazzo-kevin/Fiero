@@ -201,7 +201,6 @@ namespace Fiero.Core
                 child.Draw(target, states);
             }
         }
-
         public virtual void Dispose() { }
     }
 }

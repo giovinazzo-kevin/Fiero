@@ -8,5 +8,11 @@ namespace Fiero.Business
             : base(ui, resources, buttons, styles)
         {
         }
+
+        protected override void SetDefaultSize()
+        {
+            Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Position.V = Size.V / 2;
+        }
     }
 }

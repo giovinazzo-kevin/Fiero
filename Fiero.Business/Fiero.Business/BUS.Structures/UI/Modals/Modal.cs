@@ -14,7 +14,7 @@ namespace Fiero.Business
         private bool _dirty;
 
         protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, Data.UI.WindowSize, buttons, styles)
+            : base(ui, buttons, styles)
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
@@ -28,12 +28,6 @@ namespace Fiero.Business
                 .Match(x => x.HasClass("row-even"))
                 .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
             ;
-
-        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            base.OnGameWindowSizeChanged(obj);
-            Invalidate();
-        }
 
         protected void Invalidate()
         {

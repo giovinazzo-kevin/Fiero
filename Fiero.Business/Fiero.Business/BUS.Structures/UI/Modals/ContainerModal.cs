@@ -28,25 +28,23 @@ namespace Fiero.Business
             Container = cont;
             Items.AddRange(cont.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
             CurrentPage.ValueChanged += (_, __) => Invalidate();
+            Size.ValueChanged += (_, __) =>
+            {
+                if (Layout is null) return;
+                // Update PageSize dynamically
+                var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
+                var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
+                var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
+                if (newPageSize != PageSize.V)
+                {
+                    PageSize.V = newPageSize;
+                    RebuildLayout();
+                }
+                Invalidate();
+            };
         }
 
         protected abstract bool ShouldRemoveItem(Item i, TActions a);
-
-        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            Size.V = obj.NewValue / 2;
-            Position.V = obj.NewValue / 2 - Size.V / 2;
-            // Update PageSize dynamically
-            var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
-            var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
-            var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
-            if (newPageSize != PageSize.V)
-            {
-                PageSize.V = newPageSize;
-                RebuildLayout();
-            }
-            Invalidate();
-        }
 
         protected override void RegisterHotkeys(ModalWindowButton[] buttons)
         {

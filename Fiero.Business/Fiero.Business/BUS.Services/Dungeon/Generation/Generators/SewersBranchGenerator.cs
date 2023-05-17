@@ -14,7 +14,7 @@ namespace Fiero.Business
         {
             var (size, subdivisions) = floorId.Depth switch
             {
-                _ => (new Coord(71, 71), new Coord(4, 4)),
+                _ => (new Coord(71, 71), new Coord(2, 2)),
             };
             var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2))
                 .ToList();

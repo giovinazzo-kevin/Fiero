@@ -109,6 +109,7 @@ namespace Fiero.Business
         public void Draw(FloorGenerationContext ctx)
         {
             var drawnRooms = new HashSet<Node>();
+            Root.Room.Draw(ctx);
             foreach (var (_, corridor, child) in Traverse())
             {
                 if (child != null && !drawnRooms.Contains(child))

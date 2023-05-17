@@ -55,13 +55,6 @@ namespace Fiero.Business
             }
         }
 
-        protected override void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            var popupSize = UI.Store.Get(Data.UI.PopUpSize);
-            Size.V = new(popupSize.X, popupSize.Y / 4);
-            Position.V = new(obj.NewValue.X / 2 - Layout.Size.V.X / 2, 0);
-        }
-
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<UIControl>(s => s
                 .Apply(x =>

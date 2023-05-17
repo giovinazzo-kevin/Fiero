@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Unconcern.Common;
+using static Fiero.Business.Data;
 
 namespace Fiero.Business
 {
@@ -17,13 +18,13 @@ namespace Fiero.Business
         protected readonly GameResources Resources;
         protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
 
-        protected Layout Layout { get; private set; }
-        public Viewport Viewport { get; private set; }
+        public readonly Viewport Viewport;
+        public readonly MainSceneWindow Window;
+        public readonly DeveloperConsole DeveloperConsole;
 
         public readonly SystemRequest<RenderSystem, PointSelectedEvent, EventResult> PointSelected;
         public readonly SystemRequest<RenderSystem, ActorSelectedEvent, EventResult> ActorSelected;
         public readonly SystemRequest<RenderSystem, ActorDeselectedEvent, EventResult> ActorDeselected;
-
 
         public void CenterOn(Actor a)
         {
@@ -42,81 +43,55 @@ namespace Fiero.Business
             PointSelected.Handle(new(c));
         }
 
-        public RenderSystem(EventBus bus, GameUI ui, GameLoop loop, GameResources resources) : base(bus)
+        public RenderSystem(EventBus bus, GameUI ui, GameLoop loop, GameResources resources, MainSceneWindow window, DeveloperConsole console) : base(bus)
         {
             UI = ui;
             Loop = loop;
             Resources = resources;
-
+            Viewport = window.Viewport;
+            Window = window;
+            DeveloperConsole = console;
             ActorSelected = new(this, nameof(ActorSelected));
             PointSelected = new(this, nameof(PointSelected));
             ActorDeselected = new(this, nameof(ActorDeselected));
-
             PointSelected.ResponseReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
-                {
-                    Viewport.Following.V = null;
-
-                    var viewSize = Viewport.ViewArea.V.Size();
-                    Viewport.ViewArea.V = new(evt.Point.X - viewSize.X / 2, evt.Point.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
-
-                    Viewport.SetDirty();
-                }
+                    Window.OnPointSelected(evt.Point);
             };
             ActorSelected.ResponseReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
-                {
-                    Viewport.Following.V = evt.Actor;
-
-                    var pos = evt.Actor.Position();
-                    var viewSize = Viewport.ViewArea.V.Size();
-                    Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
-
-                    Viewport.SetDirty();
-                }
+                    Window.OnActorSelected(evt.Actor);
             };
             ActorDeselected.ResponseReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
-                {
-                    Viewport.Following.V = null;
-                    Viewport.SetDirty();
-                }
-            };
-        }
-
-        public void Initialize()
-        {
-            Layout = UI.CreateLayout().Build(new(), grid => grid
-                .Row()
-                    .Cell<Viewport>(v => Viewport = v)
-                .End()
-            );
-            Data.UI.WindowSize.ValueChanged += (args) =>
-            {
-                Layout.Position.V = new();
-                Layout.Size.V = args.NewValue;
-
-                var viewPos = Viewport.ViewArea.V.Position();
-                Viewport.ViewArea.V = new(
-                    viewPos.X,
-                    viewPos.Y,
-                    args.NewValue.X / Viewport.ViewTileSize.V.X,
-                    args.NewValue.Y / Viewport.ViewTileSize.V.Y
-                );
+                    Window.OnActorDeselected();
             };
         }
 
         public void Update()
         {
-            Layout.Update();
+            if (!Window.IsOpen)
+                UI.Show(Window);
+
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Hotkeys.DeveloperConsole)))
+            {
+                if (!DeveloperConsole.IsOpen)
+                    UI.Show(DeveloperConsole);
+                else
+                    DeveloperConsole.Close(ModalWindowButton.None);
+            }
         }
 
         public void Draw()
         {
-            UI.Window.RenderWindow.Draw(Layout);
+            DrawVfx();
+        }
+
+        protected void DrawVfx()
+        {
             var viewPos = Viewport.ViewArea.V.Position();
             foreach (var k in Vfx.Keys)
             {
@@ -163,7 +138,7 @@ namespace Fiero.Business
             {
                 var time = TimeSpan.Zero;
                 var increment = TimeSpan.FromMilliseconds(4);
-                var timeline = animations.SelectMany(a => Timeline(a))
+                var timeline = animations.SelectMany(Timeline)
                     .OrderBy(x => x.Time)
                     .ToList();
                 var viewPos = Viewport.ViewArea.V.Position();

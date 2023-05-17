@@ -13,11 +13,11 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     [TransientDependency]
-    public class ConsoleBox : Widget
+    public class DeveloperConsole : Widget
     {
         record class ScriptClosure(Script s)
         {
-            public void OnInputAvailable(ConsoleBox _, string arg2)
+            public void OnInputAvailable(DeveloperConsole _, string arg2)
             {
                 s.ScriptProperties.In.Write(arg2);
                 s.ScriptProperties.In.Flush();
@@ -33,15 +33,15 @@ namespace Fiero.Business
         private readonly StringBuilder _outputBuffer = new();
 
         public readonly ErgoScriptingSystem ScriptingSystem;
-        public event Action<ConsoleBox, string> OutputAvailable;
-        public event Action<ConsoleBox, string> InputAvailable;
+        public event Action<DeveloperConsole, string> OutputAvailable;
+        public event Action<DeveloperConsole, string> InputAvailable;
 
-        public ConsoleBox(GameSystems systems, EventBus bus, GameUI ui, GameColors<ColorName> colors)
-            : base(ui, Data.UI.WindowSize)
+        public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
+            : base(ui)
         {
             EventBus = bus;
             Colors = colors;
-            ScriptingSystem = systems.Scripting;
+            ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
         }
 
@@ -56,7 +56,7 @@ namespace Fiero.Business
             Write(s + Environment.NewLine);
         }
 
-        protected virtual void OnOutputAvailable(ConsoleBox self, string chunk)
+        protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
         {
             _outputBuffer.Append(chunk);
             if (!_delay.IsDebouncing)

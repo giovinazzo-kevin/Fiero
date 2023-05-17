@@ -15,6 +15,7 @@ namespace Fiero.Business
         protected readonly GameResources Resources;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
+        public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
         public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(32, 32));
         public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
@@ -39,6 +40,16 @@ namespace Fiero.Business
                 _renderSprite?.Dispose();
                 _renderTexture = new((uint)Size.V.X, (uint)Size.V.Y) { Smooth = false };
                 _renderSprite = new(_renderTexture.Texture);
+                if (AutoUpdateViewArea.V)
+                {
+                    var viewPos = ViewArea.V.Position();
+                    ViewArea.V = new(
+                        viewPos.X,
+                        viewPos.Y,
+                        Size.V.X / ViewTileSize.V.X,
+                        Size.V.Y / ViewTileSize.V.Y
+                    );
+                }
                 SetDirty();
             };
             ViewArea.ValueChanged += (_, __) => SetDirty();
@@ -51,6 +62,8 @@ namespace Fiero.Business
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
+            if (Following.V is null)
+                return;
             if (_dirty)
             {
                 if (!Bake())

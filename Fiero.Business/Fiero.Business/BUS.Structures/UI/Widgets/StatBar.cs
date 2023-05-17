@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    // TODO: Make UIControl
     public class StatBar : Widget
     {
         public readonly string Stat;
@@ -12,7 +13,7 @@ namespace Fiero.Business
         public readonly Label Label;
 
         public StatBar(GameUI ui, string stat, ColorName color)
-            : base(ui, Data.UI.WindowSize)
+            : base(ui)
         {
             Stat = stat;
             Color = color;

@@ -6,7 +6,6 @@ using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Unconcern.Common;
 
@@ -167,11 +166,6 @@ namespace Fiero.Business
             var sieve = Bus.Filter<object>();
             _ = Task.Run(async () =>
             {
-                var logPath = "log.txt";
-                if (File.Exists(logPath))
-                {
-                    File.Delete(logPath);
-                }
                 while (true)
                 {
                     while (sieve.Messages.TryDequeue(out var msg))

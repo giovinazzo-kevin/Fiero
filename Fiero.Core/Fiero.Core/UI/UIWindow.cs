@@ -6,8 +6,6 @@ namespace Fiero.Core
     {
         public readonly GameUI UI;
 
-        public readonly GameDatum<Coord> GameWindowSize;
-
         public Layout Layout { get; private set; }
         public UIControlProperty<string> Title { get; private set; }
         public UIControlProperty<Coord> Size { get; private set; } = new(nameof(Size));
@@ -16,8 +14,18 @@ namespace Fiero.Core
         public event Action<UIWindow, ModalWindowButton> Closed;
         public event Action Updated;
 
+        public bool IsOpen { get; private set; }
+
+        protected virtual void SetDefaultSize()
+        {
+            Size.V = UI.Window.Size;
+        }
+
         public virtual void Open(string title)
         {
+            IsOpen = true;
+            if (Size.V == default)
+                SetDefaultSize();
             if (Title == null && title != null)
             {
                 Title = new(nameof(Title), title);
@@ -30,18 +38,16 @@ namespace Fiero.Core
             Layout = UI.CreateLayout()
                 .Build(Size.V, grid => CreateLayout(grid, Title ?? "Untitled"));
             Layout.Position.V = Position.V;
-            OnGameWindowSizeChanged(new(GameWindowSize, new(), UI.Store.Get(GameWindowSize)));
+            Layout.Size.V = Size.V;
         }
 
         public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);
 
-        public UIWindow(GameUI ui, GameDatum<Coord> gameWindowSize)
+        public UIWindow(GameUI ui)
         {
             UI = ui;
-            Size.V = ui.Store.Get(gameWindowSize);
             Size.ValueUpdated += Size_ValueUpdated;
             Position.ValueUpdated += Position_ValueUpdated;
-            (GameWindowSize = gameWindowSize).ValueChanged += OnGameWindowSizeChanged;
         }
 
         private void Position_ValueUpdated(UIControlProperty<Coord> arg1, Coord old)
@@ -54,11 +60,6 @@ namespace Fiero.Core
         {
             if (Layout == null) return;
             Layout.Size.V = Size.V;
-        }
-
-        protected virtual void OnGameWindowSizeChanged(GameDatumChangedEventArgs<Coord> obj)
-        {
-            Size.V = obj.NewValue;
         }
 
         protected LayoutGrid ApplyStyles(LayoutGrid grid)
@@ -84,18 +85,20 @@ namespace Fiero.Core
 
         public virtual void Close(ModalWindowButton buttonPressed)
         {
-            GameWindowSize.ValueChanged -= OnGameWindowSizeChanged;
+            IsOpen = false;
             Closed?.Invoke(this, buttonPressed);
         }
 
         public virtual void Update()
         {
+            if (!IsOpen) return;
             Layout.Update();
             Updated?.Invoke();
         }
 
         public virtual void Draw()
         {
+            if (!IsOpen) return;
             UI.Window.RenderWindow.Draw(Layout);
         }
     }

@@ -1,6 +1,4 @@
 ﻿using LightInject;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,7 +15,12 @@ namespace Fiero.Core
         public IEnumerable<UIWindow> GetOpenWindows() => OpenWindows.Except(GetOpenModals());
         public IEnumerable<ModalWindow> GetOpenModals() => OpenWindows.OfType<ModalWindow>();
 
-        public GameUI(IServiceFactory sp, GameInput input, GameDataStore store, GameWindow window)
+        public GameUI(
+            IServiceFactory sp,
+            GameInput input,
+            GameDataStore store,
+            GameWindow window
+        )
         {
             ServiceProvider = sp;
             Store = store;
@@ -29,12 +32,18 @@ namespace Fiero.Core
         public T Show<T>(T wnd, string title = null)
             where T : UIWindow
         {
+            if (wnd.IsOpen)
+                wnd.Close(ModalWindowButton.None);
             OpenWindows.Add(wnd);
-            wnd.Closed += (_, __) => OpenWindows.Remove(wnd);
+            wnd.Closed += Wnd_Closed;
             wnd.Open(title);
             return wnd;
+            void Wnd_Closed(UIWindow wnd, ModalWindowButton btn)
+            {
+                OpenWindows.Remove(wnd);
+                wnd.Closed -= Wnd_Closed;
+            }
         }
-
         public LayoutBuilder CreateLayout() => new(ServiceProvider);
     }
 }

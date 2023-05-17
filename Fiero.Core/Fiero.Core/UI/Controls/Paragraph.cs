@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Fiero.Core
 {
+
     public class Paragraph : UIControl
     {
         public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };

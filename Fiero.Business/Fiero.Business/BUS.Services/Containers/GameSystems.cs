@@ -10,7 +10,6 @@ namespace Fiero.Business
         public readonly FactionSystem Faction;
         public readonly DungeonSystem Dungeon;
         public readonly RenderSystem Render;
-        public readonly InterfaceSystem Interface;
         public readonly ErgoScriptingSystem Scripting;
         public readonly MetaSystem Meta;
 
@@ -20,7 +19,6 @@ namespace Fiero.Business
             FactionSystem faction,
             DungeonSystem dungeon,
             RenderSystem render,
-            InterfaceSystem @interface,
             ErgoScriptingSystem scripting,
             MetaSystem meta
 
@@ -31,7 +29,6 @@ namespace Fiero.Business
             Faction = faction;
             Dungeon = dungeon;
             Render = render;
-            Interface = @interface;
             Scripting = scripting;
             Meta = meta;
         }

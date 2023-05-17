@@ -4,7 +4,8 @@ using SFML.Graphics;
 namespace Fiero.Business
 {
 
-    public class Minimap : Widget
+    [TransientDependency]
+    public class MiniMap : Widget
     {
         protected readonly DungeonSystem FloorSystem;
         protected readonly FactionSystem FactionSystem;
@@ -16,12 +17,12 @@ namespace Fiero.Business
         private Sprite _renderSprite;
         private bool _dirty = true;
 
-        public Minimap(
+        public MiniMap(
             GameUI ui,
             DungeonSystem floor,
             FactionSystem faction,
             GameColors<ColorName> colors
-        ) : base(ui, Data.UI.WindowSize)
+        ) : base(ui)
         {
             FloorSystem = floor;
             FactionSystem = faction;
@@ -34,7 +35,7 @@ namespace Fiero.Business
         public override void Open(string title)
         {
             base.Open(title);
-            Layout.Size.ValueChanged += (_, __) =>
+            Size.ValueChanged += (_, __) =>
             {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
@@ -125,7 +126,12 @@ namespace Fiero.Business
                 }
                 _renderTexture.Display();
                 _renderSprite.Position = Layout.Position.V;
+                // The scale division is not done with floating point numbers because the resulting minimap
+                // has unevenly-sized pixels. However, since at this scale the minimap won't use all available
+                // space, we also need to re-center it by half the difference between its scaled and original size
                 _renderSprite.Scale = Layout.Size.V / floor.Size;
+                var delta = _renderSprite.TextureRect.Size() - _renderSprite.TextureRect.Size() * _renderSprite.Scale.ToVec();
+                _renderSprite.Position -= (delta / 2).ToCoord();
                 _dirty = false;
                 return true;
             }

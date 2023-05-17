@@ -164,6 +164,17 @@ namespace Fiero.Core
             return this;
         }
 
+        public LayoutGrid Cell<T>(T instance)
+            where T : UIControl
+        {
+            if (!IsCell)
+            {
+                throw new ArgumentException();
+            }
+            Controls.Add(new(typeof(T), x => { }) { Instance = instance });
+            return this;
+        }
+
         public LayoutGrid Repeat(int count, Func<int, LayoutGrid, LayoutGrid> action)
         {
             var ret = this;

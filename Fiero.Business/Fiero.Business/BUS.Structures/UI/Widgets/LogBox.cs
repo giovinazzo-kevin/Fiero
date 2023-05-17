@@ -4,6 +4,7 @@ using System.Linq;
 namespace Fiero.Business
 {
 
+    [TransientDependency]
     public class LogBox : Widget
     {
         protected readonly GameColors<ColorName> Colors;
@@ -12,33 +13,34 @@ namespace Fiero.Business
         public readonly UIControlProperty<int> NumRowsDisplayed = new(nameof(NumRowsDisplayed), 10);
 
         public LogBox(GameUI ui, GameColors<ColorName> colors)
-            : base(ui, Data.UI.WindowSize)
+            : base(ui)
         {
             Colors = colors;
             NumRowsDisplayed.ValueChanged += (_, __) => RebuildLayout();
-            Following.ValueChanged += (f, old) =>
-            {
-                if (old?.Log != null)
-                {
-                    old.Log.LogAdded -= LogAdded;
-                }
-                if (f.V != null)
-                {
-                    f.V.Log.LogAdded += LogAdded;
-                }
-
-                void LogAdded(LogComponent component, string newLog)
-                {
-                    var paragraph = Layout?.Query(x => true, x => "log-text".Equals(x.Id))
-                        .Cast<Paragraph>()
-                        .SingleOrDefault();
-                    if (paragraph == null) return;
-                    var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
-                    paragraph.Text.V = string.Join("\n", messages);
-                }
-            };
+            Following.ValueUpdated += Following_ValueUpdated;
         }
 
+        private void Following_ValueUpdated(UIControlProperty<Actor> prop, Actor old)
+        {
+            if (old?.Log != null)
+            {
+                old.Log.LogAdded -= LogAdded;
+            }
+            if (prop.V != null)
+            {
+                prop.V.Log.LogAdded += LogAdded;
+                LogAdded(prop.V.Log, prop.V.Log.GetMessages().Last());
+            }
+            void LogAdded(LogComponent component, string newLog)
+            {
+                var paragraph = Layout?.Query(x => true, x => "log-text".Equals(x.Id))
+                    .Cast<Paragraph>()
+                    .SingleOrDefault();
+                if (paragraph == null) return;
+                var messages = component.GetMessages().TakeLast(NumRowsDisplayed.V - 1).Append(newLog);
+                paragraph.Text.V = string.Join("\n", messages);
+            }
+        }
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<Paragraph>(r => r.Apply(p =>
             {

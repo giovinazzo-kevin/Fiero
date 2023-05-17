@@ -10,8 +10,8 @@ namespace Fiero.Core
         protected readonly ModalWindowButton[] Buttons;
         protected readonly ModalWindowStyles Styles;
 
-        public ModalWindow(GameUI ui, GameDatum<Coord> gameWindowSize, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, gameWindowSize)
+        public ModalWindow(GameUI ui, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
+            : base(ui)
         {
             Buttons = buttons;
             Styles = styles;

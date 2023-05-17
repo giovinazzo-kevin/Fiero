@@ -53,8 +53,6 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            Systems.Render.Initialize();
-            Systems.Interface.Initialize();
             SubscribeDialogueHandlers();
 
             // TODO: Move dialogue handlers to Ergo scripts!
@@ -126,9 +124,7 @@ namespace Fiero.Business.Scenes
 
         private IEnumerable<Subscription> RouteRenderSystemEvents()
         {
-            // Update the interface to show info about the actor we are currently watching
-            yield return Systems.Render.ActorSelected.SubscribeHandler(e => Systems.Interface.ActorSelected.Handle(new(e.Actor)));
-            yield return Systems.Render.ActorDeselected.SubscribeHandler(e => Systems.Interface.ActorDeselected.Handle(new()));
+            yield break;
         }
         private IEnumerable<Subscription> RouteFloorSystemEvents()
         {
@@ -156,7 +152,8 @@ namespace Fiero.Business.Scenes
             scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             {
                 Console.WriteLine("Script loaded: " + e.Script.ScriptProperties.ScriptPath);
-                scriptLoaded.Add(Systems.Interface.TrackScript(e.Script));
+                scriptLoaded.Add(Systems.Render.DeveloperConsole
+                    .TrackScript(e.Script, routeStdin: "cli".Equals(e.Script.ScriptProperties.ScriptPath)));
                 return true;
             }));
             yield return scriptLoaded;
@@ -845,7 +842,7 @@ namespace Fiero.Business.Scenes
             {
                 if (e.Obstacle != null)
                 {
-                    e.Actor.Log?.Write($"$Action.YouBumpInto$ {e.Obstacle.Info.Name}.");
+                    //e.Actor.Log?.Write($"$Action.YouBumpInto$ {e.Obstacle.Info.Name}.");
                     if (e.Actor.IsPlayer())
                     {
                         Resources.Sounds.Get(SoundName.WallBump, e.Obstacle.Position() - Player.Position()).Play();
@@ -853,7 +850,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    e.Actor.Log?.Write($"$Action.YouBumpIntoTheVoid$.");
+                    //e.Actor.Log?.Write($"$Action.YouBumpIntoTheVoid$.");
                 }
             });
             // ActionSystem.ActorSteppedOnTrap:
@@ -1024,7 +1021,6 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
-            Systems.Interface.Update();
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(Key.R))
             {
                 TrySetState(SceneState.Main);
@@ -1035,7 +1031,6 @@ namespace Fiero.Business.Scenes
         {
             UI.Window.Clear();
             Systems.Render.Draw();
-            Systems.Interface.Draw();
         }
 
         protected override bool CanChangeState(SceneState newState) => true;
@@ -1048,7 +1043,6 @@ namespace Fiero.Business.Scenes
             }
             if (State == SceneState.Main)
             {
-                Systems.Interface.Reset();
                 Systems.Action.Reset();
                 Systems.Render.CenterOn(Player);
             }

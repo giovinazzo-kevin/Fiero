@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Unconcern.Common
 {
@@ -12,13 +8,16 @@ namespace Unconcern.Common
     public class Subscription : IDisposable
     {
         private readonly IEnumerable<Action> _unsub;
-        private bool _unsubbed = false;
+        private readonly List<Subscription> _children = new();
+        public bool Disposed { get; private set; }
         public bool ThrowIfAlreadyDisposed { get; set; }
 
-        public Subscription()
+
+
+        public Subscription(bool throwOnDoubleDispose = true)
         {
             _unsub = Enumerable.Empty<Action>();
-            ThrowIfAlreadyDisposed = false;
+            ThrowIfAlreadyDisposed = throwOnDoubleDispose;
         }
 
         public Subscription(IEnumerable<Action> unsub, bool throwOnDoubleDispose = true)
@@ -33,28 +32,30 @@ namespace Unconcern.Common
             ThrowIfAlreadyDisposed = throwOnDoubleDispose;
         }
 
-        public Subscription Add(params Subscription[] other)
+        public void Add(params Subscription[] other)
         {
-            return new Subscription(other.Prepend(this), ThrowIfAlreadyDisposed);
-        }
-
-        public static Subscription operator +(Subscription self, Subscription other)
-        {
-            return self.Add(other);
+            _children.AddRange(other);
         }
 
         public void Dispose()
         {
-            if (_unsubbed) {
+            if (Disposed)
+            {
                 if (ThrowIfAlreadyDisposed)
                     throw new ObjectDisposedException(null);
                 else
                     return;
             }
-            foreach (var unsub in _unsub) {
+            foreach (var unsub in _unsub)
+            {
                 unsub();
             }
-            _unsubbed = true;
+            for (int i = _children.Count - 1; i >= 0; i--)
+            {
+                _children[i].Dispose();
+                _children.RemoveAt(i);
+            }
+            Disposed = true;
         }
     }
 }

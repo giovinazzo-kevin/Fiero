@@ -155,6 +155,7 @@ namespace Fiero.Business.Scenes
             var scriptLoaded = new Subscription();
             scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             {
+                Console.WriteLine("Script loaded: " + e.Script.ScriptProperties.ScriptPath);
                 scriptLoaded.Add(Systems.Interface.TrackScript(e.Script));
                 return true;
             }));

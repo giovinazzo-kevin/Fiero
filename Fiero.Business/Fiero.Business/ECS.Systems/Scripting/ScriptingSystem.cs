@@ -25,7 +25,10 @@ namespace Fiero.Business
         public readonly FieroLib FieroLib;
         public InterpreterScope Scope;
 
+        private event Action _unload;
+
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
+        public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
         public ErgoScriptingSystem(EventBus bus, IServiceFactory sp) : base(bus)
@@ -48,6 +51,7 @@ namespace Fiero.Business
                     .WithImport(FieroModule));
 
             ScriptLoaded = new(this, nameof(ScriptLoaded));
+            ScriptUnloaded = new(this, nameof(ScriptUnloaded));
             InputAvailable = new(this, nameof(InputAvailable));
         }
 
@@ -96,6 +100,11 @@ namespace Fiero.Business
                 return true;
             }
             return false;
+        }
+
+        public void UnloadAllScripts()
+        {
+            _unload?.Invoke();
         }
 
         // TODO: Figure out script lifetime and call this method!!

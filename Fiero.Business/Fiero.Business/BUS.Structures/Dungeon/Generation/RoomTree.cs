@@ -9,12 +9,28 @@ namespace Fiero.Business
         {
             public static Node Root(Room r) => new(r, new());
 
+            public float Centrality { get; private set; }
+
+            internal float ComputeCentrality(Node root, HashSet<Node> seen = null, float partialSum = 0)
+            {
+                seen ??= new();
+                seen.Add(this);
+                if (this == root) return partialSum;
+                var newSum = partialSum;
+                foreach (var link in Links)
+                {
+                    if (seen.Contains(link.Node)) continue;
+                    newSum += link.Node.ComputeCentrality(root, seen, partialSum + 1);
+                }
+                return Centrality = newSum;
+            }
+
             public bool TryLink(Corridor corridor, Node child)
             {
                 if (Links.Any(l => l.Corridor == corridor))
                     return false;
                 Links.Add((corridor, child));
-                child.Links.Add((corridor, this));
+                child.TryLink(corridor, this);
                 return true;
             }
 
@@ -28,7 +44,6 @@ namespace Fiero.Business
 
         public IEnumerable<(Node Parent, Corridor Link, Node Child)> Traverse()
         {
-            yield return (null, null, Root);
             var visited = new HashSet<Node>();
             foreach (var rest in Inner(Root, visited))
                 yield return rest;
@@ -82,8 +97,12 @@ namespace Fiero.Business
 
                 seen.Add(node);
             }
-            return new(dict.Values.First());
-
+            var tree = new RoomTree(dict.Values.First());
+            // Now that the tree is built we can post-process it in order to calculate:
+            // - Centrality (high centrality = more connectedness)
+            foreach (var node in seen)
+                node.ComputeCentrality(tree.Root);
+            return tree;
             Node GetOrCreate(Room r) => dict.TryGetValue(r, out var ret) ? ret : dict[r] = Node.Root(r);
         }
 

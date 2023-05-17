@@ -341,7 +341,7 @@ namespace Fiero.Business
             return ret;
         }
 
-        public void MarkActiveCorridors(IEnumerable<Corridor> interSectorCorridors)
+        public void MarkActiveConnectors(IEnumerable<Corridor> interSectorCorridors)
         {
             foreach (var room in Rooms)
             {

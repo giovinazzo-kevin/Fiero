@@ -14,28 +14,38 @@ namespace Fiero.Business
         {
             var (size, subdivisions) = floorId.Depth switch
             {
-                _ => (new Coord(51, 51), new Coord(2, 2)),
+                _ => (new Coord(71, 71), new Coord(4, 4)),
             };
             var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2))
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2))
                 .ToList();
 
-            //var numSecrets = new Dice(2, 2);
-            //foreach (var n in numSecrets.Roll())
-            //{
-            //    var sector = Rng.Random.Choose(roomSectors);
-            //    sector.MarkSecretCorridors(n);
-            //}
-            foreach (var r in roomSectors)
+            var numSecrets = new Dice(2, 2);
+            // Secret corridors have fake doors that look just like walls!
+            // A scroll of magic mapping, and some skills, will reveal them.
+            foreach (var n in numSecrets.Roll())
             {
-                r.MarkActiveCorridors(corridors);
+                var sector = Rng.Random.Choose(roomSectors);
+                sector.MarkSecretCorridors(n);
+            }
+            // MarkActiveConnectors will flag all room connectors that are being
+            // used either as part of an intra- or of an inter-sector corridor.
+            // This lets the room know which points should remain connected.
+            foreach (var sector in roomSectors)
+            {
+                sector.MarkActiveConnectors(corridors);
             }
 
             var tree = RoomTree.Build(
                 roomSectors.SelectMany(s => s.Rooms).ToArray(),
                 corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
             );
+
+            var centralNode = tree.Traverse()
+                .Select(x => x.Child)
+                .Distinct()
+                .MaxBy(x => x.Centrality);
 
             return builder
                 .WithStep(tree.Draw)
@@ -45,7 +55,7 @@ namespace Fiero.Business
                     {
                         // Add upstairs and downstairs to respective floors
                         var emptyTiles = ctx.GetEmptyTiles()
-                            .Where(t => t.Name == TileName.Room)
+                            .Where(t => t.Name == TileName.Room && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
                             .Select(x => x.Position)
                             .Shuffle(Rng.Random);
                         if (!emptyTiles.Any())

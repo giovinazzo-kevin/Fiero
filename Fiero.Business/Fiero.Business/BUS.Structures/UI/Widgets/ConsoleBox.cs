@@ -15,6 +15,15 @@ namespace Fiero.Business
     [TransientDependency]
     public class ConsoleBox : Widget
     {
+        record class ScriptClosure(Script s)
+        {
+            public void OnInputAvailable(ConsoleBox _, string arg2)
+            {
+                s.ScriptProperties.In.Write(arg2);
+                s.ScriptProperties.In.Flush();
+            }
+        };
+
         public const double ScriptUpdateRate = 0.15;
 
         protected readonly GameColors<ColorName> Colors;
@@ -104,19 +113,14 @@ namespace Fiero.Business
                 .Build();
 
             _ = Concern.Deferral.LoopForever(expr, cts.Token);
-            if (routeStdin) InputAvailable += OnInputAvailable;
+            var closure = new ScriptClosure(s);
+            if (routeStdin) InputAvailable += closure.OnInputAvailable;
             return new(new[] { () => {
                 cts.Cancel();
                 outPipe.Reader.Complete();
                 outPipe.Writer.Complete();
-                if(routeStdin) InputAvailable -= OnInputAvailable;
+                if(routeStdin) InputAvailable -= closure.OnInputAvailable;
             } });
-
-            void OnInputAvailable(ConsoleBox arg1, string arg2)
-            {
-                s.ScriptProperties.In.Write(arg2);
-                s.ScriptProperties.In.Flush();
-            }
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)

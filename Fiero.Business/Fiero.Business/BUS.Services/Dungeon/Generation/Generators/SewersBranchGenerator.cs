@@ -10,28 +10,6 @@ namespace Fiero.Business
     {
         static bool GKRAdded = false;
 
-        protected virtual EntityBuilder<Actor> GenerateMonster(FloorId floorId, GameEntityBuilders builder)
-        {
-            var D = floorId.Depth;
-            if (!GKRAdded)
-            {
-                GKRAdded = true;
-                return builder.Boss_NpcGreatKingRat();
-            }
-
-            return Rng.Random.ChooseWeighted(new[] {
-                (builder.NPC_RatMerchant(), D * 0 + 1f),
-                (builder.NPC_Rat(), D * 0 + 100f),
-                (builder.NPC_RatCheese(), D * 0 + 10f),
-                (builder.NPC_RatArcher(), D * 1 + 50f),
-                (builder.NPC_RatThief(), D * 1 + 25f),
-                (builder.NPC_RatMonk(), D * 2 + 30f),
-                (builder.NPC_RatPugilist(), D * 2 + 20f),
-                (builder.NPC_RatWizard(), D * 3 + 40f),
-                (builder.NPC_RatArsonist(), D * 5 + 10f),
-            });
-        }
-
         public override Floor GenerateFloor(FloorId floorId, FloorBuilder builder)
         {
             var (size, subdivisions) = floorId.Depth switch
@@ -49,6 +27,10 @@ namespace Fiero.Business
             //    var sector = Rng.Random.Choose(roomSectors);
             //    sector.MarkSecretCorridors(n);
             //}
+            foreach (var r in roomSectors)
+            {
+                r.MarkActiveCorridors(corridors);
+            }
 
             var tree = RoomTree.Build(
                 roomSectors.SelectMany(s => s.Rooms).ToArray(),
@@ -56,18 +38,7 @@ namespace Fiero.Business
             );
 
             return builder
-                .WithStep(ctx =>
-                {
-                    tree.Draw(ctx);
-                    foreach (var r in roomSectors)
-                    {
-                        r.Draw(ctx);
-                    }
-                    foreach (var c in corridors)
-                    {
-                        c.Draw(ctx);
-                    }
-                })
+                .WithStep(tree.Draw)
                 .WithStep(ctx =>
                 {
                     foreach (var conn in ctx.GetConnections())
@@ -96,7 +67,8 @@ namespace Fiero.Business
                 Room room = Rng.Random.ChooseWeighted(new (Func<Room>, float)[] {
                     (() => new ShrineRoom(),    0.5f),
                     (() => new TreasureRoom(),  1.0f),
-                    (() => new EmptyRoom() ,   98.5f)
+                    //(() => new CrampedRoom() ,  44.25f),
+                    (() => new EmptyRoom() ,    44.25f)
                 })();
 
                 room.Drawn += (r, ctx) =>
@@ -110,7 +82,7 @@ namespace Fiero.Business
                         {
                             if (Chance.OneIn(2))
                             {
-                                TryAddObject("Monster", e => GenerateMonster(floorId, e));
+                                // TryAddObject("Monster", e => GenerateMonster(floorId, e));
                             }
                         });
                     }

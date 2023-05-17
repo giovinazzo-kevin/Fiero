@@ -117,7 +117,7 @@ namespace Fiero.Business
                     .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right)
                         .IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
                     .Where(IsConnectorPlacementValid)
-                    .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
+                    .OrderBy(p => p.Right.Middle.DistSq(p.Left.Middle))
                     .ToList();
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
@@ -156,7 +156,7 @@ namespace Fiero.Business
                     .Where(p => new Line(p.Left.Edge.Left, p.Left.Edge.Right)
                         .IsParallel(new Line(p.Right.Edge.Left, p.Right.Edge.Right)))
                     .Where(IsConnectorPlacementValid)
-                    .OrderBy(p => p.Right.Center.DistSq(p.Left.Center))
+                    .OrderBy(p => p.Right.Middle.DistSq(p.Left.Middle))
                     .ToList();
                 var workingSet = new HashSet<Corridor>();
                 foreach (var bestPair in connectorPairs.Take(nBest.Roll().Sum()))
@@ -339,6 +339,19 @@ namespace Fiero.Business
                 Console.WriteLine(closedSet.Join(","));
             }
             return ret;
+        }
+
+        public void MarkActiveCorridors(IEnumerable<Corridor> interSectorCorridors)
+        {
+            foreach (var room in Rooms)
+            {
+                var connectors = room.GetConnectors();
+                var protectedConnectors = Corridors.Concat(interSectorCorridors)
+                    .SelectMany(c => new[] { c.Start, c.End })
+                    .Where(connectors.Contains);
+                foreach (var conn in connectors)
+                    conn.IsActive = protectedConnectors.Contains(conn);
+            }
         }
 
         public void Draw(FloorGenerationContext ctx)

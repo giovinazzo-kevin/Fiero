@@ -11,6 +11,7 @@ namespace Fiero.Business
     {
         protected readonly HashSet<IntRect> Rects;
         protected readonly HashSet<int> Indices;
+        protected readonly List<RoomConnector> Connectors;
 
         public event Action<Room, FloorGenerationContext> Drawn;
 
@@ -32,6 +33,7 @@ namespace Fiero.Business
         {
             Rects = new();
             Indices = new();
+            Connectors = new();
         }
 
         public void AddRect(int index, IntRect rect)
@@ -40,20 +42,20 @@ namespace Fiero.Business
             Rects.Add(rect);
             Position = Rects.Min(r => r.Position());
             Size = Rects.Max(r => r.Position() + r.Size() - Position);
+            Connectors.Clear();
+            Connectors.AddRange(SelectConnectors());
         }
 
-        public virtual IEnumerable<RoomConnector> GetConnectors()
+        protected virtual IEnumerable<RoomConnector> SelectConnectors()
         {
-            var openEdges = Rects.SelectMany(r => r.GetEdges())
+            return Rects.SelectMany(r => r.GetEdges())
                 .ToLookup(r => r)
                 .Where(l => l.Count() == 1)
                 .SelectMany(l => l)
                 .Select(l => new RoomConnector(this, l));
-            foreach (var edge in openEdges)
-            {
-                yield return edge;
-            }
         }
+
+        public IEnumerable<RoomConnector> GetConnectors() => Connectors;
 
         public virtual void Draw(FloorGenerationContext ctx)
         {
@@ -61,7 +63,7 @@ namespace Fiero.Business
             {
                 ctx.FillBox(rect.Position(), rect.Size(), GroundTile);
             }
-            foreach (var conn in GetConnectors())
+            foreach (var conn in SelectConnectors())
             {
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, WallTile);
             }

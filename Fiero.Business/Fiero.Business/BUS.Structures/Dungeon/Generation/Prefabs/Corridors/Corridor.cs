@@ -29,8 +29,8 @@ namespace Fiero.Business
 
         IEnumerable<Coord> Generate()
         {
-            var startMiddle = (Start.Edge.Left + Start.Edge.Right) / 2;
-            var endMiddle = (End.Edge.Left + End.Edge.Right) / 2;
+            var startMiddle = Start.Middle;
+            var endMiddle = End.Middle;
             var v1 = (Start.Edge.Left - Start.Edge.Right).Clamp(-1, 1);
             var d1 = (int)(Math.Atan2(v1.Y, v1.X) * 180f / Math.PI);
             var v2 = (End.Edge.Left - End.Edge.Right).Clamp(-1, 1);

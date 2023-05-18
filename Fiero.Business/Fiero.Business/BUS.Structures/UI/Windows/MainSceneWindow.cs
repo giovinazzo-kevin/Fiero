@@ -179,6 +179,7 @@ namespace Fiero.Business
                         .End()
                     .End()
                     .Row(h: 160, px: true, id: "mini-map")
+                        .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
                 .End()

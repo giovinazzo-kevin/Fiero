@@ -73,7 +73,7 @@ namespace Fiero.Business
                 var floorId = Following.V.FloorId();
                 if (!FloorSystem.TryGetFloor(floorId, out var floor))
                     return false;
-                _renderTexture.Clear(UI.GetColor(ColorName.UIBackground));
+                _renderTexture.Clear(Color.Transparent);
                 using var whitePixel = new RenderTexture(1, 1);
                 whitePixel.Clear(Color.White);
                 whitePixel.Display();
@@ -126,7 +126,9 @@ namespace Fiero.Business
                 }
                 _renderTexture.Display();
                 _renderSprite.Position = Layout.Position.V;
-                _renderSprite.Scale = Layout.Size.V / floor.Size.ToVec();
+                _renderSprite.Scale = Layout.Size.V / floor.Size; // int division to preserve AR
+                var delta = _renderSprite.GetLocalBounds().Size() * _renderSprite.Scale.ToVec() / 2 - Size.V / 2;
+                _renderSprite.Position -= delta;
                 _dirty = false;
                 return true;
             }

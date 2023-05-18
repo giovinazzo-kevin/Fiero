@@ -79,7 +79,7 @@ namespace Fiero.Business
             {
                 var floorId = Viewport.Following.V.FloorId();
                 PlayerNameLabel.Text.V = Viewport.Following.V.Info.Name;
-                PlayerDescLabel.Text.V = Viewport.Following.V.ActorProperties.Type.ToString();
+                PlayerDescLabel.Text.V = $"Level {Viewport.Following.V.ActorProperties.Level.V} {Viewport.Following.V.ActorProperties.Race}";
                 CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
             }
@@ -110,17 +110,23 @@ namespace Fiero.Business
                     .Row(h: 24, px: true, id: "name", @class: "center")
                         .Cell<Label>(x => PlayerNameLabel = x)
                     .End()
-                    .Row(h: 24, px: true, id: "hp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Red)
-                    .End()
-                    .Row(h: 24, px: true, id: "mp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Blue)
-                    .End()
-                    .Row(h: 24, px: true, id: "xp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Yellow)
-                    .End()
                     .Row(h: 24, px: true, id: "desc", @class: "center")
                         .Cell<Label>(x => PlayerDescLabel = x)
+                    .End()
+                    .Row(h: 12, px: true, id: "hp-bar")
+                        .Cell<Layout>(x => x.Background.V = Color.Red)
+                    .End()
+                    .Row(h: 1, px: true, @class: "spacer")
+                        .Cell<Layout>()
+                    .End()
+                    .Row(h: 12, px: true, id: "mp-bar")
+                        .Cell<Layout>(x => x.Background.V = Color.Blue)
+                    .End()
+                    .Row(h: 1, px: true, @class: "spacer")
+                        .Cell<Layout>()
+                    .End()
+                    .Row(h: 12, px: true, id: "xp-bar")
+                        .Cell<Layout>(x => x.Background.V = Color.Yellow)
                     .End()
                     .Row(@class: "spacer")
                         .Cell<Layout>()

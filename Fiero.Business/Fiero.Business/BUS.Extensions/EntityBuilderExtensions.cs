@@ -62,10 +62,20 @@ namespace Fiero.Business
             {
                 c.Type = type;
             });
+        public static EntityBuilder<T> WithRace<T>(this EntityBuilder<T> builder, RaceName race)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
+            {
+                c.Race = race;
+            });
         public static EntityBuilder<T> WithHealth<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
             {
                 c.Health = new(0, maximum, current ?? maximum);
+            });
+        public static EntityBuilder<T> WithLevel<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
+            {
+                c.Level = new(0, maximum, current ?? 0);
             });
         public static EntityBuilder<T> WithCorpse<T>(this EntityBuilder<T> builder, CorpseName type, Chance chance)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
@@ -164,11 +174,10 @@ namespace Fiero.Business
             });
         public static EntityBuilder<T> WithLogging<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<LogComponent>(_ => { });
-        public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type, RaceName race)
+        public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type)
             where T : Actor => builder.AddOrTweak<NpcComponent>(c =>
             {
                 c.Type = type;
-                c.Race = race;
             });
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, NpcName type)
             where T : Actor => builder.AddOrTweak<DialogueComponent>(c =>

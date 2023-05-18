@@ -72,6 +72,16 @@ namespace Fiero.Business
             {
                 c.Health = new(0, maximum, current ?? maximum);
             });
+        public static EntityBuilder<T> WithMagic<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
+            {
+                c.Magic = new(0, maximum, current ?? maximum);
+            });
+        public static EntityBuilder<T> WithExperience<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
+            where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
+            {
+                c.Experience = new(0, maximum, current ?? maximum);
+            });
         public static EntityBuilder<T> WithLevel<T>(this EntityBuilder<T> builder, int maximum, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>(c =>
             {

@@ -46,15 +46,9 @@ namespace Fiero.Core
                 {
                     foreach (var c in grid.Controls)
                     {
-                        if (c.Instance is null)
-                        {
-                            var resolver = GetResolver(c.Type);
-                            var control = resolver();
-                            if (control != null)
-                            {
-                                c.Initialize?.Invoke(c.Instance = control);
-                            }
-                        }
+                        var instance = c.Instance ?? GetResolver(c.Type)();
+                        if (instance != null)
+                            c.Initialize?.Invoke(c.Instance = instance);
                     }
                 }
 

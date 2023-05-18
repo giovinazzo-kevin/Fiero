@@ -7,9 +7,9 @@ namespace Fiero.Business
     [TransientDependency]
     public class MiniMap : Widget
     {
-        protected readonly DungeonSystem FloorSystem;
-        protected readonly FactionSystem FactionSystem;
-        protected readonly GameColors<ColorName> Colors;
+        public readonly DungeonSystem FloorSystem;
+        public readonly FactionSystem FactionSystem;
+        public readonly GameColors<ColorName> Colors;
 
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
@@ -73,7 +73,7 @@ namespace Fiero.Business
                 var floorId = Following.V.FloorId();
                 if (!FloorSystem.TryGetFloor(floorId, out var floor))
                     return false;
-                _renderTexture.Clear(Color.Transparent);
+                _renderTexture.Clear(UI.GetColor(ColorName.UIBackground));
                 using var whitePixel = new RenderTexture(1, 1);
                 whitePixel.Clear(Color.White);
                 whitePixel.Display();
@@ -111,7 +111,7 @@ namespace Fiero.Business
                             Feature x when x.FeatureProperties.Name == FeatureName.Trap => ColorName.Black,
                             Feature x when x.FeatureProperties.Name == FeatureName.Downstairs => ColorName.LightGreen,
                             Feature x when x.FeatureProperties.Name == FeatureName.Upstairs => ColorName.Green,
-                            Actor x when x == Following.V => ColorName.White,
+                            Actor x when x == Following.V => ColorName.Cyan,
                             Actor x when FactionSystem.GetRelations(x, Following).Left.IsFriendly() => ColorName.LightYellow,
                             Actor x when FactionSystem.GetRelations(x, Following).Left.IsHostile() => ColorName.LightRed,
                             Actor x => ColorName.LightGray,
@@ -126,12 +126,7 @@ namespace Fiero.Business
                 }
                 _renderTexture.Display();
                 _renderSprite.Position = Layout.Position.V;
-                // The scale division is not done with floating point numbers because the resulting minimap
-                // has unevenly-sized pixels. However, since at this scale the minimap won't use all available
-                // space, we also need to re-center it by half the difference between its scaled and original size
-                _renderSprite.Scale = Layout.Size.V / floor.Size;
-                var delta = _renderSprite.TextureRect.Size() * _renderSprite.Scale.ToVec() - _renderSprite.TextureRect.Size();
-                _renderSprite.Position += (delta / 2).Abs().ToCoord();
+                _renderSprite.Scale = Layout.Size.V / floor.Size.ToVec();
                 _dirty = false;
                 return true;
             }

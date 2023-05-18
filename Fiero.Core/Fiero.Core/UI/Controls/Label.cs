@@ -70,7 +70,7 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             base.Draw(target, states);
-            DrawText(this, LabelDrawable, new(), target, states);
+            DrawText(this, LabelDrawable, Origin.V.ToCoord(), target, states);
         }
 
         public static void DrawText(Label label, BitmapText text, Coord offset, RenderTarget target, RenderStates states)
@@ -82,7 +82,7 @@ namespace Fiero.Core
                 var drawablePos = drawableBounds.Position();
                 var drawableSize = drawableBounds.Size();
                 var subDelta = drawableSize * text.Scale - drawableSize;
-                var delta = label.ContentRenderPos - drawablePos - drawableSize / 2f + label.ContentRenderSize / 2f - subDelta / 2f;
+                var delta = text.Position - drawablePos - drawableSize / 2f + label.ContentRenderSize / 2f - subDelta / 2f;
                 var deltaCoord = delta.Round().ToCoord();
                 switch (label.HorizontalAlignment.V)
                 {

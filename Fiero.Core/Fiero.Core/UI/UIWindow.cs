@@ -35,6 +35,7 @@ namespace Fiero.Core
 
         protected virtual void RebuildLayout()
         {
+            Layout?.Dispose();
             Layout = UI.CreateLayout()
                 .Build(Size.V, grid => CreateLayout(grid, Title ?? "Untitled"));
             Layout.Position.V = Position.V;

@@ -46,9 +46,8 @@ namespace Fiero.Business
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.CenterContentH.V = false;
-                p.Background.V = Colors.Get(ColorName.UIBackground).AddAlpha(-128);
+                p.Background.V = Colors.Get(ColorName.UIBackground);
                 p.Padding.V = new(ts, ts);
-                p.Margin.V = new(ts, ts);
             }))
             ;
 

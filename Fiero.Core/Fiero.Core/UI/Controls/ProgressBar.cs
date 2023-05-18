@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System;
 
 namespace Fiero.Core
 {
@@ -8,10 +9,9 @@ namespace Fiero.Core
         protected readonly Sprite LeftHalf, MiddleHalf, RightHalf;
         protected readonly Sprite LeftFull, MiddleFull, RightFull;
         public readonly int TileSize;
-
-        public readonly UIControlProperty<int> Length = new(nameof(Length), 3);
         public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
-        public readonly UIControlProperty<bool> Center = new(nameof(Center), false);
+        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
+        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
         public readonly UIControlProperty<bool> Capped = new(nameof(Capped), true);
 
         public ProgressBar(GameInput input, int tileSize,
@@ -30,38 +30,51 @@ namespace Fiero.Core
         {
             if (IsHidden)
                 return;
-            if (Length.V != 0)
-            {
-                Size.V = new((Length - 1) * TileSize, TileSize);
-            }
-            else
-            {
-                Length.V = (int)(Size.V.X / (TileSize * Scale.V.X)) + 2;
-            }
+            var len = (int)Math.Round(Size.V.X / (TileSize * Scale.V.X));
             base.Draw(target, states);
-            for (var i = 0; i < Length; i++)
+            for (var i = 0; i < len; i++)
             {
-                var full = i < Length * Progress;
-                var half = (i + 1) > Length * Progress;
+                var full = i < len * Progress;
+                var half = (i + 1) > len * Progress;
                 var piece = full ? half ? MiddleHalf : MiddleFull : MiddleEmpty;
                 if (Capped.V && i == 0)
                 {
                     piece = full ? half ? LeftHalf : LeftFull : LeftEmpty;
                 }
-                else if (Capped.V && i == Length - 1)
+                else if (Capped.V && i == len - 1)
                 {
                     piece = full ? half ? RightHalf : RightFull : RightEmpty;
                 }
                 piece.Color = Foreground;
                 piece.Scale = Scale.V;
                 piece.Position = new(ContentRenderPos.X + i * TileSize * Scale.V.X, ContentRenderPos.Y);
-                if (Center.V)
+                var delta = new Vec(Size.V.X / len, Size.V.Y) - piece.GetLocalBounds().Size();
+                switch (HorizontalAlignment.V)
                 {
-                    piece.Position += new Coord(1, 0) * (piece.GetLocalBounds().Size() * Length.V - Size.V) / 2;
+                    case Core.HorizontalAlignment.Center:
+                        piece.Position += Coord.PositiveX * delta / 2;
+                        break;
+                    case Core.HorizontalAlignment.Right:
+                        piece.Position += Coord.PositiveX * delta;
+                        break;
                 }
-                piece.Origin = new Coord(TileSize / 2, 0) - Origin.V * new Coord(TileSize, TileSize);
+                switch (VerticalAlignment.V)
+                {
+                    case Core.VerticalAlignment.Middle:
+                        piece.Position += Coord.PositiveY * delta / 2;
+                        break;
+                    case Core.VerticalAlignment.Bottom:
+                        piece.Position += Coord.PositiveY * delta;
+                        break;
+                }
+                //piece.Origin = new Coord(TileSize / 2, 0) - Origin.V * new Coord(TileSize, TileSize);
                 target.Draw(piece, states);
             }
+        }
+
+        public override void Dispose()
+        {
+            // No need to dispose the sprites as they are not clones but references to global sprites
         }
     }
 }

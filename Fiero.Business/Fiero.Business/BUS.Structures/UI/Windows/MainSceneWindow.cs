@@ -1,5 +1,5 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using Fiero.Business.BUS.Structures.UI.Widgets;
+using Fiero.Core;
 
 namespace Fiero.Business
 {
@@ -12,6 +12,9 @@ namespace Fiero.Business
         public readonly LogBox LogBox;
         public readonly MiniMap MiniMap;
         public readonly Viewport Viewport;
+        public readonly StatBar HP;
+        public readonly StatBar MP;
+        public readonly StatBar XP;
 
         protected Label PlayerNameLabel { get; private set; }
         protected Label PlayerDescLabel { get; private set; }
@@ -20,13 +23,29 @@ namespace Fiero.Business
 
         protected readonly ActionSystem ActionSystem;
 
-        public MainSceneWindow(GameUI ui, LogBox logs, MiniMap miniMap, GameResources res, FactionSystem fac, DungeonSystem floor, ActionSystem act, GameLoop loop)
+        public MainSceneWindow(
+            GameUI ui,
+            LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp,
+            ActionSystem act, GameResources res, GameLoop loop)
             : base(ui)
         {
             LogBox = logs;
             MiniMap = miniMap;
-            Viewport = new Viewport(ui.Input, floor, fac, res, loop);
-            ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency
+            HP = hp; HP.Stat.V = nameof(HP);
+            HP.EnableDragging = false;
+            HP.Color.V = ColorName.Red;
+
+            MP = mp; MP.Stat.V = nameof(MP);
+            MP.EnableDragging = false;
+            MP.Color.V = ColorName.Blue;
+
+            XP = xp; XP.Stat.V = nameof(XP);
+            XP.EnableDragging = false;
+            XP.Color.V = ColorName.Yellow;
+
+
+            Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
+            ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency?
             LogBox.EnableDragging = false;
             MiniMap.EnableDragging = false;
 
@@ -69,19 +88,39 @@ namespace Fiero.Business
             base.Open(title);
             MiniMap.Open(string.Empty);
             LogBox.Open(string.Empty);
+            HP.Open(string.Empty);
+            MP.Open(string.Empty);
+            XP.Open(string.Empty);
         }
 
         public override void Draw()
         {
             if (!IsOpen)
                 return;
-            if (Viewport.Following.V != null)
+            // TODO: use UI events
+            if (Viewport.Following.V is { } following)
             {
-                var floorId = Viewport.Following.V.FloorId();
-                PlayerNameLabel.Text.V = Viewport.Following.V.Info.Name;
-                PlayerDescLabel.Text.V = $"Level {Viewport.Following.V.ActorProperties.Level.V} {Viewport.Following.V.ActorProperties.Race}";
+                var floorId = following.FloorId();
+                PlayerNameLabel.Text.V = following.Info.Name;
+                PlayerDescLabel.Text.V = $"Level {following.ActorProperties.Level.V} {following.ActorProperties.Race}";
                 CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+
+                if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
+                {
+                    HP.Value.V = hp;
+                    HP.MaxValue.V = maxHp;
+                }
+                if (following.ActorProperties.Magic is { Min: _, Max: var maxMp, V: var mp })
+                {
+                    MP.Value.V = mp;
+                    MP.MaxValue.V = maxMp;
+                }
+                if (following.ActorProperties.Experience is { Min: _, Max: var maxXp, V: var xp })
+                {
+                    XP.Value.V = xp;
+                    XP.MaxValue.V = maxXp;
+                }
             }
             base.Draw();
         }
@@ -106,27 +145,27 @@ namespace Fiero.Business
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
-                .Col(w: 200, px: true, @class: "stat-panel")
+                .Col(w: 160, px: true, @class: "stat-panel")
                     .Row(h: 24, px: true, id: "name", @class: "center")
                         .Cell<Label>(x => PlayerNameLabel = x)
                     .End()
                     .Row(h: 24, px: true, id: "desc", @class: "center")
                         .Cell<Label>(x => PlayerDescLabel = x)
                     .End()
-                    .Row(h: 12, px: true, id: "hp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Red)
+                    .Row(h: 16, px: true, id: "hp-bar")
+                        .Cell<UIWindowAsControl>(x => x.Window.V = HP)
                     .End()
-                    .Row(h: 1, px: true, @class: "spacer")
+                    .Row(h: 2, px: true, @class: "spacer")
                         .Cell<Layout>()
                     .End()
-                    .Row(h: 12, px: true, id: "mp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Blue)
+                    .Row(h: 16, px: true, id: "mp-bar")
+                        .Cell<UIWindowAsControl>(x => x.Window.V = MP)
                     .End()
-                    .Row(h: 1, px: true, @class: "spacer")
+                    .Row(h: 2, px: true, @class: "spacer")
                         .Cell<Layout>()
                     .End()
-                    .Row(h: 12, px: true, id: "xp-bar")
-                        .Cell<Layout>(x => x.Background.V = Color.Yellow)
+                    .Row(h: 16, px: true, id: "xp-bar")
+                        .Cell<UIWindowAsControl>(x => x.Window.V = XP)
                     .End()
                     .Row(@class: "spacer")
                         .Cell<Layout>()
@@ -139,12 +178,12 @@ namespace Fiero.Business
                             .Cell<Label>(x => CurrentPlaceLabel = x)
                         .End()
                     .End()
-                    .Row(h: 200, px: true, id: "mini-map")
+                    .Row(h: 160, px: true, id: "mini-map")
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
                 .End()
             .End()
-            .Row(h: 200, px: true, id: "log-panel")
+            .Row(h: 160, px: true, id: "log-panel")
                 .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
     }

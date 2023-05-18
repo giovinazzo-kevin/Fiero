@@ -171,7 +171,7 @@ namespace Fiero.Core
             {
                 throw new ArgumentException();
             }
-            Controls.Add(new(typeof(T), x => { }) { Instance = instance });
+            Controls.Add(new(typeof(T), null) { Instance = instance });
             return this;
         }
 

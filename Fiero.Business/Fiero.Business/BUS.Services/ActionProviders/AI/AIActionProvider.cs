@@ -1,7 +1,6 @@
 ﻿using Fiero.Core;
 using Fiero.Core.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Fiero.Business
@@ -9,70 +8,13 @@ namespace Fiero.Business
 
     public partial class AiActionProvider : ActionProvider
     {
-        protected readonly List<IAISensor> Sensors;
-
-        protected readonly AiSensor<Stat> MyHealth;
-        protected readonly AiSensor<Weapon> MyWeapons;
-        protected readonly AiSensor<Consumable> MyConsumables;
-        protected readonly AiSensor<Consumable> MyHelpfulConsumables;
-        protected readonly AiSensor<Consumable> MyHarmfulConsumables;
-        protected readonly AiSensor<Consumable> MyUnidentifiedConsumables;
-        protected readonly AiSensor<Consumable> MyPanicButtons;
-
-        protected readonly AiSensor<Item> NearbyItems;
-        protected readonly AiSensor<Actor> NearbyEnemies;
-        protected readonly AiSensor<Actor> NearbyAllies;
-
-        protected int TurnsSinceSightingHostile { get; private set; }
-        protected int TurnsSinceSightingFriendly { get; private set; }
-
         protected Chance RepathChance { get; set; } = new(1, 25);
-
-        protected bool Panic => MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10;
-
 
         private StateName _state = StateName.Wandering;
 
         public AiActionProvider(GameSystems systems)
             : base(systems)
         {
-            Sensors = new() {
-                (MyHealth = new((sys, a) => new[] { a.ActorProperties.Health })),
-                (MyWeapons = new((sys, a) => a.Inventory.GetWeapons()
-                    .OrderByDescending(w => w.WeaponProperties.DamagePerTurn))),
-                (MyConsumables = new((sys, a) => a.Inventory.GetConsumables()
-                    .Where(v => v.ItemProperties.Identified))),
-                (MyUnidentifiedConsumables = new((sys, a) => a.Inventory.GetConsumables()
-                    .Where(v => !v.ItemProperties.Identified))),
-                (MyHelpfulConsumables = new((sys, a) => MyConsumables.AlertingValues
-                    .Where(v => v.GetEffectFlags().IsDefensive))),
-                (MyHarmfulConsumables = new((sys, a) => MyConsumables.AlertingValues
-                    .Where(v => v.TryCast<Throwable>(out var t) && t.ThrowableProperties.BaseDamage > 0
-                             || v.GetEffectFlags().IsOffensive))),
-                (MyPanicButtons = new((sys, a) => MyConsumables.AlertingValues
-                    .Where(v => v.GetEffectFlags().IsPanicButton))),
-                (NearbyAllies = new((sys, a) => {
-                    return Shapes.Neighborhood(a.Position(), 7)
-                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b));
-                })),
-                (NearbyEnemies = new((sys, a) => {
-                    return Shapes.Neighborhood(a.Position(), 7)
-                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
-                        && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
-                })),
-                (NearbyItems = new((sys, a) => {
-                    return Shapes.Box(a.Position(), 7)
-                     .SelectMany(p => sys.Dungeon.GetItemsAt(a.FloorId(), p))
-                     .OrderBy(i => i.SquaredDistanceFrom(a));
-                }))
-            };
-
-            MyHealth.ConfigureAlert((s, a, v) => v.Percentage <= 0.25f);
-            MyConsumables.ConfigureAlert((s, a, v) => v.ConsumableProperties.RemainingUses > 0);
-            MyWeapons.ConfigureAlert((s, a, v) => a.Equipment.Weapon is null || v.WeaponProperties.DamagePerTurn > a.Equipment.Weapon.WeaponProperties.DamagePerTurn);
-            NearbyItems.ConfigureAlert((s, a, v) => !a.Inventory.Full && a.Ai.LikedItems.Any(f => f(v)) && !a.Ai.DislikedItems.Any(f => f(v)));
         }
 
         protected virtual StateName UpdateState(StateName state)
@@ -97,6 +39,8 @@ namespace Fiero.Business
             .OrderBy(b => a.SquaredDistanceFrom(b))
             .FirstOrDefault();
 
+
+        public override bool RequestDelay => false;
 
         protected virtual bool TryUseItem(Actor a, Item item, out IAction action)
         {
@@ -127,62 +71,6 @@ namespace Fiero.Business
         {
             return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Dungeon.GetActorsAt(a.FloorId(), p).Any());
         }
-
-        protected virtual bool TryPushObjective(Actor a, PhysicalEntity target, Func<IAction> goal = null)
-        {
-            a.Ai.Objectives.Push(new(target, goal));
-            return TryRecalculatePath(a);
-        }
-
-        protected virtual bool TryRecalculatePath(Actor a)
-        {
-            if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
-                return false;
-            var currentObjective = a.Ai.Objectives.Peek();
-            var floor = Systems.Dungeon.GetFloor(a.FloorId());
-            a.Ai.Path = floor.Pathfinder.Search(a.Position(), currentObjective.Target.Position(), a);
-            a.Ai.Path?.RemoveFirst();
-            var ret = a.Ai.Path != null && a.Ai.Path.Count > 0;
-            if (!ret)
-                a.Ai.Objectives.Pop();
-            return ret;
-        }
-
-        protected virtual bool TryFollowPath(Actor a, out IAction action)
-        {
-            action = default;
-            if (a.Ai.Path != null && a.Ai.Path.First != null)
-            {
-                var pos = a.Ai.Path.First.Value.Tile.Position();
-                var dir = new Coord(pos.X - a.Position().X, pos.Y - a.Position().Y);
-                var diff = Math.Abs(dir.X) + Math.Abs(dir.Y);
-                a.Ai.Path.RemoveFirst();
-                if (diff > 0 && diff <= 2)
-                {
-                    // one tile ahead
-                    if (Systems.Dungeon.TryGetCellAt(a.FloorId(), pos, out var cell)
-                        && cell.IsWalkable(a) && !cell.Actors.Any())
-                    {
-                        action = new MoveRelativeAction(dir);
-                        return true;
-                    }
-                }
-            }
-            // Destination was reached
-            else if (a.Ai.Path != null && a.Ai.Path.First == null)
-            {
-                var objective = a.Ai.Objectives.Pop();
-                a.Ai.Path = null;
-                if (objective.Goal != null)
-                    action = objective.Goal();
-                else action = new FailAction();
-                return true;
-            }
-            // Path recalculation is necessary
-            a.Ai.Path = null;
-            return false;
-        }
-
         protected virtual IAction Retreat(Actor a)
         {
             if (MyPanicButtons.Values.Count > 0)
@@ -271,7 +159,7 @@ namespace Fiero.Business
                 .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));
             var known = a.Fov.KnownTiles[a.FloorId()];
             var adjacentToKnown = unexplored
-                .Where(x => known.Any(y => x.Tile.Position().DistTaxi(y) == 1))
+                .Where(x => known.Any(y => x.Tile.Position().CardinallyAdjacent(y)))
                 .ToList();
             if (adjacentToKnown.Any())
             {
@@ -305,25 +193,6 @@ namespace Fiero.Business
             return new MoveRandomlyAction();
         }
 
-        protected virtual void UpdateCounters()
-        {
-            if (NearbyEnemies.Values.Count == 0)
-            {
-                TurnsSinceSightingHostile++;
-            }
-            else
-            {
-                TurnsSinceSightingHostile = 0;
-            }
-            if (NearbyAllies.Values.Count == 0)
-            {
-                TurnsSinceSightingFriendly++;
-            }
-            else
-            {
-                TurnsSinceSightingFriendly = 0;
-            }
-        }
 
         public override IAction GetIntent(Actor a)
         {

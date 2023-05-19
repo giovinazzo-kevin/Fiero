@@ -1,4 +1,5 @@
 ﻿{
+  "tile-border": "24 48 8 8",
   "bar_empty-l": "0 0 8 8",
   "bar_empty-m": "8 0 8 8",
   "bar_empty-r": "16 0 8 8",

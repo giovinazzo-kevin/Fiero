@@ -14,6 +14,8 @@ namespace Fiero.Core
         public static double Dist(this Coord p, Coord q) => Math.Sqrt(Math.Pow(p.X - q.X, 2) + Math.Pow(p.Y - q.Y, 2));
         public static int DistSq(this Coord p, Coord q) => (int)Math.Pow(p.X - q.X, 2) + (int)Math.Pow(p.Y - q.Y, 2);
         public static int DistTaxi(this Coord p, Coord q) => p.X - q.X + p.Y - q.Y;
+        public static bool CardinallyAdjacent(this Coord p, Coord q) => Math.Abs(p.DistTaxi(q)) == 1;
+        public static bool DiagonallyAdjacent(this Coord p, Coord q) => Math.Abs(p.DistTaxi(q)) == 2;
         public static Vec ToVec(this Vector2u v) => new(v.X, v.Y);
         public static Vec ToVec(this Vector2i v) => new(v.X, v.Y);
         public static Vec ToVec(this Vector2f v) => new(v.X, v.Y);

@@ -1,6 +1,8 @@
-﻿using Fiero.Core;
+﻿using Ergo.Lang;
+using Fiero.Core;
 using SFML.Window;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -20,16 +22,26 @@ namespace Fiero.Business
             QuickSlots = slots;
         }
 
+        private volatile bool _requestDelay;
+        public override bool RequestDelay => _requestDelay;
+
+
         public override bool TryTarget(Actor a, TargetingShape shape, bool _) => UI.Target(shape);
 
         public override IAction GetIntent(Actor a)
         {
             if (CurrentModal != null || !UI.Input.IsKeyboardFocusAvailable)
                 return new NoAction();
+            _requestDelay = true;
             if (QueuedActions.TryDequeue(out var backedUp))
             {
                 return backedUp;
             }
+            if (TryFollowPath(a, out var followPath))
+            {
+                return followPath;
+            }
+            _requestDelay = false;
             var floorId = a.FloorId();
             var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
             if (IsKeyPressed(Data.Hotkeys.MoveNW))
@@ -74,7 +86,61 @@ namespace Fiero.Business
             }
             if (IsKeyPressed(Data.Hotkeys.Look))
             {
-                UI.Look(a);
+                if (UI.Look(a, out var cell))
+                {
+                    TryPushObjective(a, cell.Tile);
+                }
+            }
+            if (IsKeyPressed(Data.Hotkeys.AutoExplore))
+            {
+                // Go to the closest tile with the highest number of unexplored neighbors
+                // Stop if you detect any danger at all
+                var unknownTiles = Systems.Dungeon.GetAllTiles(floorId)
+                    .Where(x => !a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
+                    .Select(x => x.Physics.Position)
+                    .ToHashSet();
+                var bestCandidate = a.Fov.KnownTiles[floorId]
+                    .Select(x => (P: x, N: Shapes.Neighborhood(x, 3).Sum(x =>
+                        (unknownTiles.Contains(x) ? 1 : 0) +
+                        (a.Fov.VisibleTiles[floorId].Contains(x) ? -.121f : 0)
+                    )))
+                    .Where(t => t.N > 0)
+                    .OrderByDescending(t => t.N)
+                    .ThenBy(t => t.P.DistSq(a.Physics.Position))
+                    .TrySelect(t => Systems.Dungeon.TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
+                    .Where(c => c.IsWalkable(a))
+                    .Select(t => Maybe.Some(t.Tile))
+                    .FirstOrDefault();
+                if (!bestCandidate.TryGetValue(out var tile) || !TryPushObjective(a, tile))
+                {
+                    // We've explored everything we can see without opening doors
+                    // so autoexplore will now find the closest closed door and open it
+                    var closestClosedDoor = Systems.Dungeon.GetAllFeatures(floorId)
+                        .Where(x => x.IsDoorClosed())
+                        .Where(x => a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
+                        .OrderBy(x => x.DistanceFrom(a))
+                        .Select(x => Maybe.Some(x))
+                        .FirstOrDefault();
+                    if (closestClosedDoor.TryGetValue(out var door))
+                    {
+                        // Just open the door
+                        if (door.Position().CardinallyAdjacent(a.Position()))
+                        {
+                            return new InteractWithFeatureAction(door);
+                        }
+                        // Look for the doorstep, then open the door
+                        else if (Systems.Dungeon.TryGetClosestFreeTile(floorId, door.Position(), out var doorStep,
+                            pred: cell => a.Fov.KnownTiles[floorId].Contains(cell.Tile.Position()) && cell.IsWalkable(a)))
+                        {
+                            TryPushObjective(a, doorStep.Tile, () => new InteractWithFeatureAction(door));
+                        }
+                    }
+                    else
+                    {
+                        a.Log.Write($"$DoneExploring$");
+                        Systems.Render.CenterOn(a);
+                    }
+                }
             }
             if (QuickSlots.TryGetAction(out var action))
             {

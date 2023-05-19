@@ -9,5 +9,6 @@
         Features,
         Actors,
         ForegroundEffects,
+        UserInterface
     }
 }

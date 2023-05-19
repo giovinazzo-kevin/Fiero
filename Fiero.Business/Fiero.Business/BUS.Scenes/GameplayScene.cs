@@ -275,8 +275,14 @@ namespace Fiero.Business.Scenes
                 {
                     Systems.Render.CenterOn(e.Actor);
                 }
+                // TODO: Make the delay configurable!
+                if (e.Actor.Action.ActionProvider.RequestDelay)
+                {
+                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
+                }
             });
             // ActionSystem.ActorIntentEvaluated:
+            // - Wait, if the action provider is asking for a delay
             yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e =>
             {
             });
@@ -301,7 +307,7 @@ namespace Fiero.Business.Scenes
                         .OnFirstFrame(() =>
                         {
                             e.Actor.Render.Hidden = true;
-                            Systems.Render.CenterOn(Player);
+                            Systems.Render.CenterOn(e.OldPosition);
                         })
                         .OnLastFrame(() =>
                         {
@@ -312,19 +318,26 @@ namespace Fiero.Business.Scenes
                     Systems.Render.Viewport.Animate(true, e.OldPosition, tpOut);
                     return true;
                 }
-                else if (Systems.Action.ActorMoved.Handle(e))
+                else if (Player.CanSee(e.NewPosition) || e.Actor.IsPlayer())
                 {
-                    if (Player.CanSee(e.NewPosition))
-                    {
-                        TpIn();
-                    }
+                    e.Actor.Render.Hidden = true;
+                    Systems.Action.ActorMoved.HandleOrThrow(e);
+                    TpIn();
                     return true;
                 }
-                return false;
+                Systems.Action.ActorMoved.HandleOrThrow(e);
+                return true;
 
                 void TpIn()
                 {
                     var tpIn = Animation.TeleportIn(e.Actor)
+                        .OnFirstFrame(() =>
+                        {
+                            if (Player.CanSee(e.NewPosition))
+                            {
+                                Systems.Render.CenterOn(e.NewPosition);
+                            }
+                        })
                         .OnLastFrame(() =>
                         {
                             e.Actor.Render.Hidden = false;
@@ -335,15 +348,8 @@ namespace Fiero.Business.Scenes
                         Systems.Dungeon.RecalculateFov(Player);
                         Systems.Render.CenterOn(Player);
                     }
-                    if (Player.CanSee(e.NewPosition))
-                    {
-                        Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
-                        Systems.Render.Viewport.Animate(true, e.NewPosition, tpIn);
-                    }
-                    else
-                    {
-                        e.Actor.Render.Hidden = false;
-                    }
+                    Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
+                    Systems.Render.Viewport.Animate(true, e.NewPosition, tpIn);
                 }
             });
             // ActionSystem.ActorMoved:
@@ -381,11 +387,6 @@ namespace Fiero.Business.Scenes
                     {
                         e.Actor.Log?.Write($"$Action.YouStepOverSeveral$ {count} {features.Key}.");
                     }
-                }
-                // TODO: This is ugly and there should be an actual animation for walking, optional of course
-                if (e.Actor.IsPlayer() && e.Actor.Action.ActionProvider is AutoPlayerActionProvider)
-                {
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(10)));
                 }
                 e.Actor.Physics.Position = e.NewPosition;
                 return true;

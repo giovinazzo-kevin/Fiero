@@ -1,19 +1,161 @@
 ﻿using Fiero.Core;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Fiero.Business
 {
     public abstract class ActionProvider
     {
+        protected readonly List<IAISensor> Sensors;
+
+        protected readonly AiSensor<Stat> MyHealth;
+        protected readonly AiSensor<Weapon> MyWeapons;
+        protected readonly AiSensor<Consumable> MyConsumables;
+        protected readonly AiSensor<Consumable> MyHelpfulConsumables;
+        protected readonly AiSensor<Consumable> MyHarmfulConsumables;
+        protected readonly AiSensor<Consumable> MyUnidentifiedConsumables;
+        protected readonly AiSensor<Consumable> MyPanicButtons;
+
+        protected readonly AiSensor<Item> NearbyItems;
+        protected readonly AiSensor<Actor> NearbyEnemies;
+        protected readonly AiSensor<Actor> NearbyAllies;
+
+        protected bool Panic => MyHealth.RaisingAlert && TurnsSinceSightingHostile < 10;
+        protected int TurnsSinceSightingHostile { get; private set; }
+        protected int TurnsSinceSightingFriendly { get; private set; }
+
         public readonly GameSystems Systems;
+
+        /// <summary>
+        /// This should be true whenever the ActionProvider should be monitored in the UI, 
+        /// otherwise it will be too fast for the renderer to catch up. One example is when
+        /// autoexploring with the player's action provider, another is the autoplayer.
+        /// </summary>
+        public abstract bool RequestDelay { get; }
 
         public ActionProvider(GameSystems sys)
         {
             Systems = sys;
+            Sensors = new() {
+                (MyHealth = new((sys, a) => new[] { a.ActorProperties.Health })),
+                (MyWeapons = new((sys, a) => a.Inventory.GetWeapons()
+                    .OrderByDescending(w => w.WeaponProperties.DamagePerTurn))),
+                (MyConsumables = new((sys, a) => a.Inventory.GetConsumables()
+                    .Where(v => v.ItemProperties.Identified))),
+                (MyUnidentifiedConsumables = new((sys, a) => a.Inventory.GetConsumables()
+                    .Where(v => !v.ItemProperties.Identified))),
+                (MyHelpfulConsumables = new((sys, a) => MyConsumables.AlertingValues
+                    .Where(v => v.GetEffectFlags().IsDefensive))),
+                (MyHarmfulConsumables = new((sys, a) => MyConsumables.AlertingValues
+                    .Where(v => v.TryCast<Throwable>(out var t) && t.ThrowableProperties.BaseDamage > 0
+                             || v.GetEffectFlags().IsOffensive))),
+                (MyPanicButtons = new((sys, a) => MyConsumables.AlertingValues
+                    .Where(v => v.GetEffectFlags().IsPanicButton))),
+                (NearbyAllies = new((sys, a) => {
+                    return Shapes.Neighborhood(a.Position(), 7)
+                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
+                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b));
+                })),
+                (NearbyEnemies = new((sys, a) => {
+                    return Shapes.Neighborhood(a.Position(), 7)
+                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
+                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
+                        && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
+                })),
+                (NearbyItems = new((sys, a) => {
+                    return Shapes.Box(a.Position(), 7)
+                     .SelectMany(p => sys.Dungeon.GetItemsAt(a.FloorId(), p))
+                     .OrderBy(i => i.SquaredDistanceFrom(a));
+                }))
+            };
+
+            MyHealth.ConfigureAlert((s, a, v) => v.Percentage <= 0.25f);
+            MyConsumables.ConfigureAlert((s, a, v) => v.ConsumableProperties.RemainingUses > 0);
+            MyWeapons.ConfigureAlert((s, a, v) => a.Equipment.Weapon is null || v.WeaponProperties.DamagePerTurn > a.Equipment.Weapon.WeaponProperties.DamagePerTurn);
+            NearbyItems.ConfigureAlert((s, a, v) => !a.Inventory.Full && a.Ai.LikedItems.Any(f => f(v)) && !a.Ai.DislikedItems.Any(f => f(v)));
         }
 
         public abstract IAction GetIntent(Actor actor);
         public abstract bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful);
+
+        protected virtual void UpdateCounters()
+        {
+            if (NearbyEnemies.Values.Count == 0)
+            {
+                TurnsSinceSightingHostile++;
+            }
+            else
+            {
+                TurnsSinceSightingHostile = 0;
+            }
+            if (NearbyAllies.Values.Count == 0)
+            {
+                TurnsSinceSightingFriendly++;
+            }
+            else
+            {
+                TurnsSinceSightingFriendly = 0;
+            }
+        }
+
+        protected virtual bool TryPushObjective(Actor a, PhysicalEntity target, Func<IAction> goal = null)
+        {
+            a.Ai.Objectives.Push(new(target, goal));
+            return TryRecalculatePath(a);
+        }
+
+        protected virtual bool TryFollowPath(Actor a, out IAction action)
+        {
+            action = default;
+            if (a.Ai.Path != null && a.Ai.Path.First != null)
+            {
+                var pos = a.Ai.Path.First.Value.Tile.Position();
+                var dir = new Coord(pos.X - a.Position().X, pos.Y - a.Position().Y);
+                var diff = Math.Abs(dir.X) + Math.Abs(dir.Y);
+                a.Ai.Path.RemoveFirst();
+                if (diff > 0 && diff <= 2)
+                {
+                    // one tile ahead
+                    if (Systems.Dungeon.TryGetCellAt(a.FloorId(), pos, out var cell)
+                        && cell.IsWalkable(a) && !cell.Actors.Any())
+                    {
+                        action = new MoveRelativeAction(dir);
+                        return true;
+                    }
+                }
+            }
+            // Destination was reached
+            else if (a.Ai.Path != null && a.Ai.Path.First == null)
+            {
+                var objective = a.Ai.Objectives.Pop();
+                a.Ai.Path = null;
+                if (objective.Goal != null)
+                    action = objective.Goal();
+                else action = new FailAction();
+                return true;
+            }
+            // Path recalculation is necessary
+            a.Ai.Path = null;
+            return false;
+        }
+
+        protected virtual bool TryRecalculatePath(Actor a)
+        {
+            if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
+                return false;
+            var currentObjective = a.Ai.Objectives.Peek();
+            var floor = Systems.Dungeon.GetFloor(a.FloorId());
+            a.Ai.Path = floor.Pathfinder.Search(a.Position(), currentObjective.Target.Position(), a);
+            a.Ai.Path?.RemoveFirst();
+            var ret = a.Ai.Path != null && a.Ai.Path.Count > 0;
+            if (!ret)
+            {
+                a.Ai.Objectives.Pop();
+                a.Ai.Path = null;
+            }
+            return ret;
+        }
 
         protected bool TryZap(Actor a, Wand wand, out IAction action)
         {

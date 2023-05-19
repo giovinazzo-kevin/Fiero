@@ -20,6 +20,7 @@ namespace Fiero.Business
         protected Label PlayerDescLabel { get; private set; }
         protected Label CurrentTurnLabel { get; private set; }
         protected Label CurrentPlaceLabel { get; private set; }
+        protected Label CurrentPosLabel { get; private set; }
 
         protected readonly ActionSystem ActionSystem;
 
@@ -65,7 +66,7 @@ namespace Fiero.Business
 
         public void OnPointSelected(Coord p)
         {
-            Viewport.Following.V = null;
+            // Viewport.Following.V = null;
             var viewSize = Viewport.ViewArea.V.Size();
             Viewport.ViewArea.V = new(p.X - viewSize.X / 2, p.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
             Viewport.SetDirty();
@@ -101,10 +102,12 @@ namespace Fiero.Business
             if (Viewport.Following.V is { } following)
             {
                 var floorId = following.FloorId();
+                var position = following.Position();
                 PlayerNameLabel.Text.V = following.Info.Name;
                 PlayerDescLabel.Text.V = $"Level {following.ActorProperties.Level.V} {following.ActorProperties.Race}";
                 CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+                CurrentPosLabel.Text.V = $"X:{position.X};Y:{position.Y}";
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {
@@ -170,7 +173,7 @@ namespace Fiero.Business
                     .Row(@class: "spacer")
                         .Cell<Layout>()
                     .End()
-                    .Row(h: 24, px: true)
+                    .Row(h: 8, px: true)
                         .Col(id: "time")
                             .Cell<Label>(x => CurrentTurnLabel = x)
                         .End()
@@ -181,6 +184,14 @@ namespace Fiero.Business
                     .Row(h: 160, px: true, id: "mini-map")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
+                    .End()
+                    .Row(h: 8, px: true)
+                        .Col(id: "pos")
+                            .Cell<Label>(x => CurrentPosLabel = x)
+                        .End()
+                        .Col()
+                            .Cell<Layout>()
+                        .End()
                     .End()
                 .End()
             .End()

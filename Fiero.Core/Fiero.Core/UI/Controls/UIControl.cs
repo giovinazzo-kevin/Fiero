@@ -38,6 +38,7 @@ namespace Fiero.Core
         public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
         public Coord BorderRenderSize => (Size.V - Margin.V * 2).Align(Snap);
         public Coord ContentRenderSize => (Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap);
+        protected Coord TrackedMousePosition { get; private set; }
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
         public void InheritProperties(UIControl from)
@@ -107,12 +108,11 @@ namespace Fiero.Core
             return preventDefault || OnClicked(mousePos, button);
         }
 
-        private Coord _trackedMousePosition;
         protected bool TrackMouse(Coord mousePos, out UIControl clickedControl, out Mouse.Button clickedButton)
         {
             clickedButton = default;
             clickedControl = default;
-            var wasInside = Contains(_trackedMousePosition, out _);
+            var wasInside = Contains(TrackedMousePosition, out _);
             var isInside = Contains(mousePos, out _);
             var leftClick = Input.IsButtonPressed(Mouse.Button.Left);
             var rightClick = Input.IsButtonPressed(Mouse.Button.Right);
@@ -167,7 +167,7 @@ namespace Fiero.Core
                 clickedButton = leftClick ? Mouse.Button.Left : Mouse.Button.Right;
                 preventDefault = clickedControl.Click(mousePos, clickedButton);
             }
-            _trackedMousePosition = mousePos;
+            TrackedMousePosition = mousePos;
             return preventDefault;
         }
 

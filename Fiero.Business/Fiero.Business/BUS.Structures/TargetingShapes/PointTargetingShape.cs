@@ -23,7 +23,8 @@ namespace Fiero.Business
         public override bool TryOffset(Coord offs)
         {
             var newOffset = Offset + offs;
-            if((Origin + newOffset).DistTaxi(Origin) > MaxRange) {
+            if (Math.Abs((Origin + newOffset).DistTaxi(Origin)) > MaxRange)
+            {
                 return false;
             }
             Offset = newOffset;
@@ -44,11 +45,14 @@ namespace Fiero.Business
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {
-            foreach (var p in Shapes.Box(Origin, MaxRange)) {
-                if(obstacle(p)) {
+            foreach (var p in Shapes.Box(Origin, MaxRange))
+            {
+                if (obstacle(p))
+                {
                     continue;
                 }
-                if(validTarget(p)) {
+                if (validTarget(p))
+                {
                     Offset = p - Origin;
                     return true;
                 }

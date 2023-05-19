@@ -127,14 +127,14 @@ namespace Fiero.Business
             }
         }
 
-        public static bool Look(this GameUI ui, Actor a)
+        public static bool Look(this GameUI ui, Actor a, out MapCell selectedPoint)
         {
             var floorSystem = (DungeonSystem)ui.ServiceProvider.GetInstance(typeof(DungeonSystem));
             var renderSystem = (RenderSystem)ui.ServiceProvider.GetInstance(typeof(RenderSystem));
             var shape = new PointTargetingShape(renderSystem.GetViewportCenter(), 1000);
+            var floorId = renderSystem.GetViewportFloor();
             var result = ui.FreeCursor(shape, cursorMoved: c =>
             {
-                var floorId = renderSystem.GetViewportFloor();
                 var pos = c.GetPoints().Single();
                 renderSystem.CenterOn(pos);
                 if (a.Fov is null || a.Fov.KnownTiles[floorId].Contains(pos))
@@ -154,6 +154,9 @@ namespace Fiero.Business
                 }
             });
             //renderSystem.SetLookText(String.Empty);
+            var pos = shape.GetPoints().Single();
+            if (!floorSystem.TryGetCellAt(floorId, pos, out selectedPoint))
+                return false;
             return result;
         }
 

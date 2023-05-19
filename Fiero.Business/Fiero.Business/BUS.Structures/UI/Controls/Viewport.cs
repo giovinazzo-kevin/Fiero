@@ -1,4 +1,5 @@
-﻿using Fiero.Core;
+﻿using Ergo.Lang;
+using Fiero.Core;
 using Fiero.Core.Structures;
 using SFML.Graphics;
 using System;
@@ -67,6 +68,18 @@ namespace Fiero.Business
         }
 
         public void SetDirty() => _dirty = true;
+
+        /// <summary>
+        /// Returns the position of the tile currently highlighted by the mouse, or none if the mouse is not over the viewport.
+        /// </summary>
+        public Maybe<Coord> MouseToWorldPos()
+        {
+            if (!IsMouseOver)
+                return default;
+            var pos = TrackedMousePosition - Position.V;
+            var worldPos = pos / ViewTileSize.V;
+            return worldPos;
+        }
 
         public override void Draw(RenderTarget target, RenderStates states)
         {
@@ -143,6 +156,7 @@ namespace Fiero.Business
 
             bool Bake()
             {
+                var highlightedTile = MouseToWorldPos();
                 var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
                 foreach (var key in Enum.GetValues<RenderLayerName>())
                 {

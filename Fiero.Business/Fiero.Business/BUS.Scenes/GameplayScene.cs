@@ -187,6 +187,8 @@ namespace Fiero.Business.Scenes
                     .WithItems(
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
+                            .WithIntrinsicEffect(new EffectDef(EffectName.IncreaseMaxHP, magnitude: 100, canStack: true),
+                                e => new GrantedOnEquip(e))
                             .Build(),
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),

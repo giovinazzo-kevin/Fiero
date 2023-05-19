@@ -92,7 +92,7 @@ namespace Fiero.Business
                         {
                             if (Chance.OneIn(2))
                             {
-                                // TryAddObject("Monster", e => GenerateMonster(floorId, e));
+                                TryAddObject("Monster", e => e.NPC_Rat());
                             }
                         });
                     }

@@ -135,6 +135,7 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.Interact, Keyboard.Key.G);
             Store.SetValue(Data.Hotkeys.Look, Keyboard.Key.X);
             Store.SetValue(Data.Hotkeys.AutoExplore, Keyboard.Key.E);
+            Store.SetValue(Data.Hotkeys.AutoFight, Keyboard.Key.Tab);
             Store.SetValue(Data.Hotkeys.MoveNW, Keyboard.Key.Numpad7);
             Store.SetValue(Data.Hotkeys.MoveN, Keyboard.Key.Numpad8);
             Store.SetValue(Data.Hotkeys.MoveNE, Keyboard.Key.Numpad9);

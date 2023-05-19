@@ -15,6 +15,8 @@
         UncontrolledTeleport,
         Explosion,
         MagicMapping,
+        IncreaseMaxHP,
+        IncreaseMaxMP,
         Trap,
         AutoPickup
     }

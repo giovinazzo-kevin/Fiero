@@ -60,6 +60,8 @@ namespace Fiero.Business
                 EffectName.Explosion => new ExplosionEffect(source, Magnitude * 5, Shapes.Disc(Coord.Zero, Magnitude * 3 - 1)),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.AutoPickup => new AutopickupEffect(),
+                EffectName.IncreaseMaxMP => new IncreaseMaxMPEffect(source, Magnitude),
+                EffectName.IncreaseMaxHP => new IncreaseMaxHPEffect(source, Magnitude),
                 EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
                 EffectName.Script => new ScriptEffect(Script),
                 _ => throw new NotSupportedException(Name.ToString()),

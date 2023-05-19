@@ -53,20 +53,26 @@ namespace Fiero.Business
                 (MyPanicButtons = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.GetEffectFlags().IsPanicButton))),
                 (NearbyAllies = new((sys, a) => {
-                    return Shapes.Neighborhood(a.Position(), 7)
+                    return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
+                    ? set
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b));
+                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b))
+                    : Enumerable.Empty<Actor>();
                 })),
                 (NearbyEnemies = new((sys, a) => {
-                    return Shapes.Neighborhood(a.Position(), 7)
+                    return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
+                    ? set
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
                      .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
-                        && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3);
+                        && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3)
+                    : Enumerable.Empty<Actor>();
                 })),
                 (NearbyItems = new((sys, a) => {
-                    return Shapes.Box(a.Position(), 7)
+                    return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
+                    ? set
                      .SelectMany(p => sys.Dungeon.GetItemsAt(a.FloorId(), p))
-                     .OrderBy(i => i.SquaredDistanceFrom(a));
+                     .OrderBy(i => i.SquaredDistanceFrom(a))
+                    : Enumerable.Empty<Item>();
                 }))
             };
 
@@ -76,7 +82,15 @@ namespace Fiero.Business
             NearbyItems.ConfigureAlert((s, a, v) => !a.Inventory.Full && a.Ai.LikedItems.Any(f => f(v)) && !a.Ai.DislikedItems.Any(f => f(v)));
         }
 
-        public abstract IAction GetIntent(Actor actor);
+        public virtual IAction GetIntent(Actor actor)
+        {
+            foreach (var sensor in Sensors)
+            {
+                sensor.Update(Systems, actor);
+            }
+            UpdateCounters();
+            return new FailAction();
+        }
         public abstract bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful);
 
         protected virtual void UpdateCounters()
@@ -128,9 +142,8 @@ namespace Fiero.Business
             // Destination was reached
             else if (a.Ai.Path != null && a.Ai.Path.First == null)
             {
-                var objective = a.Ai.Objectives.Pop();
                 a.Ai.Path = null;
-                if (objective.Goal != null)
+                if (a.Ai.Objectives.TryPop(out var objective) && objective.Goal != null)
                     action = objective.Goal();
                 else action = new FailAction();
                 return true;
@@ -155,6 +168,40 @@ namespace Fiero.Business
                 a.Ai.Path = null;
             }
             return ret;
+        }
+
+        protected Actor GetClosestHostile(Actor a) => NearbyEnemies.Values
+            .OrderBy(a.SquaredDistanceFrom)
+            .FirstOrDefault();
+
+
+        protected Actor GetClosestFriendly(Actor a) => NearbyAllies.Values
+            .OrderBy(a.SquaredDistanceFrom)
+            .FirstOrDefault();
+
+        protected virtual bool TryUseItem(Actor a, Item item, out IAction action)
+        {
+            action = default;
+            var flags = item.GetEffectFlags();
+            if (item.TryCast<Potion>(out var potion) && flags.IsDefensive && Panic)
+            {
+                action = new QuaffPotionAction(potion);
+                return true;
+            }
+            if (item.TryCast<Scroll>(out var scroll))
+            {
+                action = new ReadScrollAction(scroll);
+                return true;
+            }
+            if (item.TryCast<Wand>(out var wand))
+            {
+                return TryZap(a, wand, out action);
+            }
+            if (item.TryCast<Throwable>(out var throwable))
+            {
+                return TryThrow(a, throwable, out action);
+            }
+            return false;
         }
 
         protected bool TryZap(Actor a, Wand wand, out IAction action)

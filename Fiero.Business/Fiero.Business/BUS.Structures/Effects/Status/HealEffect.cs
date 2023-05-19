@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -23,6 +21,7 @@ namespace Fiero.Business
         protected override void Apply(GameSystems systems, Actor target)
         {
             systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, Amount));
+            End();
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

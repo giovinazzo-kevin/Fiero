@@ -30,6 +30,7 @@ namespace Fiero.Business
 
         public override IAction GetIntent(Actor a)
         {
+            base.GetIntent(a);
             if (CurrentModal != null || !UI.Input.IsKeyboardFocusAvailable)
                 return new NoAction();
             _requestDelay = true;
@@ -140,6 +141,15 @@ namespace Fiero.Business
                         a.Log.Write($"$DoneExploring$");
                         Systems.Render.CenterOn(a);
                     }
+                }
+            }
+            if (IsKeyPressed(Data.Hotkeys.AutoFight))
+            {
+                if (GetClosestHostile(a) is { } hostile)
+                {
+                    if (a.IsInMeleeRange(hostile))
+                        return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
+                    TryPushObjective(a, hostile, () => new MeleeAttackOtherAction(hostile, a.Equipment.Weapon));
                 }
             }
             if (QuickSlots.TryGetAction(out var action))

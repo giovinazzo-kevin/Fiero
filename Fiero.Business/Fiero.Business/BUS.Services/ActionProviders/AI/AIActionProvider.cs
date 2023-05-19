@@ -30,42 +30,8 @@ namespace Fiero.Business
             return StateName.Fighting;
         }
 
-        protected Actor GetClosestHostile(Actor a) => NearbyEnemies.Values
-            .OrderBy(b => a.SquaredDistanceFrom(b))
-            .FirstOrDefault();
-
-
-        protected Actor GetClosestFriendly(Actor a) => NearbyAllies.Values
-            .OrderBy(b => a.SquaredDistanceFrom(b))
-            .FirstOrDefault();
-
 
         public override bool RequestDelay => false;
-
-        protected virtual bool TryUseItem(Actor a, Item item, out IAction action)
-        {
-            action = default;
-            var flags = item.GetEffectFlags();
-            if (item.TryCast<Potion>(out var potion) && flags.IsDefensive && Panic)
-            {
-                action = new QuaffPotionAction(potion);
-                return true;
-            }
-            if (item.TryCast<Scroll>(out var scroll))
-            {
-                action = new ReadScrollAction(scroll);
-                return true;
-            }
-            if (item.TryCast<Wand>(out var wand))
-            {
-                return TryZap(a, wand, out action);
-            }
-            if (item.TryCast<Throwable>(out var throwable))
-            {
-                return TryThrow(a, throwable, out action);
-            }
-            return false;
-        }
 
         public override bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful)
         {
@@ -193,14 +159,9 @@ namespace Fiero.Business
             return new MoveRandomlyAction();
         }
 
-
         public override IAction GetIntent(Actor a)
         {
-            foreach (var sensor in Sensors)
-            {
-                sensor.Update(Systems, a);
-            }
-            UpdateCounters();
+            base.GetIntent(a);
             return (_state = UpdateState(_state)) switch
             {
                 StateName.Retreating => Retreat(a),

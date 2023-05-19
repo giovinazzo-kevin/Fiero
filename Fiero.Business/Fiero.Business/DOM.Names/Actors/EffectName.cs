@@ -14,7 +14,8 @@
         RaiseUndead,
         UncontrolledTeleport,
         Explosion,
+        MagicMapping,
         Trap,
-        Autopickup
+        AutoPickup
     }
 }

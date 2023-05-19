@@ -483,11 +483,9 @@ namespace Fiero.Business.Scenes
             {
                 if (e.Source.TryCast<Actor>(out var attacker))
                 {
-                    // make sure that neutrals aggro the attacker
-                    if (e.Victim.Ai != null && e.Victim.Ai.Target == null)
-                    {
-                        e.Victim.Ai.Target = attacker;
-                    }
+                    // force AI to recalculate 
+                    if (e.Victim.Ai != null)
+                        e.Victim.Ai.Objectives.Clear();
                     // make sure that people hold a grudge regardless of factions
                     Systems.Faction.SetUnilateralRelation(e.Victim, attacker, StandingName.Hated);
                 }
@@ -882,12 +880,9 @@ namespace Fiero.Business.Scenes
             // - Empty and fill action queue on player floor change
             yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e =>
             {
-                if (e.Feature.FeatureProperties.Name == FeatureName.Door)
+                if (e.Feature.TryToggleDoor())
                 {
-                    e.Feature.Physics.BlocksMovement ^= true;
-                    e.Feature.Physics.BlocksLight = e.Feature.Physics.BlocksMovement;
-                    e.Feature.Render.Hidden = !e.Feature.Physics.BlocksMovement;
-                    if (e.Feature.Physics.BlocksMovement)
+                    if (e.Feature.IsDoorClosed())
                     {
                         e.Actor.Log?.Write($"$Action.YouCloseThe$ {e.Feature.Info.Name}.");
                     }

@@ -50,7 +50,7 @@ namespace Fiero.Business
             .WithFieldOfView(7)
             .WithLogging()
             .WithEffectTracking()
-            .WithIntrinsicEffect(new(EffectName.Autopickup))
+            .WithIntrinsicEffect(new(EffectName.AutoPickup))
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             ;
 
@@ -636,6 +636,8 @@ namespace Fiero.Business
             => Scroll(new(EffectName.Entrapment, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassExplosion()
             => Scroll(new(EffectName.Explosion, magnitude: 2), ScrollModifierName.AreaAffectsEveryoneButTarget);
+        public EntityBuilder<Scroll> Scroll_OfMagicMapping()
+            => Scroll(new(EffectName.MagicMapping), ScrollModifierName.Self);
         #endregion
 
         #region WANDS

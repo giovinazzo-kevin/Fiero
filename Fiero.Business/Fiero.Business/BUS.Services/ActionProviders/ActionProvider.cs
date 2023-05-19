@@ -25,14 +25,14 @@ namespace Fiero.Business
             var autoTarget = zapShape.TryAutoTarget(
                 p => Systems.Dungeon.GetActorsAt(floorId, p).Any(b =>
                 {
-                    if (!wand.ItemProperties.Identified)
-                        return true;
                     var rel = Systems.Faction.GetRelations(a, b);
+                    if (!wand.ItemProperties.Identified && rel.Right.IsHostile())
+                        return true;
                     if (wand.Effects != null && wand.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
                         return false;
-                    if (rel.Left.IsFriendly() && flags.IsDefensive)
+                    if (rel.Right.IsFriendly() && flags.IsDefensive)
                         return true;
-                    if (rel.Left.IsHostile() && flags.IsOffensive)
+                    if (rel.Right.IsHostile() && flags.IsOffensive)
                         return true;
                     return false;
                 }),

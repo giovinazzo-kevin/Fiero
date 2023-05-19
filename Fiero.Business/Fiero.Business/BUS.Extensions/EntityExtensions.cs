@@ -36,6 +36,38 @@ namespace Fiero.Business
             }
             return ret;
         }
+
+        public static bool IsDoorOpen(this Feature a) => a.FeatureProperties.Name == FeatureName.Door
+            && !a.Physics.BlocksMovement;
+        public static bool IsDoorClosed(this Feature a) => a.FeatureProperties.Name == FeatureName.Door
+            && a.Physics.BlocksMovement;
+        public static bool TryToggleDoor(this Feature a)
+        {
+            if (a is not { FeatureProperties: { Name: FeatureName.Door } } door)
+                return false;
+            door.Physics.BlocksPlayerPathing =
+            door.Physics.BlocksNpcPathing =
+            door.Physics.BlocksLight =
+                (door.Physics.BlocksMovement ^= true);
+            door.Render.Hidden = !door.Physics.BlocksMovement;
+            return true;
+        }
+        public static bool TryOpenDoor(this Feature a)
+        {
+            if (a is not { FeatureProperties: { Name: FeatureName.Door } } door)
+                return false;
+            if (a.IsDoorOpen())
+                return false;
+            return a.TryToggleDoor();
+        }
+        public static bool TryCloseDoor(this Feature a)
+        {
+            if (a is not { FeatureProperties: { Name: FeatureName.Door } } door)
+                return false;
+            if (a.IsDoorClosed())
+                return false;
+            return a.TryToggleDoor();
+        }
         public static bool IsInMeleeRange(this Actor a, Coord c) => a.SquaredDistanceFrom(c) <= 2;
         public static bool IsInMeleeRange(this Actor a, PhysicalEntity b) => a.IsInMeleeRange(b.Position());
         public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && a.Physics.Roots > 0;

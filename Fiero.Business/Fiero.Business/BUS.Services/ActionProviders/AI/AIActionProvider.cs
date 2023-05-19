@@ -128,21 +128,24 @@ namespace Fiero.Business
             return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Dungeon.GetActorsAt(a.FloorId(), p).Any());
         }
 
-        protected virtual void SetTarget(Actor a, PhysicalEntity target, Func<IAction> goal = null)
+        protected virtual bool TryPushObjective(Actor a, PhysicalEntity target, Func<IAction> goal = null)
         {
-            a.Ai.Target = target;
-            a.Ai.Goal = goal;
-            TryRecalculatePath(a);
+            a.Ai.Objectives.Push(new(target, goal));
+            return TryRecalculatePath(a);
         }
 
         protected virtual bool TryRecalculatePath(Actor a)
         {
             if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
                 return false;
+            var currentObjective = a.Ai.Objectives.Peek();
             var floor = Systems.Dungeon.GetFloor(a.FloorId());
-            a.Ai.Path = floor.Pathfinder.Search(a.Position(), a.Ai.Target.Position(), a);
+            a.Ai.Path = floor.Pathfinder.Search(a.Position(), currentObjective.Target.Position(), a);
             a.Ai.Path?.RemoveFirst();
-            return true;
+            var ret = a.Ai.Path != null && a.Ai.Path.Count > 0;
+            if (!ret)
+                a.Ai.Objectives.Pop();
+            return ret;
         }
 
         protected virtual bool TryFollowPath(Actor a, out IAction action)
@@ -166,22 +169,18 @@ namespace Fiero.Business
                 }
             }
             // Destination was reached
-            else if (a.Ai.Path != null && a.Ai.Path.First == null && a.Ai.Goal is { } goal)
+            else if (a.Ai.Path != null && a.Ai.Path.First == null)
             {
-                Clear();
-                action = goal();
+                var objective = a.Ai.Objectives.Pop();
+                a.Ai.Path = null;
+                if (objective.Goal != null)
+                    action = objective.Goal();
+                else action = new FailAction();
                 return true;
             }
             // Path recalculation is necessary
-            Clear();
+            a.Ai.Path = null;
             return false;
-
-            void Clear()
-            {
-                a.Ai.Path = null;
-                a.Ai.Target = null;
-                a.Ai.Goal = null;
-            }
         }
 
         protected virtual IAction Retreat(Actor a)
@@ -217,7 +216,7 @@ namespace Fiero.Business
             IAction action;
             if (GetClosestHostile(a) is { } hostile)
             {
-                SetTarget(a, hostile);
+                TryPushObjective(a, hostile);
                 if (a.IsInMeleeRange(hostile))
                 {
                     return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
@@ -266,6 +265,20 @@ namespace Fiero.Business
             return new WaitAction();
         }
 
+        protected virtual void Repath(Actor a)
+        {
+            var unexplored = Systems.Dungeon.GetFloor(a.FloorId())
+                .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));
+            var known = a.Fov.KnownTiles[a.FloorId()];
+            var adjacentToKnown = unexplored
+                .Where(x => known.Any(y => x.Tile.Position().DistTaxi(y) == 1))
+                .ToList();
+            if (adjacentToKnown.Any())
+            {
+                TryPushObjective(a, adjacentToKnown.Shuffle(Rng.Random).First().Tile);
+            }
+        }
+
         protected virtual IAction Wander(Actor a)
         {
             if (NearbyItems.AlertingValues.Count > 0)
@@ -275,7 +288,7 @@ namespace Fiero.Business
                 {
                     return new PickUpItemAction(closestItem);
                 }
-                SetTarget(a, closestItem);
+                TryPushObjective(a, closestItem);
             }
             if (TryFollowPath(a, out var action))
             {
@@ -283,11 +296,10 @@ namespace Fiero.Business
             }
             if (a.Ai.Target == null && RepathChance.Check(Rng.Random))
             {
-                var randomTile = Systems.Dungeon.GetFloor(a.FloorId())
-                    .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));
-                if (randomTile.Any())
+                Repath(a);
+                if (TryFollowPath(a, out action))
                 {
-                    SetTarget(a, randomTile.Shuffle(Rng.Random).First().Tile);
+                    return action;
                 }
             }
             return new MoveRandomlyAction();

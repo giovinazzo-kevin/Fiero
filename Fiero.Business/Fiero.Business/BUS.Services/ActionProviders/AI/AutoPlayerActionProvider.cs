@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -17,21 +18,13 @@ namespace Fiero.Business
             RepathChance = Chance.Always;
         }
 
-        protected override IAction Wander(Actor a)
+        protected override void Repath(Actor a)
         {
             if (a.Ai.Target == null)
             {
-                var features = Systems.Dungeon.GetAllFeatures(a.FloorId());
-                var downstairs = features
-                    .Where(f => f.FeatureProperties.Name == FeatureName.Downstairs)
-                    .FirstOrDefault();
-                if (downstairs != null)
-                {
-                    SetTarget(a, downstairs, () => new InteractWithFeatureAction(downstairs));
-                }
+                Console.WriteLine("Recalc");
             }
-
-            return base.Wander(a);
+            base.Repath(a);
         }
     }
 }

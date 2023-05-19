@@ -25,6 +25,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnEnded;
         public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorMoved;
         public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorTeleporting;
+        public readonly SystemRequest<ActionSystem, ActorUsedMagicMappingEvent, EventResult> ActorUsedMagicMapping;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorWaited;
         public readonly SystemRequest<ActionSystem, ActorSpawnedEvent, EventResult> ActorSpawned;
         public readonly SystemRequest<ActionSystem, ActorDespawnedEvent, EventResult> ActorDespawned;
@@ -85,6 +86,7 @@ namespace Fiero.Business
             ActorTurnEnded = new(this, nameof(ActorTurnEnded));
             ActorMoved = new(this, nameof(ActorMoved));
             ActorTeleporting = new(this, nameof(ActorTeleporting));
+            ActorUsedMagicMapping = new(this, nameof(ActorUsedMagicMapping));
             ActorSpawned = new(this, nameof(ActorSpawned));
             ActorDespawned = new(this, nameof(ActorDespawned));
             ActorWaited = new(this, nameof(ActorWaited));
@@ -164,6 +166,8 @@ namespace Fiero.Business
         {
             var ret = default(bool?);
             var cost = action.Cost;
+            if (t.Actor.IsInvalid())
+                return cost;
             if (t.ActorId == TURN_ACTOR_ID)
                 return cost;
 

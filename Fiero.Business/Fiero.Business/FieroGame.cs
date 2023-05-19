@@ -171,10 +171,7 @@ namespace Fiero.Business
                     while (sieve.Messages.TryDequeue(out var msg))
                     {
                         var log = msg.ToString();
-                        if (log.Contains("Player"))
-                        {
-                            Console.WriteLine(log);
-                        }
+                        Console.WriteLine(log);
                     }
                     await Task.Delay(100);
                 }

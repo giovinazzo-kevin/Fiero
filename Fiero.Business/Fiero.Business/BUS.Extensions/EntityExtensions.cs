@@ -52,6 +52,30 @@ namespace Fiero.Business
             door.Render.Hidden = !door.Physics.BlocksMovement;
             return true;
         }
+        public static bool TryFollow(this Actor a, Actor b)
+        {
+            if (a.Party is not { } aParty)
+                return false;
+            if (b.Party is not { } bParty)
+                return false;
+            if (bParty.Leader != null)
+                return false;
+            aParty.Followers.Add(b);
+            bParty.Leader = a;
+            return true;
+        }
+        public static bool TryUnfollow(this Actor a, Actor b)
+        {
+            if (a.Party is not { } aParty)
+                return false;
+            if (b.Party is not { } bParty)
+                return false;
+            if (aParty.Leader != b)
+                return false;
+            bParty.Followers.Remove(a);
+            aParty.Leader = null;
+            return true;
+        }
         public static bool TryOpenDoor(this Feature a)
         {
             if (a is not { FeatureProperties: { Name: FeatureName.Door } } door)

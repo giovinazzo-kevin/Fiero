@@ -28,5 +28,7 @@ namespace Fiero.Business
         public FieldOfViewComponent Fov { get; private set; }
         [NonTerm]
         public SpellLibraryComponent Spells { get; private set; }
+        [NonTerm]
+        public PartyComponent Party { get; private set; }
     }
 }

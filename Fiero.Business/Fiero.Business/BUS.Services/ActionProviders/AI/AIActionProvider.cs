@@ -8,7 +8,7 @@ namespace Fiero.Business
 
     public partial class AiActionProvider : ActionProvider
     {
-        protected Chance RepathChance { get; set; } = new(1, 25);
+        protected Chance RepathChance { get; set; } = new(1, 1);
 
         private StateName _state = StateName.Wandering;
 
@@ -121,15 +121,22 @@ namespace Fiero.Business
 
         protected virtual void Repath(Actor a)
         {
-            var unexplored = Systems.Dungeon.GetFloor(a.FloorId())
-                .Cells.Values.Where(c => c.IsWalkable(a) && !a.Knows(c.Tile.Position()));
-            var known = a.Fov.KnownTiles[a.FloorId()];
-            var adjacentToKnown = unexplored
-                .Where(x => known.Any(y => x.Tile.Position().CardinallyAdjacent(y)))
-                .ToList();
-            if (adjacentToKnown.Any())
+            var floorId = a.FloorId();
+            // Stick to the leader
+            if (a.Party?.Leader is { } leader)
             {
-                TryPushObjective(a, adjacentToKnown.Shuffle(Rng.Random).First().Tile);
+                // Find a non-occupied tile that either you or the leader know
+                if (Systems.Dungeon.TryGetClosestFreeTile(floorId, leader.Position(), out var closestToPlayer,
+                    pred: c => c.IsWalkable(a) && (a.Fov.KnownTiles[floorId].Contains(c.Tile.Position())
+                                                || leader.Fov.KnownTiles[floorId].Contains(c.Tile.Position()))))
+                {
+                    TryPushObjective(a, closestToPlayer.Tile);
+                }
+            }
+            // Explore
+            else if (TryGetUnexploredCandidate(a, out var tile))
+            {
+                TryPushObjective(a, tile);
             }
         }
 

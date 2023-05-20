@@ -1,4 +1,5 @@
-﻿using Fiero.Core;
+﻿using Ergo.Lang;
+using Fiero.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,6 +118,28 @@ namespace Fiero.Business
         {
             a.Ai.Objectives.Push(new(target, goal));
             return TryRecalculatePath(a);
+        }
+
+        protected virtual bool TryGetUnexploredCandidate(Actor a, out Tile tile)
+        {
+            var floorId = a.FloorId();
+            var unknownTiles = Systems.Dungeon.GetAllTiles(floorId)
+                .Where(x => !a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
+                .Select(x => x.Physics.Position)
+                .ToHashSet();
+            var bestCandidate = a.Fov.KnownTiles[floorId]
+                .Select(x => (P: x, N: Shapes.Neighborhood(x, 3).Sum(x =>
+                    (unknownTiles.Contains(x) ? 1 : 0) +
+                    (a.Fov.VisibleTiles[floorId].Contains(x) ? -.121f : 0)
+                )))
+                .Where(t => t.N > 0)
+                .OrderByDescending(t => t.N)
+                .ThenBy(t => t.P.DistSq(a.Physics.Position))
+                .TrySelect(t => Systems.Dungeon.TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
+                .Where(c => c.IsWalkable(a))
+                .Select(t => Maybe.Some(t.Tile))
+                .FirstOrDefault();
+            return bestCandidate.TryGetValue(out tile);
         }
 
         protected virtual bool TryFollowPath(Actor a, out IAction action)

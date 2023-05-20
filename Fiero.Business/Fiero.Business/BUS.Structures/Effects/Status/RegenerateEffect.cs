@@ -3,6 +3,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     // Heal a fixed % of your max HP 
     public class RegenerateEffect : TypedEffect<Actor>
     {

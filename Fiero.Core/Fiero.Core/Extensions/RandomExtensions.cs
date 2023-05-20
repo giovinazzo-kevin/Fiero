@@ -30,6 +30,23 @@ namespace Fiero.Core.Extensions
             => rng.Next(min, max + 1);
         public static double Between(this Random rng, double min, double max)
             => min + rng.NextDouble() * (max - min);
+        /// <summary>
+        /// Rounds a number with a 50% chance of either rounding down or up.
+        /// </summary>
+        public static int Round(this Random rng, double number) =>
+            rng.NChancesIn(1, 2) ? (int)Math.Floor(number) : (int)Math.Ceiling(number);
+        /// <summary>
+        /// Rounds a number with a chance of rounding down or up that depends on how close that number is to 0.5, where it is 50%.
+        /// </summary>
+        public static int RoundProportional(this Random rng, double number)
+        {
+            var decimalPart = number - (int)number;
+            // calculate chance to round up. This will be 1 at 0 and 1, 0 at 0.5, and linearly changing in between.
+            var roundUpChance = Math.Abs(decimalPart - 0.5) * 2;
+
+            // If the generated random number is less than our chance, we round up, otherwise round down.
+            return rng.NextDouble() < roundUpChance ? (int)Math.Ceiling(number) : (int)Math.Floor(number);
+        }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
         {

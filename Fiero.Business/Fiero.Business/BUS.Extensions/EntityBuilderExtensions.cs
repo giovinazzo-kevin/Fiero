@@ -182,6 +182,11 @@ namespace Fiero.Business
             {
                 c.Name = faction;
             });
+        public static EntityBuilder<T> WithParty<T>(this EntityBuilder<T> builder, Actor leader = null)
+            where T : Actor => builder.AddOrTweak<PartyComponent>(c =>
+            {
+                c.Leader = leader;
+            });
         public static EntityBuilder<T> WithLogging<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<LogComponent>(_ => { });
         public static EntityBuilder<T> WithNpcInfo<T>(this EntityBuilder<T> builder, NpcName type)

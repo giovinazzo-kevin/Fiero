@@ -189,6 +189,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Weapon_Sword()
                             .WithIntrinsicEffect(new EffectDef(EffectName.IncreaseMaxHP, magnitude: 100, canStack: true),
                                 e => new GrantedOnEquip(e))
+                            .WithIntrinsicEffect(new EffectDef(EffectName.Vampirism, magnitude: 3, canStack: true))
                             .Build(),
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),
@@ -616,6 +617,7 @@ namespace Fiero.Business.Scenes
                     necro?.Log?.Write($"$Action.NoRoomToRaiseUndead$.");
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
+                undead.TryFollow(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
                 EntityBuilder<Actor> Raise(EntityBuilder<Actor> zombie, EntityBuilder<Actor> skeleton, UndeadRaisingName mode)

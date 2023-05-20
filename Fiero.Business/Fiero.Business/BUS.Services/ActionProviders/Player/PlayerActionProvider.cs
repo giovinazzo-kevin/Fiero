@@ -96,23 +96,7 @@ namespace Fiero.Business
             {
                 // Go to the closest tile with the highest number of unexplored neighbors
                 // Stop if you detect any danger at all
-                var unknownTiles = Systems.Dungeon.GetAllTiles(floorId)
-                    .Where(x => !a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
-                    .Select(x => x.Physics.Position)
-                    .ToHashSet();
-                var bestCandidate = a.Fov.KnownTiles[floorId]
-                    .Select(x => (P: x, N: Shapes.Neighborhood(x, 3).Sum(x =>
-                        (unknownTiles.Contains(x) ? 1 : 0) +
-                        (a.Fov.VisibleTiles[floorId].Contains(x) ? -.121f : 0)
-                    )))
-                    .Where(t => t.N > 0)
-                    .OrderByDescending(t => t.N)
-                    .ThenBy(t => t.P.DistSq(a.Physics.Position))
-                    .TrySelect(t => Systems.Dungeon.TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
-                    .Where(c => c.IsWalkable(a))
-                    .Select(t => Maybe.Some(t.Tile))
-                    .FirstOrDefault();
-                if (!bestCandidate.TryGetValue(out var tile) || !TryPushObjective(a, tile))
+                if (!TryGetUnexploredCandidate(a, out var tile) || !TryPushObjective(a, tile))
                 {
                     // We've explored everything we can see without opening doors
                     // so autoexplore will now find the closest closed door and open it

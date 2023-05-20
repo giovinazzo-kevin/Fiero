@@ -52,6 +52,7 @@ namespace Fiero.Business
             .WithEffectTracking()
             .WithIntrinsicEffect(new(EffectName.AutoPickup))
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
+            .WithParty()
             ;
 
         private EntityBuilder<Actor> Enemy()
@@ -69,9 +70,10 @@ namespace Fiero.Business
             .WithFaction(FactionName.None)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithEquipment()
-            .WithFieldOfView(7)
+            .WithFieldOfView(5)
             .WithEffectTracking()
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
+            .WithParty()
             ;
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity)

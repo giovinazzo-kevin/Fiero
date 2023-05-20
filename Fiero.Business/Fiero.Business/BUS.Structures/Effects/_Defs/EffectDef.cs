@@ -57,7 +57,7 @@ namespace Fiero.Business
                 EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(source),
                 EffectName.MagicMapping => new MagicMappingEffect(source),
                 EffectName.Heal => new HealEffect(source, Magnitude * 10),
-                EffectName.Vampirism => new VampirismEffect(this, .025f),
+                EffectName.Vampirism => new VampirismEffect(this, Magnitude),
                 EffectName.Explosion => new ExplosionEffect(source, Magnitude * 5, Shapes.Disc(Coord.Zero, Magnitude * 3 - 1)),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.AutoPickup => new AutopickupEffect(),

@@ -6,16 +6,11 @@ namespace Fiero.Business
 {
     public class VampirismEffect : HitDealtEffect
     {
-        public readonly Func<int, int> GetAmount;
+        public readonly int Magnitude;
 
-        public VampirismEffect(EffectDef source, int amount) : base(source)
+        public VampirismEffect(EffectDef source, int magnitude) : base(source)
         {
-            GetAmount = _ => amount;
-        }
-
-        public VampirismEffect(EffectDef source, float percentage) : base(source)
-        {
-            GetAmount = damage => Math.Max(1, Rng.Random.RoundProportional(percentage * damage));
+            Magnitude = magnitude;
         }
 
         public override EffectName Name => EffectName.Vampirism;
@@ -24,8 +19,13 @@ namespace Fiero.Business
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage)
         {
-            var hp = GetAmount(damage);
-            systems.Action.ActorHealed.HandleOrThrow(new(source, source, owner, hp));
+            var fixedHealing = Rng.Random.RoundProportional((Magnitude / 2f));
+            // ~1% at magnitude 1, ~30% at magnitude 10
+            var percentCurve = 0.3 * Math.Pow(Magnitude, 2) + 1;
+            var percentHealing = Rng.Random.RoundProportional((damage * percentCurve / 100f));
+            // 50% of healing 1HP at level 1, 100% of 1HP at level 2, 50% of 2HP at level 3, 100% of 2HP at level 4...
+            var totalHealing = fixedHealing + percentHealing;
+            systems.Action.ActorHealed.HandleOrThrow(new(source, source, owner, totalHealing));
         }
     }
 }

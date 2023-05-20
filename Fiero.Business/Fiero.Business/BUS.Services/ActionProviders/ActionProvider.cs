@@ -122,12 +122,15 @@ namespace Fiero.Business
 
         protected virtual bool TryGetUnexploredCandidate(Actor a, out Tile tile)
         {
+            tile = default;
             var floorId = a.FloorId();
+            if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles))
+                return false;
             var unknownTiles = Systems.Dungeon.GetAllTiles(floorId)
-                .Where(x => !a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
+                .Where(x => !knownTiles.Contains(x.Physics.Position))
                 .Select(x => x.Physics.Position)
                 .ToHashSet();
-            var bestCandidate = a.Fov.KnownTiles[floorId]
+            var bestCandidate = knownTiles
                 .Select(x => (P: x, N: Shapes.Neighborhood(x, 3).Sum(x =>
                     (unknownTiles.Contains(x) ? 1 : 0) +
                     (a.Fov.VisibleTiles[floorId].Contains(x) ? -.121f : 0)

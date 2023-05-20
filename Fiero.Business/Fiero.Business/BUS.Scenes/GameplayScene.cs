@@ -617,7 +617,7 @@ namespace Fiero.Business.Scenes
                     necro?.Log?.Write($"$Action.NoRoomToRaiseUndead$.");
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
-                undead.TryFollow(necro);
+                undead.TryJoinParty(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
                 EntityBuilder<Actor> Raise(EntityBuilder<Actor> zombie, EntityBuilder<Actor> skeleton, UndeadRaisingName mode)

@@ -52,7 +52,7 @@ namespace Fiero.Business
             door.Render.Hidden = !door.Physics.BlocksMovement;
             return true;
         }
-        public static bool TryFollow(this Actor a, Actor b)
+        public static bool TryJoinParty(this Actor a, Actor b)
         {
             if (a.Party is not { } aParty)
                 return false;
@@ -60,11 +60,11 @@ namespace Fiero.Business
                 return false;
             if (bParty.Leader != null)
                 return false;
-            aParty.Followers.Add(b);
-            bParty.Leader = a;
+            bParty.Followers.Add(a);
+            aParty.Leader = b;
             return true;
         }
-        public static bool TryUnfollow(this Actor a, Actor b)
+        public static bool TryLeaveParty(this Actor a, Actor b)
         {
             if (a.Party is not { } aParty)
                 return false;

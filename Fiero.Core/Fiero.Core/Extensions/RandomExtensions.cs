@@ -40,12 +40,9 @@ namespace Fiero.Core.Extensions
         /// </summary>
         public static int RoundProportional(this Random rng, double number)
         {
-            var decimalPart = number - (int)number;
-            // calculate chance to round up. This will be 1 at 0 and 1, 0 at 0.5, and linearly changing in between.
-            var roundUpChance = Math.Abs(decimalPart - 0.5) * 2;
-
-            // If the generated random number is less than our chance, we round up, otherwise round down.
-            return rng.NextDouble() < roundUpChance ? (int)Math.Ceiling(number) : (int)Math.Floor(number);
+            var decimalPart = number - Math.Floor(number);
+            // If the generated random number is less than the decimal part, we round up, otherwise round down.
+            return rng.NextDouble() < decimalPart ? (int)Math.Ceiling(number) : (int)Math.Floor(number);
         }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)

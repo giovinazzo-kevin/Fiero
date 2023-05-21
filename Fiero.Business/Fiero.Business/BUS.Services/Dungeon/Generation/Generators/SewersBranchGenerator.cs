@@ -30,13 +30,8 @@ namespace Fiero.Business
             // used either as part of an intra- or of an inter-sector corridor.
             // This lets the room know which points should remain connected.
             foreach (var sector in roomSectors)
-            {
                 sector.MarkActiveConnectors(corridors);
-                if (sector.Rooms.FirstOrDefault(x => x.Disconnected) is { } disc)
-                {
-                    ;
-                }
-            }
+            RoomSector.MarkSharedConnectors(roomSectors);
 
             var tree = RoomTree.Build(
                 roomSectors.SelectMany(s => s.Rooms).ToArray(),

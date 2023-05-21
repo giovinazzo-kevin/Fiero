@@ -11,7 +11,11 @@ namespace Fiero.Business
         /// <summary>
         /// An external generator will set this to true before drawing if the connector is being actively used.
         /// </summary>
-        public bool IsActive { get; set; }
+        public bool IsUsed { get; set; }
+        /// <summary>
+        /// If true, this connector will not be drawn as a wall but as ground
+        /// </summary>
+        public bool IsHidden { get; set; }
 
         public RoomConnector(Room owner, UnorderedPair<Coord> edge)
         {

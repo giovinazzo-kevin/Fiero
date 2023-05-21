@@ -22,7 +22,7 @@ namespace Fiero.Business
         public bool AllowItems { get; protected set; } = true;
         public bool AllowFeatures { get; protected set; } = true;
 
-        public bool Disconnected => !Connectors.Any(x => x.IsActive);
+        public bool Disconnected => !Connectors.Any(x => x.IsUsed);
 
         public IEnumerable<IntRect> GetRects() => Rects;
         public IEnumerable<int> GetIndices() => Indices;
@@ -59,6 +59,9 @@ namespace Fiero.Business
             }
             foreach (var conn in Connectors)
             {
+                if (conn.IsHidden)
+                    continue;
+
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
             }
             Drawn?.Invoke(this, ctx);

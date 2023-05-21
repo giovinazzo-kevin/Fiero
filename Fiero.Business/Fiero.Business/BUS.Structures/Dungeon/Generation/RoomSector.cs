@@ -342,7 +342,27 @@ namespace Fiero.Business
                     .SelectMany(c => new[] { c.Start, c.End })
                     .Where(connectors.Contains);
                 foreach (var conn in connectors)
-                    conn.IsActive = protectedConnectors.Contains(conn);
+                    conn.IsUsed = protectedConnectors.Contains(conn);
+            }
+        }
+
+        public static void MarkSharedConnectors(IEnumerable<RoomSector> sectors)
+        {
+            var pairs = sectors.SelectMany(s => s.Rooms)
+                .SelectMany(r => r.GetConnectors())
+                .Pairs();
+            foreach (var pair in pairs)
+            {
+                var a = Shapes.Line(pair.Left.Edge.Left, pair.Left.Edge.Right);
+                var b = Shapes.Line(pair.Right.Edge.Left, pair.Right.Edge.Right);
+                var ca = a.Count();
+                var cb = b.Count();
+                var ci = a.Intersect(b).Count();
+                if (ci == ca || ci == cb)
+                {
+                    pair.Left.IsHidden = true;
+                    pair.Right.IsHidden = true;
+                }
             }
         }
 

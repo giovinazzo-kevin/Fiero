@@ -8,7 +8,12 @@ namespace Fiero.Business
 {
     public class SewersBranchGenerator : BranchGenerator
     {
-        static bool GKRAdded = false;
+        public static readonly DungeonTheme Theme = DungeonTheme.Default with
+        {
+            WallTile = (c => DungeonTheme.Default.WallTile(c).WithCustomColor(ColorName.LightGreen)),
+            GroundTile = (c => DungeonTheme.Default.GroundTile(c).WithCustomColor(ColorName.Green))
+        };
+
 
         public override Floor GenerateFloor(FloorId floorId, FloorBuilder builder)
         {
@@ -16,10 +21,37 @@ namespace Fiero.Business
             {
                 _ => (new Coord(50, 50), new Coord(2, 2)),
             };
-            var roomSectors = RoomSector.CreateTiling((size - Coord.PositiveOne) / subdivisions, subdivisions, CreateRoom, new Dice(1, 2))
+            var roomSectors = RoomSector.CreateTiling(size, subdivisions, CreateRoom)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2))
                 .ToList();
+
+            // MarkActiveConnectors will flag all room connectors that are being
+            // used either as part of an intra- or of an inter-sector corridor.
+            // This lets the room know which points should remain connected.
+            foreach (var sector in roomSectors)
+            {
+                sector.MarkActiveConnectors(corridors);
+                if (sector.Rooms.FirstOrDefault(x => x.Disconnected) is { } disc)
+                {
+                    ;
+                }
+            }
+
+            var tree = RoomTree.Build(
+                roomSectors.SelectMany(s => s.Rooms).ToArray(),
+                corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
+            );
+            tree.SetTheme(Theme,
+                prefab => prefab is EmptyRoom
+                       || prefab is Corridor);
+
+            var roomCount = roomSectors.SelectMany(x => x.Rooms).Count();
+            Console.WriteLine($"RoomCount: {roomCount}");
+            Console.WriteLine($"CorridorCount: {corridors.Count + roomSectors.SelectMany(x => x.Corridors).Count()}");
+            Console.WriteLine($"TreeNodeCount: {tree.Nodes.Count()}");
+            Console.WriteLine($"TreeCorridorCount: {tree.Corridors.Count()}");
+
 
             var numSecrets = new Dice(2, 2);
             // Secret corridors have fake doors that look just like walls!
@@ -29,22 +61,8 @@ namespace Fiero.Business
                 var sector = Rng.Random.Choose(roomSectors);
                 sector.MarkSecretCorridors(n);
             }
-            // MarkActiveConnectors will flag all room connectors that are being
-            // used either as part of an intra- or of an inter-sector corridor.
-            // This lets the room know which points should remain connected.
-            foreach (var sector in roomSectors)
-            {
-                sector.MarkActiveConnectors(corridors);
-            }
 
-            var tree = RoomTree.Build(
-                roomSectors.SelectMany(s => s.Rooms).ToArray(),
-                corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
-            );
-
-            var centralNode = tree.Traverse()
-                .Select(x => x.Child)
-                .Distinct()
+            var centralNode = tree.Nodes
                 .MaxBy(x => x.Centrality);
 
             return builder
@@ -80,7 +98,6 @@ namespace Fiero.Business
                     //(() => new CrampedRoom() ,  44.25f),
                     (() => new EmptyRoom() ,    44.25f)
                 })();
-
                 room.Drawn += (r, ctx) =>
                 {
                     var area = r.GetRects().Count(); // Chances are not actually per-room but per room square

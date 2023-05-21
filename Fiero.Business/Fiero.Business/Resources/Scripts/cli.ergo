@@ -24,4 +24,10 @@ command(Spawn) :-
 command(spawn) :-
 	bagof(Thing, spawn(Thing), Things),
 	write(Things), nl.
+%%% Sets the RNG seed to a known hex string
+command(SetRngSeed) :-
+	str_fmt('seed {0}', [Num], SetRngSeed) -> (
+	set_rng_seed(Num) -> (write('seed set to: '), write(Num), nl)
+					   ; (write('couldn\'t set seed to: '), write(Num), nl)
+	).
 	

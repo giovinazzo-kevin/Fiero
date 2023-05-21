@@ -13,8 +13,15 @@ namespace Fiero.Business
             AllowItems = false;
         }
 
-        protected override TileDef WallTile(Coord c) => base.WallTile(c).WithCustomColor(ColorName.White);
-        protected override TileDef GroundTile(Coord c) => base.GroundTile(c).WithCustomColor(ColorName.White);
+        protected override DungeonTheme CustomizeTheme(DungeonTheme theme)
+        {
+            theme = base.CustomizeTheme(theme);
+            return theme with
+            {
+                WallTile = (c => theme.WallTile(c).WithCustomColor(ColorName.White)),
+                GroundTile = (c => theme.GroundTile(c).WithCustomColor(ColorName.White)),
+            };
+        }
 
         public override void Draw(FloorGenerationContext ctx)
         {

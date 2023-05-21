@@ -5,30 +5,79 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-
-    public class Corridor : IFloorGenerationPrefab
+    public class Corridor : ThemedFloorGenerationPrefab
     {
         public RoomConnector Start { get; private set; }
         public RoomConnector End { get; private set; }
-        public ColorName Color { get; set; }
+        public int MiddleThickness { get; private set; } = 1;
+        public int StartThickness { get; private set; } = 1;
+        public int EndThickness { get; private set; } = 1;
 
-        public readonly Coord[] Points;
+        public int EffectiveStartThickness => HasMiddleJoint ? StartThickness : MiddleThickness;
+        public int EffectiveEndThickness => HasMiddleJoint ? EndThickness : MiddleThickness;
 
-        protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
-        protected virtual TileDef GroundTile(Coord c) => new(TileName.Corridor, c, Color);
-        protected virtual EntityBuilder<Feature> DoorFeature(GameEntityBuilders e, Coord c) => e.Feature_Door();
-        protected virtual Chance DoorChance() => new(1, 3);
+        public Coord[] Points { get; private set; }
 
-        public Corridor(RoomConnector a, RoomConnector b, ColorName color)
+        public int Length { get; private set; }
+        public bool HasMiddleJoint { get; private set; }
+
+        public Corridor(RoomConnector a, RoomConnector b)
         {
             Start = a;
             End = b;
-            Color = color;
-            Points = Generate().ToArray();
+            UpdateGeometry();
+        }
+
+        protected void UpdateGeometry()
+        {
+            var (a, b) = (Start, End);
+            var aEdge = new Line(a.Edge.Left, a.Edge.Right);
+            var bEdge = new Line(b.Edge.Left, b.Edge.Right);
+            var aPoints = Shapes.Line(aEdge.Start, aEdge.End).ToHashSet();
+            var bPoints = Shapes.Line(bEdge.Start, bEdge.End).ToHashSet();
+            var (aMidSide, bMidSide) = (aEdge.DeterminePointSide(b.Middle), bEdge.DeterminePointSide(a.Middle));
+            Points = Generate()
+                // Generates creates a thick corridor that may exceed the edge of the connectors
+                // so we need to trim the excess by removing all points that fall on the wrong side
+                .Where(p =>
+                {
+                    var (aPSide, bPSide) = (aEdge.DeterminePointSide(p), bEdge.DeterminePointSide(p));
+                    if (aPSide != aMidSide || bPSide != bMidSide) return false;
+                    // Also remove points falling directly on the connector, as we need to draw the door frame there
+                    if (aPoints.Contains(p) || bPoints.Contains(p)) return false;
+                    return true;
+                })
+                .ToArray();
+        }
+
+        protected override DungeonTheme CustomizeTheme(DungeonTheme theme)
+        {
+            theme = base.CustomizeTheme(theme);
+
+            var roll = theme.CorridorThickness
+                .Roll();
+            if (theme.UnevenCorridors)
+            {
+                StartThickness = roll.Take(1).Single();
+                EndThickness = roll.Take(1).Single();
+                MiddleThickness = roll.Take(1).Single();
+            }
+            else
+            {
+                StartThickness = MiddleThickness = EndThickness = roll.Take(1).Single();
+            }
+            if (Start != null && End != null)
+                UpdateGeometry();
+
+            return theme with
+            {
+                GroundTile = (c => new(TileName.Corridor, c, theme.GroundTile(c).Color))
+            };
         }
 
         IEnumerable<Coord> Generate()
         {
+            Length = 0;
             var startMiddle = Start.Middle;
             var endMiddle = End.Middle;
             var v1 = (Start.Edge.Left - Start.Edge.Right).Clamp(-1, 1);
@@ -40,6 +89,8 @@ namespace Fiero.Business
             var middle = (startMiddle + endMiddle) / 2;
             var l1 = new Line(startMiddle, startMiddle + new Coord(v1.Y, v1.X));
             var l2 = new Line(endMiddle, endMiddle + new Coord(v2.Y, v2.X));
+            HasMiddleJoint = !((middle.X == startMiddle.X && middle.X == endMiddle.X)
+                || (middle.Y == startMiddle.Y && middle.Y == endMiddle.Y));
             if (!l1.IsParallel(l2))
             {
                 middle = new(
@@ -51,43 +102,102 @@ namespace Fiero.Business
             {
                 case 0:
                 case 180:
-                    foreach (var p in Shapes.Line(startMiddle, connectStart = new(startMiddle.X, middle.Y))) yield return p;
+                    connectStart = new(startMiddle.X, middle.Y);
+                    Length += startMiddle.DistManhattan(connectStart);
+                    foreach (var p in Shapes.ThickLine(startMiddle, connectStart, EffectiveStartThickness))
+                        yield return p;
                     break;
                 case 90:
                 case 270:
-                    foreach (var p in Shapes.Line(startMiddle, connectStart = new(middle.X, startMiddle.Y))) yield return p;
+                    connectStart = new(middle.X, startMiddle.Y);
+                    Length += startMiddle.DistManhattan(connectStart);
+                    foreach (var p in Shapes.ThickLine(startMiddle, connectStart, EffectiveStartThickness)) yield return p;
                     break;
             }
             switch (d2.Mod(360))
             {
                 case 0:
                 case 180:
-                    foreach (var p in Shapes.Line(endMiddle, connectEnd = new(endMiddle.X, middle.Y))) yield return p;
+                    connectEnd = new(endMiddle.X, middle.Y);
+                    Length += endMiddle.DistManhattan(connectEnd);
+                    foreach (var p in Shapes.ThickLine(endMiddle, connectEnd, EffectiveEndThickness)) yield return p;
                     break;
                 case 90:
                 case 270:
-                    foreach (var p in Shapes.Line(endMiddle, connectEnd = new(middle.X, endMiddle.Y))) yield return p;
+                    connectEnd = new(middle.X, endMiddle.Y);
+                    Length += endMiddle.DistManhattan(connectEnd);
+                    foreach (var p in Shapes.ThickLine(endMiddle, connectEnd, EffectiveEndThickness)) yield return p;
                     break;
             }
-            foreach (var p in Shapes.Line(connectStart, connectEnd)) yield return p;
+            if (HasMiddleJoint)
+            {
+                Length += connectStart.DistManhattan(connectEnd);
+                foreach (var p in Shapes.ThickLine(connectStart, connectEnd, MiddleThickness))
+                    yield return p;
+            }
         }
 
-        public virtual void Draw(FloorGenerationContext ctx)
+        public virtual void DrawPoints(FloorGenerationContext ctx)
         {
             foreach (var p in Points)
-            {
-                ctx.Draw(p, GroundTile);
-            }
+                ctx.Draw(p, Theme.GroundTile);
+        }
+
+        public virtual void DrawDoors(FloorGenerationContext ctx, bool start = true, bool end = true)
+        {
             var startMiddle = (Start.Edge.Left + Start.Edge.Right) / 2;
             var endMiddle = (End.Edge.Left + End.Edge.Right) / 2;
-            if (DoorChance().Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle))
+            if (start
+                && Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle)
+                && (EffectiveStartThickness) % 2 == 1) // don't draw doors when the thickness is even: they're ugly
             {
-                ctx.TryAddFeature(nameof(FeatureName.Door), startMiddle, e => DoorFeature(e, startMiddle));
+                DrawDoorAndFrame(Start);
             }
-            if (DoorChance().Check() && !ctx.GetObjects().Any(obj => obj.Position == endMiddle))
+            else if (start)
             {
-                ctx.TryAddFeature(nameof(FeatureName.Door), endMiddle, e => DoorFeature(e, endMiddle));
+                DrawOpenFrame(Start);
             }
+            if (end
+                && Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == endMiddle)
+                && (EffectiveEndThickness) % 2 == 1) // TODO: Add double door for 2-wide?
+            {
+                DrawDoorAndFrame(End);
+            }
+            else if (end)
+            {
+                DrawOpenFrame(End);
+            }
+
+            void DrawOpenFrame(RoomConnector edge)
+            {
+                foreach (var p in Shapes.Line(edge.Edge.Left, edge.Edge.Right))
+                {
+                    if (!Points.Any(q => q.CardinallyAdjacent(p)))
+                        continue;
+                    ctx.SetTile(p, Theme.GroundTile(p));
+                }
+            }
+
+            void DrawDoorAndFrame(RoomConnector edge)
+            {
+                foreach (var p in Shapes.Line(edge.Edge.Left, edge.Edge.Right))
+                {
+                    if (!Points.Any(q => q.CardinallyAdjacent(p)))
+                        continue;
+                    ctx.SetTile(p, Theme.WallTile(p));
+                    if (p == edge.Middle)
+                    {
+                        ctx.SetTile(p, Theme.GroundTile(p));
+                        ctx.TryAddFeature(nameof(FeatureName.Door), p, e => Theme.DoorFeature(e, startMiddle));
+                    }
+                }
+            }
+        }
+
+        public override void Draw(FloorGenerationContext ctx)
+        {
+            DrawPoints(ctx);
+            DrawDoors(ctx);
         }
     }
 }

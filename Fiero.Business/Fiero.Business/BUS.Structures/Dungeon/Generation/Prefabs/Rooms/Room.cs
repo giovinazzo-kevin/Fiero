@@ -7,7 +7,7 @@ using System.Linq;
 namespace Fiero.Business
 {
 
-    public abstract class Room : IFloorGenerationPrefab
+    public abstract class Room : ThemedFloorGenerationPrefab
     {
         protected readonly HashSet<IntRect> Rects;
         protected readonly HashSet<int> Indices;
@@ -22,8 +22,7 @@ namespace Fiero.Business
         public bool AllowItems { get; protected set; } = true;
         public bool AllowFeatures { get; protected set; } = true;
 
-        protected virtual TileDef WallTile(Coord c) => new(TileName.Wall, c);
-        protected virtual TileDef GroundTile(Coord c) => new(TileName.Room, c);
+        public bool Disconnected => !Connectors.Any(x => x.IsActive);
 
         public IEnumerable<IntRect> GetRects() => Rects;
         public IEnumerable<int> GetIndices() => Indices;
@@ -43,29 +42,24 @@ namespace Fiero.Business
             Position = Rects.Min(r => r.Position());
             Size = Rects.Max(r => r.Position() + r.Size() - Position);
             Connectors.Clear();
-            Connectors.AddRange(SelectConnectors());
-        }
-
-        protected virtual IEnumerable<RoomConnector> SelectConnectors()
-        {
-            return Rects.SelectMany(r => r.GetEdges())
+            Connectors.AddRange(Rects.SelectMany(r => r.GetEdges())
                 .ToLookup(r => r)
                 .Where(l => l.Count() == 1)
                 .SelectMany(l => l)
-                .Select(l => new RoomConnector(this, l));
+                .Select(l => new RoomConnector(this, l)));
         }
 
         public IEnumerable<RoomConnector> GetConnectors() => Connectors;
 
-        public virtual void Draw(FloorGenerationContext ctx)
+        public override void Draw(FloorGenerationContext ctx)
         {
             foreach (var rect in Rects)
             {
-                ctx.FillBox(rect.Position(), rect.Size(), GroundTile);
+                ctx.FillBox(rect.Position(), rect.Size(), Theme.GroundTile);
             }
-            foreach (var conn in SelectConnectors())
+            foreach (var conn in Connectors)
             {
-                ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, WallTile);
+                ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
             }
             Drawn?.Invoke(this, ctx);
         }

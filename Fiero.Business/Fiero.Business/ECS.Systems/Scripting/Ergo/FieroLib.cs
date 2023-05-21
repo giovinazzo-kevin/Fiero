@@ -23,6 +23,7 @@ public class FieroLib : Library
     {
         ServiceFactory = sp;
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<Spawn>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<SetRngSeed>());
         _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }
 

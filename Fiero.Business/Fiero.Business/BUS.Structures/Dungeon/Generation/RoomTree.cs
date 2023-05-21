@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace Fiero.Business
@@ -42,22 +44,45 @@ namespace Fiero.Business
             Root = root;
         }
 
+        public IEnumerable<Node> Nodes => Traverse().Select(x => x.Child).Distinct();
+        public IEnumerable<Corridor> Corridors => Traverse().Select(x => x.Link).Where(x => x is not null).Distinct();
         public IEnumerable<(Node Parent, Corridor Link, Node Child)> Traverse()
         {
-            var visited = new HashSet<Node>();
-            foreach (var rest in Inner(Root, visited))
-                yield return rest;
-            IEnumerable<(Node P, Corridor C, Node N)> Inner(Node root, HashSet<Node> visited)
+            var visitedRooms = new Dictionary<Room, int>();
+            var visitedCorridors = new Dictionary<Corridor, int>();
+            visitedRooms[Root.Room] = 1;
+            yield return (null, null, Root);
+            foreach (var result in Inner(Root, null, visitedRooms, visitedCorridors))
+                yield return result;
+
+            IEnumerable<(Node P, Corridor C, Node N)> Inner(Node current, Corridor prevCorridor, Dictionary<Room, int> visitedRooms, Dictionary<Corridor, int> visitedCorridors)
             {
-                visited.Add(root);
-                foreach (var (c, n) in root.Links)
+                foreach (var (corridor, next) in current.Links)
                 {
-                    if (visited.Contains(n))
+                    if (visitedCorridors.ContainsKey(corridor) || visitedRooms.ContainsKey(next.Room) && visitedRooms[next.Room] > 1)
                         continue;
-                    yield return (root, c, n);
-                    foreach (var rest in Inner(n, visited))
-                        yield return rest;
+
+                    visitedRooms[next.Room] = visitedRooms.ContainsKey(next.Room) ? visitedRooms[next.Room] + 1 : 1;
+                    visitedCorridors[corridor] = visitedCorridors.ContainsKey(corridor) ? visitedCorridors[corridor] + 1 : 1;
+
+                    yield return (current, corridor, next);
+                    foreach (var result in Inner(next, corridor, visitedRooms, visitedCorridors))
+                        yield return result;
                 }
+            }
+        }
+
+        public void SetTheme(DungeonTheme theme, Func<IFloorGenerationPrefab, bool> pred = null)
+        {
+            pred ??= _ => true;
+            if (pred(Root.Room))
+                Root.Room.Theme = theme;
+            foreach (var (_, corridor, child) in Traverse())
+            {
+                if (pred(corridor))
+                    corridor.Theme = theme;
+                if (pred(child.Room))
+                    child.Room.Theme = theme;
             }
         }
 
@@ -81,11 +106,13 @@ namespace Fiero.Business
                 var linksFwd = corridors
                     .Where(c => c.Start.Owner == node.Room);
 
+                var any = false;
                 foreach (var bwd in linksBwd)
                 {
                     var r = GetOrCreate(bwd.Start.Owner);
                     r.TryLink(bwd, node);
                     stack.Push(r);
+                    any = true;
                 }
 
                 foreach (var fwd in linksFwd)
@@ -93,33 +120,44 @@ namespace Fiero.Business
                     var r = GetOrCreate(fwd.End.Owner);
                     node.TryLink(fwd, r);
                     stack.Push(r);
+                    any = true;
+                }
+
+                if (!any)
+                {
+                    // throw new ArgumentException(nameof(node));
                 }
 
                 seen.Add(node);
             }
             var tree = new RoomTree(dict.Values.First());
-            // Now that the tree is built we can post-process it in order to calculate:
-            // - Centrality (high centrality = more connectedness)
+            // Now that the tree is built we can post-process it in order to:
+            // - Calculate the centrality of the graph to determine the spawn point
             foreach (var node in seen)
+            {
                 node.ComputeCentrality(tree.Root);
+            }
             return tree;
+
             Node GetOrCreate(Room r) => dict.TryGetValue(r, out var ret) ? ret : dict[r] = Node.Root(r);
         }
 
         public void Draw(FloorGenerationContext ctx)
         {
             var drawnRooms = new HashSet<Node>();
-            Root.Room.Draw(ctx);
-            foreach (var (_, corridor, child) in Traverse())
+            foreach (var child in Nodes)
             {
                 if (child != null && !drawnRooms.Contains(child))
                 {
                     child.Room.Draw(ctx);
                     drawnRooms.Add(child);
                 }
-                if (corridor != null)
-                    corridor.Draw(ctx);
             }
+            //foreach (var corridor in Corridors)
+            //{
+            //    corridor.Draw(ctx);
+            //}
+            new CorridorLayer(Corridors).Draw(ctx);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Fiero.Business
             .WithActorInfo(ActorName.Monster)
             .WithRace(RaceName.Monster)
             .WithNpcInfo(NpcName.Monster)
-            .WithFaction(FactionName.None)
+            .WithFaction(FactionName.Monsters)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithEquipment()
             .WithFieldOfView(5)
@@ -132,7 +132,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Potion> Potion(EffectDef quaffEffect, EffectDef throwEffect)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
+            var rng = Rng.SeededInstance(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
 
             var adjectives = new[] {
                 "swirling", "warm", "slimy", "dilute", "clear", "foaming", "fizzling",
@@ -200,7 +200,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Wand> Wand(EffectDef effect, int charges)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
+            var rng = Rng.SeededInstance(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
 
             var adjectives = new[] {
                 "crooked", "rotten", "engraved", "carved", "gnarled", "twisted", "long",
@@ -244,7 +244,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Scroll> Scroll(EffectDef effect, ScrollModifierName modifier)
         {
-            var rng = Rng.Seeded(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
+            var rng = Rng.SeededInstance(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
             var label = ScrollLabel();
             return Throwable<Scroll>(
                 @throw: ThrowName.Line,

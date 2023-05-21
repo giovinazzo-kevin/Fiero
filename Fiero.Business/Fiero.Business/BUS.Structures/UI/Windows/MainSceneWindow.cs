@@ -21,6 +21,7 @@ namespace Fiero.Business
         protected Label CurrentTurnLabel { get; private set; }
         protected Label CurrentPlaceLabel { get; private set; }
         protected Label CurrentPosLabel { get; private set; }
+        protected Label RngSeedLabel { get; private set; }
 
         protected readonly ActionSystem ActionSystem;
 
@@ -107,7 +108,8 @@ namespace Fiero.Business
                 PlayerDescLabel.Text.V = $"Level {following.ActorProperties.Level.V} {following.ActorProperties.Race}";
                 CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
-                CurrentPosLabel.Text.V = $"X:{position.X};Y:{position.Y}";
+                CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
+                RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {
@@ -143,12 +145,13 @@ namespace Fiero.Business
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;
 
+        const int UISize = 240;
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
-                .Col(w: 160, px: true, @class: "stat-panel")
+                .Col(w: UISize, px: true, @class: "stat-panel")
                     .Row(h: 24, px: true, id: "name", @class: "center")
                         .Cell<Label>(x => PlayerNameLabel = x)
                     .End()
@@ -181,7 +184,7 @@ namespace Fiero.Business
                             .Cell<Label>(x => CurrentPlaceLabel = x)
                         .End()
                     .End()
-                    .Row(h: 160, px: true, id: "mini-map")
+                    .Row(h: UISize, px: true, id: "mini-map")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
@@ -189,13 +192,13 @@ namespace Fiero.Business
                         .Col(id: "pos")
                             .Cell<Label>(x => CurrentPosLabel = x)
                         .End()
-                        .Col()
-                            .Cell<Layout>()
+                        .Col(id: "seed", @class: "right")
+                            .Cell<Label>(x => RngSeedLabel = x)
                         .End()
                     .End()
                 .End()
             .End()
-            .Row(h: 160, px: true, id: "log-panel")
+            .Row(h: UISize, px: true, id: "log-panel")
                 .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
     }

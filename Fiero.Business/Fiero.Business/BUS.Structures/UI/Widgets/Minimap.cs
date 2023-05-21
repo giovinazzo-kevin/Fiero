@@ -101,7 +101,7 @@ namespace Fiero.Business
                         using var sprite = new Sprite(whitePixel.Texture);
                         sprite.Color = Colors.Get(drawable switch
                         {
-                            Feature x when x.FeatureProperties.Name == FeatureName.Door && x.Physics.BlocksLight => ColorName.White,
+                            Feature x when x.FeatureProperties.Name == FeatureName.Door && x.Physics.BlocksLight => ColorName.Yellow,
                             Tile x when x.TileProperties.Name == TileName.Corridor && seen => ColorName.LightMagenta,
                             Tile x when x.TileProperties.Name == TileName.Corridor => ColorName.Magenta,
                             Tile x when x.Physics.BlocksMovement => ColorName.White,

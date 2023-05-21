@@ -8,10 +8,16 @@ namespace Fiero.Core
     {
         public static IEnumerable<Coord> Box(Coord center, int side)
         {
-            side /= 2;
-            for (int x = -side; x <= side; x++)
+            int halfSide = side / 2;
+            int start = -halfSide;
+            int end = halfSide;
+
+            if (side % 2 == 0)
+                end--;
+
+            for (int x = start; x <= end; x++)
             {
-                for (int y = -side; y <= side; y++)
+                for (int y = start; y <= end; y++)
                 {
                     yield return center + new Coord(x, y);
                 }
@@ -132,6 +138,16 @@ namespace Fiero.Core
                 if (e2 > -dx) { er -= dy; start = new(start.X + sx, start.Y); }
                 if (e2 < dy) { er += dx; start = new(start.X, start.Y + sy); }
             }
+        }
+
+        public static IEnumerable<Coord> ThickLine(Coord start, Coord end, int thickness)
+        {
+            if (thickness <= 0)
+                return Enumerable.Empty<Coord>();
+            var len = start.DistChebyshev(end);
+            return Line(start, end)
+                .SelectMany(p => Box(p, thickness))
+                .Where(p => p.DistChebyshev(start) <= len && p.DistChebyshev(end) <= len);
         }
     }
 }

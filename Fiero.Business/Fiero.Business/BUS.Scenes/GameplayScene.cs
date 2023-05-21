@@ -53,8 +53,8 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
+            GenerateNewRngSeed();
             SubscribeDialogueHandlers();
-
             // TODO: Move dialogue handlers to Ergo scripts!
             void SubscribeDialogueHandlers()
             {
@@ -163,7 +163,6 @@ namespace Fiero.Business.Scenes
             // ActionSystem.GameStarted:
             // - Clear old entities and references if present
             // - Clear scratch textures for procedural sprites
-            // - Generate a new RNG seed
             // - Generate map
             // - Create and spawn player
             // - Set faction Relations to default values
@@ -175,9 +174,6 @@ namespace Fiero.Business.Scenes
                 Resources.Sprites.ClearProceduralSprites();
                 QuickSlots.UnsetAll();
                 Entities.Clear(true);
-
-                var newRngSeed = (int)DateTime.Now.ToBinary();
-                Store.SetValue(Data.Global.RngSeed, newRngSeed);
 
                 // Create player
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
@@ -207,7 +203,7 @@ namespace Fiero.Business.Scenes
                     )
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
-                    //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
+                    .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
 
                 // Generate map
@@ -506,6 +502,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorDespawned:
             // - Handle game over when the player dies
             // - Remove entity from floor and action systems and handle cleanup
+            // - Generate a new RNG seed
             yield return Systems.Action.ActorDespawned.SubscribeResponse(e =>
             {
                 var wasPlayer = e.Actor.IsPlayer();
@@ -516,6 +513,7 @@ namespace Fiero.Business.Scenes
                 Entities.RemoveFlagged(true);
                 if (wasPlayer)
                 {
+                    GenerateNewRngSeed();
                     TrySetState(SceneState.Main);
                 }
                 return true;
@@ -925,7 +923,7 @@ namespace Fiero.Business.Scenes
                     {
                         return false; // Sorry monsters
                     }
-                    var chestRng = Rng.Seeded(e.Feature.Id);
+                    var chestRng = Rng.SeededInstance(e.Feature.Id);
                     if (Chance.Check(chestRng, 1, 10))
                     {
                         // Spawn a mimic, log a message and play a sound
@@ -1013,12 +1011,27 @@ namespace Fiero.Business.Scenes
             });
         }
 
+        public void GenerateNewRngSeed()
+        {
+            var newRngSeed = (int)DateTime.Now.ToBinary();
+            Store.SetValue(Data.Global.RngSeed, newRngSeed);
+            Rng.SetGlobalSeed(newRngSeed);
+        }
+
         public override void Update()
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(Key.R))
             {
+                if (UI.Input.IsKeyDown(Key.LShift))
+                {
+                    GenerateNewRngSeed();
+                }
+                else
+                {
+                    Rng.SetGlobalSeed(Store.Get(Data.Global.RngSeed));
+                }
                 TrySetState(SceneState.Main);
             }
         }

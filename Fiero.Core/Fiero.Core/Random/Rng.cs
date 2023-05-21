@@ -12,6 +12,12 @@ namespace Fiero.Core
             return new Random(seed);
         });
         public static Random Random => _rng.Value;
-        public static Random Seeded(int seed) => new(seed);
+        public static Random SeededInstance(int seed) => new(seed);
+        public static void SetGlobalSeed(int seed)
+        {
+            _staticSeed = seed;
+            _rng.Value = new Random(seed);
+        }
+        public static int GetGlobalSeed() => _staticSeed;
     }
 }

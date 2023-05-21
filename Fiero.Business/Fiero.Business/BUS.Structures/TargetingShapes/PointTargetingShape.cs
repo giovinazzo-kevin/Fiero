@@ -23,7 +23,7 @@ namespace Fiero.Business
         public override bool TryOffset(Coord offs)
         {
             var newOffset = Offset + offs;
-            if (Math.Abs((Origin + newOffset).DistTaxi(Origin)) > MaxRange)
+            if (Math.Abs((Origin + newOffset).DistManhattan(Origin)) > MaxRange)
             {
                 return false;
             }

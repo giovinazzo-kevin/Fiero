@@ -86,6 +86,7 @@ namespace Fiero.Business
         public IEnumerable<ObjectDef> GetObjectsAt(Coord p) => Objects.TryGetValue(p, out var set) ? set : Enumerable.Empty<ObjectDef>();
         public IEnumerable<TileDef> GetTiles() => Tiles.Values;
         public TileDef GetTile(Coord p) => Tiles[p];
+        public bool TryGetTile(Coord p, out TileDef tile) => Tiles.TryGetValue(p, out tile);
         /// Returns all tiles without dungeon features
         public IEnumerable<TileDef> GetEmptyTiles() => Tiles
                 .Where(x => !GetObjectsAt(x.Key).Where(x => x.IsFeature).Any())

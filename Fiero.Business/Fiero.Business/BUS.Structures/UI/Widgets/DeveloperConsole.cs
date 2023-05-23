@@ -146,7 +146,7 @@ namespace Fiero.Business
             .AddRule<Paragraph>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
-                p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
+                p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Padding.V = new(ts, ts);
                 p.Cols.V = p.ContentRenderSize.X / p.FontSize.V.X;
@@ -162,7 +162,7 @@ namespace Fiero.Business
             }))
             .AddRule<UIControl>(r => r.Apply(x =>
             {
-                x.OutlineColor.V = Colors.Get(ColorName.White).AddAlpha(-128);
+                x.OutlineColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
                 x.OutlineThickness.V = 1;
             }))
             ;

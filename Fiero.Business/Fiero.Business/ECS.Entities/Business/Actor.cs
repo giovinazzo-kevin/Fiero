@@ -3,6 +3,7 @@ using Fiero.Core;
 
 namespace Fiero.Business
 {
+    [Term(Marshalling = TermMarshalling.Named)]
     public class Actor : PhysicalEntity
     {
         [NonTerm]
@@ -27,7 +28,6 @@ namespace Fiero.Business
         public FieldOfViewComponent Fov { get; private set; }
         [NonTerm]
         public SpellLibraryComponent Spells { get; private set; }
-        [NonTerm]
         public PartyComponent Party { get; private set; }
     }
 }

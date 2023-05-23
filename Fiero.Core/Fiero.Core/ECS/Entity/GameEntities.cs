@@ -321,6 +321,14 @@ namespace Fiero.Core
             }
         }
 
+
+        public void Update<TComponent>(int entityId, TComponent copyProperties)
+            where TComponent : EcsComponent
+            => Update<TComponent>(entityId, comp =>
+        {
+
+        });
+
         public void Update<TComponent>(int entityId, Action<TComponent> update)
             where TComponent : EcsComponent
         {

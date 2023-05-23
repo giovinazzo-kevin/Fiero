@@ -7,21 +7,12 @@ using Ergo.Solver.BuiltIns;
 using Fiero.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Fiero.Business;
 
 [SingletonDependency]
 public sealed class CastEntity : GameEntitiesBuiltIn
 {
-    public static readonly IReadOnlyDictionary<string, Type> ProxyableTypes = Assembly.GetExecutingAssembly()
-        .GetTypes()
-        .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(Entity)))
-        .ToDictionary(x => x.Name.ToErgoCase());
-    public static readonly MethodInfo TryGetProxy = typeof(GameEntities)
-        .GetMethod(nameof(GameEntities.TryGetProxy), BindingFlags.Instance | BindingFlags.Public);
-
     public CastEntity(GameEntities entities, GameDataStore store)
         : base("", new("cast_entity"), 3, entities, store)
     {
@@ -30,7 +21,7 @@ public sealed class CastEntity : GameEntitiesBuiltIn
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
     {
         var (entityId, proxyType, cast) = (arguments[0], arguments[1], arguments[2]);
-        if (!proxyType.IsGround || !ProxyableTypes.TryGetValue(proxyType.Explain(), out var type))
+        if (!proxyType.IsGround || !ProxyableEntityTypes.TryGetValue(proxyType.Explain(), out var type))
         {
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.EntityType, proxyType.Explain());
             yield break;

@@ -205,6 +205,7 @@ namespace Fiero.Business.Scenes
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
+                Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Sewers, 1);

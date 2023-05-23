@@ -1,7 +1,12 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
 using Ergo.Solver.BuiltIns;
 using Fiero.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Fiero.Business;
 
@@ -9,6 +14,20 @@ public abstract class GameEntitiesBuiltIn : SolverBuiltIn
 {
     public readonly GameDataStore Store;
     public readonly GameEntities Entities;
+
+    public static readonly IReadOnlyDictionary<string, Type> ProxyableEntityTypes = Assembly.GetExecutingAssembly()
+        .GetTypes()
+        .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(Entity)))
+        .ToDictionary(x => x.Name.ToErgoCase());
+    public static readonly IReadOnlyDictionary<string, Type> ProxyableComponentTypes = Assembly.GetExecutingAssembly()
+        .GetTypes()
+        .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(EcsComponent)))
+        .ToDictionary(x => x.Name.ToErgoCase());
+
+    public static readonly MethodInfo TryGetProxy = typeof(GameEntities)
+        .GetMethod(nameof(GameEntities.TryGetProxy), BindingFlags.Instance | BindingFlags.Public);
+
+
     public GameEntitiesBuiltIn(string doc, Atom functor, Maybe<int> arity, GameEntities entities, GameDataStore store)
         : base(doc, functor, arity, ErgoScriptingSystem.FieroModule)
     {

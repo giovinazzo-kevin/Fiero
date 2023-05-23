@@ -95,7 +95,7 @@ namespace Fiero.Business
         {
             var connectedRooms = new HashSet<Room>();
             var roomPairs = sector.Rooms.Pairs()
-                .OrderBy(p => p.Left.Position.DistSq(p.Right.Position));
+                .OrderBy(p => p.Left.Position.DistManhattan(p.Right.Position));
             foreach (var rp in roomPairs)
             {
                 if (connectedRooms.Contains(rp.Left) && connectedRooms.Contains(rp.Right))
@@ -130,12 +130,12 @@ namespace Fiero.Business
             }
         }
 
-        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors, Dice nBest)
+        public static IEnumerable<Corridor> GenerateInterSectorCorridors(IList<RoomSector> sectors)
         {
             var connectedSectors = new HashSet<UnorderedPair<RoomSector>>();
             var sectorPairs = sectors.Pairs()
                 .Where(s => s.Left.GridPos.CardinallyAdjacent(s.Right.GridPos))
-                .OrderBy(p => p.Left.Sector.Position().DistSq(p.Right.Sector.Position()))
+                .OrderBy(p => p.Left.Sector.Position().DistManhattan(p.Right.Sector.Position()))
                 .ToList()
                 ;
             foreach (var sp in sectorPairs)
@@ -153,7 +153,7 @@ namespace Fiero.Business
                     .ToList();
                 var workingSet = new HashSet<Corridor>(sectors
                     .SelectMany(x => x.Corridors));
-                foreach (var item in Inner().Take(nBest.Roll().Sum()))
+                foreach (var item in Inner().Take(1))
                     yield return item;
                 IEnumerable<Corridor> Inner()
                 {

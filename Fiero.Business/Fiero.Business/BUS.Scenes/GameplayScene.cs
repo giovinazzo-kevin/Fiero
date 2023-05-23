@@ -358,6 +358,8 @@ namespace Fiero.Business.Scenes
             // - Play animation if enabled in the settings or if this is the AutoPlayer
             yield return Systems.Action.ActorMoved.SubscribeResponse(e =>
             {
+                if (e.Actor.IsInvalid())
+                    return true;
                 var floor = Systems.Dungeon.GetFloor(e.Actor.FloorId());
                 floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);

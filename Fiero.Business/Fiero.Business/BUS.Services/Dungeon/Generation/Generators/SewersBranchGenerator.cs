@@ -23,7 +23,7 @@ namespace Fiero.Business
             };
             var roomSectors = RoomSector.CreateTiling(size, subdivisions, CreateRoom)
                 .ToList();
-            var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors, new Dice(1, 2))
+            var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)
                 .ToList();
 
             // MarkActiveConnectors will flag all room connectors that are being

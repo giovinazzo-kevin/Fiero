@@ -12,14 +12,15 @@ namespace Fiero.Core
 
         public int Range { get; }
 
-        public PinkNumber(int range = 128)
+        public PinkNumber(int range = 128, Random rng = null)
         {
             _maxKey = 0x1f; // Five bits set
             Range = range;
             _key = 0;
-            _rng = new Random();
+            _rng = rng ?? new Random();
             _whiteValues = new int[5];
-            for (int i = 0; i < _whiteValues.Length; i++) {
+            for (int i = 0; i < _whiteValues.Length; i++)
+            {
                 _whiteValues[i] = _rng.Next() % (range / 5);
             }
         }
@@ -36,7 +37,8 @@ namespace Fiero.Core
             // a list of bits that have changed.
             int diff = last_key ^ _key;
             sum = 0;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++)
+            {
                 // If bit changed get new random number for corresponding
                 // white_value
                 if ((diff & (1 << i)) != 0)

@@ -1,5 +1,4 @@
 ﻿using SFML.Graphics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +17,6 @@ namespace Fiero.Core
 
         public Sprite Write(char c) => new(Sprites[c]);
         public IEnumerable<Sprite> Write(string s) => s
-            .Select((c, i) => new Sprite(Sprites[c]) { Position = new Coord(i, 0) * Size });
+            .Select((c, i) => new Sprite(c >= 0 && c < Sprites.Length ? Sprites[c] : Sprites['?']) { Position = new Coord(i, 0) * Size });
     }
 }

@@ -9,6 +9,8 @@ namespace Fiero.Business
         public int Roots { get; set; }
         // Can phase through solid objects
         public bool Phasing { get; set; }
+        // Can fly above the ground
+        public bool Flying { get; set; }
         public bool CanMove { get; set; }
         public bool BlocksMovement { get; set; }
         public bool BlocksNpcPathing { get; set; }

@@ -8,6 +8,7 @@ namespace Fiero.Business
         [RequiredComponent]
         public TileComponent TileProperties { get; private set; }
 
+        public double GetCost(PhysicalEntity e) => TileProperties.PathingCost;
         public bool IsWalkable(PhysicalEntity actor) => actor.Physics.Phasing || !Physics.BlocksMovement;
     }
 }

@@ -68,11 +68,7 @@ namespace Fiero.Business
             }
             if (Start != null && End != null)
                 UpdateGeometry();
-
-            return theme with
-            {
-                GroundTile = (c => new(TileName.Corridor, c, theme.GroundTile(c).Color))
-            };
+            return theme;
         }
 
         IEnumerable<Coord> Generate()
@@ -140,7 +136,7 @@ namespace Fiero.Business
         public virtual void DrawPoints(FloorGenerationContext ctx)
         {
             foreach (var p in Points)
-                ctx.Draw(p, Theme.GroundTile);
+                ctx.Draw(p, Theme.CorridorTile);
         }
 
         public virtual void DrawDoors(FloorGenerationContext ctx, bool start = true, bool end = true)
@@ -174,7 +170,7 @@ namespace Fiero.Business
                 {
                     if (!Points.Any(q => q.CardinallyAdjacent(p)))
                         continue;
-                    ctx.SetTile(p, Theme.GroundTile(p));
+                    ctx.SetTile(p, Theme.CorridorTile(p));
                 }
             }
 
@@ -187,7 +183,7 @@ namespace Fiero.Business
                     ctx.SetTile(p, Theme.WallTile(p));
                     if (p == edge.Middle)
                     {
-                        ctx.SetTile(p, Theme.GroundTile(p));
+                        ctx.SetTile(p, Theme.CorridorTile(p));
                         ctx.TryAddFeature(nameof(FeatureName.Door), p, e => Theme.DoorFeature(e, startMiddle));
                     }
                 }

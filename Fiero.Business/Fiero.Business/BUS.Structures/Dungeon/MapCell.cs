@@ -25,6 +25,14 @@ namespace Fiero.Business
                 true => f.Physics.BlocksPlayerPathing,
                 false => f.Physics.BlocksNpcPathing
             });
+        public double GetCost(PhysicalEntity e)
+        {
+            var cost = 0d;
+            if (!IsWalkable(e)) return 1000; // arbitrarily high cost
+            if (e.Physics.Flying && e.Physics.Roots == 0) return 0; // flying units ignore pathing costs unless rooted to the ground
+            cost += Tile.GetCost(e);
+            return cost;
+        }
         public bool BlocksMovement() => Features.Any(f => f.Physics.BlocksMovement) || Tile.Physics.BlocksMovement;
         public IEnumerable<PhysicalEntity> GetDrawables(VisibilityName visibility = VisibilityName.Visible, bool seen = true)
         {

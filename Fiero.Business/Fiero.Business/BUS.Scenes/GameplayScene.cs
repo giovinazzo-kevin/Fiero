@@ -205,7 +205,7 @@ namespace Fiero.Business.Scenes
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .Build();
-
+                Store.SetValue(Data.Player.Id, Player.Id);
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Sewers, 1);
                 Systems.Dungeon.AddDungeon(d => d.WithStep(ctx =>
@@ -925,7 +925,7 @@ namespace Fiero.Business.Scenes
                     {
                         return false; // Sorry monsters
                     }
-                    var chestRng = Rng.SeededInstance(e.Feature.Id);
+                    var chestRng = Rng.SeededRandom(e.Feature.Id);
                     if (Chance.Check(chestRng, 1, 10))
                     {
                         // Spawn a mimic, log a message and play a sound

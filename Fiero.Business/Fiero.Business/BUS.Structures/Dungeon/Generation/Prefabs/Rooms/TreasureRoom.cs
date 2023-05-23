@@ -18,7 +18,7 @@ namespace Fiero.Business
             return theme with
             {
                 WallTile = (c => theme.WallTile(c).WithCustomColor(ColorName.Yellow)),
-                GroundTile = (c => theme.GroundTile(c).WithCustomColor(ColorName.Yellow)),
+                RoomTile = (c => theme.RoomTile(c).WithCustomColor(ColorName.Yellow)),
             };
         }
 

@@ -11,7 +11,8 @@ namespace Fiero.Business
         public static readonly DungeonTheme Theme = DungeonTheme.Default with
         {
             WallTile = (c => DungeonTheme.Default.WallTile(c).WithCustomColor(ColorName.LightGreen)),
-            GroundTile = (c => DungeonTheme.Default.GroundTile(c).WithCustomColor(ColorName.Green))
+            RoomTile = (c => DungeonTheme.Default.RoomTile(c).WithCustomColor(ColorName.Gray)),
+            CorridorTile = (c => DungeonTheme.Default.CorridorTile(c).WithCustomColor(ColorName.Green))
         };
 
 
@@ -90,7 +91,7 @@ namespace Fiero.Business
                 Room room = Rng.Random.ChooseWeighted(new (Func<Room>, float)[] {
                     (() => new ShrineRoom(),    0.5f),
                     (() => new TreasureRoom(),  1.0f),
-                    //(() => new CrampedRoom() ,  44.25f),
+                    (() => new WetFloorSewerRoom() ,  44.25f),
                     (() => new EmptyRoom() ,    44.25f)
                 })();
                 room.Drawn += (r, ctx) =>

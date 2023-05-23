@@ -9,9 +9,9 @@ namespace Fiero.Core
         public double Mean { get; }
         public double StandardDeviation { get; }
 
-        public GaussianNumber(double mean, double stdDev, int range = 128)
+        public GaussianNumber(double mean, double stdDev, int range = 128, Random rng = null)
         {
-            _rng = new Random();
+            _rng = rng ?? new Random();
             Mean = mean;
             StandardDeviation = stdDev;
             Range = range;
@@ -25,7 +25,7 @@ namespace Fiero.Core
             // Random normal(0,1)
             var randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
             // Random normal(mean,stdDev^2)
-            var randNormal = Mean + StandardDeviation * randStdNormal; 
+            var randNormal = Mean + StandardDeviation * randStdNormal;
             return (int)(randNormal * Range);
         }
     }

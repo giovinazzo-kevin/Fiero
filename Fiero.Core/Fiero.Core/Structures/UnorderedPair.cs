@@ -24,6 +24,12 @@
             return false;
         }
 
+        public void Deconstruct(out T left, out T right)
+        {
+            left = Left;
+            right = Right;
+        }
+
         public static bool operator ==(UnorderedPair<T> left, UnorderedPair<T> right)
         {
             return left.Equals(right);

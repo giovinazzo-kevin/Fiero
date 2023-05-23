@@ -1,4 +1,5 @@
-﻿using Ergo.Shell;
+﻿using Ergo.Lang.Extensions;
+using Ergo.Shell;
 using Fiero.Business.Utils;
 using Fiero.Core;
 using System;
@@ -71,7 +72,9 @@ namespace Fiero.Business
 
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
         {
-            _outputBuffer.Append(chunk);
+            _outputBuffer.Append(chunk
+                .Replace("⊤", "true")
+                .Replace("⊥", "false"));
             if (!_delay.IsDebouncing)
             {
                 _delay.Fire += _delay_Fire;
@@ -84,7 +87,10 @@ namespace Fiero.Business
                     .Cast<Paragraph>()
                         .Single();
                 paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
-                    .Replace("\r", string.Empty);
+                    .Replace("\r", string.Empty)
+                    .Split('\n')
+                    .TakeLast(paragraph.Rows.V)
+                    .Join("\n");
                 _outputBuffer.Clear();
             }
         }
@@ -178,5 +184,10 @@ namespace Fiero.Business
                     })
                 .End()
             ;
+
+        public override void Update()
+        {
+            base.Update();
+        }
     }
 }

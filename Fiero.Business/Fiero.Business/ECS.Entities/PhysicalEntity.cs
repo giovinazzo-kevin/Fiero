@@ -8,7 +8,6 @@ namespace Fiero.Business
         [NonTerm]
         [RequiredComponent]
         public PhysicsComponent Physics { get; private set; }
-        [NonTerm]
         public InventoryComponent Inventory { get; private set; }
     }
 }

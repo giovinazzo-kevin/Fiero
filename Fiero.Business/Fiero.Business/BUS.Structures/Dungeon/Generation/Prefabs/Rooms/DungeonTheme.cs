@@ -5,7 +5,9 @@ namespace Fiero.Business
 {
     public readonly record struct DungeonTheme(
         Func<Coord, TileDef> WallTile,
-        Func<Coord, TileDef> GroundTile,
+        Func<Coord, TileDef> RoomTile,
+        Func<Coord, TileDef> CorridorTile,
+        Func<Coord, TileDef> WaterTile,
         Func<GameEntityBuilders, Coord, EntityBuilder<Feature>> DoorFeature,
         Dice CorridorThickness,
         Chance DoorChance,
@@ -15,7 +17,9 @@ namespace Fiero.Business
     {
         public static readonly DungeonTheme Default = new DungeonTheme(
             WallTile: c => new(TileName.Wall, c),
-            GroundTile: c => new(TileName.Room, c),
+            RoomTile: c => new(TileName.Room, c),
+            CorridorTile: c => new(TileName.Corridor, c),
+            WaterTile: c => new(TileName.Water, c, ColorName.LightBlue),
             DoorFeature: (e, c) => e.Feature_Door(),
             CorridorThickness: new(1, 3, (die, side) => 1f / Math.Pow(side, 2)), // thick corridors are rarer
             DoorChance: Chance.FiftyFifty,

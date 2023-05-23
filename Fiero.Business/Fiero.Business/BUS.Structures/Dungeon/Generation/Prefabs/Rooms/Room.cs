@@ -55,7 +55,7 @@ namespace Fiero.Business
         {
             foreach (var rect in Rects)
             {
-                ctx.FillBox(rect.Position(), rect.Size(), Theme.GroundTile);
+                ctx.FillBox(rect.Position(), rect.Size(), Theme.RoomTile);
             }
             foreach (var conn in Connectors)
             {
@@ -64,6 +64,11 @@ namespace Fiero.Business
 
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
             }
+            OnDrawn(ctx);
+        }
+
+        protected void OnDrawn(FloorGenerationContext ctx)
+        {
             Drawn?.Invoke(this, ctx);
         }
     }

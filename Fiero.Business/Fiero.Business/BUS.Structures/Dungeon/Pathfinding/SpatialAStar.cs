@@ -22,18 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+using Fiero.Core;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using Fiero.Core;
 
 namespace Fiero.Business
 {
     public interface IPathNode<TUserContext>
     {
         Boolean IsWalkable(TUserContext inContext);
+        double GetCost(TUserContext inContext);
     }
 
     public interface IIndexedObject
@@ -71,6 +69,8 @@ namespace Fiero.Business
             {
                 return UserContext.IsWalkable(inContext);
             }
+
+            public double GetCost(TUserContext inContext) => UserContext.GetCost(inContext);
 
             public int X { get; internal set; }
             public int Y { get; internal set; }
@@ -122,7 +122,7 @@ namespace Fiero.Business
             var pathNode = new PathNode(xy.X, xy.Y, node);
             var update = m_SearchSpace[xy.X, xy.Y];
             oldValue = update.UserContext;
-            (update.F, update.G, update.H, update.UserContext, update.Index) 
+            (update.F, update.G, update.H, update.UserContext, update.Index)
                 = (pathNode.F, pathNode.G, pathNode.H, pathNode.UserContext, pathNode.Index);
         }
 
@@ -138,7 +138,8 @@ namespace Fiero.Business
             var diffX = Math.Abs(inStart.X - inEnd.X);
             var diffY = Math.Abs(inStart.Y - inEnd.Y);
 
-            return (diffX + diffY) switch {
+            return (diffX + diffY) switch
+            {
                 1 => 1,
                 2 => SQRT_2,
                 0 => 0,
@@ -196,7 +197,7 @@ namespace Fiero.Business
 
                 if (x == endNode)
                 {
-                   // watch.Stop();
+                    // watch.Stop();
 
                     //elapsed.Add(watch.ElapsedMilliseconds);
 
@@ -228,7 +229,7 @@ namespace Fiero.Business
 
                     nodes++;
 
-                    var tentative_g_score = m_RuntimeGrid[x].G + NeighborDistance(x, y);
+                    var tentative_g_score = m_RuntimeGrid[x].G + NeighborDistance(x, y) + y.UserContext.GetCost(inUserContext);
                     var wasAdded = false;
 
                     if (!m_OpenSet.Contains(y))

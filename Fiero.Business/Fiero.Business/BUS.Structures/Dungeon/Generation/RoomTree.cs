@@ -153,10 +153,6 @@ namespace Fiero.Business
                     drawnRooms.Add(child);
                 }
             }
-            //foreach (var corridor in Corridors)
-            //{
-            //    corridor.Draw(ctx);
-            //}
             new CorridorLayer(Corridors).Draw(ctx);
         }
     }

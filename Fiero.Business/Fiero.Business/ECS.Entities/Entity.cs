@@ -3,6 +3,7 @@ using Fiero.Core;
 
 namespace Fiero.Business
 {
+    [Term(Marshalling = TermMarshalling.Named)]
     public class Entity : EcsEntity
     {
         [NonTerm]

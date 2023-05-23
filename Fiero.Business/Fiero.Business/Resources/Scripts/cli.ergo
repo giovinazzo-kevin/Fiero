@@ -30,4 +30,7 @@ command(SetRngSeed) :-
 	set_rng_seed(Num) -> (write('seed set to: '), write(Num), nl)
 					   ; (write('couldn\'t set seed to: '), write(Num), nl)
 	).
-	
+%%% Prints the player entity after casting it to Actor
+command(player) :- 
+	player as actor is Player,
+	write_dict(Player), nl.

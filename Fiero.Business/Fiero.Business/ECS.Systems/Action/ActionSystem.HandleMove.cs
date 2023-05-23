@@ -29,9 +29,9 @@ namespace Fiero.Business
                 action = new WaitAction();
                 cost = HandleAction(t, ref action);
             }
-            else if (_floorSystem.TryGetTileAt(floorId, newPos, out var tile))
+            else if (_floorSystem.TryGetCellAt(floorId, newPos, out var cell))
             {
-                if (t.Actor.Physics.Phasing || !tile.Physics.BlocksMovement)
+                if (cell.IsWalkable(t.Actor))
                 {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
@@ -39,6 +39,9 @@ namespace Fiero.Business
                     {
                         if (t.Actor.Physics.Phasing || !featuresHere.Any(f => f.Physics.BlocksMovement))
                         {
+                            // Movement successful
+                            if (!t.Actor.Physics.Phasing)
+                                cost += cell.Tile.TileProperties.MovementCost;
                             return ActorMoved.Handle(new(t.Actor, oldPos, newPos));
                         }
                         else
@@ -56,12 +59,16 @@ namespace Fiero.Business
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack())
                         {
-                            // attack-bump is a free "combo"
                             action = new MeleeAttackOtherAction(target, t.Actor.Equipment.Weapon);
                             cost = HandleAction(t, ref action);
+                            // Melee-fighting on difficult terrain is the same as moving through it
+                            if (!t.Actor.Physics.Phasing)
+                                cost += cell.Tile.TileProperties.MovementCost;
                         }
                         else if (relationship.IsFriendly())
                         {
+                            if (!t.Actor.Physics.Phasing)
+                                cost += cell.Tile.TileProperties.MovementCost;
                             // you can swap position with allies in twice the amount of time it takes to move
                             cost *= 2;
                             t.Actor.Log.Write($"$Action.YouSwapPlacesWith$ {target.Info.Name}.");
@@ -73,7 +80,7 @@ namespace Fiero.Business
                 }
                 else
                 {
-                    ActorBumpedObstacle.Raise(new(t.Actor, tile));
+                    ActorBumpedObstacle.Raise(new(t.Actor, cell.Tile));
                     return false;
                 }
             }

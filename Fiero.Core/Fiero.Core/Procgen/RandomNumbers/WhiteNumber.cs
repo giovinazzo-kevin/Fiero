@@ -7,9 +7,9 @@ namespace Fiero.Core
         private readonly Random _rng;
         public int Range { get; }
 
-        public WhiteNumber(int range = 128)
+        public WhiteNumber(int range = 128, Random rng = null)
         {
-            _rng = new Random();
+            _rng = rng ?? new Random();
             Range = range;
         }
 

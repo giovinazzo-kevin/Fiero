@@ -130,7 +130,7 @@ namespace Fiero.Core
             {
                 return false;
             }
-            var rng = rngSeed is { } seed ? Rng.SeededInstance(seed) : new Random();
+            var rng = rngSeed is { } seed ? Rng.SeededRandom(seed) : new Random();
             sprite = sprites.Shuffle(rng).First();
             if (dict.TryGetValue($"{key}_Mask", out var masks))
             {

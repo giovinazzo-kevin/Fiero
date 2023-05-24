@@ -1,5 +1,4 @@
-﻿using Ergo.Lang.Extensions;
-using Fiero.Core;
+﻿using Fiero.Core;
 using Fiero.Core.Extensions;
 using Fiero.Core.Structures;
 using SFML.Graphics;
@@ -76,7 +75,6 @@ namespace Fiero.Business
                 })
                 .ToList();
             Corridors = GenerateIntraSectorCorridors(this).ToList();
-            Console.WriteLine($"Rooms: {Rooms.Count}; Corridors: {Corridors.Count}");
         }
 
         public void MarkSecretCorridors(int roll)
@@ -326,10 +324,6 @@ namespace Fiero.Business
             var ret = !DiagonallyAdjacent(discontiguous, a)
                 && closedSet.Count > 0
                 && (maxLength <= 0 || closedSet.Count <= maxLength);
-            if (ret)
-            {
-                Console.WriteLine(closedSet.Join(","));
-            }
             return ret;
         }
 

@@ -23,9 +23,16 @@ public abstract class GameEntitiesBuiltIn : SolverBuiltIn
         .GetTypes()
         .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(EcsComponent)))
         .ToDictionary(x => x.Name.ToErgoCase());
+    public static readonly IReadOnlyDictionary<string, Dictionary<string, PropertyInfo>> ProxyableComponentProperties = Assembly.GetExecutingAssembly()
+        .GetTypes()
+        .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(EcsComponent)))
+        .ToDictionary(x => x.Name.ToErgoCase(), x => x.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(x => x.Name.ToErgoCase()));
 
     public static readonly MethodInfo TryGetProxy = typeof(GameEntities)
         .GetMethod(nameof(GameEntities.TryGetProxy), BindingFlags.Instance | BindingFlags.Public);
+
+    public static readonly MethodInfo TryGetComponent = typeof(GameEntities)
+        .GetMethod(nameof(GameEntities.TryGetComponent), BindingFlags.Instance | BindingFlags.Public);
 
 
     public GameEntitiesBuiltIn(string doc, Atom functor, Maybe<int> arity, GameEntities entities, GameDataStore store)

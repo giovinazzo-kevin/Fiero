@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Unconcern;
 using Unconcern.Common;
@@ -18,10 +19,32 @@ namespace Fiero.Business
     {
         record class ScriptClosure(Script s)
         {
-            public void OnInputAvailable(DeveloperConsole _, string arg2)
+            static string ScriptName(Script s) => Path.GetFileNameWithoutExtension(s.ScriptProperties.ScriptPath);
+
+            protected readonly Regex InputRegex = new($@"^\s*:{ScriptName(s)}\s*");
+
+            public void OnInputAvailable(DeveloperConsole _, string chunk)
             {
-                s.ScriptProperties.In.Write(arg2);
-                s.ScriptProperties.In.Flush();
+                if (InputRegex.IsMatch(chunk))
+                {
+                    chunk = InputRegex.Replace(chunk, string.Empty);
+                    s.ScriptProperties.In.Write(chunk);
+                    s.ScriptProperties.In.Flush();
+                }
+            }
+        };
+        record class ShellClosure(ErgoShell s, TextWriter inWriter)
+        {
+            protected readonly Regex QueryRegex = new(@"^\s*(.*?)\s*\.\s*\n$");
+
+            public void OnInputAvailable(DeveloperConsole _, string chunk)
+            {
+                if (QueryRegex.Match(chunk) is { Success: true, Groups: var groups })
+                {
+                    var query = groups[1].Value;
+                    inWriter.WriteLine(query);
+                    inWriter.Flush();
+                }
             }
         };
 
@@ -45,12 +68,17 @@ namespace Fiero.Business
             Colors = colors;
             ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
+            InputAvailable += OnInputAvailable;
+        }
+
+        protected void OnInputAvailable(DeveloperConsole self, string chunk)
+        {
+            //ScriptingSystem.InputAvailable.Raise(new(chunk));
         }
 
         public void Write(string s)
         {
             InputAvailable?.Invoke(this, s);
-            ScriptingSystem.InputAvailable.Raise(new(s));
         }
 
         public void WriteLine(string s)
@@ -72,48 +100,34 @@ namespace Fiero.Business
 
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
         {
-            _outputBuffer.Append(chunk
-                .Replace("⊤", "true")
-                .Replace("⊥", "false"));
-            if (!_delay.IsDebouncing)
-            {
-                _delay.Fire += _delay_Fire;
-            }
-            _delay.Hit();
-            void _delay_Fire(Debounce obj)
-            {
-                obj.Fire -= _delay_Fire;
-                var paragraph = Layout.Query(x => true, x => "output".Equals(x.Id))
-                    .Cast<Paragraph>()
-                        .Single();
-                paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
-                    .Replace("\r", string.Empty)
-                    .Split('\n')
-                    .TakeLast(paragraph.Rows.V)
-                    .Join("\n");
-                _outputBuffer.Clear();
-            }
+            _outputBuffer.Append(chunk);
+            if (Layout is null)
+                return;
+            var paragraph = Layout.Query(x => true, x => "output".Equals(x.Id))
+                .Cast<Paragraph>()
+                    .Single();
+            paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
+                .Replace("\r", string.Empty)
+                .Split('\n')
+                .TakeLast(paragraph.Rows.V)
+                .Join("\n");
+            _outputBuffer.Clear();
         }
 
-        public Subscription TrackScript(Script s, bool routeStdin = false)
+        public Subscription TrackShell(ErgoShell s, bool routeStdin = true)
         {
+            s.UseColors = false;
+            s.UseUnicode = false;
             var outPipe = new Pipe();
-            var inPipe = new Pipe();
-
             var outWriter = TextWriter.Synchronized(new StreamWriter(outPipe.Writer.AsStream(), ErgoShell.Encoding));
             var outReader = TextReader.Synchronized(new StreamReader(outPipe.Reader.AsStream(), ErgoShell.Encoding));
+            var inPipe = new Pipe();
             var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), ErgoShell.Encoding));
             var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), ErgoShell.Encoding));
-
-            s.ScriptProperties.In = inWriter;
-            s.ScriptProperties.Out = outReader;
-
-            s.ScriptProperties.Solver.SetIn(inReader);
-            s.ScriptProperties.Solver.SetOut(outWriter);
-
-
+            s.SetOut(outWriter);
+            s.SetIn(inReader);
             var cts = new CancellationTokenSource();
-            var expr = Concern.Defer()
+            var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
                 .Do(async token =>
                 {
@@ -130,14 +144,42 @@ namespace Fiero.Business
                     OutputAvailable?.Invoke(this, sb.ToString());
                 })
                 .Build();
+            var replExpr = Concern.Defer()
+                .UseAsynchronousTimer()
+                .Do(async token =>
+                {
+                    await foreach (var ans in s.Repl(_ => ScriptingSystem.ShellScope))
+                    {
 
-            _ = Concern.Deferral.LoopForever(expr, cts.Token);
-            var closure = new ScriptClosure(s);
+                    }
+                })
+                .Build();
+            _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
+            _ = Concern.Deferral.LoopForever(replExpr, cts.Token);
+            var closure = new ShellClosure(s, inWriter);
             if (routeStdin) InputAvailable += closure.OnInputAvailable;
             return new(new[] { () => {
                 cts.Cancel();
                 outPipe.Reader.Complete();
                 outPipe.Writer.Complete();
+                inPipe.Reader.Complete();
+                inPipe.Writer.Complete();
+            if (routeStdin) InputAvailable -= closure.OnInputAvailable;
+            } });
+        }
+
+        public Subscription TrackScript(Script s, bool routeStdin = false)
+        {
+            var inPipe = new Pipe();
+            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), ErgoShell.Encoding));
+            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), ErgoShell.Encoding));
+            s.ScriptProperties.In = inWriter;
+            s.ScriptProperties.Solver.SetIn(inReader);
+            var closure = new ScriptClosure(s);
+            if (routeStdin) InputAvailable += closure.OnInputAvailable;
+            return new(new[] { () => {
+                inPipe.Reader.Complete();
+                inPipe.Writer.Complete();
                 if(routeStdin) InputAvailable -= closure.OnInputAvailable;
             } });
         }

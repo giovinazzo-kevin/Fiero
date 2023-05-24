@@ -43,12 +43,6 @@ namespace Fiero.Business
                        || prefab is Corridor);
 
             var roomCount = roomSectors.SelectMany(x => x.Rooms).Count();
-            Console.WriteLine($"RoomCount: {roomCount}");
-            Console.WriteLine($"CorridorCount: {corridors.Count + roomSectors.SelectMany(x => x.Corridors).Count()}");
-            Console.WriteLine($"TreeNodeCount: {tree.Nodes.Count()}");
-            Console.WriteLine($"TreeCorridorCount: {tree.Corridors.Count()}");
-
-
             var numSecrets = new Dice(2, 2);
             // Secret corridors have fake doors that look just like walls!
             // A scroll of magic mapping, and some skills, will reveal them.

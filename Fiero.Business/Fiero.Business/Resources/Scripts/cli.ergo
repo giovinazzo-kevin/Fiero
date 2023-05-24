@@ -1,4 +1,5 @@
 :- module(cli, []).
+:- use_module(dict).
 :- subscribe(scripting, [input_available]).
 
 %%% This script has its input stream redirected to the game console, so calls to read* won't block
@@ -33,4 +34,7 @@ command(SetRngSeed) :-
 %%% Prints the player entity after casting it to Actor
 command(player) :- 
 	player as actor is Player,
-	write_dict(Player), nl.
+	component_set_value('$'(Player, render), color, red, R1),
+	% dict_key_value(Player, render, Render),
+	% component_set_value(Render, color, red, R1),
+	write_dict(R1), nl.

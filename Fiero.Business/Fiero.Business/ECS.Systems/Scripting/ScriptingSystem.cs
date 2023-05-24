@@ -4,6 +4,7 @@ using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
+using Ergo.Shell;
 using Ergo.Solver;
 using Fiero.Core;
 using LightInject;
@@ -21,9 +22,11 @@ namespace Fiero.Business
             GetScriptRoutes();
 
         public readonly ErgoFacade Facade;
+        public readonly ErgoShell Shell;
         public readonly ErgoInterpreter Interpreter;
         public readonly FieroLib FieroLib;
-        public InterpreterScope Scope;
+        internal InterpreterScope InterpreterScope;
+        internal ShellScope ShellScope;
 
         private event Action _unload;
 
@@ -35,21 +38,21 @@ namespace Fiero.Business
         {
             FieroLib = new(sp);
             Facade = GetErgoFacade();
-            Interpreter = Facade.BuildInterpreter(
-                InterpreterFlags.Default
-            );
-            Scope = Interpreter.CreateScope(stdlib => stdlib)
+            Shell = Facade.BuildShell();
+            Interpreter = Shell.Interpreter;
+            InterpreterScope = Interpreter.CreateScope(stdlib => stdlib)
                 .WithSearchDirectory(@".\Resources\Scripts\")
                 .WithRuntime(true)
                 ;
-            var fiero = Interpreter.Load(ref Scope, FieroModule)
+            var fiero = Interpreter.Load(ref InterpreterScope, FieroModule)
                 .GetOrThrow(new InvalidOperationException())
                 .WithLinkedLibrary(FieroLib);
-            Scope = Scope
+            InterpreterScope = InterpreterScope
                 .WithModule(fiero)
-                .WithModule(Scope.Modules[WellKnown.Modules.Stdlib]
+                .WithModule(InterpreterScope.Modules[WellKnown.Modules.Stdlib]
                     .WithImport(FieroModule));
-
+            ShellScope = Shell.CreateScope()
+                .WithInterpreterScope(InterpreterScope);
             ScriptLoaded = new(this, nameof(ScriptLoaded));
             ScriptUnloaded = new(this, nameof(ScriptUnloaded));
             InputAvailable = new(this, nameof(InputAvailable));
@@ -69,13 +72,13 @@ namespace Fiero.Business
         {
             if (script.IsInvalid())
                 return false;
-            var localScope = Scope
+            var localScope = InterpreterScope
                 .WithExceptionHandler(new(
                     @catch: ex =>
                     {
                         script.ScriptProperties.LastError = ex;
                         // TODO: Use script's stderr!!
-                        Console.WriteLine(ex);
+                        Shell.WriteLine(ex.ToString(), Ergo.Shell.LogLevel.Err);
                     },
                     @finally: () =>
                     {
@@ -176,8 +179,8 @@ namespace Fiero.Business
                 }
                 catch (ErgoException ex)
                 {
-                    // TODO: Log to the in-game console
-                    Console.WriteLine(ex);
+                    // TODO: Log to the script stderr
+                    self.Script.ScriptProperties.LastError = ex;
                     return false;
                 }
             }

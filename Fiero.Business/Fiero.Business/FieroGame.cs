@@ -4,7 +4,6 @@ using Fiero.Core.Structures;
 using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unconcern.Common;
@@ -173,7 +172,7 @@ namespace Fiero.Business
                     while (sieve.Messages.TryDequeue(out var msg))
                     {
                         var log = msg.ToString();
-                        Console.WriteLine(log);
+                        // Console.WriteLine(log);
                     }
                     await Task.Delay(100);
                 }

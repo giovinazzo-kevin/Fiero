@@ -147,11 +147,12 @@ namespace Fiero.Business.Scenes
         private IEnumerable<Subscription> RouteScriptingSystemEvents()
         {
             // ScriptingSystem.ScriptLoaded:
+            // - Track console output
             // - Track script in console
+            yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
             var scriptLoaded = new Subscription();
             scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             {
-                Console.WriteLine("Script loaded: " + e.Script.ScriptProperties.ScriptPath);
                 scriptLoaded.Add(Systems.Render.DeveloperConsole
                     .TrackScript(e.Script, routeStdin: "cli".Equals(e.Script.ScriptProperties.ScriptPath)));
                 return true;

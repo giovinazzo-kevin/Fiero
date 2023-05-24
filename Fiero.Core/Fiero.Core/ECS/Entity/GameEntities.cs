@@ -42,6 +42,7 @@ namespace Fiero.Core
         public readonly IServiceFactory ServiceFactory;
         protected readonly HashSet<TrackedEntity> Entities;
         protected readonly Dictionary<Type, HashSet<TrackedEntity>> Components;
+        protected readonly Dictionary<int, EcsComponent> ComponentsLookup;
         protected readonly Dictionary<Type, HashSet<PropertyInfo>> ProxyablePropertyCache;
         protected readonly Dictionary<OrderedPair<int, Type>, EcsEntity> ProxyCache;
         protected readonly Queue<int> EntityRemovalQueue;
@@ -75,6 +76,7 @@ namespace Fiero.Core
             ProxyCache = new Dictionary<OrderedPair<int, Type>, EcsEntity>();
             Children = new HashSet<GameEntities>();
             ProtectedEntities = new HashSet<int>();
+            ComponentsLookup = new Dictionary<int, EcsComponent>();
         }
 
         public void StartProtecting(int entity) => ProtectedEntities.Add(entity);
@@ -256,6 +258,7 @@ namespace Fiero.Core
                 parentHashSet.Add(trackedEntity);
             }
             hashSet.Add(trackedEntity);
+            ComponentsLookup[component.Id] = component;
         }
 
         public bool FlagComponentForRemoval(int entityId, int componentId)
@@ -297,6 +300,7 @@ namespace Fiero.Core
                 {
                     Components.Remove(tComponent);
                 }
+                ComponentsLookup.Remove(component.Id);
             }
             while (EntityRemovalQueue.TryDequeue(out var entityId))
             {
@@ -356,7 +360,16 @@ namespace Fiero.Core
             return Enumerable.Empty<TComponent>();
         }
 
-
+        public bool TryGetComponent<TComponent>(int id, out TComponent component)
+        {
+            if (ComponentsLookup.TryGetValue(id, out var comp) && comp is TComponent comp_)
+            {
+                component = comp_;
+                return true;
+            }
+            component = default;
+            return false;
+        }
 
         public bool TryGetFirstComponent<TComponent>(int entityId, out TComponent component)
         {

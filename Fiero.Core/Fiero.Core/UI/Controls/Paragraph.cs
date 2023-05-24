@@ -72,8 +72,11 @@ namespace Fiero.Core
             {
                 for (int i = Children.Count - 1; i >= 0 && delta++ < 0; i--)
                 {
-                    if (Children[i] is Label)
+                    if (Children[i] is Label l)
+                    {
+                        l.Text.V = string.Empty;
                         Children.RemoveAt(i);
+                    }
                 }
             }
             else
@@ -115,7 +118,7 @@ namespace Fiero.Core
                     lines.InsertRange(i + 1, newLines.Skip(1));
                 }
             }
-            foreach (var (c, l) in Labels.Zip(lines.Take(Rows)))
+            foreach (var (c, l) in Labels.Zip(lines.Concat(Enumerable.Repeat(string.Empty, Rows)).Take(Rows)))
             {
                 var len = Math.Min(l.Length, Cols);
                 c.Text.V = l[..len];

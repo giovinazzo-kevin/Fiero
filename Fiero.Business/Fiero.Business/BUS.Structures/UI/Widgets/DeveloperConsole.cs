@@ -1,13 +1,9 @@
-﻿using Ergo.Lang.Extensions;
-using Ergo.Shell;
-using Fiero.Business.Utils;
+﻿using Ergo.Shell;
 using Fiero.Core;
 using System;
 using System.IO;
 using System.IO.Pipelines;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Unconcern;
 using Unconcern.Common;
@@ -15,51 +11,24 @@ using Unconcern.Common;
 namespace Fiero.Business
 {
     [TransientDependency]
-    public class DeveloperConsole : Widget
+    public partial class DeveloperConsole : Widget
     {
-        record class ScriptClosure(Script s)
-        {
-            static string ScriptName(Script s) => Path.GetFileNameWithoutExtension(s.ScriptProperties.ScriptPath);
-
-            protected readonly Regex InputRegex = new($@"^\s*:{ScriptName(s)}\s*");
-
-            public void OnInputAvailable(DeveloperConsole _, string chunk)
-            {
-                if (InputRegex.IsMatch(chunk))
-                {
-                    chunk = InputRegex.Replace(chunk, string.Empty);
-                    s.ScriptProperties.In.Write(chunk);
-                    s.ScriptProperties.In.Flush();
-                }
-            }
-        };
-        record class ShellClosure(ErgoShell s, TextWriter inWriter)
-        {
-            protected readonly Regex QueryRegex = new(@"^\s*(.*?)\s*\.\s*\n$");
-
-            public void OnInputAvailable(DeveloperConsole _, string chunk)
-            {
-                if (QueryRegex.Match(chunk) is { Success: true, Groups: var groups })
-                {
-                    var query = groups[1].Value;
-                    inWriter.WriteLine(query);
-                    inWriter.Flush();
-                }
-            }
-        };
-
         public const double ScriptUpdateRate = 0.15;
+        public const int TabSize = 2;
 
-        private DelayedDebounce _delay = new(TimeSpan.FromSeconds(ScriptUpdateRate), 1);
-        private readonly StringBuilder _outputBuffer = new();
+        private readonly StringBuilder _inputBuffer = new();
 
         protected readonly GameColors<ColorName> Colors;
         protected Textbox InputTextbox { get; private set; }
+        protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
         public readonly ErgoScriptingSystem ScriptingSystem;
+
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, string> InputAvailable;
+
+        public Coord Cursor { get; set; }
 
         public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui)
@@ -74,11 +43,42 @@ namespace Fiero.Business
         protected void OnInputAvailable(DeveloperConsole self, string chunk)
         {
             //ScriptingSystem.InputAvailable.Raise(new(chunk));
+            Pane.WriteLine(string.Empty);
+        }
+
+        public void Put(char c)
+        {
+            switch (c)
+            {
+                case '\n':
+                    _inputBuffer.Append(c);
+                    InputAvailable?.Invoke(this, _inputBuffer.ToString());
+                    _inputBuffer.Clear();
+                    Cursor += Coord.PositiveY;
+                    break;
+                case '\b' when _inputBuffer.Length > 0:
+                    Cursor -= Coord.PositiveX;
+                    break;
+                case '\r':
+                    Cursor *= Coord.PositiveY;
+                    break;
+                case '\t':
+                    for (int i = 0; i < TabSize; i++)
+                        Put(' ');
+                    break;
+                default:
+                    _inputBuffer.Insert(Cursor.X, c);
+                    Cursor += Coord.PositiveX;
+                    if (Cursor.X < _inputBuffer.Length)
+                        _inputBuffer.Remove(Cursor.X, 1);
+                    break;
+            }
         }
 
         public void Write(string s)
         {
-            InputAvailable?.Invoke(this, s);
+            foreach (char c in s)
+                Put(c);
         }
 
         public void WriteLine(string s)
@@ -100,30 +100,22 @@ namespace Fiero.Business
 
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
         {
-            _outputBuffer.Append(chunk);
             if (Layout is null)
                 return;
-            var paragraph = Layout.Query(x => true, x => "output".Equals(x.Id))
-                .Cast<Paragraph>()
-                    .Single();
-            paragraph.Text.V = (paragraph.Text.V + _outputBuffer.ToString())
-                .Replace("\r", string.Empty)
-                .Split('\n')
-                .TakeLast(paragraph.Rows.V)
-                .Join("\n");
-            _outputBuffer.Clear();
+            Pane.Write(chunk);
         }
 
         public Subscription TrackShell(ErgoShell s, bool routeStdin = true)
         {
             s.UseColors = false;
-            s.UseUnicode = false;
+            s.UseANSIEscapeSequences = false;
+            s.UseUnicodeSymbols = false;
             var outPipe = new Pipe();
-            var outWriter = TextWriter.Synchronized(new StreamWriter(outPipe.Writer.AsStream(), ErgoShell.Encoding));
-            var outReader = TextReader.Synchronized(new StreamReader(outPipe.Reader.AsStream(), ErgoShell.Encoding));
+            var outWriter = TextWriter.Synchronized(new StreamWriter(outPipe.Writer.AsStream(), s.Encoding));
+            var outReader = TextReader.Synchronized(new StreamReader(outPipe.Reader.AsStream(), s.Encoding));
             var inPipe = new Pipe();
-            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), ErgoShell.Encoding));
-            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), ErgoShell.Encoding));
+            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), s.Encoding));
+            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), s.Encoding));
             s.SetOut(outWriter);
             s.SetIn(inReader);
             var cts = new CancellationTokenSource();
@@ -171,8 +163,8 @@ namespace Fiero.Business
         public Subscription TrackScript(Script s, bool routeStdin = false)
         {
             var inPipe = new Pipe();
-            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), ErgoShell.Encoding));
-            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), ErgoShell.Encoding));
+            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), s.ScriptProperties.Solver.Out.Encoding));
+            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), s.ScriptProperties.Solver.Out.Encoding));
             s.ScriptProperties.In = inWriter;
             s.ScriptProperties.Solver.SetIn(inReader);
             var closure = new ScriptClosure(s);
@@ -185,14 +177,12 @@ namespace Fiero.Business
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Paragraph>(r => r.Apply(p =>
+            .AddRule<ConsolePane>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Padding.V = new(ts, ts);
-                p.Cols.V = p.ContentRenderSize.X / p.FontSize.V.X;
-                p.Rows.V = p.ContentRenderSize.Y / p.FontSize.V.Y;
             }))
             .AddRule<Textbox>(r => r.Apply(t =>
             {
@@ -211,7 +201,7 @@ namespace Fiero.Business
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
                 .Row(id: "output")
-                    .Cell<Paragraph>()
+                    .Cell<ConsolePane>(p => Pane = p)
                 .End()
                 .Row(h: 20, px: true, id: "input")
                     .Cell<Textbox>(t =>

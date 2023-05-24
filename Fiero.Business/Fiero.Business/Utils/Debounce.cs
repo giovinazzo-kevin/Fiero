@@ -15,6 +15,8 @@ public class Debounce
 
     public event Action<Debounce>? Fire;
 
+    public bool Enabled { get; set; }
+
     public Debounce(TimeSpan cooldown)
     {
         Cooldown = cooldown;
@@ -45,6 +47,8 @@ public class Debounce
 
     protected virtual bool OnHit()
     {
+        if (!Enabled) return true;
+
         LastHit = DateTime.UtcNow;
         return true;
     }

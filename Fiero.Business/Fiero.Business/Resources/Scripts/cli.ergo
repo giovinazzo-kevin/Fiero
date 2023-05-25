@@ -1,5 +1,4 @@
 :- module(cli, []).
-:- use_module(dict).
 :- subscribe(scripting, [input_available]).
 
 %%% This script has its input stream redirected to the game console, so calls to read* won't block

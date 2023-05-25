@@ -124,6 +124,7 @@ namespace Fiero.Core
                 Loop.Update += (t, dt) =>
                 {
                     Update();
+                    Input.Update();
                 };
                 // Always called once per frame before the window is drawn
                 Loop.Render += (t, dt) =>
@@ -138,7 +139,6 @@ namespace Fiero.Core
         {
             if (Window.HasFocus())
             {
-                Input.Update(Window.GetMousePosition());
                 // Update all non-modal windows
                 foreach (var wnd in UI.GetOpenWindows())
                 {

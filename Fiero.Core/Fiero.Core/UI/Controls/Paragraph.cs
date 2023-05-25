@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace Fiero.Core
 {
-
     public class Paragraph : UIControl
     {
         public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
@@ -18,7 +17,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
         public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true);
 
-        protected IEnumerable<Label> Labels => Children.OfType<Label>();
+        protected readonly List<Label> Labels = new();
 
         public Paragraph(GameInput input) : base(input)
         {
@@ -72,9 +71,11 @@ namespace Fiero.Core
             {
                 for (int i = Children.Count - 1; i >= 0 && delta++ < 0; i--)
                 {
-                    if (Children[i] is Label l)
+                    if (Children[i] is not Label label) continue;
+                    if (Labels.Contains(label))
                     {
-                        l.Text.V = string.Empty;
+                        label.Text.V = string.Empty;
+                        Labels.Remove(label);
                         Children.RemoveAt(i);
                     }
                 }
@@ -83,7 +84,9 @@ namespace Fiero.Core
             {
                 for (; delta-- > 0;)
                 {
-                    Children.Add(CreateLabel());
+                    var label = CreateLabel();
+                    Children.Add(label);
+                    Labels.Add(label);
                 }
                 OnTextInvalidated();
             }

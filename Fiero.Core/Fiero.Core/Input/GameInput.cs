@@ -1,38 +1,67 @@
 ﻿using SFML.System;
 using SFML.Window;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace Fiero.Core
 {
+
     public class GameInput
     {
         private (long Timestamp, bool Delay, int KeyCode)? _kbRepeat;
+        private readonly bool[] _kb0, _kb1;
+        private readonly bool[] _m0, _m1;
+        private float _sw0, _sw1;
 
-        private readonly bool[] _kb1;
-        private readonly bool[] _kb0;
-        private readonly bool[] _m1;
-        private readonly bool[] _m0;
-
-        private readonly Stopwatch _sw;
+        private readonly Stopwatch _stopWatch;
         private Vector2i _mouse;
-
-        public int KeyRepeatIntervalMs { get; set; } = 20;
-        public int KeyRepeatDelayMs { get; set; } = 600;
 
         private volatile bool _focusStolen;
         private object _focusHolder;
         public bool IsKeyboardFocusAvailable => !_focusStolen;
+        public int KeyRepeatIntervalMs { get; set; } = 20;
+        public int KeyRepeatDelayMs { get; set; } = 600;
+        public readonly byte[] KeyboardState;
 
-        public GameInput()
+        protected readonly GameWindow Window;
+
+        public GameInput(GameWindow win)
         {
-            _sw = new Stopwatch();
-            _kb1 = new bool[(int)Keyboard.Key.KeyCount];
-            _kb0 = new bool[(int)Keyboard.Key.KeyCount];
-            _m1 = new bool[(int)Mouse.Button.ButtonCount];
+            Window = win;
+            _stopWatch = new Stopwatch();
+            _kb0 = new bool[256];
+            _kb1 = new bool[_kb0.Length];
+            KeyboardState = new byte[_kb0.Length];
             _m0 = new bool[(int)Mouse.Button.ButtonCount];
-            _sw.Start();
+            _m1 = new bool[_m0.Length];
+            win.RenderWindowChanged += (_, old) =>
+            {
+                if (old != null)
+                {
+                    old.MouseButtonPressed -= RenderWindow_MouseButtonPressed;
+                    old.MouseButtonReleased -= RenderWindow_MouseButtonReleased;
+                    old.MouseWheelScrolled -= RenderWindow_MouseWheelScrolled;
+                }
+                win.RenderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
+                win.RenderWindow.MouseButtonReleased += RenderWindow_MouseButtonReleased;
+                win.RenderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
+            };
+            _stopWatch.Start();
+        }
+
+        private void RenderWindow_MouseButtonReleased(object sender, MouseButtonEventArgs e)
+        {
+            _m1[(int)e.Button] = false;
+        }
+        private void RenderWindow_MouseButtonPressed(object sender, MouseButtonEventArgs e)
+        {
+            _m1[(int)e.Button] = true;
+        }
+        private void RenderWindow_MouseWheelScrolled(object sender, MouseWheelScrollEventArgs e)
+        {
+            _sw1 = e.Delta;
         }
 
         public bool TryStealFocus(object owner)
@@ -51,85 +80,91 @@ namespace Fiero.Core
             return !(_focusStolen = false);
         }
 
-        public void Update(Vector2i mousePos)
+        public void Clear()
         {
-            _mouse = mousePos;
-            for (var i = 0; i < (int)Keyboard.Key.KeyCount; i++)
+            Array.Clear(_kb1);
+            Array.Clear(_kb0);
+            Array.Clear(_m1);
+            Array.Clear(_m0);
+            _sw0 = _sw1 = 0;
+        }
+
+        public void Update()
+        {
+            _mouse = Window.GetMousePosition();
+            Array.Copy(_m1, _m0, _m0.Length);
+            for (var i = 0; i < _kb0.Length; i++)
             {
-                var usedToBeUp = !_kb0[i];
                 _kb0[i] = _kb1[i];
-                _kb1[i] = Keyboard.IsKeyPressed((Keyboard.Key)i);
-                if ((_kbRepeat == null || _kbRepeat.Value.KeyCode != i) && _kb0[i] && _kb1[i] && usedToBeUp)
+                _kb1[i] = (WinKeyboardState.GetAsyncKeyState(i) & 0x8000) != 0;
+                KeyboardState[i] = (byte)(_kb1[i] ? 0xFF : 0);
+                if ((_kbRepeat == null || _kbRepeat.Value.KeyCode != i) && IsKeyPressed((VirtualKeys)i))
                 {
-                    _kbRepeat = (_sw.ElapsedMilliseconds, true, i);
+                    _kbRepeat = (_stopWatch.ElapsedMilliseconds, true, i);
                 }
                 else if (_kbRepeat is { KeyCode: var keyCode, Delay: var delay, Timestamp: var millis })
                 {
                     if (keyCode == i)
                     {
-                        if (!_kb0[i] && !_kb1[i] && !usedToBeUp)
+                        if (IsKeyReleased((VirtualKeys)i))
                         {
                             _kbRepeat = null;
                         }
                         else
                         {
-                            var delta = _sw.ElapsedMilliseconds - millis;
+                            var delta = _stopWatch.ElapsedMilliseconds - millis;
                             if (delay && delta >= KeyRepeatDelayMs)
                             {
                                 _kb0[i] = false;
-                                _kbRepeat = (_sw.ElapsedMilliseconds, false, i);
+                                _kbRepeat = (_stopWatch.ElapsedMilliseconds, false, i);
                             }
                             else if (!delay && delta >= KeyRepeatIntervalMs)
                             {
                                 _kb0[i] = false;
-                                _kbRepeat = (_sw.ElapsedMilliseconds + KeyRepeatIntervalMs, false, i);
+                                _kbRepeat = (_stopWatch.ElapsedMilliseconds + KeyRepeatIntervalMs, false, i);
                             }
                         }
                     }
                 }
             }
-            for (var i = 0; i < (int)Mouse.Button.ButtonCount; i++)
-            {
-                _m0[i] = _m1[i];
-                _m1[i] = Mouse.IsButtonPressed((Mouse.Button)i);
-            }
+            _sw0 = _sw1;
+            _sw1 = 0;
         }
 
-        public bool IsKeyDown(Keyboard.Key k) => _kb1[(int)k] && _kb0[(int)k];
-        public bool IsKeyUp(Keyboard.Key k) => !_kb1[(int)k] && !_kb0[(int)k];
-        public bool IsKeyPressed(Keyboard.Key k) => _kb1[(int)k] && !_kb0[(int)k];
-        public bool IsKeyReleased(Keyboard.Key k) => !_kb1[(int)k] && _kb0[(int)k];
+        public bool IsKeyDown(VirtualKeys k) => _kb1[(int)k] && _kb0[(int)k];
+        public bool IsKeyUp(VirtualKeys k) => !_kb1[(int)k] && !_kb0[(int)k];
+        public bool IsKeyPressed(VirtualKeys k) => _kb1[(int)k] && !_kb0[(int)k];
+        public bool IsKeyReleased(VirtualKeys k) => !_kb1[(int)k] && _kb0[(int)k];
 
-        public IEnumerable<Keyboard.Key> KeysPressed() => Enumerable.Range(0, (int)Keyboard.Key.KeyCount)
-            .Where(i => _kb1[i] && !_kb0[i])
-            .Select(i => (Keyboard.Key)i);
-        public IEnumerable<Keyboard.Key> KeysReleased() => Enumerable.Range(0, (int)Keyboard.Key.KeyCount)
-            .Where(i => !_kb1[i] && _kb0[i])
-            .Select(i => (Keyboard.Key)i);
-        public IEnumerable<Keyboard.Key> KeysDown() => Enumerable.Range(0, (int)Keyboard.Key.KeyCount)
-            .Where(i => _kb1[i] && _kb0[i])
-            .Select(i => (Keyboard.Key)i);
-        public IEnumerable<Keyboard.Key> KeysUp() => Enumerable.Range(0, (int)Keyboard.Key.KeyCount)
-            .Where(i => !_kb1[i] && !_kb0[i])
-            .Select(i => (Keyboard.Key)i);
+        public bool IsMouseWheelScrollingDown() => _sw1 != 0 && _sw0 > _sw1;
+        public bool IsMouseWheelScrollingUp() => _sw1 != 0 && _sw0 < _sw1;
+
+        public IEnumerable<VirtualKeys> KeysPressed => Enum.GetValues<VirtualKeys>()
+            .Where(IsKeyPressed);
+        public IEnumerable<VirtualKeys> KeysReleased => Enum.GetValues<VirtualKeys>()
+            .Where(IsKeyReleased);
+        public IEnumerable<VirtualKeys> KeysDown => Enum.GetValues<VirtualKeys>()
+            .Where(IsKeyDown);
+        public IEnumerable<VirtualKeys> KeysUp => Enum.GetValues<VirtualKeys>()
+            .Where(IsKeyUp);
 
         public bool IsButtonDown(Mouse.Button k) => _m1[(int)k] && _m0[(int)k];
         public bool IsButtonUp(Mouse.Button k) => !_m1[(int)k] && !_m0[(int)k];
         public bool IsButtonPressed(Mouse.Button k) => _m1[(int)k] && !_m0[(int)k];
         public bool IsButtonReleased(Mouse.Button k) => !_m1[(int)k] && _m0[(int)k];
 
-        public IEnumerable<Mouse.Button> ButtonsPressed() => Enumerable.Range(0, (int)Mouse.Button.ButtonCount)
-            .Where(i => _m1[i] && !_m0[i])
-            .Select(i => (Mouse.Button)i);
-        public IEnumerable<Mouse.Button> ButtonsReleased() => Enumerable.Range(0, (int)Mouse.Button.ButtonCount)
-            .Where(i => !_m1[i] && _m0[i])
-            .Select(i => (Mouse.Button)i);
-        public IEnumerable<Mouse.Button> ButtonsDown() => Enumerable.Range(0, (int)Mouse.Button.ButtonCount)
-            .Where(i => _m1[i] && _m0[i])
-            .Select(i => (Mouse.Button)i);
-        public IEnumerable<Mouse.Button> ButtonsUp() => Enumerable.Range(0, (int)Mouse.Button.ButtonCount)
-            .Where(i => !_m1[i] && !_m0[i])
-            .Select(i => (Mouse.Button)i);
+        public IEnumerable<Mouse.Button> ButtonsPressed => Enum.GetValues<Mouse.Button>()
+            .Where(b => b >= 0 && b < Mouse.Button.ButtonCount)
+            .Where(IsButtonPressed);
+        public IEnumerable<Mouse.Button> ButtonsReleased => Enum.GetValues<Mouse.Button>()
+            .Where(b => b >= 0 && b < Mouse.Button.ButtonCount)
+            .Where(IsButtonReleased);
+        public IEnumerable<Mouse.Button> ButtonsDown => Enum.GetValues<Mouse.Button>()
+            .Where(b => b >= 0 && b < Mouse.Button.ButtonCount)
+            .Where(IsButtonDown);
+        public IEnumerable<Mouse.Button> ButtonsUp => Enum.GetValues<Mouse.Button>()
+            .Where(b => b >= 0 && b < Mouse.Button.ButtonCount)
+            .Where(IsButtonUp);
 
         public Coord GetMousePosition() => _mouse.ToCoord();
     }

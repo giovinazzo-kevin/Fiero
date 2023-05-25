@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using Fiero.Core.Structures;
-using SFML.Window;
 using System;
 using System.Collections.Generic;
 
@@ -9,27 +8,29 @@ namespace Fiero.Business
     [SingletonDependency]
     public class QuickSlotHelper
     {
-        protected static readonly GameDatum<Keyboard.Key>[] Keys = new[] {
-            Data.Hotkeys.QuickSlot1, Data.Hotkeys.QuickSlot2, Data.Hotkeys.QuickSlot3, 
+        protected static readonly GameDatum<VirtualKeys>[] Keys = new[] {
+            Data.Hotkeys.QuickSlot1, Data.Hotkeys.QuickSlot2, Data.Hotkeys.QuickSlot3,
             Data.Hotkeys.QuickSlot4, Data.Hotkeys.QuickSlot5, Data.Hotkeys.QuickSlot6,
             Data.Hotkeys.QuickSlot7, Data.Hotkeys.QuickSlot8, Data.Hotkeys.QuickSlot9
         };
         protected readonly GameInput Input;
         protected readonly GameDataStore Store;
-        protected readonly Dictionary<Keyboard.Key, OrderedPair<DrawableEntity, Func<IAction>>> Map = new();
+        protected readonly Dictionary<VirtualKeys, OrderedPair<DrawableEntity, Func<IAction>>> Map = new();
 
         public QuickSlotHelper(GameInput input, GameDataStore store)
         {
             Input = input;
             Store = store;
 
-            foreach (var slot in Keys) {
+            foreach (var slot in Keys)
+            {
                 slot.ValueChanged += Slot_ValueChanged;
             }
 
-            void Slot_ValueChanged(GameDatumChangedEventArgs<Keyboard.Key> obj)
+            void Slot_ValueChanged(GameDatumChangedEventArgs<VirtualKeys> obj)
             {
-                if(Map.TryGetValue(obj.OldValue, out var getter)) {
+                if (Map.TryGetValue(obj.OldValue, out var getter))
+                {
                     Map.Remove(obj.OldValue);
                     Map[obj.NewValue] = getter;
                 }
@@ -54,7 +55,8 @@ namespace Fiero.Business
 
         public void UnsetAll()
         {
-            for (int i = 1; i <= 9; i++) {
+            for (int i = 1; i <= 9; i++)
+            {
                 Unset(i);
             }
         }
@@ -62,9 +64,11 @@ namespace Fiero.Business
         public bool TryGetAction(out IAction action)
         {
             action = default;
-            for (int i = 0; i < Keys.Length; i++) {
+            for (int i = 0; i < Keys.Length; i++)
+            {
                 var key = Store.Get(Keys[i]);
-                if (Input.IsKeyPressed(key) && Map.TryGetValue(key, out var getter)) {
+                if (Input.IsKeyPressed(key) && Map.TryGetValue(key, out var getter))
+                {
                     action = getter.Right();
                     return true;
                 }
@@ -74,9 +78,11 @@ namespace Fiero.Business
 
         public IEnumerable<OrderedPair<int, SpriteDef>> GetSprites()
         {
-            for (int i = 0; i < Keys.Length; i++) {
+            for (int i = 0; i < Keys.Length; i++)
+            {
                 var key = Store.Get(Keys[i]);
-                if (Map.TryGetValue(key, out var getter)) {
+                if (Map.TryGetValue(key, out var getter))
+                {
                     yield return new(i + 1, new(
                         getter.Left.Render.Texture,
                         getter.Left.Render.Sprite,

@@ -13,6 +13,6 @@
         UI,
 
         FontLight,
-        FontBold
+        FontMonospace
     }
 }

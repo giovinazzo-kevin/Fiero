@@ -1,11 +1,21 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using System;
 
 namespace Fiero.Core
 {
     public sealed class GameWindow
     {
-        public RenderWindow RenderWindow { get; internal set; }
+        private RenderWindow _window;
+        public RenderWindow RenderWindow
+        {
+            get => _window; internal set
+            {
+                var old = _window;
+                _window = value;
+                RenderWindowChanged?.Invoke(this, old);
+            }
+        }
         public Coord Size => RenderWindow.Size.ToCoord();
         public GameWindow()
         {
@@ -19,5 +29,7 @@ namespace Fiero.Core
         public void Draw(Drawable d) => RenderWindow.Draw(d);
         public void Draw(Drawable d, RenderStates states) => RenderWindow.Draw(d, states);
         public Coord GetMousePosition() => Mouse.GetPosition(RenderWindow).ToCoord();
+
+        public event Action<GameWindow, RenderWindow> RenderWindowChanged;
     }
 }

@@ -318,6 +318,7 @@ namespace Fiero.Business
                     if (blocking)
                     {
                         Loop.WaitAndDraw(increment);
+                        Input.Update();
                     }
                     else
                     {

@@ -31,7 +31,7 @@ namespace Fiero.Business
             }
             else if (_floorSystem.TryGetCellAt(floorId, newPos, out var cell))
             {
-                if (cell.IsWalkable(t.Actor))
+                if (cell.Tile.IsWalkable(t.Actor))
                 {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);

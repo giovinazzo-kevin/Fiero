@@ -26,9 +26,9 @@ namespace Fiero.Business
             TileSize = UI.Store.Get(Data.UI.TileSize);
         }
 
-        protected virtual BitmapFont GetFont()
+        protected virtual BitmapFont GetFont(FontName name = FontName.Light)
         {
-            return Resources.Fonts.Get(FontName.Light);
+            return Resources.Fonts.Get(name);
         }
 
         protected virtual BitmapText GetText(string str)

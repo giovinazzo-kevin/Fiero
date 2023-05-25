@@ -1,6 +1,5 @@
 ﻿using Ergo.Lang;
 using Fiero.Core;
-using SFML.Window;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,6 +39,12 @@ namespace Fiero.Business
             }
             if (TryFollowPath(a, out var followPath))
             {
+                if (GetClosestHostile(a) != null)
+                {
+                    a.Ai.Objectives.Clear();
+                    a.Ai.Path = null;
+                    return new NoAction();
+                }
                 return followPath;
             }
             _requestDelay = false;
@@ -288,8 +293,8 @@ namespace Fiero.Business
                     return new FailAction();
                 return new MoveRelativeAction(c);
             }
-            bool IsKeyPressed(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
-            bool IsKeyDown(GameDatum<Keyboard.Key> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));
+            bool IsKeyPressed(GameDatum<VirtualKeys> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
+            bool IsKeyDown(GameDatum<VirtualKeys> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));
         }
     }
 }

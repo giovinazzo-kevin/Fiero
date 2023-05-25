@@ -1,8 +1,6 @@
 ﻿using Ergo.Shell;
 using Fiero.Core;
 using System;
-using System.IO;
-using System.IO.Pipelines;
 using System.Text;
 using System.Threading;
 using Unconcern;
@@ -10,25 +8,22 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
     [TransientDependency]
     public partial class DeveloperConsole : Widget
     {
         public const double ScriptUpdateRate = 0.15;
         public const int TabSize = 2;
 
-        private readonly StringBuilder _inputBuffer = new();
-
         protected readonly GameColors<ColorName> Colors;
-        protected Textbox InputTextbox { get; private set; }
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
         public readonly ErgoScriptingSystem ScriptingSystem;
 
         public event Action<DeveloperConsole, string> OutputAvailable;
-        public event Action<DeveloperConsole, string> InputAvailable;
-
-        public Coord Cursor { get; set; }
+        public event Action<DeveloperConsole, char> CharAvailable;
+        public event Action<DeveloperConsole, string> LineAvailable;
 
         public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui)
@@ -37,65 +32,29 @@ namespace Fiero.Business
             Colors = colors;
             ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
-            InputAvailable += OnInputAvailable;
         }
 
-        protected void OnInputAvailable(DeveloperConsole self, string chunk)
+        protected void WriteLine(string s)
         {
-            //ScriptingSystem.InputAvailable.Raise(new(chunk));
-            Pane.WriteLine(string.Empty);
+            Pane.WriteLine(s);
+            LineAvailable?.Invoke(this, s);
         }
 
-        public void Put(char c)
+        protected void Put(char c)
         {
-            switch (c)
-            {
-                case '\n':
-                    _inputBuffer.Append(c);
-                    InputAvailable?.Invoke(this, _inputBuffer.ToString());
-                    _inputBuffer.Clear();
-                    Cursor += Coord.PositiveY;
-                    break;
-                case '\b' when _inputBuffer.Length > 0:
-                    Cursor -= Coord.PositiveX;
-                    break;
-                case '\r':
-                    Cursor *= Coord.PositiveY;
-                    break;
-                case '\t':
-                    for (int i = 0; i < TabSize; i++)
-                        Put(' ');
-                    break;
-                default:
-                    _inputBuffer.Insert(Cursor.X, c);
-                    Cursor += Coord.PositiveX;
-                    if (Cursor.X < _inputBuffer.Length)
-                        _inputBuffer.Remove(Cursor.X, 1);
-                    break;
-            }
-        }
-
-        public void Write(string s)
-        {
-            foreach (char c in s)
-                Put(c);
-        }
-
-        public void WriteLine(string s)
-        {
-            Write(s + Environment.NewLine);
+            CharAvailable?.Invoke(this, c);
         }
 
         public void Show()
         {
             Layout.IsHidden.V = false;
-            Layout.Focus(InputTextbox);
+            Layout.Focus(Pane);
         }
 
         public void Hide()
         {
             Layout.IsHidden.V = true;
-            InputTextbox.IsActive.V = false;
+            Pane.IsActive.V = false;
         }
 
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
@@ -105,34 +64,26 @@ namespace Fiero.Business
             Pane.Write(chunk);
         }
 
-        public Subscription TrackShell(ErgoShell s, bool routeStdin = true)
+        public Subscription TrackShell(ErgoShell s)
         {
             s.UseColors = false;
             s.UseANSIEscapeSequences = false;
             s.UseUnicodeSymbols = false;
-            var outPipe = new Pipe();
-            var outWriter = TextWriter.Synchronized(new StreamWriter(outPipe.Writer.AsStream(), s.Encoding));
-            var outReader = TextReader.Synchronized(new StreamReader(outPipe.Reader.AsStream(), s.Encoding));
-            var inPipe = new Pipe();
-            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), s.Encoding));
-            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), s.Encoding));
-            s.SetOut(outWriter);
-            s.SetIn(inReader);
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();
-                    var result = await outPipe.Reader.ReadAsync(token);
+                    var result = await ScriptingSystem.Out.Reader.ReadAsync(token);
                     var buffer = result.Buffer;
                     foreach (var segment in buffer)
                     {
                         var bytes = segment.Span.ToArray();
-                        var str = outWriter.Encoding.GetString(bytes);
+                        var str = ScriptingSystem.OutWriter.Encoding.GetString(bytes);
                         sb.Append(str);
                     }
-                    outPipe.Reader.AdvanceTo(buffer.End);
+                    ScriptingSystem.Out.Reader.AdvanceTo(buffer.End);
                     OutputAvailable?.Invoke(this, sb.ToString());
                 })
                 .Build();
@@ -140,39 +91,22 @@ namespace Fiero.Business
                 .UseAsynchronousTimer()
                 .Do(async token =>
                 {
-                    await foreach (var ans in s.Repl(_ => ScriptingSystem.ShellScope))
-                    {
-
-                    }
+                    await foreach (var ans in s.Repl(ScriptingSystem.StdlibScope)) ;
                 })
                 .Build();
             _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
             _ = Concern.Deferral.LoopForever(replExpr, cts.Token);
-            var closure = new ShellClosure(s, inWriter);
-            if (routeStdin) InputAvailable += closure.OnInputAvailable;
+            var closure = new ShellClosure(s, ScriptingSystem.InWriter);
+            CharAvailable += closure.OnCharAvailable;
+            LineAvailable += closure.OnLineAvailable;
             return new(new[] { () => {
                 cts.Cancel();
-                outPipe.Reader.Complete();
-                outPipe.Writer.Complete();
-                inPipe.Reader.Complete();
-                inPipe.Writer.Complete();
-            if (routeStdin) InputAvailable -= closure.OnInputAvailable;
-            } });
-        }
-
-        public Subscription TrackScript(Script s, bool routeStdin = false)
-        {
-            var inPipe = new Pipe();
-            var inWriter = TextWriter.Synchronized(new StreamWriter(inPipe.Writer.AsStream(), s.ScriptProperties.Solver.Out.Encoding));
-            var inReader = TextReader.Synchronized(new StreamReader(inPipe.Reader.AsStream(), s.ScriptProperties.Solver.Out.Encoding));
-            s.ScriptProperties.In = inWriter;
-            s.ScriptProperties.Solver.SetIn(inReader);
-            var closure = new ScriptClosure(s);
-            if (routeStdin) InputAvailable += closure.OnInputAvailable;
-            return new(new[] { () => {
-                inPipe.Reader.Complete();
-                inPipe.Writer.Complete();
-                if(routeStdin) InputAvailable -= closure.OnInputAvailable;
+                ScriptingSystem.Out.Reader.Complete();
+                ScriptingSystem.Out.Writer.Complete();
+                ScriptingSystem.Out.Reader.Complete();
+                ScriptingSystem.Out.Writer.Complete();
+                CharAvailable -= closure.OnCharAvailable;
+                LineAvailable -= closure.OnLineAvailable;
             } });
         }
 
@@ -182,15 +116,7 @@ namespace Fiero.Business
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
-                p.Padding.V = new(ts, ts);
-            }))
-            .AddRule<Textbox>(r => r.Apply(t =>
-            {
-                var ts = UI.Store.Get(Data.UI.TileSize);
-                t.Padding.V = new(ts / 2, 0);
-                t.MaxLength.V = t.ContentRenderSize.X / t.FontSize.V.X;
-                t.Background.V = Colors.Get(ColorName.Black).AddAlpha(-128);
-                t.Foreground.V = Colors.Get(ColorName.White);
+                p.Margin.V = p.Padding.V = new(ts, ts);
             }))
             .AddRule<UIControl>(r => r.Apply(x =>
             {
@@ -201,17 +127,23 @@ namespace Fiero.Business
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
                 .Row(id: "output")
-                    .Cell<ConsolePane>(p => Pane = p)
-                .End()
-                .Row(h: 20, px: true, id: "input")
-                    .Cell<Textbox>(t =>
+                    .Cell<ConsolePane>(p =>
                     {
-                        InputTextbox = t;
-                        t.EnterPressed += obj =>
+                        Pane = p;
+                        Pane.Caret.CharAvailable += (caret, ch) =>
                         {
-                            var text = obj.Text.V;
-                            obj.Text.V = string.Empty;
-                            WriteLine(text);
+                            if (ScriptingSystem.Shell.InputReader.Blocking)
+                            {
+                                Put(ch);
+                            }
+                        };
+                        Pane.Caret.EnterPressed += (caret) =>
+                        {
+                            if (!ScriptingSystem.Shell.InputReader.Blocking)
+                            {
+                                WriteLine(Pane.Caret.Text);
+                                Pane.ScrollToCursor();
+                            }
                         };
                     })
                 .End()

@@ -95,12 +95,12 @@ namespace Fiero.Core
 
         public override void Update()
         {
-            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Up))
+            if (IsMouseOver && Input.IsKeyPressed(VirtualKeys.Up))
             {
                 var i = Options.IndexOf(SelectedOption);
                 SelectOption(x => x.Control == Options[(i + 1) % Options.Count].Control);
             }
-            if (IsMouseOver && Input.IsKeyPressed(Keyboard.Key.Down))
+            if (IsMouseOver && Input.IsKeyPressed(VirtualKeys.Down))
             {
                 var i = Options.IndexOf(SelectedOption);
                 SelectOption(x => x.Control == Options[((i - 1 + Options.Count) % Options.Count) % Options.Count].Control);

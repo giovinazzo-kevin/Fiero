@@ -9,7 +9,7 @@ namespace Fiero.Core
 {
     public abstract partial class UIControl : Drawable, IDisposable
     {
-        protected readonly GameInput Input;
+        public readonly GameInput Input;
         public readonly List<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
 

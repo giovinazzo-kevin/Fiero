@@ -45,7 +45,8 @@ namespace Fiero.Core
             _ioc.Register<TGame>(new PerContainerLifetime());
             _ioc.Register<IGame, TGame>(new PerContainerLifetime());
 
-            var singletons = Assembly.GetEntryAssembly().GetTypes()
+            var singletons = Assembly.GetEntryAssembly().GetTypes().Concat(Assembly.GetExecutingAssembly().GetTypes())
+                .Distinct()
                 .Select(t => (Type: t, Attr: t.GetCustomAttribute<SingletonDependencyAttribute>()))
                 .Where(x => x.Attr != null && !x.Type.IsAbstract && x.Type.IsClass);
             foreach (var (type, attr) in singletons)

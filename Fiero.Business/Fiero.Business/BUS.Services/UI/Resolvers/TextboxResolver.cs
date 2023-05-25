@@ -2,17 +2,20 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Textbox>))]
-    public class TextboxResolver : UIControlResolver<Textbox>
+    [SingletonDependency(typeof(IUIControlResolver<TextBox>))]
+    public class TextboxResolver : UIControlResolver<TextBox>
     {
-        public TextboxResolver(GameUI ui, GameResources resources)
+        public readonly KeyboardInputReader Reader;
+
+        public TextboxResolver(GameUI ui, GameResources resources, KeyboardInputReader reader)
             : base(ui, resources)
         {
+            Reader = reader;
         }
 
-        public override Textbox Resolve(LayoutGrid dom)
+        public override TextBox Resolve(LayoutGrid dom)
         {
-            var x = new Textbox(UI.Input);
+            var x = new TextBox(UI.Input, Reader);
             x.Font.V = GetFont();
             x.Foreground.V = Foreground;
             x.Background.V = Background;

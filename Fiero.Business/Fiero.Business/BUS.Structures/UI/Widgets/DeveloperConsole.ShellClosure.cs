@@ -1,6 +1,5 @@
 ﻿using Ergo.Shell;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace Fiero.Business
 {
@@ -8,16 +7,15 @@ namespace Fiero.Business
     {
         record class ShellClosure(ErgoShell s, TextWriter inWriter)
         {
-            protected readonly Regex QueryRegex = new(@"^\s*(.*?)\s*\.\s*\n$");
-
-            public void OnInputAvailable(DeveloperConsole _, string chunk)
+            public void OnCharAvailable(DeveloperConsole _, char c)
             {
-                if (QueryRegex.Match(chunk) is { Success: true, Groups: var groups })
-                {
-                    var query = groups[1].Value;
-                    inWriter.WriteLine(query);
-                    inWriter.Flush();
-                }
+                inWriter.Write(c);
+                inWriter.Flush();
+            }
+            public void OnLineAvailable(DeveloperConsole _, string s)
+            {
+                inWriter.WriteLine(s);
+                inWriter.Flush();
             }
         };
     }

@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Window;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,12 +78,9 @@ namespace Fiero.Business
 
         public override void Update()
         {
-            var shift = UI.Input.IsKeyPressed(Keyboard.Key.LShift)
-                      ^ UI.Input.IsKeyPressed(Keyboard.Key.RShift);
-            var ctrl = UI.Input.IsKeyPressed(Keyboard.Key.LControl)
-                      ^ UI.Input.IsKeyPressed(Keyboard.Key.RControl);
-            var alt = UI.Input.IsKeyPressed(Keyboard.Key.LAlt)
-                      ^ UI.Input.IsKeyPressed(Keyboard.Key.RAlt);
+            var shift = UI.Input.IsKeyPressed(VirtualKeys.Shift);
+            var ctrl = UI.Input.IsKeyPressed(VirtualKeys.Control);
+            var alt = UI.Input.IsKeyPressed(VirtualKeys.Menu);
             foreach (var pair in Hotkeys)
             {
                 if (!UI.Input.IsKeyPressed(pair.Key.Key))

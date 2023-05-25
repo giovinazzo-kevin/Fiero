@@ -2,7 +2,7 @@
 {
     public enum FontName
     {
-        Bold,
+        Monospace,
         Light
     }
 }

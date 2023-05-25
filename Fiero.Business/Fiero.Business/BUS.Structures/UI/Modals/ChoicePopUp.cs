@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Window;
 using System;
 
 namespace Fiero.Business
@@ -50,17 +49,17 @@ namespace Fiero.Business
                 Invalidate();
             }
 
-            SelectNumber(Keyboard.Key.Num1, 0);
-            SelectNumber(Keyboard.Key.Num2, 1);
-            SelectNumber(Keyboard.Key.Num3, 2);
-            SelectNumber(Keyboard.Key.Num4, 3);
-            SelectNumber(Keyboard.Key.Num5, 4);
-            SelectNumber(Keyboard.Key.Num6, 5);
-            SelectNumber(Keyboard.Key.Num7, 6);
-            SelectNumber(Keyboard.Key.Num8, 7);
-            SelectNumber(Keyboard.Key.Num9, 8);
+            SelectNumber(VirtualKeys.N1, 0);
+            SelectNumber(VirtualKeys.N2, 1);
+            SelectNumber(VirtualKeys.N3, 2);
+            SelectNumber(VirtualKeys.N4, 3);
+            SelectNumber(VirtualKeys.N5, 4);
+            SelectNumber(VirtualKeys.N6, 5);
+            SelectNumber(VirtualKeys.N7, 6);
+            SelectNumber(VirtualKeys.N8, 7);
+            SelectNumber(VirtualKeys.N9, 8);
 
-            void SelectNumber(Keyboard.Key key, int index)
+            void SelectNumber(VirtualKeys key, int index)
             {
                 if (index < 0 || index >= Options.Length)
                 {

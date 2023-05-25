@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Unconcern.Common;
-using static SFML.Window.Keyboard;
 
 namespace Fiero.Business.Scenes
 {
@@ -150,14 +149,14 @@ namespace Fiero.Business.Scenes
             // - Track console output
             // - Track script in console
             yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
-            var scriptLoaded = new Subscription();
-            scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
-            {
-                scriptLoaded.Add(Systems.Render.DeveloperConsole
-                    .TrackScript(e.Script, routeStdin: "cli".Equals(e.Script.ScriptProperties.ScriptPath)));
-                return true;
-            }));
-            yield return scriptLoaded;
+            //var scriptLoaded = new Subscription();
+            //scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
+            //{
+            //    scriptLoaded.Add(Systems.Render.DeveloperConsole
+            //        .TrackScript(e.Script));
+            //    return true;
+            //}));
+            //yield return scriptLoaded;
         }
         private IEnumerable<Subscription> RouteActionSystemEvents()
         {
@@ -203,8 +202,9 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
-                    .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
+                    //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
+                    .WithHealth(100)
                     .Build();
                 Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);
@@ -540,9 +540,8 @@ namespace Fiero.Business.Scenes
                 e.Actor.Render.Hidden = true;
                 if (Player.CanSee(e.Actor))
                 {
-                    // Since this is a blocking animation and we just hid the victim, we need to refresh the viewport before showing it
                     Systems.Render.CenterOn(Player);
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Death(e.Actor));
+                    Systems.Render.Viewport.Animate(false, e.Actor.Position(), Animation.Death(e.Actor));
                 }
                 var corpseDef = e.Actor.ActorProperties.Corpse;
                 if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
@@ -599,6 +598,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.CorpseRaised:
             // - Spawn undead
+            // - Play animation
             // - Destroy leftover corpse
             yield return Systems.Action.CorpseRaised.SubscribeResponse(e =>
             {
@@ -613,12 +613,13 @@ namespace Fiero.Business.Scenes
                     .WithFaction(faction)
                     .Build();
                 undead.Physics.Position = e.Corpse.Position();
-                // TODO: Dedicated sound + blocking animation
                 if (!Systems.TrySpawn(e.Corpse.FloorId(), undead))
                 {
                     necro?.Log?.Write($"$Action.NoRoomToRaiseUndead$.");
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
+                Resources.Sounds.Get(SoundName.Buff, undead.Position() - Player.Position()).Play();
+                Systems.Render.Viewport.Animate(true, undead.Position(), Animation.Buff(ColorName.Magenta));
                 undead.TryJoinParty(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
@@ -726,7 +727,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.Viewport.Animate(false, e.Position, Animation.Explosion(scale: new(0.5f, 0.5f)));
+                    Systems.Render.Viewport.Animate(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f)));
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {
@@ -1026,9 +1027,9 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update();
-            if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(Key.R))
+            if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(VirtualKeys.R))
             {
-                if (UI.Input.IsKeyDown(Key.LShift))
+                if (UI.Input.IsKeyDown(VirtualKeys.Shift))
                 {
                     GenerateNewRngSeed();
                 }

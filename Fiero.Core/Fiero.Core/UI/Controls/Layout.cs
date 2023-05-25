@@ -41,7 +41,7 @@ namespace Fiero.Core
             var preventDefault = TrackMouse(Input.GetMousePosition(), out var clickedControl, out var clickedButton);
             if (!preventDefault)
             {
-                if (clickedControl != null)
+                if (clickedControl != null && !clickedControl.IsHidden.V)
                 {
                     Focus(clickedControl);
                 }

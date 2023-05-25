@@ -75,7 +75,6 @@ namespace Fiero.Business
             }, (t, dt) =>
             {
                 ui.Window.DispatchEvents();
-                ui.Input.Update(ui.Window.GetMousePosition());
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveN)))
                     Move(new(0, -1));
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveS)))
@@ -98,6 +97,7 @@ namespace Fiero.Business
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCw))
                     || shape.CanRotateWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
                     RotateCCw();
+                ui.Input.Update();
             });
             renderSystem.HideTargetingShape();
             return result;

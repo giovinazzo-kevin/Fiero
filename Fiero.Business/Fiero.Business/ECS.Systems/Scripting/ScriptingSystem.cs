@@ -10,7 +10,10 @@ using Fiero.Core;
 using LightInject;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
+using System.Text;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -25,8 +28,12 @@ namespace Fiero.Business
         public readonly ErgoShell Shell;
         public readonly ErgoInterpreter Interpreter;
         public readonly FieroLib FieroLib;
-        internal InterpreterScope InterpreterScope;
-        internal ShellScope ShellScope;
+        public readonly InterpreterScope StdlibScope;
+
+        public readonly Pipe In = new(), Out = new();
+        public readonly TextWriter InWriter, OutWriter;
+        public readonly TextReader InReader, OutReader;
+        public readonly IAsyncInputReader AsyncInputReader;
 
         private event Action _unload;
 
@@ -34,25 +41,31 @@ namespace Fiero.Business
         public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
-        public ErgoScriptingSystem(EventBus bus, IServiceFactory sp) : base(bus)
+        public ErgoScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
+            var encoding = Encoding.GetEncoding(437);
+            OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), encoding));
+            OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), encoding));
+            InWriter = TextWriter.Synchronized(new StreamWriter(In.Writer.AsStream(), encoding));
+            InReader = TextReader.Synchronized(new StreamReader(In.Reader.AsStream(), encoding));
+            AsyncInputReader = reader;
             FieroLib = new(sp);
             Facade = GetErgoFacade();
             Shell = Facade.BuildShell();
             Interpreter = Shell.Interpreter;
-            InterpreterScope = Interpreter.CreateScope(stdlib => stdlib)
-                .WithSearchDirectory(@".\Resources\Scripts\")
-                .WithRuntime(true)
-                ;
-            var fiero = Interpreter.Load(ref InterpreterScope, FieroModule)
+            StdlibScope = Interpreter.CreateScope()
+                .WithSearchDirectory(@".\Resources\Scripts\");
+            var fiero = Interpreter.Load(ref StdlibScope, FieroModule)
                 .GetOrThrow(new InvalidOperationException())
                 .WithLinkedLibrary(FieroLib);
-            InterpreterScope = InterpreterScope
+            var stdlib = StdlibScope.Modules[WellKnown.Modules.Stdlib];
+            StdlibScope = StdlibScope
                 .WithModule(fiero)
-                .WithModule(InterpreterScope.Modules[WellKnown.Modules.Stdlib]
-                    .WithImport(FieroModule));
-            ShellScope = Shell.CreateScope()
-                .WithInterpreterScope(InterpreterScope);
+                .WithModule(stdlib
+                    .WithImport(FieroModule))
+                .WithCurrentModule(WellKnown.Modules.User)
+                .WithModule(new Module(WellKnown.Modules.User, runtime: true)
+                    .WithImport(WellKnown.Modules.Stdlib));
             ScriptLoaded = new(this, nameof(ScriptLoaded));
             ScriptUnloaded = new(this, nameof(ScriptUnloaded));
             InputAvailable = new(this, nameof(InputAvailable));
@@ -65,6 +78,8 @@ namespace Fiero.Business
         {
             return ErgoFacade.Standard
                 .AddLibrary(() => FieroLib)
+                .SetOutput(OutWriter)
+                .SetInput(InReader, Maybe.Some(AsyncInputReader))
                 ;
         }
 
@@ -72,23 +87,13 @@ namespace Fiero.Business
         {
             if (script.IsInvalid())
                 return false;
-            var localScope = InterpreterScope
-                .WithExceptionHandler(new(
-                    @catch: ex =>
-                    {
-                        script.ScriptProperties.LastError = ex;
-                        // TODO: Use script's stderr!!
-                        Shell.WriteLine(ex.ToString(), Ergo.Shell.LogLevel.Err);
-                    },
-                    @finally: () =>
-                    {
-
-                    }));
-            if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath)).TryGetValue(out var module))
+            var localScope = StdlibScope;
+            if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
+                .TryGetValue(out var module))
             {
                 var solver = Facade.BuildSolver(
                     localScope.BuildKnowledgeBase(),
-                    SolverFlags.Default & ~SolverFlags.ThrowOnPredicateNotFound
+                    SolverFlags.Default
                 );
                 var solverScope = solver.CreateScope(localScope);
                 script.ScriptProperties.Solver = solver;

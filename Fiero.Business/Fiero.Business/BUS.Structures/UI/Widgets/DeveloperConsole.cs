@@ -141,6 +141,7 @@ namespace Fiero.Business
                         {
                             if (!ScriptingSystem.Shell.InputReader.Blocking)
                             {
+                                Pane.History.Add(Pane.Caret.Text);
                                 WriteLine(Pane.Caret.Text);
                                 Pane.ScrollToCursor();
                             }

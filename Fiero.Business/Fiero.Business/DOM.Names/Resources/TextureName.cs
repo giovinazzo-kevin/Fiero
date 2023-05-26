@@ -13,6 +13,7 @@
         UI,
 
         FontLight,
+        FontTerminal,
         FontMonospace
     }
 }

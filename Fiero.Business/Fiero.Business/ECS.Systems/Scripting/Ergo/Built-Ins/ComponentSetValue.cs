@@ -25,7 +25,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
             if (ProxyableComponentTypes.TryGetValue(key, out var type))
             {
                 // This is a copy of the original for now
-                var actualComponent = (EcsComponent)TermMarshall.FromTerm(component, type, mode: TermMarshalling.Named);
+                EcsComponent actualComponent = (EcsComponent)TermMarshall.FromTerm(component, type, mode: TermMarshalling.Named);
                 var args = new object[] { actualComponent.Id, default(EcsComponent) };
                 if ((bool)TryGetComponent.MakeGenericMethod(type).Invoke(Entities, args))
                 {

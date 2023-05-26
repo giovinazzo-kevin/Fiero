@@ -13,7 +13,7 @@ namespace Fiero.Core
         public readonly List<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
 
-        public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false);
+        public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false) { Inherited = false };
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
         public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new()) { Inherited = false };
         public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new()) { Inherited = false };

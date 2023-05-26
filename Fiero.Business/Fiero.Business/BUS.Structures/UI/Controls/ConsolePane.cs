@@ -13,6 +13,8 @@ namespace Fiero.Business
         public readonly UIControlProperty<Coord> Cursor = new(nameof(Cursor));
         public readonly UIControlProperty<int> TabSize = new(nameof(TabSize), 4);
         public readonly ObservableCollection<StringBuilder> Lines = new();
+        public readonly ObservableCollection<string> History = new();
+        public readonly UIControlProperty<int> HistoryCursor = new(nameof(HistoryCursor), 0);
         public readonly UIControlProperty<int> Scroll = new(nameof(Scroll), 0);
         public readonly UIControlProperty<int> ScrollAmount = new(nameof(ScrollAmount), 8);
         public TextBox Caret { get; private set; }
@@ -29,6 +31,7 @@ namespace Fiero.Business
                 Caret.Padding.V = Caret.Margin.V = Coord.Zero;
                 Cursor_ValueChanged(null, Cursor);
             };
+            History.CollectionChanged += History_CollectionChanged;
             Cursor.ValueChanged += Cursor_ValueChanged;
             Caret.CharAvailable += Caret_CharAvailable;
             Children.Add(Caret);
@@ -37,6 +40,11 @@ namespace Fiero.Business
             Caret.InheritProperties(this);
             Caret.ClearOnEnter.V = true;
             Caret.IsHidden.V = true;
+        }
+
+        private void History_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            HistoryCursor.V = History.Count - 1;
         }
 
         private void Caret_CharAvailable(TextBox arg1, char arg2)
@@ -81,6 +89,12 @@ namespace Fiero.Business
             else if (Input.IsMouseWheelScrollingUp())
             {
                 ScrollUp();
+            }
+            if (Input.IsKeyPressed(VirtualKeys.Up) && History.Any())
+            {
+                if (HistoryCursor.V < 0)
+                    HistoryCursor.V = History.Count - 1;
+                Caret.Text.V = History[HistoryCursor.V--];
             }
         }
         public void ScrollDown()

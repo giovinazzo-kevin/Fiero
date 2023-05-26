@@ -1,11 +1,9 @@
-﻿using Ergo.Lang;
-using Fiero.Core;
+﻿using Fiero.Core;
 
 namespace Fiero.Business
 {
     public class PhysicalEntity : DrawableEntity
     {
-        [NonTerm]
         [RequiredComponent]
         public PhysicsComponent Physics { get; private set; }
         public InventoryComponent Inventory { get; private set; }

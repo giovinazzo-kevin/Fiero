@@ -44,6 +44,9 @@
     <None Update="Resources\Fonts\Terminus_8x12.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Fonts\Terminus_8x12_syntax.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Localizations\en\en.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -57,14 +57,14 @@ namespace Fiero.Business
                     return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
                     ? set
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b))
+                     .Where(b => a != b && sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b))
                     : Enumerable.Empty<Actor>();
                 })),
                 (NearbyEnemies = new((sys, a) => {
                     return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
                     ? set
                      .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
+                     .Where(b => a != b && sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
                         && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3)
                     : Enumerable.Empty<Actor>();
                 })),

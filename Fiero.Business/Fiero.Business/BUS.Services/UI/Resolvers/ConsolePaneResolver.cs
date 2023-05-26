@@ -15,7 +15,7 @@ namespace Fiero.Business
         public override ConsolePane Resolve(LayoutGrid dom)
         {
             var x = new ConsolePane(UI.Input, Reader);
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Terminal);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.FontSize.V = x.Font.V.Size;

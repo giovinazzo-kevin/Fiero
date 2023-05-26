@@ -76,9 +76,11 @@ namespace Fiero.Business
             Textures.Add(TextureName.UI, new Texture("Resources/Textures/8x8_ui.png"));
             Textures.Add(TextureName.FontMonospace, new Texture("Resources/Fonts/CGA8x8thick.png"));
             Textures.Add(TextureName.FontLight, new Texture("Resources/Fonts/Terminus_8x12.png"));
+            Textures.Add(TextureName.FontTerminal, new Texture("Resources/Fonts/Terminus_8x12_syntax.png"));
 
             Fonts.Add(FontName.Monospace, new(8, 8), Textures.Get(TextureName.FontMonospace));
             Fonts.Add(FontName.Light, new(8, 12), Textures.Get(TextureName.FontLight));
+            Fonts.Add(FontName.Terminal, new(8, 12), Textures.Get(TextureName.FontTerminal));
 
             //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 

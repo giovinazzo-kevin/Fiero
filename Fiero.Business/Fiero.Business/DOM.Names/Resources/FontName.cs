@@ -3,6 +3,7 @@
     public enum FontName
     {
         Monospace,
-        Light
+        Light,
+        Terminal,
     }
 }

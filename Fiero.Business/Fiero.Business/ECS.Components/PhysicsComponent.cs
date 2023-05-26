@@ -1,10 +1,13 @@
-﻿using Fiero.Core;
+﻿using Ergo.Lang;
+using Fiero.Core;
 
 namespace Fiero.Business
 {
     public class PhysicsComponent : EcsComponent
     {
+        [NonTerm]
         public FloorId FloorId { get; set; }
+        [NonTerm]
         public Coord Position { get; set; }
         public int Roots { get; set; }
         // Can phase through solid objects

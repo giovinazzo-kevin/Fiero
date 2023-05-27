@@ -202,7 +202,6 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
-                    //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"cli").Build()))
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .WithHealth(100)
                     .Build();

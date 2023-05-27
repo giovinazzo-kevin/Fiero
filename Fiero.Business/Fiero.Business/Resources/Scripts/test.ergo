@@ -4,7 +4,7 @@
 
 :- dynamic(num_killed/1).
 
-action:actor_killed(_{killer: @player(_)}) :- 
+action:actor_killed(_{killer: @player}) :- 
 	( num_killed(K) 
 	-> retract(num_killed(K))
 	 ; K = 0

@@ -388,6 +388,8 @@ namespace Fiero.Core
         public TComponent GetSingleComponent<TComponent>(int entityId)
             => GetComponents(entityId).OfType<TComponent>().Single();
 
+        public bool IsTracking(int entityId) => Entities.TryGetValue(new TrackedEntity(entityId), out _);
+
         public IEnumerable<EcsComponent> GetComponents(int entityId)
         {
             if (EntityRemovalQueue.Contains(entityId))

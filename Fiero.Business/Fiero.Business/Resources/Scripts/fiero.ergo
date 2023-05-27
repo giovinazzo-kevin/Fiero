@@ -1,17 +1,15 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2]).
+:- module(fiero, [as/2, '='/2]).
 :- op(40, yfx, ['as']).
 
 %%% Used as a prefix for game-related macros to make them stand out more
 :- op(50, fx, ['@']).
-%%% Shorthand macro for matching the player and retrieving the PId
+%%% Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
-	@player(Id) :- 
-		O = actor{actor_properties: _{type: player}, id: Id}
+	@player :- player as actor is O
 )).
-
 
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
@@ -19,3 +17,20 @@
 %: Example use: player as actor is _P, write_dict(_P)
 Entity as Type is Proxy :-
 	cast_entity(Entity, Type, Proxy).
+%: Assignment of component property, mirrors dict access. Impure, modifies the state of the component.
+D.Key = Val :-
+	nonvar(D), 
+	term_type(Key, atom),
+	OldVal = D,
+	component_set_value(OldVal, Key, Val),
+	!.
+
+
+%%% DEV CHEATS
+
+noclip(E) :-
+	E as actor is Actor,
+	Actor.physics.phasing ->
+		component_set_value(Actor.physics, phasing, false, _)
+		; component_set_value(Actor.physics, phasing, true, _)
+		.

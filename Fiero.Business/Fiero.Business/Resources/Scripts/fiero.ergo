@@ -24,13 +24,20 @@ D.Key = Val :-
 	OldVal = D,
 	component_set_value(OldVal, Key, Val),
 	!.
-
+%: Toggles a boolean property and optionally performs an action depending on the value.
+toggle(Prop, OnTrue, OnFalse) :-
+	Value = Prop,
+	Value -> 
+		(Prop = false, call(OnFalse))
+		; (Prop = true, call(OnTrue)).
+toggle(Prop, OnTrue) :- toggle(Prop, OnTrue, ()).
+toggle(Prop) :- toggle(Prop, (), ()).
 
 %%% DEV CHEATS
 
-noclip(E) :-
-	E as actor is Actor,
-	Actor.physics.phasing ->
-		component_set_value(Actor.physics, phasing, false, _)
-		; component_set_value(Actor.physics, phasing, true, _)
-		.
+%: Toggles collision for the specified entity
+noclip(Entity) :-
+	Id = Entity.info.name,
+	toggle(Entity.physics.phasing, write('noclip on: ', Id), write('noclip off: ', Id)), nl.
+
+noclip :- noclip(@player).

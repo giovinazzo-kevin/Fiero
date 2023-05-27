@@ -6,7 +6,6 @@ namespace Fiero.Business
     [Term(Marshalling = TermMarshalling.Named)]
     public class Entity : EcsEntity
     {
-        [NonTerm]
         [RequiredComponent]
         public InfoComponent Info { get; private set; }
         [NonTerm]

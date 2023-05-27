@@ -289,7 +289,7 @@ namespace Fiero.Business
                     return new FailAction();
                 // don't check features, we want to bump those
                 // don't check pathing, that's for autoexplore
-                if (cell.Tile.Physics.BlocksMovement)
+                if (!cell.Tile.IsWalkable(a))
                     return new FailAction();
                 return new MoveRelativeAction(c);
             }

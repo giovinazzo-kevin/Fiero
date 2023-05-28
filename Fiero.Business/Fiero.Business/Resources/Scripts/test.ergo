@@ -5,7 +5,7 @@
 
 action:actor_killed(_{killer: K}) :- 
 	owner_id(&K.id),
-	K.render.color = red.
+	K.actor_properties.hp := &K.actor_properties.hp + 10.
 
 test:started(_{owner:_{id: OwnerId }}) :-
 	asserta(owner_id(OwnerId)),

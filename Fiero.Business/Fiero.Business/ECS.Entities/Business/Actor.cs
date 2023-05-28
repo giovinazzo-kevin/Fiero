@@ -10,7 +10,6 @@ namespace Fiero.Business
         [RequiredComponent]
         public ActionComponent Action { get; private set; }
         [RequiredComponent]
-        [NonTerm]
         public ActorComponent ActorProperties { get; private set; }
         [NonTerm]
         [RequiredComponent]

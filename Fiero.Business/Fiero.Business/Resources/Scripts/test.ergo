@@ -3,10 +3,9 @@
 :- subscribe(action, [actor_killed]).
 :- dynamic(owner_id/1).
 
+began(E) :- asserta(owner_id(&E.owner.id)).
+ended(E) :- retract(owner_id(&E.owner.id)).
+
 action:actor_killed(_{killer: K}) :- 
 	owner_id(&K.id),
 	K.actor_properties.hp := &K.actor_properties.hp + 10.
-
-test:started(_{owner:_{id: OwnerId }}) :-
-	asserta(owner_id(OwnerId)),
-	write(OwnerId), nl.

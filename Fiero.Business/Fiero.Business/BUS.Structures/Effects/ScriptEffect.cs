@@ -28,7 +28,7 @@ namespace Fiero.Business
             Script = script;
             Description = description ?? string.Empty;
             var module = Script.ScriptProperties.Scope.Module;
-            EffectStartedHook = new(new(new("started"), Maybe.Some(1), module, default));
+            EffectStartedHook = new(new(new("began"), Maybe.Some(1), module, default));
             EffectEndedHook = new(new(new("ended"), Maybe.Some(1), module, default));
         }
 

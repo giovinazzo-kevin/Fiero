@@ -28,10 +28,19 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
             {
                 // This is a copy of the original for now
                 if (!scope.InterpreterScope.ExceptionHandler.TryGet(() =>
-                    (EcsComponent)TermMarshall.FromTerm(component, type, mode: TermMarshalling.Named))
+                {
+                    try
+                    {
+                        return (EcsComponent)TermMarshall.FromTerm(component, type, mode: TermMarshalling.Named);
+                    }
+                    catch (Exception x)
+                    {
+                        throw new InternalErgoException($"Can not convert term {component.Explain()} to type {type}");
+                    }
+                })
                     .TryGetValue(out var actualComponent))
                 {
-                    yield return ThrowFalse(scope, Ergo.Lang.Exceptions.SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, property.Explain());
+                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, property.Explain());
                     yield break;
                 }
                 var args = new object[] { actualComponent.Id, default(EcsComponent) };
@@ -49,7 +58,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
                             {
                                 prop.SetValue(actualComponent, newValueObject);
                             }
-                            catch (ArgumentException)
+                            catch (Exception)
                             {
                                 throw new InternalErgoException($"Can not convert atom {newValue.Explain()} to type {ergoType}");
                             }

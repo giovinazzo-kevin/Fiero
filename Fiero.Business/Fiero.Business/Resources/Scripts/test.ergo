@@ -3,9 +3,11 @@
 :- subscribe(action, [actor_killed]).
 :- dynamic(owner_id/1).
 
-began(E) :- asserta(owner_id(&E.owner.id)).
-ended(E) :- retract(owner_id(&E.owner.id)).
+% Remember the id of any actor who uses this effect
+test:began(E) :- asserta(owner_id(&E.owner.id)).
+test:ended(E) :- retract(owner_id(&E.owner.id)).
 
-action:actor_killed(_{killer: K}) :- 
-	owner_id(&K.id),
-	K.actor_properties.hp := &K.actor_properties.hp + 10.
+% Heal owners by 10HP when they kill someone
+action:actor_killed(_{killer: _{ id: Id, actor: Props }}) :- 
+	owner_id(Id),
+	Props.hp := &Props.hp + 10.

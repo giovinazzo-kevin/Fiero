@@ -4,3 +4,7 @@
 
 action:actor_killed(_{killer: K}) :- 
 	K.render.color = red.
+
+test:started(_{owner: X}) :-
+	X as actor is A,
+	write_dict(A).

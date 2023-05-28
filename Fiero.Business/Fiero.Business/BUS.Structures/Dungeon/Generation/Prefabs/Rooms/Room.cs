@@ -35,10 +35,10 @@ namespace Fiero.Business
             Connectors = new();
         }
 
-        public void AddRect(int index, IntRect rect)
+        public void AddRect(RoomRect rect)
         {
-            Indices.Add(index);
-            Rects.Add(rect);
+            Indices.Add(rect.GridIndex);
+            Rects.Add(rect.Rect);
             Position = Rects.Min(r => r.Position());
             Size = Rects.Max(r => r.Position() + r.Size() - Position);
             Connectors.Clear();

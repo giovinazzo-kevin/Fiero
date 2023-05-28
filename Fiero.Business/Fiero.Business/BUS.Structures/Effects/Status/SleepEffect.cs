@@ -40,7 +40,7 @@ namespace Fiero.Business
             {
                 if (e.Victim == owner && Rng.Random.NChancesIn(e.Damage, 100))
                 {
-                    End();
+                    End(systems, owner);
                 }
             });
         }

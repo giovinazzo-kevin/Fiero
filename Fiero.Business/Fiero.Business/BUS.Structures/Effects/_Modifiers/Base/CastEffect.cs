@@ -47,7 +47,7 @@ namespace Fiero.Business
                 {
                     if (e.Spell == spell)
                     {
-                        End(); // TODO: If spells become singletons, remove this
+                        End(systems, owner); // TODO: If spells become singletons, remove this
                     }
                 });
             }

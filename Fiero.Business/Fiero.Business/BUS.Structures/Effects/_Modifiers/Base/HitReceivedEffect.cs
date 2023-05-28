@@ -18,22 +18,30 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Actor>(out var actor)) {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if (e.Victim == actor) {
+            if (owner.TryCast<Actor>(out var actor))
+            {
+                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                {
+                    if (e.Victim == actor)
+                    {
                         OnApplied(systems, owner, e.Source, e.Victim, e.Damage);
                     }
                 });
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
-                yield return systems.Action.ActorDied.SubscribeHandler(e => {
-                    if (e.Actor == actor) {
-                        End();
+                yield return systems.Action.ActorDied.SubscribeHandler(e =>
+                {
+                    if (e.Actor == actor)
+                    {
+                        End(systems, owner);
                     }
                 });
             }
-            if (owner.TryCast<Armor>(out var armor)) {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if ((e.Victim.Equipment?.IsEquipped(armor) ?? false)) {
+            if (owner.TryCast<Armor>(out var armor))
+            {
+                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                {
+                    if ((e.Victim.Equipment?.IsEquipped(armor) ?? false))
+                    {
                         OnApplied(systems, owner, e.Source, e.Victim, e.Damage);
                     }
                 });

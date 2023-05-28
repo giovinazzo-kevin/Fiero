@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using LightInject;
 using System;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -14,17 +15,18 @@ namespace Fiero.Business
             where T : Entity => builder.AddOrTweak<EffectsComponent>(c =>
             {
                 c.Intrinsic.Add(def);
+                // Delegate starting the effect to the next turn, so that the game is in a known valid state
                 builder.Built += (b, o) =>
                 {
-                    wrap ??= (e => e.Resolve(o));
-                    var fx = wrap(def);
-                    if (fx is ScriptEffect se && se.Script.ScriptProperties.LastError != null)
+                    var systems = b.ServiceFactory.GetInstance<GameSystems>();
+                    var sub = new Subscription();
+                    sub.Add(systems.Action.TurnStarted.SubscribeHandler(b =>
                     {
-                        // If a script errored out during initialization, for instance by failing to load,
-                        // then don't start it. Error messages are handled by the WithScriptInfo method.
-                        return;
-                    }
-                    fx.Start(b.ServiceFactory.GetInstance<GameSystems>(), o);
+                        wrap ??= (e => e.Resolve(o));
+                        var fx = wrap(def);
+                        fx.Start(systems, o);
+                        sub.Dispose();
+                    }));
                 };
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
@@ -317,6 +319,7 @@ namespace Fiero.Business
                     if (!scriptSystem.LoadScript(e))
                     {
                         // TODO: Log to the in-game console that doesn't exist yet
+                        return;
                     }
                 };
             });

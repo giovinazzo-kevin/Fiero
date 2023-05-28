@@ -19,41 +19,55 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Tile>(out var tile)) {
-                yield return systems.Action.ActorMoved.SubscribeHandler(e => {
-                    if (tile.FloorId() != e.Actor.FloorId()) {
+            if (owner.TryCast<Tile>(out var tile))
+            {
+                yield return systems.Action.ActorMoved.SubscribeHandler(e =>
+                {
+                    if (tile.FloorId() != e.Actor.FloorId())
+                    {
                         return;
                     }
-                    if (e.NewPosition == tile.Position()) {
+                    if (e.NewPosition == tile.Position())
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
-                    else if (e.OldPosition == tile.Position()) {
+                    else if (e.OldPosition == tile.Position())
+                    {
                         OnRemoved(systems, owner, e.Actor);
                     }
                 });
                 // End the effect when this tile is removed or destroyed for any reason
-                yield return systems.Dungeon.TileChanged.SubscribeHandler(e => {
-                    if (e.OldState == tile) {
-                        End();
+                yield return systems.Dungeon.TileChanged.SubscribeHandler(e =>
+                {
+                    if (e.OldState == tile)
+                    {
+                        End(systems, owner);
                     }
                 });
             }
-            if (owner.TryCast<Feature>(out var feature)) {
-                yield return systems.Action.ActorMoved.SubscribeHandler(e => {
-                    if(feature.FloorId() != e.Actor.FloorId()) {
+            if (owner.TryCast<Feature>(out var feature))
+            {
+                yield return systems.Action.ActorMoved.SubscribeHandler(e =>
+                {
+                    if (feature.FloorId() != e.Actor.FloorId())
+                    {
                         return;
                     }
-                    if (e.NewPosition == feature.Position()) {
+                    if (e.NewPosition == feature.Position())
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
-                    else if (e.OldPosition == feature.Position()) {
+                    else if (e.OldPosition == feature.Position())
+                    {
                         OnRemoved(systems, owner, e.Actor);
                     }
                 });
                 // End the effect when this feature is removed or destroyed for any reason
-                yield return systems.Dungeon.FeatureRemoved.SubscribeHandler(e => {
-                    if (e.OldState == feature) {
-                        End();
+                yield return systems.Dungeon.FeatureRemoved.SubscribeHandler(e =>
+                {
+                    if (e.OldState == feature)
+                    {
+                        End(systems, owner);
                     }
                 });
             }

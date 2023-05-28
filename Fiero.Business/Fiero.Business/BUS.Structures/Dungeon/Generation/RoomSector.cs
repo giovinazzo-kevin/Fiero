@@ -4,6 +4,7 @@ using Fiero.Core.Structures;
 using SFML.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Fiero.Business
@@ -17,7 +18,7 @@ namespace Fiero.Business
         public readonly List<Room> Rooms;
         public readonly List<Corridor> Corridors;
 
-        public RoomSector(IntRect sector, Coord gridCoord, bool[] cells, Func<Room> makeRoom)
+        public RoomSector(IntRect sector, Coord gridCoord, bool[] cells, Func<ImmutableArray<RoomRect>, Room> makeRoom)
         {
             if (cells.Length != 16)
                 throw new ArgumentOutOfRangeException(nameof(cells));
@@ -64,15 +65,7 @@ namespace Fiero.Business
             }
 
             Rooms = groups
-                .Select(s =>
-                {
-                    var room = makeRoom();
-                    foreach (var i in s)
-                    {
-                        room.AddRect(i, rects[i]);
-                    }
-                    return room;
-                })
+                .Select(s => makeRoom(s.Select(i => new RoomRect(rects[i], i)).ToImmutableArray()))
                 .ToList();
             Corridors = GenerateIntraSectorCorridors(this).ToList();
         }
@@ -196,7 +189,7 @@ namespace Fiero.Business
             public static int[] BottomEdge = new[] { 3, 7, 11, 15 };
             public static int[] RightEdge = new[] { 12, 13, 14, 15 };
         };
-        public static IEnumerable<RoomSector> CreateTiling(Coord mapSize, Coord gridSize, Func<Room> makeRoom)
+        public static IEnumerable<RoomSector> CreateTiling(Coord mapSize, Coord gridSize, Dice maxLength, Func<ImmutableArray<RoomRect>, Room> makeRoom)
         {
             var sectorScale = (mapSize - Coord.PositiveOne) / gridSize;
             // Create a grid of sectors such that:
@@ -213,7 +206,7 @@ namespace Fiero.Business
                     nodes.TryGetValue(g + Coord.PositiveX, out var right);
                     nodes.TryGetValue(g + Coord.PositiveY, out var bottom);
                     var node = new Node(g, null, right, bottom);
-                    nodes[g] = node with { Item = Create(sector, _g, makeRoom, i => Constrain(node, i)) };
+                    nodes[g] = node with { Item = Create(sector, _g, maxLength, makeRoom, i => Constrain(node, i)) };
                 }
             }
             return nodes.Values.Select(v => v.Item);
@@ -243,7 +236,7 @@ namespace Fiero.Business
             }
         }
 
-        public static RoomSector Create(IntRect sector, Coord gridPos, Func<Room> makeRoom, Func<int, bool> constrain)
+        public static RoomSector Create(IntRect sector, Coord gridPos, Dice maxLength, Func<ImmutableArray<RoomRect>, Room> makeRoom, Func<int, bool> constrain)
         {
             constrain ??= _ => true;
             var mat = new bool[16];
@@ -257,7 +250,7 @@ namespace Fiero.Business
                 foreach (var index in indices
                     .Where(i => !candidates.Contains(i))
                     .Where(constrain)
-                    .Where(i => TetrisAdjacent(candidates, i))
+                    .Where(i => TetrisAdjacent(candidates, i, maxLength))
                 )
                 {
                     candidates.Add(index);
@@ -296,7 +289,7 @@ namespace Fiero.Business
         // and NOT diagonally adjacent to any DISCONTIGUOUS cell
         // and doesn't have more than 3 other neighbors
         // and the contiguous block is shorter than N cells
-        public static bool TetrisAdjacent(IEnumerable<int> candidates, int a, int maxLength = 6)
+        public static bool TetrisAdjacent(IEnumerable<int> candidates, int a, Dice maxLength)
         {
             var map = candidates
                 .Select(c => (Index: c, Coord: ToCoord(c)))
@@ -320,10 +313,10 @@ namespace Fiero.Business
             }
 
             var discontiguous = candidates.Where(c => !closedSet.Contains(c));
-
+            var len = maxLength.Roll().Sum();
             var ret = !DiagonallyAdjacent(discontiguous, a)
                 && closedSet.Count > 0
-                && (maxLength <= 0 || closedSet.Count <= maxLength);
+                && (len <= 0 || closedSet.Count <= len);
             return ret;
         }
 

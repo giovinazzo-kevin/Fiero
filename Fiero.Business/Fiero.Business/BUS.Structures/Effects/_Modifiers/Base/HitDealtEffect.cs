@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -19,22 +18,30 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Actor>(out var actor)) {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if (e.Source == actor) {
+            if (owner.TryCast<Actor>(out var actor))
+            {
+                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                {
+                    if (e.Source == actor)
+                    {
                         OnApplied(systems, owner, actor, e.Victim, e.Damage);
                     }
                 });
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
-                yield return systems.Action.ActorDied.SubscribeHandler(e => {
-                    if (e.Actor == actor) {
-                        End();
+                yield return systems.Action.ActorDied.SubscribeHandler(e =>
+                {
+                    if (e.Actor == actor)
+                    {
+                        End(systems, owner);
                     }
                 });
             }
-            else if (owner.TryCast<Weapon>(out var weapon)) {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e => {
-                    if (e.Weapon == weapon && e.Source.TryCast<Actor>(out var source)) {
+            else if (owner.TryCast<Weapon>(out var weapon))
+            {
+                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                {
+                    if (e.Weapon == weapon && e.Source.TryCast<Actor>(out var source))
+                    {
                         OnApplied(systems, owner, source, e.Victim, e.Damage);
                     }
                 });

@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Ergo.Interpreter.Libraries;
+using Ergo.Lang;
+using Ergo.Solver;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -11,18 +15,52 @@ namespace Fiero.Business
     /// </summary>
     public class ScriptEffect : Effect
     {
+        public readonly record struct EffectStartedEvent(Entity Owner);
+        public readonly record struct EffectEndedEvent(Entity Owner);
+
         public readonly Script Script;
         public readonly string Description;
+        public readonly Hook EffectStartedHook;
+        public readonly Hook EffectEndedHook;
 
         public ScriptEffect(Script script, string description = null)
         {
             Script = script;
             Description = description ?? string.Empty;
+            var module = Script.ScriptProperties.Scope.Module;
+            EffectStartedHook = new(new(new("started"), Maybe.Some(1), module, default));
+            EffectEndedHook = new(new(new("ended"), Maybe.Some(1), module, default));
         }
 
         public override EffectName Name => EffectName.Script;
         public override string DisplayName => Script.Info.Name;
         public override string DisplayDescription => Description;
+
+        protected SolverContext CreateContext() => SolverContext.Create(Script.ScriptProperties.Solver, Script.ScriptProperties.Scope.InterpreterScope);
+
+        protected override void OnStarted(GameSystems systems, Entity owner)
+        {
+            base.OnStarted(systems, owner);
+            using var ctx = CreateContext();
+            var eventTerm = TermMarshall.ToTerm(new EffectStartedEvent(owner), mode: TermMarshalling.Named);
+            if (EffectStartedHook.IsDefined(ctx))
+            {
+                foreach (var _ in EffectStartedHook.Call(ctx, Script.ScriptProperties.Scope, ImmutableArray.Create(eventTerm)))
+                    ;
+            }
+        }
+
+        protected override void OnEnded(GameSystems systems, Entity owner)
+        {
+            base.OnEnded(systems, owner);
+            using var ctx = CreateContext();
+            var eventTerm = TermMarshall.ToTerm(new EffectEndedEvent(owner), mode: TermMarshalling.Named);
+            if (EffectEndedHook.IsDefined(ctx))
+            {
+                foreach (var _ in EffectEndedHook.Call(ctx, Script.ScriptProperties.Scope, ImmutableArray.Create(eventTerm)))
+                    ;
+            }
+        }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {

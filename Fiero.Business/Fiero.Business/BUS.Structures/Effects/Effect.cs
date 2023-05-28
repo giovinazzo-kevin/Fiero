@@ -16,12 +16,14 @@ namespace Fiero.Business
         public abstract string DisplayName { get; }
         public abstract string DisplayDescription { get; }
 
-
         protected abstract IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner);
-        protected virtual void OnStarted(GameSystems systems, Entity owner) { }
+        protected virtual void OnStarted(GameSystems systems, Entity owner)
+        {
+
+        }
         public void Start(GameSystems systems, Entity owner)
         {
-            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(); }));
+            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(systems, owner); }));
             if (!(this is ModifierEffect))
             {
                 Started += e => owner.Effects?.Active.Add(e);
@@ -37,10 +39,10 @@ namespace Fiero.Business
             OnStarted(systems, owner);
         }
 
-        protected virtual void OnEnded() { }
-        public void End()
+        protected virtual void OnEnded(GameSystems systems, Entity owner) { }
+        public void End(GameSystems systems, Entity owner)
         {
-            OnEnded();
+            OnEnded(systems, owner);
             foreach (var sub in Subscriptions)
             {
                 sub.Dispose();

@@ -20,7 +20,7 @@ namespace Fiero.Business
                 .First(x => x.Value.IsWalkable(target))
                 .Key;
             systems.Action.ActorTeleporting.HandleOrThrow(new(target, target.Position(), randomPos));
-            End();
+            End(systems, target);
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

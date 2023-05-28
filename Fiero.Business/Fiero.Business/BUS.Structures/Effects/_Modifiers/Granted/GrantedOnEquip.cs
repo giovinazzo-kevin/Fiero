@@ -18,7 +18,7 @@
         protected override void OnRemoved(GameSystems systems, Actor target)
         {
             if (Instance != null)
-                Instance.End();
+                Instance.End(systems, target);
             Instance = null;
         }
     }

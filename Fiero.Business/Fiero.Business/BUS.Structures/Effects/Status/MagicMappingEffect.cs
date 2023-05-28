@@ -16,7 +16,7 @@ namespace Fiero.Business
             foreach (var tile in systems.Dungeon.GetAllTiles(fid))
                 target.Fov.KnownTiles[fid].Add(tile.Position());
             systems.Action.ActorUsedMagicMapping.HandleOrThrow(new(target, Source));
-            End();
+            End(systems, target);
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

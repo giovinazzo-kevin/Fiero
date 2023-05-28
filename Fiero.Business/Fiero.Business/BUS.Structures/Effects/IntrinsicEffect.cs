@@ -19,43 +19,58 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if(owner.TryCast<Actor>(out var target)) {
-                yield return systems.Action.ActorSpawned.SubscribeHandler(e => {
-                    if (e.Actor == target) {
+            if (owner.TryCast<Actor>(out var target))
+            {
+                yield return systems.Action.ActorSpawned.SubscribeHandler(e =>
+                {
+                    if (e.Actor == target)
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
-                yield return systems.Action.ActorDied.SubscribeHandler(e => {
-                    if (e.Actor == target) {
+                yield return systems.Action.ActorDied.SubscribeHandler(e =>
+                {
+                    if (e.Actor == target)
+                    {
                         OnRemoved(systems, owner, e.Actor);
-                        End();
+                        End(systems, owner);
                     }
                 });
             }
-            else if (owner.TryCast<Item>(out var item)) {
-                yield return systems.Action.ItemPickedUp.SubscribeHandler(e => {
-                    if (e.Item == item) {
+            else if (owner.TryCast<Item>(out var item))
+            {
+                yield return systems.Action.ItemPickedUp.SubscribeHandler(e =>
+                {
+                    if (e.Item == item)
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });
-                yield return systems.Action.ItemDropped.SubscribeHandler(e => {
-                    if (e.Item == item) {
+                yield return systems.Action.ItemDropped.SubscribeHandler(e =>
+                {
+                    if (e.Item == item)
+                    {
                         OnRemoved(systems, owner, e.Actor);
                     }
                 });
                 // TODO: End the effect when the item is destroyed, if I end up adding a way to destroy items
             }
-            else if (owner.TryCast<Spell>(out var spell)) {
-                yield return systems.Action.SpellLearned.SubscribeHandler(e => {
-                    if (e.Spell == spell) {
+            else if (owner.TryCast<Spell>(out var spell))
+            {
+                yield return systems.Action.SpellLearned.SubscribeHandler(e =>
+                {
+                    if (e.Spell == spell)
+                    {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });
-                yield return systems.Action.SpellForgotten.SubscribeHandler(e => {
-                    if (e.Spell == spell) {
+                yield return systems.Action.SpellForgotten.SubscribeHandler(e =>
+                {
+                    if (e.Spell == spell)
+                    {
                         OnRemoved(systems, owner, e.Actor);
-                        End(); // TODO: If spells become singletons, remove this
+                        End(systems, owner); // TODO: If spells become singletons, remove this
                     }
                 });
             }

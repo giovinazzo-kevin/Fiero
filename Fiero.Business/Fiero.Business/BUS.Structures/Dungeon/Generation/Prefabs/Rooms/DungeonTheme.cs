@@ -10,6 +10,7 @@ namespace Fiero.Business
         Func<Coord, TileDef> WaterTile,
         Func<GameEntityBuilders, Coord, EntityBuilder<Feature>> DoorFeature,
         Dice CorridorThickness,
+        Dice MaxRoomSquares,
         Chance DoorChance,
         bool UnevenCorridors
 
@@ -22,6 +23,7 @@ namespace Fiero.Business
             WaterTile: c => new(TileName.Water, c, ColorName.LightBlue),
             DoorFeature: (e, c) => e.Feature_Door(),
             CorridorThickness: new(1, 3, (die, side) => 1f / Math.Pow(side, 2)), // thick corridors are rarer
+            MaxRoomSquares: new(1, 6),
             DoorChance: Chance.FiftyFifty,
             UnevenCorridors: true
         );

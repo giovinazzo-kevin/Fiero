@@ -21,9 +21,9 @@ namespace Fiero.Business
             GetStat = getStat;
         }
 
-        protected override void OnEnded()
+        protected override void OnEnded(GameSystems systems, Entity owner)
         {
-            base.OnEnded();
+            base.OnEnded(systems, owner);
             foreach (var onEnded in _onEnded)
                 onEnded();
             _onEnded.Clear();

@@ -67,7 +67,7 @@ namespace Fiero.Business
                         systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, owner, damage));
                     }
                 }
-                End();
+                End(systems, owner);
             }
         }
 

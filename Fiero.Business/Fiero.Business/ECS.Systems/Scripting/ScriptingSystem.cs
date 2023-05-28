@@ -1,5 +1,6 @@
 ﻿using Ergo.Facade;
 using Ergo.Interpreter;
+using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
@@ -10,6 +11,7 @@ using Fiero.Core;
 using LightInject;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
@@ -40,6 +42,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
         public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
+
 
         public ErgoScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
@@ -146,10 +149,11 @@ namespace Fiero.Business
                     var reqName = new Atom(field.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
                     var reqType = field.FieldType.GetGenericArguments()[1];
+                    var hook = new Hook(new(reqName, 1, sysName, default));
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
-                            .SubscribeResponse(evt => Respond(self, evt, reqType, reqName, sysName));
+                            .SubscribeResponse(evt => Respond(self, evt, reqType, hook));
                     });
                 }
                 else
@@ -157,28 +161,32 @@ namespace Fiero.Business
                     var evtName = new Atom(field.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
                     var evtType = field.FieldType.GetGenericArguments()[1];
+                    var hook = new Hook(new(evtName, 1, sysName, default));
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                            .SubscribeHandler(evt => Respond(self, evt, evtType, evtName, sysName));
+                            .SubscribeHandler(evt => Respond(self, evt, evtType, hook));
                     });
                 }
             }
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Type type, Atom evtName, Atom sysName)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook)
             {
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named);
-                // Qualify term with module so that the declaration needs to match, e.g. action:actor_turn_started/1
-                var query = new Query(((ITerm)new Complex(evtName, term)).Qualified(sysName));
                 try
                 {
+                    var scope = self.Script.ScriptProperties.Scope;
                     // TODO: Figure out a way for scripts to return complex EventResults?
-                    foreach (var _ in self.Script.Solve(query))
+                    using var ctx = SolverContext.Create(self.Script.ScriptProperties.Solver, scope.InterpreterScope);
+                    if (hook.IsDefined(ctx))
                     {
-                        if (self.Script.ScriptProperties.LastError != null)
-                            return false;
+                        foreach (var _ in hook.Call(ctx, scope, ImmutableArray.Create(term)))
+                        {
+                            if (self.Script.ScriptProperties.LastError != null)
+                                return false;
+                        }
                     }
                     return true;
                 }

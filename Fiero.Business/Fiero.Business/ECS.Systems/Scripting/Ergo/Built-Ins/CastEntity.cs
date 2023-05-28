@@ -34,6 +34,8 @@ public sealed class CastEntity : GameEntitiesBuiltIn
                 maybeId = special.Id;
             else if (int.TryParse(expl, out var id_))
                 maybeId = id_;
+            else if (entityId.IsAbstract<Dict>().TryGetValue(out var dict) && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
+                maybeId = id_;
             if (maybeId.TryGetValue(out var id))
             {
                 var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };

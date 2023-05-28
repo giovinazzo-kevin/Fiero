@@ -2,6 +2,7 @@
 using Fiero.Core.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Fiero.Business
@@ -12,7 +13,8 @@ namespace Fiero.Business
         {
             WallTile = (c => DungeonTheme.Default.WallTile(c).WithCustomColor(ColorName.LightGreen)),
             RoomTile = (c => DungeonTheme.Default.RoomTile(c).WithCustomColor(ColorName.Gray)),
-            CorridorTile = (c => DungeonTheme.Default.CorridorTile(c).WithCustomColor(ColorName.Green))
+            CorridorTile = (c => DungeonTheme.Default.CorridorTile(c).WithCustomColor(ColorName.Green)),
+            MaxRoomSquares = new(1, 6, (d, s) => 1f / Math.Pow(s, 2))
         };
 
 
@@ -22,7 +24,7 @@ namespace Fiero.Business
             {
                 _ => (new Coord(50, 50), new Coord(2, 2)),
             };
-            var roomSectors = RoomSector.CreateTiling(size, subdivisions, CreateRoom)
+            var roomSectors = RoomSector.CreateTiling(size, subdivisions, Theme.MaxRoomSquares, CreateRoom)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)
                 .ToList();
@@ -80,14 +82,16 @@ namespace Fiero.Business
                 })
                 .Build(floorId, size);
 
-            Room CreateRoom()
+            Room CreateRoom(ImmutableArray<RoomRect> rects)
             {
                 Room room = Rng.Random.ChooseWeighted(new (Func<Room>, float)[] {
-                    (() => new ShrineRoom(),    0.5f),
-                    (() => new TreasureRoom(),  1.0f),
-                    (() => new WetFloorSewerRoom() ,  44.25f),
-                    (() => new EmptyRoom() ,    44.25f)
+                    (() => new ShrineRoom(),    0.5f / rects.Length),
+                    (() => new TreasureRoom(),  1.0f / rects.Length),
+                    (() => new WetFloorSewerRoom() ,  44.25f * rects.Length),
+                    (() => new EmptyRoom() ,    44.25f * rects.Length)
                 })();
+                foreach (var rect in rects)
+                    room.AddRect(rect);
                 room.Drawn += (r, ctx) =>
                 {
                     var area = r.GetRects().Count(); // Chances are not actually per-room but per room square

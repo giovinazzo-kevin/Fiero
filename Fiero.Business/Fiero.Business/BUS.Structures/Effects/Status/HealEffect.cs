@@ -21,7 +21,7 @@ namespace Fiero.Business
         protected override void Apply(GameSystems systems, Actor target)
         {
             systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, Amount));
-            End();
+            End(systems, target);
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -27,16 +25,18 @@ namespace Fiero.Business
 
             void Temporary_Ended(Effect _)
             {
-                effect.End();
+                effect.End(systems, owner);
                 Ended -= Temporary_Ended;
             }
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            yield return systems.Action.TurnEnded.SubscribeHandler(e => {
-                if (Time++ >= Duration) {
-                    End();
+            yield return systems.Action.TurnEnded.SubscribeHandler(e =>
+            {
+                if (Time++ >= Duration)
+                {
+                    End(systems, owner);
                 }
             });
         }

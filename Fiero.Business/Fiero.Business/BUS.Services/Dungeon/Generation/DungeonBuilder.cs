@@ -37,7 +37,7 @@ namespace Fiero.Business
             {
                 var builder = _serviceFactory.GetInstance<FloorBuilder>()
                     .WithStep(ctx => ctx.AddConnections(node.Connections.ToArray()));
-                var generator = (BranchGenerator)_serviceFactory.GetInstance(node.Builder);
+                var generator = (IBranchGenerator)_serviceFactory.GetInstance(node.Builder);
                 var floor = generator.GenerateFloor(node.Id, builder);
                 yield return floor;
             }

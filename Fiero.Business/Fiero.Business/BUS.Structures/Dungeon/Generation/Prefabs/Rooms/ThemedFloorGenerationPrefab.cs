@@ -1,4 +1,5 @@
-﻿namespace Fiero.Business
+﻿
+namespace Fiero.Business
 {
     public abstract class ThemedFloorGenerationPrefab : IFloorGenerationPrefab
     {

@@ -1,10 +1,7 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    [TransientDependency]
-    public abstract class BranchGenerator
+    public interface IBranchGenerator
     {
-        public abstract Floor GenerateFloor(FloorId id, FloorBuilder builder);
+        Floor GenerateFloor(FloorId id, FloorBuilder builder);
     }
 }

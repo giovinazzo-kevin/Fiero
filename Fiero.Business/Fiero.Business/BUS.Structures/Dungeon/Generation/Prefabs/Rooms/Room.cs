@@ -18,6 +18,7 @@ namespace Fiero.Business
         public Coord Position { get; private set; }
         public Coord Size { get; private set; }
 
+        public RoomTree Tree { get; internal set; }
         public bool AllowMonsters { get; protected set; } = true;
         public bool AllowItems { get; protected set; } = true;
         public bool AllowFeatures { get; protected set; } = true;

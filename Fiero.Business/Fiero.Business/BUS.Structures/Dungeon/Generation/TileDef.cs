@@ -29,6 +29,7 @@ namespace Fiero.Business
             TileName.Room => Decorate(entities.Tile_Room(), id),
             TileName.Corridor => Decorate(entities.Tile_Corridor(), id),
             TileName.Wall => Decorate(entities.Tile_Wall(), id),
+            TileName.Hole => Decorate(entities.Tile_Hole(), id),
             TileName.Water => Decorate(entities.Tile_Water(), id),
             _ => Decorate(entities.Tile_Unimplemented(), id),
         };

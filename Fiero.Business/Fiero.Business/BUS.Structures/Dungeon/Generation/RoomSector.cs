@@ -15,10 +15,15 @@ namespace Fiero.Business
         public readonly bool[] Cells;
         public readonly IntRect Sector;
         public readonly Coord GridPos;
-        public readonly List<Room> Rooms;
-        public readonly List<Corridor> Corridors;
+        public readonly List<Room> Rooms = new();
+        public readonly List<Corridor> Corridors = new();
+        private readonly List<List<int>> _groups;
+        private readonly Dictionary<int, IntRect> _rects;
 
-        public RoomSector(IntRect sector, Coord gridCoord, bool[] cells, Func<ImmutableArray<RoomRect>, Room> makeRoom)
+        public int RoomCount => _groups.Count;
+
+
+        public RoomSector(IntRect sector, Coord gridCoord, bool[] cells)
         {
             if (cells.Length != 16)
                 throw new ArgumentOutOfRangeException(nameof(cells));
@@ -26,15 +31,15 @@ namespace Fiero.Business
             Cells = cells;
             GridPos = gridCoord;
             var subdivisions = Sector.Subdivide(new(4, 4));
-            var rects = subdivisions
+            _rects = subdivisions
                 .Select((r, i) => (Index: i, Rect: r))
-                .Where(r => cells[r.Index])
+                .Where(r => Cells[r.Index])
                 .ToDictionary(r => r.Index, r => r.Rect);
-            var groups = new List<List<int>>();
-            foreach (var key in rects.Keys)
+            _groups = new List<List<int>>();
+            foreach (var key in _rects.Keys)
             {
                 var added = false;
-                foreach (var group in groups)
+                foreach (var group in _groups)
                 {
                     if (CardinallyAdjacent(group, key))
                     {
@@ -45,29 +50,38 @@ namespace Fiero.Business
                 }
                 if (!added)
                 {
-                    groups.Add(new() { key });
+                    _groups.Add(new() { key });
                 }
             }
 
             // merge adjacent groups (technically this shouldn't be necessary but... TODO: verify)
-            for (int i = groups.Count - 1; i >= 0; i--)
+            for (int i = _groups.Count - 1; i >= 0; i--)
             {
                 for (int j = i - 1; j >= 0; j--)
                 {
-                    if (groups[i].Any(x => CardinallyAdjacent(groups[j], x)))
+                    if (_groups[i].Any(x => CardinallyAdjacent(_groups[j], x)))
                     {
-                        groups[i].AddRange(groups[j]);
-                        groups.RemoveAt(j);
+                        _groups[i].AddRange(_groups[j]);
+                        _groups.RemoveAt(j);
 
                         j--; i--;
                     }
                 }
             }
 
-            Rooms = groups
-                .Select(s => makeRoom(s.Select(i => new RoomRect(rects[i], i)).ToImmutableArray()))
-                .ToList();
-            Corridors = GenerateIntraSectorCorridors(this).ToList();
+        }
+
+        public void Build(Pool<Func<Room>> pool)
+        {
+            Rooms.AddRange(_groups
+                .Select(s =>
+                {
+                    var r = pool.Next()();
+                    foreach (var rect in s.Select(i => new RoomRect(_rects[i], i)).ToImmutableArray())
+                        r.AddRect(rect);
+                    return r;
+                }));
+            Corridors.AddRange(GenerateIntraSectorCorridors(this));
         }
 
         public void MarkSecretCorridors(int roll)
@@ -189,7 +203,7 @@ namespace Fiero.Business
             public static int[] BottomEdge = new[] { 3, 7, 11, 15 };
             public static int[] RightEdge = new[] { 12, 13, 14, 15 };
         };
-        public static IEnumerable<RoomSector> CreateTiling(Coord mapSize, Coord gridSize, Dice maxLength, Func<ImmutableArray<RoomRect>, Room> makeRoom)
+        public static IEnumerable<RoomSector> CreateTiling(Coord mapSize, Coord gridSize, Dice maxLength, Pool<Func<Room>> roomPool)
         {
             var sectorScale = (mapSize - Coord.PositiveOne) / gridSize;
             // Create a grid of sectors such that:
@@ -206,10 +220,16 @@ namespace Fiero.Business
                     nodes.TryGetValue(g + Coord.PositiveX, out var right);
                     nodes.TryGetValue(g + Coord.PositiveY, out var bottom);
                     var node = new Node(g, null, right, bottom);
-                    nodes[g] = node with { Item = Create(sector, _g, maxLength, makeRoom, i => Constrain(node, i)) };
+                    nodes[g] = node with { Item = Create(sector, _g, maxLength, i => Constrain(node, i)) };
                 }
             }
-            return nodes.Values.Select(v => v.Item);
+            var numRooms = nodes.Values.Select(n => n.Item.RoomCount).Sum();
+            roomPool = roomPool.WithCapacity(numRooms);
+            foreach (var item in nodes.Values)
+            {
+                item.Item.Build(roomPool);
+                yield return item.Item;
+            }
 
             bool Constrain(Node n, int i)
             {
@@ -236,7 +256,7 @@ namespace Fiero.Business
             }
         }
 
-        public static RoomSector Create(IntRect sector, Coord gridPos, Dice maxLength, Func<ImmutableArray<RoomRect>, Room> makeRoom, Func<int, bool> constrain)
+        public static RoomSector Create(IntRect sector, Coord gridPos, Dice maxLength, Func<int, bool> constrain)
         {
             constrain ??= _ => true;
             var mat = new bool[16];
@@ -257,9 +277,8 @@ namespace Fiero.Business
                     mat[index] = true;
                     break;
                 }
-
             }
-            return new(sector, gridPos, mat, makeRoom);
+            return new(sector, gridPos, mat);
         }
 
         static Coord ToCoord(int a) => new(a / 4, a % 4);

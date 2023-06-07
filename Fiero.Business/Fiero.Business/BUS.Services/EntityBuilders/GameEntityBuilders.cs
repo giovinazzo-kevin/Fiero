@@ -670,13 +670,13 @@ namespace Fiero.Business
             _ => ColorName.White
         };
 
-        private IEnumerable<(Item[] Item, float Weight)> ChestLootTable()
+        private IEnumerable<WeightedItem<Item[]>> ChestLootTable()
         {
             // COMMON CHESTS: Consumables; some thematic, some mixed bags
-            yield return (Loadout(
+            yield return new(Loadout(
                 RandomPotion()
             ), 1000);
-            yield return (Loadout(
+            yield return new(Loadout(
                 (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
@@ -732,6 +732,11 @@ namespace Fiero.Business
             => Tile(TileName.Wall, ColorName.Gray)
             .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Wall)
+            ;
+        public EntityBuilder<Tile> Tile_Hole()
+            => Tile(TileName.Hole, ColorName.Gray)
+            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Ground)
             ;
         public EntityBuilder<Tile> Tile_Room()
             => Tile(TileName.Room, ColorName.LightGray)

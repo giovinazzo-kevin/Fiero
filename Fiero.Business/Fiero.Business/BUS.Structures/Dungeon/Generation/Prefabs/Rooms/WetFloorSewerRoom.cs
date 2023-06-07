@@ -25,7 +25,7 @@ namespace Fiero.Business
                 switch (simplex.Next())
                 {
                     case 0:
-                        ctx.Draw(new(simplex.X, simplex.Y), Theme.WaterTile);
+                        ctx.Draw(new(simplex.X, simplex.Y), Theme.HoleTile);
                         break;
                     case 1:
                         ctx.Draw(new(simplex.X, simplex.Y), Theme.RoomTile);

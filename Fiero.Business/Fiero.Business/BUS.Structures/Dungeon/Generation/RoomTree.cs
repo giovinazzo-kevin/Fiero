@@ -135,6 +135,7 @@ namespace Fiero.Business
             // - Calculate the centrality of the graph to determine the spawn point
             foreach (var node in seen)
             {
+                node.Room.Tree = tree;
                 node.ComputeCentrality(tree.Root);
             }
             return tree;

@@ -29,7 +29,7 @@ namespace Fiero.Business
         public void AddBranch<T>(
             DungeonBranchName branch,
             int levels
-        ) where T : BranchGenerator
+        ) where T : IBranchGenerator
         {
             var connections = new HashSet<FloorConnection>();
             for (int i = 1; i <= levels; i++)

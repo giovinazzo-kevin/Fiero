@@ -7,16 +7,59 @@ namespace Fiero.Core.Extensions
     public static class RandomExtensions
     {
         public static T Choose<T>(this Random rng, IList<T> source) => source.Shuffle(rng).First();
-        public static T ChooseWeighted<T>(this Random rng, params (T Item, float Weight)[] source)
+        public static T ChooseWeighted<T>(this Random rng, params WeightedItem<T>[] source) => ChooseWeighted(rng, (IList<WeightedItem<T>>)source);
+        public static T ChooseWeighted<T>(this Random rng, IList<WeightedItem<T>> source)
         {
             var dist = rng.NextDouble() * source.Sum(s => s.Weight);
-            for (int i = 0; i < source.Length; i++)
+            for (int i = 0; i < source.Count; i++)
             {
                 dist -= source[i].Weight;
                 if (dist < 0)
                     return source[i].Item;
             }
             throw new InvalidOperationException();
+        }
+        public static List<T> ChooseMultipleGuaranteedWeighted<T>(this Random rng, IList<GuaranteedWeightedItem<T>> source, int numSelections)
+        {
+            var sum = source.Sum(s => s.MinAmount);
+            if (numSelections < sum)
+                throw new ArgumentException($"Sum of minimum amounts ({sum}) exceeds total number of selections ({numSelections}).");
+
+            var results = new List<T>();
+            var remainingItems = new List<WeightedItem<T>>(source);
+
+            // Prepare list of guaranteed items
+            var guaranteedItems = new List<T>();
+            foreach (var item in source)
+            {
+                for (int i = 0; i < item.MinAmount; i++)
+                {
+                    guaranteedItems.Add(item.Item);
+                }
+            }
+
+            // Interleave guaranteed items with random selections
+            while (results.Count < numSelections)
+            {
+                if (rng.NextDouble() < (double)guaranteedItems.Count / (numSelections - results.Count) && guaranteedItems.Count > 0)
+                {
+                    // Select a random guaranteed item
+                    int index = rng.Next(guaranteedItems.Count);
+                    T chosenItem = guaranteedItems[index];
+                    guaranteedItems.RemoveAt(index);
+
+                    results.Add(chosenItem);
+                }
+                else
+                {
+                    // Select a weighted random remaining item
+                    var chosenItem = rng.ChooseWeighted(remainingItems);
+
+                    results.Add(chosenItem);
+                }
+            }
+
+            return results;
         }
         public static bool NChancesIn(this Random rng, float numerator, float denominator)
         {

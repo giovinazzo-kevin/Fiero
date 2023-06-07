@@ -1,9 +1,11 @@
 ﻿using Fiero.Core;
 using SFML.Graphics;
 using System;
+using System.Linq;
 
 namespace Fiero.Business
 {
+    public readonly record struct FloorGenerationRule(Func<FloorGenerationContext, TileDef, bool> Match, Func<FloorGenerationContext, TileDef, TileDef> Apply);
 
     public static class DungeonGenerationExtensions
     {
@@ -86,5 +88,13 @@ namespace Fiero.Business
         }
 
         public static void Draw(this FloorGenerationContext ctx, IFloorGenerationPrefab r) => r.Draw(ctx);
+        public static void Rule(this FloorGenerationContext ctx, FloorGenerationRule rule)
+        {
+            foreach (var tile in ctx.GetTiles()
+                .Where(x => rule.Match(ctx, x))
+                .ToArray() // Force computation to run in two separate steps
+                .Select(x => rule.Apply(ctx, x)))
+                ctx.SetTile(tile.Position, tile);
+        }
     }
 }

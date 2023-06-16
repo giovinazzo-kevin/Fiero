@@ -131,7 +131,8 @@ namespace Fiero.Business
                                                                                     // left and above are clear. we can assume the tile to the left is clear because otherwise the bottom vector
                                                                                     // would be greater, so we only have to check above
                     if (bottom.GreaterOrEqual(bottomY * 2 + 1, x * 2) && BlocksLight(x, bottomY, octant, origin) &&
-                       !BlocksLight(x, bottomY + 1, octant, origin)) {
+                       !BlocksLight(x, bottomY + 1, octant, origin))
+                    {
                         bottomY++;
                     }
                 }
@@ -160,7 +161,8 @@ namespace Fiero.Business
                         // if we found a transition from clear to opaque or vice versa, adjust the top and bottom vectors
                         if (x != rangeLimit) // but don't bother adjusting them if this is the last column anyway
                         {
-                            if (isOpaque) {
+                            if (isOpaque)
+                            {
                                 if (wasOpaque == 0) // if we found a transition from clear to opaque, this sector is done in this column,
                                 {                  // so adjust the bottom vector upward and continue processing it in the next column
                                                    // if the opaque tile has a beveled top-left corner, move the bottom vector up to the top center.
@@ -184,7 +186,8 @@ namespace Fiero.Business
                                 }
                                 wasOpaque = 1;
                             }
-                            else {
+                            else
+                            {
                                 if (wasOpaque > 0) // if we found a transition from opaque to clear, adjust the top vector downwards
                                 {
                                     // if the opaque tile has a beveled bottom-right corner, move the top vector down to the bottom center.
@@ -217,7 +220,8 @@ namespace Fiero.Business
         bool BlocksLight(uint x, uint y, uint octant, Coord origin)
         {
             uint nx = (uint)origin.X, ny = (uint)origin.Y;
-            switch (octant) {
+            switch (octant)
+            {
                 case 0: nx += x; ny -= y; break;
                 case 1: nx += y; ny -= x; break;
                 case 2: nx -= y; ny -= x; break;
@@ -233,7 +237,8 @@ namespace Fiero.Business
         void SetVisible(uint x, uint y, uint octant, Coord origin)
         {
             uint nx = (uint)origin.X, ny = (uint)origin.Y;
-            switch (octant) {
+            switch (octant)
+            {
                 case 0: nx += x; ny -= y; break;
                 case 1: nx += y; ny -= x; break;
                 case 2: nx -= y; ny -= x; break;

@@ -18,8 +18,8 @@
         }
 
         public EffectFlags Or(EffectFlags other) => new(
-            IsBuff || other.IsBuff, 
-            IsDebuff || other.IsDebuff, 
+            IsBuff || other.IsBuff,
+            IsDebuff || other.IsDebuff,
             IsPanicButton || other.IsPanicButton,
             IsOffensive || other.IsOffensive,
             IsDefensive || other.IsDefensive

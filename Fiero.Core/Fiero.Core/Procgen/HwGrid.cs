@@ -1,10 +1,5 @@
 ﻿using SFML.Graphics;
 using SFML.Graphics.Glsl;
-using System;
-using System.Linq.Expressions;
-using System.Numerics;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
@@ -33,8 +28,8 @@ namespace Fiero.Core
 
         public HardwareGrid(int w, int h)
         {
-            _tex = new ((uint)w, (uint)h);
-            _render = new ((uint)w, (uint)h);
+            _tex = new((uint)w, (uint)h);
+            _render = new((uint)w, (uint)h);
             Pixels = new byte[w * h * 4];
             RecompileShader(String.Empty, String.Empty);
         }
@@ -62,7 +57,8 @@ namespace Fiero.Core
                     gl_FragColor = frag;
                 }}
             ";
-            if (String.Equals(_fragmentShader, fragmentShader)) {
+            if (String.Equals(_fragmentShader, fragmentShader))
+            {
                 return;
             }
             _shader?.Dispose();
@@ -92,14 +88,18 @@ namespace Fiero.Core
 
         public void SetPixels(Func<Coord, Color> setter, int maxDegreeOfParallelism = 1)
         {
-            if(maxDegreeOfParallelism > 1) {
-                Parallel.For(0, _tex.Size.X * _tex.Size.Y, new() { MaxDegreeOfParallelism = maxDegreeOfParallelism }, xy => {
+            if (maxDegreeOfParallelism > 1)
+            {
+                Parallel.For(0, _tex.Size.X * _tex.Size.Y, new() { MaxDegreeOfParallelism = maxDegreeOfParallelism }, xy =>
+                {
                     var coord = new Coord((int)(xy % _tex.Size.X), (int)(xy / _tex.Size.Y));
                     SetPixel(coord, setter(coord));
                 });
             }
-            else {
-                for (int xy = 0; xy < _tex.Size.X * _tex.Size.Y; xy++) {
+            else
+            {
+                for (int xy = 0; xy < _tex.Size.X * _tex.Size.Y; xy++)
+                {
                     var coord = new Coord((int)(xy % _tex.Size.X), (int)(xy / _tex.Size.Y));
                     SetPixel(coord, setter(coord));
                 }
@@ -131,7 +131,8 @@ namespace Fiero.Core
                 {(preserveAlpha ? "" : "frag.a = 1;")}
             ");
             _shader.SetUniform(nameof(kernel), kernel);
-            for (int i = 0; i < times; i++) {
+            for (int i = 0; i < times; i++)
+            {
                 Update();
             }
             RecompileShader(String.Empty, String.Empty);

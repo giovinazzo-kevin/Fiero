@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class TransientDependencyAttribute : Attribute

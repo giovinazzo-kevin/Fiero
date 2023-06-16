@@ -45,7 +45,7 @@ namespace Unconcern.Deferral
 
         public IDeferExpressionBuilder WaitAtMost(TimeSpan maxDuration)
         {
-         
+
             return new DeferExpressionBuilder(_expression.WithDuration(maxDuration, waitFullDuration: false));
         }
         public IDeferExpressionBuilder WaitExactly(TimeSpan maxDuration)

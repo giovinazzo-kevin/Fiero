@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unconcern.Common;
 
 namespace Unconcern.Delegation
@@ -23,7 +22,7 @@ namespace Unconcern.Delegation
 
 
         internal DelegateExpression(
-            EventBus bus, 
+            EventBus bus,
             IEnumerable<Func<EventBus.Message, bool>> triggers,
             IEnumerable<Func<EventBus.Message, EventBus.Message>> replies,
             IEnumerable<Action<EventBus.Message>> handlers,

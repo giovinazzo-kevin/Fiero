@@ -12,9 +12,9 @@ namespace Fiero.Core
         );
 
         public static readonly Mat3 CardinalLaplacian = new(
-             0,  0.25f,  0,
+             0, 0.25f, 0,
              0.25f, -1, 0.25f,
-             0, 0.25f,  0
+             0, 0.25f, 0
         );
 
 

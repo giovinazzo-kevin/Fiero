@@ -1,8 +1,4 @@
-﻿using SFML.Audio;
-using SFML.System;
-using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class Oscillator : ISynthesizer
     {
@@ -40,7 +36,8 @@ namespace Fiero.Core
 
         public bool NextSample(int sr, float time, out double sample)
         {
-            sample = Shape switch {
+            sample = Shape switch
+            {
                 OscillatorShape.Sine => Wave.Sine(time, Amplitude.V, Frequency.V),
                 OscillatorShape.Triangle => Wave.Triangle(time, Amplitude.V, Frequency.V),
                 OscillatorShape.Saw => Wave.Saw(time, Amplitude.V, Frequency.V),

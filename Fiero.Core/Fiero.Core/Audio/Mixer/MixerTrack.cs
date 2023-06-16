@@ -1,12 +1,4 @@
-﻿using SFML.Audio;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
 
     /// <summary>
@@ -56,13 +48,17 @@ namespace Fiero.Core
             sample = 0;
             if (Mute)
                 return true;
-            foreach (var synth in Synths) {
-                if (synth.NextSample(sr, t, out var synthSample)) {
+            foreach (var synth in Synths)
+            {
+                if (synth.NextSample(sr, t, out var synthSample))
+                {
                     sample += synthSample;
                 }
             }
-            foreach (var fx in Effects) {
-                if(fx.NextSample(sr, t, sample, out var effectedSample)) {
+            foreach (var fx in Effects)
+            {
+                if (fx.NextSample(sr, t, sample, out var effectedSample))
+                {
                     sample = effectedSample;
                 }
             }

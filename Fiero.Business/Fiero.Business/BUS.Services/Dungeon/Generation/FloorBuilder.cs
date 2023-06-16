@@ -1,9 +1,6 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
 using System.Linq;
 
 namespace Fiero.Business
@@ -32,7 +29,8 @@ namespace Fiero.Business
             var floor = new Floor(id, size);
             var context = new FloorGenerationContext(_entityBuilders, size);
             // Run user steps, initializing the context
-            foreach (var step in _steps) {
+            foreach (var step in _steps)
+            {
                 step(context);
             }
             // Get all objects that were added to the context, but exclude portals and stairs which need special handling
@@ -42,30 +40,36 @@ namespace Fiero.Business
             // Place all tiles that were set in the context, including objects that eventually resolve to tiles
             var tileObjects = objects.TrySelect(e => (e.TryCast<Tile>(out var t), t))
                 .ToList();
-            foreach (var tile in tileObjects) {
+            foreach (var tile in tileObjects)
+            {
                 floor.SetTile(tile);
             }
-            foreach (var tileDef in context.GetTiles()) {
+            foreach (var tileDef in context.GetTiles())
+            {
                 if (tileObjects.Any(t => t.Position() == tileDef.Position))
                     continue;
-                if (tileDef.Name != TileName.None) {
+                if (tileDef.Name != TileName.None)
+                {
                     floor.SetTile(tileDef.Resolve(_entityBuilders, id).Build());
                 }
             }
             // Place all features that were added to the context
             var featureObjects = objects.TrySelect(e => (e.TryCast<Feature>(out var f), f))
                 .ToList();
-            foreach (var feature in featureObjects) {
+            foreach (var feature in featureObjects)
+            {
                 floor.AddFeature(feature);
             }
             // Place all items that were added to the context
             var itemObjects = objects.TrySelect(e => (e.TryCast<Item>(out var i), i));
-            foreach (var item in itemObjects) {
+            foreach (var item in itemObjects)
+            {
                 floor.AddItem(item);
             }
             // Spawn all enemies and actors that were added to the context
             var actorObjects = objects.TrySelect(e => (e.TryCast<Actor>(out var a), a));
-            foreach (var actor in actorObjects) {
+            foreach (var actor in actorObjects)
+            {
                 floor.AddActor(actor);
             }
             return floor;

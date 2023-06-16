@@ -1,12 +1,4 @@
-﻿using LightInject;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class Tracker
     {
@@ -32,7 +24,8 @@ namespace Fiero.Core
         public Tracker(int nChannels, Mixer mixer = null)
         {
             _channels = new TrackerChannel[nChannels];
-            for (int i = 0; i < nChannels; i++) {
+            for (int i = 0; i < nChannels; i++)
+            {
                 _channels[i] = new();
             }
             Tempo = new(min: 1, max: 1000, init: 100, OnTempoChanged);
@@ -48,7 +41,8 @@ namespace Fiero.Core
 
         protected virtual void OnRowsPerPatternChanged(int rowsPerPattern)
         {
-            foreach (var chan in Channels) {
+            foreach (var chan in Channels)
+            {
                 chan.Resize(rowsPerPattern);
             }
         }
@@ -78,7 +72,8 @@ namespace Fiero.Core
             if (State != TrackerState.Playing)
                 return false;
 
-            if((_accumulator += delta) >= _interval) {
+            if ((_accumulator += delta) >= _interval)
+            {
                 _accumulator = 0;
                 rowsToPlay = Channels.Select(c => c.GetRow(Row))
                     .ToArray();
@@ -96,7 +91,8 @@ namespace Fiero.Core
             if (row.Instrument - 1 >= Instruments.Count)
                 return;
             var instrument = Instruments[row.Instrument - 1];
-            switch (row.Note) {
+            switch (row.Note)
+            {
                 case TrackerNote.None:
                     break;
                 case TrackerNote.Stop:
@@ -111,8 +107,10 @@ namespace Fiero.Core
         public bool Update(float delta, out int playedRow)
         {
             playedRow = Row;
-            if(UpdateChannels(delta, out var rowsToPlay)) {
-                foreach (var row in rowsToPlay) {
+            if (UpdateChannels(delta, out var rowsToPlay))
+            {
+                foreach (var row in rowsToPlay)
+                {
                     PlayRow(row);
                 }
                 Step?.Invoke(this, Row);

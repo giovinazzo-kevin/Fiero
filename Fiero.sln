@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiero.Business", "Fiero.Bus
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unconcern", "Unconcern\Unconcern.csproj", "{74BBE421-14EE-48FD-AE59-AADB7BEF531D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ergo", "F:\Ergo\Ergo\Ergo.csproj", "{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ergo", "D:\Projects\Ergo\Ergo\Ergo.csproj", "{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{79B85F42-0F77-41F5-B91A-539920D0C8F7}"
 EndProject

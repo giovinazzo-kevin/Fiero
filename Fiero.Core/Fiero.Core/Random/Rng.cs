@@ -1,6 +1,4 @@
 ﻿using Simplex;
-using System;
-using System.Threading;
 
 namespace Fiero.Core
 {

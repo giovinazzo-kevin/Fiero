@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using System;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -8,7 +7,8 @@ namespace Fiero.Business
     {
         private bool HandleReadScroll(ActorTime t, ref IAction action, ref int? cost)
         {
-            if (action is ReadScrollAction a) {
+            if (action is ReadScrollAction a)
+            {
                 return ItemConsumed.Handle(new(t.Actor, a.Scroll))
                     && ScrollRead.Handle(new(t.Actor, a.Scroll));
             }

@@ -1,7 +1,4 @@
-﻿using SFML.Graphics;
-using System.Threading.Tasks;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public interface IGameScene
     {

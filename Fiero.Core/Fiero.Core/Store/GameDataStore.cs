@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
 
     public class GameDataStore
@@ -22,7 +19,8 @@ namespace Fiero.Core
 
         public bool TryGetValue<T>(GameDatum<T> datum, out T value)
         {
-            if (Data.TryGetValue(datum.Name, out var obj)) {
+            if (Data.TryGetValue(datum.Name, out var obj))
+            {
                 value = (T)obj;
                 return true;
             }
@@ -32,7 +30,8 @@ namespace Fiero.Core
 
         public bool TrySetValue<T>(GameDatum<T> datum, T compare, T newValue)
         {
-            if (Data.TryGetValue(datum.Name, out var old) && !Equals(old, compare)) {
+            if (Data.TryGetValue(datum.Name, out var old) && !Equals(old, compare))
+            {
                 return false;
             }
             Data[datum.Name] = newValue;
@@ -41,7 +40,7 @@ namespace Fiero.Core
         }
 
         public void SetValue<T>(GameDatum<T> datum, T newValue) => TrySetValue(datum, GetOrDefault(datum), newValue);
-        public void UpdateValue<T>(GameDatum<T> datum, Func<T, T> update) 
+        public void UpdateValue<T>(GameDatum<T> datum, Func<T, T> update)
         {
             var old = GetOrDefault(datum);
             TrySetValue(datum, old, update(old));

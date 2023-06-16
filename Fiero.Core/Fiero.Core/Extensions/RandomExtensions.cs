@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Core.Extensions
+﻿namespace Fiero.Core.Extensions
 {
     public static class RandomExtensions
     {

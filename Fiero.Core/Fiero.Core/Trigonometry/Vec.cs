@@ -1,5 +1,4 @@
 ﻿using SFML.System;
-using System;
 using System.Drawing;
 
 namespace Fiero.Core

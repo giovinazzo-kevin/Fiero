@@ -1,6 +1,4 @@
-﻿using SFML.System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public interface ISynthesizer
 

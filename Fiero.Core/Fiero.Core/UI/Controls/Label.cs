@@ -1,6 +1,4 @@
 ﻿using SFML.Graphics;
-using System;
-using System.Linq;
 
 namespace Fiero.Core
 {

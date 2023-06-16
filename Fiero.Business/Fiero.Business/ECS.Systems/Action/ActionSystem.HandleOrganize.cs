@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using System;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -8,13 +7,16 @@ namespace Fiero.Business
     {
         private bool HandleOrganize(ActorTime t, ref IAction action, ref int? cost)
         {
-            if (action is DropItemAction drop) {
+            if (action is DropItemAction drop)
+            {
                 return ItemDropped.Handle(new(t.Actor, drop.Item));
             }
-            else if (action is EquipItemAction equip) {
+            else if (action is EquipItemAction equip)
+            {
                 return ItemEquipped.Handle(new(t.Actor, equip.Item));
             }
-            else if (action is UnequipItemAction unequip) {
+            else if (action is UnequipItemAction unequip)
+            {
                 return ItemUnequipped.Handle(new(t.Actor, unequip.Item));
             }
             else throw new NotSupportedException();

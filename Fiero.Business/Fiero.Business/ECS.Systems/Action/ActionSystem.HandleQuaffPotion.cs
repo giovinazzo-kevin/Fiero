@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using System;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -8,7 +7,8 @@ namespace Fiero.Business
     {
         private bool HandleQuaffPotion(ActorTime t, ref IAction action, ref int? cost)
         {
-            if (action is QuaffPotionAction a) {
+            if (action is QuaffPotionAction a)
+            {
                 return ItemConsumed.Handle(new(t.Actor, a.Potion))
                     && PotionQuaffed.Handle(new(t.Actor, a.Potion));
             }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Unconcern.Common
 {
@@ -21,10 +18,13 @@ namespace Unconcern.Common
             Bus = bus;
             _filter = filter;
             Messages = new ConcurrentQueue<EventBus.Message<T>>();
-            _unsub = Bus.Register(msg => {
-                if(msg.Type.IsAssignableTo(typeof(T))) {
+            _unsub = Bus.Register(msg =>
+            {
+                if (msg.Type.IsAssignableTo(typeof(T)))
+                {
                     var tMsg = new EventBus.Message<T>(msg.Timestamp, (T)msg.Content, msg.Sender, msg.Recipients);
-                    if(_filter(tMsg)) {
+                    if (_filter(tMsg))
+                    {
                         MessageSieved?.Invoke(this, tMsg);
                         Messages.Enqueue(tMsg);
                     }

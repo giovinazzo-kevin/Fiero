@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Unconcern.Common;
 
 namespace Unconcern.Delegation
@@ -21,7 +20,8 @@ namespace Unconcern.Delegation
 
         public IDelegateExpressionBuilder Do<T>(Action<EventBus.Message<T>> handle)
         {
-            return new DelegateExpressionBuilder(Expression.WithHandler(msg => {
+            return new DelegateExpressionBuilder(Expression.WithHandler(msg =>
+            {
                 if (!msg.Type.IsAssignableTo(typeof(T)))
                     throw new InvalidCastException("wrong_handler");
                 var content = (T)msg.Content;
@@ -31,7 +31,8 @@ namespace Unconcern.Delegation
 
         public IDelegateExpressionBuilder Send<T, U>(Func<EventBus.Message<T>, EventBus.Message<U>> transform)
         {
-            return new DelegateExpressionBuilder(Expression.WithReply(msg => {
+            return new DelegateExpressionBuilder(Expression.WithReply(msg =>
+            {
                 if (!msg.Type.IsAssignableTo(typeof(T)))
                     throw new InvalidCastException("wrong_reply");
                 var content = (T)msg.Content;
@@ -42,7 +43,8 @@ namespace Unconcern.Delegation
 
         public IDelegateExpressionBuilder When<T>(Func<EventBus.Message<T>, bool> cond)
         {
-            return new DelegateExpressionBuilder(Expression.WithCondition(msg => {
+            return new DelegateExpressionBuilder(Expression.WithCondition(msg =>
+            {
                 if (!msg.Type.IsAssignableTo(typeof(T)))
                     return false;
                 var content = (T)msg.Content;

@@ -1,7 +1,5 @@
 ﻿using Fiero.Core;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -10,7 +8,7 @@ namespace Fiero.Business
         public readonly bool CanTake;
 
         public ChestModal(GameUI ui, GameResources resources, Feature ft, bool canTake)
-            : base(ui, resources, ft, new[] { ModalWindowButton.Close }, ModalWindowStyles.Default) 
+            : base(ui, resources, ft, new[] { ModalWindowButton.Close }, ModalWindowStyles.Default)
         {
             CanTake = canTake;
         }
@@ -23,7 +21,8 @@ namespace Fiero.Business
 
         protected override IEnumerable<ChestActionName> GetAvailableActions(Item i)
         {
-            if(CanTake) {
+            if (CanTake)
+            {
                 yield return ChestActionName.Take;
             }
             yield return ChestActionName.Drop;

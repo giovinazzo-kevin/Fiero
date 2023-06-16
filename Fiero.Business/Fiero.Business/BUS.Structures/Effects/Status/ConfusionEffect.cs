@@ -1,7 +1,6 @@
 ﻿using Fiero.Core;
 using Fiero.Core.Extensions;
 using System.Collections.Generic;
-using System.Linq;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -18,10 +17,13 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e => {
-                if (e.Actor == owner && Rng.Random.NChancesIn(2, 3)) {
+            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e =>
+            {
+                if (e.Actor == owner && Rng.Random.NChancesIn(2, 3))
+                {
                     var dir = new Coord(Rng.Random.Between(-1, 1), Rng.Random.Between(-1, 1));
-                    return e.Intent.Name switch {
+                    return e.Intent.Name switch
+                    {
                         ActionName.Move => new(new MoveRelativeAction(dir)),
                         ActionName.MeleeAttack => new(new MoveRelativeAction(dir)),
                         ActionName.Throw when e.Intent is ThrowItemAtPointAction x => new(new ThrowItemAtPointAction(dir, x.Item)),

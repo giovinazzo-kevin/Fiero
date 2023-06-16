@@ -1,6 +1,5 @@
 ﻿using Fiero.Core;
 using System;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -9,14 +8,16 @@ namespace Fiero.Business
         private bool HandleMeleeAttack(ActorTime t, ref IAction action, ref int? cost)
         {
             var victim = default(Actor);
-            if (action is MeleeAttackOtherAction oth) {
+            if (action is MeleeAttackOtherAction oth)
+            {
                 victim = oth.Victim;
-                return MayTarget(t.Actor, victim) 
+                return MayTarget(t.Actor, victim)
                     && HandleMeleeAttack(ref cost, oth.Weapon);
             }
-            else if (action is MeleeAttackPointAction dir) {
+            else if (action is MeleeAttackPointAction dir)
+            {
                 var newPos = t.Actor.Position() + dir.Point;
-                return TryFindVictim(newPos, t.Actor, out victim) 
+                return TryFindVictim(newPos, t.Actor, out victim)
                     && MayTarget(t.Actor, victim)
                     && HandleMeleeAttack(ref cost, dir.Weapon);
             }
@@ -24,7 +25,8 @@ namespace Fiero.Business
 
             bool HandleMeleeAttack(ref int? cost, Weapon weapon)
             {
-                if (t.Actor.DistanceFrom(victim) >= 2) {
+                if (t.Actor.DistanceFrom(victim) >= 2)
+                {
                     // out of reach
                     return false;
                 }

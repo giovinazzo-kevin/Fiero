@@ -1,6 +1,4 @@
 ﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
 
 namespace Fiero.Business
 {
@@ -17,7 +15,7 @@ namespace Fiero.Business
         public bool TryEquip(Item i)
         {
             if (i.TryCast<Weapon>(out var w)) return TryEquip(w);
-            if (i.TryCast<Armor> (out var a)) return TryEquip(a);
+            if (i.TryCast<Armor>(out var a)) return TryEquip(a);
             return false;
         }
 
@@ -25,8 +23,8 @@ namespace Fiero.Business
         {
             if (!IsEquipped(i))
                 return false;
-            if (i.Id == Weapon?.Id)  return UnequipWeapon();
-            if (i.Id == Armor?.Id)  return UnequipArmor();
+            if (i.Id == Weapon?.Id) return UnequipWeapon();
+            if (i.Id == Armor?.Id) return UnequipArmor();
             return false;
         }
 
@@ -44,7 +42,8 @@ namespace Fiero.Business
 
         public bool UnequipWeapon()
         {
-            if (Weapon != null) {
+            if (Weapon != null)
+            {
                 Weapon = null;
                 return true;
             }
@@ -53,7 +52,8 @@ namespace Fiero.Business
 
         public bool UnequipArmor()
         {
-            if (Armor != null) {
+            if (Armor != null)
+            {
                 Armor = null;
                 return true;
             }

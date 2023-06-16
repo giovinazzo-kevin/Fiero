@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class GrantedWhenSteppedOn : SteppedOnEffect
     {
@@ -19,12 +17,16 @@ namespace Fiero.Business
 
         protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
         {
-            if (owner.TryCast<Feature>(out var feature)) {
-                if (IsTrap) {
+            if (owner.TryCast<Feature>(out var feature))
+            {
+                if (IsTrap)
+                {
                     systems.Action.ActorSteppedOnTrap.Raise(new(target, feature));
                 }
-                if(AutoRemove) {
-                    Subscriptions.Add(systems.Action.TurnEnded.SubscribeHandler(e => {
+                if (AutoRemove)
+                {
+                    Subscriptions.Add(systems.Action.TurnEnded.SubscribeHandler(e =>
+                    {
                         // Removing the feature automatically ends all of its effects, so there's no need to call End()
                         systems.Dungeon.RemoveFeature(feature);
                     }));

@@ -1,6 +1,5 @@
 ﻿using SFML.Graphics;
 using Simplex;
-using System;
 
 namespace Fiero.Core
 {

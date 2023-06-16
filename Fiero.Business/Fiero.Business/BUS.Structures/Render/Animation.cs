@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 
 namespace Fiero.Business
@@ -15,7 +13,8 @@ namespace Fiero.Business
 
         public Animation OnFirstFrame(Action a)
         {
-            FramePlaying += (_, i, f) => {
+            FramePlaying += (_, i, f) =>
+            {
                 if (i == 0) a();
             };
             return this;
@@ -23,7 +22,8 @@ namespace Fiero.Business
 
         public Animation OnLastFrame(Action a)
         {
-            FramePlaying += (_, i, f) => {
+            FramePlaying += (_, i, f) =>
+            {
                 if (i == Frames.Length - 1) a();
             };
             return this;

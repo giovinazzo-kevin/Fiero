@@ -1,6 +1,4 @@
 ﻿using SFML.System;
-using System;
-using System.Threading;
 
 namespace Fiero.Core
 {
@@ -14,9 +12,11 @@ namespace Fiero.Core
 
         public readonly int SampleRate;
 
-        public Time Duration {
+        public Time Duration
+        {
             get => Time.FromSeconds(_bufferLengthSeconds);
-            set {
+            set
+            {
                 _bufferLengthSeconds = value.AsSeconds();
                 _buffer = new short[(int)(SampleRate * _bufferLengthSeconds)];
             }
@@ -48,7 +48,8 @@ namespace Fiero.Core
             var toRead = Math.Clamp(n, 0, _buffer.Length);
             samples = new short[toRead];
             Lock.EnterReadLock();
-            for (int i = 0; i < toRead; i++) {
+            for (int i = 0; i < toRead; i++)
+            {
                 samples[i] = _buffer[i];
             }
             Array.ConstrainedCopy(_buffer, toRead, _buffer, 0, _buffer.Length - toRead);

@@ -1,10 +1,5 @@
 ﻿using SFML.Audio;
 using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
@@ -28,13 +23,15 @@ namespace Fiero.Core
         {
             Master = new(sampleRate);
             _tracks = new MixerTrack[nTracks];
-            for (int i = 0; i < nTracks; i++) {
+            for (int i = 0; i < nTracks; i++)
+            {
                 _tracks[i] = new(sampleRate);
                 Master.Attach(_tracks[i]);
             }
             Buffer = new(sampleRate);
             Buffer.Duration = Time.FromMilliseconds(100);
-            for (int i = 0; i < Buffer.DurationInSamples; i++) {
+            for (int i = 0; i < Buffer.DurationInSamples; i++)
+            {
                 Buffer.Store(0);
             }
             Initialize(1, (uint)sampleRate);
@@ -43,16 +40,21 @@ namespace Fiero.Core
 
         protected void FillBuffer()
         {
-            while(true) {
+            while (true)
+            {
                 BufferRefill.WaitOne();
-                if(!Unbuffered) {
-                    while(!Buffer.Full) {
+                if (!Unbuffered)
+                {
+                    while (!Buffer.Full)
+                    {
                         var t = PlayingOffset.AsSeconds();
                         var d = Buffer.Duration.AsSeconds() / Buffer.DurationInSamples;
-                        if (!Master.NextSample((int)SampleRate, t + Buffer.UsedDurationInSamples * d, out var sample)) {
+                        if (!Master.NextSample((int)SampleRate, t + Buffer.UsedDurationInSamples * d, out var sample))
+                        {
                             break;
                         }
-                        if (!Buffer.Store(Sample.Denormalize(sample))) {
+                        if (!Buffer.Store(Sample.Denormalize(sample)))
+                        {
                             break;
                         }
                     }
@@ -75,8 +77,10 @@ namespace Fiero.Core
                 samples = new short[requestSamples];
                 var t = PlayingOffset.AsSeconds();
                 var w = freq / requestSamples;
-                for (int i = 0; i < requestSamples; i++) {
-                    if (!Master.NextSample((int)SampleRate, (float)(t + i * w), out var sample)) {
+                for (int i = 0; i < requestSamples; i++)
+                {
+                    if (!Master.NextSample((int)SampleRate, (float)(t + i * w), out var sample))
+                    {
                         return false;
                     }
                     samples[i] = Sample.Denormalize(sample);

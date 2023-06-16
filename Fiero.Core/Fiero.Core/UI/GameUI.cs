@@ -1,7 +1,4 @@
 ﻿using LightInject;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Fiero.Core
 {
     public class GameUI

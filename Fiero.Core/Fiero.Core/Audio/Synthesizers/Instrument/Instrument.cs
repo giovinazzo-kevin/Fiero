@@ -1,8 +1,4 @@
-﻿using SFML.System;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Dynamic;
+﻿using System.Collections.Concurrent;
 
 namespace Fiero.Core
 {
@@ -24,7 +20,8 @@ namespace Fiero.Core
 
         public void Play(Note note, int octave, float durationInSeconds, float volume = 1)
         {
-            if (Sounds.Count >= MaxVoices) {
+            if (Sounds.Count >= MaxVoices)
+            {
                 Sounds.TryDequeue(out _);
             }
             var osc = GetOscillator();
@@ -45,17 +42,21 @@ namespace Fiero.Core
         {
             _sampleRate = sr;
             sample = 0;
-            for (int i = 0; i < Sounds.Count; i++) {
-                if(Sounds.TryDequeue(out var sound)) {
+            for (int i = 0; i < Sounds.Count; i++)
+            {
+                if (Sounds.TryDequeue(out var sound))
+                {
                     var (osc, env, dur) = sound;
-                    if (dur == 1) {
+                    if (dur == 1)
+                    {
                         env.Disengage();
                     }
                     osc.NextSample(sr, t, out var oscSample);
                     env.NextSample(sr, t, out var envelopeSample);
                     sample += oscSample * envelopeSample;
                     dur -= 1;
-                    if (env.State != EnvelopeState.Off) {
+                    if (env.State != EnvelopeState.Off)
+                    {
                         Sounds.Enqueue((osc, env, dur));
                     }
                 }

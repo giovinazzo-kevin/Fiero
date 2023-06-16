@@ -1,12 +1,8 @@
 ﻿using Fiero.Core.Extensions;
 using Fiero.Core.Structures;
 using SFML.Graphics;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Fiero.Core
 {

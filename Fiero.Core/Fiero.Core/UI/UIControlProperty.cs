@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
 
     public class UIControlProperty<T> : IUIControlProperty

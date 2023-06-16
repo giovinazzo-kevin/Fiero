@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
 
     public class Envelope : ISynthesizer
     {
-        public readonly Knob<float> Delay   = new(0, 1, 0.0f);
-        public readonly Knob<float> Attack  = new(0, 1, 0.02f);
-        public readonly Knob<float> Hold    = new(0, 1, 0.1f);
-        public readonly Knob<float> Decay   = new(0, 1, 0.8f);
+        public readonly Knob<float> Delay = new(0, 1, 0.0f);
+        public readonly Knob<float> Attack = new(0, 1, 0.02f);
+        public readonly Knob<float> Hold = new(0, 1, 0.1f);
+        public readonly Knob<float> Decay = new(0, 1, 0.8f);
         public readonly Knob<float> Sustain = new(0, 1, 0.5f);
         public readonly Knob<float> Release = new(0, 1, 0.4f);
 
@@ -44,7 +42,8 @@ namespace Fiero.Core
         {
             State = newState;
             _currentSample = 0;
-            switch(State) {
+            switch (State)
+            {
                 case EnvelopeState.Delay:
                     _nextStateSample = (uint)(_sampleRate * Delay);
                     _level = 0;
@@ -87,8 +86,10 @@ namespace Fiero.Core
         {
             _sampleRate = (uint)sr;
 
-            if(State != EnvelopeState.Off && State != EnvelopeState.Sustain) {
-                if(_currentSample == _nextStateSample) {
+            if (State != EnvelopeState.Off && State != EnvelopeState.Sustain)
+            {
+                if (_currentSample == _nextStateSample)
+                {
                     EnterState((EnvelopeState)((int)(State + 1) % _stateCount));
                 }
                 _level *= _multiplier;

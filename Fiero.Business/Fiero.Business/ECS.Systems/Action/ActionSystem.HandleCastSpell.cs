@@ -8,8 +8,10 @@ namespace Fiero.Business
     {
         private bool HandleCastSpell(ActorTime t, ref IAction action, ref int? cost)
         {
-            if (action is CastSpellAction cast) {
-                if (SpellTargeted.Handle(new(t.Actor, cast.Spell))) {
+            if (action is CastSpellAction cast)
+            {
+                if (SpellTargeted.Handle(new(t.Actor, cast.Spell)))
+                {
                     var systems = (GameSystems)_entities.ServiceFactory.GetInstance(typeof(GameSystems));
                     var validTargets = cast.TargetingShape.GetPoints()
                         .TrySelect(p => (_floorSystem.TryGetCellAt(t.Actor.FloorId(), p, out var cell), cell))

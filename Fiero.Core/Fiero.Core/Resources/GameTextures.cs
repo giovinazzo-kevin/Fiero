@@ -1,7 +1,4 @@
 ﻿using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Fiero.Core
 {
@@ -21,7 +18,8 @@ namespace Fiero.Core
 
         public void ClearProceduralTextures()
         {
-            foreach (var tex in ProceduralTextures) {
+            foreach (var tex in ProceduralTextures)
+            {
                 tex.Dispose();
             }
             ProceduralTextures.Clear();

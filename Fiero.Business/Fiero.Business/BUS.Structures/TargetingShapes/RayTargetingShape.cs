@@ -32,7 +32,7 @@ namespace Fiero.Business
         {
             Rotation += deg * (float)Math.PI / 180;
             RayTip = new Coord(
-                (int)Math.Round(Math.Cos(Rotation) * Length), 
+                (int)Math.Round(Math.Cos(Rotation) * Length),
                 (int)Math.Round(Math.Sin(Rotation) * Length)
             );
         }
@@ -53,12 +53,16 @@ namespace Fiero.Business
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {
-            for (int i = 0; i < 8; i++) {
-                foreach (var p in GetPoints()) {
-                    if (obstacle(p)) {
+            for (int i = 0; i < 8; i++)
+            {
+                foreach (var p in GetPoints())
+                {
+                    if (obstacle(p))
+                    {
                         break;
                     }
-                    if(validTarget(p)) {
+                    if (validTarget(p))
+                    {
                         return true;
                     }
                 }

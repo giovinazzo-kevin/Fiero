@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Fiero.Core\Fiero.Core\Fiero.Core.csproj" />
-    <ProjectReference Include="F:\Ergo\Ergo\Ergo.csproj" />
+    <ProjectReference Include="D:\Projects\Ergo\Ergo\Ergo.csproj" />
   </ItemGroup>
 
   <ItemGroup>

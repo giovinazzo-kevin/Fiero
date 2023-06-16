@@ -1,7 +1,4 @@
 ﻿using SFML.Window;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Core
 {

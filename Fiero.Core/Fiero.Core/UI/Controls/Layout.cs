@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class Layout : UIControl
     {

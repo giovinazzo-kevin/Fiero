@@ -17,10 +17,13 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e => {
-                if (e.Actor == owner && Rng.Random.NChancesIn(2, 3)) {
+            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e =>
+            {
+                if (e.Actor == owner && Rng.Random.NChancesIn(2, 3))
+                {
                     var dir = new Coord(Rng.Random.Between(-1, 1), Rng.Random.Between(-1, 1));
-                    return e.Intent.Name switch {
+                    return e.Intent.Name switch
+                    {
                         ActionName.Cast => new(new FailAction()) /* TODO: Log message that you can't cast */,
                         ActionName.Read => new(new FailAction()) /* TODO: Log message that you can't read */,
                         _ => new(e.Intent)

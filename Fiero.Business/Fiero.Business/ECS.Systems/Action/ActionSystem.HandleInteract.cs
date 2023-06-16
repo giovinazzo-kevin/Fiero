@@ -1,13 +1,6 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
-using SFML.System;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
-using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -15,13 +8,16 @@ namespace Fiero.Business
     {
         private bool HandleInteract(ActorTime t, ref IAction action, ref int? cost)
         {
-            if (action is InteractRelativeAction genericUse) {
+            if (action is InteractRelativeAction genericUse)
+            {
                 return HandleGenericUse(genericUse.Coord, ref action, ref cost);
             }
-            else if (action is InteractWithFeatureAction useFeature) {
+            else if (action is InteractWithFeatureAction useFeature)
+            {
                 return FeatureInteractedWith.Handle(new(t.Actor, useFeature.Feature));
             }
-            else if (action is PickUpItemAction pickUp) {
+            else if (action is PickUpItemAction pickUp)
+            {
                 return ItemPickedUp.Handle(new(t.Actor, pickUp.Item));
             }
             else throw new NotSupportedException();
@@ -32,12 +28,14 @@ namespace Fiero.Business
                 var usePos = t.Actor.Position() + point;
                 var itemsHere = _floorSystem.GetItemsAt(floorId, usePos).ToList();
                 var featuresHere = _floorSystem.GetFeaturesAt(floorId, usePos).ToList();
-                if (itemsHere.Any() && t.Actor.Inventory != null) {
+                if (itemsHere.Any() && t.Actor.Inventory != null)
+                {
                     var item = itemsHere.First();
                     action = new PickUpItemAction(item);
                     cost = HandleAction(t, ref action);
                 }
-                else if (featuresHere.Any()) {
+                else if (featuresHere.Any())
+                {
                     var feature = featuresHere.Single();
                     action = new InteractWithFeatureAction(feature);
                     cost = HandleAction(t, ref action);

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Globalization;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Fiero.Core
 {
@@ -27,7 +20,8 @@ namespace Fiero.Core
 
         public async Task LoadJsonAsync(TLocales culture, string fileName)
         {
-            if(!File.Exists(fileName)) {
+            if (!File.Exists(fileName))
+            {
                 throw new FileNotFoundException(fileName);
             }
             using var fs = new FileStream(fileName, FileMode.Open);
@@ -44,7 +38,8 @@ namespace Fiero.Core
 
         public string Get(string key)
         {
-            if(TryGet<string>(key, out var value)) {
+            if (TryGet<string>(key, out var value))
+            {
                 return value;
             }
             return key;
@@ -52,7 +47,8 @@ namespace Fiero.Core
 
         public string[] GetArray(string key)
         {
-            if(TryGet<string[]>(key, out var array)) {
+            if (TryGet<string[]>(key, out var array))
+            {
                 return array;
             }
             return Array.Empty<string>();
@@ -60,7 +56,8 @@ namespace Fiero.Core
 
         public bool TryGet<T>(string key, out T value)
         {
-            if(_translations.TryGetValue(CurrentCulture, out var dict)) {
+            if (_translations.TryGetValue(CurrentCulture, out var dict))
+            {
                 var keyParts = key.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
                 value = (T)GetInner(dict, keyParts[0], keyParts[1..]);
                 return true;
@@ -70,38 +67,47 @@ namespace Fiero.Core
 
             object GetInner(JsonElement outer, string key, params string[] rest)
             {
-                if (TryGetIndex(key, out var index)) {
+                if (TryGetIndex(key, out var index))
+                {
                     return GetInner(outer, Regex.Replace(key, @"\[(\d+)\]", String.Empty), rest.Prepend($"[{index}]").ToArray());
                 }
-                if (outer.TryGetProperty(key, out var inner)) {
+                if (outer.TryGetProperty(key, out var inner))
+                {
                     return Switch(inner, rest);
                 }
                 return key;
 
                 object Switch(JsonElement inner, params string[] rest)
                 {
-                    if (inner.ValueKind == JsonValueKind.Object) {
-                        if (rest.Length == 0) {
+                    if (inner.ValueKind == JsonValueKind.Object)
+                    {
+                        if (rest.Length == 0)
+                        {
                             return inner;
                         }
                         return GetInner(inner, rest[0], rest[1..]);
                     }
-                    else if (inner.ValueKind == JsonValueKind.Array) {
-                        if(rest.Length == 0) {
+                    else if (inner.ValueKind == JsonValueKind.Array)
+                    {
+                        if (rest.Length == 0)
+                        {
                             return inner.EnumerateArray()
                                 .Select(e => e.GetString())
                                 .ToArray();
                         }
-                        if (!TryGetIndex(rest[0], out var index)) {
+                        if (!TryGetIndex(rest[0], out var index))
+                        {
                             throw new ArgumentException(nameof(rest));
                         }
-                        if("__length".Equals(rest[0], StringComparison.OrdinalIgnoreCase)) {
+                        if ("__length".Equals(rest[0], StringComparison.OrdinalIgnoreCase))
+                        {
                             return inner.GetArrayLength();
                         }
                         var elem = inner.EnumerateArray().ElementAt(index);
                         return Switch(elem, rest[1..]);
                     }
-                    else {
+                    else
+                    {
                         return inner.GetString();
                     }
                 }
@@ -109,7 +115,8 @@ namespace Fiero.Core
 
             bool TryGetIndex(string key, out int index)
             {
-                if (Regex.Match(key, @".*?\[(\d+)\]") is { Groups: var groups, Success: true }) {
+                if (Regex.Match(key, @".*?\[(\d+)\]") is { Groups: var groups, Success: true })
+                {
                     index = Int32.Parse(groups[1].Value);
                     return true;
                 }

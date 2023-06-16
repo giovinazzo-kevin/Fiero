@@ -24,8 +24,10 @@ namespace Fiero.Business
             where TSys : EcsSystem
         {
             var sub = default(Subscription);
-            sub = evt.SubscribeHandler(msg => {
-                if(until(msg)) {
+            sub = evt.SubscribeHandler(msg =>
+            {
+                if (until(msg))
+                {
                     sub.Dispose();
                 }
             });

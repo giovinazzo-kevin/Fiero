@@ -31,10 +31,12 @@ namespace Fiero.Business
 
         public void ConfigureAlert(Func<GameSystems, Actor, T, bool> match, bool appendLogic = false)
         {
-            if (!appendLogic) {
+            if (!appendLogic)
+            {
                 ShouldRaiseAlert = match;
             }
-            else {
+            else
+            {
                 var shouldRaiseAlert = ShouldRaiseAlert;
                 ShouldRaiseAlert = (s, a, x) => shouldRaiseAlert(s, a, x) && match(s, a, x);
             }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class GameDatum
     {
@@ -14,7 +12,7 @@ namespace Fiero.Core
     {
         public event Action<GameDatumChangedEventArgs<T>> ValueChanged;
 
-        internal void OnValueChanged(T oldValue, T newValue) 
+        internal void OnValueChanged(T oldValue, T newValue)
             => ValueChanged?.Invoke(new(this, oldValue, newValue));
 
         public GameDatum(string name) : base(typeof(T), name) { }

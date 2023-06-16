@@ -1,8 +1,4 @@
-﻿using SFML.System;
-using System;
-using System.Collections.Generic;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class TrackerChannel
     {
@@ -12,7 +8,8 @@ namespace Fiero.Core
         public void SetRow(int pos, TrackerChannelRow row) => Rows[pos % Rows.Count] = row;
         public void ResetRows()
         {
-            for (int i = 0; i < Rows.Count; i++) {
+            for (int i = 0; i < Rows.Count; i++)
+            {
                 Rows[i] = TrackerChannelRow.Empty();
             }
         }
@@ -23,12 +20,15 @@ namespace Fiero.Core
 
         public void Resize(int newRows)
         {
-            if(newRows > Rows.Count) {
-                for (int i = 0; i < newRows - Rows.Count; i++) {
+            if (newRows > Rows.Count)
+            {
+                for (int i = 0; i < newRows - Rows.Count; i++)
+                {
                     Rows.Add(TrackerChannelRow.Empty());
                 }
             }
-            else if(newRows < Rows.Count) {
+            else if (newRows < Rows.Count)
+            {
                 Rows.RemoveRange(newRows, Rows.Count - newRows);
             }
         }

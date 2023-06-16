@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     [SingletonDependency]
     public sealed class KeyboardInputReader

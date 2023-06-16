@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Fiero.Business
 {
@@ -24,10 +22,12 @@ namespace Fiero.Business
 
         public bool TryIdentify(Item i)
         {
-            if(i.ItemProperties.Identified) {
+            if (i.ItemProperties.Identified)
+            {
                 return false;
             }
-            if(IdentificationRules.Any(r => r(i))) {
+            if (IdentificationRules.Any(r => r(i)))
+            {
                 i.ItemProperties.Identified = true;
                 return true;
             }
@@ -37,25 +37,30 @@ namespace Fiero.Business
         public bool TryPut(Item i, out bool fullyMerged)
         {
             fullyMerged = false;
-            if (Capacity <= 0 || Count < Capacity) {
+            if (Capacity <= 0 || Count < Capacity)
+            {
                 // Merge charges on consumables of the same kind (not wands)
                 var merged = false;
                 merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out fullyMerged);
-                if(!merged) {
+                if (!merged)
+                {
                     merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.QuaffEffect.Name == x.PotionProperties.QuaffEffect.Name
                                                              && y.PotionProperties.ThrowEffect.Name == x.PotionProperties.ThrowEffect.Name, out var fully);
                     fullyMerged |= fully;
                 }
-                if (!merged) {
+                if (!merged)
+                {
                     merged |= TryMergeCharges<Scroll>((x, y) => y.ScrollProperties.Effect.Name == x.ScrollProperties.Effect.Name
                                                              && y.ScrollProperties.Modifier == x.ScrollProperties.Modifier, out var fully);
                     fullyMerged |= fully;
                 }
-                if (!merged) {
+                if (!merged)
+                {
                     merged |= TryMergeResources<Resource>((x, y) => y.ResourceProperties.Name == x.ResourceProperties.Name, out var fully);
                     fullyMerged |= fully;
                 }
-                if (!merged || !fullyMerged) {
+                if (!merged || !fullyMerged)
+                {
                     Items.Add(i);
                 }
                 return true;
@@ -66,18 +71,22 @@ namespace Fiero.Business
                 where T : Consumable
             {
                 fullyMerged = false;
-                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified) {
-                    while (x.ConsumableProperties.RemainingUses > 0) {
+                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified)
+                {
+                    while (x.ConsumableProperties.RemainingUses > 0)
+                    {
                         var y = Items.TrySelect(x => (x.TryCast<T>(out var e), e)).FirstOrDefault(y =>
                                y.ItemProperties.Identified
                             && y.ConsumableProperties.RemainingUses < y.ConsumableProperties.MaximumUses
                             && equal(x, y)
                         );
-                        if (y is { }) {
+                        if (y is { })
+                        {
                             x.ConsumableProperties.RemainingUses--;
                             y.ConsumableProperties.RemainingUses++;
                         }
-                        else {
+                        else
+                        {
                             return true;
                         }
                     }
@@ -91,18 +100,22 @@ namespace Fiero.Business
                 where T : Resource
             {
                 fullyMerged = false;
-                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified) {
-                    while (x.ResourceProperties.Amount > 0) {
+                if (i.TryCast<T>(out var x) && x.ItemProperties.Identified)
+                {
+                    while (x.ResourceProperties.Amount > 0)
+                    {
                         var y = Items.TrySelect(x => (x.TryCast<T>(out var e), e)).FirstOrDefault(y =>
                                y.ItemProperties.Identified
                             && y.ResourceProperties.Amount < y.ResourceProperties.MaximumAmount
                             && equal(x, y)
                         );
-                        if (y is { }) {
+                        if (y is { })
+                        {
                             x.ResourceProperties.Amount--;
                             y.ResourceProperties.Amount++;
                         }
-                        else {
+                        else
+                        {
                             return true;
                         }
                     }

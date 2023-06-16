@@ -24,10 +24,10 @@ namespace Unconcern.Deferral
         public IEnumerable<Func<CancellationToken, Task>> Tasks => TasksList;
 
         internal DeferExpression(
-            IEnumerable<Func<CancellationToken, Task>> tasks, 
-            TimeSpan start, 
+            IEnumerable<Func<CancellationToken, Task>> tasks,
+            TimeSpan start,
             TimeSpan duration,
-            IEnumerable<IDeferExpression> siblings, 
+            IEnumerable<IDeferExpression> siblings,
             IEnumerable<IDeferExpression> children,
             IEnumerable<IDeferExpression> fallbacks,
             bool waitDuration,

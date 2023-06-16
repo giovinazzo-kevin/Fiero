@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 
 namespace Fiero.Core
 {
     public class LayoutStyleBuilder
     {
-        private readonly ImmutableList<LayoutRule> _rules;
+        private readonly System.Collections.Immutable.ImmutableList<LayoutRule> _rules;
 
         public LayoutStyleBuilder(IEnumerable<LayoutRule> rules = null)
         {
@@ -48,6 +45,6 @@ namespace Fiero.Core
         public LayoutStyleBuilder<T> Match(Func<LayoutGrid, bool> match) => new(x => match(x) && _match(x), _apply, _priority);
         public LayoutStyleBuilder<T> Apply(Action<T> apply) => new(_match, x => { apply((T)x); _apply(x); }, _priority);
         public LayoutStyleBuilder<T> WithPriority(int newPriority) => new(_match, _apply, newPriority);
-        public LayoutRule Build() => new (typeof(T), _match, _apply, _priority);
+        public LayoutRule Build() => new(typeof(T), _match, _apply, _priority);
     }
 }

@@ -21,8 +21,10 @@ namespace Fiero.Core
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
-            if (Checked.V) {
-                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2) {
+            if (Checked.V)
+            {
+                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
+                {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
                     FillColor = Accent,
                     OutlineColor = Foreground,
@@ -30,8 +32,10 @@ namespace Fiero.Core
                 };
                 target.Draw(rect, states);
             }
-            else {
-                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2) {
+            else
+            {
+                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
+                {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
                     FillColor = Background,
                     OutlineColor = Foreground,

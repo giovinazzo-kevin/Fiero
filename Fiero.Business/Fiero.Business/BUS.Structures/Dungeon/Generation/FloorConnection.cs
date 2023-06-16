@@ -19,7 +19,7 @@ namespace Fiero.Business
             return hash.ToHashCode();
         }
 
-        public override bool Equals(object obj) => obj is FloorConnection c 
+        public override bool Equals(object obj) => obj is FloorConnection c
             ? c.From == From && c.To == To
             : base.Equals(obj);
 

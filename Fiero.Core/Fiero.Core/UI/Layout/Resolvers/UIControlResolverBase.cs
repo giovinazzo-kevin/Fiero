@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public abstract class UIControlResolverBase<T, TFonts, TTextures, TLocales, TSounds, TColors> : IUIControlResolver<T>
         where TTextures : struct, Enum
@@ -15,7 +12,8 @@ namespace Fiero.Core
 
         public UIControlResolverBase(
             GameUI ui
-        ) {
+        )
+        {
             UI = ui;
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using Unconcern;
+﻿using Unconcern;
 using Unconcern.Common;
 using Unconcern.Delegation;
 

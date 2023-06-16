@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Diagnostics;
 
 namespace Fiero.Core
 {
@@ -45,16 +43,19 @@ namespace Fiero.Core
             T = 0f;
             var accumulator = 0f;
             var currentTime = (float)time.Elapsed.TotalSeconds;
-            while ((duration.TotalSeconds == 0 || time.Elapsed < duration) && !ct.IsCancellationRequested) {
+            while ((duration.TotalSeconds == 0 || time.Elapsed < duration) && !ct.IsCancellationRequested)
+            {
                 var newTime = (float)time.Elapsed.TotalSeconds;
                 var frameTime = newTime - currentTime;
-                if (frameTime > 0.25f) {
+                if (frameTime > 0.25f)
+                {
                     frameTime = 0.25f;
                 }
                 currentTime = newTime;
                 Tick?.Invoke(T, TimeStep);
                 accumulator += frameTime;
-                while (accumulator >= TimeStep) {
+                while (accumulator >= TimeStep)
+                {
                     Update?.Invoke(T, TimeStep);
                     if (@break()) return T;
                     T += TimeStep;

@@ -20,13 +20,18 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Wand>(out var wand)) {
-                yield return systems.Action.WandZapped.SubscribeHandler(e => {
-                    if (e.Wand == owner) {
-                        if(e.Victim != null) {
+            if (owner.TryCast<Wand>(out var wand))
+            {
+                yield return systems.Action.WandZapped.SubscribeHandler(e =>
+                {
+                    if (e.Wand == owner)
+                    {
+                        if (e.Victim != null)
+                        {
                             OnApplied(systems, owner, e.Actor, e.Victim);
                         }
-                        else {
+                        else
+                        {
                             OnApplied(systems, owner, e.Actor, e.Position);
                         }
                     }

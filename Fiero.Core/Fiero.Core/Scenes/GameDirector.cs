@@ -1,9 +1,4 @@
-﻿using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class GameDirector
     {
@@ -37,11 +32,14 @@ namespace Fiero.Core
             where T : struct, Enum
         {
             var tState = typeof(T);
-            if (!_cache.TryGetValue(tState, out var cached)) {
+            if (!_cache.TryGetValue(tState, out var cached))
+            {
                 throw new InvalidOperationException($"A scene with state {tState.Name} was not registered");
             }
-            if(_currentItem != null) {
-                if(_currentItem.Scene.TrySetState(state)) {
+            if (_currentItem != null)
+            {
+                if (_currentItem.Scene.TrySetState(state))
+                {
                     return true;
                 }
                 return false;
@@ -54,7 +52,8 @@ namespace Fiero.Core
             where T : struct, Enum
         {
             var tState = typeof(T);
-            if (_cache.ContainsKey(tState)) {
+            if (_cache.ContainsKey(tState))
+            {
                 throw new InvalidOperationException($"A scene with state {tState.Name} was already registered");
             }
             _cache[tState] = new CachedItem(tState, scene);
@@ -64,7 +63,8 @@ namespace Fiero.Core
         public async Task AddScenes(IEnumerable<IGameScene> scenes)
         {
             var addSceneGeneric = typeof(GameDirector).GetMethod(nameof(AddScene));
-            foreach (var scene in scenes) {
+            foreach (var scene in scenes)
+            {
                 var addScene = addSceneGeneric.MakeGenericMethod(scene.State.GetType());
                 await (Task)addScene.Invoke(this, new object[] { scene });
             }
@@ -76,27 +76,34 @@ namespace Fiero.Core
         {
             var tStateA = typeof(A);
             var tStateB = typeof(B);
-            if (!_cache.TryGetValue(tStateA, out var a)) {
+            if (!_cache.TryGetValue(tStateA, out var a))
+            {
                 throw new InvalidOperationException($"A scene with state {tStateA.Name} was not registered");
             }
-            if (!_cache.ContainsKey(tStateB)) {
+            if (!_cache.ContainsKey(tStateB))
+            {
                 throw new InvalidOperationException($"A scene with state {tStateB.Name} was not registered");
             }
-            if(!a.Transitions.TryAdd(fromState, toState)) {
+            if (!a.Transitions.TryAdd(fromState, toState))
+            {
                 throw new InvalidOperationException($"A transition from state {tStateA.Name} to state {tStateB.Name} was already registered");
             }
         }
 
         public virtual void Update()
         {
-            if (_currentItem != null) {
+            if (_currentItem != null)
+            {
                 _currentItem.Scene.Update();
-                if (_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState)) {
+                if (_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState))
+                {
                     var tNextState = nextState.GetType();
-                    if (!_cache.TryGetValue(tNextState, out var nextItem)) {
+                    if (!_cache.TryGetValue(tNextState, out var nextItem))
+                    {
                         throw new InvalidOperationException($"Could not access cached item for transition from  state {_currentItem.Scene.State.GetType().Name} to state {tNextState.Name}");
                     }
-                    if (nextItem.Scene.TrySetState(nextState)) {
+                    if (nextItem.Scene.TrySetState(nextState))
+                    {
                         _currentItem = nextItem;
                     }
                 }
@@ -105,7 +112,8 @@ namespace Fiero.Core
 
         public virtual void Draw()
         {
-            if (_currentItem != null) {
+            if (_currentItem != null)
+            {
                 _currentItem.Scene.Draw();
             }
         }

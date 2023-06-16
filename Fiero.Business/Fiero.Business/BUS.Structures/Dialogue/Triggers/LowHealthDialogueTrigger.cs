@@ -18,8 +18,10 @@ namespace Fiero.Business
         public override bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners)
         {
             listeners = default;
-            if(speaker is Actor a) {
-                if (a.ActorProperties.Health.Percentage <= PercentageThreshold && base.TryTrigger(floorId, speaker, out listeners)) {
+            if (speaker is Actor a)
+            {
+                if (a.ActorProperties.Health.Percentage <= PercentageThreshold && base.TryTrigger(floorId, speaker, out listeners))
+                {
                     return listeners.Any();
                 }
             }

@@ -1,10 +1,4 @@
-﻿using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using Unconcern.Common;
 
 namespace Fiero.Core
@@ -21,8 +15,8 @@ namespace Fiero.Core
 
         public event Action<GameScene<TState>, TState> StateChanged;
         private event Action DisposeSubscriptions;
-        protected readonly ImmutableList<TState> EntryStates;
-        protected readonly ImmutableList<TState> ExitStates;
+        protected readonly System.Collections.Immutable.ImmutableList<TState> EntryStates;
+        protected readonly System.Collections.Immutable.ImmutableList<TState> ExitStates;
 
         public GameScene()
         {
@@ -38,7 +32,8 @@ namespace Fiero.Core
 
         public virtual Task InitializeAsync()
         {
-            if(_initialized) {
+            if (_initialized)
+            {
                 throw new InvalidOperationException("This scene was already initialized");
             }
             _initialized = true;
@@ -56,16 +51,19 @@ namespace Fiero.Core
         }
 
         protected abstract bool CanChangeState(TState newState);
-        
+
         private void RerouteEvents(TState newState)
         {
             var isExitState = ExitStates.Contains(newState);
             var isEntryState = EntryStates.Contains(newState);
-            if (isEntryState || isExitState) {
+            if (isEntryState || isExitState)
+            {
                 DisposeSubscriptions?.Invoke();
             }
-            if (isEntryState) {
-                foreach (var sub in RouteEvents()) {
+            if (isEntryState)
+            {
+                foreach (var sub in RouteEvents())
+                {
                     DisposeSubscriptions += DisposeSubscription;
                     void DisposeSubscription()
                     {

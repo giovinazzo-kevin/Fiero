@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -20,14 +19,19 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            if (owner.TryCast<Weapon>(out _) || owner.TryCast<Armor>(out _)) {
-                yield return systems.Action.ItemEquipped.SubscribeHandler(e => {
-                    if (e.Item == owner) {
+            if (owner.TryCast<Weapon>(out _) || owner.TryCast<Armor>(out _))
+            {
+                yield return systems.Action.ItemEquipped.SubscribeHandler(e =>
+                {
+                    if (e.Item == owner)
+                    {
                         OnApplied(systems, e.Actor);
                     }
                 });
-                yield return systems.Action.ItemUnequipped.SubscribeHandler(e => {
-                    if (e.Item == owner) {
+                yield return systems.Action.ItemUnequipped.SubscribeHandler(e =>
+                {
+                    if (e.Item == owner)
+                    {
                         OnRemoved(systems, e.Actor);
                     }
                 });

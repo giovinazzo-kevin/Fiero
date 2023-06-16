@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     [TransientDependency]
     public abstract class EcsEntity

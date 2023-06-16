@@ -2,11 +2,6 @@
 using Fiero.Core.Structures;
 using SFML.Graphics;
 using SFML.Window;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fiero.Core
 {

@@ -11,8 +11,10 @@ namespace Unconcern.Deferral
     {
         public static Task LoopForever(this IDeferExpression expr, CancellationToken ct = default)
         {
-            return Task.Run(async () => {
-                while(true) {
+            return Task.Run(async () =>
+            {
+                while (true)
+                {
                     await expr.Now(ct);
                 }
             }, ct);
@@ -27,8 +29,10 @@ namespace Unconcern.Deferral
         {
             fallbacks ??= Enumerable.Empty<IDeferExpression>();
             var tasks = expression.Siblings.Prepend(expression)
-                .Select(e => {
-                    if(e.PreciseTimer || tightLoop) {
+                .Select(e =>
+                {
+                    if (e.PreciseTimer || tightLoop)
+                    {
                         return Task.Run(() => Sandbox(e, fallbacks).GetAwaiter().GetResult());
                     }
                     return Sandbox(e, fallbacks);
@@ -48,55 +52,72 @@ namespace Unconcern.Deferral
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalToken, durationTokenSource.Token);
                 var fb = fallbacks.Concat(expression.Fallbacks)
                     .ToArray();
-                if (watch.Elapsed < expression.Delay) {
-                    if(!preciseTimer) {
+                if (watch.Elapsed < expression.Delay)
+                {
+                    if (!preciseTimer)
+                    {
                         await AsyncDelay(expression.Delay - watch.Elapsed);
                     }
-                    else {
+                    else
+                    {
                         SyncDelay(expression.Delay - watch.Elapsed, watch);
                     }
                 }
-                try {
+                try
+                {
                     watch.Restart();
-                    if (!preciseTimer) {
-                        if(expression.WaitDuration) {
+                    if (!preciseTimer)
+                    {
+                        if (expression.WaitDuration)
+                        {
                             await Task.WhenAny(
                                 Task.Delay(expression.Duration, tokenSource.Token),
                                 Task.WhenAll(expression.Tasks.Select(t => t(tokenSource.Token))));
                         }
-                        else {
+                        else
+                        {
                             await Task.WhenAll(expression.Tasks.Select(t => t(tokenSource.Token)));
                         }
                     }
-                    else {
-                        foreach (var t in expression.Tasks) {
+                    else
+                    {
+                        foreach (var t in expression.Tasks)
+                        {
                             t(tokenSource.Token)
                                 .GetAwaiter()
                                 .GetResult();
                         }
                     }
                     if (expression.Duration < TimeSpan.MaxValue
-                        && watch.Elapsed < expression.Duration) {
-                        if (!preciseTimer) {
-                            if(expression.WaitDuration) {
+                        && watch.Elapsed < expression.Duration)
+                    {
+                        if (!preciseTimer)
+                        {
+                            if (expression.WaitDuration)
+                            {
                                 await AsyncDelay(expression.Duration - watch.Elapsed);
                             }
                         }
-                        else {
-                            if (expression.WaitDuration) {
+                        else
+                        {
+                            if (expression.WaitDuration)
+                            {
                                 SyncDelay(expression.Duration - watch.Elapsed, watch);
                             }
                         }
                     }
                 }
-                catch(Exception e) when (fb.Length > 0 && (e is TaskCanceledException || e is OperationCanceledException)) {
-                    for (int i = 0; i < fb.Length - 1; i++) {
-                        try {
+                catch (Exception e) when (fb.Length > 0 && (e is TaskCanceledException || e is OperationCanceledException))
+                {
+                    for (int i = 0; i < fb.Length - 1; i++)
+                    {
+                        try
+                        {
                             await fb[i].Now(externalToken, null, preciseTimer);
                             return;
                         }
-                        catch(TaskCanceledException) { }
-                        catch(OperationCanceledException) { }
+                        catch (TaskCanceledException) { }
+                        catch (OperationCanceledException) { }
                     }
                     await fb[^1].Now(externalToken, null, preciseTimer);
                     return;
@@ -114,7 +135,8 @@ namespace Unconcern.Deferral
             {
                 var spinWait = new SpinWait();
                 sw.Restart();
-                while(sw.Elapsed < delay) {
+                while (sw.Elapsed < delay)
+                {
                     spinWait.SpinOnce(-1);
                 }
                 sw.Stop();
@@ -142,7 +164,8 @@ namespace Unconcern.Deferral
         }
         internal static IDeferExpression WithStart(this IDeferExpression self, TimeSpan newStart)
         {
-            if(!self.Siblings.Any()) {
+            if (!self.Siblings.Any())
+            {
                 return new DeferExpression(self.Tasks, newStart, self.Duration, self.Siblings, self.Children, self.Fallbacks, self.WaitDuration, self.PreciseTimer);
             }
             return new DeferExpression(Array.Empty<Func<CancellationToken, Task>>(), newStart, TimeSpan.MaxValue, null, new[] { self }, null, false, self.PreciseTimer);

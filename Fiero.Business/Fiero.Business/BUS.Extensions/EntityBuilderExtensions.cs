@@ -323,5 +323,11 @@ namespace Fiero.Business
                     }
                 };
             });
+        public static EntityBuilder<T> WithIntrinsicTrait<T>(this EntityBuilder<T> builder, Trait trait)
+            where T : Entity => builder.AddOrTweak<TraitsComponent>(c =>
+            {
+                c.AddIntrinsicTrait(trait);
+            })
+            .WithIntrinsicEffect(trait.Effect);
     }
 }

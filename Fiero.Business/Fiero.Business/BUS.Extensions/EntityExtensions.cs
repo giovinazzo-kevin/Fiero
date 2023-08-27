@@ -94,6 +94,7 @@ namespace Fiero.Business
         }
         public static bool IsInMeleeRange(this Actor a, Coord c) => a.SquaredDistanceFrom(c) <= 2;
         public static bool IsInMeleeRange(this Actor a, PhysicalEntity b) => a.IsInMeleeRange(b.Position());
+        public static bool HasTrait(this Entity e, TraitName t) => e.Traits != null && e.Traits.Active.Any(x => x.Name == t);
         public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && a.Physics.Roots > 0;
         public static bool IsImmobile(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove || a.Physics.Roots > 0;
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;

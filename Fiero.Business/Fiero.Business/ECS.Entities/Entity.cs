@@ -10,6 +10,7 @@ namespace Fiero.Business
         public InfoComponent Info { get; private set; }
         [NonTerm]
         public EffectsComponent Effects { get; private set; }
+        public TraitsComponent Traits { get; private set; }
         public override string ToString() => Info?.Name;
     }
 }

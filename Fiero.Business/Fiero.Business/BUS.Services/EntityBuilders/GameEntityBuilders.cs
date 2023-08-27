@@ -50,7 +50,7 @@ namespace Fiero.Business
             .WithFieldOfView(7)
             .WithLogging()
             .WithEffectTracking()
-            .WithIntrinsicEffect(new(EffectName.AutoPickup))
+            .WithIntrinsicEffect(new(EffectName.AutoPickup, canStack: false))
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
             ;
@@ -603,7 +603,7 @@ namespace Fiero.Business
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Explosion, chance: 1f, magnitude: 1), e => new GrantedWhenHitByThrownItem(e))
+            .WithIntrinsicEffect(new(EffectName.Explosion, "1", chance: 1f), e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion
 
@@ -612,34 +612,34 @@ namespace Fiero.Business
 
         #region POTIONS
         public EntityBuilder<Potion> Potion_OfConfusion()
-            => Potion(new(EffectName.Confusion, duration: 10), new(EffectName.Confusion, duration: 10));
+            => Potion(new(EffectName.Confusion, duration: 10, canStack: false), new(EffectName.Confusion, duration: 10));
         public EntityBuilder<Potion> Potion_OfSleep()
-            => Potion(new(EffectName.Sleep, duration: 10), new(EffectName.Sleep, duration: 10));
+            => Potion(new(EffectName.Sleep, duration: 10, canStack: false), new(EffectName.Sleep, duration: 10));
         public EntityBuilder<Potion> Potion_OfSilence()
-            => Potion(new(EffectName.Silence, duration: 10), new(EffectName.Silence, duration: 10));
+            => Potion(new(EffectName.Silence, duration: 10, canStack: false), new(EffectName.Silence, duration: 10));
         public EntityBuilder<Potion> Potion_OfEntrapment()
-            => Potion(new(EffectName.Entrapment, duration: 10), new(EffectName.Entrapment, duration: 10));
+            => Potion(new(EffectName.Entrapment, duration: 10, canStack: false), new(EffectName.Entrapment, duration: 10));
         public EntityBuilder<Potion> Potion_OfTeleport()
-            => Potion(new(EffectName.UncontrolledTeleport), new(EffectName.UncontrolledTeleport));
+            => Potion(new(EffectName.UncontrolledTeleport, canStack: false), new(EffectName.UncontrolledTeleport));
         public EntityBuilder<Potion> Potion_OfHealing()
-            => Potion(new(EffectName.Heal, magnitude: 2), new(EffectName.Heal, magnitude: 2));
+            => Potion(new(EffectName.Heal, "2"), new(EffectName.Heal, "2"));
         #endregion
 
         #region SCROLLS
         public EntityBuilder<Scroll> Scroll_OfRaiseUndead()
-            => Scroll(new(EffectName.RaiseUndead, magnitude: (int)UndeadRaisingName.Random), ScrollModifierName.AreaAffectsItems);
+            => Scroll(new(EffectName.RaiseUndead, UndeadRaisingName.Random.ToString()), ScrollModifierName.AreaAffectsItems);
         public EntityBuilder<Scroll> Scroll_OfMassConfusion()
-            => Scroll(new(EffectName.Confusion, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Confusion, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSleep()
-            => Scroll(new(EffectName.Sleep, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Sleep, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassSilence()
-            => Scroll(new(EffectName.Silence, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Silence, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassEntrapment()
-            => Scroll(new(EffectName.Entrapment, duration: 10), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Entrapment, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMassExplosion()
-            => Scroll(new(EffectName.Explosion, magnitude: 2), ScrollModifierName.AreaAffectsEveryoneButTarget);
+            => Scroll(new(EffectName.Explosion, "2"), ScrollModifierName.AreaAffectsEveryoneButTarget);
         public EntityBuilder<Scroll> Scroll_OfMagicMapping()
-            => Scroll(new(EffectName.MagicMapping), ScrollModifierName.Self);
+            => Scroll(new(EffectName.MagicMapping, canStack: false), ScrollModifierName.Self);
         #endregion
 
         #region WANDS

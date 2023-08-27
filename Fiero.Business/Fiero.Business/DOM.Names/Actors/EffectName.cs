@@ -18,6 +18,7 @@
         IncreaseMaxHP,
         IncreaseMaxMP,
         Trap,
-        AutoPickup
+        AutoPickup,
+        BestowTrait
     }
 }

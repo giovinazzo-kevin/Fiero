@@ -4,6 +4,8 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
+
+
     public abstract class IncreaseMaxStatEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.IncreaseMaxStatEffect.Name$";
@@ -35,6 +37,10 @@ namespace Fiero.Business
             if (GetStat(target) is not { } stat)
                 return;
             stat.Max += Amount;
+            if (stat.Max < 0)
+                stat.Max = 0;
+            if (stat.V > stat.Max)
+                stat.V = stat.Max;
             _onEnded.Add(() => stat.Max -= Amount);
         }
 

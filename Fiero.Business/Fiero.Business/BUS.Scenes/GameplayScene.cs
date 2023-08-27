@@ -183,9 +183,9 @@ namespace Fiero.Business.Scenes
                     .WithItems(
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
-                            .WithIntrinsicEffect(new EffectDef(EffectName.IncreaseMaxHP, magnitude: 100, canStack: true),
+                            .WithIntrinsicEffect(new EffectDef(EffectName.BestowTrait, TraitName.Huge.ToString()),
                                 e => new GrantedOnEquip(e))
-                            .WithIntrinsicEffect(new EffectDef(EffectName.Vampirism, magnitude: 3, canStack: true))
+                            .WithIntrinsicEffect(new EffectDef(EffectName.Vampirism, "3"))
                             .Build(),
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),
@@ -201,9 +201,9 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
-                    .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
+                    .WithIntrinsicTrait(Traits.Tiny)
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
-                    .WithHealth(100)
+                    .WithHealth(20)
                     .Build();
                 Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);

@@ -1,7 +1,1 @@
-:- module(cheats, [noclip/0, noclip/1]).
-%: Toggles collision for the specified entity
-noclip(Entity) :-
-	Id = Entity.info.name,
-	toggle(Entity.physics.phasing, write('noclip on: ', Id), write('noclip off: ', Id)), nl.
-
-noclip :- noclip(@player).
+:- module(cheats, []).

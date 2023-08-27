@@ -50,17 +50,22 @@ public sealed class CastEntity : GameEntitiesBuiltIn
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.EntityID, entityId);
             yield break;
         }
+        var any = false;
         foreach (var id in Entities.GetEntities())
         {
             var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };
             if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
             {
                 var ret = Unify(tryGetProxyArgs[1]);
-                yield return ret;
-                if (ret.Result.Equals(WellKnown.Literals.False))
-                    yield break;
+                if (!ret.Result.Equals(WellKnown.Literals.False))
+                {
+                    yield return ret;
+                    any = true;
+                }
             }
         }
+        if (!any)
+            yield return False();
         yield break;
 
         Evaluation Unify(object entity)

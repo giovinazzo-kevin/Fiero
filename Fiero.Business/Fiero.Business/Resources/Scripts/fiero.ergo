@@ -19,7 +19,7 @@ Entity as Type is Proxy :-
 D.Key = Val :-
 	nonvar(D), 
 	term_type(Key, atom),
-	OldVal = D,
+	OldVal = D, % Calls dict_deref/2
 	component_set_value(OldVal, Key, Val),
 	!.
 %: Assignment of component property with automatic arithmetic evaluation of the rhs.
@@ -31,12 +31,3 @@ D.Key := Val :-
 	Eval := Val,
 	component_set_value(OldVal, Key, Eval),
 	!.
-
-%: Toggles a boolean property and optionally performs an action depending on the value.
-toggle(Prop, OnTrue, OnFalse) :-
-	Value = &Prop,
-	Value -> 
-		(Prop = false, call(OnFalse))
-		; (Prop = true, call(OnTrue)).
-toggle(Prop, OnTrue) :- toggle(Prop, OnTrue, ()).
-toggle(Prop) :- toggle(Prop, (), ()).

@@ -12,7 +12,7 @@ namespace Fiero.Business
             WallTile = (c => DungeonTheme.Default.WallTile(c).WithCustomColor(ColorName.LightGreen)),
             RoomTile = (c => DungeonTheme.Default.RoomTile(c).WithCustomColor(ColorName.Gray)),
             CorridorTile = (c => DungeonTheme.Default.CorridorTile(c).WithCustomColor(ColorName.Green)),
-            RoomSquares = new(1, 6, (d, s) => 1f / Math.Pow(s, 2))
+            RoomSquares = new(3, 8, (d, s) => 1f / Math.Pow(s, 2)),
         };
 
         public SewersBranchGenerator() : base(DefaultTheme) { }

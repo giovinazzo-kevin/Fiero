@@ -53,7 +53,7 @@ namespace Fiero.Business
             ColorName tint = ColorName.White,
             Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null,
-            Coord offset = default
+            Vec offset = default
         )
         {
             var dir = to.ToVec().Clamp(-1, 1);
@@ -117,7 +117,7 @@ namespace Fiero.Business
         {
             var k = new Vec(0.5f, 0.5f);
             return new(new[] {
-                new AnimationFrame(TimeSpan.FromMilliseconds(4), MakeSprite(new())),
+                new AnimationFrame(TimeSpan.FromMilliseconds(04), MakeSprite(new())),
                 new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
@@ -125,11 +125,11 @@ namespace Fiero.Business
                 new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
                 new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4), MakeSprite(new())),
+                new AnimationFrame(TimeSpan.FromMilliseconds(04), MakeSprite(new())),
             });
 
             SpriteDef MakeSprite(Vec ofs) =>
-                new(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, ofs, new(1, 1));
+                new(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, ofs - new Vec(0f, 0.166f), new(1, 1));
         }
 
         public static Animation Wait(
@@ -145,11 +145,12 @@ namespace Fiero.Business
             Actor actor
         )
             => StraightProjectile(
-                new(0, -25),
+                new Coord(0, -25),
                 actor.Render.Sprite,
                 actor.Render.Texture,
                 actor.Render.Color,
-                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4))
+                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
+                offset: new Vec(0f, -0.166f)
             );
 
         public static Animation TeleportIn(
@@ -161,7 +162,7 @@ namespace Fiero.Business
                 actor.Render.Texture,
                 actor.Render.Color,
                 i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
-                offset: new(0, -25)
+                offset: new(0, -25 + 0.166f)
             );
 
         public static Animation DamageNumber(

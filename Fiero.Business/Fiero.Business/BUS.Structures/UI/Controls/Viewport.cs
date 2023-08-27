@@ -77,7 +77,7 @@ namespace Fiero.Business
             if (!IsMouseOver)
                 return default;
             var pos = TrackedMousePosition - Position.V;
-            var worldPos = pos / ViewTileSize.V;
+            var worldPos = pos / ViewTileSize.V + Following.V.Position();
             return worldPos;
         }
 
@@ -156,7 +156,6 @@ namespace Fiero.Business
 
             bool Bake()
             {
-                var highlightedTile = MouseToWorldPos();
                 var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
                 foreach (var key in Enum.GetValues<RenderLayerName>())
                 {
@@ -195,14 +194,15 @@ namespace Fiero.Business
                         var asActor = drawable as Actor;
                         var rngSeed = drawable.Render.GetHashCode();
                         // Draw allegiance circle
-                        if (asActor != null && drawable != Following.V)
+                        if (asActor != null)
                         {
                             layers[RenderLayerName.BackgroundEffects] += tex =>
                             {
                                 var color = FactionSystem.GetRelations(Following.V, asActor).Left switch
                                 {
-                                    var x when x.IsHostile() => ColorName.Red,
-                                    var x when x.IsFriendly() => ColorName.Green,
+                                    var _ when asActor.IsPlayer() => ColorName.LightCyan,
+                                    var x when x.IsHostile() => ColorName.LightRed,
+                                    var x when x.IsFriendly() => ColorName.LightGreen,
                                     _ => ColorName.Yellow
                                 };
                                 if (!Resources.Sprites.TryGet(TextureName.Icons, "AllegianceCircle", color, out var circleDef, rngSeed))
@@ -211,7 +211,7 @@ namespace Fiero.Business
                                 var spriteSize = sprite.GetLocalBounds().Size();
                                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                                 sprite.Scale = ViewTileSize.V / spriteSize;
-                                sprite.Position = screenPos + spriteSize * new Vec(0f, 0.25f) * sprite.Scale.ToVec();
+                                sprite.Position = screenPos;
                                 tex.Draw(sprite, states);
                             };
                         }
@@ -222,9 +222,11 @@ namespace Fiero.Business
                             {
                                 using var sprite = new Sprite(spriteDef);
                                 var spriteSize = sprite.GetLocalBounds().Size();
-                                sprite.Position = screenPos;
                                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                                 sprite.Scale = ViewTileSize.V / spriteSize;
+                                sprite.Position = screenPos;
+                                if (asActor != null)
+                                    sprite.Position -= new Vec(0f, 0.33f) * spriteSize;
                                 if (!seen)
                                 {
                                     sprite.Color = sprite.Color.AddRgb(-64, -64, -64);

@@ -10,4 +10,5 @@ test:ended(E) :- retract(owner_id(&E.owner.id)).
 % Heal owners by 10HP when they kill someone
 action:actor_killed(_{killer: _{ id: Id, actor: Comp }}) :- 
 	owner_id(Id),
+	write('we'), nl,
 	Comp.hp := &Comp.hp + 10.

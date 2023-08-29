@@ -22,7 +22,7 @@ namespace Fiero.Business
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
-        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(32, 32));
+        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
         public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 

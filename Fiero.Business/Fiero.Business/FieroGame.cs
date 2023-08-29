@@ -120,7 +120,7 @@ namespace Fiero.Business
             Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
-            Store.SetValue(Data.UI.TileSize, 8);
+            Store.SetValue(Data.UI.TileSize, 16);
             Store.SetValue(Data.UI.MinWindowSize, new(800, 800));
             Store.SetValue(Data.UI.WindowSize, new(800, 800));
             Store.SetValue(Data.UI.PopUpSize, new(400, 400));

@@ -4,49 +4,39 @@ namespace Fiero.Core
 {
     public class ProgressBar : UIControl
     {
-        protected readonly Sprite LeftEmpty, MiddleEmpty, RightEmpty;
-        protected readonly Sprite LeftHalf, MiddleHalf, RightHalf;
-        protected readonly Sprite LeftFull, MiddleFull, RightFull;
-        public readonly int TileSize;
+        protected readonly Sprite LeftFrame, MiddleFrame, RightFrame;
+        protected readonly Sprite Fill;
+
         public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
         public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
         public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
-        public readonly UIControlProperty<bool> Capped = new(nameof(Capped), true);
 
-        public ProgressBar(GameInput input, int tileSize,
-            Sprite le, Sprite me, Sprite re,
-            Sprite lh, Sprite mh, Sprite rh,
-            Sprite lf, Sprite mf, Sprite rf)
+        public ProgressBar(GameInput input,
+            Sprite le, Sprite me, Sprite re, Sprite f)
             : base(input)
         {
-            TileSize = tileSize;
-            LeftEmpty = le; MiddleEmpty = me; RightEmpty = re;
-            LeftHalf = lh; MiddleHalf = mh; RightHalf = rh;
-            LeftFull = lf; MiddleFull = mf; RightFull = rf;
+            LeftFrame = le; MiddleFrame = me; RightFrame = re;
+            Fill = f;
         }
 
         public override void Draw(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
-            var len = (int)Math.Round(Size.V.X / (TileSize * Scale.V.X));
+            var tileSize = MiddleFrame.TextureRect.Size().X;
+            var len = (int)(Size.V.X / (tileSize * Scale.V.X));
             base.Draw(target, states);
             for (var i = 0; i < len; i++)
             {
-                var full = i < len * Progress;
-                var half = (i + 1) > len * Progress;
-                var piece = full ? half ? MiddleHalf : MiddleFull : MiddleEmpty;
-                if (Capped.V && i == 0)
+                var piece = true switch
                 {
-                    piece = full ? half ? LeftHalf : LeftFull : LeftEmpty;
-                }
-                else if (Capped.V && i == len - 1)
-                {
-                    piece = full ? half ? RightHalf : RightFull : RightEmpty;
-                }
-                piece.Color = Foreground;
+                    _ when i == 0 => LeftFrame,
+                    _ when i == len - 1 => RightFrame,
+                    _ => MiddleFrame
+                };
+                piece.Color = Color.White;
                 piece.Scale = Scale.V;
-                piece.Position = new(ContentRenderPos.X + i * TileSize * Scale.V.X, ContentRenderPos.Y);
+                piece.Position = new(ContentRenderPos.X + i * tileSize * Scale.V.X, ContentRenderPos.Y);
                 var delta = new Vec(Size.V.X / len, Size.V.Y) - piece.GetLocalBounds().Size();
                 switch (HorizontalAlignment.V)
                 {
@@ -66,7 +56,33 @@ namespace Fiero.Core
                         piece.Position += Coord.PositiveY * delta;
                         break;
                 }
-                //piece.Origin = new Coord(TileSize / 2, 0) - Origin.V * new Coord(TileSize, TileSize);
+                Fill.Scale = piece.Scale;
+                Fill.Position = piece.Position;
+                Fill.Color = Foreground;
+                if (piece == MiddleFrame)
+                {
+                    var full = Progress.V * (len - 2) >= i;
+                    var empty = Progress.V * (len - 2) <= i - 1;
+                    if (full)
+                    {
+                        Fill.TextureRect = new(
+                            Fill.TextureRect.Left,
+                            Fill.TextureRect.Top,
+                            tileSize, tileSize
+                        );
+                        target.Draw(Fill, states);
+                    }
+                    else if (!empty)
+                    {
+                        var subTilePercentage = (Progress.V * (len - 2) - (i - 1)) * tileSize;
+                        Fill.TextureRect = new(
+                            Fill.TextureRect.Left,
+                            Fill.TextureRect.Top,
+                            (int)subTilePercentage, tileSize
+                        );
+                        target.Draw(Fill, states);
+                    }
+                }
                 target.Draw(piece, states);
             }
         }

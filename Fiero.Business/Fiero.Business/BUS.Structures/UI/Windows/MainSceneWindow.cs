@@ -16,8 +16,7 @@ namespace Fiero.Business
         public readonly StatBar MP;
         public readonly StatBar XP;
 
-        protected Label PlayerNameLabel { get; private set; }
-        protected Label PlayerDescLabel { get; private set; }
+        protected Header PlayerNameLabel { get; private set; }
         protected Label CurrentTurnLabel { get; private set; }
         protected Label CurrentPlaceLabel { get; private set; }
         protected Label CurrentPosLabel { get; private set; }
@@ -35,15 +34,15 @@ namespace Fiero.Business
             MiniMap = miniMap;
             HP = hp; HP.Stat.V = nameof(HP);
             HP.EnableDragging = false;
-            HP.Color.V = ColorName.Red;
+            HP.Color.V = ColorName.LightRed;
 
             MP = mp; MP.Stat.V = nameof(MP);
             MP.EnableDragging = false;
-            MP.Color.V = ColorName.Blue;
+            MP.Color.V = ColorName.LightBlue;
 
             XP = xp; XP.Stat.V = nameof(XP);
             XP.EnableDragging = false;
-            XP.Color.V = ColorName.Yellow;
+            XP.Color.V = ColorName.LightYellow;
 
 
             Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
@@ -88,8 +87,8 @@ namespace Fiero.Business
         public override void Open(string title)
         {
             base.Open(title);
-            MiniMap.Open(string.Empty);
             LogBox.Open(string.Empty);
+            MiniMap.Open(string.Empty);
             HP.Open(string.Empty);
             MP.Open(string.Empty);
             XP.Open(string.Empty);
@@ -104,8 +103,7 @@ namespace Fiero.Business
             {
                 var floorId = following.FloorId();
                 var position = following.Position();
-                PlayerNameLabel.Text.V = following.Info.Name;
-                PlayerDescLabel.Text.V = $"Level {following.ActorProperties.Level.V} {following.ActorProperties.Race}";
+                PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
                 CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
                 CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
@@ -134,7 +132,8 @@ namespace Fiero.Business
             .AddRule<Label>(x => x
                 .Apply(l =>
                 {
-                    l.Background.V = UI.GetColor(ColorName.UIBackground);
+                    if (l is not Header)
+                        l.Background.V = UI.GetColor(ColorName.UIBackground);
                     l.Padding.V = new(5, 0);
                 }))
             .AddRule<Label>(x => x
@@ -145,55 +144,58 @@ namespace Fiero.Business
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;
 
-        const int UISize = 240;
+        const int UISize = 248;
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
                 .Col(w: UISize, px: true, @class: "stat-panel")
-                    .Row(h: 24, px: true, id: "name", @class: "center")
-                        .Cell<Label>(x => PlayerNameLabel = x)
+                    .Row(h: 16, px: true, id: "name", @class: "center")
+                        .Cell<Header>(x => PlayerNameLabel = x)
                     .End()
-                    .Row(h: 24, px: true, id: "desc", @class: "center")
-                        .Cell<Label>(x => PlayerDescLabel = x)
+                    .Row(h: 4, px: true, @class: "spacer")
+                        .Cell<Layout>()
                     .End()
                     .Row(h: 16, px: true, id: "hp-bar")
+                        .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = HP)
                     .End()
-                    .Row(h: 2, px: true, @class: "spacer")
+                    .Row(h: 4, px: true, @class: "spacer")
                         .Cell<Layout>()
                     .End()
                     .Row(h: 16, px: true, id: "mp-bar")
+                        .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MP)
                     .End()
-                    .Row(h: 2, px: true, @class: "spacer")
+                    .Row(h: 4, px: true, @class: "spacer")
                         .Cell<Layout>()
                     .End()
                     .Row(h: 16, px: true, id: "xp-bar")
+                        .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = XP)
                     .End()
                     .Row(@class: "spacer")
                         .Cell<Layout>()
                     .End()
-                    .Row(h: 8, px: true)
-                        .Col(id: "time")
-                            .Cell<Label>(x => CurrentTurnLabel = x)
+                    .Row(h: 16, px: true)
+                        .Col(id: "time", @class: "center")
+                            .Cell<Header>(x => CurrentTurnLabel = x)
                         .End()
-                        .Col(id: "place", @class: "right")
-                            .Cell<Label>(x => CurrentPlaceLabel = x)
+                        .Col(id: "place", @class: "center")
+                            .Cell<Header>(x => CurrentPlaceLabel = x)
                         .End()
                     .End()
                     .Row(h: UISize, px: true, id: "mini-map")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
-                    .Row(h: 8, px: true)
-                        .Col(id: "pos")
-                            .Cell<Label>(x => CurrentPosLabel = x)
+                    .Row(h: 16, px: true)
+                        .Col(id: "pos", @class: "center")
+                            .Cell<Header>(x => CurrentPosLabel = x)
                         .End()
-                        .Col(id: "seed", @class: "right")
-                            .Cell<Label>(x => RngSeedLabel = x)
+                        .Col(id: "seed", @class: "center")
+                            .Cell<Header>(x => RngSeedLabel = x)
                         .End()
                     .End()
                 .End()

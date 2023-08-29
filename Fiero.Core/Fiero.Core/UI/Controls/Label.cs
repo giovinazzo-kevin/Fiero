@@ -68,7 +68,7 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             base.Draw(target, states);
-            DrawText(this, LabelDrawable, Origin.V.ToCoord(), target, states);
+            DrawText(this, LabelDrawable, Origin.V.ToCoord() + Margin.V + Padding.V / 2, target, states);
         }
 
         public static void DrawText(Label label, BitmapText text, Coord offset, RenderTarget target, RenderStates states)

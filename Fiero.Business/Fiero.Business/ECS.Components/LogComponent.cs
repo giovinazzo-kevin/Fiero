@@ -43,8 +43,8 @@ namespace Fiero.Business
                     message += $" x{repeatCount + 1}";
                 }
             }
-            LogAdded?.Invoke(this, message);
             Messages.Add(message);
+            LogAdded?.Invoke(this, message);
             if (Messages.Count >= 100)
             {
                 LogPruned?.Invoke(this, Messages[0]);

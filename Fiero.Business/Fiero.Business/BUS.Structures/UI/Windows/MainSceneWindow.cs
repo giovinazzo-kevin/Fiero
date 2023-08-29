@@ -24,6 +24,9 @@ namespace Fiero.Business
 
         protected readonly ActionSystem ActionSystem;
 
+        const int SideBarWidth = 248;
+        const int BottomBarHeight = 128;
+
         public MainSceneWindow(
             GameUI ui,
             LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp,
@@ -144,13 +147,12 @@ namespace Fiero.Business
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;
 
-        const int UISize = 248;
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
-                .Col(w: UISize, px: true, @class: "stat-panel")
+                .Col(w: SideBarWidth, px: true, @class: "stat-panel")
                     .Row(h: 16, px: true, id: "name", @class: "center")
                         .Cell<Header>(x => PlayerNameLabel = x)
                     .End()
@@ -182,17 +184,17 @@ namespace Fiero.Business
                         .Col(id: "time", @class: "center")
                             .Cell<Header>(x => CurrentTurnLabel = x)
                         .End()
-                        .Col(id: "place", @class: "center")
-                            .Cell<Header>(x => CurrentPlaceLabel = x)
+                        .Col(id: "pos", @class: "center")
+                            .Cell<Header>(x => CurrentPosLabel = x)
                         .End()
                     .End()
-                    .Row(h: UISize, px: true, id: "mini-map")
+                    .Row(h: SideBarWidth, px: true, id: "mini-map")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
                     .Row(h: 16, px: true)
-                        .Col(id: "pos", @class: "center")
-                            .Cell<Header>(x => CurrentPosLabel = x)
+                        .Col(id: "place", @class: "center")
+                            .Cell<Header>(x => CurrentPlaceLabel = x)
                         .End()
                         .Col(id: "seed", @class: "center")
                             .Cell<Header>(x => RngSeedLabel = x)
@@ -200,7 +202,7 @@ namespace Fiero.Business
                     .End()
                 .End()
             .End()
-            .Row(h: UISize, px: true, id: "log-panel")
+            .Row(h: BottomBarHeight, px: true, id: "log-panel")
                 .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
     }

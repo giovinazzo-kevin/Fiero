@@ -10,7 +10,7 @@
         public UIControlProperty<Coord> Position { get; private set; } = new(nameof(Position));
 
         public event Action<UIWindow, ModalWindowButton> Closed;
-        public event Action Updated;
+        public event Action<UIWindow> Updated;
 
         public bool IsOpen { get; private set; }
 
@@ -31,13 +31,17 @@
             RebuildLayout();
         }
 
+        protected virtual void OnLayoutRebuilt(Layout oldValue) { }
+
         protected virtual void RebuildLayout()
         {
-            Layout?.Dispose();
+            var oldLayout = Layout;
             Layout = UI.CreateLayout()
                 .Build(Size.V, grid => CreateLayout(grid, Title ?? "Untitled"));
             Layout.Position.V = Position.V;
             Layout.Size.V = Size.V;
+            OnLayoutRebuilt(oldLayout);
+            oldLayout?.Dispose();
         }
 
         public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);
@@ -92,7 +96,7 @@
         {
             if (!IsOpen) return;
             Layout.Update();
-            Updated?.Invoke();
+            Updated?.Invoke(this);
         }
 
         public virtual void Draw()

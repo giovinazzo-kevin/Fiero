@@ -7,6 +7,7 @@
   "header-l": "208 32 16 16",
   "header-m": "224 32 16 16",
   "header-r": "240 32 16 16",
+  "hotbar-slot": "176 0 32 32",
   "textbox-l": "0 24 8 8",
   "textbox-r": "16 24 8 8",
   "textbox-bl": "0 32 8 8",

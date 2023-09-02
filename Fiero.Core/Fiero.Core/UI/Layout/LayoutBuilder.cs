@@ -1,5 +1,4 @@
-﻿using LightInject;
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class LayoutBuilder
     {
@@ -10,6 +9,18 @@ namespace Fiero.Core
         {
             ServiceProvider = serviceProvider;
             Input = ServiceProvider.GetInstance<GameInput>();
+        }
+
+        public Func<UIControl> GetResolver(Type controlType, LayoutGrid grid)
+        {
+            var resolverType = typeof(IUIControlResolver<>).MakeGenericType(controlType);
+            var resolver = ServiceProvider.GetInstance(resolverType);
+            var resolveMethod = resolver.GetType().GetMethod(nameof(IUIControlResolver<UIControl>.Resolve));
+            return () =>
+            {
+                var control = resolveMethod.Invoke(resolver, new object[] { grid });
+                return (UIControl)control;
+            };
         }
 
         public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
@@ -24,25 +35,13 @@ namespace Fiero.Core
             ResizeRecursive(size, layout.Position.V, grid);
             return layout;
 
-            Func<UIControl> GetResolver(Type controlType)
-            {
-                var resolverType = typeof(IUIControlResolver<>).MakeGenericType(controlType);
-                var resolver = ServiceProvider.GetInstance(resolverType);
-                var resolveMethod = resolver.GetType().GetMethod(nameof(IUIControlResolver<UIControl>.Resolve));
-                return () =>
-                {
-                    var control = resolveMethod.Invoke(resolver, new object[] { grid });
-                    return (UIControl)control;
-                };
-            }
-
             IEnumerable<UIControl> CreateRecursive(LayoutGrid grid)
             {
                 if (grid.IsCell)
                 {
                     foreach (var c in grid.Controls)
                     {
-                        var instance = c.Instance ?? GetResolver(c.Type)();
+                        var instance = c.Instance ?? GetResolver(c.Type, grid)();
                         if (instance != null)
                             c.Initialize?.Invoke(c.Instance = instance);
                     }

@@ -148,6 +148,9 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         return ret;
     }
 
+    /// <summary>
+    /// Creates a new implicitly-managed cell from the specified initializer.
+    /// </summary>
     public LayoutGrid Cell<T>(Action<T> initialize = null)
         where T : UIControl
     {
@@ -159,6 +162,9 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         return this;
     }
 
+    /// <summary>
+    /// Creates a new explicitly-managed cell from the specified instance.
+    /// </summary>
     public LayoutGrid Cell<T>(T instance)
         where T : UIControl
     {
@@ -167,6 +173,24 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
             throw new ArgumentException();
         }
         Controls.Add(new(typeof(T), null) { Instance = instance });
+        return this;
+    }
+
+    /// <summary>
+    /// Creates a new implicitly-managed cell from the specified initializer while tracking all instance changes with a LayoutRef.
+    /// </summary>
+    public LayoutGrid Cell<T>(LayoutRef<T> lref, Action<T> initialize = null)
+        where T : UIControl
+    {
+        if (!IsCell)
+        {
+            throw new ArgumentException();
+        }
+        Controls.Add(new(typeof(T), x =>
+        {
+            lref.Control = (T)x;
+            initialize?.Invoke(lref.Control);
+        }));
         return this;
     }
 

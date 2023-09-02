@@ -10,9 +10,9 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         public readonly UIControlProperty<string> Stat = new(nameof(Stat));
         public readonly UIControlProperty<ColorName> Color = new(nameof(Color));
 
-        protected Label StatLabel { get; private set; }
-        protected Label ValueLabel { get; private set; }
-        protected ProgressBar ProgressBar { get; private set; }
+        protected readonly LayoutRef<Label> StatLabel = new();
+        protected readonly LayoutRef<Label> ValueLabel = new();
+        protected readonly LayoutRef<ProgressBar> ProgressBar = new();
 
         public StatBar(GameUI ui)
             : base(ui)
@@ -33,7 +33,8 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
                 .Apply(l => l.Origin.V = new Vec(0, 1)))
             .AddRule<Label>(h => h
                 .Match(x => x.Id == "stat-label")
-                .Apply(l => l.Foreground.V = UI.GetColor(Color)))
+                .Apply(l => l.Foreground.V = UI.GetColor(Color))
+                .Apply(l => l.Margin.V = new(l.FontSize.V.X, 0)))
             .AddRule<ProgressBar>(r => r
                 .Apply(p => p.Foreground.V = UI.GetColor(Color))
                 .Apply(l => l.Background.V = SFML.Graphics.Color.Transparent)
@@ -44,30 +45,20 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
             .Col(w: 32, px: true, id: "stat-label")
-                .Cell<Label>(l =>
-                {
-                    StatLabel = l;
-                    StatLabel.Margin.V = new(StatLabel.FontSize.V.X / 2 * 2, 0);
-                })
+                .Cell(StatLabel)
             .End()
             .Col()
-                .Cell<ProgressBar>(p =>
-                {
-                    ProgressBar = p;
-                })
-                .Cell<Label>(l =>
-                {
-                    ValueLabel = l;
-                })
+                .Cell(ProgressBar)
+                .Cell(ValueLabel)
             .End();
 
         protected void Invalidate()
         {
             if (!IsOpen)
                 return;
-            ProgressBar.Progress.V = MaxValue.V != 0 ? Value.V / (float)MaxValue.V : 0;
-            ValueLabel.Text.V = $"{Value.V}/{MaxValue.V}";
-            StatLabel.Text.V = $"{Stat.V}:";
+            ProgressBar.Control.Progress.V = MaxValue.V != 0 ? Value.V / (float)MaxValue.V : 0;
+            ValueLabel.Control.Text.V = $"{Value.V}/{MaxValue.V}";
+            StatLabel.Control.Text.V = $"{Stat.V}:";
         }
 
         public override void Draw()

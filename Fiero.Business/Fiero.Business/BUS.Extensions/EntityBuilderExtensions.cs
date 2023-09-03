@@ -19,7 +19,7 @@ namespace Fiero.Business
                 builder.Built += (b, o) =>
                 {
                     var systems = b.ServiceFactory.GetInstance<GameSystems>();
-                    var sub = new Subscription();
+                    var sub = new Subscription(throwOnDoubleDispose: false);
                     sub.Add(systems.Action.TurnStarted.SubscribeHandler(b =>
                     {
                         wrap ??= (e => e.Resolve(o));

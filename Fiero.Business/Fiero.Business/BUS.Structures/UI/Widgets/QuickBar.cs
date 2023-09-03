@@ -66,6 +66,12 @@ namespace Fiero.Business
                 .ToArray();
             var labels = Layout.Query<Label>(l => true, g => g.HasAnyClass("quickbar-slot"))
                 .ToArray();
+            for (int i = 0; i < pictures.Length; i++)
+            {
+                pictures[i].Sprite.V = null;
+                labels[i * 3 + 1].Text.V = string.Empty;
+                labels[i * 3 + 2].Text.V = string.Empty;
+            }
             foreach (var (i, name, drawable) in obj.GetSlots())
             {
                 pictures[i - 1].Sprite.V = Resources.Sprites.Get(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color);

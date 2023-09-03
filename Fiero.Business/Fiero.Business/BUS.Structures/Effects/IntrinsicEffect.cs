@@ -6,7 +6,7 @@ namespace Fiero.Business
     /// <summary>
     /// Intrinsic effects can be applied to:
     /// - Actors:
-    ///     - The effect is applied to the actor when the actor spawns, and it ends when the actor dies.
+    ///     - The effect is applied to the actor on its next turn's start, and it ends when the actor dies.
     /// - Items:
     ///     - The effect is applied to the actor that picks up the item, and it ends when the actor drops the item.
     /// - Spells:
@@ -21,13 +21,16 @@ namespace Fiero.Business
         {
             if (owner.TryCast<Actor>(out var target))
             {
-                yield return systems.Action.ActorSpawned.SubscribeHandler(e =>
+                var sub = new Subscription(throwOnDoubleDispose: false);
+                sub.Add(systems.Action.ActorTurnStarted.SubscribeHandler(e =>
                 {
                     if (e.Actor == target)
                     {
                         OnApplied(systems, owner, e.Actor);
+                        sub.Dispose();
                     }
-                });
+                }));
+                yield return sub;
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
                 yield return systems.Action.ActorDied.SubscribeHandler(e =>
                 {

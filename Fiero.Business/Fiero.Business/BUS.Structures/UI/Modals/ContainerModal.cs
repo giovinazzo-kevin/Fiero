@@ -10,7 +10,7 @@ namespace Fiero.Business
         where TContainer : PhysicalEntity
         where TActions : struct, Enum
     {
-        public const int RowHeight = 32; // px
+        public const int RowHeight = 34; // px
         public const int PaginatorHeight = 32; // px
 
         public readonly TContainer Container;

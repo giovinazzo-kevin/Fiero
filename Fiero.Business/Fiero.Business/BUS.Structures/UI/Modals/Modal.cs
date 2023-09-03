@@ -54,8 +54,9 @@ namespace Fiero.Business
         protected override void OnLayoutRebuilt(Layout oldValue)
         {
             //base.OnLayoutRebuilt(oldValue);
-            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize) / 2;
-            Layout.Position.V = Layout.Size.V / 2;
+            var vws = UI.Store.Get(Data.UI.ViewportSize);
+            Layout.Size.V = (vws * new Vec(0.8f, 0.6f)).ToCoord();
+            Layout.Position.V = vws / 2 - Layout.Size.V / 2;
         }
 
         protected void Invalidate()

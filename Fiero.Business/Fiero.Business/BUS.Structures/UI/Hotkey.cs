@@ -16,5 +16,7 @@ namespace Fiero.Business
             Control = control;
             Alt = alt;
         }
+
+        public override string ToString() => $"{Key} ({Shift}, {Control}, {Alt})";
     }
 }

@@ -22,13 +22,6 @@ namespace Fiero.Business
                 OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
         }
-        protected override void OnLayoutRebuilt(Layout oldValue)
-        {
-            //base.OnLayoutRebuilt(oldValue);
-            var windowSize = UI.Store.Get(Data.UI.WindowSize);
-            Layout.Size.V = new(windowSize.X, 200);
-            Layout.Position.V = new(0, windowSize.Y - 200);
-        }
 
         public override void Update()
         {
@@ -91,7 +84,7 @@ namespace Fiero.Business
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
             .Col()
                 .Repeat(Options.Length, (i, layout) => layout
-                .Row(@class: "choice")
+                .Row(h: 24, px: true, @class: "choice")
                     .Cell<Button>(b =>
                     {
                         b.ZOrder.V = i;
@@ -110,11 +103,15 @@ namespace Fiero.Business
                         };
                     })
                 .End())
-                .Repeat(Math.Max(0, 4 - Options.Length), (i, layout) => layout
-                .Row(@class: "spacer")
-                    .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
-                .End())
             .End()
             ;
+
+        protected override void OnLayoutRebuilt(Layout oldValue)
+        {
+            base.OnLayoutRebuilt(oldValue);
+            var popupSize = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Size.V = new(popupSize.X, 24 * Options.Length + TitleHeight + ButtonsHeight);
+        }
+
     }
 }

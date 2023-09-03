@@ -10,6 +10,8 @@ namespace Fiero.Core
         protected readonly ModalWindowButton[] Buttons;
         protected readonly ModalWindowStyles Styles;
 
+        protected int TitleHeight, ButtonsHeight;
+
         public ModalWindow(GameUI ui, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
             : base(ui)
         {
@@ -24,13 +26,13 @@ namespace Fiero.Core
             var hasButtons = Styles.HasFlag(ModalWindowStyles.CustomButtons) && Buttons.Length > 0;
             var hasTitleBar = Styles.HasFlag(ModalWindowStyles.TitleBar);
 
-            var titleHeight = hasTitle ? 16 : 0;
-            var buttonsHeight = hasButtons ? 16 : 0;
+            TitleHeight = hasTitle ? 16 : 0;
+            ButtonsHeight = hasButtons ? 24 : 0;
             var contentHeight = 1f;
             return ApplyStyles(grid)
                 .Col(@class: "modal")
                     .If(hasTitle, g => g
-                        .Row(h: titleHeight, px: true, @class: "modal-title")
+                        .Row(h: TitleHeight, px: true, @class: "modal-title")
                             .Col()
                                 .Cell<Label>(l =>
                                 {
@@ -70,12 +72,13 @@ namespace Fiero.Core
                     .Row(h: contentHeight, @class: "modal-content", id: "modal-content")
                         .Repeat(1, (i, g) => RenderContent(g))
                     .End()
-                    .If(hasButtons, g => g.Row(h: buttonsHeight, px: true, @class: "modal-controls")
+                    .If(hasButtons, g => g.Row(h: ButtonsHeight, px: true, @class: "modal-controls")
                         .Repeat(Buttons.Length, (i, grid) => grid
                             .Col()
                                 .Cell<Button>(b =>
                                 {
                                     b.Text.V = Buttons[i].ToString();
+                                    b.FontSize.V = new Coord(16, 24);
                                     b.HorizontalAlignment.V = HorizontalAlignment.Center;
                                     b.Clicked += (_, __, ___) =>
                                     {

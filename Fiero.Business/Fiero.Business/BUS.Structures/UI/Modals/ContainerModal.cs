@@ -17,6 +17,26 @@ namespace Fiero.Business
         public event Action<Item, TActions> ActionPerformed;
 
 
+        protected readonly VirtualKeys[] Letters = new[]
+        {
+            VirtualKeys.N1, VirtualKeys.N2, VirtualKeys.N3, VirtualKeys.N4, VirtualKeys.N5, VirtualKeys.N6,
+            VirtualKeys.N7, VirtualKeys.N8, VirtualKeys.N9, VirtualKeys.N0,
+            VirtualKeys.A, VirtualKeys.B, VirtualKeys.C, VirtualKeys.D, VirtualKeys.E, VirtualKeys.F, VirtualKeys.G,
+            VirtualKeys.H, VirtualKeys.I, VirtualKeys.J, VirtualKeys.K, VirtualKeys.L, VirtualKeys.M, VirtualKeys.N,
+            VirtualKeys.O, VirtualKeys.P, VirtualKeys.Q, VirtualKeys.R, VirtualKeys.S, VirtualKeys.T, VirtualKeys.U,
+            VirtualKeys.V, VirtualKeys.W, VirtualKeys.X, VirtualKeys.Y, VirtualKeys.Z
+        };
+
+        protected int KeyToIndex(VirtualKeys k)
+        {
+            var i = Array.IndexOf(Letters, k);
+            if (i == -1)
+                i = 0;
+            return i;
+        }
+
+        protected VirtualKeys IndexToKey(int i) => Letters[i % Letters.Length];
+
         protected readonly List<Item> Items = new();
         public UIControlProperty<int> CurrentPage { get; private set; } = new(nameof(CurrentPage), 0, invalidate: true);
         public UIControlProperty<int> PageSize { get; private set; } = new(nameof(PageSize), 20, invalidate: true);
@@ -52,12 +72,28 @@ namespace Fiero.Business
             var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
             var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
             var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
+            var dirty = false;
             if (newPageSize != PageSize.V)
             {
                 PageSize.V = newPageSize;
-                RebuildLayout();
+                dirty = true;
             }
+            if (CurrentPage.V + 1 > NumPages)
+            {
+                CurrentPage.V = NumPages - 1;
+                dirty = true;
+            }
+            if (dirty)
+                RebuildLayout();
             Invalidate();
+        }
+
+
+        public void KeyboardSelectItem(int index, bool shift)
+        {
+            var items = Layout.Query<Button>(l => true, g => g.HasAnyClass("item-name"));
+            var item = items.ElementAtOrDefault(index + (shift ? Letters.Length : 0));
+            item.Click(item.Position, Mouse.Button.Left);
         }
 
         protected abstract bool ShouldRemoveItem(Item i, TActions a);
@@ -65,7 +101,13 @@ namespace Fiero.Business
         protected override void RegisterHotkeys(ModalWindowButton[] buttons)
         {
             base.RegisterHotkeys(buttons);
-            Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Inventory)), () => Close(ModalWindowButton.ImplicitNo));
+            int i = 0;
+            foreach (var item in Letters)
+            {
+                var j = i++;
+                Hotkeys.Add(new Hotkey(item), () => KeyboardSelectItem(j, false));
+                Hotkeys.Add(new Hotkey(item, shift: true), () => KeyboardSelectItem(j, true));
+            }
         }
 
         protected virtual bool OnItemClicked(Button b, int index, Mouse.Button mouseButton)
@@ -99,6 +141,15 @@ namespace Fiero.Business
         protected abstract IEnumerable<TActions> GetAvailableActions(Item i);
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+            .AddRule<UIControl>(s => s
+                .Match(x => x.HasClass("paginator"))
+                .Apply(x =>
+                {
+                    x.Background.V = UI.GetColor(ColorName.UIBorder);
+                    x.Foreground.V = UI.GetColor(ColorName.UIBackground);
+                    x.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
+                    x.OutlineThickness.V = 1;
+                }))
             .AddRule<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
                 .Apply(x =>
@@ -118,7 +169,7 @@ namespace Fiero.Business
         {
             return layout
                 .Repeat(PageSize.V, (index, grid) => grid
-                .Row(h: RowHeight, px: true, @class: index % 2 == 0 ? "row-even" : "row-odd")
+                .Row(h: RowHeight, px: true, @class: index % 2 == 0 ? "row row-even" : "row row-odd")
                     .Col(w: RowHeight, px: true, @class: "item-sprite")
                         .Cell<Picture>(p =>
                         {
@@ -140,14 +191,14 @@ namespace Fiero.Business
                     .End()
                 .End())
                 .Row(h: PaginatorHeight, px: true)
-                    .Col(@class: "spacer")
+                    .Col(@class: "paginator spacer")
                         .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
                     .End()
-                    .Col(w: 16, px: true, @class: "paginator paginator-prev")
+                    .Col(w: 32, px: true, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = "<";
-                            b.Scale.V = new Vec(2, 2);
+                            b.FontSize.V = new Coord(16, 24);
                             b.HorizontalAlignment.V = HorizontalAlignment.Right;
                             b.Clicked += (_, __, ___) =>
                             {
@@ -159,16 +210,16 @@ namespace Fiero.Business
                     .Col(w: 64, px: true, @class: "paginator paginator-current")
                         .Cell<Label>(l =>
                         {
-                            l.Scale.V = new Vec(2, 2);
+                            l.FontSize.V = new Coord(16, 24);
                             l.HorizontalAlignment.V = HorizontalAlignment.Center;
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
-                    .Col(w: 16, px: true, @class: "paginator paginator-next")
+                    .Col(w: 32, px: true, @class: "paginator paginator-next")
                         .Cell<Button>(b =>
                         {
                             b.Text.V = ">";
-                            b.Scale.V = new Vec(2, 2);
+                            b.FontSize.V = new Coord(16, 24);
                             b.HorizontalAlignment.V = HorizontalAlignment.Left;
                             b.Clicked += (_, __, ___) =>
                             {
@@ -177,7 +228,7 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                    .Col(@class: "spacer")
+                    .Col(@class: "paginator spacer")
                         .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
                     .End()
                 .End();
@@ -210,8 +261,14 @@ namespace Fiero.Business
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultForeground);
                 }
-
-                b.Text.V = Items[i].DisplayName;
+                var shift = index >= Letters.Length;
+                if (shift)
+                {
+                    index -= Letters.Length;
+                }
+                var key = IndexToKey(index);
+                var letter = WinKeyboardState.GetCharsFromKeys(key, UI.Input.KeyboardState, shift: shift);
+                b.Text.V = $"{letter.Last()}) {Items[i].DisplayName}";
             }
 
             void RefreshPageLabel(Label l)
@@ -219,6 +276,5 @@ namespace Fiero.Business
                 l.Text.V = $"{CurrentPage.V + 1}/{NumPages}";
             }
         }
-
     }
 }

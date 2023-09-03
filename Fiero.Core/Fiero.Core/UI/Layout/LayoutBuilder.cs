@@ -46,10 +46,25 @@
                 {
                     foreach (var c in grid.Controls)
                     {
-                        var instance = c.Instance ?? GetResolver(c.Type, grid)();
-                        if (c.Instance == null && instance != null)
-                            c.Initialize?.Invoke(instance);
-                        c.Instance = instance;
+                        if (c.Instance != null)
+                        {
+                            // pre-initialized
+                            foreach (var rule in grid.GetStyles(c.Type))
+                                rule(c.Instance);
+                        }
+                        if (c.Instance is null)
+                        {
+                            var instance = GetResolver(c.Type, grid)();
+                            c.Instance = instance;
+                            if (instance != null)
+                            {
+                                foreach (var rule in grid.GetStyles(c.Type))
+                                {
+                                    rule(instance);
+                                }
+                                c.Initialize?.Invoke(instance);
+                            }
+                        }
                     }
                 }
 
@@ -131,10 +146,6 @@
                             {
                                 c.Instance.Position.V = computedChildPos;
                                 c.Instance.Size.V = computedChildSize;
-                                foreach (var rule in grid.GetStyles(c.Type))
-                                {
-                                    rule(c.Instance);
-                                }
                             }
                         }
                         Inner(computedChildSize, child, computedChildPos, i + 1);

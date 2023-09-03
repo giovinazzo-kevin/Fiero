@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -183,6 +184,7 @@ namespace Fiero.Business
                         })
                     .End()
                     .Col(@class: "item-name")
+                        .Cell<Layout>()
                         .Cell<Button>(b =>
                         {
                             Invalidated += () => RefreshItemButton(b, index);
@@ -196,7 +198,7 @@ namespace Fiero.Business
                 .End())
                 .Row(h: PaginatorHeight, px: true)
                     .Col(@class: "paginator spacer")
-                        .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
+                        .Cell<Layout>()
                     .End()
                     .Col(w: 32, px: true, @class: "paginator paginator-prev")
                         .Cell<Button>(b =>
@@ -233,7 +235,7 @@ namespace Fiero.Business
                         })
                     .End()
                     .Col(@class: "paginator spacer")
-                        .Cell<Layout>(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground))
+                        .Cell<Layout>()
                     .End()
                 .End();
 
@@ -259,12 +261,8 @@ namespace Fiero.Business
                     return;
                 }
 
-                if (Container.TryCast<Actor>(out var actor))
-                {
-                    b.Foreground.V = Items[i].TryCast<Equipment>(out var e) && actor.ActorEquipment.IsEquipped(e)
-                        ? UI.Store.Get(Data.UI.DefaultAccent)
-                        : UI.Store.Get(Data.UI.DefaultForeground);
-                }
+                var equipped = Container.TryCast<Actor>(out var actor) && Items[i].TryCast<Equipment>(out var e) && actor.ActorEquipment.IsEquipped(e);
+                b.Background.V = equipped ? UI.GetColor(ColorName.UIBorder) : Color.Transparent;
                 var shift = index >= Letters.Length;
                 if (shift)
                 {
@@ -272,7 +270,8 @@ namespace Fiero.Business
                 }
                 var key = IndexToKey(index);
                 var letter = WinKeyboardState.GetCharsFromKeys(key, UI.Input.KeyboardState, shift: shift);
-                b.Text.V = $"{letter.Last()}) {Items[i].DisplayName}";
+                var text = $"{letter.Last()}) {Items[i].DisplayName}";
+                b.Text.V = text;
             }
 
             void RefreshPageLabel(Label l)

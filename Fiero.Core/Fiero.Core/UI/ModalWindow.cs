@@ -1,6 +1,4 @@
-﻿using SFML.Graphics;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public abstract class ModalWindow : Widget
     {
@@ -38,8 +36,6 @@ namespace Fiero.Core
                                 {
                                     l.Text.V = title;
                                     l.HorizontalAlignment.V = HorizontalAlignment.Center;
-                                    l.Foreground.V = Color.White;
-                                    l.OutlineColor.V = Color.White;
                                     l.OutlineThickness.V = 1;
                                     l.ZOrder.V = -1;
                                     if (Title != null)
@@ -53,9 +49,6 @@ namespace Fiero.Core
                                     .Cell<Button>(b =>
                                     {
                                         b.Text.V = "x";
-                                        b.Foreground.V = Color.White;
-                                        b.Background.V = Color.Red;
-                                        b.OutlineColor.V = Color.White;
                                         b.OutlineThickness.V = 1;
                                         b.VerticalAlignment.V = VerticalAlignment.Middle;
                                         b.HorizontalAlignment.V = HorizontalAlignment.Center;

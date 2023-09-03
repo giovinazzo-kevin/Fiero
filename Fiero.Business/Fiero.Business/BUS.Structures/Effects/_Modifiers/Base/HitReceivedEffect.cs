@@ -40,7 +40,7 @@ namespace Fiero.Business
             {
                 yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
                 {
-                    if ((e.Victim.Equipment?.IsEquipped(armor) ?? false))
+                    if ((e.Victim.ActorEquipment?.IsEquipped(armor) ?? false))
                     {
                         OnApplied(systems, owner, e.Source, e.Victim, e.Damage);
                     }

@@ -20,7 +20,7 @@ namespace Fiero.Business
         [NonTerm]
         public LogComponent Log { get; private set; }
         [NonTerm]
-        public EquipmentComponent Equipment { get; private set; }
+        public ActorEquipmentComponent ActorEquipment { get; private set; }
         [NonTerm]
         public DialogueComponent Dialogue { get; private set; }
         [NonTerm]

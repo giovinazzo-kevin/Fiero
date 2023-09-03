@@ -141,8 +141,8 @@ namespace Fiero.Business
                     });
                 };
             });
-        public static EntityBuilder<T> WithEquipment<T>(this EntityBuilder<T> builder)
-            where T : Actor => builder.AddOrTweak<EquipmentComponent>();
+        public static EntityBuilder<T> WithActorEquipment<T>(this EntityBuilder<T> builder)
+            where T : Actor => builder.AddOrTweak<ActorEquipmentComponent>();
         public static EntityBuilder<T> WithEnemyAi<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>(c =>
             {
@@ -307,6 +307,11 @@ namespace Fiero.Business
                 c.Rarity = rarity;
                 c.UnidentifiedName = unidentName;
                 c.Identified = String.IsNullOrEmpty(unidentName);
+            });
+        public static EntityBuilder<T> WithEquipmentInfo<T>(this EntityBuilder<T> builder, EquipmentTypeName type)
+            where T : Equipment => builder.AddOrTweak<EquipmentComponent>(c =>
+            {
+                c.Type = type;
             });
         public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName)
             where T : Script => builder.AddOrTweak<ErgoScriptComponent>(c =>

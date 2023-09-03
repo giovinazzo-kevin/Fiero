@@ -22,19 +22,18 @@ namespace Fiero.Business
 
         protected override IEnumerable<InventoryActionName> GetAvailableActions(Item i)
         {
-            if (Container.Equipment.IsEquipped(i))
+            if (i.TryCast<Equipment>(out var eq))
             {
-                yield return InventoryActionName.Unequip;
-                yield return InventoryActionName.Set;
-            }
-            else
-            {
-                yield return InventoryActionName.Drop;
-                if (i.TryCast<Weapon>(out _) || i.TryCast<Armor>(out _))
+                if (Container.ActorEquipment.IsEquipped(eq))
+                {
+                    yield return InventoryActionName.Unequip;
+                }
+                else
                 {
                     yield return InventoryActionName.Equip;
-                    yield return InventoryActionName.Set;
+                    yield return InventoryActionName.Drop;
                 }
+                yield return InventoryActionName.Set;
             }
             if (i.TryCast<Throwable>(out _))
             {

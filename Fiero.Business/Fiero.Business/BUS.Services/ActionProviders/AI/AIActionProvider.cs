@@ -73,7 +73,7 @@ namespace Fiero.Business
                 TryPushObjective(a, hostile);
                 if (a.IsInMeleeRange(hostile))
                 {
-                    return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
+                    return new MeleeAttackOtherAction(hostile, a.ActorEquipment.Weapons.ToArray());
                 }
 
                 if (MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon)

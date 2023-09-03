@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -40,7 +41,7 @@ namespace Fiero.Business
             {
                 yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
                 {
-                    if (e.Weapon == weapon && e.Source.TryCast<Actor>(out var source))
+                    if (e.Weapons.Contains(weapon) && e.Source.TryCast<Actor>(out var source))
                     {
                         OnApplied(systems, owner, source, e.Victim, e.Damage);
                     }

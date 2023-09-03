@@ -64,7 +64,7 @@ namespace Fiero.Business
                     foreach (var a in systems.Dungeon.GetActorsAt(floorId, p + pos))
                     {
                         var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
-                        systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, owner, damage));
+                        systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
                     }
                 }
                 End(systems, owner);

@@ -125,7 +125,7 @@ namespace Fiero.Business
             {
                 if (r.All(x => x))
                 {
-                    ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapon, e.Damage));
+                    ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapons, e.Damage));
                 }
             };
             ActorDamaged.ResponseReceived += (_, e, r) =>
@@ -258,9 +258,9 @@ namespace Fiero.Business
             return true;
         }
 
-        private bool HandleAttack(AttackName type, Actor attacker, Actor victim, ref int? cost, Entity weapon, out int damage, out int swingDelay)
+        private bool HandleAttack(AttackName type, Actor attacker, Actor victim, ref int? cost, Entity[] weapons, out int damage, out int swingDelay)
         {
-            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapon))
+            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapons))
             {
                 cost += swingDelay;
                 return true;
@@ -268,28 +268,31 @@ namespace Fiero.Business
             return false;
         }
 
-        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor victim, Entity attackWith)
+        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor victim, Entity[] attackWith)
         {
             damage = 1; swingDelay = 0;
             if (attackWith != null)
             {
-                if (type == AttackName.Melee && attackWith.TryCast<Weapon>(out var w))
+                foreach (var item in attackWith)
                 {
-                    swingDelay = w.WeaponProperties.SwingDelay;
-                    damage += w.WeaponProperties.BaseDamage;
-                }
-                else if (type == AttackName.Ranged && attackWith.TryCast<Throwable>(out var t))
-                {
-                    damage += t.ThrowableProperties.BaseDamage;
-                }
-                else if (type == AttackName.Magic && attackWith.TryCast<Spell>(out var s))
-                {
-                    swingDelay = s.SpellProperties.CastDelay;
-                    damage += s.SpellProperties.BaseDamage;
-                }
-                else if (type == AttackName.Magic && attackWith.TryCast<Wand>(out _))
-                {
-                    damage = 0;
+                    if (type == AttackName.Melee && item.TryCast<Weapon>(out var w))
+                    {
+                        swingDelay = w.WeaponProperties.SwingDelay;
+                        damage += w.WeaponProperties.BaseDamage;
+                    }
+                    else if (type == AttackName.Ranged && item.TryCast<Throwable>(out var t))
+                    {
+                        damage += t.ThrowableProperties.BaseDamage;
+                    }
+                    else if (type == AttackName.Magic && item.TryCast<Spell>(out var s))
+                    {
+                        swingDelay = s.SpellProperties.CastDelay;
+                        damage += s.SpellProperties.BaseDamage;
+                    }
+                    else if (type == AttackName.Magic && item.TryCast<Wand>(out _))
+                    {
+                        damage = 0;
+                    }
                 }
             }
             return ActorAttacked.Handle(new(type, attacker, victim, attackWith, damage, swingDelay));

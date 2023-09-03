@@ -21,7 +21,7 @@ namespace Fiero.Business
             }
             else if (action is EquipOrUnequipItemAction equipOrUnequip)
             {
-                if (t.Actor.Equipment.IsEquipped(equipOrUnequip.Item))
+                if (t.Actor.ActorEquipment.IsEquipped(equipOrUnequip.Item))
                     return ItemUnequipped.Handle(new(t.Actor, equipOrUnequip.Item));
                 return ItemEquipped.Handle(new(t.Actor, equipOrUnequip.Item));
             }

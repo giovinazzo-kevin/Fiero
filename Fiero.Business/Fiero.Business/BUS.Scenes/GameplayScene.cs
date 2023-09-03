@@ -447,22 +447,26 @@ namespace Fiero.Business.Scenes
                         Systems.Render.Viewport.Animate(true, e.Attacker.Position(), anim);
                     }
                 }
-                else if (e.Type == AttackName.Ranged && e.Weapon.TryCast<Potion>(out var potion))
+                foreach (var weapon in e.Weapons)
                 {
-                    if (e.Attacker.Identify(potion, q => q.PotionProperties.QuaffEffect.Name == potion.PotionProperties.QuaffEffect.Name
-                                                      && q.PotionProperties.ThrowEffect.Name == potion.PotionProperties.ThrowEffect.Name))
+                    if (e.Type == AttackName.Ranged && weapon.TryCast<Potion>(out var potion))
                     {
-                        e.Attacker.Log?.Write($"$Action.YouIdentifyAPotion$ {potion.DisplayName}.");
+                        if (e.Attacker.Identify(potion, q => q.PotionProperties.QuaffEffect.Name == potion.PotionProperties.QuaffEffect.Name
+                                                          && q.PotionProperties.ThrowEffect.Name == potion.PotionProperties.ThrowEffect.Name))
+                        {
+                            e.Attacker.Log?.Write($"$Action.YouIdentifyAPotion$ {potion.DisplayName}.");
+                        }
                     }
-                }
-                else if (e.Type == AttackName.Magic && e.Weapon.TryCast<Wand>(out var wand))
-                {
+                    else if (e.Type == AttackName.Magic && weapon.TryCast<Wand>(out var wand))
+                    {
 
-                    if (e.Attacker.Identify(wand, q => q.WandProperties.Effect.Name == wand.WandProperties.Effect.Name))
-                    {
-                        e.Attacker.Log?.Write($"$Action.YouIdentifyAWand$ {wand.DisplayName}.");
+                        if (e.Attacker.Identify(wand, q => q.WandProperties.Effect.Name == wand.WandProperties.Effect.Name))
+                        {
+                            e.Attacker.Log?.Write($"$Action.YouIdentifyAWand$ {wand.DisplayName}.");
+                        }
                     }
                 }
+
                 return true;
             });
             // ActionSystem.ActorHealed 
@@ -671,7 +675,7 @@ namespace Fiero.Business.Scenes
             // - Equip item or fail
             yield return Systems.Action.ItemEquipped.SubscribeResponse(e =>
             {
-                if (e.Actor.Equipment.TryEquip(e.Item))
+                if (e.Actor.ActorEquipment.TryEquip(e.Item))
                 {
                     e.Actor.Log?.Write($"$Action.YouEquip$ {e.Item.DisplayName}.");
                     return true;
@@ -686,7 +690,7 @@ namespace Fiero.Business.Scenes
             // - Unequip item or fail
             yield return Systems.Action.ItemUnequipped.SubscribeResponse(e =>
             {
-                if (e.Actor.Equipment.TryUnequip(e.Item))
+                if (e.Actor.ActorEquipment.TryUnequip(e.Item))
                 {
                     e.Actor.Log?.Write($"$Action.YouUnequip$ {e.Item.DisplayName}.");
                     return true;

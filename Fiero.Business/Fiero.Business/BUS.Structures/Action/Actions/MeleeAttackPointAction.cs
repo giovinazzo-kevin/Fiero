@@ -5,11 +5,11 @@ namespace Fiero.Business
     public readonly struct MeleeAttackPointAction : IAction
     {
         public readonly Coord Point;
-        public readonly Weapon Weapon;
-        public MeleeAttackPointAction(Coord coord, Weapon weapon)
+        public readonly Weapon[] Weapons;
+        public MeleeAttackPointAction(Coord coord, Weapon[] weapons)
         {
             Point = coord;
-            Weapon = weapon;
+            Weapons = weapons;
         }
         ActionName IAction.Name => ActionName.MeleeAttack;
         int? IAction.Cost => 100;

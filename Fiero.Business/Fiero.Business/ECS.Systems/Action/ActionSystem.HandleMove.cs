@@ -59,7 +59,7 @@ namespace Fiero.Business
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack())
                         {
-                            action = new MeleeAttackOtherAction(target, t.Actor.Equipment.Weapon);
+                            action = new MeleeAttackOtherAction(target, t.Actor.ActorEquipment.Weapons.ToArray());
                             cost = HandleAction(t, ref action);
                             // Melee-fighting on difficult terrain is the same as moving through it
                             if (!t.Actor.Physics.Phasing)

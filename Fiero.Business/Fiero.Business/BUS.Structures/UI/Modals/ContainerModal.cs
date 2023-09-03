@@ -261,7 +261,7 @@ namespace Fiero.Business
 
                 if (Container.TryCast<Actor>(out var actor))
                 {
-                    b.Foreground.V = actor.Equipment.IsEquipped(Items[i])
+                    b.Foreground.V = Items[i].TryCast<Equipment>(out var e) && actor.ActorEquipment.IsEquipped(e)
                         ? UI.Store.Get(Data.UI.DefaultAccent)
                         : UI.Store.Get(Data.UI.DefaultForeground);
                 }

@@ -34,7 +34,7 @@ namespace Fiero.Business
             {
                 if (e.Actor == owner)
                 {
-                    systems.Action.ActorDamaged.Handle(new(e.Actor, e.Actor, e.Actor, Amount));
+                    systems.Action.ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, Amount));
                 }
                 return new();
             });

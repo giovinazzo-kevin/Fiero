@@ -145,8 +145,8 @@ namespace Fiero.Business
                 if (GetClosestHostile(a) is { } hostile)
                 {
                     if (a.IsInMeleeRange(hostile))
-                        return new MeleeAttackOtherAction(hostile, a.Equipment.Weapon);
-                    TryPushObjective(a, hostile, () => new MeleeAttackOtherAction(hostile, a.Equipment.Weapon));
+                        return new MeleeAttackOtherAction(hostile, a.ActorEquipment.Weapons.ToArray());
+                    TryPushObjective(a, hostile, () => new MeleeAttackOtherAction(hostile, a.ActorEquipment.Weapons.ToArray()));
                 }
             }
             if (QuickSlots.TryGetAction(out var action))
@@ -178,11 +178,11 @@ namespace Fiero.Business
                         case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable) && TryThrow(a, throwable, out var @throw):
                             QueuedActions.Enqueue(@throw);
                             break;
-                        case InventoryActionName.Equip:
-                            QueuedActions.Enqueue(new EquipItemAction(item));
+                        case InventoryActionName.Equip when item.TryCast<Equipment>(out var equip):
+                            QueuedActions.Enqueue(new EquipItemAction(equip));
                             break;
-                        case InventoryActionName.Unequip:
-                            QueuedActions.Enqueue(new UnequipItemAction(item));
+                        case InventoryActionName.Unequip when item.TryCast<Equipment>(out var equip):
+                            QueuedActions.Enqueue(new UnequipItemAction(equip));
                             break;
                         case InventoryActionName.Drop:
                             QueuedActions.Enqueue(new DropItemAction(item));
@@ -305,7 +305,7 @@ namespace Fiero.Business
             {
                 if (wantToAttack)
                 {
-                    return new MeleeAttackPointAction(c, a.Equipment.Weapon);
+                    return new MeleeAttackPointAction(c, a.ActorEquipment.Weapons.ToArray());
                 }
                 if (!Systems.Dungeon.TryGetCellAt(a.FloorId(), a.Position() + c, out var cell))
                     return new FailAction();

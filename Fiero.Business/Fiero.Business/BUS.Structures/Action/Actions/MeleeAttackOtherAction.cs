@@ -3,11 +3,11 @@
     public readonly struct MeleeAttackOtherAction : IAction
     {
         public readonly Actor Victim;
-        public readonly Weapon Weapon;
-        public MeleeAttackOtherAction(Actor victim, Weapon weapon)
+        public readonly Weapon[] Weapons;
+        public MeleeAttackOtherAction(Actor victim, Weapon[] weapons)
         {
             Victim = victim;
-            Weapon = weapon;
+            Weapons = weapons;
         }
         ActionName IAction.Name => ActionName.MeleeAttack;
         int? IAction.Cost => 100;

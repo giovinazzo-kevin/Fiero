@@ -44,7 +44,7 @@ namespace Fiero.Business
             .WithActorInfo(ActorName.Player)
             .WithFaction(FactionName.Players)
             .WithRace(RaceName.Monster)
-            .WithEquipment()
+            .WithActorEquipment()
             .WithInventory(50)
             .WithSpellLibrary()
             .WithFieldOfView(7)
@@ -69,15 +69,20 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.Monster)
             .WithFaction(FactionName.Monsters)
             .WithPhysics(Coord.Zero, canMove: true)
-            .WithEquipment()
+            .WithActorEquipment()
             .WithFieldOfView(5)
             .WithEffectTracking()
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
             ;
 
-        public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity)
-            => Entities.CreateBuilder<Weapon>()
+        public EntityBuilder<T> Equipment<T>(EquipmentTypeName type)
+            where T : Equipment => Entities.CreateBuilder<T>()
+            .WithEquipmentInfo(type)
+            ;
+
+        public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
+            => Equipment<Weapon>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
             .WithName(type.ToString())
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
             .WithPhysics(Coord.Zero)
@@ -586,7 +591,7 @@ namespace Fiero.Business
 
         #region WEAPONS
         public EntityBuilder<Weapon> Weapon_Sword()
-            => Weapon("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10)
+            => Weapon("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, twoHanded: false)
             ;
         #endregion
 

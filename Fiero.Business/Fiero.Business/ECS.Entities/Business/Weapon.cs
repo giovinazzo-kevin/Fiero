@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class Weapon : Item
+    public class Weapon : Equipment
     {
         [RequiredComponent]
         public WeaponComponent WeaponProperties { get; private set; }

@@ -78,7 +78,7 @@ namespace Fiero.Business
                             .First();
                         break;
                 }
-                return HandleAttack(AttackName.Ranged, t.Actor, victim, ref cost, item, out _, out _);
+                return HandleAttack(AttackName.Ranged, t.Actor, victim, ref cost, new[] { item }, out _, out _);
             }
 
         }

@@ -12,25 +12,25 @@ namespace Fiero.Business
             {
                 victim = oth.Victim;
                 return MayTarget(t.Actor, victim)
-                    && HandleMeleeAttack(ref cost, oth.Weapon);
+                    && HandleMeleeAttack(ref cost, oth.Weapons);
             }
             else if (action is MeleeAttackPointAction dir)
             {
                 var newPos = t.Actor.Position() + dir.Point;
                 return TryFindVictim(newPos, t.Actor, out victim)
                     && MayTarget(t.Actor, victim)
-                    && HandleMeleeAttack(ref cost, dir.Weapon);
+                    && HandleMeleeAttack(ref cost, dir.Weapons);
             }
             else throw new NotSupportedException(action.GetType().Name);
 
-            bool HandleMeleeAttack(ref int? cost, Weapon weapon)
+            bool HandleMeleeAttack(ref int? cost, Weapon[] weapons)
             {
                 if (t.Actor.DistanceFrom(victim) >= 2)
                 {
                     // out of reach
                     return false;
                 }
-                return HandleAttack(AttackName.Melee, t.Actor, victim, ref cost, weapon, out _, out _);
+                return HandleAttack(AttackName.Melee, t.Actor, victim, ref cost, weapons, out _, out _);
             }
         }
     }

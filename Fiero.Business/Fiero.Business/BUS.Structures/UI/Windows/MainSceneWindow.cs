@@ -16,6 +16,7 @@ namespace Fiero.Business
         public readonly StatBar MP;
         public readonly StatBar XP;
         public readonly QuickBar QuickBar;
+        public readonly EquipmentDisplay EquipmentDisplay;
 
         protected Header PlayerNameLabel { get; private set; }
         protected Label CurrentTurnLabel { get; private set; }
@@ -30,7 +31,7 @@ namespace Fiero.Business
 
         public MainSceneWindow(
             GameUI ui,
-            LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp, QuickBar quickbar,
+            LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp, QuickBar quickbar, EquipmentDisplay equipmentDisplay,
             ActionSystem act, GameResources res, GameLoop loop)
             : base(ui)
         {
@@ -50,6 +51,9 @@ namespace Fiero.Business
 
             QuickBar = quickbar;
             QuickBar.EnableDragging = false;
+
+            EquipmentDisplay = equipmentDisplay;
+            EquipmentDisplay.EnableDragging = false;
 
             Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
             ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency?
@@ -100,6 +104,7 @@ namespace Fiero.Business
             MP.Open(string.Empty);
             XP.Open(string.Empty);
             QuickBar.Open(string.Empty);
+            EquipmentDisplay.Open(string.Empty);
             Layout.Size.V = UI.Window.Size;
         }
 
@@ -192,6 +197,12 @@ namespace Fiero.Business
                     .Row(h: 16, px: true, id: "xp-bar")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = XP)
+                    .End()
+                    .Row(@class: "spacer")
+                        .Cell<Layout>()
+                    .End()
+                    .Row(h: 36 * 4 + 18 * 4, px: true)
+                        .Cell<UIWindowAsControl>(x => x.Window.V = EquipmentDisplay)
                     .End()
                     .Row(@class: "spacer")
                         .Cell<Layout>()

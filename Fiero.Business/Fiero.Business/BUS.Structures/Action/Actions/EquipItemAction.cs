@@ -2,8 +2,8 @@
 {
     public readonly struct EquipItemAction : IAction
     {
-        public readonly Item Item;
-        public EquipItemAction(Item item)
+        public readonly Equipment Item;
+        public EquipItemAction(Equipment item)
         {
             Item = item;
         }

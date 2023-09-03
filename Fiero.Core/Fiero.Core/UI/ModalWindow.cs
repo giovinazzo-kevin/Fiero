@@ -1,6 +1,8 @@
-﻿namespace Fiero.Core
+﻿using SFML.Graphics;
+
+namespace Fiero.Core
 {
-    public abstract class ModalWindow : UIWindow
+    public abstract class ModalWindow : Widget
     {
         public event Action<ModalWindow, ModalWindowButton> Confirmed;
         public event Action<ModalWindow, ModalWindowButton> Cancelled;
@@ -19,24 +21,52 @@
         {
             Layout?.Dispose();
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
-            var hasButtons = Styles.HasFlag(ModalWindowStyles.Buttons);
+            var hasButtons = Styles.HasFlag(ModalWindowStyles.CustomButtons) && Buttons.Length > 0;
+            var hasTitleBar = Styles.HasFlag(ModalWindowStyles.TitleBar);
 
-            var titleHeight = hasTitle ? 24 : 0f;
-            var buttonsHeight = hasButtons ? 48f : 0f;
+            var titleHeight = hasTitle ? 16 : 0;
+            var buttonsHeight = hasButtons ? 16 : 0;
             var contentHeight = 1f;
             return ApplyStyles(grid)
                 .Col(@class: "modal")
-                    .If(hasTitle, g => g.Row(h: titleHeight, px: true, @class: "modal-title")
-                        .Cell<Label>(l =>
-                        {
-                            l.Text.V = title;
-                            l.HorizontalAlignment.V = HorizontalAlignment.Center;
-                            if (Title != null)
-                            {
-                                Title.V = l.Text.V;
-                            }
-                        })
-                    .End())
+                    .If(hasTitle, g => g
+                        .Row(h: titleHeight, px: true, @class: "modal-title")
+                            .Col()
+                                .Cell<Label>(l =>
+                                {
+                                    l.Text.V = title;
+                                    l.HorizontalAlignment.V = HorizontalAlignment.Center;
+                                    l.Foreground.V = Color.White;
+                                    l.OutlineColor.V = Color.White;
+                                    l.OutlineThickness.V = 1;
+                                    l.ZOrder.V = -1;
+                                    if (Title != null)
+                                    {
+                                        Title.V = l.Text.V;
+                                    }
+                                })
+                            .End()
+                            .If(hasTitleBar, g => g
+                                .Col(w: 16, px: true, @class: "modal-title modal-close")
+                                    .Cell<Button>(b =>
+                                    {
+                                        b.Text.V = "x";
+                                        b.Foreground.V = Color.White;
+                                        b.Background.V = Color.Red;
+                                        b.OutlineColor.V = Color.White;
+                                        b.OutlineThickness.V = 1;
+                                        b.VerticalAlignment.V = VerticalAlignment.Middle;
+                                        b.HorizontalAlignment.V = HorizontalAlignment.Center;
+                                        b.ZOrder.V = -1;
+                                        b.Clicked += (_, __, ___) =>
+                                        {
+                                            Close(new("modal-close", null));
+                                            return false;
+                                        };
+                                    })
+                            .End())
+                        .End()
+                    )
                     .Row(h: contentHeight, @class: "modal-content", id: "modal-content")
                         .Repeat(1, (i, g) => RenderContent(g))
                     .End()

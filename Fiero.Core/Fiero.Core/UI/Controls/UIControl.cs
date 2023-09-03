@@ -14,7 +14,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
         public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new()) { Inherited = false };
         public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new()) { Inherited = false };
-        public readonly UIControlProperty<Coord> Position = new(nameof(Position), new(), invalidate: true);
+        public readonly UIControlProperty<Coord> Position = new(nameof(Position), new());
         public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
         public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new());
         public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1), invalidate: true);
@@ -31,9 +31,9 @@ namespace Fiero.Core
         public event Action<UIControl> Invalidated;
         public void Invalidate() => Invalidated?.Invoke(this);
 
-        public Coord BorderRenderPos => (Position.V + Margin.V).Align(Snap);
+        public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
         public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
-        public Coord BorderRenderSize => (Size.V - Margin.V * 2).Align(Snap);
+        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
         public Coord ContentRenderSize => (Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap);
         protected Coord TrackedMousePosition { get; private set; }
 
@@ -59,7 +59,6 @@ namespace Fiero.Core
                 .Where(p => p.FieldType.GetInterface(nameof(IUIControlProperty)) != null)
                 .Select(p => (IUIControlProperty)p.GetValue(this))
                 .ToList();
-
             var registerInvalidationEvents = typeof(UIControl)
                 .GetMethod(nameof(RegisterInvalidationEvents), BindingFlags.Instance | BindingFlags.NonPublic);
             foreach (var prop in Properties)
@@ -82,9 +81,9 @@ namespace Fiero.Core
         {
             owner = default;
             if (point.X >= BorderRenderPos.X * Scale.V.X
-                && point.X <= BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
+                && point.X < BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
                 && point.Y >= BorderRenderPos.Y * Scale.V.Y
-                && point.Y <= BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y)
+                && point.Y < BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y)
             {
                 foreach (var child in Children.Where(c => c.IsInteractive && !c.IsHidden))
                 {
@@ -111,8 +110,8 @@ namespace Fiero.Core
             clickedControl = default;
             var wasInside = Contains(TrackedMousePosition, out _);
             var isInside = Contains(mousePos, out _);
-            var leftClick = Input.IsButtonPressed(Mouse.Button.Left);
-            var rightClick = Input.IsButtonPressed(Mouse.Button.Right);
+            var leftClick = Input.IsButtonReleased(Mouse.Button.Left);
+            var rightClick = Input.IsButtonReleased(Mouse.Button.Right);
             var click = leftClick || rightClick;
             var preventDefault = false;
             if (!wasInside && isInside)
@@ -182,8 +181,8 @@ namespace Fiero.Core
             {
                 Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background,
-                OutlineThickness = OutlineThickness.V,
-                OutlineColor = OutlineColor.V
+                OutlineThickness = OutlineThickness,
+                OutlineColor = OutlineColor
             };
             target.Draw(rect, states);
         }

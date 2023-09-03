@@ -13,19 +13,19 @@ namespace Fiero.Core
         {
             Size.ValueUpdated += (_, __) =>
             {
-                if (Window.V is null) return;
-                Window.V.Size.V = Size.V;
+                if (Window.V?.Layout is null) return;
+                Window.V.Layout.Size.V = Size.V;
             };
             Position.ValueUpdated += (_, __) =>
             {
-                if (Window.V is null) return;
-                Window.V.Position.V = Position.V;
+                if (Window.V?.Layout is null) return;
+                Window.V.Layout.Position.V = Position.V;
             };
             Window.ValueUpdated += (_, __) =>
             {
-                if (Window is null) return;
-                Window.V.Position.V = Position.V;
-                Window.V.Size.V = Size.V;
+                if (Window.V?.Layout is null) return;
+                Window.V.Layout.Position.V = Position.V;
+                Window.V.Layout.Size.V = Size.V;
             };
         }
 

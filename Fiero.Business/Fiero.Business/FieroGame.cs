@@ -42,6 +42,12 @@ namespace Fiero.Business
             Scenes = gameScenes;
             Store = store;
             loop.TimeStep = 1f / 1000;
+
+            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
+            {
+                UI.Store.SetValue(Data.UI.ViewportSize, obj.NewValue - new Coord(248, 128));
+            }
         }
 
         protected override void InitializeWindow(RenderWindow win)

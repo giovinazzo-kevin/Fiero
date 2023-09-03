@@ -21,17 +21,13 @@ namespace Fiero.Business
             {
                 OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
-            Data.UI.WindowSize.ValueChanged += e =>
-            {
-                SetDefaultSize();
-            };
         }
-
-        protected override void SetDefaultSize()
+        protected override void OnLayoutRebuilt(Layout oldValue)
         {
+            //base.OnLayoutRebuilt(oldValue);
             var windowSize = UI.Store.Get(Data.UI.WindowSize);
-            Size.V = new(windowSize.X, 200);
-            Position.V = new(0, windowSize.Y - 200);
+            Layout.Size.V = new(windowSize.X, 200);
+            Layout.Position.V = new(0, windowSize.Y - 200);
         }
 
         public override void Update()

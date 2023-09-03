@@ -8,7 +8,7 @@ namespace Fiero.Business
     public class InventoryModal : ContainerModal<Actor, InventoryActionName>
     {
         public InventoryModal(GameUI ui, GameResources resources, Actor act)
-            : base(ui, resources, act, new[] { ModalWindowButton.Close }, ModalWindowStyles.Default) { }
+            : base(ui, resources, act, new ModalWindowButton[] { }, ModalWindowStyles.Default) { }
 
         protected override bool ShouldRemoveItem(Item i, InventoryActionName a)
         {

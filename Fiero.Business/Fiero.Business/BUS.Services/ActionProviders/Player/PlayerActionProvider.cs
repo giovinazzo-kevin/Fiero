@@ -147,7 +147,7 @@ namespace Fiero.Business
             }
             if (IsKeyPressed(Data.Hotkeys.Inventory))
             {
-                var inventoryModal = UI.Inventory(a, "Bag");
+                var inventoryModal = UI.Inventory(a, $"{a.Info.Name} > Inventory");
                 CurrentModal = inventoryModal;
                 inventoryModal.Closed += (_, __) => CurrentModal = null;
                 inventoryModal.ActionPerformed += (item, action) =>

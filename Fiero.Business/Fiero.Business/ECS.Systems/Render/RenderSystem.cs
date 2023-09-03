@@ -64,10 +64,6 @@ namespace Fiero.Business
                 if (res.All(x => x))
                     Window.OnActorDeselected();
             };
-            Window.Size.ValueChanged += (p, old) =>
-            {
-                DeveloperConsole.Size.V = Window.Size.V;
-            };
         }
 
         public void Reset()

@@ -43,6 +43,10 @@ namespace Fiero.Business
         UISecondary,
         [Description("UI accent color")]
         UIAccent,
+        [Description("UI border color")]
+        UIBorder,
+        [Description("UI disabled control color")]
+        UIDisabled,
         [Description("UI background color")]
         UIBackground
     }

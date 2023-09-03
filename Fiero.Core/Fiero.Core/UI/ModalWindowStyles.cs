@@ -5,8 +5,9 @@
     {
         None = 0,
         Title = 1,
-        Buttons = 2,
+        TitleBar = 2,
+        CustomButtons = 4,
 
-        Default = Title | Buttons
+        Default = Title | TitleBar | CustomButtons
     }
 }

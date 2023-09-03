@@ -55,7 +55,8 @@ namespace Fiero.Business
 
             Data.UI.WindowSize.ValueChanged += (e) =>
             {
-                Size.V = e.NewValue;
+                if (Layout is null) return;
+                Layout.Size.V = e.NewValue;
             };
         }
 
@@ -95,6 +96,7 @@ namespace Fiero.Business
             HP.Open(string.Empty);
             MP.Open(string.Empty);
             XP.Open(string.Empty);
+            Layout.Size.V = UI.Window.Size;
         }
 
         public override void Draw()
@@ -147,12 +149,17 @@ namespace Fiero.Business
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;
 
-        public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
+        public override LayoutGrid CreateLayout(LayoutGrid grid, string title)
+        {
+            var sidebarWidth = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).X;
+            var bottombarHeight = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).Y;
+
+            return ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
                     .Cell(Viewport)
                 .End()
-                .Col(w: SideBarWidth, px: true, @class: "stat-panel")
+                .Col(w: sidebarWidth, px: true, @class: "stat-panel")
                     .Row(h: 16, px: true, id: "name", @class: "center")
                         .Cell<Header>(x => PlayerNameLabel = x)
                     .End()
@@ -188,7 +195,7 @@ namespace Fiero.Business
                             .Cell<Header>(x => CurrentPosLabel = x)
                         .End()
                     .End()
-                    .Row(h: SideBarWidth, px: true, id: "mini-map")
+                    .Row(h: sidebarWidth, px: true, id: "mini-map")
                         .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = MiniMap)
                     .End()
@@ -202,8 +209,9 @@ namespace Fiero.Business
                     .End()
                 .End()
             .End()
-            .Row(h: BottomBarHeight, px: true, id: "log-panel")
+            .Row(h: bottombarHeight, px: true, id: "log-panel")
                 .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
+        }
     }
 }

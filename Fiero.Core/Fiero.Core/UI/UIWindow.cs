@@ -6,24 +6,15 @@
 
         public Layout Layout { get; private set; }
         public UIControlProperty<string> Title { get; private set; }
-        public UIControlProperty<Coord> Size { get; private set; } = new(nameof(Size));
-        public UIControlProperty<Coord> Position { get; private set; } = new(nameof(Position));
 
         public event Action<UIWindow, ModalWindowButton> Closed;
         public event Action<UIWindow> Updated;
 
         public bool IsOpen { get; private set; }
 
-        protected virtual void SetDefaultSize()
-        {
-            Size.V = UI.Window.Size;
-        }
-
         public virtual void Open(string title)
         {
             IsOpen = true;
-            if (Size.V == default)
-                SetDefaultSize();
             if (Title == null && title != null)
             {
                 Title = new(nameof(Title), title);
@@ -37,9 +28,7 @@
         {
             var oldLayout = Layout;
             Layout = UI.CreateLayout()
-                .Build(Size.V, grid => CreateLayout(grid, Title ?? "Untitled"));
-            Layout.Position.V = Position.V;
-            Layout.Size.V = Size.V;
+                .Build(UI.Window.Size, grid => CreateLayout(grid, Title ?? "Untitled"));
             OnLayoutRebuilt(oldLayout);
             oldLayout?.Dispose();
         }
@@ -49,20 +38,6 @@
         public UIWindow(GameUI ui)
         {
             UI = ui;
-            Size.ValueUpdated += Size_ValueUpdated;
-            Position.ValueUpdated += Position_ValueUpdated;
-        }
-
-        private void Position_ValueUpdated(UIControlProperty<Coord> arg1, Coord old)
-        {
-            if (Layout == null) return;
-            Layout.Position.V = Position.V;
-        }
-
-        void Size_ValueUpdated(UIControlProperty<Coord> arg1, Coord old)
-        {
-            if (Layout == null) return;
-            Layout.Size.V = Size.V;
         }
 
         protected LayoutGrid ApplyStyles(LayoutGrid grid)

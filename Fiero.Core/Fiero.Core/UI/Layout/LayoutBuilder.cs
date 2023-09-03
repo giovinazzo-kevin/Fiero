@@ -28,11 +28,16 @@
             var grid = build(new(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size)));
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
+            layout.Position.ValueChanged += (_, old) =>
+            {
+                MoveRecursive(layout.Position.V - old, grid);
+            };
             layout.Invalidated += _ =>
             {
                 ResizeRecursive(layout.Size.V, layout.Position.V, grid);
             };
-            ResizeRecursive(size, layout.Position.V, grid);
+            if (size != Coord.Zero)
+                ResizeRecursive(size, layout.Position.V, grid);
             return layout;
 
             IEnumerable<UIControl> CreateRecursive(LayoutGrid grid)
@@ -42,8 +47,9 @@
                     foreach (var c in grid.Controls)
                     {
                         var instance = c.Instance ?? GetResolver(c.Type, grid)();
-                        if (instance != null)
-                            c.Initialize?.Invoke(c.Instance = instance);
+                        if (c.Instance == null && instance != null)
+                            c.Initialize?.Invoke(instance);
+                        c.Instance = instance;
                     }
                 }
 
@@ -68,6 +74,25 @@
                                 yield return c.Instance;
                             }
                         }
+                    }
+                }
+            }
+
+            void MoveRecursive(Coord delta, LayoutGrid grid, int i = 0)
+            {
+                Inner(delta, grid, i);
+                void Inner(Coord delta, LayoutGrid grid, int i = 0)
+                {
+                    foreach (var child in grid)
+                    {
+                        if (child.IsCell)
+                        {
+                            foreach (var c in child.Controls)
+                            {
+                                c.Instance.Position.V += delta;
+                            }
+                        }
+                        Inner(delta, child, i + 1);
                     }
                 }
             }

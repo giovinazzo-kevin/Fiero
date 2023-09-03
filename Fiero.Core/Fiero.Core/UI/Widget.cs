@@ -7,6 +7,7 @@ namespace Fiero.Core
         private Coord? _dragStart;
 
         public bool EnableDragging { get; set; } = true;
+        public bool IsDragging => _dragStart.HasValue;
 
         public event Action<Widget, Coord> Dragged;
         public event Action<Widget, Coord> Dropped;
@@ -19,7 +20,8 @@ namespace Fiero.Core
         {
             if (!IsOpen)
                 return;
-            base.Update();
+            if (!IsDragging)
+                base.Update();
             if (!EnableDragging)
                 return;
             var mousePos = UI.Input.GetMousePosition();
@@ -28,16 +30,25 @@ namespace Fiero.Core
             var gameWindowSize = UI.Window.Size;
             if (_dragStart.HasValue && leftDown)
             {
-                Layout.Position.V = (mousePos - _dragStart.Value);
+                var delta = (mousePos - _dragStart.Value);
+                if (delta.X == 0 && delta.Y == 0)
+                    return;
+                Layout.Position.V = Layout.Position.V + delta;
+                _dragStart = mousePos;
                 // Calculate by how much the window is offscreen and correct by that much
-                var offscreen = ((Layout.Position.V + Size.V) - gameWindowSize);
-                Layout.Position.V -= offscreen;
+                var offscreenBottomRight = ((Layout.Position.V)).Clamp(maxX: 0, maxY: 0);
+                var offscreenTopLeft = ((Layout.Position.V + Layout.Size.V) - gameWindowSize).Clamp(minX: 0, minY: 0);
+                Layout.Position.V -= offscreenTopLeft;
+                Layout.Position.V -= offscreenBottomRight;
 
                 Dragged?.Invoke(this, Layout.Position.V);
             }
-            else if (Layout.Contains(mousePos, out _) && !_dragStart.HasValue && leftClick)
+            else if (Layout.Contains(mousePos, out var owner) && !_dragStart.HasValue && leftClick)
             {
-                _dragStart = mousePos - Layout.Position.V;
+                // Make sure user clicked on a non-interactive part of the window
+                if (owner.IsInteractive.V)
+                    return;
+                _dragStart = mousePos;
             }
             else if (!leftDown && _dragStart.HasValue)
             {

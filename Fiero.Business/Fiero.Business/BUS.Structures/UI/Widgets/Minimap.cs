@@ -35,12 +35,13 @@ namespace Fiero.Business
         public override void Open(string title)
         {
             base.Open(title);
-            Size.ValueChanged += (_, __) =>
+            Layout.Size.ValueChanged += (_, __) =>
             {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
                 SetDirty();
             };
+            Layout.Position.ValueChanged += (_, __) => SetDirty();
             Layout.Invalidated += (_) => SetDirty();
             SetDirty();
         }
@@ -127,7 +128,7 @@ namespace Fiero.Business
                 _renderTexture.Display();
                 _renderSprite.Position = Layout.Position.V;
                 _renderSprite.Scale = Layout.Size.V / floor.Size; // int division to preserve AR
-                var delta = _renderSprite.GetLocalBounds().Size() * _renderSprite.Scale.ToVec() / 2 - Size.V / 2;
+                var delta = _renderSprite.GetLocalBounds().Size() * _renderSprite.Scale.ToVec() / 2 - Layout.Size.V / 2;
                 _renderSprite.Position -= delta;
                 _dirty = false;
                 return true;

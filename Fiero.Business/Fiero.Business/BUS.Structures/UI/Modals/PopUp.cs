@@ -9,10 +9,11 @@ namespace Fiero.Business
         {
         }
 
-        protected override void SetDefaultSize()
+        protected override void OnLayoutRebuilt(Layout oldValue)
         {
-            Size.V = UI.Store.Get(Data.UI.PopUpSize);
-            Position.V = Size.V / 2;
+            //base.OnLayoutRebuilt(oldValue);
+            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Position.V = Layout.Size.V / 2;
         }
     }
 }

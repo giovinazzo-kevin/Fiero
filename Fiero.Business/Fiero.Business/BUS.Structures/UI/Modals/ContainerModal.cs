@@ -11,7 +11,7 @@ namespace Fiero.Business
         where TActions : struct, Enum
     {
         public const int RowHeight = 32; // px
-        public const int PaginatorHeight = 48; // px
+        public const int PaginatorHeight = 32; // px
 
         public readonly TContainer Container;
         public event Action<Item, TActions> ActionPerformed;
@@ -28,7 +28,12 @@ namespace Fiero.Business
             Container = cont;
             Items.AddRange(cont.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
             CurrentPage.ValueChanged += (_, __) => Invalidate();
-            Size.ValueChanged += (_, __) =>
+        }
+
+        protected override void OnLayoutRebuilt(Layout oldValue)
+        {
+            base.OnLayoutRebuilt(oldValue);
+            Layout.Size.ValueChanged += (_, __) =>
             {
                 UpdatePageSize();
             };
@@ -109,8 +114,6 @@ namespace Fiero.Business
                     x.Padding.V = new(8, 0);
                 }))
             ;
-
-
         protected override LayoutGrid RenderContent(LayoutGrid layout)
         {
             return layout
@@ -120,13 +123,19 @@ namespace Fiero.Business
                         .Cell<Picture>(p =>
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
+                            p.OutlineThickness.V = 1;
+                            p.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                         })
                     .End()
-                    .Col(w: 1.94f, @class: "item-name")
+                    .Col(@class: "item-name")
                         .Cell<Button>(b =>
                         {
                             Invalidated += () => RefreshItemButton(b, index);
                             b.Clicked += (_, __, button) => OnItemClicked(b, index, button);
+                            b.MouseEntered += (x, __) => x.Foreground.V = UI.GetColor(ColorName.UIAccent);
+                            b.MouseLeft += (x, __) => x.Foreground.V = UI.GetColor(ColorName.UIPrimary);
+                            b.OutlineThickness.V = 1;
+                            b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                         })
                     .End()
                 .End())
@@ -138,6 +147,8 @@ namespace Fiero.Business
                         .Cell<Button>(b =>
                         {
                             b.Text.V = "<";
+                            b.Scale.V = new Vec(2, 2);
+                            b.HorizontalAlignment.V = HorizontalAlignment.Right;
                             b.Clicked += (_, __, ___) =>
                             {
                                 CurrentPage.V = (CurrentPage.V - 1).Mod(NumPages);
@@ -145,9 +156,11 @@ namespace Fiero.Business
                             };
                         })
                     .End()
-                    .Col(w: 0.25f, @class: "paginator paginator-current")
+                    .Col(w: 64, px: true, @class: "paginator paginator-current")
                         .Cell<Label>(l =>
                         {
+                            l.Scale.V = new Vec(2, 2);
+                            l.HorizontalAlignment.V = HorizontalAlignment.Center;
                             Invalidated += () => RefreshPageLabel(l);
                         })
                     .End()
@@ -155,6 +168,8 @@ namespace Fiero.Business
                         .Cell<Button>(b =>
                         {
                             b.Text.V = ">";
+                            b.Scale.V = new Vec(2, 2);
+                            b.HorizontalAlignment.V = HorizontalAlignment.Left;
                             b.Clicked += (_, __, ___) =>
                             {
                                 CurrentPage.V = (CurrentPage.V + 1).Mod(NumPages);
@@ -204,5 +219,6 @@ namespace Fiero.Business
                 l.Text.V = $"{CurrentPage.V + 1}/{NumPages}";
             }
         }
+
     }
 }

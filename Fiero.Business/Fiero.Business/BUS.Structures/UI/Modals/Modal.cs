@@ -17,21 +17,37 @@ namespace Fiero.Business
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
+            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
+            {
+                OnLayoutRebuilt(Layout);
+            }
         }
-
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
             .AddRule<UIControl>(style => style
-                .Match(x => x.HasAnyClass("modal-title", "modal-controls", "modal-content"))
-                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground)))
+                .Match(x => x.HasAnyClass("modal-title", "modal-controls"))
+                .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBorder))
+                .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIBackground))
+                .Apply(x => x.OutlineColor.V = UI.GetColor(ColorName.UIBorder))
+            )
             .AddRule<UIControl>(style => style
-                .Match(x => x.HasClass("row-even"))
-                .Apply(x => x.Background.V = UI.Store.Get(Data.UI.DefaultBackground).AddRgb(16, 16, 16)))
+                .Match(x => x.HasAnyClass("modal-close"))
+                .Apply(x => x.Background.V = UI.GetColor(ColorName.Red))
+                .Apply(x => x.Foreground.V = UI.GetColor(ColorName.White))
+            )
+            .AddRule<UIControl>(style => style
+                .Match(x => x.HasAllClasses("row", "row-even"))
+                .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(8, 8, 8)))
+            .AddRule<UIControl>(style => style
+                .Match(x => x.HasAllClasses("row", "row-odd"))
+                .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground)))
             ;
 
-        protected override void SetDefaultSize()
+        protected override void OnLayoutRebuilt(Layout oldValue)
         {
-            Size.V = UI.Store.Get(Data.UI.PopUpSize);
-            Position.V = Size.V / 2;
+            //base.OnLayoutRebuilt(oldValue);
+            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize) / 2;
+            Layout.Position.V = Layout.Size.V / 2;
         }
 
         protected void Invalidate()

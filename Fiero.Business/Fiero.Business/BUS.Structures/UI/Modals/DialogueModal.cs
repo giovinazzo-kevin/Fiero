@@ -25,11 +25,11 @@ namespace Fiero.Business
             Speaker = speaker;
             Listeners = listeners;
         }
-
-        protected override void SetDefaultSize()
+        protected override void OnLayoutRebuilt(Layout oldValue)
         {
-            Size.V = UI.Store.Get(Data.UI.PopUpSize);
-            Position.V = Size.V / 2 * new Coord(1, 0);
+            //base.OnLayoutRebuilt(oldValue);
+            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Position.V = Layout.Size.V / 2 * new Coord(1, 0);
         }
 
         public override void Open(string title)

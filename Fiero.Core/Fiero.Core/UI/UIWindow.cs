@@ -27,8 +27,10 @@
         protected virtual void RebuildLayout()
         {
             var oldLayout = Layout;
+            var oldPos = oldLayout?.Position.V ?? Coord.Zero;
             Layout = UI.CreateLayout()
                 .Build(UI.Window.Size, grid => CreateLayout(grid, Title ?? "Untitled"));
+            Layout.Position.V = oldPos;
             OnLayoutRebuilt(oldLayout);
             oldLayout?.Dispose();
         }

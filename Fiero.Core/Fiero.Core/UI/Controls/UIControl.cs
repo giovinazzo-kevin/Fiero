@@ -32,9 +32,9 @@ namespace Fiero.Core
         public void Invalidate() => Invalidated?.Invoke(this);
 
         public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-        public Coord ContentRenderPos => (Position.V + Margin.V + Padding.V).Align(Snap);
-        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-        public Coord ContentRenderSize => (Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap);
+        public Coord ContentRenderPos => ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
+        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
+        public Coord ContentRenderSize => ((Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
         protected Coord TrackedMousePosition { get; private set; }
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.

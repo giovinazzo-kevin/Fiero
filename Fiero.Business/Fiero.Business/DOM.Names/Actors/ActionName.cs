@@ -13,6 +13,7 @@
         Read,
         Throw,
         Quaff,
-        Zap
+        Zap,
+        Macro
     }
 }

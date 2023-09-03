@@ -42,8 +42,8 @@ namespace Fiero.Business
         public UIControlProperty<int> PageSize { get; private set; } = new(nameof(PageSize), 20, invalidate: true);
         protected int NumPages => (Items.Count - 1) / PageSize.V + 1;
 
-        public ContainerModal(GameUI ui, GameResources resources, TContainer cont, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, resources, buttons, styles)
+        public ContainerModal(GameUI ui, GameResources resources, TContainer cont, ModalWindowButton[] buttons)
+            : base(ui, resources, buttons, ModalWindowStyles.Default)
         {
             Container = cont;
             Items.AddRange(cont.Inventory?.GetItems() ?? Enumerable.Empty<Item>());
@@ -93,7 +93,7 @@ namespace Fiero.Business
         {
             var items = Layout.Query<Button>(l => true, g => g.HasAnyClass("item-name"));
             var item = items.ElementAtOrDefault(index + (shift ? Letters.Length : 0));
-            item.Click(item.Position, Mouse.Button.Left);
+            item?.Click(item.Position, Mouse.Button.Left);
         }
 
         protected abstract bool ShouldRemoveItem(Item i, TActions a);
@@ -102,6 +102,10 @@ namespace Fiero.Business
         {
             base.RegisterHotkeys(buttons);
             int i = 0;
+            Hotkeys.Add(new Hotkey(VirtualKeys.Prior), () => PrevPage());
+            Hotkeys.Add(new Hotkey(VirtualKeys.Left), () => PrevPage());
+            Hotkeys.Add(new Hotkey(VirtualKeys.Next), () => NextPage());
+            Hotkeys.Add(new Hotkey(VirtualKeys.Right), () => NextPage());
             foreach (var item in Letters)
             {
                 var j = i++;
@@ -202,7 +206,7 @@ namespace Fiero.Business
                             b.HorizontalAlignment.V = HorizontalAlignment.Right;
                             b.Clicked += (_, __, ___) =>
                             {
-                                CurrentPage.V = (CurrentPage.V - 1).Mod(NumPages);
+                                PrevPage();
                                 return false;
                             };
                         })
@@ -223,7 +227,7 @@ namespace Fiero.Business
                             b.HorizontalAlignment.V = HorizontalAlignment.Left;
                             b.Clicked += (_, __, ___) =>
                             {
-                                CurrentPage.V = (CurrentPage.V + 1).Mod(NumPages);
+                                NextPage();
                                 return false;
                             };
                         })
@@ -276,5 +280,26 @@ namespace Fiero.Business
                 l.Text.V = $"{CurrentPage.V + 1}/{NumPages}";
             }
         }
+
+        public void NextPage()
+        {
+            CurrentPage.V = (CurrentPage.V + 1).Mod(NumPages);
+        }
+
+        public void PrevPage()
+        {
+            CurrentPage.V = (CurrentPage.V - 1).Mod(NumPages);
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if (UI.Input.IsMouseWheelScrollingUp())
+                PrevPage();
+            if (UI.Input.IsMouseWheelScrollingDown())
+                NextPage();
+        }
+
     }
+
 }

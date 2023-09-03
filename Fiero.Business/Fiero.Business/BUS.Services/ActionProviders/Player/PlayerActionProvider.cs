@@ -26,6 +26,13 @@ namespace Fiero.Business
 
 
         public override bool TryTarget(Actor a, TargetingShape shape, bool _) => UI.Target(shape);
+        protected void UnsetSlotIfConsumed(DrawableEntity item, int slot)
+        {
+            if (item is Consumable c
+                && c.ConsumableProperties.ConsumedWhenEmpty
+                && c.ConsumableProperties.RemainingUses == 1)
+                QuickSlots.Unset(slot);
+        }
 
         public override IAction GetIntent(Actor a)
         {
@@ -33,6 +40,7 @@ namespace Fiero.Business
             if (CurrentModal != null || !UI.Input.IsKeyboardFocusAvailable)
                 return new NoAction();
             _requestDelay = true;
+            QuickSlots.Refresh();
             if (QueuedActions.TryDequeue(out var backedUp))
             {
                 return backedUp;
@@ -194,7 +202,7 @@ namespace Fiero.Business
                         {
                             if (choice == InventoryActionName.Throw)
                             {
-                                QuickSlots.Set(slot, item, () =>
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                                 {
                                     if (TryThrow(a, wand, out action))
                                     {
@@ -206,7 +214,7 @@ namespace Fiero.Business
                             }
                             else
                             {
-                                QuickSlots.Set(slot, item, () => TryZap(a, wand, out var action) ? action : new FailAction());
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Zap), () => TryZap(a, wand, out var action) ? action : new FailAction());
                             }
                         };
                     }
@@ -216,7 +224,7 @@ namespace Fiero.Business
                         {
                             if (choice == InventoryActionName.Throw)
                             {
-                                QuickSlots.Set(slot, item, () =>
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                                 {
                                     if (TryThrow(a, potion, out action))
                                     {
@@ -228,9 +236,9 @@ namespace Fiero.Business
                             }
                             else
                             {
-                                QuickSlots.Set(slot, item, () =>
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Quaff), () =>
                                 {
-                                    QuickSlots.Unset(slot);
+                                    UnsetSlotIfConsumed(item, slot);
                                     return new QuaffPotionAction(potion);
                                 });
                             }
@@ -242,7 +250,7 @@ namespace Fiero.Business
                         {
                             if (choice == InventoryActionName.Throw)
                             {
-                                QuickSlots.Set(slot, item, () =>
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                                 {
                                     if (TryThrow(a, scroll, out action))
                                     {
@@ -254,24 +262,38 @@ namespace Fiero.Business
                             }
                             else
                             {
-                                QuickSlots.Set(slot, item, () =>
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Read), () =>
                                 {
-                                    QuickSlots.Unset(slot);
+                                    UnsetSlotIfConsumed(item, slot);
                                     return new ReadScrollAction(scroll);
                                 });
                             }
                         };
                     }
+                    else if (item.TryCast<Weapon>(out var weapon))
+                    {
+                        QuickSlots.Set(slot, weapon, nameof(InventoryActionName.Equip), () =>
+                        {
+                            return new EquipOrUnequipItemAction(weapon);
+                        });
+                    }
+                    else if (item.TryCast<Armor>(out var armor))
+                    {
+                        QuickSlots.Set(slot, armor, nameof(InventoryActionName.Equip), () =>
+                        {
+                            return new EquipOrUnequipItemAction(armor);
+                        });
+                    }
                     else if (item.TryCast<Throwable>(out var throwable))
                     {
-                        QuickSlots.Set(slot, item, () =>
+                        QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                         {
                             if (TryThrow(a, throwable, out action))
                             {
-                                if (!throwable.ThrowableProperties.ThrowsUseCharges || throwable.ConsumableProperties.RemainingUses == 1)
-                                {
+                                if (throwable.ThrowableProperties.ThrowsUseCharges)
+                                    UnsetSlotIfConsumed(item, slot);
+                                else
                                     QuickSlots.Unset(slot);
-                                }
                                 return action;
                             }
                             return new FailAction();

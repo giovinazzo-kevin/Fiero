@@ -246,6 +246,21 @@ namespace Fiero.Business
         {
             var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
             var label = ScrollLabel();
+            var colors = new[] {
+                ColorName.Red,
+                ColorName.Green,
+                ColorName.Blue,
+                ColorName.Cyan,
+                ColorName.Yellow,
+                ColorName.Magenta,
+                ColorName.LightRed,
+                ColorName.LightGreen,
+                ColorName.LightBlue,
+                ColorName.LightCyan,
+                ColorName.LightYellow,
+                ColorName.LightMagenta
+            };
+            var scrollColor = rng.Choose(colors);
             return Throwable<Scroll>(
                 @throw: ThrowName.Line,
                 name: ThrowableName.Misc,
@@ -260,7 +275,7 @@ namespace Fiero.Business
                 throwsUseCharges: false
             )
             .WithName($"Scroll of {effect}")
-            .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Scroll), ColorName.White)
+            .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Scroll), scrollColor)
             .WithScrollInfo(effect, modifier)
             .WithIntrinsicEffect(effect, e => new GrantedWhenTargetedByScroll(e, modifier))
             ;

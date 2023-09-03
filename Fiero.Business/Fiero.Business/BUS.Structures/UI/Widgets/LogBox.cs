@@ -3,21 +3,18 @@ using System.Linq;
 
 namespace Fiero.Business
 {
-
     [TransientDependency]
     public class LogBox : Widget
     {
-        protected readonly GameColors<ColorName> Colors;
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
         public Paragraph Paragraph { get; private set; }
 
         public int NumRowsDisplayed => Layout.ContentRenderSize.Y / (Paragraph?.FontSize.V.Y ?? 12);
 
-        public LogBox(GameUI ui, GameColors<ColorName> colors)
+        public LogBox(GameUI ui)
             : base(ui)
         {
-            Colors = colors;
             Following.ValueUpdated += Following_ValueUpdated;
         }
 
@@ -52,7 +49,7 @@ namespace Fiero.Business
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.CenterContentH.V = false;
-                p.Background.V = Colors.Get(ColorName.UIBackground);
+                p.Background.V = UI.GetColor(ColorName.UIBackground);
                 p.Padding.V = new(ts, ts);
             }))
             ;

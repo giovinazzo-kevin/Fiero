@@ -14,10 +14,11 @@
 
   "EmptyScroll": "64 0 16 16",
   "Scroll": "64 16 16 16",
+  "Scroll_Mask": "64 32 16 16",
 
   "GrapplingHook": "64 48 16 16",
 
   "Sword": "80 0 16 16",
 
-  "RatCorpse":  "224 0 16 16"
+  "RatCorpse": "224 0 16 16"
 }

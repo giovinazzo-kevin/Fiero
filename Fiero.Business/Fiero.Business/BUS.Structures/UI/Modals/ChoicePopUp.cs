@@ -13,8 +13,8 @@ namespace Fiero.Business
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
-        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, resources, buttons, styles)
+        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons)
+            : base(ui, resources, buttons)
         {
             Options = options;
             Confirmed += (_, __) =>
@@ -27,12 +27,14 @@ namespace Fiero.Business
         {
             base.Update();
 
-            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN)))
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))
+                || UI.Input.IsMouseWheelScrollingUp())
             {
                 SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
                 Invalidate();
             }
-            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS)))
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS))
+                || UI.Input.IsMouseWheelScrollingDown())
             {
                 SelectedIndex = (SelectedIndex + 1).Mod(Options.Length);
                 Invalidate();

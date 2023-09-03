@@ -24,7 +24,7 @@ namespace Fiero.Core
             Layout?.Dispose();
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
             var hasButtons = Styles.HasFlag(ModalWindowStyles.CustomButtons) && Buttons.Length > 0;
-            var hasTitleBar = Styles.HasFlag(ModalWindowStyles.TitleBar);
+            var hasTitleBar = Styles.HasFlag(ModalWindowStyles.TitleBar_Close);
 
             TitleHeight = hasTitle ? 16 : 0;
             ButtonsHeight = hasButtons ? 24 : 0;

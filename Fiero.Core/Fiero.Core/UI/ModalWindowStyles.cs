@@ -5,9 +5,9 @@
     {
         None = 0,
         Title = 1,
-        TitleBar = 2,
-        CustomButtons = 4,
+        TitleBar_Close = 2,
+        CustomButtons = 128,
 
-        Default = Title | TitleBar | CustomButtons
+        Default = Title | TitleBar_Close | CustomButtons
     }
 }

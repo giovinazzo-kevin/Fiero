@@ -18,7 +18,7 @@
 
         public IEnumerable<T> Query<T>(Func<Layout, bool> match, Func<LayoutGrid, bool> select = null)
             where T : UIControl
-            => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).Cast<T>();
+            => Query(match, x => x.Is<T>() && (select?.Invoke(x) ?? true)).OfType<T>();
 
         public virtual void Focus(UIControl control)
         {

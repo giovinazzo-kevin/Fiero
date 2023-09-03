@@ -19,6 +19,12 @@ namespace Fiero.Business
             {
                 return ItemUnequipped.Handle(new(t.Actor, unequip.Item));
             }
+            else if (action is EquipOrUnequipItemAction equipOrUnequip)
+            {
+                if (t.Actor.Equipment.IsEquipped(equipOrUnequip.Item))
+                    return ItemUnequipped.Handle(new(t.Actor, equipOrUnequip.Item));
+                return ItemEquipped.Handle(new(t.Actor, equipOrUnequip.Item));
+            }
             else throw new NotSupportedException();
         }
     }

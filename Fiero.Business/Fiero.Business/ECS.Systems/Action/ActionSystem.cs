@@ -203,6 +203,9 @@ namespace Fiero.Business
                 case ActionName.Organize:
                     ret = HandleOrganize(t, ref action, ref cost);
                     break;
+                case ActionName.Macro:
+                    ret = HandleMacro(t, ref action, ref cost);
+                    break;
                 case ActionName.Fail:
                     ret = false;
                     break;

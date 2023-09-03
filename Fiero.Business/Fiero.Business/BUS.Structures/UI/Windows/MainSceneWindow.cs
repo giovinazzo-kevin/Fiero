@@ -15,6 +15,7 @@ namespace Fiero.Business
         public readonly StatBar HP;
         public readonly StatBar MP;
         public readonly StatBar XP;
+        public readonly QuickBar QuickBar;
 
         protected Header PlayerNameLabel { get; private set; }
         protected Label CurrentTurnLabel { get; private set; }
@@ -25,11 +26,11 @@ namespace Fiero.Business
         protected readonly ActionSystem ActionSystem;
 
         const int SideBarWidth = 248;
-        const int BottomBarHeight = 128;
+        const int BottomBarHeight = 172;
 
         public MainSceneWindow(
             GameUI ui,
-            LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp,
+            LogBox logs, MiniMap miniMap, StatBar hp, StatBar mp, StatBar xp, QuickBar quickbar,
             ActionSystem act, GameResources res, GameLoop loop)
             : base(ui)
         {
@@ -47,6 +48,8 @@ namespace Fiero.Business
             XP.EnableDragging = false;
             XP.Color.V = ColorName.LightYellow;
 
+            QuickBar = quickbar;
+            QuickBar.EnableDragging = false;
 
             Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
             ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency?
@@ -96,6 +99,7 @@ namespace Fiero.Business
             HP.Open(string.Empty);
             MP.Open(string.Empty);
             XP.Open(string.Empty);
+            QuickBar.Open(string.Empty);
             Layout.Size.V = UI.Window.Size;
         }
 
@@ -152,12 +156,17 @@ namespace Fiero.Business
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title)
         {
             var sidebarWidth = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).X;
-            var bottombarHeight = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).Y;
+            var logHeight = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).Y;
 
             return ApplyStyles(grid)
             .Row()
                 .Col(id: "viewport")
-                    .Cell(Viewport)
+                    .Row()
+                        .Cell(Viewport)
+                    .End()
+                    .Row(h: 36, px: true, id: "quickbar")
+                        .Cell<UIWindowAsControl>(x => x.Window.V = QuickBar)
+                    .End()
                 .End()
                 .Col(w: sidebarWidth, px: true, @class: "stat-panel")
                     .Row(h: 16, px: true, id: "name", @class: "center")
@@ -209,7 +218,7 @@ namespace Fiero.Business
                     .End()
                 .End()
             .End()
-            .Row(h: bottombarHeight, px: true, id: "log-panel")
+            .Row(h: logHeight, px: true, id: "log-panel")
                 .Cell<UIWindowAsControl>(x => x.Window.V = LogBox)
             .End();
         }

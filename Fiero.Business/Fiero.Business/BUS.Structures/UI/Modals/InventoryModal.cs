@@ -8,7 +8,7 @@ namespace Fiero.Business
     public class InventoryModal : ContainerModal<Actor, InventoryActionName>
     {
         public InventoryModal(GameUI ui, GameResources resources, Actor act)
-            : base(ui, resources, act, new ModalWindowButton[] { }, ModalWindowStyles.Default) { }
+            : base(ui, resources, act, new ModalWindowButton[] { }) { }
 
         protected override bool ShouldRemoveItem(Item i, InventoryActionName a)
         {
@@ -25,6 +25,7 @@ namespace Fiero.Business
             if (Container.Equipment.IsEquipped(i))
             {
                 yield return InventoryActionName.Unequip;
+                yield return InventoryActionName.Set;
             }
             else
             {
@@ -32,12 +33,13 @@ namespace Fiero.Business
                 if (i.TryCast<Weapon>(out _) || i.TryCast<Armor>(out _))
                 {
                     yield return InventoryActionName.Equip;
+                    yield return InventoryActionName.Set;
                 }
             }
             if (i.TryCast<Throwable>(out _))
             {
-                yield return InventoryActionName.Set;
                 yield return InventoryActionName.Throw;
+                yield return InventoryActionName.Set;
             }
             if (i.TryCast<Potion>(out _))
             {
@@ -51,8 +53,8 @@ namespace Fiero.Business
             }
             if (i.TryCast<Wand>(out _))
             {
-                yield return InventoryActionName.Set;
                 yield return InventoryActionName.Zap;
+                yield return InventoryActionName.Set;
             }
         }
     }

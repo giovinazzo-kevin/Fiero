@@ -12,8 +12,16 @@ namespace Fiero.Business
         protected event Action Invalidated;
         private bool _dirty;
 
-        protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
-            : base(ui, buttons, styles)
+        public bool CanBeClosedImplicitly => Buttons.Any(b => b.ResultType == false)
+            || this.Styles.HasFlag(ModalWindowStyles.TitleBar_Close);
+
+        protected static ModalWindowStyles GetDefaultStyles(ModalWindowButton[] buttons)
+            => buttons.Any(x => x.ResultType == false)
+                ? ModalWindowStyles.Default
+                : ModalWindowStyles.Default & ~ModalWindowStyles.TitleBar_Close;
+
+        protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles? styles = null)
+            : base(ui, buttons, styles ?? GetDefaultStyles(buttons))
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
@@ -70,7 +78,7 @@ namespace Fiero.Business
             {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Confirm)), () => Close(ModalWindowButton.ImplicitYes));
             }
-            if (buttons.Any(b => b.ResultType == false))
+            if (CanBeClosedImplicitly)
             {
                 Hotkeys.Add(new Hotkey(UI.Store.Get(Data.Hotkeys.Cancel)), () => Close(ModalWindowButton.ImplicitNo));
             }

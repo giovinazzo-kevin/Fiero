@@ -10,7 +10,6 @@ namespace Fiero.Business
     {
         public static Color GetColor(this GameUI ui, ColorName name) =>
             ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
-
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
             => ui.Open(
                 new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),
@@ -32,8 +31,7 @@ namespace Fiero.Business
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),
                     choices,
-                    new[] { ModalWindowButton.Ok },
-                    ModalWindowStyles.Default
+                    new[] { ModalWindowButton.Ok }
                 ),
                 title
             );
@@ -43,8 +41,7 @@ namespace Fiero.Business
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),
                     choices,
-                    new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
-                    ModalWindowStyles.Default
+                    new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel }
                 ),
                 title
             );

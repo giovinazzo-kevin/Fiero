@@ -152,7 +152,6 @@ namespace Fiero.Core
                 renderTarget.Draw(sprite);
                 renderTarget.Display();
                 using var image = renderTarget.Texture.CopyToImage();
-                // image.SaveToFile(@"E:\Repos\Fiero\Fiero.Business\Fiero.Business\Resources\Textures\hmm.png");
                 var tex = new Texture(image);
                 Textures.StoreProceduralTexture(tex);
                 procDict[procKey] = sprite = new(tex, new(0, 0, sprite.TextureRect.Width, sprite.TextureRect.Height));

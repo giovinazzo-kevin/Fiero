@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +12,8 @@ namespace Fiero.Business
         public IEnumerable<KeyValuePair<EquipmentSlotName, Equipment>> EquippedItems => Dict;
         public IEnumerable<Weapon> Weapons => Dict.Values.OfType<Weapon>();
         public Armor Armor => Dict.Values.OfType<Armor>().SingleOrDefault();
+
+        public event Action<ActorEquipmentComponent> EquipmentChanged;
 
         public bool TryGetHeld(out Equipment leftHand, out Equipment rightHand)
         {
@@ -54,14 +57,22 @@ namespace Fiero.Business
             var slot = MapFreeSlot(i.EquipmentProperties.Type);
             if (slot is null)
                 return false;
-            return Dict.TryAdd(slot.Value, i);
+            if (Dict.TryAdd(slot.Value, i))
+            {
+                EquipmentChanged?.Invoke(this);
+                return true;
+            }
+            return false;
         }
         public bool TryUnequip(Equipment i)
         {
             foreach (var (k, v) in Dict)
             {
-                if (v.Id == i.Id)
-                    return Dict.Remove(k);
+                if (v.Id == i.Id && Dict.Remove(k))
+                {
+                    EquipmentChanged?.Invoke(this);
+                    return true;
+                }
             }
             return false;
         }

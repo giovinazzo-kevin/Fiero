@@ -167,6 +167,7 @@ namespace Fiero.Business
 
         public static Animation DamageNumber(
             int damage,
+            TextureName font = TextureName.FontMonospace,
             ColorName tint = ColorName.White,
             Vec? scale = null
         )
@@ -175,19 +176,19 @@ namespace Fiero.Business
             var str = damage.ToString();
 
             return new(
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetSprites(new(0, -0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 32), GetSprites(new(0, -0.50f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 16), GetSprites(new(0, -0.25f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetSprites(new(0, +0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 8), GetSprites(new(0, +0.50f), tint, str))
+                new AnimationFrame(TimeSpan.FromMilliseconds(10), GetSprites(new(0, +0.00f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(12), GetSprites(new(0, -0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(24), GetSprites(new(0, -0.50f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(16), GetSprites(new(0, -0.25f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(12), GetSprites(new(0, +0.00f), ColorName.White, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(10), GetSprites(new(0, +0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(8), GetSprites(new(0, +0.50f), tint, str))
             );
 
             SpriteDef[] GetSprites(Vec ofs, ColorName tint, string text)
             {
                 return text.Select((c, i) => new SpriteDef(
-                        TextureName.FontLight,
+                        font,
                         ((int)c).ToString(),
                         tint,
                         ofs + new Vec(i * s.X - text.Length * s.X / 4, 0),

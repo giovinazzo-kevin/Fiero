@@ -118,7 +118,8 @@ namespace Fiero.Business
             await Sprites.LoadJsonAsync(TextureName.Animations, "Resources/Spritesheets/animations.json");
             await Sprites.LoadJsonAsync(TextureName.UI, "Resources/Spritesheets/ui.json");
             await Sprites.LoadJsonAsync(TextureName.Icons, "Resources/Spritesheets/icons.json");
-            Sprites.BuildIndex(TextureName.FontMonospace, new(8, 12));
+            Sprites.BuildIndex(TextureName.FontMonospace, new(8, 8));
+            Sprites.BuildIndex(TextureName.FontTerminal, new(8, 12));
             Sprites.BuildIndex(TextureName.FontLight, new(8, 12));
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");

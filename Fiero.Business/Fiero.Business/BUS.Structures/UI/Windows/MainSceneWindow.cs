@@ -72,6 +72,7 @@ namespace Fiero.Business
             MiniMap.Following.V = null;
             LogBox.Following.V = null;
             Viewport.Following.V = null;
+            EquipmentDisplay.Following.V = null;
             Viewport.SetDirty();
         }
 
@@ -89,6 +90,7 @@ namespace Fiero.Business
             MiniMap.Following.V = a;
             LogBox.Following.V = a;
             Viewport.Following.V = a;
+            EquipmentDisplay.Following.V = a;
             var pos = a.Position();
             var viewSize = Viewport.ViewArea.V.Size();
             Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
@@ -117,11 +119,11 @@ namespace Fiero.Business
             {
                 var floorId = following.FloorId();
                 var position = following.Position();
-                PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
-                CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
-                CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
-                CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
-                RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
+                //PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
+                //CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
+                //CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+                //CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
+                //RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {
@@ -201,7 +203,7 @@ namespace Fiero.Business
                     .Row(@class: "spacer")
                         .Cell<Layout>()
                     .End()
-                    .Row(h: 36 * 4 + 18 * 4, px: true)
+                    .Row(h: 36 * 5 + 18 * 5, px: true)
                         .Cell<UIWindowAsControl>(x => x.Window.V = EquipmentDisplay)
                     .End()
                     .Row(@class: "spacer")

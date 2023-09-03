@@ -479,7 +479,7 @@ namespace Fiero.Business.Scenes
                 var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target))
                 {
-                    Systems.Render.Viewport.Animate(false, e.Target.Position(), Animation.DamageNumber(actualHeal, ColorName.LightGreen));
+                    Systems.Render.Viewport.Animate(false, e.Target.Position(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
                 }
                 return true;
             });
@@ -503,7 +503,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Victim))
                 {
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                    Systems.Render.Viewport.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), color));
+                    Systems.Render.Viewport.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
                 }
                 return true;
             });

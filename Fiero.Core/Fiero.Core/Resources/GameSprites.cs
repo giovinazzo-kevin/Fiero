@@ -66,10 +66,11 @@ namespace Fiero.Core
             AddSpritesheet(atlas, builder =>
             {
                 var size = Textures.Get(atlas).Size;
-                for (int x = 0; x < size.X; x++)
-                    for (int y = 0; y < size.Y; y++)
+                var w = size.X / tileSize.X;
+                for (int x = 0; x < w; x++)
+                    for (int y = 0; y < size.Y / tileSize.Y; y++)
                         builder.WithSprite(
-                            (y * size.X + x).ToString(),
+                            (y * w + x).ToString(),
                             tex => new Sprite(tex, new(x * tileSize.X, y * tileSize.Y, tileSize.X, tileSize.Y)));
             });
         }

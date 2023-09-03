@@ -277,7 +277,7 @@ namespace Fiero.Business
                 {
                     if (type == AttackName.Melee && item.TryCast<Weapon>(out var w))
                     {
-                        swingDelay = w.WeaponProperties.SwingDelay;
+                        swingDelay += w.WeaponProperties.SwingDelay;
                         damage += w.WeaponProperties.BaseDamage;
                     }
                     else if (type == AttackName.Ranged && item.TryCast<Throwable>(out var t))

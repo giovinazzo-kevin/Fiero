@@ -2,6 +2,7 @@
 using Fiero.Core.Structures;
 using SFML.Graphics;
 using SFML.Window;
+using System.Diagnostics;
 
 namespace Fiero.Core
 {
@@ -27,6 +28,10 @@ namespace Fiero.Core
         public readonly GameUI UI;
         public readonly GameWindow Window;
         public readonly GameLocalizations<TLocales> Localization;
+
+        public float MeasuredFramesPerSecond { get; private set; }
+        private readonly Stopwatch _fpsStopwatch = new();
+        private TimeSpan _lastTimestamp;
 
         public Game(
             OffButton off,
@@ -95,7 +100,7 @@ namespace Fiero.Core
 
         protected virtual void InitializeWindow(RenderWindow win)
         {
-            win.SetFramerateLimit(60);
+            win.SetFramerateLimit(144);
             win.SetKeyRepeatEnabled(true);
             win.SetActive(true);
             win.Resized += (e, eh) =>
@@ -126,6 +131,7 @@ namespace Fiero.Core
                 {
                     Draw();
                 };
+                _fpsStopwatch.Start();
                 Loop.Run(ct: token);
             }
         }
@@ -154,12 +160,20 @@ namespace Fiero.Core
 
         public virtual void Draw()
         {
+            var currentTimestamp = _fpsStopwatch.Elapsed;
+            var frameTime = currentTimestamp - _lastTimestamp;
+            _lastTimestamp = currentTimestamp;
+
+            MeasuredFramesPerSecond = (1f / (float)frameTime.TotalSeconds + MeasuredFramesPerSecond) / 2;
+
             Director.Draw();
             // Windows are drawn before modals
             foreach (var win in UI.GetOpenWindows().Union(UI.GetOpenModals()))
             {
                 win.Draw();
             }
+            using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", new Font(@"C:\Windows\Fonts\Arial.ttf"));
+            Window.Draw(text);
             Window.Display();
         }
     }

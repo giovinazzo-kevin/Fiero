@@ -5,6 +5,7 @@ using SFML.Graphics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -291,7 +292,7 @@ namespace Fiero.Business
             void Impl()
             {
                 var time = TimeSpan.Zero;
-                var increment = TimeSpan.FromMilliseconds(4);
+                var increment = TimeSpan.FromMilliseconds(1);
                 var timeline = animations.SelectMany(Timeline)
                     .OrderBy(x => x.Time)
                     .ToList();
@@ -299,6 +300,7 @@ namespace Fiero.Business
                 var myVfx = new ConcurrentQueue<OrderedPair<Coord, SpriteDef>>();
                 var k = Vfx.Keys.LastOrDefault() + 1;
                 Vfx[k] = myVfx;
+                var sw = new Stopwatch();
                 while (timeline.Count > 0)
                 {
                     for (int i = timeline.Count - 1; i >= 0; i--)
@@ -317,6 +319,7 @@ namespace Fiero.Business
                             timeline.RemoveAt(i);
                         }
                     }
+                    sw.Restart();
                     if (blocking)
                     {
                         Loop.WaitAndDraw(increment);
@@ -324,9 +327,9 @@ namespace Fiero.Business
                     }
                     else
                     {
-                        new GameLoop() { TimeStep = 1 / 30f }.Run(increment);
+                        new GameLoop() { }.Run(increment);
                     }
-                    time += increment;
+                    time += sw.Elapsed;
                     myVfx.Clear();
                 }
                 Vfx.Remove(k, out _);

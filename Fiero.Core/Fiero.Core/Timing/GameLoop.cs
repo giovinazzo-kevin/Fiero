@@ -13,7 +13,7 @@ namespace Fiero.Core
 
         public GameLoop()
         {
-            TimeStep = 1f / 500f;
+            TimeStep = 1f / 125f;
         }
 
         public virtual float WaitAndDraw(TimeSpan time, Action<float, float> onUpdate = null, Action<float, float> onRender = null)

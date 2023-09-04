@@ -1,5 +1,6 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace Fiero.Core
@@ -7,7 +8,7 @@ namespace Fiero.Core
     public abstract partial class UIControl : Drawable, IDisposable
     {
         public readonly GameInput Input;
-        public readonly List<UIControl> Children;
+        public readonly ObservableCollection<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
 
         public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false) { Inherited = false };
@@ -29,7 +30,14 @@ namespace Fiero.Core
         public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
-        public void Invalidate() => Invalidated?.Invoke(this);
+        private RenderTexture _target;
+        private bool _isDirty = true;
+
+        public void Invalidate()
+        {
+            Invalidated?.Invoke(this);
+            _isDirty = true;
+        }
 
         public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
         public Coord ContentRenderPos => ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
@@ -52,7 +60,7 @@ namespace Fiero.Core
         public UIControl(GameInput input)
         {
             Input = input;
-            Children = new List<UIControl>();
+            Children = new();
 
             Properties = GetType()
                 .GetRuntimeFields()
@@ -61,6 +69,33 @@ namespace Fiero.Core
                 .ToList();
             var registerInvalidationEvents = typeof(UIControl)
                 .GetMethod(nameof(RegisterInvalidationEvents), BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Children.CollectionChanged += (sender, e) =>
+            {
+                if (e.OldItems != null)
+                    foreach (UIControl i in e.OldItems)
+                        i.Invalidated -= PropagateInvalidation;
+                if (e.NewItems != null)
+                    foreach (UIControl i in e.NewItems)
+                        i.Invalidated += PropagateInvalidation;
+                Invalidate();
+                void PropagateInvalidation(UIControl obj)
+                {
+                    Invalidate();
+                }
+            };
+
+            Size.ValueChanged += (_, __) =>
+            {
+                _target?.Dispose();
+                _target = null;
+                if (Size.V != Coord.Zero && Scale.V != Vec.Zero)
+                {
+                    _target = new RenderTexture((uint)(Size.V.X * Scale.V.X), (uint)(Size.V.Y * Scale.V.Y));
+                }
+                Invalidate();
+            };
+
             foreach (var prop in Properties)
             {
                 prop.SetOwner(this);
@@ -71,6 +106,7 @@ namespace Fiero.Core
                 }
             }
         }
+
 
         private void RegisterInvalidationEvents<T>(UIControlProperty<T> prop)
         {
@@ -116,6 +152,7 @@ namespace Fiero.Core
             {
                 MouseEntered?.Invoke(this, mousePos);
                 OnMouseEntered(mousePos);
+                Invalidate();
                 if (!click)
                 {
                     foreach (var child in Children)
@@ -128,6 +165,7 @@ namespace Fiero.Core
             {
                 MouseLeft?.Invoke(this, mousePos);
                 OnMouseLeft(mousePos);
+                Invalidate();
                 if (!click)
                 {
                     foreach (var child in Children)
@@ -185,16 +223,34 @@ namespace Fiero.Core
             target.Draw(rect, states);
         }
 
-        public virtual void Draw(RenderTarget target, RenderStates states)
+        protected virtual void Render(RenderTarget target, RenderStates states)
         {
-            if (IsHidden)
-                return;
             DrawBackground(target, states);
             foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1))
             {
+                child._isDirty = true;
                 child.Draw(target, states);
             }
         }
+
+        public void Draw(RenderTarget target, RenderStates states)
+        {
+            if (IsHidden)
+                return;
+            if (_target is null) return;
+            if (_isDirty)
+            {
+                _isDirty = false;
+                _target.Clear(Background.V);
+                var innerStates = RenderStates.Default;
+                innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
+                Render(_target, innerStates);
+                _target.Display();
+            }
+            using var sprite = new Sprite(_target.Texture) { Position = Position.V };
+            target.Draw(sprite, states);
+        }
+
         public virtual void Dispose() { }
     }
 }

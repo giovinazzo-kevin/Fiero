@@ -66,6 +66,7 @@ namespace Fiero.Business
             ViewArea.ValueChanged += (_, __) => SetDirty();
             Following.ValueChanged += (_, __) => SetDirty();
             ViewTileSize.ValueChanged += (_, __) => SetDirty();
+            Invalidated += (_) => SetDirty();
         }
 
         public void SetDirty() => _dirty = true;
@@ -82,9 +83,9 @@ namespace Fiero.Business
             return worldPos;
         }
 
-        public override void Draw(RenderTarget target, RenderStates states)
+        protected override void Render(RenderTarget target, RenderStates states)
         {
-            base.Draw(target, states);
+            base.Render(target, states);
             if (Following.V is null)
                 return;
             if (_dirty)

@@ -13,7 +13,7 @@ namespace Fiero.Core
             LeftFrame = le; MiddleFrame = me; RightFrame = re;
         }
 
-        public override void Draw(RenderTarget target, RenderStates states)
+        protected override void Render(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
@@ -53,7 +53,7 @@ namespace Fiero.Core
                 }
                 target.Draw(piece, states);
             }
-            base.Draw(target, states);
+            base.Render(target, states);
             Background.V = bg;
         }
 

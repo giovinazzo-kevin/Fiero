@@ -48,7 +48,8 @@
         public Layout(LayoutGrid dom, GameInput input, params UIControl[] controls) : base(input)
         {
             Dom = dom;
-            Children.AddRange(controls);
+            foreach (var c in controls)
+                Children.Add(c);
         }
 
         public override void Dispose()

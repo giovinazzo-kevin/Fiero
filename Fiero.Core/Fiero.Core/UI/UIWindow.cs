@@ -38,6 +38,7 @@
             Layout.Size.V = oldSize;
             OnLayoutRebuilt(oldLayout);
             oldLayout?.Dispose();
+            Layout.Invalidate();
         }
 
         public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);

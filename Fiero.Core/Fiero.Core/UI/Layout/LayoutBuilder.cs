@@ -32,7 +32,7 @@
             {
                 MoveRecursive(layout.Position.V - old, grid);
             };
-            layout.Invalidated += _ =>
+            layout.Size.ValueChanged += (_, old) =>
             {
                 ResizeRecursive(layout.Size.V, layout.Position.V, grid);
             };

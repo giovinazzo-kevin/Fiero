@@ -76,7 +76,11 @@ namespace Fiero.Core
         public Combobox RemoveOptions(Func<object, bool> predicate)
         {
             var toRemove = Options.Where(o => predicate(o.Value));
-            Children.RemoveAll(c => toRemove.Select(r => r.Control).Contains(c));
+            for (int j = Children.Count - 1; j >= 0; j--)
+            {
+                if (toRemove.Select(r => r.Control).Contains(Children[j]))
+                    Children.RemoveAt(j);
+            }
             Options.RemoveAll(o => toRemove.Select(r => r.Value).Contains(o.Value));
             foreach (var remove in toRemove)
             {

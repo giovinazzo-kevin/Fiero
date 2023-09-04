@@ -18,9 +18,9 @@ namespace Fiero.Core
             return true;
         }
 
-        public override void Draw(RenderTarget target, RenderStates states)
+        protected override void Render(RenderTarget target, RenderStates states)
         {
-            base.Draw(target, states);
+            base.Render(target, states);
             if (Checked.V)
             {
                 var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)

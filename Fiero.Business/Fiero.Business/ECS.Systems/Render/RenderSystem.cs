@@ -31,11 +31,13 @@ namespace Fiero.Business
             {
                 ActorSelected.Handle(new(a));
             }
+            Viewport.Invalidate();
         }
 
         public void CenterOn(Coord c)
         {
             PointSelected.Handle(new(c));
+            Viewport.Invalidate();
         }
 
         public RenderSystem(EventBus bus, GameUI ui, GameLoop loop, GameResources resources, MainSceneWindow window, DeveloperConsole console) : base(bus)

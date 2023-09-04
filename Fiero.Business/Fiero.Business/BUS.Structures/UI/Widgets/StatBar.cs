@@ -60,6 +60,7 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
             ValueLabel.Control.Text.V = $"{Value.V}/{MaxValue.V}";
             StatLabel.Control.Text.V = $"{Stat.V}:";
         }
+        protected override void DefaultSize() { }
 
         public override void Draw()
         {

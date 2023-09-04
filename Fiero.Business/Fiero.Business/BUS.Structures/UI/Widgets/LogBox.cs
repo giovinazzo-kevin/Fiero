@@ -60,6 +60,10 @@ namespace Fiero.Business
                 .End()
             ;
 
+        protected override void DefaultSize()
+        {
+
+        }
         protected override void OnLayoutRebuilt(Layout oldValue)
         {
             if (oldValue != null)

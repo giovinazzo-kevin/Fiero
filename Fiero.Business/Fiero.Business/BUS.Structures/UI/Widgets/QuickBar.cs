@@ -9,6 +9,7 @@ namespace Fiero.Business
         public readonly GameResources Resources;
         public readonly QuickSlotHelper QuickSlotHelper;
 
+        protected override void DefaultSize() { }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
             .AddRule<UIControl>(r => r

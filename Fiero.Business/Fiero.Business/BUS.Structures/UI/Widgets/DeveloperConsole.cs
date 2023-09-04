@@ -34,6 +34,8 @@ namespace Fiero.Business
             OutputAvailable += OnOutputAvailable;
         }
 
+        protected override void DefaultSize() { }
+
         protected void WriteLine(string s)
         {
             Pane.WriteLine(s);
@@ -72,6 +74,7 @@ namespace Fiero.Business
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
+                .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();
@@ -89,6 +92,7 @@ namespace Fiero.Business
                 .Build();
             var replExpr = Concern.Defer()
                 .UseAsynchronousTimer()
+                .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     await foreach (var ans in s.Repl(ScriptingSystem.StdlibScope)) ;

@@ -14,7 +14,7 @@ namespace Fiero.Business
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
         public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons)
-            : base(ui, resources, buttons)
+            : base(ui, resources, buttons, GetDefaultStyles(buttons) & ~ModalWindowStyles.TitleBar_Maximize)
         {
             Options = options;
             Confirmed += (_, __) =>
@@ -108,12 +108,10 @@ namespace Fiero.Business
             .End()
             ;
 
-        protected override void OnLayoutRebuilt(Layout oldValue)
+        public override void Minimize()
         {
-            base.OnLayoutRebuilt(oldValue);
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
             Layout.Size.V = new(popupSize.X, 24 * Options.Length + TitleHeight + ButtonsHeight);
         }
-
     }
 }

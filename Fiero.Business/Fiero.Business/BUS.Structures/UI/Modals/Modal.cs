@@ -20,6 +20,9 @@ namespace Fiero.Business
                 ? ModalWindowStyles.Default
                 : ModalWindowStyles.Default & ~ModalWindowStyles.TitleBar_Close;
 
+        protected override bool IsMaximized { get; set; }
+        public bool IsResponsive { get; set; } = true;
+
         protected Modal(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles? styles = null)
             : base(ui, buttons, styles ?? GetDefaultStyles(buttons))
         {
@@ -28,7 +31,8 @@ namespace Fiero.Business
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
-                OnLayoutRebuilt(Layout);
+                if (IsResponsive)
+                    Layout.Size.V += obj.NewValue - obj.OldValue;
             }
         }
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
@@ -44,20 +48,17 @@ namespace Fiero.Business
                 .Apply(x => x.Foreground.V = UI.GetColor(ColorName.White))
             )
             .AddRule<UIControl>(style => style
+                .Match(x => x.HasAnyClass("modal-maximize"))
+                .Apply(x => x.Background.V = UI.GetColor(ColorName.Blue))
+                .Apply(x => x.Foreground.V = UI.GetColor(ColorName.White))
+            )
+            .AddRule<UIControl>(style => style
                 .Match(x => x.HasAllClasses("row", "row-even"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(8, 8, 8)))
             .AddRule<UIControl>(style => style
                 .Match(x => x.HasAllClasses("row", "row-odd"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground)))
             ;
-
-        protected override void OnLayoutRebuilt(Layout oldValue)
-        {
-            //base.OnLayoutRebuilt(oldValue);
-            var vws = UI.Store.Get(Data.UI.ViewportSize);
-            Layout.Size.V = (vws * new Vec(0.8f, 0.6f)).ToCoord();
-            Layout.Position.V = vws / 2 - Layout.Size.V / 2;
-        }
 
         protected void Invalidate()
         {
@@ -71,6 +72,21 @@ namespace Fiero.Business
             RegisterHotkeys(Buttons);
             base.Open(title);
             Invalidate();
+        }
+
+        public override void Maximize()
+        {
+            Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
+            Layout.Position.V = Coord.Zero;
+            IsMaximized = true;
+        }
+
+        public override void Minimize()
+        {
+            var vws = UI.Store.Get(Data.UI.ViewportSize);
+            Layout.Size.V = (vws * new Vec(0.8f, 0.6f)).ToCoord();
+            Layout.Position.V = vws / 2 - Layout.Size.V / 2;
+            IsMaximized = false;
         }
 
         protected virtual void RegisterHotkeys(ModalWindowButton[] buttons)

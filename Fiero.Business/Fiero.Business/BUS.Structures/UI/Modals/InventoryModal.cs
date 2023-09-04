@@ -22,16 +22,17 @@ namespace Fiero.Business
 
         protected override IEnumerable<InventoryActionName> GetAvailableActions(Item i)
         {
+            var canDrop = true;
             if (i.TryCast<Equipment>(out var eq))
             {
                 if (Container.ActorEquipment.IsEquipped(eq))
                 {
+                    canDrop = false;
                     yield return InventoryActionName.Unequip;
                 }
                 else
                 {
                     yield return InventoryActionName.Equip;
-                    yield return InventoryActionName.Drop;
                 }
                 yield return InventoryActionName.Set;
             }
@@ -54,6 +55,10 @@ namespace Fiero.Business
             {
                 yield return InventoryActionName.Zap;
                 yield return InventoryActionName.Set;
+            }
+            if (canDrop)
+            {
+                yield return InventoryActionName.Drop;
             }
         }
     }

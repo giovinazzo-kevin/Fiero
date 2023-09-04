@@ -58,6 +58,7 @@ namespace Fiero.Business
         }
 
         public void SetDirty() => _dirty = true;
+        protected override void DefaultSize() { }
 
         public override void Draw()
         {

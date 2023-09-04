@@ -4,6 +4,13 @@ namespace Fiero.Core.Extensions
 {
     public static class GameLinqExtensions
     {
+        public static IEnumerable<U> TrySelect<T, U>(this IEnumerable<T> source, Func<T, (bool, U)> tryGet)
+        {
+            return source.Select(tryGet)
+                .Where(x => x.Item1)
+                .Select(x => x.Item2);
+        }
+
         public static IEnumerable<T> OfAssignableType<_, T>(this IEnumerable<_> source)
         {
             return source.Where(x => x.GetType().IsAssignableTo(typeof(T))).Cast<T>();

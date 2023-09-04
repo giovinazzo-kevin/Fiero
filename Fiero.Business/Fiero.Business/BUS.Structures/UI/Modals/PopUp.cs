@@ -6,14 +6,14 @@ namespace Fiero.Business
     {
 
 
-        public PopUp(GameUI ui, GameResources resources, ModalWindowButton[] buttons)
-            : base(ui, resources, buttons)
+        public PopUp(GameUI ui, GameResources resources, ModalWindowButton[] buttons, ModalWindowStyles? styles)
+            : base(ui, resources, buttons, styles)
         {
+            IsResponsive = false;
         }
 
-        protected override void OnLayoutRebuilt(Layout oldValue)
+        public override void Minimize()
         {
-            //base.OnLayoutRebuilt(oldValue);
             Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
             Layout.Position.V = Layout.Size.V / 2;
         }

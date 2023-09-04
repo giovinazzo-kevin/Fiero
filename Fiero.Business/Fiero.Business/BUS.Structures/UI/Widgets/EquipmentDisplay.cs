@@ -117,10 +117,8 @@ namespace Fiero.Business
             ;
         }
 
-        protected override void OnLayoutRebuilt(Layout oldValue)
-        {
-            base.OnLayoutRebuilt(oldValue);
-        }
+        protected override void DefaultSize() { }
+
         public EquipmentDisplay(GameUI ui, GameResources resources) : base(ui)
         {
             Resources = resources;

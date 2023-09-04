@@ -9,6 +9,7 @@
         protected readonly ModalWindowStyles Styles;
 
         protected int TitleHeight, ButtonsHeight;
+        protected abstract bool IsMaximized { get; set; }
 
         public ModalWindow(GameUI ui, ModalWindowButton[] buttons, ModalWindowStyles styles = ModalWindowStyles.Default)
             : base(ui)
@@ -22,7 +23,8 @@
             Layout?.Dispose();
             var hasTitle = Styles.HasFlag(ModalWindowStyles.Title);
             var hasButtons = Styles.HasFlag(ModalWindowStyles.CustomButtons) && Buttons.Length > 0;
-            var hasTitleBar = Styles.HasFlag(ModalWindowStyles.TitleBar_Close);
+            var hasCloseButton = Styles.HasFlag(ModalWindowStyles.TitleBar_Close);
+            var hasMaximizeButton = Styles.HasFlag(ModalWindowStyles.TitleBar_Maximize);
 
             TitleHeight = hasTitle ? 16 : 0;
             ButtonsHeight = hasButtons ? 24 : 0;
@@ -44,7 +46,33 @@
                                     }
                                 })
                             .End()
-                            .If(hasTitleBar, g => g
+                            .If(hasMaximizeButton, g => g
+                                .Col(w: 16, px: true, @class: "modal-title modal-maximize")
+                                    .Cell<Button>(b =>
+                                    {
+                                        b.Text.V = "O";
+                                        b.OutlineThickness.V = 1;
+                                        b.VerticalAlignment.V = VerticalAlignment.Middle;
+                                        b.HorizontalAlignment.V = HorizontalAlignment.Center;
+                                        b.ZOrder.V = -1;
+                                        b.Clicked += B_Clicked;
+                                        bool B_Clicked(UIControl arg1, Coord arg2, SFML.Window.Mouse.Button arg3)
+                                        {
+                                            if (!IsMaximized)
+                                            {
+                                                b.Text.V = "o";
+                                                Maximize();
+                                            }
+                                            else
+                                            {
+                                                b.Text.V = "O";
+                                                Minimize();
+                                            }
+                                            return true;
+                                        }
+                                    })
+                            .End())
+                            .If(hasCloseButton, g => g
                                 .Col(w: 16, px: true, @class: "modal-title modal-close")
                                     .Cell<Button>(b =>
                                     {
@@ -84,6 +112,13 @@
                     .End())
                 .End();
         }
+
+        protected override void DefaultSize()
+        {
+            Minimize();
+        }
+        public abstract void Maximize();
+        public abstract void Minimize();
 
         public override void Close(ModalWindowButton buttonPressed)
         {

@@ -66,6 +66,7 @@ namespace Fiero.Business
                 Layout.Size.V = e.NewValue;
             };
         }
+        protected override void DefaultSize() { }
 
         public void OnActorDeselected()
         {

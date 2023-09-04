@@ -33,7 +33,7 @@ namespace Fiero.Core
 
         public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
         public Coord ContentRenderPos => ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
+        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap));
         public Coord ContentRenderSize => ((Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
         protected Coord TrackedMousePosition { get; private set; }
 
@@ -77,25 +77,23 @@ namespace Fiero.Core
             prop.ValueChanged += (_, __) => Invalidate();
         }
 
-        public virtual bool Contains(Coord point, out UIControl owner)
+        public virtual IEnumerable<UIControl> Contains(Coord point)
         {
-            owner = default;
             if (point.X >= BorderRenderPos.X * Scale.V.X
                 && point.X < BorderRenderPos.X * Scale.V.X + BorderRenderSize.X * Scale.V.X
                 && point.Y >= BorderRenderPos.Y * Scale.V.Y
                 && point.Y < BorderRenderPos.Y * Scale.V.Y + BorderRenderSize.Y * Scale.V.Y)
             {
-                foreach (var child in Children.Where(c => c.IsInteractive && !c.IsHidden))
+                foreach (var child in Children
+                    .Where(c => !c.IsHidden))
                 {
-                    if (child.Contains(point, out owner))
+                    foreach (var s in child.Contains(point))
                     {
-                        return true;
+                        yield return s;
                     }
                 }
-                owner = this;
-                return true;
+                yield return this;
             }
-            return false;
         }
 
         public bool Click(Coord mousePos, Mouse.Button button)
@@ -108,8 +106,8 @@ namespace Fiero.Core
         {
             clickedButton = default;
             clickedControl = default;
-            var wasInside = Contains(TrackedMousePosition, out _);
-            var isInside = Contains(mousePos, out _);
+            var wasInside = Contains(TrackedMousePosition).Any();
+            var isInside = Contains(mousePos).Any();
             var leftClick = Input.IsButtonReleased(Mouse.Button.Left);
             var rightClick = Input.IsButtonReleased(Mouse.Button.Right);
             var click = leftClick || rightClick;
@@ -152,12 +150,12 @@ namespace Fiero.Core
             }
             if (isInside && click)
             {
-                foreach (var child in Children)
+                foreach (var con in Children
+                    .SelectMany(child => child.Contains(mousePos)
+                        .Where(con => con.IsInteractive.V)))
                 {
-                    if (child.Contains(mousePos, out clickedControl))
-                    {
-                        break;
-                    }
+                    clickedControl = con;
+                    break;
                 }
                 clickedControl ??= this;
                 clickedButton = leftClick ? Mouse.Button.Left : Mouse.Button.Right;
@@ -177,7 +175,7 @@ namespace Fiero.Core
 
         protected virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
-            var rect = new RectangleShape(BorderRenderSize.ToVector2f())
+            var rect = new RectangleShape((BorderRenderSize - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToVector2f())
             {
                 Position = BorderRenderPos.ToVector2f(),
                 FillColor = Background,

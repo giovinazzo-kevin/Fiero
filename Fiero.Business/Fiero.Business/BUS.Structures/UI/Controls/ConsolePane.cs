@@ -63,7 +63,7 @@ namespace Fiero.Business
             var physicalCursorPos = ((Cursor.V - new Coord(0, Scroll.V)) * glyphSize + renderOffset).ToCoord();
 
             // Check if the cursor would be physically outside of the paragraph
-            if (!Contains(physicalCursorPos, out _))
+            if (!Contains(physicalCursorPos).Any())
             {
                 // If so, hide it
                 Caret.IsHidden.V = true;

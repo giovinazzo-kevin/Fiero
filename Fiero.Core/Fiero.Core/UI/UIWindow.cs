@@ -12,6 +12,8 @@
 
         public bool IsOpen { get; private set; }
 
+        protected abstract void DefaultSize();
+
         public virtual void Open(string title)
         {
             IsOpen = true;
@@ -20,6 +22,7 @@
                 Title = new(nameof(Title), title);
             }
             RebuildLayout();
+            DefaultSize();
         }
 
         protected virtual void OnLayoutRebuilt(Layout oldValue) { }
@@ -27,10 +30,12 @@
         protected virtual void RebuildLayout()
         {
             var oldLayout = Layout;
+            var oldSize = oldLayout?.Size.V ?? Coord.Zero;
             var oldPos = oldLayout?.Position.V ?? Coord.Zero;
             Layout = UI.CreateLayout()
                 .Build(UI.Window.Size, grid => CreateLayout(grid, Title ?? "Untitled"));
             Layout.Position.V = oldPos;
+            Layout.Size.V = oldSize;
             OnLayoutRebuilt(oldLayout);
             oldLayout?.Dispose();
         }

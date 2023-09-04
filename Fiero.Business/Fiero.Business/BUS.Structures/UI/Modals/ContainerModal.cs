@@ -11,8 +11,8 @@ namespace Fiero.Business
         where TContainer : PhysicalEntity
         where TActions : struct, Enum
     {
-        public const int RowHeight = 34; // px
-        public const int PaginatorHeight = 32; // px
+        public const int RowHeight = 18; // px
+        public const int PaginatorHeight = 16; // px
 
         public readonly TContainer Container;
         public event Action<Item, TActions> ActionPerformed;
@@ -27,14 +27,6 @@ namespace Fiero.Business
             VirtualKeys.O, VirtualKeys.P, VirtualKeys.Q, VirtualKeys.R, VirtualKeys.S, VirtualKeys.T, VirtualKeys.U,
             VirtualKeys.V, VirtualKeys.W, VirtualKeys.X, VirtualKeys.Y, VirtualKeys.Z
         };
-
-        protected int KeyToIndex(VirtualKeys k)
-        {
-            var i = Array.IndexOf(Letters, k);
-            if (i == -1)
-                i = 0;
-            return i;
-        }
 
         protected VirtualKeys IndexToKey(int i) => Letters[i % Letters.Length];
 
@@ -189,8 +181,8 @@ namespace Fiero.Business
                         {
                             Invalidated += () => RefreshItemButton(b, index);
                             b.Clicked += (_, __, button) => OnItemClicked(b, index, button);
-                            b.MouseEntered += (x, __) => x.Foreground.V = UI.GetColor(ColorName.UIAccent);
-                            b.MouseLeft += (x, __) => x.Foreground.V = UI.GetColor(ColorName.UIPrimary);
+                            b.MouseEntered += (x, __) => x.Background.V = UI.GetColor(ColorName.UIBorder);
+                            b.MouseLeft += (x, __) => x.Background.V = Color.Transparent;
                             b.OutlineThickness.V = 1;
                             b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                         })
@@ -262,7 +254,7 @@ namespace Fiero.Business
                 }
 
                 var equipped = Container.TryCast<Actor>(out var actor) && Items[i].TryCast<Equipment>(out var e) && actor.ActorEquipment.IsEquipped(e);
-                b.Background.V = equipped ? UI.GetColor(ColorName.UIBorder) : Color.Transparent;
+                b.Foreground.V = equipped ? UI.GetColor(ColorName.UIAccent) : UI.GetColor(ColorName.UIPrimary);
                 var shift = index >= Letters.Length;
                 if (shift)
                 {

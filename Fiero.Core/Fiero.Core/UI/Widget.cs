@@ -2,7 +2,7 @@
 
 namespace Fiero.Core
 {
-    public class Widget : UIWindow
+    public abstract class Widget : UIWindow
     {
         private Coord? _dragStart;
 
@@ -43,11 +43,14 @@ namespace Fiero.Core
 
                 Dragged?.Invoke(this, Layout.Position.V);
             }
-            else if (Layout.Contains(mousePos, out var owner) && !_dragStart.HasValue && leftClick)
+            else if (!_dragStart.HasValue && leftClick)
             {
-                // Make sure user clicked on a non-interactive part of the window
-                if (owner.IsInteractive.V)
-                    return;
+                foreach (var con in Layout.Contains(mousePos))
+                {
+                    // Make sure user clicked on a non-interactive part of the window
+                    if (con.IsInteractive.V)
+                        return;
+                }
                 _dragStart = mousePos;
             }
             else if (!leftDown && _dragStart.HasValue)

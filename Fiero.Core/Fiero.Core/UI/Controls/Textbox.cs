@@ -81,11 +81,11 @@ namespace Fiero.Core
             }
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
-            base.Render(target, states);
+            base.Repaint(target, states);
             if (LabelDrawable != null && _caretShown)
             {
                 var drawableSize = LabelDrawable.GetLocalBounds().Size();

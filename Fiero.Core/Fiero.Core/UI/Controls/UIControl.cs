@@ -223,7 +223,7 @@ namespace Fiero.Core
             target.Draw(rect, states);
         }
 
-        protected virtual void Render(RenderTarget target, RenderStates states)
+        protected virtual void Repaint(RenderTarget target, RenderStates states)
         {
             DrawBackground(target, states);
             foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1))
@@ -244,7 +244,7 @@ namespace Fiero.Core
                 _target.Clear(Background.V);
                 var innerStates = RenderStates.Default;
                 innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
-                Render(_target, innerStates);
+                Repaint(_target, innerStates);
                 _target.Display();
             }
             using var sprite = new Sprite(_target.Texture) { Position = Position.V };

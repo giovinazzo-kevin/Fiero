@@ -83,9 +83,9 @@ namespace Fiero.Business
             return worldPos;
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
-            base.Render(target, states);
+            base.Repaint(target, states);
             if (Following.V is null)
                 return;
             if (_dirty)

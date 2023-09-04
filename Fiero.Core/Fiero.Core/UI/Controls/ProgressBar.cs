@@ -19,13 +19,13 @@ namespace Fiero.Core
             Fill = f;
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
             var tileSize = MiddleFrame.TextureRect.Size().X;
             var len = (int)(Size.V.X / (tileSize * Scale.V.X));
-            base.Render(target, states);
+            base.Repaint(target, states);
             for (var i = 0; i < len; i++)
             {
                 var piece = true switch

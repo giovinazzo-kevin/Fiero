@@ -16,9 +16,9 @@ namespace Fiero.Core
         {
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
-            base.Render(target, states);
+            base.Repaint(target, states);
             if (!(Sprite.V is { } spriteDef))
             {
                 return;

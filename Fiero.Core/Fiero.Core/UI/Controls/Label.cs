@@ -63,11 +63,11 @@ namespace Fiero.Core
             };
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
             if (IsHidden)
                 return;
-            base.Render(target, states);
+            base.Repaint(target, states);
             DrawText(this, LabelDrawable, Origin.V.ToCoord() + Margin.V + Padding.V / 2, target, states);
         }
 

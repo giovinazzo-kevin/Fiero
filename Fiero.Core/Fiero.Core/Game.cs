@@ -129,7 +129,8 @@ namespace Fiero.Core
                 // Always called once per frame before the window is drawn
                 Loop.Render += (t, dt) =>
                 {
-                    Draw();
+                    var states = RenderStates.Default;
+                    Draw(Window.RenderWindow, states);
                 };
                 _fpsStopwatch.Start();
                 Loop.Run(ct: token);
@@ -158,7 +159,7 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Draw()
+        public virtual void Draw(RenderTarget target, RenderStates states)
         {
             var currentTimestamp = _fpsStopwatch.Elapsed;
             var frameTime = currentTimestamp - _lastTimestamp;
@@ -170,7 +171,7 @@ namespace Fiero.Core
             // Windows are drawn before modals
             foreach (var win in UI.GetOpenWindows().Union(UI.GetOpenModals()))
             {
-                win.Draw();
+                win.Draw(target, states);
             }
             using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", new Font(@"C:\Windows\Fonts\Arial.ttf"));
             Window.Draw(text);

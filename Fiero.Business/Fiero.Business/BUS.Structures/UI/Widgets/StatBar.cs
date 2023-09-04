@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 
 namespace Fiero.Business.BUS.Structures.UI.Widgets
 {
@@ -62,9 +63,9 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         }
         protected override void DefaultSize() { }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target, RenderStates states)
         {
-            base.Draw();
+            base.Draw(target, states);
         }
     }
 }

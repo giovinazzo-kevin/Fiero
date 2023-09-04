@@ -1,4 +1,6 @@
-﻿namespace Fiero.Core
+﻿using SFML.Graphics;
+
+namespace Fiero.Core
 {
     public abstract class UIWindow
     {
@@ -82,10 +84,10 @@
             Updated?.Invoke(this);
         }
 
-        public virtual void Draw()
+        public virtual void Draw(RenderTarget target, RenderStates states)
         {
             if (!IsOpen) return;
-            UI.Window.RenderWindow.Draw(Layout);
+            target.Draw(Layout, states);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Fiero.Business.BUS.Structures.UI.Widgets;
 using Fiero.Core;
+using SFML.Graphics;
 
 namespace Fiero.Business
 {
@@ -111,7 +112,7 @@ namespace Fiero.Business
             Layout.Size.V = UI.Window.Size;
         }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target, RenderStates states)
         {
             if (!IsOpen)
                 return;
@@ -142,7 +143,7 @@ namespace Fiero.Business
                     XP.MaxValue.V = maxXp;
                 }
             }
-            base.Draw();
+            base.Draw(target, states);
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)

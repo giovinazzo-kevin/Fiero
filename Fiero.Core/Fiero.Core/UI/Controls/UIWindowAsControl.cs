@@ -29,10 +29,10 @@ namespace Fiero.Core
             };
         }
 
-        protected override void Render(RenderTarget target, RenderStates states)
+        protected override void Repaint(RenderTarget target, RenderStates states)
         {
             if (Window.V is null || !Window.V.IsOpen) return;
-            Window.V.Draw();
+            Window.V.Draw(target, states);
         }
 
         public override void Update()

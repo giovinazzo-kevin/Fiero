@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +107,7 @@ namespace Fiero.Business
             base.Close(buttonPressed);
         }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target, RenderStates states)
         {
             if (_dirty)
             {
@@ -114,7 +115,7 @@ namespace Fiero.Business
                 Layout.Invalidate();
                 _dirty = false;
             }
-            base.Draw();
+            base.Draw(target, states);
         }
 
         public override void Update()

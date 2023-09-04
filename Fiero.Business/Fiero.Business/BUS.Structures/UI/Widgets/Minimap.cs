@@ -60,16 +60,16 @@ namespace Fiero.Business
         public void SetDirty() => _dirty = true;
         protected override void DefaultSize() { }
 
-        public override void Draw()
+        public override void Draw(RenderTarget target, RenderStates states)
         {
-            base.Draw();
+            base.Draw(target, states);
             if (_dirty && Following.V != null)
             {
                 Repaint();
                 if (!Bake())
                     return;
             }
-            UI.Window.Draw(_renderSprite);
+            target.Draw(_renderSprite);
             bool Bake()
             {
                 var floorId = Following.V.FloorId();

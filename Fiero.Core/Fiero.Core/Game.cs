@@ -131,6 +131,7 @@ namespace Fiero.Core
                 {
                     var states = RenderStates.Default;
                     Draw(Window.RenderWindow, states);
+                    Window.Display();
                 };
                 _fpsStopwatch.Start();
                 Loop.Run(ct: token);
@@ -174,8 +175,7 @@ namespace Fiero.Core
                 win.Draw(target, states);
             }
             using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", new Font(@"C:\Windows\Fonts\Arial.ttf"));
-            Window.Draw(text);
-            Window.Display();
+            target.Draw(text);
         }
     }
 }

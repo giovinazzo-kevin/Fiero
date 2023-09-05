@@ -37,7 +37,6 @@ namespace Fiero.Core
 
         public void Invalidate(UIControl source = null)
         {
-            InvalidateDerivedSizes();
             Invalidated?.Invoke(source ?? this);
             if (source != null && Children.Contains(source))
             {
@@ -67,7 +66,7 @@ namespace Fiero.Core
             }
         }
 
-        protected virtual void InvalidateDerivedSizes()
+        protected virtual void RecomputeBoundaries()
         {
             BorderRenderPos = ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
             ContentRenderPos = ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
@@ -115,11 +114,13 @@ namespace Fiero.Core
                 Invalidate();
             };
 
-            Position.ValueChanged += (_, __) =>
-            {
-                InvalidateDerivedSizes();
-            };
-
+            Position.ValueChanged += (_, __) => RecomputeBoundaries();
+            Margin.ValueChanged += (_, __) => RecomputeBoundaries();
+            Padding.ValueChanged += (_, __) => RecomputeBoundaries();
+            OutlineThickness.ValueChanged += (_, __) => RecomputeBoundaries();
+            Snap.ValueChanged += (_, __) => RecomputeBoundaries();
+            Size.ValueChanged += (_, __) => RecomputeBoundaries();
+            RecomputeBoundaries();
             foreach (var prop in Properties)
             {
                 prop.SetOwner(this);
@@ -237,9 +238,8 @@ namespace Fiero.Core
             }
             if (isInside && click)
             {
-                foreach (var con in Children
-                    .SelectMany(child => child.Contains(mousePos)
-                        .Where(con => con.IsInteractive.V)))
+                foreach (var con in Contains(mousePos)
+                        .Where(con => con.IsInteractive.V))
                 {
                     clickedControl = con;
                     break;

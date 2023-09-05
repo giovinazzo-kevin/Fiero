@@ -45,13 +45,15 @@ namespace Fiero.Core
             }
             else if (!_dragStart.HasValue && leftClick)
             {
+                var any = false;
                 foreach (var con in Layout.Contains(mousePos))
                 {
                     // Make sure user clicked on a non-interactive part of the window
                     if (con.IsInteractive.V)
                         return;
-                    _dragStart = mousePos;
+                    any = true;
                 }
+                if (any) _dragStart = mousePos;
             }
             else if (!leftDown && _dragStart.HasValue)
             {

@@ -10,13 +10,13 @@ namespace Fiero.Business
 {
     public class ConsolePane : Paragraph
     {
-        public readonly UIControlProperty<Coord> Cursor = new(nameof(Cursor));
-        public readonly UIControlProperty<int> TabSize = new(nameof(TabSize), 4);
+        public readonly UIControlProperty<Coord> Cursor = new(nameof(Cursor), invalidate: true);
+        public readonly UIControlProperty<int> TabSize = new(nameof(TabSize), 4, invalidate: true);
         public readonly ObservableCollection<StringBuilder> Lines = new();
         public readonly ObservableCollection<string> History = new();
-        public readonly UIControlProperty<int> HistoryCursor = new(nameof(HistoryCursor), 0);
-        public readonly UIControlProperty<int> Scroll = new(nameof(Scroll), 0);
-        public readonly UIControlProperty<int> ScrollAmount = new(nameof(ScrollAmount), 8);
+        public readonly UIControlProperty<int> HistoryCursor = new(nameof(HistoryCursor), 0, invalidate: true);
+        public readonly UIControlProperty<int> Scroll = new(nameof(Scroll), 0, invalidate: true);
+        public readonly UIControlProperty<int> ScrollAmount = new(nameof(ScrollAmount), 8, invalidate: true);
         public TextBox Caret { get; private set; }
 
         private readonly Debounce _debounce = new(TimeSpan.FromMilliseconds(10)) { Enabled = true };
@@ -25,11 +25,13 @@ namespace Fiero.Business
             Caret = new(input, reader);
             Size.ValueChanged += Size_ValueChanged;
             IsActive.ValueChanged += IsActive_ValueChanged;
-            Invalidated += _ =>
+            Invalidated += src =>
             {
                 Caret.Size.V = Caret.FontSize.V;
                 Caret.Padding.V = Caret.Margin.V = Coord.Zero;
                 Cursor_ValueChanged(null, Cursor);
+                if (src != this && src != null)
+                    Invalidate();
             };
             History.CollectionChanged += History_CollectionChanged;
             Cursor.ValueChanged += Cursor_ValueChanged;

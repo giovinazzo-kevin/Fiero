@@ -34,7 +34,10 @@ namespace Fiero.Business
             OutputAvailable += OnOutputAvailable;
         }
 
-        protected override void DefaultSize() { }
+        protected override void DefaultSize()
+        {
+            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize);
+        }
 
         protected void WriteLine(string s)
         {

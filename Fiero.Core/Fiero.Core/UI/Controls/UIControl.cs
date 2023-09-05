@@ -30,7 +30,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
-        protected bool IsDirty { get; private set; } = true;
+        protected bool IsDirty { get; set; } = true;
 
         private RenderTexture _target;
         private HashSet<UIControl> _redrawChildren = new();

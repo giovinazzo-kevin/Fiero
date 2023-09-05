@@ -60,17 +60,20 @@ namespace Fiero.Core
                             text.Append(ch);
                         break;
                 }
+                Invalidate();
             }
             if (_caretStopwatch.ElapsedMilliseconds > 2 * CaretBlinkIntervalMs)
             {
                 _caretShown = false;
                 _caret = null;
                 _caretStopwatch.Restart();
+                Invalidate();
             }
             else if (!_caretShown && _caretStopwatch.ElapsedMilliseconds > CaretBlinkIntervalMs)
             {
                 _caret = new BitmapText(Font.V, "|");
                 _caretShown = true;
+                Invalidate();
             }
             Text.V = text.ToString()[..Math.Min(MaxLength.V, text.Length)];
             if (enterPressed)
@@ -78,6 +81,7 @@ namespace Fiero.Core
                 EnterPressed?.Invoke(this);
                 if (ClearOnEnter)
                     Text.V = string.Empty;
+                Invalidate();
             }
         }
 

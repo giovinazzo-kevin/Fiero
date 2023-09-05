@@ -13,8 +13,8 @@ namespace Fiero.Core
 
         public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false) { Inherited = false };
         public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
-        public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new()) { Inherited = false };
-        public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new()) { Inherited = false };
+        public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new(), invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new(), invalidate: true) { Inherited = false };
         public readonly UIControlProperty<Coord> Position = new(nameof(Position), new());
         public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
         public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new());
@@ -22,12 +22,12 @@ namespace Fiero.Core
         public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255), invalidate: true);
         public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0), invalidate: true);
         public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0), invalidate: true);
-        public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagated = true };
-        public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagated = true };
+        public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
+        public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
-        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255)) { Inherited = false };
-        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0) { Inherited = false };
+        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
         protected bool IsDirty { get; private set; } = true;
@@ -37,6 +37,7 @@ namespace Fiero.Core
 
         public void Invalidate(UIControl source = null)
         {
+            InvalidateDerivedSizes();
             Invalidated?.Invoke(source ?? this);
             if (source != null && Children.Contains(source))
             {
@@ -48,10 +49,10 @@ namespace Fiero.Core
             }
         }
 
-        public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-        public Coord ContentRenderPos => ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-        public Coord BorderRenderSize => ((Size.V - Margin.V * 2).Align(Snap));
-        public Coord ContentRenderSize => ((Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
+        public Coord BorderRenderPos { get; private set; }
+        public Coord ContentRenderPos { get; private set; }
+        public Coord BorderRenderSize { get; private set; }
+        public Coord ContentRenderSize { get; private set; }
         protected Coord TrackedMousePosition { get; private set; }
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
@@ -64,6 +65,14 @@ namespace Fiero.Core
                     myProp.Value = fromProp.Value;
                 }
             }
+        }
+
+        protected virtual void InvalidateDerivedSizes()
+        {
+            BorderRenderPos = ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
+            ContentRenderPos = ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
+            BorderRenderSize = ((Size.V - Margin.V * 2).Align(Snap));
+            ContentRenderSize = ((Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
         }
 
         public UIControl(GameInput input)
@@ -104,6 +113,11 @@ namespace Fiero.Core
                     _target = new RenderTexture((uint)(Size.V.X * Scale.V.X), (uint)(Size.V.Y * Scale.V.Y));
                 }
                 Invalidate();
+            };
+
+            Position.ValueChanged += (_, __) =>
+            {
+                InvalidateDerivedSizes();
             };
 
             foreach (var prop in Properties)

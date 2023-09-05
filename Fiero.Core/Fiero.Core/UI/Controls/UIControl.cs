@@ -301,20 +301,27 @@ namespace Fiero.Core
             {
                 var toRepaintAnyway = Children.Except(_redrawChildren)
                     .Where(otherChild => _redrawChildren.Any(rd => rd.Intersects(otherChild)));
-                foreach (var child in _redrawChildren
+                var drawList = _redrawChildren
                     .Concat(toRepaintAnyway)
                     .OrderByDescending(x => x.ZOrder.V)
                     .ThenByDescending(x => x.IsActive.V ? 0 : 1)
-                    .ThenBy(Children.IndexOf)) // Preserves the natural ordering where z-order is implicit
+                    .ThenBy(Children.IndexOf) // Preserves the natural ordering where z-order is implicit
+                    .ToArray();
+                // If a child has a semitransparent background, we need to 
+                foreach (var child in drawList
+                    .Where(c => c.Background.V.A < 255 && c.Background.V.A > 0))
                 {
                     using var rect = new RectangleShape(child.BorderRenderSize)
                     {
                         FillColor = Color.Transparent,
-                        Position = child.BorderRenderPos.ToVector2f() - new SFML.System.Vector2f(1, 1)
+                        Position = (child.BorderRenderPos - BorderRenderPos - Coord.PositiveOne).ToVector2f()
                     };
                     var eraser = RenderStates.Default;
                     eraser.BlendMode = BlendMode.None;
                     _target.Draw(rect, eraser);
+                }
+                foreach (var child in drawList)
+                {
                     child.Repaint(_target, innerStates);
                     child.IsDirty = false;
                 }

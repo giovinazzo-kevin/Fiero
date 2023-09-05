@@ -114,10 +114,10 @@ namespace Fiero.Business
             LineAvailable += closure.OnLineAvailable;
             return new(new[] { () => {
                 cts.Cancel();
-                ScriptingSystem.Out.Reader.Complete();
-                ScriptingSystem.Out.Writer.Complete();
-                ScriptingSystem.Out.Reader.Complete();
-                ScriptingSystem.Out.Writer.Complete();
+                // ScriptingSystem.Out.Reader.Complete();
+                // ScriptingSystem.Out.Writer.Complete();
+                // ScriptingSystem.Out.Reader.Complete();
+                // ScriptingSystem.Out.Writer.Complete();
                 CharAvailable -= closure.OnCharAvailable;
                 LineAvailable -= closure.OnLineAvailable;
             } });

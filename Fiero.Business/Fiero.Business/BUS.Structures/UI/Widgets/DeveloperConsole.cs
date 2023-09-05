@@ -85,7 +85,7 @@ namespace Fiero.Business
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
-                .After(TimeSpan.FromMilliseconds(50))
+                //.After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();
@@ -117,7 +117,10 @@ namespace Fiero.Business
             return new(new[] { () => {
                 CharAvailable -= closure.OnCharAvailable;
                 LineAvailable -= closure.OnLineAvailable;
-                ScriptingSystem.In.Reader.CancelPendingRead();
+                //ScriptingSystem.Out.Writer.CancelPendingFlush();
+                //ScriptingSystem.Out.Reader.CancelPendingRead();
+                //ScriptingSystem.In.Writer.CancelPendingFlush();
+                // ScriptingSystem.In.Reader.CancelPendingRead();
                 cts.Cancel();
             } });
         }

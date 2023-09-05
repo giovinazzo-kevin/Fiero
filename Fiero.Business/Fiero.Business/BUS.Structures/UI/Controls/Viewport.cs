@@ -123,7 +123,6 @@ namespace Fiero.Business
                         var spriteSize = sprite.GetLocalBounds().Size();
                         sprite.Position = (spriteDef.Offset + worldPos - viewPos) * ViewTileSize.V + Position.V;
                         sprite.Scale = ViewTileSize.V / spriteSize * spriteDef.Scale;
-                        sprite.Color = Resources.Colors.Get(spriteDef.Color);
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                         target.Draw(sprite, states);
                         anim.Enqueue(pair);
@@ -320,6 +319,7 @@ namespace Fiero.Business
                             timeline.RemoveAt(i);
                         }
                     }
+                    Invalidate();
                     sw.Restart();
                     if (blocking)
                     {

@@ -542,16 +542,21 @@ namespace Fiero.Business.Scenes
                     Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
                 }
                 e.Actor.Render.Hidden = true;
-                if (Player.CanSee(e.Actor))
-                {
-                    Systems.Render.CenterOn(Player);
-                    Systems.Render.Viewport.Animate(false, e.Actor.Position(), Animation.Death(e.Actor));
-                }
+
+                Corpse corpse = null;
                 var corpseDef = e.Actor.ActorProperties.Corpse;
                 if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
                 {
-                    var corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
+                    corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
                     Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                }
+
+                if (Player.CanSee(e.Actor))
+                {
+                    if (corpse != null) corpse.Render.Hidden = true;
+                    Systems.Render.CenterOn(Player);
+                    Systems.Render.Viewport.Animate(false, e.Actor.Position(), Animation.Death(e.Actor)
+                        .OnLastFrame(() => { if (corpse != null) corpse.Render.Hidden = false; }));
                 }
 
                 if (e.Actor.Inventory != null)
@@ -713,8 +718,8 @@ namespace Fiero.Business.Scenes
                     Systems.Render.CenterOn(Player);
                     var anim = e.Item.ThrowableProperties.Throw switch
                     {
-                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite),
-                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite)
+                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color)
                     };
                     Systems.Render.Viewport.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
@@ -749,7 +754,7 @@ namespace Fiero.Business.Scenes
                 Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
-                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite);
+                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
                     Systems.Render.Viewport.Animate(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                 }

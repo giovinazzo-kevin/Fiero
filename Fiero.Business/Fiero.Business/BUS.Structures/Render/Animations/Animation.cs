@@ -117,15 +117,15 @@ namespace Fiero.Business
         {
             var k = new Vec(0.5f, 0.5f);
             return new(new[] {
-                new AnimationFrame(TimeSpan.FromMilliseconds(04), MakeSprite(new())),
-                new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(09), MakeSprite(k * new Vec(1.00f, 1.00f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(10), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(15), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(04), MakeSprite(new())),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 04), MakeSprite(new())),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 09), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 09), MakeSprite(k * new Vec(1.00f, 1.00f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), MakeSprite(k * new Vec(0.75f, 0.75f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 15), MakeSprite(k * new Vec(0.50f, 0.50f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 15), MakeSprite(k * new Vec(0.25f, 0.25f) * direction)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 04), MakeSprite(new())),
             });
 
             SpriteDef MakeSprite(Vec ofs) =>
@@ -172,7 +172,7 @@ namespace Fiero.Business
             Vec? scale = null
         )
         {
-            var s = scale ?? new(0.5f, 0.5f);
+            var s = scale ?? new(0.25f, 0.25f);
             var str = damage.ToString();
 
             return new(

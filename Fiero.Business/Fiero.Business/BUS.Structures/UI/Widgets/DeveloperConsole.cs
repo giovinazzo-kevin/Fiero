@@ -32,6 +32,12 @@ namespace Fiero.Business
             Colors = colors;
             ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
+            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
+            {
+                if (Layout != null)
+                    Layout.Size.V += obj.NewValue - obj.OldValue;
+            }
         }
 
         protected override void DefaultSize()

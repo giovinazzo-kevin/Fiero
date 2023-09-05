@@ -32,7 +32,7 @@ namespace Fiero.Business
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
-                if (IsResponsive)
+                if (IsResponsive && Layout != null)
                     Layout.Size.V += obj.NewValue - obj.OldValue;
             }
         }

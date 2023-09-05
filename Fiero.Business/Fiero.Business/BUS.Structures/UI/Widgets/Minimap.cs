@@ -42,7 +42,7 @@ namespace Fiero.Business
                 SetDirty();
             };
             Layout.Position.ValueChanged += (_, __) => SetDirty();
-            Layout.Invalidated += (_) => SetDirty();
+            //Layout.Invalidated += (_) => SetDirty();
             SetDirty();
         }
 
@@ -57,7 +57,11 @@ namespace Fiero.Business
             _renderSprite = new(_renderTexture.Texture);
         }
 
-        public void SetDirty() => _dirty = true;
+        public void SetDirty()
+        {
+            _dirty = true;
+            Layout?.Invalidate();
+        }
         protected override void DefaultSize() { }
 
         public override void Draw(RenderTarget target, RenderStates states)

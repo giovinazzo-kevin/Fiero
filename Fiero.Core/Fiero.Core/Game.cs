@@ -142,7 +142,7 @@ namespace Fiero.Core
             if (Window.HasFocus())
             {
                 // Update all non-modal windows
-                foreach (var wnd in UI.GetOpenWindows())
+                foreach (var wnd in UI.GetOpenWindows().Reverse())
                 {
                     wnd.Update();
                 }

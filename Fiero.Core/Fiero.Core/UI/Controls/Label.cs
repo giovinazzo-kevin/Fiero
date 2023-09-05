@@ -104,5 +104,7 @@ namespace Fiero.Core
                 target.Draw(text, states);
             }
         }
+
+        public override string ToString() => Text.V;
     }
 }

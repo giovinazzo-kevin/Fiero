@@ -19,9 +19,9 @@ namespace Fiero.Core
         public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
         public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new());
         public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1), invalidate: true);
-        public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255));
-        public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0));
-        public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0));
+        public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255), invalidate: true);
+        public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0), invalidate: true);
+        public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0), invalidate: true);
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false) { Propagated = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false) { Propagated = true };
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
@@ -30,13 +30,22 @@ namespace Fiero.Core
         public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
-        private RenderTexture _target;
-        private bool _isDirty = true;
+        protected bool IsDirty { get; private set; } = true;
 
-        public void Invalidate()
+        private RenderTexture _target;
+        private HashSet<UIControl> _redrawChildren = new();
+
+        public void Invalidate(UIControl source = null)
         {
-            Invalidated?.Invoke(this);
-            _isDirty = true;
+            Invalidated?.Invoke(source ?? this);
+            if (source != null && Children.Contains(source))
+            {
+                _redrawChildren.Add(source);
+            }
+            else if (source == null || source == this)
+            {
+                IsDirty = true;
+            }
         }
 
         public Coord BorderRenderPos => ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
@@ -74,14 +83,15 @@ namespace Fiero.Core
             {
                 if (e.OldItems != null)
                     foreach (UIControl i in e.OldItems)
-                        i.Invalidated -= PropagateInvalidation;
+                        i.Invalidated -= PropagateUpwards;
                 if (e.NewItems != null)
                     foreach (UIControl i in e.NewItems)
-                        i.Invalidated += PropagateInvalidation;
+                        i.Invalidated += PropagateUpwards;
                 Invalidate();
-                void PropagateInvalidation(UIControl obj)
+                void PropagateUpwards(UIControl source)
                 {
-                    Invalidate();
+                    if (source != this && source != null)
+                        Invalidate(source);
                 }
             };
 
@@ -107,10 +117,37 @@ namespace Fiero.Core
             }
         }
 
-
         private void RegisterInvalidationEvents<T>(UIControlProperty<T> prop)
         {
             prop.ValueChanged += (_, __) => Invalidate();
+        }
+
+        /// <summary>
+        /// Like Contains but goes in depth recursively if it finds a nested object.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public virtual IEnumerable<UIControl> HitTest(Coord point)
+        {
+            foreach (var contained in Contains(point))
+            {
+                if (contained is not UIWindowAsControl wnd)
+                {
+                    yield return contained;
+                    continue;
+                }
+                foreach (var child in wnd.Window.V.Layout.HitTest(point))
+                {
+                    yield return child;
+                }
+            }
+        }
+
+        public bool Intersects(UIControl other)
+        {
+            var a = new IntRect(BorderRenderPos.X, BorderRenderPos.Y, BorderRenderSize.X, BorderRenderSize.Y).Inflate(-1);
+            var b = new IntRect(other.BorderRenderPos.X, other.BorderRenderPos.Y, other.BorderRenderSize.X, other.BorderRenderSize.Y).Inflate(-1);
+            return a.Intersects(b);
         }
 
         public virtual IEnumerable<UIControl> Contains(Coord point)
@@ -152,7 +189,6 @@ namespace Fiero.Core
             {
                 MouseEntered?.Invoke(this, mousePos);
                 OnMouseEntered(mousePos);
-                Invalidate();
                 if (!click)
                 {
                     foreach (var child in Children)
@@ -165,7 +201,6 @@ namespace Fiero.Core
             {
                 MouseLeft?.Invoke(this, mousePos);
                 OnMouseLeft(mousePos);
-                Invalidate();
                 if (!click)
                 {
                     foreach (var child in Children)
@@ -228,8 +263,7 @@ namespace Fiero.Core
             DrawBackground(target, states);
             foreach (var child in Children.OrderByDescending(x => x.ZOrder.V).ThenByDescending(x => x.IsActive.V ? 0 : 1))
             {
-                child._isDirty = true;
-                child.Draw(target, states);
+                child.Repaint(target, states);
             }
         }
 
@@ -238,19 +272,38 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             if (_target is null) return;
-            if (_isDirty)
+            var innerStates = RenderStates.Default;
+            innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
+            if (IsDirty)
             {
-                _isDirty = false;
-                _target.Clear(Background.V);
-                var innerStates = RenderStates.Default;
-                innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
+                IsDirty = false;
+                _target.Clear(Color.Transparent);
                 Repaint(_target, innerStates);
-                _target.Display();
+                foreach (var child in Children)
+                    child.IsDirty = false;
+                _redrawChildren.Clear();
             }
+            if (_redrawChildren.Count > 0)
+            {
+                var toRepaintAnyway = Children.Except(_redrawChildren)
+                    .Where(otherChild => _redrawChildren.Any(rd => rd.Intersects(otherChild)));
+                foreach (var child in _redrawChildren
+                    .Concat(toRepaintAnyway)
+                    .OrderByDescending(x => x.ZOrder.V)
+                    .ThenByDescending(x => x.IsActive.V ? 0 : 1)
+                    .ThenBy(Children.IndexOf)) // Preserves the natural ordering where z-order is implicit
+                {
+                    child.Repaint(_target, innerStates);
+                    child.IsDirty = false;
+                }
+                _redrawChildren.Clear();
+            }
+            _target.Display();
             using var sprite = new Sprite(_target.Texture) { Position = Position.V };
             target.Draw(sprite, states);
         }
 
         public virtual void Dispose() { }
+
     }
 }

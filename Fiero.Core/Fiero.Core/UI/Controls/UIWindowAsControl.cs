@@ -21,12 +21,15 @@ namespace Fiero.Core
                 if (Window.V?.Layout is null) return;
                 Window.V.Layout.Position.V = Position.V;
             };
-            Window.ValueUpdated += (_, __) =>
+            Window.ValueChanged += (_, old) =>
             {
-                if (Window.V?.Layout is null) return;
+                if (Window.V?.Layout is null)
+                    return;
                 Window.V.Layout.Position.V = Position.V;
                 Window.V.Layout.Size.V = Size.V;
             };
+            //Invalidated += source =>
+            //    Window.V?.Layout?.Invalidate(source);
         }
 
         protected override void Repaint(RenderTarget target, RenderStates states)
@@ -39,6 +42,8 @@ namespace Fiero.Core
         {
             if (Window.V is null) return;
             Window.V.Update();
+            if (!IsDirty)
+                Invalidate(); // The window handles its own invalidation logic, so redraw it each frame
         }
     }
 }

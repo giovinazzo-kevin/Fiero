@@ -1,6 +1,7 @@
 ﻿using Fiero.Business.BUS.Structures.UI.Widgets;
 using Fiero.Core;
 using SFML.Graphics;
+using System.Linq;
 
 namespace Fiero.Business
 {
@@ -57,6 +58,8 @@ namespace Fiero.Business
             EquipmentDisplay.EnableDragging = false;
 
             Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
+            Viewport.Background.V = Color.Black;
+
             ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency?
             LogBox.EnableDragging = false;
             MiniMap.EnableDragging = false;
@@ -76,6 +79,31 @@ namespace Fiero.Business
             Viewport.Following.V = null;
             EquipmentDisplay.Following.V = null;
             Viewport.SetDirty();
+        }
+
+        public override void Update()
+        {
+            base.Update();
+#if DEBUG
+            if (UI.Input.IsButtonPressed(SFML.Window.Mouse.Button.Right))
+            {
+                var options = Layout.HitTest(UI.Input.GetMousePosition())
+                    .Select(x => $"{x.GetType()} {x.ToString()}")
+                    .ToArray();
+                Layout.HitTest(UI.Input.GetMousePosition())
+                        .Select(x => $"{x.GetType()} {x.ToString()}")
+                        .ToArray();
+                UI.NecessaryChoice(options);
+                foreach (var wnd in UI.GetOpenModals().ToList())
+                {
+                    options = wnd.Layout.HitTest(UI.Input.GetMousePosition())
+                        .Select(x => $"{x.GetType()} {x.ToString()}")
+                        .ToArray();
+                    if (options.Any())
+                        UI.NecessaryChoice(options);
+                }
+            }
+#endif
         }
 
         public void OnPointSelected(Coord p)

@@ -110,8 +110,10 @@ namespace Fiero.Business
 
         public override void Minimize()
         {
+            var vwSize = UI.Store.Get(Data.UI.ViewportSize);
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
             Layout.Size.V = new(popupSize.X, 24 * Options.Length + TitleHeight + ButtonsHeight);
+            Layout.Position.V = vwSize / 2 - Layout.Size.V / 2;
         }
     }
 }

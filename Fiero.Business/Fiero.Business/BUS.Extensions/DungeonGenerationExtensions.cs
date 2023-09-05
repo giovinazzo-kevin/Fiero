@@ -1,5 +1,4 @@
 ﻿using Fiero.Core;
-using SFML.Graphics;
 using System;
 using System.Linq;
 
@@ -9,11 +8,6 @@ namespace Fiero.Business
 
     public static class DungeonGenerationExtensions
     {
-        public static IntRect Inflate(this IntRect rect, int area)
-        {
-            return new(rect.Left - area, rect.Top - area, rect.Width + area, rect.Height + area);
-        }
-
         public static void Draw(this FloorGenerationContext ctx, Coord p, Func<Coord, TileDef> makeTile)
         {
             var tile = makeTile(p);

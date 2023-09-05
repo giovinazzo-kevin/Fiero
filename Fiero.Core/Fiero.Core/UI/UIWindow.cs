@@ -9,10 +9,12 @@ namespace Fiero.Core
         public Layout Layout { get; private set; }
         public UIControlProperty<string> Title { get; private set; }
 
+        public event Action<UIWindow> Opened;
         public event Action<UIWindow, ModalWindowButton> Closed;
         public event Action<UIWindow> Updated;
 
         public bool IsOpen { get; private set; }
+
 
         protected abstract void DefaultSize();
 
@@ -25,6 +27,7 @@ namespace Fiero.Core
             }
             RebuildLayout();
             DefaultSize();
+            Opened?.Invoke(this);
         }
 
         protected virtual void OnLayoutRebuilt(Layout oldValue) { }
@@ -87,7 +90,7 @@ namespace Fiero.Core
         public virtual void Draw(RenderTarget target, RenderStates states)
         {
             if (!IsOpen) return;
-            target.Draw(Layout, states);
+            Layout.Draw(target, states);
         }
     }
 }

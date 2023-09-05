@@ -50,8 +50,8 @@ namespace Fiero.Core
                     // Make sure user clicked on a non-interactive part of the window
                     if (con.IsInteractive.V)
                         return;
+                    _dragStart = mousePos;
                 }
-                _dragStart = mousePos;
             }
             else if (!leftDown && _dragStart.HasValue)
             {

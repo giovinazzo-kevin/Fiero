@@ -5,14 +5,14 @@ namespace Fiero.Core
     public class Paragraph : UIControl
     {
         public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12)) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty);
-        public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255);
-        public readonly UIControlProperty<int> Rows = new(nameof(Rows), 10);
-        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false) { Inherited = false };
-        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false);
-        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true);
-        public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true);
+        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12), invalidate: true) { Propagated = true, Inherited = true };
+        public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
+        public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255, invalidate: true);
+        public readonly UIControlProperty<int> Rows = new(nameof(Rows), 10, invalidate: true);
+        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false, invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false, invalidate: true);
+        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true, invalidate: true);
+        public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true, invalidate: true);
 
         protected readonly List<Label> Labels = new();
 

@@ -166,7 +166,7 @@ namespace Fiero.Core
             var frameTime = currentTimestamp - _lastTimestamp;
             _lastTimestamp = currentTimestamp;
 
-            MeasuredFramesPerSecond = (1f / (float)frameTime.TotalSeconds + MeasuredFramesPerSecond) / 2;
+            MeasuredFramesPerSecond = 0.02f * 1f / (float)frameTime.TotalSeconds + MeasuredFramesPerSecond * 0.98f;
 
             Director.Draw();
             // Windows are drawn before modals

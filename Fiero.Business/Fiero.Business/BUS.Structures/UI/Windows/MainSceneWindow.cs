@@ -149,11 +149,11 @@ namespace Fiero.Business
             {
                 var floorId = following.FloorId();
                 var position = following.Position();
-                //PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
-                //CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
-                //CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
-                //CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
-                //RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
+                PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
+                CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
+                CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+                CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
+                RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {

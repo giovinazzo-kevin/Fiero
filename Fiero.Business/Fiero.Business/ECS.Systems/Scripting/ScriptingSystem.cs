@@ -34,23 +34,34 @@ namespace Fiero.Business
 
         public readonly Pipe In = new(), Out = new();
         public readonly TextWriter InWriter, OutWriter;
-        public readonly TextReader InReader, OutReader;
+        public TextReader InReader { get; private set; }
+        public readonly TextReader OutReader;
         public readonly IAsyncInputReader AsyncInputReader;
 
         private event Action _unload;
 
+        public readonly Encoding Encoding = Encoding.GetEncoding(437);
         public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
         public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
 
+        public void ResetPipes()
+        {
+            In.Writer.Complete();
+            In.Reader.Complete();
+            Out.Writer.Complete();
+            Out.Reader.Complete();
+            In.Reset();
+            Out.Reset();
+        }
+
         public ErgoScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
-            var encoding = Encoding.GetEncoding(437);
-            OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), encoding));
-            OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), encoding));
-            InWriter = TextWriter.Synchronized(new StreamWriter(In.Writer.AsStream(), encoding));
-            InReader = TextReader.Synchronized(new StreamReader(In.Reader.AsStream(), encoding));
+            OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), Encoding));
+            OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), Encoding));
+            InWriter = TextWriter.Synchronized(new StreamWriter(In.Writer.AsStream(), Encoding));
+            InReader = TextReader.Synchronized(new StreamReader(In.Reader.AsStream(), Encoding));
             AsyncInputReader = reader;
             FieroLib = new(sp);
             Facade = GetErgoFacade();
@@ -108,6 +119,7 @@ namespace Fiero.Business
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
                 solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
+                //_unload += () => UnloadScript(script);
                 return true;
             }
             return false;

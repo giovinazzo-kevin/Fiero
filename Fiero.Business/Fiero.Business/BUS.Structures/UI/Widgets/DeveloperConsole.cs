@@ -25,6 +25,8 @@ namespace Fiero.Business
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
+        private static readonly ManualResetEventSlim ConsoleAvailable = new(true);
+
         public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui)
         {
@@ -104,11 +106,7 @@ namespace Fiero.Business
                 .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
-                    await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, exit:
-                        _ => token.IsCancellationRequested))
-                    {
-                        ;
-                    }
+                    await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, ct: token)) ;
                 })
                 .Build();
             _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
@@ -117,9 +115,10 @@ namespace Fiero.Business
             CharAvailable += closure.OnCharAvailable;
             LineAvailable += closure.OnLineAvailable;
             return new(new[] { () => {
-                cts.Cancel();
                 CharAvailable -= closure.OnCharAvailable;
                 LineAvailable -= closure.OnLineAvailable;
+                ScriptingSystem.In.Reader.CancelPendingRead();
+                cts.Cancel();
             } });
         }
 

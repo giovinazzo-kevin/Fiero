@@ -5,17 +5,17 @@ namespace Fiero.Business
 {
     public partial class DeveloperConsole
     {
-        record class ShellClosure(ErgoShell s, TextWriter inWriter)
+        record class ShellClosure(ErgoShell Shell, TextWriter InWriter)
         {
             public void OnCharAvailable(DeveloperConsole _, char c)
             {
-                inWriter.Write(c);
-                inWriter.Flush();
+                InWriter.Write(c);
+                InWriter.Flush();
             }
             public void OnLineAvailable(DeveloperConsole _, string s)
             {
-                inWriter.WriteLine(s);
-                inWriter.Flush();
+                InWriter.WriteLine(s);
+                InWriter.Flush();
             }
         };
     }

@@ -149,6 +149,7 @@ namespace Fiero.Business.Scenes
             // - Track console output
             // - Track script in console
             yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
+            yield return new Subscription(new[] { Systems.Scripting.UnloadAllScripts });
             //var scriptLoaded = new Subscription();
             //scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             //{

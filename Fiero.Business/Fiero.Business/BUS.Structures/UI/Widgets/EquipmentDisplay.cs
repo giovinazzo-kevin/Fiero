@@ -122,10 +122,10 @@ namespace Fiero.Business
         public EquipmentDisplay(GameUI ui, GameResources resources) : base(ui)
         {
             Resources = resources;
-            Following.ValueUpdated += Following_ValueUpdated;
+            Following.ValueChanged += Following_ValueChanged;
         }
 
-        private void Following_ValueUpdated(UIControlProperty<Actor> arg1, Actor old)
+        private void Following_ValueChanged(UIControlProperty<Actor> arg1, Actor old)
         {
             if (old?.ActorEquipment != null)
                 old.ActorEquipment.EquipmentChanged -= ActorEquipment_EquipmentChanged;
@@ -159,7 +159,6 @@ namespace Fiero.Business
                     case EquipmentSlotName.RightHand: Update("hand-right", v); break;
                 }
             }
-
             void Update(string @class, Equipment v)
             {
                 Layout.Query<Label>(l => true, g => g.HasAllClasses(@class, "label")).Single().Text.V

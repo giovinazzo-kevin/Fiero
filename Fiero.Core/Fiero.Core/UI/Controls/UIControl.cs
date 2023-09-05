@@ -309,7 +309,7 @@ namespace Fiero.Core
                     .ToArray();
                 // If a child has a semitransparent background, we need to 
                 foreach (var child in drawList
-                    .Where(c => c.Background.V.A < 255 && c.Background.V.A > 0))
+                    .Where(c => c.Background.V.A < 255))
                 {
                     using var rect = new RectangleShape(child.BorderRenderSize)
                     {

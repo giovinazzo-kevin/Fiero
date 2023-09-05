@@ -75,11 +75,11 @@ namespace Fiero.Business
             Pane.Write(chunk);
         }
 
-        public Subscription TrackShell(ErgoShell s)
+        public Subscription TrackShell(ErgoShell shell)
         {
-            s.UseColors = false;
-            s.UseANSIEscapeSequences = false;
-            s.UseUnicodeSymbols = false;
+            shell.UseColors = false;
+            shell.UseANSIEscapeSequences = false;
+            shell.UseUnicodeSymbols = false;
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
@@ -104,20 +104,20 @@ namespace Fiero.Business
                 .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
-                    await foreach (var ans in s.Repl(ScriptingSystem.StdlibScope)) ;
+                    await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, exit:
+                        _ => token.IsCancellationRequested))
+                    {
+                        ;
+                    }
                 })
                 .Build();
             _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
             _ = Concern.Deferral.LoopForever(replExpr, cts.Token);
-            var closure = new ShellClosure(s, ScriptingSystem.InWriter);
+            var closure = new ShellClosure(shell, ScriptingSystem.InWriter);
             CharAvailable += closure.OnCharAvailable;
             LineAvailable += closure.OnLineAvailable;
             return new(new[] { () => {
                 cts.Cancel();
-                // ScriptingSystem.Out.Reader.Complete();
-                // ScriptingSystem.Out.Writer.Complete();
-                // ScriptingSystem.Out.Reader.Complete();
-                // ScriptingSystem.Out.Writer.Complete();
                 CharAvailable -= closure.OnCharAvailable;
                 LineAvailable -= closure.OnLineAvailable;
             } });

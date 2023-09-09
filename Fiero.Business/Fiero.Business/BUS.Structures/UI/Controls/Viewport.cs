@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fiero.Business
@@ -30,6 +31,7 @@ namespace Fiero.Business
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
         private bool _dirty = true;
+        private volatile int _id;
 
         protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
 
@@ -298,7 +300,7 @@ namespace Fiero.Business
                     .ToList();
                 var viewPos = ViewArea.V.Position();
                 var myVfx = new ConcurrentQueue<OrderedPair<Coord, SpriteDef>>();
-                var k = Vfx.Keys.LastOrDefault() + 1;
+                var k = Interlocked.Increment(ref _id);
                 Vfx[k] = myVfx;
                 var sw = new Stopwatch();
                 while (timeline.Count > 0)
@@ -319,8 +321,8 @@ namespace Fiero.Business
                             timeline.RemoveAt(i);
                         }
                     }
-                    Invalidate();
                     sw.Restart();
+                    Invalidate();
                     if (blocking)
                     {
                         Loop.WaitAndDraw(increment);

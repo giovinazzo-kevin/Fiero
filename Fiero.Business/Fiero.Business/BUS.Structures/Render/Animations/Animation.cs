@@ -172,18 +172,25 @@ namespace Fiero.Business
             Vec? scale = null
         )
         {
-            var s = scale ?? new(0.25f, 0.25f);
+            var s = scale ?? new(0.5f, 0.5f);
             var str = damage.ToString();
 
+            var startX = 0.25f;
             return new(
-                new AnimationFrame(TimeSpan.FromMilliseconds(10), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(12), GetSprites(new(0, -0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(24), GetSprites(new(0, -0.50f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(16), GetSprites(new(0, -0.25f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(12), GetSprites(new(0, +0.00f), ColorName.White, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(10), GetSprites(new(0, +0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(8), GetSprites(new(0, +0.50f), tint, str))
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetSprites(new(startX, +0.00f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.33f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 48), GetSprites(new(AnimateX(), -0.50f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), +0.00f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetSprites(new(AnimateX(), +0.25f), tint, str)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 8), GetSprites(new(AnimateX(), +0.50f), tint, str))
             );
+
+            float AnimateX()
+            {
+                return startX;
+            }
 
             SpriteDef[] GetSprites(Vec ofs, ColorName tint, string text)
             {

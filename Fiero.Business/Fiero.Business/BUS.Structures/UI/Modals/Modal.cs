@@ -29,8 +29,8 @@ namespace Fiero.Business
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
-            void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
+            Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
+            void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 if (IsResponsive && Layout != null)
                     Layout.Size.V += obj.NewValue - obj.OldValue;

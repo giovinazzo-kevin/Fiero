@@ -1,10 +1,14 @@
 ﻿using Fiero.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Fiero.Business
 {
     public class ChoicePopUp<T> : PopUp
     {
+        readonly record struct Mapping(VirtualKeys Key, string Display);
+
         protected int SelectedIndex;
 
         public readonly T[] Options;
@@ -12,6 +16,8 @@ namespace Fiero.Business
 
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
+
+        private readonly Dictionary<int, Mapping> _mapping = new();
 
         public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons)
             : base(ui, resources, buttons, GetDefaultStyles(buttons) & ~ModalWindowStyles.TitleBar_Maximize)
@@ -21,6 +27,34 @@ namespace Fiero.Business
             {
                 OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
+
+            _mapping[0] = new(VirtualKeys.N1, "1");
+            _mapping[1] = new(VirtualKeys.N2, "2");
+            _mapping[2] = new(VirtualKeys.N3, "3");
+            _mapping[3] = new(VirtualKeys.N4, "4");
+            _mapping[4] = new(VirtualKeys.N5, "5");
+            _mapping[5] = new(VirtualKeys.N6, "6");
+            _mapping[6] = new(VirtualKeys.N7, "7");
+            _mapping[7] = new(VirtualKeys.N8, "8");
+            _mapping[8] = new(VirtualKeys.N9, "9");
+            _mapping[9] = new(VirtualKeys.N0, "0");
+        }
+
+        public bool IsMapped(VirtualKeys key) => _mapping.Values.Any(m => m.Key == key);
+        public void Remap(int slot, VirtualKeys key)
+        {
+            _mapping[slot] = new(key, VkToDisplay(key));
+            RebuildLayout();
+        }
+
+        private string VkToDisplay(VirtualKeys vk)
+        {
+            var str = vk.ToString();
+            if ((int)vk >= (int)VirtualKeys.A && (int)vk <= (int)VirtualKeys.Z)
+                return str.ToLower().Substring(0, 1);
+            if ((int)vk >= (int)VirtualKeys.N0 && (int)vk <= (int)VirtualKeys.N9)
+                return str.ToLower().Substring(1, 1);
+            return str;
         }
 
         public override void Update()
@@ -40,32 +74,25 @@ namespace Fiero.Business
                 Invalidate();
             }
 
-            SelectNumber(VirtualKeys.N1, 0);
-            SelectNumber(VirtualKeys.N2, 1);
-            SelectNumber(VirtualKeys.N3, 2);
-            SelectNumber(VirtualKeys.N4, 3);
-            SelectNumber(VirtualKeys.N5, 4);
-            SelectNumber(VirtualKeys.N6, 5);
-            SelectNumber(VirtualKeys.N7, 6);
-            SelectNumber(VirtualKeys.N8, 7);
-            SelectNumber(VirtualKeys.N9, 8);
+            foreach (var (i, map) in _mapping)
+            {
+                if (SelectNumber(map.Key, i))
+                    break;
+            }
 
-            void SelectNumber(VirtualKeys key, int index)
+            bool SelectNumber(VirtualKeys key, int index)
             {
                 if (index < 0 || index >= Options.Length)
                 {
-                    return;
+                    return false;
                 }
                 if (UI.Input.IsKeyPressed(key))
                 {
-                    if (SelectedIndex == index)
-                    {
-                        Close(ModalWindowButton.ImplicitYes);
-                        return;
-                    }
                     SelectedIndex = index;
-                    Invalidate();
+                    Close(ModalWindowButton.ImplicitYes);
+                    return true;
                 }
+                return false;
             }
         }
 
@@ -90,7 +117,7 @@ namespace Fiero.Business
                     .Cell<Button>(b =>
                     {
                         b.ZOrder.V = i;
-                        b.Text.V = $"{i + 1}) " + Options[i]?.ToString() ?? "(ERROR)";
+                        b.Text.V = $"{_mapping[i].Display}) " + Options[i]?.ToString() ?? "(ERROR)";
                         b.Clicked += (_, __, ___) =>
                         {
                             if (SelectedIndex == i)

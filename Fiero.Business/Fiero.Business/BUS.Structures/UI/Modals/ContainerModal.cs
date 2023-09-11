@@ -118,10 +118,17 @@ namespace Fiero.Business
             {
                 return false;
             }
+            var actions = GetAvailableActions(Items[i]).Distinct().ToArray();
             var modal = UI.OptionalChoice(
-                GetAvailableActions(Items[i]).Distinct().ToArray(),
+                actions,
                 Items[i].DisplayName
             );
+            for (int a = 0; a < actions.Length; a++)
+            {
+                if (TryMapAction(modal, actions[a], out var vk))
+                    modal.Remap(a, vk);
+            }
+
             modal.Confirmed += (_, __) =>
             {
                 ActionPerformed?.Invoke(Items[i], modal.SelectedOption);
@@ -133,6 +140,36 @@ namespace Fiero.Business
             };
             Invalidate();
             return false;
+        }
+
+        protected static bool TryMapAction(ChoicePopUp<TActions> modal, TActions action, out VirtualKeys vk)
+        {
+            var text = action.ToString();
+            while (text.Length > 0)
+            {
+                var letter = text[0];
+                if (!LetterToVK(letter, out vk) || modal.IsMapped(vk))
+                    continue;
+                return true;
+            }
+            vk = default;
+            return false;
+
+            bool LetterToVK(char c, out VirtualKeys vk)
+            {
+                if (char.IsDigit(c))
+                {
+                    vk = (VirtualKeys)(c - '0' + (int)VirtualKeys.N0);
+                    return true;
+                }
+                if (char.IsLetter(c))
+                {
+                    vk = (VirtualKeys)(Char.ToLower(c) - 'a' + (int)VirtualKeys.A);
+                    return true;
+                }
+                vk = default;
+                return false;
+            }
         }
 
         protected abstract IEnumerable<TActions> GetAvailableActions(Item i);

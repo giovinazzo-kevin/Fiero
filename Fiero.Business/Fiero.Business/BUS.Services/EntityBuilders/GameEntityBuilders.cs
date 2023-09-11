@@ -615,7 +615,7 @@ namespace Fiero.Business
                 name: ThrowableName.Bomb,
                 itemRarity: 1,
                 remainingUses: charges,
-                maxUses: charges,
+                maxUses: 99,
                 damage: 0,
                 maxRange: 4,
                 mulchChance: 1f,

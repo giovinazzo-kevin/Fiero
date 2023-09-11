@@ -51,7 +51,9 @@ public sealed class Spawn : SolverBuiltIn
             var floorId = player?.FloorId() ?? default;
             var position = player?.Position() ?? default;
 
-            var builder = (IEntityBuilder)builderFunc.Invoke(Builders, null);
+            var builder = (IEntityBuilder)builderFunc.Invoke(Builders, builderFunc.GetParameters()
+                .Select(x => x.DefaultValue).ToArray());
+
             var entity = builder.Build();
             if (entity is PhysicalEntity e)
                 e.Physics.Position = position;

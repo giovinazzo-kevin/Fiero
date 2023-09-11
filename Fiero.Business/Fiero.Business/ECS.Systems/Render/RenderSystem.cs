@@ -158,7 +158,7 @@ namespace Fiero.Business
             }
             if (blocking)
             {
-                //Loop.WaitAndDraw(animations.Select(x => x.Duration).Max(), onUpdate: (t, ts) => UI.Input.Update());
+                Loop.WaitAndDraw(animations.Select(x => x.Duration).Max(), onUpdate: (t, ts) => UI.Input.Update());
             }
         }
 

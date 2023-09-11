@@ -20,7 +20,11 @@ namespace Fiero.Core
         {
             var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
-            if (onUpdate != null) innerLoop.Update += onUpdate;
+            innerLoop.Update += (t, ts) =>
+            {
+                T += ts;
+                onUpdate?.Invoke(T, TimeStep);
+            };
             if (onRender != null) innerLoop.Render += onRender;
             innerLoop.Run(time);
             return innerLoop.T;

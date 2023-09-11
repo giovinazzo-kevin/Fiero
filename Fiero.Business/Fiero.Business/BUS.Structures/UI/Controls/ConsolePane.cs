@@ -98,6 +98,12 @@ namespace Fiero.Business
                     HistoryCursor.V = History.Count - 1;
                 Caret.Text.V = History[HistoryCursor.V--];
             }
+            if (Input.IsKeyPressed(VirtualKeys.Left) && Cursor.V.X > 0)
+            {
+            }
+            if (Input.IsKeyPressed(VirtualKeys.Right) && Cursor.V.X < Caret.Text.V.Length - 1)
+            {
+            }
         }
         public void ScrollDown()
         {

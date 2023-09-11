@@ -630,7 +630,7 @@ namespace Fiero.Business.Scenes
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
                 Resources.Sounds.Get(SoundName.Buff, undead.Position() - Player.Position()).Play();
-                Systems.Render.AnimateViewport(true, undead.Position(), Animation.Buff(ColorName.Magenta));
+                Systems.Render.AnimateViewport(false, undead.Position(), Animation.Buff(ColorName.Magenta));
                 undead.TryJoinParty(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
@@ -738,7 +738,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.AnimateViewport(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f)));
+                    Systems.Render.AnimateViewport(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {

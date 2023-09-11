@@ -25,8 +25,6 @@ namespace Fiero.Business
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        private static readonly ManualResetEventSlim ConsoleAvailable = new(true);
-
         public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui)
         {
@@ -34,11 +32,11 @@ namespace Fiero.Business
             Colors = colors;
             ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
-            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
-            void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
+            Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
+            void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 if (Layout != null)
-                    Layout.Size.V += obj.NewValue - obj.OldValue;
+                    Layout.Size.V = obj.NewValue;
             }
         }
 
@@ -117,11 +115,9 @@ namespace Fiero.Business
             return new(new[] { () => {
                 CharAvailable -= closure.OnCharAvailable;
                 LineAvailable -= closure.OnLineAvailable;
-                //ScriptingSystem.Out.Writer.CancelPendingFlush();
-                //ScriptingSystem.Out.Reader.CancelPendingRead();
-                //ScriptingSystem.In.Writer.CancelPendingFlush();
-                // ScriptingSystem.In.Reader.CancelPendingRead();
                 cts.Cancel();
+                ScriptingSystem.In.Reader.CancelPendingRead();
+                ScriptingSystem.Out.Reader.CancelPendingRead();
             } });
         }
 
@@ -139,6 +135,12 @@ namespace Fiero.Business
                 x.OutlineThickness.V = 1;
             }))
             ;
+
+        protected override void OnLayoutRebuilt(Layout oldValue)
+        {
+            base.OnLayoutRebuilt(oldValue);
+            Layout.Focus(Pane);
+        }
 
         protected override LayoutGrid RenderContent(LayoutGrid grid) => grid
                 .Row(id: "output")

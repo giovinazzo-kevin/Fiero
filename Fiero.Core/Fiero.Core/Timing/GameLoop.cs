@@ -6,10 +6,12 @@ namespace Fiero.Core
     public class GameLoop
     {
         public TimeSpan TimeStep { get; set; }
-        public event Action<TimeSpan, TimeSpan> Tick;
         public event Action<TimeSpan, TimeSpan> Update;
         public event Action<TimeSpan, TimeSpan> Render;
         public TimeSpan T { get; private set; }
+
+        public double FPS => 1 / _averageFrameTime;
+        private double _averageFrameTime;
 
         public GameLoop()
         {
@@ -25,18 +27,31 @@ namespace Fiero.Core
                 T += ts;
                 onUpdate?.Invoke(T, TimeStep);
             };
-            if (onRender != null) innerLoop.Render += onRender;
+            innerLoop.Render += (t, dt) =>
+            {
+                onRender?.Invoke(T, dt);
+                UpdateAverageFrameTime(dt);
+            };
             innerLoop.Run(time);
             return innerLoop.T;
         }
 
-        public virtual void LoopAndDraw(Func<bool> @break, Action<TimeSpan, TimeSpan> onUpdate = null, Action<TimeSpan, TimeSpan> onRender = null)
+        public virtual TimeSpan LoopAndDraw(Func<bool> @break, Action<TimeSpan, TimeSpan> onUpdate = null, Action<TimeSpan, TimeSpan> onRender = null)
         {
             var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
-            if (onUpdate != null) innerLoop.Update += onUpdate;
-            if (onRender != null) innerLoop.Render += onRender;
+            innerLoop.Update += (t, ts) =>
+            {
+                T += ts;
+                onUpdate?.Invoke(T, TimeStep);
+            };
+            innerLoop.Render += (t, dt) =>
+            {
+                onRender?.Invoke(T, dt);
+                UpdateAverageFrameTime(dt);
+            };
             innerLoop.Run(@break: @break);
+            return innerLoop.T;
         }
 
         public TimeSpan Run(TimeSpan duration = default, CancellationToken ct = default, Func<bool> @break = null)
@@ -55,8 +70,6 @@ namespace Fiero.Core
                     frameTime = TimeSpan.FromMilliseconds(250);
                 }
                 currentTime = newTime;
-
-                Tick?.Invoke(T, frameTime);
                 accumulator += frameTime;
 
                 while (accumulator >= TimeStep)
@@ -66,7 +79,8 @@ namespace Fiero.Core
                     accumulator -= TimeStep;
                 }
 
-                Render?.Invoke(T, TimeStep);
+                Render?.Invoke(T, frameTime);
+                UpdateAverageFrameTime(frameTime);
 
                 // Calculate the remaining time to wait until the next frame
                 var remainingFrameTime = TimeStep - accumulator;
@@ -83,6 +97,11 @@ namespace Fiero.Core
             }
 
             return T;
+        }
+        private void UpdateAverageFrameTime(TimeSpan frameTime)
+        {
+            const double smoothingFactor = 0.95;
+            _averageFrameTime = smoothingFactor * _averageFrameTime + (1 - smoothingFactor) * frameTime.TotalSeconds;
         }
     }
 }

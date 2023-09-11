@@ -2,7 +2,6 @@
 using Fiero.Core.Structures;
 using SFML.Graphics;
 using SFML.Window;
-using System.Diagnostics;
 
 namespace Fiero.Core
 {
@@ -28,10 +27,6 @@ namespace Fiero.Core
         public readonly GameUI UI;
         public readonly GameWindow Window;
         public readonly GameLocalizations<TLocales> Localization;
-
-        public float MeasuredFramesPerSecond { get; private set; }
-        private readonly Stopwatch _fpsStopwatch = new();
-        private TimeSpan _lastTimestamp;
 
         public Game(
             OffButton off,
@@ -129,7 +124,6 @@ namespace Fiero.Core
                     Draw(Window.RenderWindow, states);
                     Window.Display();
                 };
-                _fpsStopwatch.Start();
                 Loop.Run(ct: token);
             }
         }
@@ -159,12 +153,6 @@ namespace Fiero.Core
         Font arial = new Font(@"C:\Windows\Fonts\Arial.ttf");
         public virtual void Draw(RenderTarget target, RenderStates states)
         {
-            var currentTimestamp = _fpsStopwatch.Elapsed;
-            var frameTime = currentTimestamp - _lastTimestamp;
-            _lastTimestamp = currentTimestamp;
-
-            MeasuredFramesPerSecond = 0.02f * 1f / (float)frameTime.TotalSeconds + MeasuredFramesPerSecond * 0.98f;
-
             Director.DrawBackground(target, states);
             // Windows are drawn before modals
             foreach (var win in UI.GetOpenWindows().Union(UI.GetOpenModals()))
@@ -172,7 +160,7 @@ namespace Fiero.Core
                 win.Draw(target, states);
             }
             Director.DrawForeground(target, states);
-            using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", arial);
+            using var text = new Text($"FPS: {Loop.FPS:000.0}", arial);
             target.Draw(text);
         }
     }

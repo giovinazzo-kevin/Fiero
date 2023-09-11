@@ -102,7 +102,7 @@ namespace Fiero.Business
             TimeSpan? frameDuration = null
         )
         {
-            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, new(), new(1, 1));
+            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, new Vec(0f, -0.166f), new(1, 1));
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(32);
             return new(Enumerable.Range(0, 6).SelectMany(i => new[] {
                 new AnimationFrame(frameDur, sprite),

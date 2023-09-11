@@ -110,7 +110,7 @@ namespace Fiero.Business.Scenes
             Layout.Update();
         }
 
-        public override void Draw()
+        public override void DrawBackground(RenderTarget target, RenderStates states)
         {
             UI.Window.Clear(Color.Black);
             UI.Window.Draw(Layout);

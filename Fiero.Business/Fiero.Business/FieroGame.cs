@@ -3,6 +3,7 @@ using Fiero.Core;
 using Fiero.Core.Structures;
 using SFML.Audio;
 using SFML.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unconcern.Common;
@@ -41,7 +42,7 @@ namespace Fiero.Business
             Dialogues = dialogues;
             Scenes = gameScenes;
             Store = store;
-            loop.TimeStep = 1f / 1000;
+            loop.TimeStep = TimeSpan.FromSeconds(1 / 200f);
 
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)

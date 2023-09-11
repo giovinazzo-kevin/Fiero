@@ -14,7 +14,7 @@
             Loop.Update += Loop_Update;
         }
 
-        private void Loop_Update(float arg1, float arg2)
+        private void Loop_Update(TimeSpan arg1, TimeSpan arg2)
         {
             _queue.Clear();
             foreach (var ch in Input.KeysPressed

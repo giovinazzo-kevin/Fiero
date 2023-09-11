@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using SFML.Graphics;
+using System.Collections.Immutable;
 using Unconcern.Common;
 
 namespace Fiero.Core
@@ -86,6 +87,7 @@ namespace Fiero.Core
         }
 
         public virtual void Update() { }
-        public virtual void Draw() { }
+        public virtual void DrawBackground(RenderTarget target, RenderStates states) { }
+        public virtual void DrawForeground(RenderTarget target, RenderStates states) { }
     }
 }

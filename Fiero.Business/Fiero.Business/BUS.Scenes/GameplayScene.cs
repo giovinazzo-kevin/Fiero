@@ -1,6 +1,7 @@
 ﻿using Fiero.Core;
 using Fiero.Core.Extensions;
 using Fiero.Core.Structures;
+using SFML.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -205,7 +206,7 @@ namespace Fiero.Business.Scenes
                     .WithIntrinsicTrait(Traits.Tiny)
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     .Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
-                    .WithHealth(20)
+                    .WithHealth(100000)
                     .Build();
                 Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);
@@ -280,7 +281,7 @@ namespace Fiero.Business.Scenes
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
+                    Systems.Render.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
                 }
             });
             // ActionSystem.ActorIntentEvaluated:
@@ -317,7 +318,7 @@ namespace Fiero.Business.Scenes
                             TpIn();
                         });
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
-                    Systems.Render.Viewport.Animate(true, e.OldPosition, tpOut);
+                    Systems.Render.AnimateViewport(true, e.OldPosition, tpOut);
                     return true;
                 }
                 else if (Player.CanSee(e.NewPosition) || e.Actor.IsPlayer())
@@ -351,7 +352,7 @@ namespace Fiero.Business.Scenes
                         Systems.Render.CenterOn(Player);
                     }
                     Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
-                    Systems.Render.Viewport.Animate(true, e.NewPosition, tpIn);
+                    Systems.Render.AnimateViewport(true, e.NewPosition, tpIn);
                 }
             });
             // ActionSystem.ActorMoved:
@@ -406,12 +407,12 @@ namespace Fiero.Business.Scenes
                 if (flags.IsBuff)
                 {
                     Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Buff(ColorName.LightCyan));
+                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Buff(ColorName.LightCyan));
                 }
                 if (flags.IsDebuff)
                 {
                     Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), Animation.Debuff(ColorName.LightMagenta));
+                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Debuff(ColorName.LightMagenta));
                 }
                 Systems.Render.CenterOn(Player);
             });
@@ -445,7 +446,7 @@ namespace Fiero.Business.Scenes
                                 e.Attacker.Render.Hidden = false;
                                 Systems.Render.CenterOn(Player);
                             });
-                        Systems.Render.Viewport.Animate(true, e.Attacker.Position(), anim);
+                        Systems.Render.AnimateViewport(true, e.Attacker.Position(), anim);
                     }
                 }
                 foreach (var weapon in e.Weapons)
@@ -480,7 +481,7 @@ namespace Fiero.Business.Scenes
                 var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target))
                 {
-                    Systems.Render.Viewport.Animate(false, e.Target.Position(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
+                    Systems.Render.AnimateViewport(false, e.Target.Position(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
                 }
                 return true;
             });
@@ -504,7 +505,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Victim))
                 {
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                    Systems.Render.Viewport.Animate(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
+                    Systems.Render.AnimateViewport(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
                 }
                 return true;
             });
@@ -556,7 +557,7 @@ namespace Fiero.Business.Scenes
                 {
                     if (corpse != null) corpse.Render.Hidden = true;
                     Systems.Render.CenterOn(Player);
-                    Systems.Render.Viewport.Animate(false, e.Actor.Position(), Animation.Death(e.Actor)
+                    Systems.Render.AnimateViewport(false, e.Actor.Position(), Animation.Death(e.Actor)
                         .OnLastFrame(() => { if (corpse != null) corpse.Render.Hidden = false; }));
                 }
 
@@ -629,7 +630,7 @@ namespace Fiero.Business.Scenes
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
                 Resources.Sounds.Get(SoundName.Buff, undead.Position() - Player.Position()).Play();
-                Systems.Render.Viewport.Animate(true, undead.Position(), Animation.Buff(ColorName.Magenta));
+                Systems.Render.AnimateViewport(true, undead.Position(), Animation.Buff(ColorName.Magenta));
                 undead.TryJoinParty(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
@@ -722,7 +723,7 @@ namespace Fiero.Business.Scenes
                         ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color),
                         _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color)
                     };
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), anim);
+                    Systems.Render.AnimateViewport(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                 }
                 if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance)
@@ -737,7 +738,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.Viewport.Animate(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f)));
+                    Systems.Render.AnimateViewport(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f)));
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {
@@ -756,7 +757,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
-                    Systems.Render.Viewport.Animate(true, e.Actor.Position(), anim);
+                    Systems.Render.AnimateViewport(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                 }
                 return true;
@@ -875,7 +876,7 @@ namespace Fiero.Business.Scenes
                     var pos = e.Feature.Position();
                     Systems.Render.CenterOn(Player);
                     Resources.Sounds.Get(SoundName.TrapSpotted, pos - Player.Position()).Play();
-                    Systems.Render.Viewport.Animate(false, pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
+                    Systems.Render.AnimateViewport(false, pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }
             });
             // ActionSystem.ExplosionHappened:
@@ -886,7 +887,7 @@ namespace Fiero.Business.Scenes
                 Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
                 if (Player.CanSee(e.Center))
                 {
-                    Systems.Render.Viewport.Animate(true, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
+                    Systems.Render.AnimateViewport(true, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
                 }
                 return true;
             });
@@ -1051,9 +1052,14 @@ namespace Fiero.Business.Scenes
             }
         }
 
-        public override void Draw()
+        public override void DrawBackground(RenderTarget target, RenderStates states)
         {
             UI.Window.Clear();
+        }
+
+        public override void DrawForeground(RenderTarget target, RenderStates states)
+        {
+            Systems.Render.Draw(target, states);
         }
 
         protected override bool CanChangeState(SceneState newState) => true;

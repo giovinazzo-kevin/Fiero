@@ -1,4 +1,6 @@
-﻿namespace Fiero.Core
+﻿using SFML.Graphics;
+
+namespace Fiero.Core
 {
     public class GameDirector
     {
@@ -110,11 +112,19 @@
             }
         }
 
-        public virtual void Draw()
+        public virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
             if (_currentItem != null)
             {
-                _currentItem.Scene.Draw();
+                _currentItem.Scene.DrawBackground(target, states);
+            }
+        }
+
+        public virtual void DrawForeground(RenderTarget target, RenderStates states)
+        {
+            if (_currentItem != null)
+            {
+                _currentItem.Scene.DrawForeground(target, states);
             }
         }
     }

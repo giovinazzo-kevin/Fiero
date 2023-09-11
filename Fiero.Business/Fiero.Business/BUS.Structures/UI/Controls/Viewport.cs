@@ -1,17 +1,12 @@
 ﻿using Ergo.Lang;
 using Fiero.Core;
-using Fiero.Core.Structures;
 using SFML.Graphics;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fiero.Business
 {
+
     /// <summary>
     /// Represents a drawable view that encompasses all tiles, items, features and actors within the specified bounds.
     /// </summary>
@@ -31,9 +26,6 @@ namespace Fiero.Business
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
         private bool _dirty = true;
-        private volatile int _id;
-
-        protected readonly ConcurrentDictionary<int, ConcurrentQueue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
 
         public Viewport(
             GameInput input,
@@ -85,6 +77,20 @@ namespace Fiero.Business
             return worldPos;
         }
 
+        public Coord ScreenToWorldPos(Coord screen)
+        {
+            var pos = screen - Position.V;
+            var worldPos = pos / ViewTileSize.V + Following.V.Position();
+            return worldPos;
+        }
+
+        public Coord WorldToScreenPos(Coord world)
+        {
+            var fWorldPos = Following.V.Position();
+            return (world - fWorldPos - Coord.PositiveOne) * ViewTileSize.V + (Position.V + Size.V / 2).Align(ViewTileSize) + ViewTileSize;
+        }
+
+
         protected override void Repaint(RenderTarget target, RenderStates states)
         {
             base.Repaint(target, states);
@@ -107,30 +113,7 @@ namespace Fiero.Business
             {
                 target.Draw(_renderSprite);
             }
-            DrawVFX();
 
-            void DrawVFX()
-            {
-                var viewPos = ViewArea.V.Position();
-                foreach (var k in Vfx.Keys)
-                {
-                    if (!Vfx.TryGetValue(k, out var anim))
-                    {
-                        continue;
-                    }
-                    for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++)
-                    {
-                        var (worldPos, spriteDef) = (pair.Left, pair.Right);
-                        using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
-                        var spriteSize = sprite.GetLocalBounds().Size();
-                        sprite.Position = (spriteDef.Offset + worldPos - viewPos) * ViewTileSize.V + Position.V;
-                        sprite.Scale = ViewTileSize.V / spriteSize * spriteDef.Scale;
-                        sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                        target.Draw(sprite, states);
-                        anim.Enqueue(pair);
-                    }
-                }
-            }
 
             void DrawTargetingShape(TargetingShape shape)
             {
@@ -278,74 +261,6 @@ namespace Fiero.Business
                 _renderTexture.Display();
                 _dirty = false;
                 return true;
-            }
-        }
-
-        public void Animate(bool blocking, Coord worldPos, params Animation[] animations)
-        {
-            if (blocking)
-            {
-                Impl();
-            }
-            else
-            {
-                Task.Run(Impl);
-            }
-            void Impl()
-            {
-                var time = TimeSpan.Zero;
-                var increment = TimeSpan.FromMilliseconds(1);
-                var timeline = animations.SelectMany(Timeline)
-                    .OrderBy(x => x.Time)
-                    .ToList();
-                var viewPos = ViewArea.V.Position();
-                var myVfx = new ConcurrentQueue<OrderedPair<Coord, SpriteDef>>();
-                var k = Interlocked.Increment(ref _id);
-                Vfx[k] = myVfx;
-                var sw = new Stopwatch();
-                while (timeline.Count > 0)
-                {
-                    for (int i = timeline.Count - 1; i >= 0; i--)
-                    {
-                        var t = timeline[i];
-                        if (time <= t.Time + t.Frame.Duration && time > t.Time)
-                        {
-                            foreach (var spriteDef in t.Frame.Sprites)
-                            {
-                                myVfx.Enqueue(new(worldPos, spriteDef));
-                            }
-                            t.Anim.OnFramePlaying(t.Index);
-                        }
-                        else if (time > t.Time + t.Frame.Duration)
-                        {
-                            timeline.RemoveAt(i);
-                        }
-                    }
-                    sw.Restart();
-                    Invalidate();
-                    if (blocking)
-                    {
-                        Loop.WaitAndDraw(increment);
-                        Input.Update();
-                    }
-                    else
-                    {
-                        new GameLoop() { }.Run(increment);
-                    }
-                    time += sw.Elapsed;
-                    myVfx.Clear();
-                }
-                Vfx.Remove(k, out _);
-            }
-
-            IEnumerable<(int Index, Animation Anim, TimeSpan Time, AnimationFrame Frame)> Timeline(Animation anim)
-            {
-                var time = TimeSpan.Zero;
-                for (int i = 0; i < anim.Frames.Length; ++i)
-                {
-                    yield return (i, anim, time, anim.Frames[i]);
-                    time += anim.Frames[i].Duration;
-                }
             }
         }
     }

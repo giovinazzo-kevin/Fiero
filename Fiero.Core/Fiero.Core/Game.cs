@@ -100,7 +100,6 @@ namespace Fiero.Core
 
         protected virtual void InitializeWindow(RenderWindow win)
         {
-            win.SetFramerateLimit(144);
             win.SetKeyRepeatEnabled(true);
             win.SetActive(true);
             win.Resized += (e, eh) =>
@@ -117,10 +116,6 @@ namespace Fiero.Core
             using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty))
             {
                 InitializeWindow(Window.RenderWindow);
-                Loop.Tick += (t, dt) =>
-                {
-                    Window.DispatchEvents();
-                };
                 Loop.Update += (t, dt) =>
                 {
                     Update();
@@ -129,6 +124,7 @@ namespace Fiero.Core
                 // Always called once per frame before the window is drawn
                 Loop.Render += (t, dt) =>
                 {
+                    Window.DispatchEvents();
                     var states = RenderStates.Default;
                     Draw(Window.RenderWindow, states);
                     Window.Display();
@@ -160,6 +156,7 @@ namespace Fiero.Core
             }
         }
 
+        Font arial = new Font(@"C:\Windows\Fonts\Arial.ttf");
         public virtual void Draw(RenderTarget target, RenderStates states)
         {
             var currentTimestamp = _fpsStopwatch.Elapsed;
@@ -168,13 +165,14 @@ namespace Fiero.Core
 
             MeasuredFramesPerSecond = 0.02f * 1f / (float)frameTime.TotalSeconds + MeasuredFramesPerSecond * 0.98f;
 
-            Director.Draw();
+            Director.DrawBackground(target, states);
             // Windows are drawn before modals
             foreach (var win in UI.GetOpenWindows().Union(UI.GetOpenModals()))
             {
                 win.Draw(target, states);
             }
-            using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", new Font(@"C:\Windows\Fonts\Arial.ttf"));
+            Director.DrawForeground(target, states);
+            using var text = new Text($"FPS: {MeasuredFramesPerSecond:000.0}", arial);
             target.Draw(text);
         }
     }

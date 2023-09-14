@@ -84,7 +84,7 @@ namespace Fiero.Business
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
             => Equipment<Weapon>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
             .WithName(type.ToString())
-            .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
+            .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.Transparent)
             .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, baseDamage, swingDelay)
             .WithItemInfo(itemRarity, unidentName)

@@ -31,7 +31,7 @@ namespace Fiero.Core
                 var rgb = kv.Value.Split(' ')
                     .Select(x => Byte.TryParse(x.Trim(), out var i) ? i : (byte)0)
                     .ToArray();
-                if (rgb.Length != 3)
+                if (rgb.Length < 3)
                 {
                     // TODO: log warning
                     continue;
@@ -44,7 +44,7 @@ namespace Fiero.Core
                     // TODO: log warning
                     continue;
                 }
-                Colors[key.Value] = new Color(rgb[0], rgb[1], rgb[2], 255);
+                Colors[key.Value] = new Color(rgb[0], rgb[1], rgb[2], rgb.Length > 3 ? rgb[3] : (byte)255);
             }
         }
     }

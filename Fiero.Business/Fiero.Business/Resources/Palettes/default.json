@@ -15,7 +15,7 @@
   "LightYellow": "255 255 0",
   "LightMagenta": "255 0 255",
   "White": "255 255 255",
-
+  "Transparent": "0 0 0 0",
   "UIPrimary": "255 255 255",
   "UISecondary": "128 0 0",
   "UIBorder": "96 136 144",

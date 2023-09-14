@@ -36,6 +36,8 @@ namespace Fiero.Business
         LightMagenta,
         [Description("black")]
         Black,
+        [Description("transparent")]
+        Transparent,
 
         [Description("primary UI color")]
         UIPrimary,

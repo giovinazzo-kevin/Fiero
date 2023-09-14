@@ -188,6 +188,7 @@ namespace Fiero.Business.Scenes
                             .WithIntrinsicEffect(new EffectDef(EffectName.BestowTrait, TraitName.Huge.ToString()),
                                 e => new GrantedOnEquip(e))
                             .WithIntrinsicEffect(new EffectDef(EffectName.Vampirism, "3"))
+                            .WithColor(ColorName.LightRed)
                             .Build(),
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),

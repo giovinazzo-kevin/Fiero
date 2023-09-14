@@ -12,7 +12,7 @@ namespace Fiero.Business
         where TActions : struct, Enum
     {
         public const int RowHeight = 18; // px
-        public const int PaginatorHeight = 16; // px
+        public const int PaginatorHeight = 24; // px
 
         public readonly TContainer Container;
         public event Action<Item, TActions> ActionPerformed;

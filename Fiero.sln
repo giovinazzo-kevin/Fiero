@@ -15,6 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ergo", "D:\Projects\Ergo\Er
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{79B85F42-0F77-41F5-B91A-539920D0C8F7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{1F0A8FAE-C853-4BBF-9A53-C516F32AD7E3}"
+	ProjectSection(SolutionItems) = preProject
+		Tutorial.md = Tutorial.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +50,7 @@ Global
 		{F5D4A50E-9628-42FF-9CC8-CB7ECC8A54E0} = {CE67812D-CA4A-41AC-B4FD-1EC1BB884567}
 		{74BBE421-14EE-48FD-AE59-AADB7BEF531D} = {79B85F42-0F77-41F5-B91A-539920D0C8F7}
 		{A8FC2FD3-2F6A-4BD2-9AAA-0B8B4B0AD4F3} = {79B85F42-0F77-41F5-B91A-539920D0C8F7}
+		{1F0A8FAE-C853-4BBF-9A53-C516F32AD7E3} = {CE67812D-CA4A-41AC-B4FD-1EC1BB884567}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {02158A3C-B34C-402B-89CC-FE2356D9D8B7}

@@ -104,9 +104,6 @@ namespace Fiero.Business
                     x.FontSize.V = x.Font.V.Size;
                     x.Padding.V = new(8, 0);
                     x.HorizontalAlignment.V = HorizontalAlignment.Left;
-                    x.Background.V = SelectedIndex == x.ZOrder.V
-                        ? UI.Store.Get(Data.UI.DefaultAccent)
-                        : UI.Store.Get(Data.UI.DefaultBackground);
                 }))
             ;
 
@@ -116,8 +113,9 @@ namespace Fiero.Business
                 .Row(h: 24, px: true, @class: "choice")
                     .Cell<Button>(b =>
                     {
-                        b.ZOrder.V = i;
                         b.Text.V = $"{_mapping[i].Display}) " + Options[i]?.ToString() ?? "(ERROR)";
+                        b.MouseEntered += (_, __) => b.Background.V = UI.GetColor(ColorName.UIAccent);
+                        b.MouseLeft += (_, __) => b.Background.V = UI.GetColor(ColorName.UIBackground);
                         b.Clicked += (_, __, ___) =>
                         {
                             if (SelectedIndex == i)

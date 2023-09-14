@@ -64,7 +64,7 @@ namespace Fiero.Business
             // Update PageSize dynamically
             var contentElem = Layout.Dom.Query(g => g.Id == "modal-content").Single();
             var availableSpace = contentElem.ComputedSize.Y - PaginatorHeight;
-            var newPageSize = (int)Math.Ceiling(availableSpace / (float)RowHeight);
+            var newPageSize = (int)Math.Floor(availableSpace / (float)RowHeight);
             var dirty = false;
             if (newPageSize != PageSize.V)
             {

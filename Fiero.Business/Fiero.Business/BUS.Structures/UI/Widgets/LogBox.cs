@@ -10,7 +10,7 @@ namespace Fiero.Business
 
         public Paragraph Paragraph { get; private set; }
 
-        public int NumRowsDisplayed => Layout.ContentRenderSize.Y / (Paragraph?.FontSize.V.Y ?? 12);
+        public int NumRowsDisplayed => Paragraph.ContentRenderSize.Y / (Paragraph?.CalculatedLineHeight ?? 12);
 
         public LogBox(GameUI ui)
             : base(ui)

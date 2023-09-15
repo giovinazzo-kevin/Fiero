@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+using Fiero.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace Fiero.Business
         public readonly DialogueNode Node;
         public readonly DrawableEntity Speaker;
         public readonly DrawableEntity[] Listeners;
+        protected readonly Actor[] Actors;
+
         protected readonly ChoicePopUp<string> Choices;
 
         protected const int DialogueHeight = 80;
@@ -39,6 +42,11 @@ namespace Fiero.Business
             Node = node;
             Speaker = speaker;
             Listeners = listeners;
+            Actors = Listeners
+                .AsEnumerable()
+                .Append(Speaker)
+                .TrySelect(x => x.TryCast<Actor>(out var a) ? (true, a) : (false, default))
+                .ToArray();
             IsResponsive = false;
             ModalWindowStyles? choicesStyle = Node.Choices.Count == 0 ? ModalWindowStyles.None : null;
             Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>(), choicesStyle);
@@ -66,12 +74,17 @@ namespace Fiero.Business
         public override void Open(string title)
         {
             Node.Trigger(Trigger, Speaker, Listeners);
+            foreach (var (line, actor) in Node.Lines.SelectMany(l => Actors.Select(a => (l, a))))
+                actor.Log?.Write($"{Speaker.Info.Name}: {line}");
             base.Open(title);
         }
 
         private void DialogueModal_OptionChosen(ChoicePopUp<string> popUp, string option)
         {
             Close(ModalWindowButton.ImplicitYes);
+            var player = Actors.Single(a => a.IsPlayer());
+            foreach (var actor in Actors)
+                actor.Log?.Write($"{player.Info.Name}: {option}");
             if (Node.Choices.TryGetValue(option, out var next) && next != null)
             {
                 if (string.IsNullOrEmpty(next.Title))

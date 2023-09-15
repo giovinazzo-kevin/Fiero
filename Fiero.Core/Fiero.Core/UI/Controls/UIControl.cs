@@ -27,7 +27,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
         public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<float> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
 
         public event Action<UIControl> Invalidated;
         protected bool IsDirty { get; set; } = true;
@@ -68,10 +68,11 @@ namespace Fiero.Core
 
         protected virtual void RecomputeBoundaries()
         {
-            BorderRenderPos = ((Position.V + Margin.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
-            ContentRenderPos = ((Position.V + Margin.V + Padding.V).Align(Snap) + new Vec(OutlineThickness.V, OutlineThickness.V)).ToCoord();
+            var outline = new Coord(OutlineThickness.V, OutlineThickness.V);
+            BorderRenderPos = (Position.V + Margin.V).Align(Snap);
             BorderRenderSize = ((Size.V - Margin.V * 2).Align(Snap));
-            ContentRenderSize = ((Size.V - Margin.V * 2 - Padding.V * 2).Align(Snap) - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToCoord();
+            ContentRenderPos = (Position.V + Margin.V + Padding.V + outline).Align(Snap);
+            ContentRenderSize = (Size.V - Margin.V * 2 - Padding.V * 2 - outline * 2).Align(Snap);
         }
 
         public UIControl(GameInput input)
@@ -258,14 +259,27 @@ namespace Fiero.Core
 
         protected virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
-            var rect = new RectangleShape((BorderRenderSize - new Vec(OutlineThickness.V, OutlineThickness.V) * 2).ToVector2f())
+            var outline = new Coord(OutlineThickness.V, OutlineThickness.V);
+            var rect = new RectangleShape((BorderRenderSize - outline * 2).ToVector2f())
             {
-                Position = BorderRenderPos.ToVector2f(),
+                Position = (BorderRenderPos + outline).ToVector2f(),
                 FillColor = Background,
                 OutlineThickness = OutlineThickness,
                 OutlineColor = OutlineColor
             };
             target.Draw(rect, states);
+            //var inner = new RectangleShape((ContentRenderSize).ToVector2f())
+            //{
+            //    Position = BorderRenderPos.ToVector2f(),
+            //    FillColor = Color.Transparent,
+            //    OutlineColor = new Color(
+            //        (byte)(Rng.Random.Next(128) + 127),
+            //        (byte)(Rng.Random.Next(128) + 127),
+            //        (byte)(Rng.Random.Next(128) + 127),
+            //        50),
+            //    OutlineThickness = 1
+            //};
+            //target.Draw(inner, states);
         }
 
         protected virtual void Repaint(RenderTarget target, RenderStates states)

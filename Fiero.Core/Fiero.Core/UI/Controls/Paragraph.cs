@@ -16,6 +16,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true, invalidate: true);
 
         public int CalculatedRows => Rows.V ?? Labels.Count;
+        public int CalculatedLineHeight => LineHeight.V ?? FontSize.V.Y;
 
         protected readonly List<Label> Labels = new();
 
@@ -51,7 +52,7 @@ namespace Fiero.Core
 
         protected virtual void OnSizeInvalidated()
         {
-            var lineHeight = (LineHeight.V ?? FontSize.V.Y);
+            var lineHeight = CalculatedLineHeight;
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
             {
                 c.Size.V = new(ContentRenderSize.X, lineHeight);
@@ -60,7 +61,7 @@ namespace Fiero.Core
 
         protected virtual void OnPositionInvalidated()
         {
-            var lineHeight = (LineHeight.V ?? FontSize.V.Y);
+            var lineHeight = CalculatedLineHeight;
             var totalHeight = CalculatedRows * lineHeight;
             var h = (int)(ContentRenderSize.Y / 2f - totalHeight / 2f);
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))

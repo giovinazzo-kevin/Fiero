@@ -75,6 +75,12 @@ namespace Fiero.Business
             Layout.Size.V = UI.Window.Size;
         }
 
+        public override void Close(ModalWindowButton buttonPressed)
+        {
+            base.Close(buttonPressed);
+            OnActorDeselected();
+        }
+
         public void OnActorDeselected()
         {
             MiniMap.Following.V = null;

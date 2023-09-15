@@ -32,25 +32,25 @@
         "Lines": [ "...?", "And who might you be?" ],
         "Choices": [
           {
-            "Line": "I'm an enemy of the Rats",
+            "Line": "I'm an enemy of the Rats.",
             "Next": "JustMet_Enemy"
           },
           {
-            "Line": "I'm a friend of the Rats",
+            "Line": "I'm a friend of the Rats.",
             "Next": "JustMet_Friend"
           },
           {
-            "Line": "I'm a nobody"
+            "Line": "I'm a nobody."
           },
           {
-            "Line": "I'm a developer"
+            "Line": "I'm a developer."
           }
         ],
         "Next": ""
       },
       "JustMet_Enemy": {
         "Face": "GreatKingRatSmirk",
-        "Lines": [ "Ha! A CAT such as yourself,", "declaring themselves enemy of the Rats?", "Very well. We'll see about that." ],
+        "Lines": [ "Ha! A CAT such as yourself, declaring", "themselves enemy of the Rats?", "Very well. We'll see about that." ],
         "Next": ""
       },
       "JustMet_Friend": {

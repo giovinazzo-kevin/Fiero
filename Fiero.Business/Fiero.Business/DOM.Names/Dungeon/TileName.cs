@@ -8,6 +8,6 @@
         Wall,
         Hole,
         Water,
-        Error
+        Error,
     }
 }

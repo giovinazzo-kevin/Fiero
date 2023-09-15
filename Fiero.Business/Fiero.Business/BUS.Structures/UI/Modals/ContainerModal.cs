@@ -196,7 +196,7 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.HorizontalAlignment.V = HorizontalAlignment.Left;
-                    x.Padding.V = new(8, 0);
+                    x.Padding.V = new(2, 0);
                 }))
             ;
         protected override LayoutGrid RenderContent(LayoutGrid layout)

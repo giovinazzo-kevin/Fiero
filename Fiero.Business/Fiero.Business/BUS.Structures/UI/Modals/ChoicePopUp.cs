@@ -64,13 +64,13 @@ namespace Fiero.Business
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))
                 || UI.Input.IsMouseWheelScrollingUp())
             {
-                SelectedIndex = (SelectedIndex - 1).Mod(Options.Length);
+                SelectedIndex = (SelectedIndex - 1).Mod(Options.Length.DefaultIfZero(1));
                 Invalidate();
             }
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveS))
                 || UI.Input.IsMouseWheelScrollingDown())
             {
-                SelectedIndex = (SelectedIndex + 1).Mod(Options.Length);
+                SelectedIndex = (SelectedIndex + 1).Mod(Options.Length.DefaultIfZero(1));
                 Invalidate();
             }
 
@@ -130,6 +130,9 @@ namespace Fiero.Business
                         };
                     })
                 .End())
+            .Row(@class: "spacer")
+                .Cell<Layout>(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
+            .End()
             .End()
             ;
 

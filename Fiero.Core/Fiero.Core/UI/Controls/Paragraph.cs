@@ -8,11 +8,14 @@ namespace Fiero.Core
         public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12), invalidate: true) { Propagated = true, Inherited = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
         public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255, invalidate: true);
-        public readonly UIControlProperty<int> Rows = new(nameof(Rows), 10, invalidate: true);
+        public readonly UIControlProperty<int?> Rows = new(nameof(Rows), null, invalidate: true);
+        public readonly UIControlProperty<int?> LineHeight = new(nameof(LineHeight), null);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false, invalidate: true) { Inherited = false };
         public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false, invalidate: true);
-        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), true, invalidate: true);
+        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), false, invalidate: true);
         public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true, invalidate: true);
+
+        public int CalculatedRows => Rows.V ?? Labels.Count;
 
         protected readonly List<Label> Labels = new();
 
@@ -48,22 +51,31 @@ namespace Fiero.Core
 
         protected virtual void OnSizeInvalidated()
         {
+            var lineHeight = (LineHeight.V ?? FontSize.V.Y);
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
             {
-                c.Size.V = new(ContentRenderSize.X, ContentRenderSize.Y / Rows);
+                c.Size.V = new(ContentRenderSize.X, lineHeight);
             }
         }
 
         protected virtual void OnPositionInvalidated()
         {
+            var lineHeight = (LineHeight.V ?? FontSize.V.Y);
+            var totalHeight = CalculatedRows * lineHeight;
+            var h = (int)(ContentRenderSize.Y / 2f - totalHeight / 2f);
             foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
             {
-                c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * ContentRenderSize.Y / Rows);
+                c.Position.V = new(ContentRenderPos.X, ContentRenderPos.Y + i * lineHeight);
+                if (CenterContentV.V)
+                {
+                    c.Position.V += new Coord(0, h);
+                }
             }
         }
 
-        protected virtual void OnMaxLinesInvalidated(int delta)
+        protected virtual void OnMaxLinesInvalidated(int? delta)
         {
+            delta ??= CalculatedRows - Labels.Count;
             if (delta < 0)
             {
                 for (int i = Children.Count - 1; i >= 0 && delta++ < 0; i--)
@@ -77,7 +89,7 @@ namespace Fiero.Core
                     }
                 }
             }
-            else
+            else if (delta > 0)
             {
                 for (; delta-- > 0;)
                 {
@@ -87,6 +99,7 @@ namespace Fiero.Core
                 }
                 OnTextInvalidated();
             }
+            OnPositionInvalidated();
         }
 
         protected Label CreateLabel()
@@ -100,6 +113,10 @@ namespace Fiero.Core
         protected virtual void OnTextInvalidated()
         {
             var lines = Text.V.Split('\n').ToList();
+            if (Rows.V is null)
+            {
+                OnMaxLinesInvalidated(lines.Count - Labels.Count);
+            }
             if (WrapContent)
             {
                 for (int i = 0; i < lines.Count; i++)
@@ -118,7 +135,7 @@ namespace Fiero.Core
                     lines.InsertRange(i + 1, newLines.Skip(1));
                 }
             }
-            foreach (var (c, l) in Labels.Zip(lines.Concat(Enumerable.Repeat(string.Empty, Rows)).Take(Rows)))
+            foreach (var (c, l) in Labels.Zip(lines.Concat(Enumerable.Repeat(string.Empty, CalculatedRows)).Take(CalculatedRows)))
             {
                 var len = Math.Min(l.Length, Cols);
                 c.Text.V = l[..len];

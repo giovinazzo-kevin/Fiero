@@ -6,10 +6,10 @@ namespace Fiero.Business
     public class DialogueNode
     {
         public readonly string Id;
-        public readonly string Face;
-        public readonly string Title;
-        public readonly string[] Lines;
-        public readonly bool Cancellable;
+        public string Face;
+        public string Title;
+        public string[] Lines;
+        public bool Cancellable;
         public readonly IDictionary<string, DialogueNode> Choices;
         public DialogueNode Next { get; set; }
 

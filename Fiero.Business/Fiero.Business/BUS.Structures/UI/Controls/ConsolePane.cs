@@ -60,7 +60,7 @@ namespace Fiero.Business
         }
         private void Cursor_ValueChanged(UIControlProperty<Coord> arg1, Coord arg2)
         {
-            var glyphSize = ContentRenderSize / new Vec(Cols.V, Rows.V);
+            var glyphSize = ContentRenderSize / new Vec(Cols.V, CalculatedRows);
             var renderOffset = ContentRenderPos - Position.V;
             var physicalCursorPos = ((Cursor.V - new Coord(0, Scroll.V)) * glyphSize + renderOffset).ToCoord();
 
@@ -109,7 +109,7 @@ namespace Fiero.Business
         {
             if (Lines.Count > Rows.V)
             {
-                Scroll.V = Math.Min(Scroll.V + ScrollAmount.V, Lines.Count - Rows.V);
+                Scroll.V = Math.Min(Scroll.V + ScrollAmount.V, Lines.Count - CalculatedRows);
                 Cursor_ValueChanged(null, Cursor.V);
                 OnTextInvalidated();
             }
@@ -135,7 +135,7 @@ namespace Fiero.Business
             // If the cursor is below the visible area
             else if (Cursor.V.Y >= Scroll.V + Rows.V)
             {
-                Scroll.V = Cursor.V.Y - Rows.V + 1;
+                Scroll.V = Cursor.V.Y - CalculatedRows + 1;
                 OnTextInvalidated();
             }
             Caret.IsHidden.V = false;
@@ -195,7 +195,7 @@ namespace Fiero.Business
                 _debounce.Fire -= _debounce_Fire;
                 Text.V = Lines
                     .Skip(Scroll.V)
-                    .Take(Rows.V)
+                    .Take(CalculatedRows)
                     .Join("\n");
             }
         }

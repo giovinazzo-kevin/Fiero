@@ -32,6 +32,7 @@ namespace Fiero.Business
             Colors = colors;
             ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
+            EnableDragging = false;
             Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
             void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
@@ -147,6 +148,7 @@ namespace Fiero.Business
                     .Cell<ConsolePane>(p =>
                     {
                         Pane = p;
+                        Pane.CenterContentV.V = Pane.CenterContentH.V = false;
                         Pane.Caret.CharAvailable += (caret, ch) =>
                         {
                             if (ScriptingSystem.Shell.InputReader.Blocking)

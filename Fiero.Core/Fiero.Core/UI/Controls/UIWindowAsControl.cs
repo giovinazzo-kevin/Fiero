@@ -23,6 +23,8 @@ namespace Fiero.Core
             };
             Window.ValueChanged += (_, old) =>
             {
+                if (!Window.V.IsOpen)
+                    Window.V.Open(string.Empty);
                 if (Window.V?.Layout is null)
                     return;
                 Window.V.Layout.Position.V = Position.V;
@@ -30,6 +32,18 @@ namespace Fiero.Core
             };
             //Invalidated += source =>
             //    Window.V?.Layout?.Invalidate(source);
+        }
+
+        public override IEnumerable<UIControl> Contains(Coord point)
+        {
+            foreach (var item in base.Contains(point))
+            {
+                yield return item;
+            }
+            foreach (var item in Window.V.Layout.Contains(point))
+            {
+                yield return item;
+            }
         }
 
         protected override void Repaint(RenderTarget target, RenderStates states)

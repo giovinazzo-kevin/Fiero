@@ -70,7 +70,10 @@ namespace Fiero.Business
                 Layout.Size.V = e.NewValue;
             };
         }
-        protected override void DefaultSize() { }
+        protected override void DefaultSize()
+        {
+            Layout.Size.V = UI.Window.Size;
+        }
 
         public void OnActorDeselected()
         {
@@ -125,19 +128,6 @@ namespace Fiero.Business
             var viewSize = Viewport.ViewArea.V.Size();
             Viewport.ViewArea.V = new(pos.X - viewSize.X / 2, pos.Y - viewSize.Y / 2, viewSize.X, viewSize.Y);
             Viewport.SetDirty();
-        }
-
-        public override void Open(string title)
-        {
-            base.Open(title);
-            LogBox.Open(string.Empty);
-            MiniMap.Open(string.Empty);
-            HP.Open(string.Empty);
-            MP.Open(string.Empty);
-            XP.Open(string.Empty);
-            QuickBar.Open(string.Empty);
-            EquipmentDisplay.Open(string.Empty);
-            Layout.Size.V = UI.Window.Size;
         }
 
         public override void Draw(RenderTarget target, RenderStates states)

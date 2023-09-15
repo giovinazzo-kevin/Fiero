@@ -151,10 +151,6 @@ namespace Fiero.Core
                     yield return contained;
                     continue;
                 }
-                foreach (var child in wnd.Window.V.Layout.HitTest(point))
-                {
-                    yield return child;
-                }
             }
         }
 

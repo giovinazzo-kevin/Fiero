@@ -36,6 +36,7 @@ namespace Fiero.Business
             Node = node;
             Speaker = speaker;
             Listeners = listeners;
+            IsResponsive = false;
             Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>());
             Choices.Cancelled += (_, btn) => Close(btn);
             Choices.OptionChosen += DialogueModal_OptionChosen;

@@ -310,7 +310,7 @@ namespace Fiero.Core
                     using var rect = new RectangleShape(child.BorderRenderSize)
                     {
                         FillColor = Color.Transparent,
-                        Position = (child.BorderRenderPos - BorderRenderPos - Coord.PositiveOne).ToVector2f()
+                        Position = (child.BorderRenderPos - BorderRenderPos).ToVector2f()
                     };
                     var eraser = RenderStates.Default;
                     eraser.BlendMode = BlendMode.None;

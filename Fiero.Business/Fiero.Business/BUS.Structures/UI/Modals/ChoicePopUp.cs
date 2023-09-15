@@ -19,8 +19,8 @@ namespace Fiero.Business
 
         private readonly Dictionary<int, Mapping> _mapping = new();
 
-        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons)
-            : base(ui, resources, buttons, GetDefaultStyles(buttons) & ~ModalWindowStyles.TitleBar_Maximize)
+        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles? styles = null)
+            : base(ui, resources, buttons, styles ?? GetDefaultStyles(buttons) & ~ModalWindowStyles.TitleBar_Maximize)
         {
             Options = options;
             Confirmed += (_, __) =>

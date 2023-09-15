@@ -13,6 +13,9 @@ namespace Fiero.Business
         public readonly DrawableEntity[] Listeners;
         protected readonly ChoicePopUp<string> Choices;
 
+        protected const int DialogueHeight = 80;
+        protected int ChoicesHeight;
+
         static ModalWindowButton[] GetOptions(bool canCancel)
         {
             return Inner(canCancel).ToArray();
@@ -37,15 +40,27 @@ namespace Fiero.Business
             Speaker = speaker;
             Listeners = listeners;
             IsResponsive = false;
-            Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>());
+            ModalWindowStyles? choicesStyle = Node.Choices.Count == 0 ? ModalWindowStyles.None : null;
+            Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>(), choicesStyle);
             Choices.Cancelled += (_, btn) => Close(btn);
             Choices.OptionChosen += DialogueModal_OptionChosen;
+            Choices.Open(string.Empty);
+            ChoicesHeight = Choices.Layout.Size.V.Y;
         }
-        protected override void OnLayoutRebuilt(Layout oldValue)
+
+        public override void Maximize()
         {
-            //base.OnLayoutRebuilt(oldValue);
-            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize);
+            Layout.Position.V = Coord.Zero;
+            IsMaximized = true;
+        }
+
+        public override void Minimize()
+        {
+            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize) * Coord.PositiveX
+                + new Coord(0, TitleHeight + DialogueHeight + ChoicesHeight + ButtonsHeight);
             Layout.Position.V = Layout.Size.V / 2 * new Coord(1, 0);
+            IsMaximized = false;
         }
 
         public override void Open(string title)
@@ -91,8 +106,8 @@ namespace Fiero.Business
             ;
 
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
-            .Row(h: 80, px: true)
-                .Col(@class: "portrait", w: 64 + 16, px: true)
+            .Row(h: DialogueHeight, px: true)
+                .Col(@class: "portrait", w: DialogueHeight, px: true)
                     .Cell<Picture>()
                 .End()
                 .Col(@class: "content")

@@ -118,7 +118,7 @@ namespace Fiero.Business
             base.Draw(target, states);
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             var shift = UI.Input.IsKeyPressed(VirtualKeys.Shift);
             var ctrl = UI.Input.IsKeyPressed(VirtualKeys.Control);
@@ -135,7 +135,7 @@ namespace Fiero.Business
                     continue;
                 pair.Value();
             }
-            base.Update();
+            base.Update(t, dt);
         }
     }
 }

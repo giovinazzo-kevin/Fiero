@@ -52,10 +52,10 @@ namespace Fiero.Core
             Window.V.Draw(target, states);
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             if (Window.V is null) return;
-            Window.V.Update();
+            Window.V.Update(t, dt);
             if (!IsDirty)
                 Invalidate(); // The window handles its own invalidation logic, so redraw it each frame
         }

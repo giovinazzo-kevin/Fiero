@@ -57,9 +57,9 @@ namespace Fiero.Business
             return str;
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
-            base.Update();
+            base.Update(t, dt);
 
             if (UI.Input.IsKeyPressed(UI.Store.Get(Data.Hotkeys.MoveN))
                 || UI.Input.IsMouseWheelScrollingUp())

@@ -94,7 +94,7 @@ namespace Fiero.Core
             return this;
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             if (IsMouseOver && Input.IsKeyPressed(VirtualKeys.Up))
             {

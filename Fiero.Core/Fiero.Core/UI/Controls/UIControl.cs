@@ -24,13 +24,16 @@ namespace Fiero.Core
         public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0), invalidate: true);
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
-        public readonly UIControlProperty<bool> IsMouseOver = new(nameof(IsMouseOver), false);
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
         public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
         public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<ToolTip> ToolTip = new(nameof(ToolTip), null) { Inherited = false };
+
+        public bool IsMouseOver { get; protected set; }
 
         public event Action<UIControl> Invalidated;
         protected bool IsDirty { get; set; } = true;
+
 
         private RenderTexture _target;
         private HashSet<UIControl> _redrawChildren = new();
@@ -114,6 +117,16 @@ namespace Fiero.Core
                     _target = new RenderTexture((uint)texw, (uint)texh);
                 }
                 Invalidate();
+            };
+
+            ToolTip.ValueChanged += (_, old) =>
+            {
+                old?.Close(default);
+                if (ToolTip.V is { } newValue)
+                {
+                    newValue.Open(string.Empty);
+                    newValue.Layout.IsHidden.V = !IsMouseOver;
+                }
             };
 
             Position.ValueChanged += (_, __) => RecomputeBoundaries();
@@ -250,11 +263,11 @@ namespace Fiero.Core
             return preventDefault;
         }
 
-        public virtual void Update()
+        public virtual void Update(TimeSpan t, TimeSpan dt)
         {
             foreach (var child in Children)
             {
-                child.Update();
+                child.Update(t, dt);
             }
         }
 
@@ -318,7 +331,8 @@ namespace Fiero.Core
                     .ThenByDescending(x => x.IsActive.V ? 0 : 1)
                     .ThenBy(Children.IndexOf) // Preserves the natural ordering where z-order is implicit
                     .ToArray();
-                // If a child has a semitransparent background, we need to 
+                // If a child has a semitransparent background, we need to physically erase its shape from the texture
+                // There's no need to do this for opaque objects
                 foreach (var child in drawList
                     .Where(c => c.Background.V.A < 255))
                 {

@@ -85,7 +85,7 @@ namespace Fiero.Business
             Timelines.Clear();
         }
 
-        public void Update()
+        public void Update(TimeSpan t, TimeSpan dt)
         {
             if (UI.Input.IsKeyPressed(UI.Store.Get(Hotkeys.DeveloperConsole)))
             {

@@ -32,7 +32,7 @@
             }
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             var preventDefault = TrackMouse(Input.GetMousePosition(), out var clickedControl, out var clickedButton);
             if (!preventDefault)
@@ -42,7 +42,7 @@
                     Focus(clickedControl);
                 }
             }
-            base.Update();
+            base.Update(t, dt);
         }
 
         public Layout(LayoutGrid dom, GameInput input, params UIControl[] controls) : base(input)

@@ -16,12 +16,12 @@ namespace Fiero.Core
         {
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             if (!IsOpen)
                 return;
             if (!IsDragging)
-                base.Update();
+                base.Update(t, dt);
             if (!EnableDragging)
                 return;
             var mousePos = UI.Input.GetMousePosition();

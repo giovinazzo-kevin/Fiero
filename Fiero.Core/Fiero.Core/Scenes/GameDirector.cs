@@ -92,11 +92,11 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Update()
+        public virtual void Update(TimeSpan t, TimeSpan dt)
         {
             if (_currentItem != null)
             {
-                _currentItem.Scene.Update();
+                _currentItem.Scene.Update(t, dt);
                 if (_currentItem.Transitions.TryGetValue(_currentItem.Scene.State, out var nextState))
                 {
                     var tNextState = nextState.GetType();

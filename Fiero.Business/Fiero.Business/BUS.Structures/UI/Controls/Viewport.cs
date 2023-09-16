@@ -60,6 +60,21 @@ namespace Fiero.Business
             ViewArea.ValueChanged += (_, __) => SetDirty();
             Following.ValueChanged += (_, __) => SetDirty();
             ViewTileSize.ValueChanged += (_, __) => SetDirty();
+            TargetingShape.ValueChanged += (_, old) =>
+            {
+                if (old != null)
+                    old.Changed -= OnChanged;
+                if (TargetingShape.V != null)
+                {
+                    TargetingShape.V.Changed += OnChanged;
+                    OnChanged(TargetingShape.V);
+                }
+
+                void OnChanged(TargetingShape v)
+                {
+                    Invalidate();
+                }
+            };
             Invalidated += (_) => SetDirty();
         }
 

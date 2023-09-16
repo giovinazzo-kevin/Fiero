@@ -105,9 +105,9 @@ namespace Fiero.Business.Scenes
             };
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
-            Layout.Update();
+            Layout.Update(t, dt);
         }
 
         public override void DrawBackground(RenderTarget target, RenderStates states)

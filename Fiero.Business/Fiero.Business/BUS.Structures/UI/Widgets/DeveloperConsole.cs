@@ -168,10 +168,5 @@ namespace Fiero.Business
                     })
                 .End()
             ;
-
-        public override void Update()
-        {
-            base.Update();
-        }
     }
 }

@@ -83,10 +83,10 @@ namespace Fiero.Core
             Closed?.Invoke(this, buttonPressed);
         }
 
-        public virtual void Update()
+        public virtual void Update(TimeSpan t, TimeSpan dt)
         {
             if (!IsOpen) return;
-            Layout.Update();
+            Layout.Update(t, dt);
             Updated?.Invoke(this);
         }
 

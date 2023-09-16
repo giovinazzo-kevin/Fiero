@@ -113,7 +113,7 @@ namespace Fiero.Core
                 InitializeWindow(Window.RenderWindow);
                 Loop.Update += (t, dt) =>
                 {
-                    Update();
+                    Update(t, dt);
                     Input.Update();
                 };
                 // Always called once per frame before the window is drawn
@@ -128,24 +128,24 @@ namespace Fiero.Core
             }
         }
 
-        public virtual void Update()
+        public virtual void Update(TimeSpan t, TimeSpan dt)
         {
             if (Window.HasFocus())
             {
                 // Update all non-modal windows
                 foreach (var wnd in UI.GetOpenWindows().Reverse())
                 {
-                    wnd.Update();
+                    wnd.Update(t, dt);
                 }
                 // Then update the topmost modal
                 if (UI.GetOpenModals().LastOrDefault() is { } modal)
                 {
-                    modal.Update();
+                    modal.Update(t, dt);
                 }
                 // If no modal is open, just update the current scene
                 else
                 {
-                    Director.Update();
+                    Director.Update(t, dt);
                 }
             }
         }

@@ -86,7 +86,7 @@ namespace Fiero.Core
             yield break;
         }
 
-        public virtual void Update() { }
+        public virtual void Update(TimeSpan t, TimeSpan dt) { }
         public virtual void DrawBackground(RenderTarget target, RenderStates states) { }
         public virtual void DrawForeground(RenderTarget target, RenderStates states) { }
     }

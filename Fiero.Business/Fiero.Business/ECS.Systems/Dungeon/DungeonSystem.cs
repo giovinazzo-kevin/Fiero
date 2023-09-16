@@ -275,7 +275,12 @@ namespace Fiero.Business
         }
 
         public bool IsLineOfSightBlocked(PhysicalEntity e, Coord a, Coord b)
-            => !TryGetFloor(e.FloorId(), out var floor)
-                || Shapes.Line(a, b).Any(p => !floor.Cells.TryGetValue(p, out var cell) || !cell.Tile.IsWalkable(e));
+        {
+            if (!TryGetFloor(e.FloorId(), out var floor))
+                return true;
+            var blocks = Shapes.Line(a, b)
+                .Where(p => !floor.Cells.TryGetValue(p, out var cell) || cell.Tile.Physics.BlocksLight);
+            return blocks.Any();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Fiero.Business.BUS.Structures.UI.Widgets;
 using Fiero.Core;
 using SFML.Graphics;
+using System;
 using System.Linq;
 
 namespace Fiero.Business
@@ -90,9 +91,9 @@ namespace Fiero.Business
             Viewport.SetDirty();
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
-            base.Update();
+            base.Update(t, dt);
 #if DEBUG
             if (UI.Input.IsButtonPressed(SFML.Window.Mouse.Button.Right))
             {

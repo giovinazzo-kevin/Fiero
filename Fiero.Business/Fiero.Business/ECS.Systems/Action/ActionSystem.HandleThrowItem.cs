@@ -69,7 +69,7 @@ namespace Fiero.Business
                 var vPos = victim.Position();
                 switch (item.ThrowableProperties.Throw)
                 {
-                    case { } when _floorSystem.IsLineOfSightBlocked(item, aPos, vPos):
+                    case { } when _floorSystem.IsLineOfSightBlocked(attacker, aPos, vPos):
                         return false;
                     // If the throwable hits in a straight line, we need to figure out the first actor across that line
                     case ThrowName.Line:

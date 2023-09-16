@@ -35,6 +35,7 @@ namespace Fiero.Business
                 (int)Math.Round(Math.Cos(Rotation) * Length),
                 (int)Math.Round(Math.Sin(Rotation) * Length)
             );
+            OnChanged();
         }
 
         public override bool CanRotateWithDirectionKeys() => true;
@@ -42,12 +43,14 @@ namespace Fiero.Business
         public override bool TryRotateCCw()
         {
             Rotate(-45);
+            OnChanged();
             return true;
         }
 
         public override bool TryRotateCw()
         {
             Rotate(45);
+            OnChanged();
             return true;
         }
 

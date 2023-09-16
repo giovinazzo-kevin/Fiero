@@ -1035,10 +1035,10 @@ namespace Fiero.Business.Scenes
             Rng.SetGlobalSeed(newRngSeed);
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
             Systems.Action.Update(Player.Id);
-            Systems.Render.Update();
+            Systems.Render.Update(t, dt);
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(VirtualKeys.R))
             {
                 if (UI.Input.IsKeyDown(VirtualKeys.Shift))

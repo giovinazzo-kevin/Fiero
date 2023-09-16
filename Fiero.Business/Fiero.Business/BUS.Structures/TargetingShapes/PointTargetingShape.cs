@@ -28,6 +28,7 @@ namespace Fiero.Business
                 return false;
             }
             Offset = newOffset;
+            OnChanged();
             return true;
         }
 
@@ -54,6 +55,7 @@ namespace Fiero.Business
                 if (validTarget(p))
                 {
                     Offset = p - Origin;
+                    OnChanged();
                     return true;
                 }
             }

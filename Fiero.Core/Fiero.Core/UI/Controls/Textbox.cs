@@ -44,9 +44,9 @@ namespace Fiero.Core
             };
         }
 
-        public override void Update()
+        public override void Update(TimeSpan t, TimeSpan dt)
         {
-            base.Update();
+            base.Update(t, dt);
             if (!IsActive)
             {
                 _caretShown = false;

@@ -7,7 +7,7 @@ namespace Fiero.Core
         object State { get; }
         bool TrySetState(object newState);
 
-        void Update();
+        void Update(TimeSpan t, TimeSpan dt);
         void DrawBackground(RenderTarget target, RenderStates states);
         void DrawForeground(RenderTarget target, RenderStates states);
 

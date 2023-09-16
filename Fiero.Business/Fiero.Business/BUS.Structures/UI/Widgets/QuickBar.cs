@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Fiero.Business
 {
+
     [TransientDependency]
     public class QuickBar : Widget
     {
@@ -53,7 +54,7 @@ namespace Fiero.Business
             base.OnLayoutRebuilt(oldValue);
             QuickSlotHelper_QuickSlotChanged(QuickSlotHelper);
         }
-        public QuickBar(GameUI ui, QuickSlotHelper helper, GameResources resources, ActionSystem action) : base(ui)
+        public QuickBar(GameUI ui, QuickSlotHelper helper, GameResources resources) : base(ui)
         {
             Resources = resources;
             QuickSlotHelper = helper;

@@ -108,9 +108,10 @@ namespace Fiero.Core
             {
                 _target?.Dispose();
                 _target = null;
-                if (Size.V != Coord.Zero && Scale.V != Vec.Zero)
+                var (texw, texh) = ((Size.V.X * Scale.V.X), (Size.V.Y * Scale.V.Y));
+                if (texw > 0 && texh > 0)
                 {
-                    _target = new RenderTexture((uint)(Size.V.X * Scale.V.X), (uint)(Size.V.Y * Scale.V.Y));
+                    _target = new RenderTexture((uint)texw, (uint)texh);
                 }
                 Invalidate();
             };

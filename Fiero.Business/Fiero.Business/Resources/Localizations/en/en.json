@@ -29,7 +29,7 @@
       "JustMet": {
         "Face": "GreatKingRatCalm",
         "Title": "The Great King Rat says 'Hello'",
-        "Lines": [ "...?", "And who might you be?" ],
+        "Lines": [ "I am cheesed to meet you!", "And who might you be?" ],
         "Choices": [
           {
             "Line": "I'm an enemy of the Rats.",

@@ -61,10 +61,5 @@ namespace Fiero.Core
                 Dropped?.Invoke(this, Layout.Position.V);
             }
         }
-
-        public override LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
-            .Col()
-                .Repeat(1, (i, g) => RenderContent(g))
-            .End();
     }
 }

@@ -46,7 +46,10 @@ namespace Fiero.Core
             Layout.Invalidate();
         }
 
-        public abstract LayoutGrid CreateLayout(LayoutGrid grid, string title);
+        public virtual LayoutGrid CreateLayout(LayoutGrid grid, string title) => ApplyStyles(grid)
+            .Col()
+                .Repeat(1, (i, g) => RenderContent(g))
+            .End();
 
         public UIWindow(GameUI ui)
         {

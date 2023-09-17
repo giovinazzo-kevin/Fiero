@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class MapCell : IPathNode<PhysicalEntity>
     {
@@ -19,12 +15,22 @@ namespace Fiero.Business
             Features = new();
         }
 
-        public bool IsWalkable(PhysicalEntity e) => e.Physics.Phasing || ((IPathNode<PhysicalEntity>)Tile).IsWalkable(e)
-            && !BlocksMovement() && !Features.Any(f => e.TryCast<Actor>(out var a) && a.IsPlayer() switch
+        public bool IsWalkable(PhysicalEntity e)
+        {
+            var ret = e.Physics.Phasing
+                || ((IPathNode<PhysicalEntity>)Tile).IsWalkable(e)
+                && !BlocksMovement();
+            if (e.TryCast<Actor>(out var a))
             {
-                true => f.Physics.BlocksPlayerPathing,
-                false => f.Physics.BlocksNpcPathing
-            });
+                ret &= !Features.Any(f => a.IsPlayer() switch
+                    {
+                        true => f.Physics.BlocksPlayerPathing,
+                        false => f.Physics.BlocksNpcPathing
+                    })
+                    && !(Actors.Any() && !Actors.Contains(a));
+            }
+            return ret;
+        }
         public double GetCost(PhysicalEntity e)
         {
             var cost = 0d;

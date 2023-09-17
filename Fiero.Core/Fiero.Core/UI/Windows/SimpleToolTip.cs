@@ -17,19 +17,19 @@
                     Label.Control.Text.ValueChanged += OnValueChanged;
                 void OnValueChanged(UIControlProperty<string> _, string __)
                 {
-                    Layout.Size.V = Label.Control.MinimumContentSize.Size();
+                    Layout.Size.V = Label.Control.MinimumContentSize;
                 }
             };
         }
 
-        protected override void DefaultSize()
-        {
-        }
+        protected override void DefaultSize() { }
 
         protected override LayoutGrid RenderContent(LayoutGrid grid)
         {
             return grid
-                .Cell(Label)
+                .Row(@class: "tooltip")
+                    .Cell(Label)
+                .End()
             ;
         }
     }

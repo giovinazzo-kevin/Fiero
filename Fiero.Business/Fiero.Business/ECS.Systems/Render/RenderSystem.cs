@@ -111,9 +111,21 @@ namespace Fiero.Business
             void UpdateAnimations()
             {
                 var time = Loop.T;
-                foreach (var (id, timeline) in Timelines)
+                var keys = new List<int>(Timelines.Keys);
+                foreach (var id in keys)
                 {
+                    if (!Timelines.TryGetValue(id, out var timeline))
+                        continue;
                     var currentFrame = timeline.Frames.First();
+                    if (time > currentFrame.Start && !Vfx.ContainsKey(id))
+                    {
+                        var myVfx = Vfx[id] = new();
+                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
+                        {
+                            myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
+                        }
+                        timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
+                    }
                     if (time > currentFrame.End && Vfx.ContainsKey(id))
                     {
                         Vfx[id].Clear();
@@ -124,15 +136,6 @@ namespace Fiero.Business
                             Timelines.Remove(id);
                             continue;
                         }
-                    }
-                    if (time > currentFrame.Start && !Vfx.ContainsKey(id))
-                    {
-                        var myVfx = Vfx[id] = new();
-                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
-                        {
-                            myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
-                        }
-                        timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
                     }
                 }
             }
@@ -149,8 +152,7 @@ namespace Fiero.Business
             {
                 if (!anim.Frames.Any())
                     continue;
-                var id = Interlocked.Increment(ref _id);
-                Timelines[id] = anim;
+                Timelines[Interlocked.Increment(ref _id)] = anim;
             }
             if (blocking)
             {

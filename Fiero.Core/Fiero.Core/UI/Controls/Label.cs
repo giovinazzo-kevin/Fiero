@@ -14,8 +14,6 @@ namespace Fiero.Core
         public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
         public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
-        public IntRect MinimumContentSize { get; protected set; }
-
         public string DisplayText => String.IsNullOrEmpty(Text.V)
             ? String.Empty
             : String.Join(String.Empty, Text.V.Take(MaxLength));
@@ -40,7 +38,7 @@ namespace Fiero.Core
                 LabelDrawable.Text = text;
                 LabelDrawable.Scale = Scale.V * factor;
             }
-            MinimumContentSize = LabelDrawable.GetGlobalBounds();
+            MinimumContentSize = LabelDrawable.GetGlobalBounds().Size();
         }
 
         public Label(GameInput input) : base(input)

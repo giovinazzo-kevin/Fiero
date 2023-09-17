@@ -1,13 +1,11 @@
 ﻿using Fiero.Business.BUS.Structures.UI.Widgets;
-using Fiero.Core;
 
 
 using SFML.Graphics;
-using System;
-using System.Linq;
 
 namespace Fiero.Business
 {
+
     /// <summary>
     /// A window that lays out the main user interface, making it responsive.
     /// </summary>

@@ -9,6 +9,8 @@
         {
         }
 
+        protected override void DefaultSize() { }
+
         public override void Update(TimeSpan t, TimeSpan dt)
         {
             if (IsOpen)

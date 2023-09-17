@@ -31,6 +31,7 @@ namespace Fiero.Core
 
         public bool IsMouseOver { get; protected set; }
 
+
         public event Action<UIControl> Invalidated;
         protected bool IsDirty { get; set; } = true;
 
@@ -44,6 +45,7 @@ namespace Fiero.Core
             Invalidated?.Invoke(source ?? this);
             if (source != null && Children.Contains(source))
             {
+                // may crash, need a lock?
                 _redrawChildren.Add(source);
             }
             else if (source == null || source == this)
@@ -57,6 +59,7 @@ namespace Fiero.Core
         public Coord BorderRenderSize { get; private set; }
         public Coord ContentRenderSize { get; private set; }
         protected Coord TrackedMousePosition { get; private set; }
+        public Coord MinimumContentSize { get; protected set; }
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
         public void InheritProperties(UIControl from)

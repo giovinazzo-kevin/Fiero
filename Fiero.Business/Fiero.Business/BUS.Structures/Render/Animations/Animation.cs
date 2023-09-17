@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-using Shapes = Fiero.Core.Shapes;
+﻿using Shapes = Fiero.Core.Shapes;
 
 namespace Fiero.Business
 {
@@ -61,7 +58,7 @@ namespace Fiero.Business
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(10));
             return new(
             Shapes.Line(new(), to)
-                .Skip(1).SkipLast(1)
+                .Skip(1)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
                 .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1))))
                 .ToArray());
@@ -149,7 +146,7 @@ namespace Fiero.Business
                 actor.Render.Sprite,
                 actor.Render.Texture,
                 actor.Render.Color,
-                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
+                i => TimeSpan.FromMilliseconds(10),
                 offset: new Vec(0f, -0.166f)
             );
 
@@ -161,7 +158,7 @@ namespace Fiero.Business
                 actor.Render.Sprite,
                 actor.Render.Texture,
                 actor.Render.Color,
-                i => TimeSpan.FromMilliseconds(Math.Max(4, 36 - (i + 1) * 4)),
+                i => TimeSpan.FromMilliseconds(10),
                 offset: new(0, -25 + 0.166f)
             );
 

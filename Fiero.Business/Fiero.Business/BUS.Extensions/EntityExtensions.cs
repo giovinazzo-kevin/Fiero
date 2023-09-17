@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public static class EntityExtensions
     {
@@ -141,7 +137,7 @@ namespace Fiero.Business
             if (!a.TryIdentify(i))
             {
                 a.Inventory.AddIdentificationRule(i => i is T _t && rule(_t) || i.TryCast<T>(out var t) && rule(t));
-                foreach (var other in a.Inventory.GetItems().Where(i => !i.ItemProperties.Identified))
+                foreach (var other in a.Inventory.GetItems().Where(j => j != i && !j.ItemProperties.Identified))
                 {
                     a.TryIdentify(other);
                 }

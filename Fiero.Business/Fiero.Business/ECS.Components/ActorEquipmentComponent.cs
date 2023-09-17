@@ -1,17 +1,12 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class ActorEquipmentComponent : EcsComponent
     {
         protected readonly Dictionary<EquipmentSlotName, Equipment> Dict = new();
 
         public IEnumerable<KeyValuePair<EquipmentSlotName, Equipment>> EquippedItems => Dict;
-        public IEnumerable<Weapon> Weapons => Dict.Values.OfType<Weapon>();
-        public Armor Armor => Dict.Values.OfType<Armor>().SingleOrDefault();
+        public IEnumerable<Weapon> Weapons => Dict.Values.TrySelect(e => e.TryCast<Weapon>(out var weap) ? (true, weap) : default);
+        public Armor Armor => Dict.Values.TrySelect(e => e.TryCast<Armor>(out var weap) ? (true, weap) : default).SingleOrDefault();
 
         public event Action<ActorEquipmentComponent> EquipmentChanged;
 

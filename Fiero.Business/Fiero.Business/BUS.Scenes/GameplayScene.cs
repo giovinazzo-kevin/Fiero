@@ -1,11 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using Fiero.Core.Structures;
-using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using SFML.Graphics;
 using Unconcern.Common;
 
 namespace Fiero.Business.Scenes
@@ -187,7 +180,8 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Weapon_Sword()
                             .WithIntrinsicEffect(new EffectDef(EffectName.BestowTrait, TraitName.Huge.ToString()),
                                 e => new GrantedOnEquip(e))
-                            .WithIntrinsicEffect(new EffectDef(EffectName.Vampirism, "3"))
+                            .WithIntrinsicEffect(new EffectDef(EffectName.UncontrolledTeleport),
+                                e => new GrantedWhenHitByMeleeWeapon(e))
                             .WithColor(ColorName.LightRed)
                             .Build(),
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
@@ -304,27 +298,23 @@ namespace Fiero.Business.Scenes
             // - Show animation and play sound
             yield return Systems.Action.ActorTeleporting.SubscribeResponse(e =>
             {
-                if (Player.CanSee(e.OldPosition))
+                var (seeOld, seeNew) = (Player.CanSee(e.OldPosition), Player.CanSee(e.NewPosition));
+
+                if (seeOld && !seeNew)
                 {
-                    Systems.Render.CenterOn(Player);
-                    var tpOut = Animation.TeleportOut(e.Actor)
-                        .OnFirstFrame(() =>
-                        {
-                            e.Actor.Render.Hidden = true;
-                            Systems.Render.CenterOn(e.OldPosition);
-                        })
-                        .OnLastFrame(() =>
-                        {
-                            Systems.Action.ActorMoved.HandleOrThrow(e);
-                            TpIn();
-                        });
-                    Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, e.OldPosition, tpOut);
+                    TpOut();
+                    Systems.Action.ActorMoved.HandleOrThrow(e);
                     return true;
                 }
-                else if (Player.CanSee(e.NewPosition) || e.Actor.IsPlayer())
+                else if (!seeOld && (seeNew || e.Actor.IsPlayer()))
                 {
-                    e.Actor.Render.Hidden = true;
+                    Systems.Action.ActorMoved.HandleOrThrow(e);
+                    TpIn();
+                    return true;
+                }
+                else if (seeOld && seeNew)
+                {
+                    TpOut();
                     Systems.Action.ActorMoved.HandleOrThrow(e);
                     TpIn();
                     return true;
@@ -332,25 +322,55 @@ namespace Fiero.Business.Scenes
                 Systems.Action.ActorMoved.HandleOrThrow(e);
                 return true;
 
+                void TpOut()
+                {
+                    Systems.Render.CenterOn(Player);
+                    var tpOut = Animation.TeleportOut(e.Actor)
+                        .OnFirstFrame(() =>
+                        {
+                            e.Actor.Render.Hidden = true;
+                            Systems.Render.CenterOn(Player);
+                        })
+                        .OnLastFrame(() =>
+                        {
+                            if (e.Actor.IsInvalid()) return;
+                            e.Actor.Render.Hidden = false;
+                        });
+                    if (!e.Actor.IsPlayer())
+                        Player.Log.Write($"{e.Actor.Info.Name} $Action.TeleportsAway$.");
+                    e.Actor.Log.Write($"$Action.YouTeleportAway$.");
+                    Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
+                    Systems.Render.AnimateViewport(true, e.OldPosition, tpOut);
+                }
+
                 void TpIn()
                 {
                     var tpIn = Animation.TeleportIn(e.Actor)
                         .OnFirstFrame(() =>
                         {
-                            if (Player.CanSee(e.NewPosition))
+                            if (e.Actor.IsPlayer() || Player.CanSee(e.NewPosition))
                             {
-                                Systems.Render.CenterOn(e.NewPosition);
+                                e.Actor.Render.Hidden = true;
+                                Systems.Render.CenterOn(Player);
                             }
                         })
                         .OnLastFrame(() =>
                         {
-                            e.Actor.Render.Hidden = false;
-                            Systems.Render.CenterOn(Player);
+                            if (e.Actor.IsInvalid()) return;
+                            if (e.Actor.IsPlayer() || Player.CanSee(e.NewPosition))
+                            {
+                                e.Actor.Render.Hidden = false;
+                                Systems.Render.CenterOn(Player);
+                            }
                         });
                     if (e.Actor.IsPlayer())
                     {
                         Systems.Dungeon.RecalculateFov(Player);
                         Systems.Render.CenterOn(Player);
+                    }
+                    else if (Player.CanSee(e.Actor))
+                    {
+                        Player.Log.Write($"{e.Actor.Info.Name} $Action.TeleportsIn$.");
                     }
                     Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
                     Systems.Render.AnimateViewport(true, e.NewPosition, tpIn);
@@ -605,6 +625,8 @@ namespace Fiero.Business.Scenes
                 if (Systems.TryPlace(e.Actor.FloorId(), e.Corpse))
                 {
                     e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
+                    if (Player.CanSee(e.Corpse))
+                        Systems.Render.CenterOn(Player);
                 }
                 return true;
             });
@@ -753,13 +775,20 @@ namespace Fiero.Business.Scenes
             // - Play an animation and a sound as the projectile flies
             yield return Systems.Action.WandZapped.SubscribeResponse(e =>
             {
-                e.Actor.Log?.Write($"$Action.YouZap{e.Wand.DisplayName}.");
+                e.Actor.Log?.Write($"$Action.YouZap$ {e.Wand.DisplayName}.");
                 Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
                     Systems.Render.AnimateViewport(true, e.Actor.Position(), anim);
                     Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                }
+                if (e.Victim != null)
+                {
+                    if (e.Actor.Identify(e.Wand, q => q.WandProperties.Effect.Name == e.Wand.WandProperties.Effect.Name))
+                    {
+                        e.Actor.Log?.Write($"$Action.YouIdentify$ {e.Wand.DisplayName}.");
+                    }
                 }
                 return true;
             });
@@ -789,7 +818,7 @@ namespace Fiero.Business.Scenes
                 if (e.Actor.Identify(e.Potion, q => q.PotionProperties.QuaffEffect.Name == e.Potion.PotionProperties.QuaffEffect.Name
                                                  && q.PotionProperties.ThrowEffect.Name == e.Potion.PotionProperties.ThrowEffect.Name))
                 {
-                    e.Actor.Log?.Write($"$Action.YouIdentifyAPotion$ {e.Potion.DisplayName}.");
+                    e.Actor.Log?.Write($"$Action.YouIdentify$ {e.Potion.DisplayName}.");
                 }
                 return true;
             });
@@ -800,7 +829,7 @@ namespace Fiero.Business.Scenes
                 e.Actor.Log?.Write($"$Action.YouRead$ {e.Scroll.DisplayName}.");
                 if (e.Actor.Identify(e.Scroll, q => q.ScrollProperties.Effect.Name == e.Scroll.ScrollProperties.Effect.Name))
                 {
-                    e.Actor.Log?.Write($"$Action.YouIdentifyAScroll$ {e.Scroll.DisplayName}.");
+                    e.Actor.Log?.Write($"$Action.YouIdentify$ {e.Scroll.DisplayName}.");
                 }
                 return true;
             });

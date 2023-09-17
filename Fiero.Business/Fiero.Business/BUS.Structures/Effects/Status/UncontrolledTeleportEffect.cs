@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -17,6 +13,7 @@ namespace Fiero.Business
         {
             var randomPos = systems.Dungeon.GetFloor(target.FloorId())
                 .Cells.Shuffle(Rng.Random)
+                .Where(x => x.Key.Dist(target.Position()) < 10)
                 .First(x => x.Value.IsWalkable(target))
                 .Key;
             systems.Action.ActorTeleporting.HandleOrThrow(new(target, target.Position(), randomPos));

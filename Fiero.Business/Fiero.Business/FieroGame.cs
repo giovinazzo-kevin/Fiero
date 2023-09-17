@@ -72,6 +72,10 @@ namespace Fiero.Business
                     .Match(x => x.HasAllClasses("row-odd"))
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(-8, -8, -8))
                     .WithPriority(P - 1))
+                .Rule<UIControl>(style => style
+                    .Match(x => x.HasAllClasses("tooltip"))
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddAlpha(-128))
+                    .WithPriority(P - 1))
 
                 .Build();
         }

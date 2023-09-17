@@ -143,6 +143,8 @@ namespace Fiero.Core
             }
             OnSizeInvalidated();
             OnPositionInvalidated();
+            MinimumContentSize = Labels.Aggregate(Coord.Zero, (a, b) => b.MinimumContentSize * Coord.PositiveY + a)
+                + new Coord(Labels.Max(x => x.MinimumContentSize.X), 0);
         }
     }
 }

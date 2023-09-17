@@ -3,21 +3,21 @@
     [TransientDependency]
     public class SimpleToolTip : ToolTip
     {
-        public readonly LayoutRef<Label> Label = new();
+        public readonly LayoutRef<Paragraph> Paragraph = new();
 
-        public void SetText(string text) => Label.Control.Text.V = text;
+        public void SetText(string text) => Paragraph.Control.Text.V = text;
 
         public SimpleToolTip(GameUI ui) : base(ui)
         {
-            Label.ControlChanged += (_, old) =>
+            Paragraph.ControlChanged += (_, old) =>
             {
                 if (old != null)
                     old.Text.ValueChanged -= OnValueChanged;
-                if (Label.Control != null)
-                    Label.Control.Text.ValueChanged += OnValueChanged;
+                if (Paragraph.Control != null)
+                    Paragraph.Control.Text.ValueChanged += OnValueChanged;
                 void OnValueChanged(UIControlProperty<string> _, string __)
                 {
-                    Layout.Size.V = Label.Control.MinimumContentSize;
+                    Layout.Size.V = Paragraph.Control.MinimumContentSize;
                 }
             };
         }
@@ -28,7 +28,7 @@
         {
             return grid
                 .Row(@class: "tooltip")
-                    .Cell(Label)
+                    .Cell(Paragraph)
                 .End()
             ;
         }

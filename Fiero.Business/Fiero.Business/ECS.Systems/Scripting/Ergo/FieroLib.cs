@@ -5,7 +5,6 @@ using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
 using Ergo.Solver.BuiltIns;
 using LightInject;
-using System.Collections.Generic;
 
 namespace Fiero.Business;
 public partial class FieroLib : Library
@@ -26,6 +25,7 @@ public partial class FieroLib : Library
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<CastEntity>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<ComponentSetValue>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<SetRngSeed>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<MsgBox>());
         _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }
 
@@ -46,9 +46,14 @@ public partial class FieroLib : Library
 
     public Ergo.Lang.Maybe<IEnumerable<Signature>> GetScriptSubscriptions(Script script)
     {
-        if (Subscribptions.TryGetValue(script.ScriptProperties.Scope.InterpreterScope.Entry, out var set))
-            return set;
-        return default;
+        var set = new HashSet<Signature>();
+        var modules = script.ScriptProperties.Scope.InterpreterScope.VisibleModules;
+        foreach (var m in modules)
+        {
+            if (Subscribptions.TryGetValue(m, out var inner))
+                set.UnionWith(inner);
+        }
+        return set;
     }
 }
 

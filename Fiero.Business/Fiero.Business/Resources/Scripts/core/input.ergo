@@ -1,0 +1,18 @@
+% This module should be imported explicitly by scripts that need to set up custom keybindings.
+% Do not modify unless you know what you are doing.
+
+:- module(input, [bind/3, unbind/3]).
+:- subscribe(input, [keyboard_event]).
+:- dynamic(key_route/3).
+
+bind(Key, Event, Predicate) :-
+    assertz(key_route(Key, Event, Predicate)).
+
+unbind(Key, Event, Predicate) :-
+    retractall(key_route(Key, Event, Predicate)).
+
+%: Intercept keyboard events sent by the game and route them to Ergo
+keyboard_event(E) :-
+    E = key_event { type: Type, key: Key },
+    key_route(Key, Type, Predicate),
+    call(Predicate, E).

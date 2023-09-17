@@ -2,8 +2,6 @@
 using Ergo.Lang.Exceptions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
-using Fiero.Core;
-using System.Collections.Generic;
 
 namespace Fiero.Business;
 

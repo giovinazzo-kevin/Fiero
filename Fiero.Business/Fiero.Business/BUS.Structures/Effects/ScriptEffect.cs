@@ -1,7 +1,6 @@
 ﻿using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Solver;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Unconcern.Common;
 
@@ -73,7 +72,8 @@ namespace Fiero.Business
                the result of that call as the EventResult to pass to the owning system.
             */
             var routes = ErgoScriptingSystem.GetScriptRoutes();
-            foreach (var sig in Script.ScriptProperties.SubscribedEvents)
+            var subbedEvents = Script.ScriptProperties.SubscribedEvents;
+            foreach (var sig in subbedEvents)
             {
                 if (routes.TryGetValue(sig, out var sub))
                 {

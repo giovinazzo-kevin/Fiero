@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public partial class AiActionProvider : ActionProvider

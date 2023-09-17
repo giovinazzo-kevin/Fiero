@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameSystems
@@ -12,6 +10,7 @@ namespace Fiero.Business
         public readonly RenderSystem Render;
         public readonly ErgoScriptingSystem Scripting;
         public readonly MetaSystem Meta;
+        public readonly InputSystem Input;
 
         public GameSystems(
             ActionSystem action,
@@ -20,7 +19,8 @@ namespace Fiero.Business
             DungeonSystem dungeon,
             RenderSystem render,
             ErgoScriptingSystem scripting,
-            MetaSystem meta
+            MetaSystem meta,
+            InputSystem input
 
         )
         {
@@ -31,6 +31,7 @@ namespace Fiero.Business
             Render = render;
             Scripting = scripting;
             Meta = meta;
+            Input = input;
         }
     }
 }

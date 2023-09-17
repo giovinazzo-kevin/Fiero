@@ -7,14 +7,9 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Shell;
 using Ergo.Solver;
-using Fiero.Core;
 using LightInject;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.IO.Pipelines;
-using System.Linq;
 using System.Text;
 using Unconcern.Common;
 
@@ -101,7 +96,8 @@ namespace Fiero.Business
         {
             if (script.IsInvalid())
                 return false;
-            var localScope = StdlibScope;
+            var localScope = StdlibScope
+                .WithRuntime(true);
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
                 .TryGetValue(out var module))
             {

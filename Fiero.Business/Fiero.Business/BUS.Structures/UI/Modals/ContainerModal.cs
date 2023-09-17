@@ -299,7 +299,7 @@ namespace Fiero.Business
                 var text = $"{letter.Last()}) {Items[i].DisplayName}";
                 b.Text.V = text;
                 if (b.ToolTip.V is SimpleToolTip tooltip)
-                    tooltip.SetText(Items[i].Info.Name.ToString());
+                    tooltip.SetText(Items[i].Info.Description ?? string.Empty);
             }
 
             void RefreshPageLabel(Label l)

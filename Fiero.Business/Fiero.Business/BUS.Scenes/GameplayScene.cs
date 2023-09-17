@@ -178,6 +178,7 @@ namespace Fiero.Business.Scenes
                     .WithItems(
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
+                            .WithDescription("Lorem ipsum dolor\nsit amet.\nThis sword is cool wtf.\nNice.")
                             .WithIntrinsicEffect(new EffectDef(EffectName.BestowTrait, TraitName.Huge.ToString()),
                                 e => new GrantedOnEquip(e))
                             .WithIntrinsicEffect(new EffectDef(EffectName.UncontrolledTeleport),
@@ -1068,6 +1069,7 @@ namespace Fiero.Business.Scenes
         {
             Systems.Action.Update(Player.Id);
             Systems.Render.Update(t, dt);
+            Systems.Input.Update(t, dt);
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(VirtualKeys.R))
             {
                 if (UI.Input.IsKeyDown(VirtualKeys.Shift))

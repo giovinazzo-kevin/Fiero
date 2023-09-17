@@ -1,10 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class DialogueModal : Modal
     {
@@ -49,7 +43,7 @@ namespace Fiero.Business
                 .ToArray();
             IsResponsive = false;
             ModalWindowStyles? choicesStyle = Node.Choices.Count == 0 ? ModalWindowStyles.None : null;
-            Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>(), choicesStyle);
+            Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>(), styles: choicesStyle);
             Choices.Cancelled += (_, btn) => Close(btn);
             Choices.OptionChosen += DialogueModal_OptionChosen;
             Choices.Open(string.Empty);

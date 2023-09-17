@@ -17,7 +17,7 @@ public sealed class MsgBox : SolverBuiltIn
 
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
     {
-        UI.OptionalChoice(new[] { arguments[0].Explain() }, arguments[1].Explain());
+        UI.NecessaryChoice(Array.Empty<string>(), arguments[0].Explain(), arguments[1].Explain());
         yield return True();
     }
 }

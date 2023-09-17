@@ -1,8 +1,4 @@
 ﻿using Ergo.Lang;
-using Fiero.Core;
-
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -195,11 +191,11 @@ namespace Fiero.Business
 
             void Set(Item item)
             {
-                UI.NecessaryChoice(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, "Which quick slot?").OptionChosen += (popup, slot) =>
+                UI.NecessaryChoice(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, title: "Which quick slot?").OptionChosen += (popup, slot) =>
                 {
                     if (item.TryCast<Wand>(out var wand))
                     {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, "Which action?").OptionChosen += (popup, choice) =>
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Zap }, title: "Which action?").OptionChosen += (popup, choice) =>
                         {
                             if (choice == InventoryActionName.Throw)
                             {
@@ -221,7 +217,7 @@ namespace Fiero.Business
                     }
                     else if (item.TryCast<Potion>(out var potion))
                     {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, "Which action?").OptionChosen += (popup, choice) =>
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Quaff }, title: "Which action?").OptionChosen += (popup, choice) =>
                         {
                             if (choice == InventoryActionName.Throw)
                             {
@@ -247,7 +243,7 @@ namespace Fiero.Business
                     }
                     else if (item.TryCast<Scroll>(out var scroll))
                     {
-                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, "Which action?").OptionChosen += (popup, choice) =>
+                        UI.NecessaryChoice(new[] { InventoryActionName.Throw, InventoryActionName.Read }, title: "Which action?").OptionChosen += (popup, choice) =>
                         {
                             if (choice == InventoryActionName.Throw)
                             {

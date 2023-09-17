@@ -38,7 +38,7 @@ namespace Fiero.Core
                 LabelDrawable.Text = text;
                 LabelDrawable.Scale = Scale.V * factor;
             }
-            MinimumContentSize = LabelDrawable.GetGlobalBounds().Size();
+            MinimumContentSize = LabelDrawable.GetGlobalBounds().Size() + Padding.V * 2;
         }
 
         public Label(GameInput input) : base(input)

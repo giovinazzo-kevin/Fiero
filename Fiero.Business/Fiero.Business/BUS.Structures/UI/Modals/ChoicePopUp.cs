@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class ChoicePopUp<T> : PopUp
     {
@@ -11,17 +6,22 @@ namespace Fiero.Business
 
         protected int SelectedIndex;
 
+        public readonly string Message;
         public readonly T[] Options;
         public T SelectedOption => Options[SelectedIndex];
 
         public event Action<ChoicePopUp<T>, T> OptionChosen;
         public event Action<ChoicePopUp<T>, T> OptionClicked;
 
+        protected readonly LayoutRef<Paragraph> Paragraph = new();
+        protected int ParagraphHeight => Message == null ? 0 : Paragraph.Control.MinimumContentSize.Y;
+
         private readonly Dictionary<int, Mapping> _mapping = new();
 
-        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, ModalWindowStyles? styles = null)
+        public ChoicePopUp(GameUI ui, GameResources resources, T[] options, ModalWindowButton[] buttons, string text = null, ModalWindowStyles? styles = null)
             : base(ui, resources, buttons, styles ?? GetDefaultStyles(buttons) & ~ModalWindowStyles.TitleBar_Maximize)
         {
+            Message = text;
             Options = options;
             Confirmed += (_, __) =>
             {
@@ -105,11 +105,22 @@ namespace Fiero.Business
                     x.Padding.V = new(8, 0);
                     x.HorizontalAlignment.V = HorizontalAlignment.Left;
                 }))
+            .Rule<Paragraph>(s => s
+                .Match(x => x.HasClass("message"))
+                .Apply(x =>
+                {
+                    x.Padding.V = new(8, 8);
+                }))
             ;
 
         protected override LayoutGrid RenderContent(LayoutGrid layout) => base.RenderContent(layout)
             .Col()
-                .Repeat(Options.Length, (i, layout) => layout
+            .If(Message != null, g => g
+                .Row(@class: "message")
+                    .Cell<Layout>()
+                    .Cell(Paragraph, p => p.Text.V = Message)
+                .End())
+            .Repeat(Options.Length, (i, layout) => layout
                 .Row(h: 24, px: true, @class: "choice")
                     .Cell<Button>(b =>
                     {
@@ -130,9 +141,6 @@ namespace Fiero.Business
                         };
                     })
                 .End())
-            .Row(@class: "spacer")
-                .Cell<Layout>(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
-            .End()
             .End()
             ;
 
@@ -140,7 +148,7 @@ namespace Fiero.Business
         {
             var vwSize = UI.Store.Get(Data.UI.ViewportSize);
             var popupSize = UI.Store.Get(Data.UI.PopUpSize);
-            Layout.Size.V = new(popupSize.X, 24 * Options.Length + TitleHeight + ButtonsHeight);
+            Layout.Size.V = new(popupSize.X, 24 * Options.Length + TitleHeight + ButtonsHeight + ParagraphHeight);
             Layout.Position.V = vwSize / 2 - Layout.Size.V / 2;
         }
     }

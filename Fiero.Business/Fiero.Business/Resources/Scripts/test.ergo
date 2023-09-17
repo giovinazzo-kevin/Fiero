@@ -1,5 +1,7 @@
 :- module(test, []).
 :- use_module(input).
 
-test:began(_) :- bind(k, pressed, [E]>>spawn(npc_rat)).
+test:began(_) :- 
+	bind(k, pressed, [E]>>spawn(npc_rat)),
+	bind(_, pressed, [E]>>msg_box(&E.key, &E.type, _)).
 test:ended(_) :- unbind(_, _, _).

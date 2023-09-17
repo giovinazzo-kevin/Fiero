@@ -117,7 +117,7 @@ namespace Fiero.Business
             var actions = GetAvailableActions(Items[i]).Distinct().ToArray();
             var modal = UI.OptionalChoice(
                 actions,
-                Items[i].DisplayName
+                title: Items[i].DisplayName
             );
             for (int a = 0; a < actions.Length; a++)
             {

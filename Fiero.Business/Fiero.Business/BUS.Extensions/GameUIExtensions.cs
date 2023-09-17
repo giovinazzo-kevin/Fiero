@@ -22,23 +22,25 @@ namespace Fiero.Business
                 new DialogueModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), trigger, node, speaker, listeners),
                 node.Title
             );
-        public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string title = null)
+        public static ChoicePopUp<T> NecessaryChoice<T>(this GameUI ui, T[] choices, string message = null, string title = null)
             => ui.Open(
                 new ChoicePopUp<T>(
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),
                     choices,
-                    new[] { ModalWindowButton.Ok }
+                    new[] { ModalWindowButton.Ok },
+                    message
                 ),
                 title
             );
-        public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string title = null)
+        public static ChoicePopUp<T> OptionalChoice<T>(this GameUI ui, T[] choices, string message = null, string title = null)
             => ui.Open(
                 new ChoicePopUp<T>(
                     ui,
                     ui.ServiceProvider.GetInstance<GameResources>(),
                     choices,
-                    new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel }
+                    new[] { ModalWindowButton.Ok, ModalWindowButton.Cancel },
+                    message
                 ),
                 title
             );

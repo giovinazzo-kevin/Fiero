@@ -1,9 +1,5 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -175,7 +171,7 @@ namespace Fiero.Business
         protected abstract IEnumerable<TActions> GetAvailableActions(Item i);
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<UIControl>(s => s
+            .Rule<UIControl>(s => s
                 .Match(x => x.HasClass("paginator"))
                 .Apply(x =>
                 {
@@ -184,14 +180,14 @@ namespace Fiero.Business
                     x.BorderColor.V = UI.GetColor(ColorName.UIBorder);
                     x.OutlineThickness.V = 1;
                 }))
-            .Style<Picture>(s => s
+            .Rule<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
                 .Apply(x =>
                 {
                     x.VerticalAlignment.V = VerticalAlignment.Middle;
                     x.LockAspectRatio.V = true;
                 }))
-            .Style<Button>(s => s
+            .Rule<Button>(s => s
                 .Match(x => x.HasClass("item-name"))
                 .Apply(x =>
                 {
@@ -303,7 +299,7 @@ namespace Fiero.Business
                 var text = $"{letter.Last()}) {Items[i].DisplayName}";
                 b.Text.V = text;
                 if (b.ToolTip.V is SimpleToolTip tooltip)
-                    tooltip.SetText(Items[i].Id.ToString());
+                    tooltip.SetText(Items[i].Info.Name.ToString());
             }
 
             void RefreshPageLabel(Label l)

@@ -95,7 +95,7 @@ namespace Fiero.Business
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<Picture>(s => s
+            .Rule<Picture>(s => s
                 .Match(x => x.HasClass("portrait"))
                 .Apply(x =>
                 {
@@ -106,7 +106,7 @@ namespace Fiero.Business
                     x.LockAspectRatio.V = true;
                     x.Background.V = UI.GetColor(ColorName.UISecondary);
                 }))
-            .Style<Paragraph>(s => s
+            .Rule<Paragraph>(s => s
                 .Match(x => x.HasClass("content"))
                 .Apply(x =>
                 {

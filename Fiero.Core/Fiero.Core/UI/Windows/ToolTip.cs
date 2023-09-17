@@ -13,7 +13,7 @@
         {
             if (IsOpen)
             {
-                Layout.Position.V = UI.Input.GetMousePosition();
+                Layout.Position.V = UI.Input.GetMousePosition() - Layout.Size.V * Coord.PositiveY;
             }
             base.Update(t, dt);
         }

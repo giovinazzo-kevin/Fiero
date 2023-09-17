@@ -11,14 +11,14 @@ namespace Fiero.Business
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<Picture>(r => r
+            .Rule<Picture>(r => r
                 .Match(l => l.HasAnyClass("equipment-slot"))
                 .Apply(l =>
                 {
                     l.OutlineThickness.V = 2;
                     l.BorderColor.V = UI.GetColor(ColorName.Cyan);
                 }))
-            .Style<Label>(r => r
+            .Rule<Label>(r => r
                 .Match(l => l.HasAnyClass("neck", "back", "ring"))
                 .Apply(l =>
                 {

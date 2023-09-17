@@ -1,10 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameEntityBuilders
@@ -83,7 +77,7 @@ namespace Fiero.Business
 
         public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
             => Equipment<Weapon>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
-            .WithName(type.ToString())
+            .WithName($"$Item.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.Transparent)
             .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, baseDamage, swingDelay)
@@ -93,7 +87,7 @@ namespace Fiero.Business
         public EntityBuilder<Corpse> Corpse(CorpseName type)
             => Entities.CreateBuilder<Corpse>()
             .WithPhysics(Coord.Zero)
-            .WithName(type.ToString())
+            .WithName($"$Corpse.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
             .WithCorpseInfo(type)
             .WithItemInfo(0)
@@ -113,7 +107,7 @@ namespace Fiero.Business
             where T : Throwable
             => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, unidentName)
             .WithThrowableInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw)
-            .WithName(name.ToString())
+            .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
             ;
 
@@ -123,14 +117,14 @@ namespace Fiero.Business
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
             .WithItemInfo(0, null)
-            .WithName(name.ToString())
+            .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
             .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
         public EntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay, EffectDef castEffect)
             => Entities.CreateBuilder<Spell>()
-            .WithName(type.ToString())
+            .WithName($"Spell.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
             .WithSpellInfo(shape, type, baseDamage, castDelay)
             ;
@@ -140,9 +134,9 @@ namespace Fiero.Business
             var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
 
             var adjectives = new[] {
-                "swirling", "warm", "slimy", "dilute", "clear", "foaming", "fizzling",
-                "murky", "sedimented", "glittering", "glowing", "cold", "gelatinous",
-                "bubbling", "lumpy", "viscous"
+                "Swirling", "Warm", "Slimy", "Dilute", "Clear", "Foaming", "Fizzling",
+                "Murky", "Sedimented", "Glittering", "Glowing", "Cold", "Gelatinous",
+                "Bubbling", "Lumpy", "Viscous"
             };
             var colors = new[] {
                 ColorName.Red,
@@ -166,14 +160,14 @@ namespace Fiero.Business
                 damage: 1,
                 maxRange: 4,
                 mulchChance: 1,
-                unidentName: $"{potionColor.Adjective} {potionColor.Color.Describe()} potion",
+                unidentName: $"$Descriptor.Potion.{potionColor.Adjective}$ $Color.{potionColor.Color}$ $Item.Potion$",
                 itemRarity: 1,
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
                 throwsUseCharges: false
                 )
-               .WithName($"Potion of {quaffEffect}")
+               .WithName($"$Item.PotionOf$ $Effect.{quaffEffect}$")
                .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Potion), potionColor.Color)
                .WithPotionInfo(quaffEffect, throwEffect)
                .WithIntrinsicEffect(quaffEffect, e => new GrantedOnQuaff(e))
@@ -232,14 +226,14 @@ namespace Fiero.Business
                 damage: 1,
                 maxRange: 7,
                 mulchChance: .75f,
-                unidentName: $"{wandColor.Adjective} {wandColor.Color.Describe()} wand",
+                unidentName: $"$Descriptor.Wand.{wandColor.Adjective}$ $Color.{wandColor.Color}$ $Item.Wand$",
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: charges,
                 consumedWhenEmpty: false,
                 throwsUseCharges: false
                 )
-               .WithName($"Wand of {effect}")
+               .WithName($"$Item.WandOf$ $Effect.{effect}$")
                .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Wand), wandColor.Color)
                .WithWandInfo(effect)
                .WithIntrinsicEffect(effect, e => new GrantedWhenHitByZappedWand(e))
@@ -279,7 +273,7 @@ namespace Fiero.Business
                 consumedWhenEmpty: true,
                 throwsUseCharges: false
             )
-            .WithName($"Scroll of {effect}")
+               .WithName($"$Item.ScrollOf$ $Effect.{effect}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Scroll), scrollColor)
             .WithScrollInfo(effect, modifier)
             .WithIntrinsicEffect(effect, e => new GrantedWhenTargetedByScroll(e, modifier))

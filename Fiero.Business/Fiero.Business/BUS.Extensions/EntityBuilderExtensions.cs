@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-using LightInject;
-using System;
+﻿using LightInject;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -8,7 +6,9 @@ namespace Fiero.Business
     public static class EntityBuilderExtensions
     {
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
-            where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = name);
+            where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Name = builder.ServiceFactory.GetInstance<GameResources>().Localizations.Translate(name));
+        public static EntityBuilder<T> WithDescription<T>(this EntityBuilder<T> builder, string desc)
+            where T : Entity => builder.AddOrTweak<InfoComponent>(c => c.Description = builder.ServiceFactory.GetInstance<GameResources>().Localizations.Translate(desc));
         public static EntityBuilder<T> WithEffectTracking<T>(this EntityBuilder<T> builder)
             where T : Entity => builder.AddOrTweak<EffectsComponent>();
         public static EntityBuilder<T> WithIntrinsicEffect<T>(this EntityBuilder<T> builder, EffectDef def, Func<EffectDef, Effect> wrap = null)
@@ -305,7 +305,8 @@ namespace Fiero.Business
             where T : Item => builder.AddOrTweak<ItemComponent>(c =>
             {
                 c.Rarity = rarity;
-                c.UnidentifiedName = unidentName;
+                if (unidentName != null)
+                    c.UnidentifiedName = builder.ServiceFactory.GetInstance<GameResources>().Localizations.Translate(unidentName);
                 c.Identified = String.IsNullOrEmpty(unidentName);
             });
         public static EntityBuilder<T> WithEquipmentInfo<T>(this EntityBuilder<T> builder, EquipmentTypeName type)

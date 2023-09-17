@@ -14,7 +14,7 @@ namespace Fiero.Business
         protected override void DefaultSize() { }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<UIControl>(r => r
+            .Rule<UIControl>(r => r
                 .Match(l => l.HasAnyClass("quickbar-slot"))
                 .Apply(l =>
                 {

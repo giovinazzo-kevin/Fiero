@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Structures;
-using SFML.Graphics;
-using System;
-using System.Threading.Tasks;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business.Scenes
 {
@@ -96,7 +92,7 @@ namespace Fiero.Business.Scenes
 
             Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l =>
             {
-                l.Text.V = Resources.Localizations.Get($"Menu.{option}");
+                l.Text.V = Resources.Localizations.Translate($"$Menu.{option}$");
                 l.Clicked += (_, __, ___) =>
                 {
                     TrySetState(state);

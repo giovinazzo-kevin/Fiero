@@ -174,17 +174,17 @@ namespace Fiero.Business
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<Label>(x => x
+            .Rule<Label>(x => x
                 .Apply(l =>
                 {
                     if (l is not Header)
                         l.Background.V = UI.GetColor(ColorName.UIBackground);
                     l.Padding.V = new(5, 0);
                 }))
-            .Style<Label>(x => x
+            .Rule<Label>(x => x
                 .Match(x => x.HasClass("center"))
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center))
-            .Style<Label>(x => x
+            .Rule<Label>(x => x
                 .Match(x => x.HasClass("right"))
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;

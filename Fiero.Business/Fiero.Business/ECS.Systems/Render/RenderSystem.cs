@@ -1,10 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Structures;
-using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using SFML.Graphics;
 using Unconcern.Common;
 using static Fiero.Business.Data;
 
@@ -153,6 +147,8 @@ namespace Fiero.Business
             var batch = animations.Select(a => new Timeline(a, screenPos, t)).ToList();
             foreach (var anim in batch)
             {
+                if (!anim.Frames.Any())
+                    continue;
                 var id = Interlocked.Increment(ref _id);
                 Timelines[id] = anim;
             }

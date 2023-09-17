@@ -46,7 +46,7 @@ namespace Fiero.Business
             }
         }
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<Paragraph>(r => r.Apply(p =>
+            .Rule<Paragraph>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.CenterContentH.V = false;

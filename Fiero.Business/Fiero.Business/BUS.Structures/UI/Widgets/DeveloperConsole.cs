@@ -124,14 +124,14 @@ namespace Fiero.Business
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<ConsolePane>(r => r.Apply(p =>
+            .Rule<ConsolePane>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Margin.V = p.Padding.V = new(ts, ts);
             }))
-            .Style<UIControl>(r => r.Apply(x =>
+            .Rule<UIControl>(r => r.Apply(x =>
             {
                 x.BorderColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
                 x.OutlineThickness.V = 1;

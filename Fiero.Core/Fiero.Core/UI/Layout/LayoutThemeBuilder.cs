@@ -11,7 +11,7 @@ namespace Fiero.Core
             _rules = ImmutableList.CreateRange(rules ?? Enumerable.Empty<LayoutRule>());
         }
 
-        public LayoutThemeBuilder Style<T>(Func<LayoutRuleBuilder<T>, LayoutRuleBuilder<T>> configure)
+        public LayoutThemeBuilder Rule<T>(Func<LayoutRuleBuilder<T>, LayoutRuleBuilder<T>> configure)
             where T : UIControl
         {
             var builder = configure(new());

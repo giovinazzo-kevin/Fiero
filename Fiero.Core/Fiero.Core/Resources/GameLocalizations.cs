@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Fiero.Core
@@ -35,6 +34,16 @@ namespace Fiero.Core
         }
 
         public bool HasLocale(TLocales culture) => _translations.ContainsKey(culture);
+
+        public string Translate(string message)
+        {
+            foreach (var match in Regex.Matches(message, "\\$(?<key>.*?)\\$").Cast<Match>())
+            {
+                var translated = Get(match.Groups["key"].Value);
+                message = message.Replace(match.Value, translated);
+            }
+            return message;
+        }
 
         public string Get(string key)
         {

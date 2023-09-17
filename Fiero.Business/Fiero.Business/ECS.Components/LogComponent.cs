@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Fiero.Business
 {
@@ -24,11 +20,7 @@ namespace Fiero.Business
         public void Write(string message)
         {
             var last = Messages.LastOrDefault();
-            foreach (var match in Regex.Matches(message, "\\$(?<key>.*?)\\$").Cast<Match>())
-            {
-                var translated = Localizations.Get(match.Groups["key"].Value);
-                message = message.Replace(match.Value, translated);
-            }
+            message = Localizations.Translate(message);
             if (last != null)
             {
                 var repeatMatch = Regex.Match(last, "x(\\d+)$");

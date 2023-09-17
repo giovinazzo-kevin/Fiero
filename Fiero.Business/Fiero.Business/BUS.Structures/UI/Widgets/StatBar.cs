@@ -29,15 +29,15 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         private void Stat_ValueChanged(UIControlProperty<string> arg1, string arg2) => Invalidate();
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Style<Label>(r => r
+            .Rule<Label>(r => r
                 .Apply(l => l.VerticalAlignment.V = VerticalAlignment.Middle)
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center)
                 .Apply(l => l.Origin.V = new Vec(0, 1)))
-            .Style<Label>(h => h
+            .Rule<Label>(h => h
                 .Match(x => x.Id == "stat-label")
                 .Apply(l => l.Foreground.V = UI.GetColor(Color))
                 .Apply(l => l.Margin.V = new(l.FontSize.V.X, 0)))
-            .Style<ProgressBar>(r => r
+            .Rule<ProgressBar>(r => r
                 .Apply(p => p.Foreground.V = UI.GetColor(Color))
                 .Apply(l => l.Background.V = SFML.Graphics.Color.Transparent)
                 .Apply(p => p.HorizontalAlignment.V = HorizontalAlignment.Left)

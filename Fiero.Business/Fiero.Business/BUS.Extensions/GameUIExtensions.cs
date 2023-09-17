@@ -1,9 +1,5 @@
-﻿using Fiero.Core;
-
-using LightInject;
+﻿using LightInject;
 using SFML.Graphics;
-using System;
-using System.Linq;
 
 namespace Fiero.Business
 {

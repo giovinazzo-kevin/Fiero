@@ -48,22 +48,31 @@ namespace Fiero.Business
 
         protected void CreateGlobalTheme()
         {
-            var defaultPriority = 100;
-            var transparentTypes = new[] { typeof(Label), typeof(Paragraph), typeof(Picture), typeof(UIWindowAsControl) };
+            var P = 100;
+            var transparentTypes = new[] { typeof(Label), typeof(Paragraph), typeof(Picture) };
             UI.Theme = new LayoutThemeBuilder()
-                .Style<UIControl>(b => b
+                .Rule<UIControl>(b => b
                     .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
                     .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIPrimary))
                     .Apply(x => x.Accent.V = UI.GetColor(ColorName.UIAccent))
-                    .WithPriority(defaultPriority))
-                .Style<UIControl>(b => b
+                    .WithPriority(P))
+                .Rule<UIControl>(b => b
                     .Filter(x => transparentTypes.Contains(x.GetType()))
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.Transparent))
-                    .WithPriority(defaultPriority - 1))
-                .Style<Header>(b => b
+                    .WithPriority(P - 1))
+                .Rule<Header>(b => b
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.White))
-                    .WithPriority(defaultPriority - 1))
+                    .WithPriority(P - 1))
+                .Rule<UIControl>(style => style
+                    .Match(x => x.HasAllClasses("row-even"))
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(8, 8, 8))
+                    .WithPriority(P - 1))
+                .Rule<UIControl>(style => style
+                    .Match(x => x.HasAllClasses("row-odd"))
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(-8, -8, -8))
+                    .WithPriority(P - 1))
+
                 .Build();
         }
 

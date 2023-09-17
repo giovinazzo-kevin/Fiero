@@ -20,6 +20,8 @@ namespace Fiero.Core
 
         public virtual TimeSpan WaitAndDraw(TimeSpan time, Action<TimeSpan, TimeSpan> onUpdate = null, Action<TimeSpan, TimeSpan> onRender = null)
         {
+            if (time <= TimeSpan.Zero)
+                return T;
             var innerLoop = new GameLoop() { TimeStep = TimeStep };
             innerLoop.Render += (t, ts) => Render?.Invoke(T, TimeStep);
             innerLoop.Update += (t, ts) =>

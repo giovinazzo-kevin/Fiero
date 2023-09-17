@@ -94,7 +94,7 @@ namespace Fiero.Business
             }
         }
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<Picture>(s => s
                 .Match(x => x.HasClass("portrait"))
                 .Apply(x =>

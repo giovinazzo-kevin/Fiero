@@ -123,7 +123,7 @@ namespace Fiero.Business
             } });
         }
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<ConsolePane>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);

@@ -10,7 +10,7 @@ namespace Fiero.Business
         public readonly GameResources Resources;
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<Picture>(r => r
                 .Match(l => l.HasAnyClass("equipment-slot"))
                 .Apply(l =>

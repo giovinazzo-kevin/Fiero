@@ -173,7 +173,7 @@ namespace Fiero.Business
             base.Draw(target, states);
         }
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<Label>(x => x
                 .Apply(l =>
                 {

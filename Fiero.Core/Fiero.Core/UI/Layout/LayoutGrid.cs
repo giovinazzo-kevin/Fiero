@@ -11,7 +11,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public readonly LayoutGrid Parent;
     protected readonly List<LayoutGrid> Children = new();
 
-    private LayoutTheme _theme;
+    private LayoutTheme _theme = new();
     public LayoutTheme Theme
     {
         get => _theme; set
@@ -89,7 +89,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         }
     }
 
-    public LayoutGrid Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
+    public LayoutGrid Style<T>(Func<LayoutRuleBuilder<T>, LayoutRuleBuilder<T>> configure)
         where T : UIControl
     {
         Theme = Theme.Style(configure);
@@ -110,7 +110,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
             .Cast<Action<UIControl>>();
     }
 
-    public LayoutGrid(LayoutPoint size, LayoutGrid parent = null, LayoutTheme theme = default)
+    public LayoutGrid(LayoutPoint size, LayoutTheme theme, LayoutGrid parent = null)
     {
         Parent = parent;
         Size = size;
@@ -132,7 +132,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public LayoutGrid Col(float w = 1, bool px = false, string @class = null, string @id = null)
     {
         var unit = LayoutUnit.FromBool(w, px);
-        var ret = new LayoutGrid(size: new(unit, LayoutUnit.FromBool(0, false)), parent: this)
+        var ret = new LayoutGrid(size: new(unit, LayoutUnit.FromBool(0, false)), theme: new(), parent: this)
         {
             Class = @class == null ? Class : @class + " " + (Class ?? ""),
             Id = id,
@@ -146,7 +146,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public LayoutGrid Row(float h = 1, bool px = false, string @class = null, string @id = null)
     {
         var unit = LayoutUnit.FromBool(h, px);
-        var ret = new LayoutGrid(size: new(LayoutUnit.FromBool(0, false), unit), parent: this)
+        var ret = new LayoutGrid(size: new(LayoutUnit.FromBool(0, false), unit), theme: new(), parent: this)
         {
             Class = @class == null ? Class : @class + " " + (Class ?? ""),
             Id = id,

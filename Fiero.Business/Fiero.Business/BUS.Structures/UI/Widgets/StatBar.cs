@@ -28,7 +28,7 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         private void Value_ValueChanged(UIControlProperty<int> arg1, int arg2) => Invalidate();
         private void Stat_ValueChanged(UIControlProperty<string> arg1, string arg2) => Invalidate();
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<Label>(r => r
                 .Apply(l => l.VerticalAlignment.V = VerticalAlignment.Middle)
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center)

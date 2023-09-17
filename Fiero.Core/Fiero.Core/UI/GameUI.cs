@@ -8,7 +8,7 @@
         public readonly IServiceFactory ServiceProvider;
         protected readonly List<UIWindow> OpenWindows;
 
-        public LayoutTheme Theme { get; set; }
+        public LayoutTheme Theme { get; set; } = new();
 
         public IEnumerable<UIWindow> GetOpenWindows() => OpenWindows.Except(GetOpenModals());
         public IEnumerable<ModalWindow> GetOpenModals() => OpenWindows.OfType<ModalWindow>();

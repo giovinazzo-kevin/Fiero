@@ -174,7 +174,7 @@ namespace Fiero.Business
 
         protected abstract IEnumerable<TActions> GetAvailableActions(Item i);
 
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<UIControl>(s => s
                 .Match(x => x.HasClass("paginator"))
                 .Apply(x =>

@@ -58,7 +58,7 @@ namespace Fiero.Core
 
         protected LayoutGrid ApplyStyles(LayoutGrid grid)
         {
-            var styleBuilder = DefineStyles(new LayoutStyleBuilder(grid.Theme));
+            var styleBuilder = DefineStyles(new LayoutThemeBuilder(grid.Theme));
             var styles = styleBuilder.Build();
             foreach (var s in styles)
             {
@@ -68,7 +68,7 @@ namespace Fiero.Core
             return grid;
         }
 
-        protected virtual LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder)
+        protected virtual LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder)
         {
             return builder;
         }

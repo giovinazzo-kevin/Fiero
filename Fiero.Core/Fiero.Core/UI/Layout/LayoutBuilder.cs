@@ -27,7 +27,7 @@
 
         public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
         {
-            var grid = build(new LayoutGrid(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size), theme: Theme));
+            var grid = build(new LayoutGrid(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size), Theme));
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
             layout.Position.ValueChanged += (_, old) =>

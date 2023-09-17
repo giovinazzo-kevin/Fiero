@@ -45,7 +45,7 @@ namespace Fiero.Business
                 UpdateParagraph(component);
             }
         }
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Style<Paragraph>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);

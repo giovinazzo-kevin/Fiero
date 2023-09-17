@@ -36,7 +36,7 @@ namespace Fiero.Business
                     Layout.Size.V += obj.NewValue - obj.OldValue;
             }
         }
-        protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => builder
             .Style<UIControl>(style => style
                 .Match(x => x.HasAnyClass("modal-title", "modal-controls"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBorder))

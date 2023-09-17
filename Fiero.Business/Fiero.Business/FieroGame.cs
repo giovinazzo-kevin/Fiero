@@ -1,11 +1,6 @@
 ﻿using Fiero.Business.Scenes;
-using Fiero.Core;
-using Fiero.Core.Structures;
 using SFML.Audio;
 using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -43,7 +38,7 @@ namespace Fiero.Business
             Scenes = gameScenes;
             Store = store;
             loop.TimeStep = TimeSpan.FromSeconds(1 / 200f);
-            CreateDefaultTheme();
+            CreateGlobalTheme();
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
@@ -51,14 +46,25 @@ namespace Fiero.Business
             }
         }
 
-        protected void CreateDefaultTheme()
+        protected void CreateGlobalTheme()
         {
-            UI.Theme = UI.Theme
+            var defaultPriority = 100;
+            var transparentTypes = new[] { typeof(Label), typeof(Paragraph), typeof(Picture), typeof(UIWindowAsControl) };
+            UI.Theme = new LayoutThemeBuilder()
                 .Style<UIControl>(b => b
-                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
                     .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
-                    .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIPrimary)))
-                ;
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
+                    .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIPrimary))
+                    .Apply(x => x.Accent.V = UI.GetColor(ColorName.UIAccent))
+                    .WithPriority(defaultPriority))
+                .Style<UIControl>(b => b
+                    .Filter(x => transparentTypes.Contains(x.GetType()))
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.Transparent))
+                    .WithPriority(defaultPriority - 1))
+                .Style<Header>(b => b
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.White))
+                    .WithPriority(defaultPriority - 1))
+                .Build();
         }
 
         protected override void InitializeWindow(RenderWindow win)

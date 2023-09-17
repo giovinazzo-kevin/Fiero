@@ -1,5 +1,5 @@
 ﻿using Fiero.Core;
-using Fiero.Core.Extensions;
+
 using System.Linq;
 
 namespace Fiero.Business

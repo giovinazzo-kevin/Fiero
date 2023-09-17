@@ -43,12 +43,22 @@ namespace Fiero.Business
             Scenes = gameScenes;
             Store = store;
             loop.TimeStep = TimeSpan.FromSeconds(1 / 200f);
-
+            CreateDefaultTheme();
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 UI.Store.SetValue(Data.UI.ViewportSize, obj.NewValue - new Coord(248, 128));
             }
+        }
+
+        protected void CreateDefaultTheme()
+        {
+            UI.Theme = UI.Theme
+                .Style<UIControl>(b => b
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
+                    .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
+                    .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIPrimary)))
+                ;
         }
 
         protected override void InitializeWindow(RenderWindow win)

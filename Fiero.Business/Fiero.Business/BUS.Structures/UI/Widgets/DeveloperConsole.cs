@@ -1,5 +1,6 @@
 ﻿using Ergo.Shell;
 using Fiero.Core;
+
 using System;
 using System.Text;
 using System.Threading;
@@ -123,16 +124,16 @@ namespace Fiero.Business
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<ConsolePane>(r => r.Apply(p =>
+            .Style<ConsolePane>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Margin.V = p.Padding.V = new(ts, ts);
             }))
-            .AddRule<UIControl>(r => r.Apply(x =>
+            .Style<UIControl>(r => r.Apply(x =>
             {
-                x.OutlineColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
+                x.BorderColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
                 x.OutlineThickness.V = 1;
             }))
             ;

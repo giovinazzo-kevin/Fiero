@@ -2,11 +2,13 @@
 {
     public class LayoutBuilder
     {
+        public readonly LayoutTheme Theme;
         public readonly IServiceFactory ServiceProvider;
         public readonly GameInput Input;
 
-        public LayoutBuilder(IServiceFactory serviceProvider)
+        public LayoutBuilder(LayoutTheme theme, IServiceFactory serviceProvider)
         {
+            Theme = theme;
             ServiceProvider = serviceProvider;
             Input = ServiceProvider.GetInstance<GameInput>();
         }
@@ -25,7 +27,7 @@
 
         public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
         {
-            var grid = build(new(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size)));
+            var grid = build(new LayoutGrid(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size), theme: Theme));
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
             layout.Position.ValueChanged += (_, old) =>

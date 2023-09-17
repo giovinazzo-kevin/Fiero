@@ -37,26 +37,26 @@ namespace Fiero.Business
             }
         }
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => builder
-            .AddRule<UIControl>(style => style
+            .Style<UIControl>(style => style
                 .Match(x => x.HasAnyClass("modal-title", "modal-controls"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBorder))
                 .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIBackground))
-                .Apply(x => x.OutlineColor.V = UI.GetColor(ColorName.UIBorder))
+                .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
             )
-            .AddRule<UIControl>(style => style
+            .Style<UIControl>(style => style
                 .Match(x => x.HasAnyClass("modal-close"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.Red))
                 .Apply(x => x.Foreground.V = UI.GetColor(ColorName.White))
             )
-            .AddRule<UIControl>(style => style
+            .Style<UIControl>(style => style
                 .Match(x => x.HasAnyClass("modal-maximize"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.Blue))
                 .Apply(x => x.Foreground.V = UI.GetColor(ColorName.White))
             )
-            .AddRule<UIControl>(style => style
+            .Style<UIControl>(style => style
                 .Match(x => x.HasAllClasses("row", "row-even"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddRgb(8, 8, 8)))
-            .AddRule<UIControl>(style => style
+            .Style<UIControl>(style => style
                 .Match(x => x.HasAllClasses("row", "row-odd"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground)))
             ;

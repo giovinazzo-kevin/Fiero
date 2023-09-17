@@ -11,14 +11,14 @@ namespace Fiero.Core
             _rules = ImmutableList.CreateRange(rules ?? Enumerable.Empty<LayoutRule>());
         }
 
-        public LayoutStyleBuilder AddRule<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
+        public LayoutStyleBuilder Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
             where T : UIControl
         {
             var builder = configure(new());
             return new(_rules.Add(builder.Build()));
         }
 
-        public IEnumerable<LayoutRule> Build() => _rules;
+        public LayoutTheme Build() => new(_rules);
     }
 
     public class LayoutStyleBuilder<T>

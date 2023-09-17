@@ -30,14 +30,14 @@ namespace Fiero.Core
             var gameWindowSize = UI.Window.Size;
             if (_dragStart.HasValue && leftDown)
             {
-                var delta = (mousePos - _dragStart.Value);
+                var delta = mousePos - _dragStart.Value;
                 if (delta.X == 0 && delta.Y == 0)
                     return;
                 Layout.Position.V = Layout.Position.V + delta;
                 _dragStart = mousePos;
                 // Calculate by how much the window is offscreen and correct by that much
-                var offscreenBottomRight = ((Layout.Position.V)).Clamp(maxX: 0, maxY: 0);
-                var offscreenTopLeft = ((Layout.Position.V + Layout.Size.V) - gameWindowSize).Clamp(minX: 0, minY: 0);
+                var offscreenBottomRight = Layout.Position.V.Clamp(maxX: 0, maxY: 0);
+                var offscreenTopLeft = (Layout.Position.V + Layout.Size.V - gameWindowSize).Clamp(minX: 0, minY: 0);
                 Layout.Position.V -= offscreenTopLeft;
                 Layout.Position.V -= offscreenBottomRight;
 

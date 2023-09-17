@@ -1,6 +1,6 @@
 ﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using Fiero.Core.Structures;
+
+
 using SFML.Graphics;
 using System;
 using System.Collections.Generic;

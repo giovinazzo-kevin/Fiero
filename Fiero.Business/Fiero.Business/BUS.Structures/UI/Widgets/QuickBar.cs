@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using System.Linq;
 
 namespace Fiero.Business
@@ -13,12 +14,12 @@ namespace Fiero.Business
         protected override void DefaultSize() { }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<UIControl>(r => r
+            .Style<UIControl>(r => r
                 .Match(l => l.HasAnyClass("quickbar-slot"))
                 .Apply(l =>
                 {
                     l.OutlineThickness.V = 2;
-                    l.OutlineColor.V = UI.GetColor(ColorName.Magenta);
+                    l.BorderColor.V = UI.GetColor(ColorName.Magenta);
                 }))
             ;
 

@@ -97,7 +97,7 @@ namespace Fiero.Business
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Button>(s => s
+            .Style<Button>(s => s
                 .Match(x => x.HasClass("choice"))
                 .Apply(x =>
                 {

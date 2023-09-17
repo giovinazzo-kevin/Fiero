@@ -1,5 +1,4 @@
-﻿using LightInject;
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public class GameUI
     {
@@ -8,6 +7,8 @@ namespace Fiero.Core
         public readonly GameWindow Window;
         public readonly IServiceFactory ServiceProvider;
         protected readonly List<UIWindow> OpenWindows;
+
+        public LayoutTheme Theme { get; set; }
 
         public IEnumerable<UIWindow> GetOpenWindows() => OpenWindows.Except(GetOpenModals());
         public IEnumerable<ModalWindow> GetOpenModals() => OpenWindows.OfType<ModalWindow>();
@@ -41,6 +42,6 @@ namespace Fiero.Core
                 wnd.Closed -= Wnd_Closed;
             }
         }
-        public LayoutBuilder CreateLayout() => new(ServiceProvider);
+        public LayoutBuilder CreateLayout() => new(Theme, ServiceProvider);
     }
 }

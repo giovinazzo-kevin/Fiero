@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using SFML.Graphics;
 
 namespace Fiero.Business.BUS.Structures.UI.Widgets
@@ -28,15 +29,15 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         private void Stat_ValueChanged(UIControlProperty<string> arg1, string arg2) => Invalidate();
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Label>(r => r
+            .Style<Label>(r => r
                 .Apply(l => l.VerticalAlignment.V = VerticalAlignment.Middle)
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center)
                 .Apply(l => l.Origin.V = new Vec(0, 1)))
-            .AddRule<Label>(h => h
+            .Style<Label>(h => h
                 .Match(x => x.Id == "stat-label")
                 .Apply(l => l.Foreground.V = UI.GetColor(Color))
                 .Apply(l => l.Margin.V = new(l.FontSize.V.X, 0)))
-            .AddRule<ProgressBar>(r => r
+            .Style<ProgressBar>(r => r
                 .Apply(p => p.Foreground.V = UI.GetColor(Color))
                 .Apply(l => l.Background.V = SFML.Graphics.Color.Transparent)
                 .Apply(p => p.HorizontalAlignment.V = HorizontalAlignment.Left)

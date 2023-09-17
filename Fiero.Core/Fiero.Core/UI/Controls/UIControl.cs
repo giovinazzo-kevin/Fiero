@@ -25,7 +25,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
-        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<Color> BorderColor = new(nameof(BorderColor), new(255, 255, 255), invalidate: true) { Inherited = false };
         public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
         public readonly UIControlProperty<ToolTip> ToolTip = new(nameof(ToolTip), null) { Inherited = false };
 
@@ -37,6 +37,7 @@ namespace Fiero.Core
 
         private RenderTexture _target;
         private HashSet<UIControl> _redrawChildren = new();
+        private TimeSpan _timeoutAcc;
 
         public void Invalidate(UIControl source = null)
         {
@@ -265,6 +266,24 @@ namespace Fiero.Core
 
         public virtual void Update(TimeSpan t, TimeSpan dt)
         {
+            if (ToolTip.V is { DisplayTimeout: var timeout } tooltip)
+            {
+                if (IsMouseOver)
+                {
+                    // Show a hidden tooltip after a set timeout
+                    if (tooltip.Layout.IsHidden && (_timeoutAcc += dt) > timeout)
+                    {
+                        _timeoutAcc = timeout;
+                        tooltip.Layout.IsHidden.V = false;
+                    }
+                }
+                else
+                {
+                    tooltip.Layout.IsHidden.V = true;
+                    _timeoutAcc = TimeSpan.Zero;
+                }
+                tooltip.Update(t, dt); // Tracks mouse position
+            }
             foreach (var child in Children)
             {
                 child.Update(t, dt);
@@ -279,21 +298,9 @@ namespace Fiero.Core
                 Position = (BorderRenderPos + outline).ToVector2f(),
                 FillColor = Background,
                 OutlineThickness = OutlineThickness,
-                OutlineColor = OutlineColor
+                OutlineColor = BorderColor
             };
             target.Draw(rect, states);
-            //var inner = new RectangleShape((ContentRenderSize).ToVector2f())
-            //{
-            //    Position = BorderRenderPos.ToVector2f(),
-            //    FillColor = Color.Transparent,
-            //    OutlineColor = new Color(
-            //        (byte)(Rng.Random.Next(128) + 127),
-            //        (byte)(Rng.Random.Next(128) + 127),
-            //        (byte)(Rng.Random.Next(128) + 127),
-            //        50),
-            //    OutlineThickness = 1
-            //};
-            //target.Draw(inner, states);
         }
 
         protected virtual void Repaint(RenderTarget target, RenderStates states)
@@ -303,6 +310,12 @@ namespace Fiero.Core
             {
                 child.Repaint(target, states);
             }
+        }
+
+        protected virtual void PostDraw(RenderTarget target, RenderStates states)
+        {
+            if (ToolTip.V is { } tooltip)
+                tooltip.Draw(target, states);
         }
 
         public void Draw(RenderTarget target, RenderStates states)
@@ -355,6 +368,11 @@ namespace Fiero.Core
             _target.Display();
             using var sprite = new Sprite(_target.Texture) { Position = Position.V };
             target.Draw(sprite, states);
+            PostDraw(target, states);
+            foreach (var c in Children)
+            {
+                c.PostDraw(target, states);
+            }
         }
 
         public virtual void Dispose() { }

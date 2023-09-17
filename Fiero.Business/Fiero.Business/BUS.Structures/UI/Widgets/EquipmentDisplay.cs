@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using System.Linq;
 
 namespace Fiero.Business
@@ -10,14 +11,14 @@ namespace Fiero.Business
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Picture>(r => r
+            .Style<Picture>(r => r
                 .Match(l => l.HasAnyClass("equipment-slot"))
                 .Apply(l =>
                 {
                     l.OutlineThickness.V = 2;
-                    l.OutlineColor.V = UI.GetColor(ColorName.Cyan);
+                    l.BorderColor.V = UI.GetColor(ColorName.Cyan);
                 }))
-            .AddRule<Label>(r => r
+            .Style<Label>(r => r
                 .Match(l => l.HasAnyClass("neck", "back", "ring"))
                 .Apply(l =>
                 {

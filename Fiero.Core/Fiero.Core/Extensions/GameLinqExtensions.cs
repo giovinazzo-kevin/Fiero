@@ -1,4 +1,6 @@
-﻿using Fiero.Core.Structures;
+﻿
+
+using Fiero.Core.Structures;
 
 namespace Fiero.Core.Extensions
 {

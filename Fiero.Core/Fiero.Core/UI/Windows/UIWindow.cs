@@ -58,12 +58,13 @@ namespace Fiero.Core
 
         protected LayoutGrid ApplyStyles(LayoutGrid grid)
         {
-            var styleBuilder = DefineStyles(new LayoutStyleBuilder());
+            var styleBuilder = DefineStyles(new LayoutStyleBuilder(grid.Theme));
             var styles = styleBuilder.Build();
             foreach (var s in styles)
             {
-                grid = grid.Style(s);
+                styles = styles.Style(s);
             }
+            grid.Theme = styles;
             return grid;
         }
 

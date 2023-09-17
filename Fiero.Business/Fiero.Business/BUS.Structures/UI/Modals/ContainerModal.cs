@@ -175,23 +175,23 @@ namespace Fiero.Business
         protected abstract IEnumerable<TActions> GetAvailableActions(Item i);
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<UIControl>(s => s
+            .Style<UIControl>(s => s
                 .Match(x => x.HasClass("paginator"))
                 .Apply(x =>
                 {
                     x.Background.V = UI.GetColor(ColorName.UIBorder);
                     x.Foreground.V = UI.GetColor(ColorName.UIBackground);
-                    x.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
+                    x.BorderColor.V = UI.GetColor(ColorName.UIBorder);
                     x.OutlineThickness.V = 1;
                 }))
-            .AddRule<Picture>(s => s
+            .Style<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
                 .Apply(x =>
                 {
                     x.VerticalAlignment.V = VerticalAlignment.Middle;
                     x.LockAspectRatio.V = true;
                 }))
-            .AddRule<Button>(s => s
+            .Style<Button>(s => s
                 .Match(x => x.HasClass("item-name"))
                 .Apply(x =>
                 {
@@ -209,7 +209,7 @@ namespace Fiero.Business
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
                             p.OutlineThickness.V = 1;
-                            p.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
+                            p.BorderColor.V = UI.GetColor(ColorName.UIBorder);
                         })
                     .End()
                     .Col(@class: "item-name")
@@ -221,7 +221,8 @@ namespace Fiero.Business
                             b.MouseEntered += (x, __) => x.Background.V = UI.GetColor(ColorName.UIBorder);
                             b.MouseLeft += (x, __) => x.Background.V = Color.Transparent;
                             b.OutlineThickness.V = 1;
-                            b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
+                            b.BorderColor.V = UI.GetColor(ColorName.UIBorder);
+                            b.ToolTip.V = new SimpleToolTip(UI);
                         })
                     .End()
                 .End())
@@ -301,6 +302,8 @@ namespace Fiero.Business
                 var letter = WinKeyboardState.GetCharsFromKeys(key, UI.Input.KeyboardState, shift: shift);
                 var text = $"{letter.Last()}) {Items[i].DisplayName}";
                 b.Text.V = text;
+                if (b.ToolTip.V is SimpleToolTip tooltip)
+                    tooltip.SetText(Items[i].Id.ToString());
             }
 
             void RefreshPageLabel(Label l)

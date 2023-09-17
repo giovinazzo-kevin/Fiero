@@ -11,6 +11,18 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public readonly LayoutGrid Parent;
     protected readonly List<LayoutGrid> Children = new();
 
+    private LayoutTheme _theme;
+    public LayoutTheme Theme
+    {
+        get => _theme; set
+        {
+            var old = _theme;
+            _theme = value;
+            ThemeChanged?.Invoke(this, old);
+        }
+    }
+    public event Action<LayoutGrid, LayoutTheme> ThemeChanged;
+
     private LayoutPoint _offset;
     public int Cols = 0, Rows = 0;
     public LayoutPoint Position { get; set; }
@@ -27,7 +39,6 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     //public Type ControlType { get; protected set; } = typeof(Layout);
     //public UIControl ControlInstance { get; internal set; } = null;
     //internal Action<UIControl> InitializeControl { get; private set; } = null;
-    protected List<LayoutRule> Styles { get; private set; }
 
     public bool Is<T>() => IsCell && Controls.Any(c => typeof(T).IsAssignableTo(c.Type));
     public bool HasClass(string cls) => Class != null && Class.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(cls);
@@ -50,7 +61,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public IEnumerable<Action<T>> GetStyles<T>()
         where T : UIControl
     {
-        var myStyles = Styles
+        var myStyles = Theme
             .Where(x => x.ControlType.IsAssignableFrom(typeof(T)))
             .OrderByDescending(x => x.Priority)
             .Select<LayoutRule, Action<UIControl>>(s => control =>
@@ -78,6 +89,19 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         }
     }
 
+    public LayoutGrid Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
+        where T : UIControl
+    {
+        Theme = Theme.Style(configure);
+        return this;
+    }
+
+    public LayoutGrid Style(LayoutRule rule)
+    {
+        Theme = Theme.Style(rule);
+        return this;
+    }
+
     public IEnumerable<Action<UIControl>> GetStyles(Type controlType)
     {
         return ((IEnumerable)typeof(LayoutGrid).GetMethod(nameof(GetStyles), 1, new Type[] { })
@@ -86,25 +110,11 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
             .Cast<Action<UIControl>>();
     }
 
-    public LayoutGrid(LayoutPoint size, LayoutGrid parent = null)
+    public LayoutGrid(LayoutPoint size, LayoutGrid parent = null, LayoutTheme theme = default)
     {
         Parent = parent;
-        Styles = new List<LayoutRule>();
         Size = size;
-    }
-
-    public LayoutGrid Style<T>(Func<LayoutStyleBuilder<T>, LayoutStyleBuilder<T>> configure)
-        where T : UIControl
-    {
-        var builder = configure(new LayoutStyleBuilder<T>());
-        Styles.Add(builder.Build());
-        return this;
-    }
-
-    public LayoutGrid Style(LayoutRule rule)
-    {
-        Styles.Add(rule);
-        return this;
+        Theme = theme;
     }
 
     public LayoutGrid Top()

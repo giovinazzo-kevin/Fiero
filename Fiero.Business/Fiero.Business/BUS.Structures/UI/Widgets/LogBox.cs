@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using System.Linq;
 
 namespace Fiero.Business
@@ -45,7 +46,7 @@ namespace Fiero.Business
             }
         }
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Paragraph>(r => r.Apply(p =>
+            .Style<Paragraph>(r => r.Apply(p =>
             {
                 var ts = UI.Store.Get(Data.UI.TileSize);
                 p.CenterContentH.V = false;

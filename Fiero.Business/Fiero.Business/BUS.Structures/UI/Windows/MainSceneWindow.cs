@@ -1,5 +1,7 @@
 ﻿using Fiero.Business.BUS.Structures.UI.Widgets;
 using Fiero.Core;
+
+
 using SFML.Graphics;
 using System;
 using System.Linq;
@@ -172,17 +174,17 @@ namespace Fiero.Business
         }
 
         protected override LayoutStyleBuilder DefineStyles(LayoutStyleBuilder builder) => base.DefineStyles(builder)
-            .AddRule<Label>(x => x
+            .Style<Label>(x => x
                 .Apply(l =>
                 {
                     if (l is not Header)
                         l.Background.V = UI.GetColor(ColorName.UIBackground);
                     l.Padding.V = new(5, 0);
                 }))
-            .AddRule<Label>(x => x
+            .Style<Label>(x => x
                 .Match(x => x.HasClass("center"))
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Center))
-            .AddRule<Label>(x => x
+            .Style<Label>(x => x
                 .Match(x => x.HasClass("right"))
                 .Apply(l => l.HorizontalAlignment.V = HorizontalAlignment.Right))
             ;

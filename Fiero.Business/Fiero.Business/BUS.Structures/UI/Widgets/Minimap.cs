@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using SFML.Graphics;
 
 namespace Fiero.Business

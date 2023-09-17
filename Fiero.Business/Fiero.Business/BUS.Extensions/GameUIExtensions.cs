@@ -1,4 +1,5 @@
 ﻿using Fiero.Core;
+
 using LightInject;
 using SFML.Graphics;
 using System;

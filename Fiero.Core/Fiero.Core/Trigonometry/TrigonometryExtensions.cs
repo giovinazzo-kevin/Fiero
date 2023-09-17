@@ -1,4 +1,5 @@
-﻿using Fiero.Core.Structures;
+﻿
+using Fiero.Core.Structures;
 using SFML.Graphics;
 using SFML.System;
 using System.Drawing;

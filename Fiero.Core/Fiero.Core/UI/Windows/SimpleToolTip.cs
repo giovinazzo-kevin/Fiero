@@ -22,7 +22,9 @@
             };
         }
 
-        protected override void DefaultSize() { }
+        protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
+            .Rule<Paragraph>(b => b
+                .Apply(x => x.Padding.V = new(8, 8)));
 
         protected override LayoutGrid RenderContent(LayoutGrid grid)
         {

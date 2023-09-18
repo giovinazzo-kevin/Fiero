@@ -59,7 +59,19 @@ namespace Fiero.Core
         public Coord BorderRenderSize { get; private set; }
         public Coord ContentRenderSize { get; private set; }
         protected Coord TrackedMousePosition { get; private set; }
-        public Coord MinimumContentSize { get; protected set; }
+
+        private Coord _minimumContentSize;
+        public Coord MinimumContentSize
+        {
+            get => _minimumContentSize; protected set
+            {
+                var old = _minimumContentSize;
+                _minimumContentSize = value;
+                MinimumContentSizeChanged?.Invoke(this, old);
+            }
+        }
+
+        public event Action<UIControl, Coord> MinimumContentSizeChanged;
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
         public void InheritProperties(UIControl from)

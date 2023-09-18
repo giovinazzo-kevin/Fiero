@@ -24,12 +24,16 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
     public event Action<LayoutGrid, LayoutTheme> ThemeChanged;
 
     private LayoutPoint _offset;
+    private bool _isRow;
     public int Cols = 0, Rows = 0;
+    public bool IsRow => _isRow;
+    public bool IsCol => !_isRow;
     public LayoutPoint Position { get; set; }
     public LayoutPoint Size { get; internal set; } = new(new(0, 1), new(0, 1));
 
     public Coord ComputedPosition { get; internal set; }
     public Coord ComputedSize { get; internal set; }
+
 
     public string Id { get; set; }
     public string Class { get; set; }
@@ -136,7 +140,8 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         {
             Class = @class == null ? Class : @class + " " + (Class ?? ""),
             Id = id,
-            Position = _offset
+            Position = _offset,
+            _isRow = false
         };
         _offset = _offset with { X = _offset.X + unit };
         Cols++;
@@ -150,7 +155,8 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         {
             Class = @class == null ? Class : @class + " " + (Class ?? ""),
             Id = id,
-            Position = _offset
+            Position = _offset,
+            _isRow = true
         };
         _offset = _offset with { Y = _offset.Y + unit };
         Rows++;

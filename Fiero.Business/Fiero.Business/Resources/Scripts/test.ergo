@@ -1,7 +1,11 @@
 :- module(test, []).
 :- use_module(input).
+:- subscribe(action, [actor_killed]).
 
 test:began(_) :- 
-	bind(k, pressed, [E]>>spawn(npc_rat)),
-	bind(_, pressed, [E]>>msg_box(&E.key, &E.type, _)).
+	bind(k, pressed, [E]>>spawn(npc_rat)).
 test:ended(_) :- unbind(_, _, _).
+
+action:actor_killed(_ { victim: V, killer: K }) :- 
+	str_fmt('{1} kills {0}', [&V.info.name, &K.info.name], Message),
+	msg_box(Message, 'Kill Event').

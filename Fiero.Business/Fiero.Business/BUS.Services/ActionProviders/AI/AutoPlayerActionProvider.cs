@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
+    [TransientDependency]
     public class AutoPlayerActionProvider : AiActionProvider
     {
         protected readonly AiSensor<Actor> EnemiesOnFloor;

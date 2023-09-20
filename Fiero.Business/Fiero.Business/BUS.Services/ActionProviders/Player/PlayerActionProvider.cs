@@ -2,6 +2,7 @@
 
 namespace Fiero.Business
 {
+    [TransientDependency]
     public class PlayerActionProvider : ActionProvider
     {
         protected readonly GameUI UI;

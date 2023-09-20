@@ -27,7 +27,7 @@
 
         public EntityBuilder<Actor> Player()
             => Entities.CreateBuilder<Actor>()
-            .WithPlayerAi(UI)
+            .WithPlayerAi()
             .WithHealth(maximum: 1, current: 1)
             .WithMagic(maximum: 1, current: 1)
             .WithLevel(maximum: 99, current: 0)
@@ -452,7 +452,7 @@
             .WithDialogueTriggers(NpcName.RatMonk)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatMonk), ColorName.White)
             .WithItems(Loadout(
-                (Potion_OfHealing().Tweak<ItemComponent>(c => c.Identified = true), Chance.Always)
+                (Potion_OfHealing().Tweak<ItemComponent>((s, c) => c.Identified = true), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
@@ -706,27 +706,27 @@
 
         public EntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .WithItems(Rng.Random.ChooseWeighted(ChestLootTable().ToArray()))
             ;
         public EntityBuilder<Feature> Feature_Shrine()
             => Feature<Feature>(FeatureName.Shrine)
             .WithDialogueTriggers(FeatureName.Shrine)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             ;
         public EntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
             .WithIntrinsicEffect(new(EffectName.Trap))
-            .Tweak<RenderComponent>(x => x.Visibility = VisibilityName.Hidden)
+            .Tweak<RenderComponent>((s, x) => x.Visibility = VisibilityName.Hidden)
             ;
         public EntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             ;
         public EntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
             => Feature<Feature>(FeatureName.Door)
-            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Wall)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
+            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, TileName.Wall.ToString(), color)
             ;
         public EntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
@@ -744,13 +744,13 @@
         #region TILES
         public EntityBuilder<Tile> Tile_Wall()
             => Tile(TileName.Wall, ColorName.Gray)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
-            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Wall)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             ;
         public EntityBuilder<Tile> Tile_Hole()
             => Tile(TileName.Hole, ColorName.Gray)
-            .Tweak<PhysicsComponent>(x => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
-            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Ground)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
             ;
         public EntityBuilder<Tile> Tile_Room()
             => Tile(TileName.Room, ColorName.LightGray)
@@ -764,8 +764,8 @@
         public EntityBuilder<Tile> Tile_Water()
             => Tile(TileName.Water, ColorName.LightBlue)
             // Moving through water is twice as slow 
-            .Tweak<TileComponent>(x => { x.MovementCost = 100; })
-            .Tweak<RenderComponent>(x => x.Layer = RenderLayerName.Ground)
+            .Tweak<TileComponent>((s, x) => { x.MovementCost = 100; })
+            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
             ;
         #endregion
     }

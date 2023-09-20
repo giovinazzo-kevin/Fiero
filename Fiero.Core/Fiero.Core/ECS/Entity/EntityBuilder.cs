@@ -1,5 +1,4 @@
-﻿using LightInject;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace Fiero.Core
 {
@@ -15,7 +14,6 @@ namespace Fiero.Core
         private Action<int> _configure;
         private readonly GameEntities _entities;
 
-        public IServiceFactory ServiceFactory => _entities.ServiceFactory;
         public event Action<EntityBuilder<TProxy>, TProxy> Built;
 
         internal EntityBuilder(GameEntities entities, IEnumerable<Type> compTypes = null, Action<int> configure = null)
@@ -25,7 +23,7 @@ namespace Fiero.Core
             _componentTypes = ImmutableHashSet.CreateRange(compTypes ?? Enumerable.Empty<Type>());
         }
 
-        public EntityBuilder<TProxy> Add<T>(Action<T> configure = null)
+        public EntityBuilder<TProxy> Add<T>(Action<IServiceFactory, T> configure = null)
             where T : EcsComponent
         {
             if (_componentTypes.Contains(typeof(T)))
@@ -44,14 +42,14 @@ namespace Fiero.Core
                 e =>
                 {
                     _configure(e);
-                    _entities.AddComponent<T>(e, c => { configure?.Invoke(c); return c; });
+                    _entities.AddComponent<T>(e, c => { configure?.Invoke(_entities.ServiceFactory, c); return c; });
                 }
             );
             builder.Built += (b, e) => Built?.Invoke(b, e);
             return builder;
         }
 
-        public EntityBuilder<TProxy> Tweak<T>(Action<T> configure)
+        public EntityBuilder<TProxy> Tweak<T>(Action<IServiceFactory, T> configure)
             where T : EcsComponent
         {
             if (!_componentTypes.Contains(typeof(T)))
@@ -64,14 +62,14 @@ namespace Fiero.Core
                 e =>
                 {
                     _configure(e);
-                    configure?.Invoke(_entities.GetFirstComponent<T>(e));
+                    configure?.Invoke(_entities.ServiceFactory, _entities.GetFirstComponent<T>(e));
                 }
             );
             builder.Built += (b, e) => Built?.Invoke(b, e);
             return builder;
         }
 
-        public EntityBuilder<TProxy> AddOrTweak<T>(Action<T> configure = null)
+        public EntityBuilder<TProxy> AddOrTweak<T>(Action<IServiceFactory, T> configure = null)
             where T : EcsComponent
         {
             if (!_componentTypes.Contains(typeof(T)))

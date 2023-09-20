@@ -1,6 +1,7 @@
 ﻿namespace Fiero.Business
 {
 
+    [TransientDependency]
     public partial class AiActionProvider : ActionProvider
     {
         protected Chance RepathChance { get; set; } = new(1, 1);

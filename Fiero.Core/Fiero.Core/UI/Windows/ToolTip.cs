@@ -3,7 +3,7 @@
     [TransientDependency]
     public abstract class ToolTip : UIWindow
     {
-        public TimeSpan DisplayTimeout { get; set; } = TimeSpan.FromSeconds(0.5);
+        public TimeSpan DisplayTimeout { get; set; } = TimeSpan.FromSeconds(0.15);
 
         public ToolTip(GameUI ui) : base(ui)
         {

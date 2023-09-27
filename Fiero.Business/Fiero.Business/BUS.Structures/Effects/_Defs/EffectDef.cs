@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly struct EffectDef
     {
@@ -65,7 +62,7 @@ namespace Fiero.Business
                 EffectName.IncreaseMaxHP => new IncreaseMaxHPEffect(source, int.Parse(Arguments)),
                 EffectName.BestowTrait => new BestowTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments))),
                 EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
-                EffectName.Script => new ScriptEffect(Script),
+                EffectName.Script => new ScriptEffect((Script)Script.Clone()),
                 _ => throw new NotSupportedException(Name.ToString()),
             };
         }

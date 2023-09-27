@@ -1,11 +1,13 @@
 :- module(bomb, []).
-:- subscribe(action, [turn_started]).
+:- subscribe(action, [turn_started, turn_ended]).
 
 began(_) :- 
-	assertz(timer(3)).
+	set_counter(fuse, 3).
+ended(_{owner: O}) :-
+	effect(effect_def(explosion, 2), O, _).
 
-action:turn_started(_) :-
-	timer(T), 
-	msg_box(T, 'fuse'),
-	end.
-	
+action:turn_ended(_) :-
+	update_counter(fuse, [T, T1]>>(T1 := T - 1), T1),
+	(T1 < 0) -> end.
+
+action:turn_started(_).

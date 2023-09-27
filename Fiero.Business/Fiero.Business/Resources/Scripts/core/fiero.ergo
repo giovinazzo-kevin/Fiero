@@ -1,8 +1,9 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2]).
+:- module(fiero, [as/2, '='/2, ':='/2, set_counter/2, unset_counter/1, update_counter/3, counter/2]).
 :- op(40, yfx, ['as']).
+:- dynamic(counter/2).
 
 %%% Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
@@ -30,3 +31,15 @@ D.Key := Val :-
 	Eval := Val,
 	component_set_value(OldVal, Key, Eval),
 	!.
+%: Undefines a counter.
+unset_counter(Name) :-
+	retractall(counter(Name, _)).
+%: Defines a counter.
+set_counter(Name, Value) :-
+	(unset_counter(Name) ; true),
+	assertz(counter(Name, Value)).
+%: Updates the value of a counter.
+update_counter(Name, Lambda, NewValue) :-
+	counter(Name, OldValue), !,
+	call(Lambda, OldValue, NewValue),
+	set_counter(Name, NewValue).

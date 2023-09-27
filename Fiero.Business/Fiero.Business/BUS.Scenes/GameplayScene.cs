@@ -762,7 +762,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.AnimateViewport(true, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    Systems.Render.AnimateViewport(false, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {
@@ -918,7 +918,7 @@ namespace Fiero.Business.Scenes
                 Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
                 if (Player.CanSee(e.Center))
                 {
-                    Systems.Render.AnimateViewport(true, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
+                    Systems.Render.AnimateViewport(false, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
                 }
                 return true;
             });

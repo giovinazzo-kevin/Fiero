@@ -26,6 +26,7 @@ public partial class FieroLib : Library
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<ComponentSetValue>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<SetRngSeed>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<MsgBox>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerEffect>());
         _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }
 

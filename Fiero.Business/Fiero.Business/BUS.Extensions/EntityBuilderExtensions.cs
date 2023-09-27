@@ -16,8 +16,10 @@ namespace Fiero.Business
             {
                 c.Intrinsic.Add(def);
                 // Delegate starting the effect to the next turn, so that the game is in a known valid state
-                builder.Built += (b, o) =>
+                builder.Built += OnBuilt;
+                void OnBuilt(EntityBuilder<T> b, T o)
                 {
+                    builder.Built -= OnBuilt;
                     var systems = s.GetInstance<GameSystems>();
                     var sub = new Subscription(throwOnDoubleDispose: false);
                     sub.Add(systems.Action.TurnStarted.SubscribeHandler(ts =>
@@ -27,7 +29,7 @@ namespace Fiero.Business
                         fx.Start(systems, o);
                         sub.Dispose();
                     }));
-                };
+                }
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)
             where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>((s, c) =>
@@ -101,8 +103,10 @@ namespace Fiero.Business
             {
                 c.Capacity = Math.Max(c.Capacity, items.Length);
                 // Delegate the actual adding of each item to when the owner of the inventory is spawned
-                builder.Built += (b, e) =>
+                builder.Built += OnBuilt;
+                void OnBuilt(EntityBuilder<T> b, T e)
                 {
+                    builder.Built -= OnBuilt;
                     var actionSystem = s.GetInstance<ActionSystem>();
                     actionSystem.ActorSpawned.SubscribeUntil(e =>
                     {
@@ -116,7 +120,8 @@ namespace Fiero.Business
                         }
                         return true;
                     });
-                };
+                }
+
             });
         public static EntityBuilder<T> WithSpellLibrary<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<SpellLibraryComponent>();
@@ -124,8 +129,10 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<SpellLibraryComponent>((s, c) =>
             {
                 // Delegate the actual adding of each spell to when the owner of the library is spawned
-                builder.Built += (b, e) =>
+                builder.Built += OnBuilt;
+                void OnBuilt(EntityBuilder<T> b, T e)
                 {
+                    builder.Built -= OnBuilt;
                     var actionSystem = s.GetInstance<ActionSystem>();
                     actionSystem.ActorSpawned.SubscribeUntil(e =>
                     {
@@ -139,7 +146,7 @@ namespace Fiero.Business
                         }
                         return true;
                     });
-                };
+                }
             });
         public static EntityBuilder<T> WithActorEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActorEquipmentComponent>();
@@ -315,14 +322,16 @@ namespace Fiero.Business
             {
                 c.ScriptPath = fileName;
                 // Delegate the actual loading of the script to when the entity is built
-                builder.Built += (b, e) =>
+                builder.Built += OnBuilt;
+                void OnBuilt(EntityBuilder<T> b, T e)
                 {
+                    builder.Built -= OnBuilt;
                     var scriptSystem = s.GetInstance<ErgoScriptingSystem>();
                     if (!scriptSystem.LoadScript(e))
                     {
                         return;
                     }
-                };
+                }
             });
         public static EntityBuilder<T> WithIntrinsicTrait<T>(this EntityBuilder<T> builder, Trait trait)
             where T : Entity => builder.AddOrTweak<TraitsComponent>((s, c) =>

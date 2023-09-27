@@ -194,7 +194,8 @@ namespace Fiero.Business
                     // TODO: Figure out a way for scripts to return complex EventResults?
                     foreach (var ctx in self.Contexts.Values)
                     {
-                        var scope = self.Script.ScriptProperties.Scope.WithInterpreterScope(ctx.Scope);
+                        var scope = self.Script.ScriptProperties.Scope
+                            .WithInterpreterScope(ctx.Scope);
                         if (hook.IsDefined(ctx))
                         {
                             foreach (var _ in hook.Call(ctx, scope, ImmutableArray.Create(term)))

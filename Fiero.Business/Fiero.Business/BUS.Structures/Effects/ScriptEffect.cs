@@ -112,7 +112,8 @@ namespace Fiero.Business
             if (Script.ScriptProperties.LastError != null)
                 return;
             var ctx = GetOrCreateContext(systems, owner);
-            var scope = Script.ScriptProperties.Scope.WithInterpreterScope(ctx.Scope);
+            var scope = Script.ScriptProperties.Scope
+                .WithInterpreterScope(ctx.Scope);
             var eventTerm = TermMarshall.ToTerm(new EffectStartedEvent(owner), mode: TermMarshalling.Named);
             if (EffectStartedHook.IsDefined(ctx))
             {
@@ -125,7 +126,8 @@ namespace Fiero.Business
         {
             base.OnEnded(systems, owner);
             var ctx = GetOrCreateContext(systems, owner);
-            var scope = Script.ScriptProperties.Scope.WithInterpreterScope(ctx.Scope);
+            var scope = Script.ScriptProperties.Scope
+                .WithInterpreterScope(ctx.Scope);
             var eventTerm = TermMarshall.ToTerm(new EffectEndedEvent(owner), mode: TermMarshalling.Named);
             if (EffectEndedHook.IsDefined(ctx))
             {

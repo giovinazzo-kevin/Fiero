@@ -52,6 +52,9 @@ namespace Fiero.Core
         public EntityBuilder<TProxy> Tweak<T>(Action<IServiceFactory, T> configure)
             where T : EcsComponent
         {
+            var x = typeof(DBNull);
+
+
             if (!_componentTypes.Contains(typeof(T)))
             {
                 throw new ArgumentException($"EntityBuilder for entity of type {typeof(TProxy).Name} has no component definition of type {typeof(T).Name}");

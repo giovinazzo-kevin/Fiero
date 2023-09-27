@@ -1,9 +1,6 @@
 ﻿using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Solver;
-using Fiero.Core;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Fiero.Business
 {

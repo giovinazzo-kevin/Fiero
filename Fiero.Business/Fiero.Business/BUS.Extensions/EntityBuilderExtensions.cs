@@ -320,7 +320,6 @@ namespace Fiero.Business
                     var scriptSystem = s.GetInstance<ErgoScriptingSystem>();
                     if (!scriptSystem.LoadScript(e))
                     {
-                        // TODO: Log to the in-game console that doesn't exist yet
                         return;
                     }
                 };

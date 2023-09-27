@@ -617,7 +617,8 @@
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Explosion, "1", chance: 1f), e => new GrantedWhenHitByThrownItem(e))
+            .WithIntrinsicEffect(new(EffectName.Script, "1", chance: 1f, script: Script("bomb").Build()),
+                e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion
 

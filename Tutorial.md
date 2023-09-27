@@ -29,3 +29,25 @@ Any starting character should be able to complete it with relatively little effo
 - **Equipping items**: the player will have several chances to find weapons and armor that they can then compare and equip.
 - **Using consumables**: the player will find many consumable items and they will face enemies that know how to use these items strategically.
 - **Using the quick bar**: the player will learn how the quick bar works by examining and modifying its initial loadout-dependent configuration.
+
+## Progression
+
+Each tutorial floor should have a well-defined reason for existing. 
+It should teach the player a cohesive lesson, slowly ramping up the tension as they descend further.
+
+### D1
+
+- Monsters: Rat
+
+This floor introduces the player to the very basics. The layout favors narrow corridors over large open areas.
+The monsters here can all be killed easily without a weapon, though they can still surround and overwhelm the player while in the open.
+No monsters have ranged or magical attacks, and they all spawn with an empty inventory, but they can still pick items up if they find any.
+Item spawns on this floor are restricted mostly to basic consumables (food, rocks, bombs...) and basic weapons (sticks, swords, bows).
+
+## Guaranteed Items
+
+These items are guaranteed to spawn at least once for a given range of floors. This helps avoid situations where the player is extremely unlucky,
+and makes runs feel more consistent in the early game. There is some randomness in how these items are spread out, making identification nontrivial.
+
+- **D1~D5**: 2x Potion of Heal
+- **D1~D5**: 1x Potion of Poison

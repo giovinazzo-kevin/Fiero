@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
@@ -29,7 +24,7 @@ namespace Fiero.Business
                     case ThrowName.Line:
                         victim = Shapes.Line(t.Actor.Position(), newPos)
                             .Skip(1)
-                            .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(t.Actor) ?? false)
+                            .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement() ?? false)
                             .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
                             .LastOrDefault();
                         break;
@@ -44,7 +39,7 @@ namespace Fiero.Business
                 else
                 {
                     var lastNonWall = Shapes.Line(t.Actor.Position(), newPos)
-                        .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(t.Actor) ?? false)
+                        .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement() ?? false)
                         .Last();
                     return Consume(t.Actor, rDir.Item)
                         && ItemThrown.Handle(new(t.Actor, null, lastNonWall, rDir.Item));

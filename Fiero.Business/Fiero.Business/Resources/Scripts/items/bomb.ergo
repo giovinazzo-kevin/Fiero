@@ -1,0 +1,11 @@
+:- module(bomb, []).
+:- subscribe(action, [turn_started]).
+
+began(_) :- 
+	assertz(timer(3)).
+
+action:turn_started(_) :-
+	timer(T), 
+	msg_box(T, 'fuse'),
+	end.
+	

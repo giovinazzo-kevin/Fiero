@@ -4,6 +4,7 @@ using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
+using Ergo.Lang.Exceptions.Handler;
 using Ergo.Lang.Extensions;
 using Ergo.Shell;
 using Ergo.Solver;
@@ -97,7 +98,12 @@ namespace Fiero.Business
             if (script.IsInvalid())
                 return false;
             var localScope = StdlibScope
-                .WithRuntime(true);
+                .WithRuntime(true)
+                .WithExceptionHandler(new ExceptionHandler(@catch: ex =>
+                {
+                    script.ScriptProperties.LastError = ex;
+                    Shell.WriteLine(ex.Message, Ergo.Shell.LogLevel.Err);
+                }));
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
                 .TryGetValue(out var module))
             {
@@ -185,15 +191,17 @@ namespace Fiero.Business
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named);
                 try
                 {
-                    var scope = self.Script.ScriptProperties.Scope;
                     // TODO: Figure out a way for scripts to return complex EventResults?
-                    using var ctx = SolverContext.Create(self.Script.ScriptProperties.Solver, scope.InterpreterScope);
-                    if (hook.IsDefined(ctx))
+                    foreach (var ctx in self.Contexts.Values)
                     {
-                        foreach (var _ in hook.Call(ctx, scope, ImmutableArray.Create(term)))
+                        var scope = self.Script.ScriptProperties.Scope.WithInterpreterScope(ctx.Scope);
+                        if (hook.IsDefined(ctx))
                         {
-                            if (self.Script.ScriptProperties.LastError != null)
-                                return false;
+                            foreach (var _ in hook.Call(ctx, scope, ImmutableArray.Create(term)))
+                            {
+                                if (self.Script.ScriptProperties.LastError != null)
+                                    return false;
+                            }
                         }
                     }
                     return true;

@@ -1,12 +1,10 @@
-﻿using Ergo.Lang.Ast;
+﻿using Ergo.Lang;
+using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
-using Fiero.Core;
 using LightInject;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -20,7 +18,7 @@ public sealed class Spawn : SolverBuiltIn
     private readonly Dictionary<string, MethodInfo> BuilderMethods;
 
     public Spawn(IServiceFactory services, GameEntityBuilders builders)
-        : base("", new("spawn"), 1, ErgoScriptingSystem.FieroModule)
+        : base("", new("spawn"), default, ErgoScriptingSystem.FieroModule)
     {
         Services = services;
         Builders = builders;
@@ -50,9 +48,16 @@ public sealed class Spawn : SolverBuiltIn
             var player = systems.Render.Viewport.Following.V;
             var floorId = player?.FloorId() ?? default;
             var position = player?.Position() ?? default;
-
             var builder = (IEntityBuilder)builderFunc.Invoke(Builders, builderFunc.GetParameters()
-                .Select(x => x.DefaultValue).ToArray());
+                .Select((x, i) =>
+                {
+                    if (args.ElementAtOrDefault(i + 1) is { } a
+                    && TermMarshall.FromTerm(a, x.ParameterType) is { } val)
+                    {
+                        return val;
+                    }
+                    return x.DefaultValue;
+                }).ToArray());
 
             var entity = builder.Build();
             if (entity is PhysicalEntity e)

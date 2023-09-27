@@ -18,6 +18,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{1F0A8FAE-C853-4BBF-9A53-C516F32AD7E3}"
 	ProjectSection(SolutionItems) = preProject
 		Tutorial.md = Tutorial.md
+		Effects.md = Effects.md
+		Weapons.md = Weapons.md
 	EndProjectSection
 EndProject
 Global

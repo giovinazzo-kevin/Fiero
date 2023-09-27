@@ -9,6 +9,9 @@
 :- expand([O] >> (
 	@owner :- owner(O)
 )).
+:- expand([O] >> (
+	@player :- player as actor is O
+)).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
 %: NOTE: 'as' has a higher precedence than 'is', so this doesn't break arithmetic expressions

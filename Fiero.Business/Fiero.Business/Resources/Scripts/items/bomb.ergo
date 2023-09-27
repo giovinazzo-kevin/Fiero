@@ -1,5 +1,5 @@
 :- module(bomb, []).
-:- subscribe(action, [turn_started]).
+:- subscribe(action, [actor_turn_started]).
 
 began :- 
 	set_counter(fuse, 3).
@@ -9,11 +9,11 @@ ended :-
 tick :-
 	counter(fuse, T),
 	position(@owner, P),
-	animate(false, P, [damage_number{damage: T, tint: light_red}]).
+	animate(true, P, [damage_number{damage: T, tint: light_red}]).
 
 tock :-
 	update_counter(fuse, decrement, T), 
-	(T < 0) -> end.
+	(T <= 0) -> end.
 
-action:turn_started(_) :-
-	tick, tock.
+% schedule animation on player turn start to prevent visual glitches
+action:actor_turn_started(_{actor:@player}) :- tick, tock.

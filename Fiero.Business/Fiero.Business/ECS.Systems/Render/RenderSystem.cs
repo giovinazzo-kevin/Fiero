@@ -101,7 +101,8 @@ namespace Fiero.Business
             {
                 for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++)
                 {
-                    var (screenPos, spriteDef) = (pair.Left, pair.Right);
+                    var (worldPos, spriteDef) = (pair.Left, pair.Right);
+                    var screenPos = Viewport.WorldToScreenPos(worldPos);
                     using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
                     var spriteSize = sprite.GetLocalBounds().Size();
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
@@ -146,12 +147,9 @@ namespace Fiero.Business
         }
 
         public void AnimateViewport(bool blocking, Coord worldPos, params Animation[] animations)
-            => Animate(blocking, Viewport.WorldToScreenPos(worldPos), animations);
-
-        public void Animate(bool blocking, Coord screenPos, params Animation[] animations)
         {
             var t = _sw.Elapsed;
-            var batch = animations.Select(a => new Timeline(a, screenPos, t)).ToList();
+            var batch = animations.Select(a => new Timeline(a, worldPos, t)).ToList();
             foreach (var anim in batch)
             {
                 if (!anim.Frames.Any())

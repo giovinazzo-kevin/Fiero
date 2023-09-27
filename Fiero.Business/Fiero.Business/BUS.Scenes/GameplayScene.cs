@@ -277,7 +277,7 @@ namespace Fiero.Business.Scenes
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
-                    Systems.Render.Animate(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
+                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
                 }
             });
             // ActionSystem.ActorIntentEvaluated:

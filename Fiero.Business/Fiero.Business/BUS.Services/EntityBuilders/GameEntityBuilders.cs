@@ -705,6 +705,11 @@
             });
         }
 
+        public EntityBuilder<Feature> Feature_Billboard(TextureName texture, string sprite, ColorName? tint = null, bool solid = false)
+            => Feature<Feature>(FeatureName.Billboard)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
+            .WithSprite(RenderLayerName.Features, texture, sprite, tint ?? ColorName.White)
+            ;
         public EntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)

@@ -4,9 +4,9 @@
     {
         Ground,
         Items,
+        Features,
         BackgroundEffects,
         Wall,
-        Features,
         Actors,
         ForegroundEffects,
         UserInterface

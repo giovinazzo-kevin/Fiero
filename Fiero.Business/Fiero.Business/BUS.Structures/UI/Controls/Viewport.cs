@@ -1,8 +1,5 @@
 ﻿using Ergo.Lang;
-using Fiero.Core;
 using SFML.Graphics;
-using System;
-using System.Collections.Generic;
 
 namespace Fiero.Business
 {
@@ -23,6 +20,7 @@ namespace Fiero.Business
         public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
+        private Coord _cachedPos;
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
         private bool _dirty = true;
@@ -88,7 +86,7 @@ namespace Fiero.Business
             if (!IsMouseOver)
                 return default;
             var pos = TrackedMousePosition - Position.V;
-            var worldPos = pos / ViewTileSize.V + Following.V.Position();
+            var worldPos = pos / ViewTileSize.V + _cachedPos;
             return worldPos;
         }
 
@@ -101,8 +99,8 @@ namespace Fiero.Business
 
         public Coord WorldToScreenPos(Coord world)
         {
-            var fWorldPos = Following.V.Position();
-            return (world - fWorldPos - Coord.PositiveOne) * ViewTileSize.V + (Position.V + Size.V / 2).Align(ViewTileSize) + ViewTileSize;
+            return (world - Following.V.Position() - Coord.PositiveOne)
+                * ViewTileSize.V + (Position.V + Size.V / 2).Align(ViewTileSize) + ViewTileSize;
         }
 
 

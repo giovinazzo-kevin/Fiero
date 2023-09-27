@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System.Diagnostics;
 using Unconcern.Common;
 using static Fiero.Business.Data;
 
@@ -22,6 +23,8 @@ namespace Fiero.Business
         public readonly SystemRequest<RenderSystem, PointSelectedEvent, EventResult> PointSelected;
         public readonly SystemRequest<RenderSystem, ActorSelectedEvent, EventResult> ActorSelected;
         public readonly SystemRequest<RenderSystem, ActorDeselectedEvent, EventResult> ActorDeselected;
+
+        private readonly Stopwatch _sw = new();
 
         public void CenterOn(Actor a)
         {
@@ -68,6 +71,7 @@ namespace Fiero.Business
                 if (res.All(x => x))
                     Window.OnActorDeselected();
             };
+            _sw.Start();
         }
 
         public void Reset()
@@ -95,7 +99,7 @@ namespace Fiero.Business
             UpdateAnimations();
             foreach (var anim in Vfx.Values)
             {
-                for (int j = 0, animCount = Vfx.Count; j < animCount && anim.TryDequeue(out var pair); j++)
+                for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++)
                 {
                     var (screenPos, spriteDef) = (pair.Left, pair.Right);
                     using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Color));
@@ -110,7 +114,7 @@ namespace Fiero.Business
 
             void UpdateAnimations()
             {
-                var time = Loop.T;
+                var time = _sw.Elapsed;
                 var keys = new List<int>(Timelines.Keys);
                 foreach (var id in keys)
                 {
@@ -146,7 +150,7 @@ namespace Fiero.Business
 
         public void Animate(bool blocking, Coord screenPos, params Animation[] animations)
         {
-            var t = Loop.T;
+            var t = _sw.Elapsed;
             var batch = animations.Select(a => new Timeline(a, screenPos, t)).ToList();
             foreach (var anim in batch)
             {

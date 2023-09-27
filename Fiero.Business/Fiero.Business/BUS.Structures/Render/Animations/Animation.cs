@@ -13,7 +13,7 @@ namespace Fiero.Business
             Vec? scale = null
         ) => new(
             Enumerable.Range(1, radius)
-                .Select(i => new AnimationFrame(frameDuration ?? TimeSpan.FromMilliseconds(24), Shapes.Circle(new(), i)
+                .Select(i => new AnimationFrame(frameDuration ?? TimeSpan.FromMilliseconds(48), Shapes.Circle(new(), i)
                     .Select(p => new SpriteDef(texture, sprite, tint, p.ToVec(), scale ?? new(1, 1)))
                     .ToArray()))
                 .ToArray()
@@ -208,8 +208,8 @@ namespace Fiero.Business
             Vec? scale = null,
             Vec? offset = null
         ) => new(
-            Enumerable.Range(0, 8).Select(i => new AnimationFrame(
-                frameDuration ?? TimeSpan.FromMilliseconds(i < 6 ? i < 3 ? 8 : 24 : 48),
+            Enumerable.Range(0, 6).Select(i => new AnimationFrame(
+                frameDuration ?? TimeSpan.FromMilliseconds(48),
                 new SpriteDef(TextureName.Animations, $"Explosion_{i + 1}", tint, offset ?? Vec.Zero, scale ?? new(1, 1))))
             .ToArray()
         );

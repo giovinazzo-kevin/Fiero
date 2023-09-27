@@ -7,7 +7,7 @@
 
 %%% Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
-	@player :- player as actor is O
+	@owner :- owner(O)
 )).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
@@ -43,3 +43,6 @@ update_counter(Name, Lambda, NewValue) :-
 	counter(Name, OldValue), !,
 	call(Lambda, OldValue, NewValue),
 	set_counter(Name, NewValue).
+%: Get entity position
+position(_{ id: Id }, P) :-
+	Id as physical_entity is _{ physics: _{ position: P } }, !.

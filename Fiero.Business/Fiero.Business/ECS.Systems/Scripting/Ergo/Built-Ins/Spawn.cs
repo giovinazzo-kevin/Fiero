@@ -35,7 +35,6 @@ public sealed class Spawn : SolverBuiltIn
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.String, args[0]);
             yield break;
         }
-
         if (args[0].IsGround)
         {
             if (!BuilderMethods.TryGetValue(entityName, out var builderFunc))

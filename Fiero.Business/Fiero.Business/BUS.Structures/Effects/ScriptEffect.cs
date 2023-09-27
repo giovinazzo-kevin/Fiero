@@ -3,6 +3,7 @@ using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using System.Collections.Immutable;
@@ -10,36 +11,65 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-
-    internal class EndEffect : SolverBuiltIn
+    internal class ScriptEffectLib : Library
     {
-        protected readonly ScriptEffect _source;
-        protected readonly Entity _owner;
-        protected readonly GameSystems _systems;
-        private bool _ended = false;
-
-        public EndEffect(GameSystems systems, ScriptEffect source, Entity owner, Atom module) : base(string.Empty, new Atom("end"), 0, module)
+        internal class End : SolverBuiltIn
         {
-            _source = source;
-            _owner = owner;
-            _systems = systems;
-        }
+            protected readonly ScriptEffect _source;
+            protected readonly Entity _owner;
+            protected readonly GameSystems _systems;
+            private bool _ended = false;
 
-        public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
-        {
-            if (_ended)
+            public End(GameSystems systems, ScriptEffect source, Entity owner, Atom module) : base(string.Empty, new Atom("end"), 0, module)
             {
+                _source = source;
+                _owner = owner;
+                _systems = systems;
+            }
+
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            {
+                if (_ended)
+                {
+                    yield return False();
+                    yield break;
+                }
+                _source.End(_systems, _owner);
+                _ended = true;
+                yield return True();
+            }
+        }
+        internal class Owner : SolverBuiltIn
+        {
+            protected readonly Entity _owner;
+
+            public Owner(Entity owner, Atom module) : base(string.Empty, new Atom("owner"), 1, module)
+            {
+                _owner = owner;
+            }
+
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            {
+                var term = TermMarshall.ToTerm(_owner);
+                if (arguments[0].Unify(term).TryGetValue(out var subs))
+                {
+                    yield return True(subs);
+                    yield break;
+                }
+                else if (arguments[0].IsAbstract<Dict>().TryGetValue(out var d1)
+                      && term.IsAbstract<Dict>().TryGetValue(out var d2)
+                      && d1.Dictionary.TryGetValue(new("id"), out var id1)
+                      && d2.Dictionary.TryGetValue(new("id"), out var id2)
+                      && id1.Equals(id2))
+                {
+                    yield return True();
+                    yield break;
+                }
                 yield return False();
                 yield break;
             }
-            _source.End(_systems, _owner);
-            _ended = true;
-            yield return True();
         }
-    }
 
-    internal class ScriptEffectLib : Library
-    {
         private readonly Atom _module;
         public override Atom Module => _module;
         protected readonly ScriptEffect _source;
@@ -54,7 +84,8 @@ namespace Fiero.Business
         }
         public override IEnumerable<SolverBuiltIn> GetExportedBuiltins()
         {
-            yield return new EndEffect(_systems, _source, _owner, _module);
+            yield return new End(_systems, _source, _owner, _module);
+            yield return new Owner(_owner, _module);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {
@@ -69,9 +100,6 @@ namespace Fiero.Business
     /// </summary>
     public class ScriptEffect : Effect
     {
-        public readonly record struct EffectStartedEvent(Entity Owner);
-        public readonly record struct EffectEndedEvent(Entity Owner);
-
         public readonly Script Script;
         public readonly InterpreterScope Scope;
         public readonly string Description;
@@ -87,8 +115,8 @@ namespace Fiero.Business
             var m = s.Modules[script.ScriptProperties.Scope.Module];
             Description = description ?? string.Empty;
             var module = Script.ScriptProperties.Scope.Module;
-            EffectStartedHook = new(new(new("began"), Maybe.Some(1), module, default));
-            EffectEndedHook = new(new(new("ended"), Maybe.Some(1), module, default));
+            EffectStartedHook = new(new(new("began"), Maybe.Some(0), module, default));
+            EffectEndedHook = new(new(new("ended"), Maybe.Some(0), module, default));
         }
 
         public override EffectName Name => EffectName.Script;
@@ -114,10 +142,9 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            var eventTerm = TermMarshall.ToTerm(new EffectStartedEvent(owner), mode: TermMarshalling.Named);
             if (EffectStartedHook.IsDefined(ctx))
             {
-                foreach (var _ in EffectStartedHook.Call(ctx, scope, ImmutableArray.Create(eventTerm)))
+                foreach (var _ in EffectStartedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
                     ;
             }
         }
@@ -128,10 +155,9 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            var eventTerm = TermMarshall.ToTerm(new EffectEndedEvent(owner), mode: TermMarshalling.Named);
             if (EffectEndedHook.IsDefined(ctx))
             {
-                foreach (var _ in EffectEndedHook.Call(ctx, scope, ImmutableArray.Create(eventTerm)))
+                foreach (var _ in EffectEndedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
                     ;
             }
             Contexts.Remove(owner.Id);

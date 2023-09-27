@@ -1,13 +1,19 @@
 :- module(bomb, []).
-:- subscribe(action, [turn_started, turn_ended]).
+:- subscribe(action, [turn_started]).
 
-began(_) :- 
+began :- 
 	set_counter(fuse, 3).
-ended(_{owner: O}) :-
-	effect(effect_def(explosion, 2), O, _).
+ended :-
+	effect(effect_def(explosion, 2), @owner, _).
 
-action:turn_ended(_) :-
-	update_counter(fuse, [T, T1]>>(T1 := T - 1), T1),
-	(T1 < 0) -> end.
+tick :-
+	counter(fuse, T),
+	position(@owner, P),
+	animate(false, P, [damage_number{damage: T, tint: light_red}]).
 
-action:turn_started(_).
+tock :-
+	update_counter(fuse, decrement, T), 
+	(T < 0) -> end.
+
+action:turn_started(_) :-
+	tick, tock.

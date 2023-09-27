@@ -3,15 +3,8 @@ using System.Drawing;
 
 namespace Fiero.Core
 {
-    public readonly struct Coord : IComparable<Coord>
+    public readonly record struct Coord(int X, int Y) : IComparable<Coord>
     {
-        public readonly int X, Y;
-        public Coord(int x = 0, int y = 0)
-        {
-            X = x;
-            Y = y;
-        }
-
         public static Coord operator +(Coord self, Coord other)
             => new Coord(self.X + other.X, self.Y + other.Y);
         public static Coord operator -(Coord self, Coord other)
@@ -40,10 +33,6 @@ namespace Fiero.Core
             => new Vec(self.X / other, self.Y / other);
         public static Vec operator *(Coord self, float other)
             => new Vec(self.X * other, self.Y * other);
-        public static bool operator ==(Coord self, Coord other)
-            => self.X == other.X && self.Y == other.Y;
-        public static bool operator !=(Coord self, Coord other)
-            => self.X != other.X || self.Y != other.Y;
 
         public void Deconstruct(out int x, out int y)
         {
@@ -67,9 +56,6 @@ namespace Fiero.Core
         public static Coord NegativeX { get; } = new Coord(-1, +0);
         public static Coord NegativeY { get; } = new Coord(+0, -1);
         public static Coord NegativeOne { get; } = new Coord(-1, -1);
-
-        public override bool Equals(object obj)
-            => obj is Coord other && this == other;
 
         public static implicit operator Vector2f(Coord v) => new(v.X, v.Y);
         public static implicit operator Vector2i(Coord v) => new(v.X, v.Y);

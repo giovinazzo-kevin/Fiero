@@ -16,8 +16,6 @@ public sealed class TriggerEffect : SolverBuiltIn
     private IServiceFactory _services;
 
     public TriggerEffect(IServiceFactory services)
-        // effect(effect_def(poison, 1), Owner, EndEffect),
-        // call(EndEffect).
         : base("", new("effect"), 3, ErgoScriptingSystem.FieroModule)
     {
         _services = services;

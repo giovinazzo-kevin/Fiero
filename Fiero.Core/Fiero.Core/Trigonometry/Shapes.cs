@@ -75,15 +75,15 @@
             }
         }
 
-        public static IEnumerable<Coord> Disc(Coord center, int diameter)
+        public static IEnumerable<Coord> Disc(Coord center, float diameter)
         {
             var radius = diameter / 2;
             var rr = radius * radius;
-            for (int x = -radius; x <= radius; x++)
+            for (float x = -radius; x <= radius; x++)
             {
-                for (int y = -radius; y <= radius; y++)
+                for (float y = -radius; y <= radius; y++)
                 {
-                    var p = center + new Coord(x, y);
+                    var p = center + new Coord((int)x, (int)y);
                     if (p.DistSq(center) <= rr)
                     {
                         yield return p;

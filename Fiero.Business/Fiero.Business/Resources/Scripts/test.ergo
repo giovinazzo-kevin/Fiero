@@ -11,4 +11,4 @@ test:ended :- unbind(_, _, _).
 
 action:actor_moved(_ { actor: @owner }) :- 
 	position(@owner, P),
-	animate(false, P, [explosion{radius: 1, tint: light_green}]).
+	animate(false, P, [explosion{radius: 1, tint: light_green, repeat: -1}]).

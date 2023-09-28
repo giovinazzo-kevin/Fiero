@@ -148,6 +148,10 @@ namespace Fiero.Business
                     if (!timeline.Frames.Any())
                     {
                         Timelines.Remove(id);
+                        if (timeline.Animation.RepeatCount < 0 || timeline.Animation.RepeatCount > 0 && timeline.Animation.RepeatCount-- > 0)
+                        {
+                            Timelines[Interlocked.Increment(ref _id)] = new Timeline(timeline.Animation, timeline.ScreenPosition, _sw.Elapsed);
+                        }
                         continue;
                     }
                 }

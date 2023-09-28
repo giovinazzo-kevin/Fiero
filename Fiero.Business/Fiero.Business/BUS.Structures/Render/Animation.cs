@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class Animation
     {
         public readonly AnimationFrame[] Frames;
         public readonly TimeSpan Duration;
+        public int RepeatCount { get; set; } = 0;
 
         public event Action<Animation, int, AnimationFrame> FramePlaying;
         public void OnFramePlaying(int frame) => FramePlaying?.Invoke(this, frame, Frames[frame]);
@@ -28,11 +26,11 @@ namespace Fiero.Business
             };
             return this;
         }
-
-        public Animation(params AnimationFrame[] frames)
+        public Animation(AnimationFrame[] frames, int repeat = 0)
         {
             Frames = frames;
             Duration = frames.Length == 0 ? TimeSpan.Zero : frames.Select(f => f.Duration).Aggregate((a, b) => a + b);
+            RepeatCount = repeat;
         }
     }
 }

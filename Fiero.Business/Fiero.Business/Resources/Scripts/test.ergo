@@ -3,8 +3,10 @@
 :- subscribe(action, [actor_moved]).
 
 test:began :- 
-	effect(effect_def(bestow_trait, huge), @owner, _),
-	effect(effect_def(remove_trait, tiny), @owner, _).
+	bind(k, pressed, [_]>>(spawn([npc_rat{}], _))),
+	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999}], _))),
+	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
+	.
 test:ended :- unbind(_, _, _).
 
 action:actor_moved(_ { actor: @owner }) :- 

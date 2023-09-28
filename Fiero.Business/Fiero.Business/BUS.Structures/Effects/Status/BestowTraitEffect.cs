@@ -25,7 +25,7 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void ApplyOnStarted(GameSystems systems, Entity target)
+        protected override void TypedOnStarted(GameSystems systems, Entity target)
         {
             if (target.Traits is null)
                 return;
@@ -62,7 +62,7 @@ namespace Fiero.Business
             Trait = trait;
         }
 
-        protected override void ApplyOnStarted(GameSystems systems, Entity target)
+        protected override void TypedOnStarted(GameSystems systems, Entity target)
         {
             if (target.Traits is null)
                 return;

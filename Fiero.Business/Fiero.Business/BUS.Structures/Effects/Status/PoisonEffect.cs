@@ -16,7 +16,7 @@ namespace Fiero.Business
             Amount = amount;
         }
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
             target.TryRoot();
             Ended += e => target.TryFree();

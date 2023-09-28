@@ -13,7 +13,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Silence.Desc$";
         public override EffectName Name => EffectName.Silence;
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target) { }
+        protected override void TypedOnStarted(GameSystems systems, Actor target) { }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {

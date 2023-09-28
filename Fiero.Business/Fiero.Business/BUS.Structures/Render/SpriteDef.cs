@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly struct SpriteDef
     {
@@ -9,13 +7,15 @@ namespace Fiero.Business
         public readonly ColorName Color;
         public readonly Vec Offset;
         public readonly Vec Scale;
-        public SpriteDef(TextureName texture, string sprite, ColorName tint, Vec ofs, Vec scale)
+        public readonly float Alpha;
+        public SpriteDef(TextureName texture, string sprite, ColorName tint, Vec ofs, Vec scale, float alpha)
         {
             Sprite = sprite;
             Texture = texture;
             Color = tint;
             Offset = ofs;
             Scale = scale;
+            Alpha = alpha;
         }
     }
 }

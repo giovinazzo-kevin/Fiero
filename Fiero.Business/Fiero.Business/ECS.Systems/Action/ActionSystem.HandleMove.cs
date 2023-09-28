@@ -52,7 +52,7 @@
                     else
                     {
                         var target = actorsHere
-                            // Fake entities such as Billboards may overlap the same tile as another actor.
+                            // Fake entities such as dummies may overlap the same tile as another actor.
                             .Single(x => x.ActorProperties.Type != ActorName.None);
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack())

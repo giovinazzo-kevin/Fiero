@@ -19,7 +19,7 @@
         }
 
 
-        public EntityBuilder<Actor> Billboard(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
+        public EntityBuilder<Actor> Dummy(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
             => Entities.CreateBuilder<Actor>()
             .AddOrTweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
             .WithHealth(1)
@@ -677,6 +677,8 @@
         #region WANDS
         public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1)
             => Wand(new(EffectName.Confusion, duration: 10), charges);
+        public EntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1)
+            => Wand(new(EffectName.Poison, magnitude.ToString(), duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfSleep(int charges = 1)
             => Wand(new(EffectName.Sleep, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfSilence(int charges = 1)

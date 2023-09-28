@@ -27,7 +27,7 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
 
             if (GetStat(target) is not { } stat)

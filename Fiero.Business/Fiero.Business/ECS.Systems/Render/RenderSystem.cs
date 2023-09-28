@@ -108,39 +108,47 @@ namespace Fiero.Business
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
                     sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                     sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                    if (spriteDef.Alpha != 1)
+                    {
+                        var color = sprite.Color;
+                        sprite.Color = Color.White;
+                        target.Draw(sprite, states);
+                        var alphaDt = (int)((1 - Math.Clamp(spriteDef.Alpha, 0, 1)) * 255);
+                        sprite.Color = color.AddAlpha(-alphaDt);
+                    }
                     target.Draw(sprite, states);
                     anim.Enqueue(pair);
                 }
             }
+        }
 
-            void UpdateAnimations()
+        void UpdateAnimations()
+        {
+            var time = _sw.Elapsed;
+            var keys = new List<int>(Timelines.Keys);
+            foreach (var id in keys)
             {
-                var time = _sw.Elapsed;
-                var keys = new List<int>(Timelines.Keys);
-                foreach (var id in keys)
+                if (!Timelines.TryGetValue(id, out var timeline))
+                    continue;
+                var currentFrame = timeline.Frames.First();
+                if (time > currentFrame.Start && !Vfx.ContainsKey(id))
                 {
-                    if (!Timelines.TryGetValue(id, out var timeline))
-                        continue;
-                    var currentFrame = timeline.Frames.First();
-                    if (time > currentFrame.Start && !Vfx.ContainsKey(id))
+                    var myVfx = Vfx[id] = new();
+                    foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
                     {
-                        var myVfx = Vfx[id] = new();
-                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
-                        {
-                            myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
-                        }
-                        timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
+                        myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
                     }
-                    if (time > currentFrame.End && Vfx.ContainsKey(id))
+                    timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
+                }
+                if (time > currentFrame.End && Vfx.ContainsKey(id))
+                {
+                    Vfx[id].Clear();
+                    Vfx.Remove(id);
+                    timeline.Frames.RemoveAt(0);
+                    if (!timeline.Frames.Any())
                     {
-                        Vfx[id].Clear();
-                        Vfx.Remove(id);
-                        timeline.Frames.RemoveAt(0);
-                        if (!timeline.Frames.Any())
-                        {
-                            Timelines.Remove(id);
-                            continue;
-                        }
+                        Timelines.Remove(id);
+                        continue;
                     }
                 }
             }

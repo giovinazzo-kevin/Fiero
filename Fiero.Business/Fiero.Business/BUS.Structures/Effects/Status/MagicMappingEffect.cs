@@ -9,7 +9,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.MagicMapping.Desc$";
         public override EffectName Name => EffectName.MagicMapping;
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
             var fid = target.FloorId();
             foreach (var tile in systems.Dungeon.GetAllTiles(fid))

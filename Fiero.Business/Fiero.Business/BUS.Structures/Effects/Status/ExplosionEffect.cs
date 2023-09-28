@@ -18,56 +18,33 @@ namespace Fiero.Business
             Shape = shape.ToArray();
         }
 
+        protected override void OnStarted(GameSystems systems, Entity owner)
+        {
+            base.OnStarted(systems, owner);
+            if (!owner.TryCast<PhysicalEntity>(out var phys))
+            {
+                return;
+            }
+            var floorId = phys.FloorId();
+            var pos = phys.Position();
+            var actualShape = Shape
+                .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
+                .ToArray();
+            systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
+            // TODO: Make this a handelr of ExplosionHappened?
+            foreach (var p in actualShape)
+            {
+                foreach (var a in systems.Dungeon.GetActorsAt(floorId, p + pos))
+                {
+                    var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
+                    systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
+                }
+            }
+            End(systems, owner);
+        }
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            // When an explosion is caused by an actor, it happens at the end of that actor's turn
-            // When an explosion is caused by the environment and targets an actor, it happens at the end of that actor's turn
-            // When an explosion is caused by the environment and targets no actor, it happens at the end of the turn
-            var sourceIsActor = Source.TryCast<Actor>(out var a) && a.ActorProperties.Type != ActorName.None;
-            var ownerIsActor = owner.TryCast<Actor>(out var o) && o.ActorProperties.Type != ActorName.None;
-            if (sourceIsActor || ownerIsActor)
-            {
-                yield return systems.Action.ActorTurnEnded.SubscribeHandler(e =>
-                {
-                    if (sourceIsActor && e.Actor != Source
-                    || !sourceIsActor && e.Actor != owner)
-                        return;
-                    Inner();
-                });
-            }
-            else
-            {
-                yield return systems.Action.TurnEnded.SubscribeHandler(e =>
-                {
-                    Inner();
-                });
-            }
-
-            void Inner()
-            {
-                if (!owner.TryCast<PhysicalEntity>(out var phys))
-                {
-                    return;
-                }
-                var floorId = phys.FloorId();
-                var pos = phys.Position();
-                var actualShape = Shape
-                    .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
-                    .ToArray();
-                systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
-                // TODO: Make this a handelr of ExplosionHappened?
-                foreach (var p in actualShape)
-                {
-                    foreach (var a in systems.Dungeon.GetActorsAt(floorId, p + pos))
-                    {
-                        var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
-                        systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
-                    }
-                }
-                End(systems, owner);
-            }
+            yield break;
         }
-
-        protected override void ApplyOnStarted(GameSystems systems, Actor target) { }
     }
 }

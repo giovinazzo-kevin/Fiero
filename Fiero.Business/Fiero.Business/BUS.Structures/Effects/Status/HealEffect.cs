@@ -18,7 +18,7 @@ namespace Fiero.Business
             Amount = amount;
         }
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
             systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, Amount));
             End(systems, target);

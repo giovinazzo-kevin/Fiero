@@ -9,7 +9,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.UncontrolledTeleport.Desc$";
         public override EffectName Name => EffectName.UncontrolledTeleport;
 
-        protected override void ApplyOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
             var randomPos = systems.Dungeon.GetFloor(target.FloorId())
                 .Cells.Shuffle(Rng.Random)

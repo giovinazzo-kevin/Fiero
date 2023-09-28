@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -10,7 +9,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.MagicMapping.Desc$";
         public override EffectName Name => EffectName.MagicMapping;
 
-        protected override void Apply(GameSystems systems, Actor target)
+        protected override void ApplyOnStarted(GameSystems systems, Actor target)
         {
             var fid = target.FloorId();
             foreach (var tile in systems.Dungeon.GetAllTiles(fid))

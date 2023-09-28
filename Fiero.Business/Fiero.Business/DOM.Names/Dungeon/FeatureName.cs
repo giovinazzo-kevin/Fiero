@@ -3,7 +3,6 @@
     public enum FeatureName
     {
         None,
-        Billboard,
         Door,
         Downstairs,
         Upstairs,

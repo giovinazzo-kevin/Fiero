@@ -1,7 +1,7 @@
 ﻿
 
+using Ergo.Lang;
 using Fiero.Core.Exceptions;
-using Fiero.Core.Structures;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -43,7 +43,8 @@ namespace Fiero.Core
             GameLocalizations<TLocales> localization,
             GameUI ui,
             GameWindow window,
-            GameDirector director)
+            GameDirector director,
+            GameEntities entities)
         {
             OffButton = off;
             Loop = loop;
@@ -58,6 +59,14 @@ namespace Fiero.Core
             Window = window;
             Director = director;
             Localization = localization;
+            // Hydrate entities when parsed from terms
+            TermMarshall.RegisterTransform<EcsEntity>(e =>
+            {
+                var proxyType = e.GetType();
+                if (entities.TryGetProxy(proxyType, e.Id, out var proxy))
+                    return proxy;
+                return e;
+            });
         }
         protected abstract Task InitializeAsync();
         protected bool ValidateResources<TEnum>(Func<TEnum, bool> validate, out IEnumerable<TEnum> failures)

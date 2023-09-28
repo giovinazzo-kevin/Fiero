@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {

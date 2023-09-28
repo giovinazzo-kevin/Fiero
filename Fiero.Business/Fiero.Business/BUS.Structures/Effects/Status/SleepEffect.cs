@@ -14,7 +14,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Sleep.Desc$";
         public override EffectName Name => EffectName.Sleep;
 
-        protected override void Apply(GameSystems systems, Actor target)
+        protected override void ApplyOnStarted(GameSystems systems, Actor target)
         {
             target.TryRoot();
             Ended += e => target.TryFree();

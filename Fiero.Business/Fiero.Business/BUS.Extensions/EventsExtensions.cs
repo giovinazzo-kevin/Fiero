@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -10,7 +7,8 @@ namespace Fiero.Business
         public static bool Handle<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload)
             where TSys : EcsSystem
         {
-            return req.Request(payload).All(x => x);
+            return req.Request(payload)
+                .All(x => x);
         }
 
         public static void HandleOrThrow<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload)

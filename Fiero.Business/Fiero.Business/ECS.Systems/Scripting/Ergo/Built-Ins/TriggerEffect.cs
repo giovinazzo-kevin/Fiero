@@ -25,13 +25,12 @@ public sealed class TriggerEffect : SolverBuiltIn
     {
         var gameEntities = _services.GetInstance<GameEntities>();
         if (arguments[0].Matches<EffectDefStub>(out var stub)
-        && arguments[1].Matches<Entity>(out var e)
-        && gameEntities.TryGetProxy(e.Id, out e))
+        && gameEntities.TryParseTerm(arguments[1], out var e))
         {
-            var def = new EffectDef(stub.Name, stub.Arguments, source: e);
+            var def = new EffectDef(stub.Name, stub.Arguments, source: (Entity)e);
             var effect = def.Resolve(null);
             // TODO: bind effect.end as callable to args[2]
-            effect.Start(_services.GetInstance<GameSystems>(), e);
+            effect.Start(_services.GetInstance<GameSystems>(), (Entity)e);
         }
         yield return True();
     }

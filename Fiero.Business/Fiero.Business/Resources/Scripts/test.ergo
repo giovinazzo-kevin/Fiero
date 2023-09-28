@@ -3,9 +3,10 @@
 :- subscribe(action, [actor_moved]).
 
 test:began :- 
-	bind(k, pressed, [E]>>spawn(npc_rat)).
+	effect(effect_def(bestow_trait, huge), @owner, _),
+	effect(effect_def(remove_trait, tiny), @owner, _).
 test:ended :- unbind(_, _, _).
 
 action:actor_moved(_ { actor: @owner }) :- 
 	position(@owner, P),
-	animate(false, P, [buff{tint: light_green}]).
+	animate(false, P, [explosion{radius: 1, tint: light_green}]).

@@ -22,6 +22,8 @@ public partial class FieroLib : Library
     {
         ServiceFactory = sp;
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<Spawn>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<Despawn>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<RaiseEvent>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<CastEntity>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<ComponentSetValue>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<SetRngSeed>());

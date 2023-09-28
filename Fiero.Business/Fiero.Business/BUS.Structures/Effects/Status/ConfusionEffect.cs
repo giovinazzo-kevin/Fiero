@@ -13,7 +13,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Confusion.Desc$";
         public override EffectName Name => EffectName.Confusion;
 
-        protected override void Apply(GameSystems systems, Actor target) { }
+        protected override void ApplyOnStarted(GameSystems systems, Actor target) { }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {

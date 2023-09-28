@@ -1,5 +1,5 @@
-﻿
-using Fiero.Core.Structures;
+﻿using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
 using System.Reflection;
 
 namespace Fiero.Core
@@ -125,7 +125,54 @@ namespace Fiero.Core
 
         public EntityBuilder<T> CreateBuilder<T>() where T : EcsEntity => new(this);
 
-        public bool TryGetProxy<T>(int entityId, out T entity)
+        public bool TryParseTerm(ITerm term, out EcsEntity entity)
+        {
+            entity = default;
+            if (!term.IsAbstract<Dict>().TryGetValue(out var dict))
+                return false;
+            if (!dict.Functor.TryGetA(out var functor))
+                return false;
+            if (!dict.Dictionary.TryGetValue(new Atom("id"), out var id))
+                return false;
+            var knownTypes = ProxyablePropertyCache.Keys
+                .SelectMany(t =>
+                {
+                    return Inner();
+                    IEnumerable<Type> Inner()
+                    {
+                        var b = t;
+                        while (b != typeof(EcsEntity))
+                        {
+                            yield return b;
+                            b = b.BaseType;
+                        }
+                    }
+                })
+                .Distinct();
+            var expl = functor.Explain();
+            if (knownTypes.FirstOrDefault(t => t.Name.ToErgoCase().Equals(expl))
+                is { } proxyType)
+            {
+                if (!TryGetProxy(proxyType, int.Parse(id.Explain()), out entity))
+                    return false;
+                return true;
+            }
+            return false;
+        }
+
+        public bool TryGetProxy(Type t, int entityId, out EcsEntity entity, bool createRequiredComponents = false)
+        {
+            entity = default;
+            var args = new object[] { entityId, entity, createRequiredComponents };
+            var ret = (bool)GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Single(x => x.IsGenericMethod && x.Name.Equals(nameof(TryGetProxy)))
+                .MakeGenericMethod(t)
+                .Invoke(this, args);
+            entity = (EcsEntity)args[1];
+            return ret;
+        }
+
+        public bool TryGetProxy<T>(int entityId, out T entity, bool createRequiredComponents = false)
             where T : EcsEntity
         {
             entity = default;
@@ -149,7 +196,7 @@ namespace Fiero.Core
             }
             var props = GetProxyableProperties<T>();
             entity = ServiceFactory.GetInstance<T>();
-            entity._refresh = (entity, entityId) =>
+            entity._refresh = (entity, entityId, createRequiredComponents) =>
             {
                 entity.Id = entityId <= 0 ? 0 : entityId;
                 if (EntityRemovalQueue.Contains(entityId))
@@ -161,7 +208,9 @@ namespace Fiero.Core
                     var comp = trackedEntity.Components.FirstOrDefault(c => c.GetType() == p.PropertyType);
                     if (comp == null && p.GetCustomAttribute<RequiredComponentAttribute>() is { })
                     {
-                        return false;
+                        if (!createRequiredComponents)
+                            return false;
+                        comp = (EcsComponent)Activator.CreateInstance(p.PropertyType);
                     }
                     if (entityId > 0)
                     {
@@ -176,20 +225,13 @@ namespace Fiero.Core
             };
             entity._cast = (entity, type) =>
             {
-                var tryGetProxy = typeof(GameEntities)
-                    .GetMethod(nameof(TryGetProxy))
-                    .MakeGenericMethod(type);
-                var proxiedEntity = Activator.CreateInstance(type); proxiedEntity = null;
-                object[] args = new object[] { entity.Id, proxiedEntity };
-                var ret = (bool)tryGetProxy.Invoke(this, args);
-                if (ret)
-                {
-                    var retEnt = (EcsEntity)args[1];
-                    return retEnt;
-                }
+                var proxiedEntity = (EcsEntity)null;
+                object[] args = new object[] { entity.Id, proxiedEntity, false };
+                if (TryGetProxy(type, entity.Id, out proxiedEntity))
+                    return proxiedEntity;
                 return null;
             };
-            if (entity.TryRefresh(entityId))
+            if (entity.TryRefresh(entityId, createRequiredComponents))
             {
                 ProxyCache[cacheKey] = entity;
                 return true;

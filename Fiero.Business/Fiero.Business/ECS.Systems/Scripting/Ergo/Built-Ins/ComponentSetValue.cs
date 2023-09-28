@@ -4,9 +4,6 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
-using Fiero.Core;
-using System;
-using System.Collections.Generic;
 
 namespace Fiero.Business;
 
@@ -31,7 +28,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
                 {
                     try
                     {
-                        return (EcsComponent)TermMarshall.FromTerm(component, type, mode: TermMarshalling.Named);
+                        return (EcsComponent)TermMarshall.FromTerm(component, type);
                     }
                     catch (Exception x)
                     {
@@ -53,7 +50,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
                         var ergoType = prop.PropertyType.Name.ToErgoCase();
                         if (!scope.InterpreterScope.ExceptionHandler.Try(() =>
                         {
-                            var newValueObject = TermMarshall.FromTerm(newValue, prop.PropertyType, mode: TermMarshalling.Named);
+                            var newValueObject = TermMarshall.FromTerm(newValue, prop.PropertyType);
                             try
                             {
                                 prop.SetValue(actualComponent, newValueObject);

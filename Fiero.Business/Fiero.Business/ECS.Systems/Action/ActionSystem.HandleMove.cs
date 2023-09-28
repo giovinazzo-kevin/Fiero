@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
@@ -35,7 +31,7 @@ namespace Fiero.Business
                 {
                     var actorsHere = _floorSystem.GetActorsAt(floorId, newPos);
                     var featuresHere = _floorSystem.GetFeaturesAt(floorId, newPos);
-                    if (!actorsHere.Any())
+                    if (!actorsHere.Any(x => x.ActorProperties.Type != ActorName.None))
                     {
                         if (t.Actor.Physics.Phasing || !featuresHere.Any(f => f.Physics.BlocksMovement))
                         {
@@ -55,7 +51,9 @@ namespace Fiero.Business
                     }
                     else
                     {
-                        var target = actorsHere.Single();
+                        var target = actorsHere
+                            // Fake entities such as Billboards may overlap the same tile as another actor.
+                            .Single(x => x.ActorProperties.Type != ActorName.None);
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack())
                         {

@@ -2,6 +2,6 @@
 {
     public partial class ActionSystem
     {
-        public readonly record struct ActorDespawnedEvent(Actor Actor);
+        public readonly record struct EntityDespawnedEvent(Entity Entity);
     }
 }

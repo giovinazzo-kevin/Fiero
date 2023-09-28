@@ -6,6 +6,7 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Unconcern.Common;
 
@@ -106,7 +107,7 @@ namespace Fiero.Business
         public readonly Hook EffectStartedHook;
         public readonly Hook EffectEndedHook;
 
-        public readonly Dictionary<int, SolverContext> Contexts = new();
+        public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
 
         public ScriptEffect(Script script, string description = null)
         {
@@ -160,7 +161,7 @@ namespace Fiero.Business
                 foreach (var _ in EffectEndedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
                     ;
             }
-            Contexts.Remove(owner.Id);
+            Contexts.Remove(owner.Id, out _);
             ctx.Dispose();
         }
 

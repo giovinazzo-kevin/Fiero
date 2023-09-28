@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -26,8 +23,8 @@ namespace Fiero.Business
             // When an explosion is caused by an actor, it happens at the end of that actor's turn
             // When an explosion is caused by the environment and targets an actor, it happens at the end of that actor's turn
             // When an explosion is caused by the environment and targets no actor, it happens at the end of the turn
-            var sourceIsActor = Source.TryCast<Actor>(out _);
-            var ownerIsActor = owner.TryCast<Actor>(out _);
+            var sourceIsActor = Source.TryCast<Actor>(out var a) && a.ActorProperties.Type != ActorName.None;
+            var ownerIsActor = owner.TryCast<Actor>(out var o) && o.ActorProperties.Type != ActorName.None;
             if (sourceIsActor || ownerIsActor)
             {
                 yield return systems.Action.ActorTurnEnded.SubscribeHandler(e =>
@@ -71,6 +68,6 @@ namespace Fiero.Business
             }
         }
 
-        protected override void Apply(GameSystems systems, Actor target) { }
+        protected override void ApplyOnStarted(GameSystems systems, Actor target) { }
     }
 }

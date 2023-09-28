@@ -4,9 +4,6 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
-using Fiero.Core;
-using System;
-using System.Collections.Generic;
 
 namespace Fiero.Business;
 
@@ -38,7 +35,7 @@ public sealed class CastEntity : GameEntitiesBuiltIn
                 maybeId = id_;
             if (maybeId.TryGetValue(out var id))
             {
-                var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };
+                var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type), false };
                 if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
                 {
                     yield return Unify(tryGetProxyArgs[1]);

@@ -18,6 +18,21 @@
             UI = ui;
         }
 
+
+        public EntityBuilder<Actor> Billboard(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
+            => Entities.CreateBuilder<Actor>()
+            .AddOrTweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
+            .WithHealth(1)
+            .WithActorInfo(ActorName.None)
+            .WithFaction(FactionName.None)
+            .WithIdleAi()
+            .WithName(name ?? sprite)
+            .WithSprite(RenderLayerName.Features, texture, sprite, tint ?? ColorName.White)
+            .WithFieldOfView(0)
+            .WithEffectTracking()
+            .WithTraitTracking()
+            ;
+
         public EntityBuilder<Script> Script(string scriptPath, string name = null)
             => Entities.CreateBuilder<Script>()
             .WithName(name ?? scriptPath)
@@ -47,6 +62,7 @@
             .WithIntrinsicEffect(new(EffectName.AutoPickup, canStack: false))
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
+            .WithTraitTracking()
             ;
 
         private EntityBuilder<Actor> Enemy()
@@ -68,6 +84,7 @@
             .WithEffectTracking()
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
+            .WithTraitTracking()
             ;
 
         public EntityBuilder<T> Equipment<T>(EquipmentTypeName type)
@@ -704,12 +721,6 @@
                 (Potion_OfEntrapment(), Chance.Always)
             });
         }
-
-        public EntityBuilder<Feature> Feature_Billboard(TextureName texture, string sprite, ColorName? tint = null, bool solid = false)
-            => Feature<Feature>(FeatureName.Billboard)
-            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
-            .WithSprite(RenderLayerName.Features, texture, sprite, tint ?? ColorName.White)
-            ;
         public EntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)

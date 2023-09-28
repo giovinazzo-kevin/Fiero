@@ -6,5 +6,7 @@
         Small,
         Large,
         Huge,
+        Invulnerable,
+        Impassible
     }
 }

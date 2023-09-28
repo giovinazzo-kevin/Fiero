@@ -17,7 +17,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.RaiseUndead.Desc$";
         public override EffectName Name => EffectName.RaiseUndead;
 
-        protected override void Apply(GameSystems systems, Corpse target)
+        protected override void ApplyOnStarted(GameSystems systems, Corpse target)
         {
             systems.Action.CorpseRaised.HandleOrThrow(new(Source, target, Mode));
         }

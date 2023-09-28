@@ -199,7 +199,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build(),
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
-                    .WithIntrinsicTrait(Traits.Tiny)
+                    //.WithIntrinsicTrait(Traits.Invulnerable)
                     .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .WithHealth(100000)
@@ -338,8 +338,8 @@ namespace Fiero.Business.Scenes
                             e.Actor.Render.Hidden = false;
                         });
                     if (!e.Actor.IsPlayer())
-                        Player.Log.Write($"{e.Actor.Info.Name} $Action.TeleportsAway$.");
-                    e.Actor.Log.Write($"$Action.YouTeleportAway$.");
+                        Player.Log?.Write($"{e.Actor.Info.Name} $Action.TeleportsAway$.");
+                    e.Actor.Log?.Write($"$Action.YouTeleportAway$.");
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
                     Systems.Render.AnimateViewport(true, e.OldPosition, tpOut);
                 }
@@ -531,23 +531,26 @@ namespace Fiero.Business.Scenes
                 }
                 return true;
             });
-            // ActionSystem.ActorDespawned:
+            // ActionSystem.EntityDespawned:
             // - Handle game over when the player dies
             // - Remove entity from floor and action systems and handle cleanup
             // - Generate a new RNG seed
-            yield return Systems.Action.ActorDespawned.SubscribeResponse(e =>
+            yield return Systems.Action.EntityDespawned.SubscribeResponse(e =>
             {
-                var wasPlayer = e.Actor.IsPlayer();
-                Systems.Action.StopTracking(e.Actor.Id);
-                Systems.Dungeon.RemoveActor(e.Actor);
-                Entities.FlagEntityForRemoval(e.Actor.Id);
-                e.Actor.TryRefresh(0);
-                Entities.RemoveFlagged(true);
-                if (wasPlayer)
+                Entities.FlagEntityForRemoval(e.Entity.Id);
+                if (e.Entity.TryCast<Actor>(out var actor))
                 {
-                    GenerateNewRngSeed();
-                    TrySetState(SceneState.Main);
+                    var wasPlayer = actor.IsPlayer();
+                    Systems.Action.StopTracking(actor.Id);
+                    Systems.Dungeon.RemoveActor(actor);
+                    actor.TryRefresh(0);
+                    if (wasPlayer)
+                    {
+                        GenerateNewRngSeed();
+                        TrySetState(SceneState.Main);
+                    }
                 }
+                Entities.RemoveFlagged(true);
                 return true;
             });
             // ActionSystem.ActorDied:
@@ -556,6 +559,10 @@ namespace Fiero.Business.Scenes
             // - Spawn corpses
             yield return Systems.Action.ActorDied.SubscribeResponse(e =>
             {
+                // Refresh entity in case a script raised this event
+                if (!Entities.TryGetProxy<Actor>(e.Actor.Id, out var actor))
+                    return true;
+
                 e.Actor.Log?.Write($"$Action.YouDie$.");
                 if (e.Actor.IsPlayer())
                 {

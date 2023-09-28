@@ -1,17 +1,18 @@
-﻿using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public class Stat<T>
         where T : IComparable<T>
     {
+        public bool Lock { get; set; }
         private T _value;
         public T V
         {
             get => _value;
             set
             {
+                if (Lock)
+                    return;
                 if (value.CompareTo(Min) < 0)
                 {
                     _value = Min;
@@ -35,6 +36,8 @@ namespace Fiero.Business
             get => _min;
             set
             {
+                if (Lock)
+                    return;
                 _min = value;
                 MinChanged?.Invoke(_value);
             }
@@ -45,6 +48,8 @@ namespace Fiero.Business
             get => _max;
             set
             {
+                if (Lock)
+                    return;
                 _max = value;
                 MaxChanged?.Invoke(_value);
             }

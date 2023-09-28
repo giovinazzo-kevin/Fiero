@@ -2,13 +2,21 @@
 :- subscribe(action, [actor_turn_started]).
 
 began :- 
-	set_counter(fuse, 3).
+	position(@owner, P),
+	set_counter(fuse, 3),
+	spawn([billboard{texture: items, sprite: bomb, solid: true}], [B]),
+	set_counter(billboard, B),
+	move(B, P),
+	effect(effect_def(bestow_trait, invulnerable), B, _).
 ended :-
-	effect(effect_def(explosion, 2), @owner, _).
+	counter(billboard, B), 
+	effect(effect_def(remove_trait, invulnerable), B, _),
+	effect(effect_def(explosion, 2), B, _).
 
 tick :-
 	counter(fuse, T),
-	position(@owner, P),
+	counter(billboard, B),
+	position(B, P),
 	animate(true, P, [damage_number{damage: T, tint: light_red}]),
 	atom_concat(countdown, T, Sound),
 	sound(Sound{position:P, volume:100}).
@@ -17,5 +25,5 @@ tock :-
 	update_counter(fuse, decrement, T), 
 	(T <= 0) -> end.
 
-% schedule animation on player turn start to prevent visual glitches
-action:actor_turn_started(_{actor:@player}) :- tick, tock.
+action:actor_turn_started(_{actor: @player}) :- 
+	tick, tock.

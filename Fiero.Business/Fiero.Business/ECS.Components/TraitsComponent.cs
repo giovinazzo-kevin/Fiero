@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class TraitsComponent : EcsComponent
     {
@@ -19,21 +15,22 @@ namespace Fiero.Business
 
         public void AddIntrinsicTrait(Trait trait)
         {
-            Intrinsic.Add(trait);
+            Intrinsic.Add(trait with { KillSwitch = () => { } });
         }
 
-        public void RemoveIntrinsicTrait(Trait trait)
+        public bool AddExtrinsicTrait(Trait trait, Action killSwitch, out Trait removed)
         {
-            Intrinsic.RemoveWhere(x => x.Name == trait.Name);
-        }
-
-        public void AddExtrinsicTrait(Trait trait)
-        {
+            trait = trait with { KillSwitch = killSwitch };
+            var ret = Extrinsic.TryGetValue(trait, out removed);
             Extrinsic.Add(trait);
+            return ret;
         }
 
-        public void RemoveExtrinsicTrait(Trait trait)
+        public void RemoveExtrinsicTrait(Trait trait, bool fireKillSwitch = false)
         {
+            if (fireKillSwitch && Extrinsic.TryGetValue(trait, out var same)
+                && same.Name == trait.Name)
+                same.KillSwitch();
             Extrinsic.RemoveWhere(x => x.Name == trait.Name);
         }
     }

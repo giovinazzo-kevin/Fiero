@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
-
-
     public abstract class IncreaseMaxStatEffect : TypedEffect<Actor>
     {
         public override string DisplayName => "$Effect.IncreaseMaxStatEffect.Name$";
@@ -31,7 +27,7 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void Apply(GameSystems systems, Actor target)
+        protected override void ApplyOnStarted(GameSystems systems, Actor target)
         {
 
             if (GetStat(target) is not { } stat)

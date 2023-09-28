@@ -19,6 +19,9 @@
         IncreaseMaxMP,
         Trap,
         AutoPickup,
-        BestowTrait
+        BestowTrait,
+        RemoveTrait,
+        Invulnerable,
+        Impassible
     }
 }

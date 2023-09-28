@@ -193,7 +193,7 @@ namespace Fiero.Business
                         var asActor = drawable as Actor;
                         var rngSeed = drawable.Render.GetHashCode();
                         // Draw allegiance circle
-                        if (asActor != null)
+                        if (asActor != null && asActor.Faction.Name != FactionName.None)
                         {
                             layers[RenderLayerName.BackgroundEffects] += tex =>
                             {
@@ -224,7 +224,7 @@ namespace Fiero.Business
                                 sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                                 sprite.Scale = ViewTileSize.V / spriteSize;
                                 sprite.Position = screenPos;
-                                if (asActor != null)
+                                if (asActor != null && asActor.Faction.Name != FactionName.None)
                                     sprite.Position -= new Vec(0f, 0.33f) * spriteSize;
                                 if (!seen)
                                 {

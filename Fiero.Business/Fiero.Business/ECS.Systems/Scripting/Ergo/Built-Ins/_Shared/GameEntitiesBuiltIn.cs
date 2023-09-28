@@ -2,10 +2,6 @@
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Solver.BuiltIns;
-using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -29,7 +25,7 @@ public abstract class GameEntitiesBuiltIn : SolverBuiltIn
         .ToDictionary(x => x.Name.ToErgoCase(), x => x.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(x => x.Name.ToErgoCase()));
 
     public static readonly MethodInfo TryGetProxy = typeof(GameEntities)
-        .GetMethod(nameof(GameEntities.TryGetProxy), BindingFlags.Instance | BindingFlags.Public);
+        .GetMethods(BindingFlags.Instance | BindingFlags.Public).Single(x => x.Name.Equals(nameof(GameEntities.TryGetProxy)) && x.IsGenericMethod);
 
     public static readonly MethodInfo TryGetComponent = typeof(GameEntities)
         .GetMethod(nameof(GameEntities.TryGetComponent), BindingFlags.Instance | BindingFlags.Public);

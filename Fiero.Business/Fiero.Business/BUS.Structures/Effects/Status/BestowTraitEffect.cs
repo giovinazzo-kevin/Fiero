@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -27,18 +25,48 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void Apply(GameSystems systems, Entity target)
+        protected override void ApplyOnStarted(GameSystems systems, Entity target)
         {
             if (target.Traits is null)
                 return;
-            target.Traits.AddExtrinsicTrait(Trait);
             var effect = Trait.Effect.Resolve(Source);
-            effect.Start(systems, target);
-            _onEnded.Add(() =>
+            var killSwitch = () =>
             {
                 effect.End(systems, target);
                 target.Traits.RemoveExtrinsicTrait(Trait);
-            });
+            };
+            if (target.Traits.AddExtrinsicTrait(Trait, killSwitch, out var removed))
+            {
+                removed.KillSwitch();
+            }
+            effect.Start(systems, target);
+            _onEnded.Add(killSwitch);
+        }
+
+        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        {
+            yield break;
+        }
+    }
+
+    public class RemoveTraitEffect : TypedEffect<Entity>
+    {
+        public override string DisplayName => "$Effect.RemoveTrait.Name$";
+        public override string DisplayDescription => "$Effect.RemoveTrait.Desc$";
+
+        public override EffectName Name => EffectName.RemoveTrait;
+
+        public readonly Trait Trait;
+        public RemoveTraitEffect(Entity source, Trait trait) : base(source)
+        {
+            Trait = trait;
+        }
+
+        protected override void ApplyOnStarted(GameSystems systems, Entity target)
+        {
+            if (target.Traits is null)
+                return;
+            target.Traits.RemoveExtrinsicTrait(Trait, fireKillSwitch: true);
         }
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

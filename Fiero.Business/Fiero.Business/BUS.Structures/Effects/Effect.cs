@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -23,6 +21,8 @@ namespace Fiero.Business
         }
         public void Start(GameSystems systems, Entity owner)
         {
+            if (owner.Effects?.Lock ?? false)
+                return;
             Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(systems, owner); }));
             if (!(this is ModifierEffect))
             {

@@ -18,7 +18,7 @@ namespace Fiero.Business
             Percentage = percentage;
         }
 
-        protected override void Apply(GameSystems systems, Actor target)
+        protected override void ApplyOnStarted(GameSystems systems, Actor target)
         {
             var hp = (int)(Percentage * target.ActorProperties.Health.Max);
             systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, hp));

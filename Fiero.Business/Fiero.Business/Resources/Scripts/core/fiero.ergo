@@ -39,13 +39,17 @@ unset_counter(Name) :-
 	retractall(counter(Name, _)).
 %: Defines a counter.
 set_counter(Name, Value) :-
-	(unset_counter(Name) ; true),
+	(unset_counter(Name) ; true), !,
 	assertz(counter(Name, Value)).
 %: Updates the value of a counter.
 update_counter(Name, Lambda, NewValue) :-
-	counter(Name, OldValue), !,
+	counter(Name, OldValue), 
 	call(Lambda, OldValue, NewValue),
 	set_counter(Name, NewValue).
 %: Get entity position
 position(_{ id: Id }, P) :-
 	Id as physical_entity is _{ physics: _{ position: P } }, !.
+
+move(_{ id: Id }, P) :-
+	position(_{ id: Id }, Old),
+	raise(action, actor_moved, _{ actor: actor{ id: Id }, old_position: Old, new_position: P }).

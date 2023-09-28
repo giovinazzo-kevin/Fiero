@@ -150,16 +150,22 @@ namespace Fiero.Business
             });
         public static EntityBuilder<T> WithActorEquipment<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActorEquipmentComponent>();
+        public static EntityBuilder<T> WithIdleAi<T>(this EntityBuilder<T> builder)
+            where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
+            {
+                c.ActionProvider = s.GetInstance<IdleActionProvider>();
+            })
+                .AddOrTweak<AiComponent>();
         public static EntityBuilder<T> WithEnemyAi<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
             {
-                c.ActionProvider = (AiActionProvider)s.GetInstance(typeof(AiActionProvider));
+                c.ActionProvider = s.GetInstance<AiActionProvider>();
             })
                 .AddOrTweak<AiComponent>();
         public static EntityBuilder<T> WithAutoPlayerAi<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
             {
-                c.ActionProvider = (AutoPlayerActionProvider)s.GetInstance(typeof(AutoPlayerActionProvider));
+                c.ActionProvider = s.GetInstance<AutoPlayerActionProvider>();
             })
                 .AddOrTweak<AiComponent>();
         public static EntityBuilder<T> WithLikedItems<T>(this EntityBuilder<T> builder, params Func<Item, bool>[] likedItems)
@@ -175,7 +181,7 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithPlayerAi<T>(this EntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
             {
-                c.ActionProvider = (PlayerActionProvider)s.GetInstance(typeof(PlayerActionProvider));
+                c.ActionProvider = s.GetInstance<PlayerActionProvider>();
             });
         public static EntityBuilder<T> WithFieldOfView<T>(this EntityBuilder<T> builder, int radius)
             where T : Actor => builder.AddOrTweak<FieldOfViewComponent>((s, c) =>
@@ -333,6 +339,8 @@ namespace Fiero.Business
                     }
                 }
             });
+        public static EntityBuilder<T> WithTraitTracking<T>(this EntityBuilder<T> builder)
+            where T : Entity => builder.AddOrTweak<TraitsComponent>();
         public static EntityBuilder<T> WithIntrinsicTrait<T>(this EntityBuilder<T> builder, Trait trait)
             where T : Entity => builder.AddOrTweak<TraitsComponent>((s, c) =>
             {

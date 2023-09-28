@@ -1,17 +1,24 @@
-﻿namespace Fiero.Core
+﻿using Ergo.Lang;
+
+namespace Fiero.Core
 {
     [TransientDependency]
+    [Term(Marshalling = TermMarshalling.Named)]
     public abstract class EcsEntity
     {
-        internal Func<EcsEntity, int, bool> _refresh;
+        [NonTerm]
+        internal Func<EcsEntity, int, bool, bool> _refresh;
+        [NonTerm]
         internal Func<EcsEntity> _clone;
+        [NonTerm]
         internal Func<EcsEntity, Type, EcsEntity> _cast;
 
+        [Term]
         public int Id { get; set; }
 
-        public bool TryRefresh(int newId)
+        public bool TryRefresh(int newId, bool createRequiredComponents = false)
         {
-            return _refresh(this, newId);
+            return _refresh(this, newId, createRequiredComponents);
         }
 
         public bool TryCast<T>(out T newEntity)

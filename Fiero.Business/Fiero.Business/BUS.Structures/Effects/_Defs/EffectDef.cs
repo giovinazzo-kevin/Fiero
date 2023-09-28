@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang.Extensions;
+
+namespace Fiero.Business
 {
     public readonly struct EffectDef
     {
@@ -48,9 +50,11 @@
                 EffectName.Confusion => new ConfusionEffect(source),
                 EffectName.Sleep => new SleepEffect(source),
                 EffectName.Silence => new SilenceEffect(source),
+                EffectName.Invulnerable => new InvulnerableEffect(source),
+                EffectName.Impassible => new ImpassibleEffect(source),
                 EffectName.Entrapment => new EntrapEffect(source),
                 EffectName.Poison => new PoisonEffect(source, int.Parse(Arguments) * 2),
-                EffectName.RaiseUndead => new RaiseUndeadEffect(source, Enum.Parse<UndeadRaisingName>(Arguments)),
+                EffectName.RaiseUndead => new RaiseUndeadEffect(source, Enum.Parse<UndeadRaisingName>(Arguments.ToCSharpCase())),
                 EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(source),
                 EffectName.MagicMapping => new MagicMappingEffect(source),
                 EffectName.Heal => new HealEffect(source, int.Parse(Arguments) * 10),
@@ -60,7 +64,8 @@
                 EffectName.AutoPickup => new AutopickupEffect(),
                 EffectName.IncreaseMaxMP => new IncreaseMaxMPEffect(source, int.Parse(Arguments)),
                 EffectName.IncreaseMaxHP => new IncreaseMaxHPEffect(source, int.Parse(Arguments)),
-                EffectName.BestowTrait => new BestowTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments))),
+                EffectName.BestowTrait => new BestowTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
+                EffectName.RemoveTrait => new RemoveTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
                 EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
                 EffectName.Script => new ScriptEffect((Script)Script.Clone()),
                 _ => throw new NotSupportedException(Name.ToString()),

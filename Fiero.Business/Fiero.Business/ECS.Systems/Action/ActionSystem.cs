@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -28,7 +24,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ActorUsedMagicMappingEvent, EventResult> ActorUsedMagicMapping;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorWaited;
         public readonly SystemRequest<ActionSystem, ActorSpawnedEvent, EventResult> ActorSpawned;
-        public readonly SystemRequest<ActionSystem, ActorDespawnedEvent, EventResult> ActorDespawned;
+        public readonly SystemRequest<ActionSystem, EntityDespawnedEvent, EventResult> EntityDespawned;
         public readonly SystemRequest<ActionSystem, ActorDiedEvent, EventResult> ActorDied;
         public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
         public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
@@ -88,7 +84,7 @@ namespace Fiero.Business
             ActorTeleporting = new(this, nameof(ActorTeleporting));
             ActorUsedMagicMapping = new(this, nameof(ActorUsedMagicMapping));
             ActorSpawned = new(this, nameof(ActorSpawned));
-            ActorDespawned = new(this, nameof(ActorDespawned));
+            EntityDespawned = new(this, nameof(EntityDespawned));
             ActorWaited = new(this, nameof(ActorWaited));
             ActorDied = new(this, nameof(ActorDied));
             ActorKilled = new(this, nameof(ActorKilled));
@@ -156,7 +152,7 @@ namespace Fiero.Business
             {
                 if (r.All(x => x))
                 {
-                    ActorDespawned.HandleOrThrow(new(e.Actor));
+                    EntityDespawned.HandleOrThrow(new(e.Actor));
                 }
             };
             Reset();
@@ -236,9 +232,9 @@ namespace Fiero.Business
             ActorSpawned.Raise(new(a));
         }
 
-        public void Despawn(Actor a)
+        public void Despawn(Entity e)
         {
-            ActorDespawned.Raise(new(a));
+            EntityDespawned.Raise(new(e));
         }
 
         private bool MayTarget(Actor attacker, Actor victim)
@@ -254,7 +250,8 @@ namespace Fiero.Business
             {
                 return false;
             }
-            victim = actorsHere.Single();
+            victim = actorsHere
+                .Single(x => x.ActorProperties.Type != ActorName.None);
             return true;
         }
 
@@ -310,6 +307,8 @@ namespace Fiero.Business
             var currentTurn = CurrentTurn;
             _actorQueue.Add(new ActorTime(actorId, proxy, () =>
             {
+                if (proxy.IsInvalid())
+                    return new WaitAction();
                 return proxy.Action.ActionProvider.GetIntent(proxy);
             }, time + Rng.Random.Next(0, 100)));
         }

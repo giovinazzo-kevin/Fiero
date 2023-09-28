@@ -1,9 +1,4 @@
 ﻿using Ergo.Lang;
-using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -291,7 +286,7 @@ namespace Fiero.Business
                     if (!throwable.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Faction.GetRelations(a, b);
-                    if (throwable.Effects != null && throwable.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
+                    if (throwable.Effects != null && b.Effects != null && throwable.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
                         return false;
                     if (rel.Left.IsFriendly() && flags.IsDefensive)
                         return true;

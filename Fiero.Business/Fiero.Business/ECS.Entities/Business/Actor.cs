@@ -1,5 +1,4 @@
 ﻿using Ergo.Lang;
-using Fiero.Core;
 
 namespace Fiero.Business
 {
@@ -26,6 +25,7 @@ namespace Fiero.Business
         [NonTerm]
         public AiComponent Ai { get; private set; }
         [NonTerm]
+        [RequiredComponent]
         public FieldOfViewComponent Fov { get; private set; }
         [NonTerm]
         public SpellLibraryComponent Spells { get; private set; }

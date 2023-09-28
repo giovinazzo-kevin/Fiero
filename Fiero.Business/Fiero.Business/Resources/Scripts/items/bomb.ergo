@@ -9,7 +9,9 @@ ended :-
 tick :-
 	counter(fuse, T),
 	position(@owner, P),
-	animate(true, P, [damage_number{damage: T, tint: light_red}]).
+	animate(true, P, [damage_number{damage: T, tint: light_red}]),
+	atom_concat(countdown, T, Sound),
+	sound(Sound{position:P, volume:100}).
 
 tock :-
 	update_counter(fuse, decrement, T), 

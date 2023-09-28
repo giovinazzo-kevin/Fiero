@@ -1,6 +1,4 @@
-﻿
-using Fiero.Core.Structures;
-using SFML.Audio;
+﻿using SFML.Audio;
 
 namespace Fiero.Core
 {
@@ -38,15 +36,16 @@ namespace Fiero.Core
         }
 
         public void Add(TSounds key, SoundBuffer value) => Buffers[key] = value;
-        public Sound Get(TSounds key, Coord? pos = null, bool relativeToListener = false)
+        public Sound Get(TSounds key, Coord? pos = null, float vol = 25, float pitch = 1, bool relativeToListener = false)
         {
             if (Buffers.GetValueOrDefault(key) is { } buf)
             {
-                var sound = new Sound(buf) { Volume = 25 };
+                var sound = new Sound(buf) { Volume = vol };
                 if (pos is { } p)
                 {
                     sound.Position = new(p.X, p.Y, 0);
                 }
+                sound.Pitch = pitch;
                 sound.RelativeToListener = relativeToListener;
                 Sounds.Add(sound);
                 return sound;

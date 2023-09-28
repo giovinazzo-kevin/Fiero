@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Ergo\Ergo\Ergo.csproj" />
     <ProjectReference Include="..\..\Unconcern\Unconcern.csproj" />
   </ItemGroup>
 

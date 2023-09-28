@@ -2,8 +2,8 @@
 {
     public enum SoundName
     {
-        UIBlip,
-        UIOk,
+        Blip,
+        Ok,
         WallBump,
         SpellCast,
         ItemUsed,
@@ -17,6 +17,9 @@
         MagicAttack,
         EnemyDeath,
         PlayerDeath,
-        Explosion
+        Explosion,
+        Countdown3,
+        Countdown2,
+        Countdown1
     }
 }

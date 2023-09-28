@@ -120,8 +120,8 @@ namespace Fiero.Business
 
             //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
-            Sounds.Add(SoundName.UIBlip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
-            Sounds.Add(SoundName.UIOk, new SoundBuffer("Resources/Sounds/00_start1.wav"));
+            Sounds.Add(SoundName.Blip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
+            Sounds.Add(SoundName.Ok, new SoundBuffer("Resources/Sounds/00_start1.wav"));
             Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/77_arrowbounce.wav"));
             Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/62_miss.wav"));
             Sounds.Add(SoundName.TrapSpotted, new SoundBuffer("Resources/Sounds/27_respawn2.wav"));
@@ -136,6 +136,9 @@ namespace Fiero.Business
             Sounds.Add(SoundName.MagicAttack, new SoundBuffer("Resources/Sounds/31_text.wav"));
             Sounds.Add(SoundName.EnemyDeath, new SoundBuffer("Resources/Sounds/69_explode.wav"));
             Sounds.Add(SoundName.PlayerDeath, new SoundBuffer("Resources/Sounds/64_lose2.wav"));
+            Sounds.Add(SoundName.Countdown3, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
+            Sounds.Add(SoundName.Countdown2, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
+            Sounds.Add(SoundName.Countdown1, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");

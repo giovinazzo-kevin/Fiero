@@ -30,6 +30,7 @@ public sealed class TriggerEffect : SolverBuiltIn
         {
             var def = new EffectDef(stub.Name, stub.Arguments, source: e);
             var effect = def.Resolve(null);
+            // TODO: bind effect.end as callable to args[2]
             effect.Start(_services.GetInstance<GameSystems>(), e);
         }
         yield return True();

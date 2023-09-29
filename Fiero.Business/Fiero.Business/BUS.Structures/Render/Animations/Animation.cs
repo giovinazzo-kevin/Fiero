@@ -53,12 +53,13 @@ namespace Fiero.Business
             ColorName tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
-            int repeat = 0
+            int repeat = 0,
+            int resolution = 50
         )
         {
-            return new(Enumerable.Range(0, 9).Select(i => new AnimationFrame(
-                frameDuration ?? TimeSpan.FromMilliseconds(24),
-                new SpriteDef(texture, sprite, tint, new(), scale ?? new(1, 1), 1 - i / 9f)))
+            return new(Enumerable.Range(0, resolution).Select(i => new AnimationFrame(
+                frameDuration ?? TimeSpan.FromMilliseconds(1000f / resolution),
+                new SpriteDef(texture, sprite, tint, new(), scale ?? new(1, 1), 1 - i / (float)resolution)))
             .ToArray(), repeat);
         }
 
@@ -121,7 +122,7 @@ namespace Fiero.Business
             int repeat = 0
         )
         {
-            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, new Vec(0f, -0.166f), new(1, 1), 1);
+            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, actor.ActorProperties.Type != ActorName.None ? new Vec(0f, -0.166f) : Vec.Zero, new(1, 1), 1);
             var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(32);
             return new(Enumerable.Range(0, 6).SelectMany(i => new[] {
                 new AnimationFrame(frameDur, sprite),

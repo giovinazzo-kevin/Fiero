@@ -1,0 +1,12 @@
+% Do not modify unless you know what you are doing.
+
+:- module(anim, []).
+stick_to(Entity, Animations, Stop) :- 
+	position(@owner, P),
+	atom_concat(anim_id_, &Entity.info.name, Key),
+	(data(Key, OldId) -> anim:stop(OldId) ; true),
+	anim:play(P, Animations, [Id]),
+	set_data(Key, Id),
+	Stop = []>>(
+		(data(Key, OldId) -> anim:stop(OldId) ; true)
+	).

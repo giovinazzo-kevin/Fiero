@@ -145,16 +145,7 @@ namespace Fiero.Business
                 if (!Timelines.TryGetValue(id, out var timeline))
                     continue;
                 var currentFrame = timeline.Frames.First();
-                if (time > currentFrame.Start && !Vfx.ContainsKey(id))
-                {
-                    var myVfx = Vfx[id] = new();
-                    foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
-                    {
-                        myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
-                    }
-                    timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
-                }
-                if (time > currentFrame.End && Vfx.ContainsKey(id))
+                if (time >= currentFrame.End && Vfx.ContainsKey(id))
                 {
                     Vfx[id].Clear();
                     Vfx.Remove(id);
@@ -168,6 +159,15 @@ namespace Fiero.Business
                         }
                         continue;
                     }
+                }
+                if (time > currentFrame.Start && !Vfx.ContainsKey(id))
+                {
+                    var myVfx = Vfx[id] = new();
+                    foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
+                    {
+                        myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
+                    }
+                    timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
                 }
             }
         }

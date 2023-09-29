@@ -1,5 +1,6 @@
 :- module(bomb, []).
 :- use_module(anim).
+:- use_module(data).
 :- subscribe(action, [actor_turn_started]).
 
 % Bombs leave a fake solid 'bomb' dummy on the ground for as long as the fuse is lit.
@@ -12,23 +13,23 @@
 
 began :- 
 	position(@owner, P),
-	set_data(fuse, 3),
+	data:fuse set 3,
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]),
-	set_data(dummy, B),
+	data:dummy set B,
 	move(B, P),
 	anim:stick_to(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], StopAnim),
-	set_data(stop_callback, StopAnim),
+	data:stop_callback set StopAnim,
 	fx:start(effect_def(bestow_trait, invulnerable), B, _).
 ended :-
-	data(dummy, B), 
-	data(stop_callback, StopAnim),
+	data:dummy get B, 
+	data:stop_callback get StopAnim,
 	call(StopAnim),
 	fx:start(effect_def(remove_trait, invulnerable), B, _),
 	fx:start(effect_def(explosion, 3), B, _).
 
 tick :-
-	data(fuse, T),
-	data(dummy, B),
+	data:fuse get T,
+	data:dummy get B,
 	position(B, P),
 	anim:play_blocking(P, [damage_number{damage: T, tint: light_red}], _),
 	(	T = 0 
@@ -38,8 +39,8 @@ tick :-
 	).
 
 tock :-
-	update_data(fuse, decrement, T), 
-	(T < 0) -> end.
+	data:fuse update decrement, 
+	data:fuse get -1, end.
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise
 action:actor_turn_started(_{actor: @player}) :- 
 	tick, tock.

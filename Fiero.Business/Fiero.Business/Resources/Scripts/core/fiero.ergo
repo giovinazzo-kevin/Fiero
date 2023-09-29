@@ -2,8 +2,8 @@
 % Do not modify unless you know what you are doing.
 
 :- module(fiero, [as/2, '='/2, ':='/2, set_data/2, unset_data/1, update_data/3, data/2]).
+
 :- op(40, yfx, ['as']).
-:- dynamic(data/2).
 
 %%% Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
@@ -34,18 +34,6 @@ D.Key := Val :-
 	Eval := Val,
 	component_set_value(OldVal, Key, Eval),
 	!.
-%: Undefine a datum.
-unset_data(Name) :-
-	retractall(data(Name, _)).
-%: Define a datum.
-set_data(Name, Value) :-
-	(unset_data(Name) ; true), !,
-	assertz(data(Name, Value)).
-%: Update the value of a datum.
-update_data(Name, Lambda, NewValue) :-
-	data(Name, OldValue), 
-	call(Lambda, OldValue, NewValue),
-	set_data(Name, NewValue).
 %: Get entity position
 position(_{ id: Id }, P) :-
 	Id as physical_entity is _{ physics: _{ position: P } }, !.

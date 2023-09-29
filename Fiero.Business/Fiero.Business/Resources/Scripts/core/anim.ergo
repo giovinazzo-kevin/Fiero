@@ -4,9 +4,9 @@
 stick_to(Entity, Animations, Stop) :- 
 	position(@owner, P),
 	atom_concat(anim_id_, &Entity.info.name, Key),
-	(data(Key, OldId) -> anim:stop(OldId) ; true),
+	(data:Key get OldId -> anim:stop(OldId) ; true),
 	anim:play(P, Animations, [Id]),
-	set_data(Key, Id),
+	data:Key set Id,
 	Stop = []>>(
-		(data(Key, OldId) -> anim:stop(OldId) ; true)
+		(data:Key get OldId -> anim:stop(OldId) ; true)
 	).

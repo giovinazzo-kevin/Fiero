@@ -1,5 +1,6 @@
 :- module(test, []).
 :- use_module(input).
+:- use_module(data).
 :- subscribe(action, [actor_moved]).
 
 test:began :- 
@@ -11,6 +12,6 @@ test:ended :- unbind(_, _, _).
 
 action:actor_moved(_ { actor: @owner }) :- 
 	position(@owner, P),
-	(data(anim_id, OldId) -> anim:stop(OldId) ; true),
+	(data:anim_id get OldId -> anim:stop(OldId) ; true),
 	anim:play(P, [explosion{radius: 1, tint: light_green, repeat: -1}], [Id]),
-	set_data(anim_id, Id).
+	data:anim_id set Id.

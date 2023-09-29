@@ -1,0 +1,24 @@
+% Do not modify unless you know what you are doing.
+
+:- module(data, [del/1, set/2, get/2, upd/2]).
+
+:- op(1001, xf, [delete]).
+:- op(1001, xfy, [set]).
+:- op(1001, xfy, [get]).
+:- op(1001, xfy, [update]).
+
+:- dynamic(d_/2).
+
+delete(Name) :-
+	retractall(d_(Name, _)).
+
+set(Name, Value) :-
+	(delete(Name) ; true), !,
+	assertz(d_(Name, Value)).
+
+get(Name, Value) :- d_(Name, Value).
+
+update(Name, Lambda) :-
+	d_(Name, OldValue), 
+	call(Lambda, OldValue, NewValue),
+	set(Name, NewValue).

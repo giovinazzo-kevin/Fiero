@@ -78,7 +78,7 @@ namespace Fiero.Business
 
         public void Reset()
         {
-            UI.Open(Window);
+            Window.Open("");
             UI.Open(DeveloperConsole);
             DeveloperConsole.Hide();
             Vfx.Clear();
@@ -87,6 +87,7 @@ namespace Fiero.Business
 
         public void Update(TimeSpan t, TimeSpan dt)
         {
+            Window.Update(t, dt);
             if (UI.Input.IsKeyPressed(UI.Store.Get(Hotkeys.DeveloperConsole)))
             {
                 if (DeveloperConsole.Layout.IsHidden)
@@ -98,6 +99,7 @@ namespace Fiero.Business
 
         public void Draw(RenderTarget target, RenderStates states)
         {
+            Window.Draw(target, states);
             UpdateAnimations();
             foreach (var anim in Vfx.Values)
             {

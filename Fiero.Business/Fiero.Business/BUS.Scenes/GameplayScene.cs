@@ -1094,11 +1094,11 @@ namespace Fiero.Business.Scenes
         public override void DrawBackground(RenderTarget target, RenderStates states)
         {
             UI.Window.Clear();
+            Systems.Render.Draw(target, states);
         }
 
         public override void DrawForeground(RenderTarget target, RenderStates states)
         {
-            Systems.Render.Draw(target, states);
         }
 
         protected override bool CanChangeState(SceneState newState) => true;

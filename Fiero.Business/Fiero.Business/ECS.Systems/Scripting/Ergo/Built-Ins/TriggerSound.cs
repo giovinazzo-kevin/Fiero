@@ -24,7 +24,7 @@ public sealed class TriggerSound : SolverBuiltIn
     private IServiceFactory _services;
 
     public TriggerSound(IServiceFactory services)
-        : base("", new("sound"), 1, ErgoScriptingSystem.FieroModule)
+        : base("", new("play"), 1, ErgoScriptingSystem.SoundModule)
     {
         _services = services;
     }

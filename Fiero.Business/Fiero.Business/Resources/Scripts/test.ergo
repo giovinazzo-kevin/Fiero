@@ -11,4 +11,6 @@ test:ended :- unbind(_, _, _).
 
 action:actor_moved(_ { actor: @owner }) :- 
 	position(@owner, P),
-	animate(false, P, [explosion{radius: 1, tint: light_green, repeat: -1}]).
+	(data(anim_id, OldId) -> anim:stop(OldId) ; true),
+	anim:play(P, [explosion{radius: 1, tint: light_green, repeat: -1}], [Id]),
+	set_data(anim_id, Id).

@@ -19,6 +19,9 @@ namespace Fiero.Business
     public partial class ErgoScriptingSystem : EcsSystem
     {
         public static readonly Atom FieroModule = new("fiero");
+        public static readonly Atom AnimationModule = new("anim");
+        public static readonly Atom SoundModule = new("sound");
+        public static readonly Atom EffectModule = new("fx");
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 

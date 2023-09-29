@@ -30,6 +30,9 @@ public partial class FieroLib : Library
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<MsgBox>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerEffect>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerAnimation>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerAnimationBlocking>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<AnimationRepeatCount>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<AnimationStop>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerSound>());
         _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }

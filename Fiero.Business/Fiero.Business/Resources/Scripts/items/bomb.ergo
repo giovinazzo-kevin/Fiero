@@ -15,22 +15,22 @@ began :-
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]),
 	set_data(dummy, B),
 	move(B, P),
-	effect(effect_def(bestow_trait, invulnerable), B, _).
+	fx:start(effect_def(bestow_trait, invulnerable), B, _).
 ended :-
 	data(dummy, B), 
-	effect(effect_def(remove_trait, invulnerable), B, _),
-	effect(effect_def(explosion, 3), B, _).
+	fx:start(effect_def(remove_trait, invulnerable), B, _),
+	fx:start(effect_def(explosion, 3), B, _).
 
 tick :-
 	data(fuse, T),
 	data(dummy, B),
 	position(B, P),
-	animate(false, P, [fade{texture: items, sprite: bomb, tint: light_red}]),
-	animate(true, P, [damage_number{damage: T, tint: light_red}]),
+	anim:play(P, [fade{texture: items, sprite: bomb, tint: light_red}], _),
+	anim:play_blocking(P, [damage_number{damage: T, tint: light_red}], _),
 	(	T = 0 
 	;   range(0 < T <= 3), Pitch := T / 3,
 		atom_concat(countdown, T, Sound),
-		sound(Sound{position:P, volume:100, pitch: Pitch})
+		sound:play(Sound{position:P, volume:100, pitch: Pitch})
 	).
 
 tock :-

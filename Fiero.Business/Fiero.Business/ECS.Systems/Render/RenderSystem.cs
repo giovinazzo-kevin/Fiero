@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Unconcern.Common;
 using static Fiero.Business.Data;
@@ -9,6 +10,7 @@ namespace Fiero.Business
     {
         private volatile int _id;
 
+        private readonly ConcurrentQueue<int> _toRemove = new();
         protected readonly Dictionary<int, Queue<OrderedPair<Coord, SpriteDef>>> Vfx = new();
         protected readonly Dictionary<int, Timeline> Timelines = new();
 
@@ -124,6 +126,18 @@ namespace Fiero.Business
 
         void UpdateAnimations()
         {
+            while (_toRemove.TryDequeue(out var id))
+            {
+                if (Timelines.TryGetValue(id, out var timeline))
+                {
+                    if (Vfx.TryGetValue(id, out var vfx))
+                        vfx.Clear();
+                    Vfx.Remove(id);
+                    timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length);
+                    timeline.Frames.Clear();
+                    Timelines.Remove(id);
+                }
+            }
             var time = _sw.Elapsed;
             var keys = new List<int>(Timelines.Keys);
             foreach (var id in keys)
@@ -150,7 +164,7 @@ namespace Fiero.Business
                         Timelines.Remove(id);
                         if (timeline.Animation.RepeatCount < 0 || timeline.Animation.RepeatCount > 0 && timeline.Animation.RepeatCount-- > 0)
                         {
-                            Timelines[Interlocked.Increment(ref _id)] = new Timeline(timeline.Animation, timeline.ScreenPosition, _sw.Elapsed);
+                            Timelines[id] = new Timeline(timeline.Animation, timeline.ScreenPosition, _sw.Elapsed);
                         }
                         continue;
                     }
@@ -158,7 +172,22 @@ namespace Fiero.Business
             }
         }
 
-        public void AnimateViewport(bool blocking, Coord worldPos, params Animation[] animations)
+        public void StopAnimation(int id)
+        {
+            _toRemove.Enqueue(id);
+        }
+
+        public bool AlterAnimation(int id, Action<Animation> action)
+        {
+            if (Timelines.TryGetValue(id, out var timeline))
+            {
+                action(timeline.Animation);
+                return true;
+            }
+            return false;
+        }
+
+        public int AnimateViewport(bool blocking, Coord worldPos, params Animation[] animations)
         {
             var t = _sw.Elapsed;
             var batch = animations.Select(a => new Timeline(a, worldPos, t)).ToList();
@@ -172,6 +201,7 @@ namespace Fiero.Business
             {
                 Loop.WaitAndDraw(animations.Select(x => x.Duration).Max(), onUpdate: (t, ts) => UI.Input.Update());
             }
+            return _id;
         }
 
         public FloorId GetViewportFloor() => Viewport.Following.V?.FloorId() ?? default;

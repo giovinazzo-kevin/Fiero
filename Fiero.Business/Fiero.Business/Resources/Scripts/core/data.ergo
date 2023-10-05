@@ -1,6 +1,6 @@
 % Do not modify unless you know what you are doing.
 
-:- module(data, [del/1, set/2, get/2, upd/2]).
+:- module(data, []).
 
 :- op(1001, xf, [delete]).
 :- op(1001, xfy, [set]).

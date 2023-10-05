@@ -1,12 +1,22 @@
 % Do not modify unless you know what you are doing.
 
 :- module(anim, []).
-stick_to(Entity, Animations, Stop) :- 
-	position(@owner, P),
-	atom_concat(anim_id_, &Entity.info.name, Key),
+:- subscribe(action, [actor_moved]).
+
+begin :-
+	data:stick_to_dict_ set _ {}.
+
+stick_to(Actor, Animations, Stop) :- 
+	data:stick_to_dict_ get Dict,
+	dict_key_value(Dict, &Actor.id, StuckAnims) 
+	; 
+
+
+
+action:actor_moved(_ { actor: A }) :- 
+	data:anims_ get Anims,
+	member(Anims, _ { key: OldId, actor: &A.id, animations: List }),
+	position(A, P),
 	(data:Key get OldId -> anim:stop(OldId) ; true),
 	anim:play(P, Animations, [Id]),
-	data:Key set Id,
-	Stop = []>>(
-		(data:Key get OldId -> anim:stop(OldId) ; true)
-	).
+	data:Key set Id.

@@ -4,12 +4,31 @@
 :- subscribe(action, [actor_moved]).
 
 begin :-
-	data:stick_to_dict_ set _ {}.
+	data:stick_to_ set _{}.
+
+stop_actor(ActorId) :-
+	ActorId as Actor is A,
+	data:stick_to_ get Dict,
+	(dict_key_value(Dict, ActorId, _{ ids: StuckIds }) -> (
+		member(Id, StuckIds),
+		anim:stop(Id)
+	) ; true),
+	Dict = NewDict with { ActorId: _ }.
 
 stick_to(Actor, Animations, Stop) :- 
-	data:stick_to_dict_ get Dict,
-	dict_key_value(Dict, &Actor.id, StuckAnims) 
-	; 
+	data:stick_to_ get Dict,
+	ActorId = Actor.id,
+	(dict_key_value(Dict, ActorId, _{ anims: StuckAnims, ids: StuckIds }) 
+	; StuckAnims = [], StuckIds = []),
+	concat(StuckAnims, Animations, NewAnims),
+	position(A, P),
+	anim:play(P, Animations, [Ids]),
+	concat(StuckIds, Ids, NewIds),
+	NewDict = Dict with { ActorId: _{ anims: NewAnims, ids: NewIds }},
+	data:stick_to_ set NewDict,
+	Stop = []>>(
+		
+	).
 
 
 

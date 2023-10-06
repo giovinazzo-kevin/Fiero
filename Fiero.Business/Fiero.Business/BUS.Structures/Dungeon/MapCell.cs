@@ -26,8 +26,7 @@
                     {
                         true => f.Physics.BlocksPlayerPathing,
                         false => f.Physics.BlocksNpcPathing
-                    })
-                    && !(Actors.Any(b => b.Id == a.Id));
+                    });
             }
             return ret;
         }

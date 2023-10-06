@@ -3,39 +3,26 @@
 :- module(anim, []).
 :- subscribe(action, [actor_moved]).
 
-begin :-
-	data:stick_to_ set _{}.
+stop_stuck(Key, StopKey) :-
+	data:Key get Dict,
+	Ids = Dict.StopKey.ids,
+	member(Id, Ids),
+	anim:stop(Id),
+	data:Key set Dict without {StopKey}.
 
-stop_actor(ActorId) :-
-	ActorId as Actor is A,
-	data:stick_to_ get Dict,
-	(dict_key_value(Dict, ActorId, _{ ids: StuckIds }) -> (
-		member(Id, StuckIds),
-		anim:stop(Id)
-	) ; true),
-	Dict = NewDict with { ActorId: _ }.
-
-stick_to(Actor, Animations, Stop) :- 
-	data:stick_to_ get Dict,
-	ActorId = Actor.id,
-	(dict_key_value(Dict, ActorId, _{ anims: StuckAnims, ids: StuckIds }) 
-	; StuckAnims = [], StuckIds = []),
-	concat(StuckAnims, Animations, NewAnims),
-	position(A, P),
-	anim:play(P, Animations, [Ids]),
-	concat(StuckIds, Ids, NewIds),
-	NewDict = Dict with { ActorId: _{ anims: NewAnims, ids: NewIds }},
-	data:stick_to_ set NewDict,
-	Stop = []>>(
-		
-	).
-
-
+stick_to(_{id: ActorId}, Animations, stop_stuck(Key, StopKey)) :- 
+	atom_concat(anims_, ActorId, Key),
+	(data:Key get Dict ; Dict = _{}),
+	uuid(StopKey),
+	position(_{id: ActorId}, P),
+	anim:play(P, Animations, Ids),
+	data:Key set Dict with { StopKey: _{ ids: Ids, anims: Animations } }.
 
 action:actor_moved(_ { actor: A }) :- 
-	data:anims_ get Anims,
-	member(Anims, _ { key: OldId, actor: &A.id, animations: List }),
+	atom_concat(anims_, &A.id, Key),
+	data:Key get Dict,
+	dict_key_value(Dict, StopKey, _{ anims: Animations }),
+	stop_stuck(Key, StopKey),
 	position(A, P),
-	(data:Key get OldId -> anim:stop(OldId) ; true),
-	anim:play(P, Animations, [Id]),
-	data:Key set Id.
+	anim:play(P, Animations, NewIds),
+	data:Key set Dict with { StopKey: NewIds, anims: Animations }.

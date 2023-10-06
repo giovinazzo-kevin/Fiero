@@ -17,13 +17,13 @@ began :-
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]),
 	data:dummy set B,
 	move(B, P),
-	anim:stick_to(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], StopAnim),
-	data:stop_callback set StopAnim,
+	% anim:stick_to(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], StopAnim),
+	% data:stop_callback set StopAnim,
 	fx:start(effect_def(bestow_trait, invulnerable), B, _).
 ended :-
 	data:dummy get B, 
-	data:stop_callback get StopAnim,
-	call(StopAnim),
+	% data:stop_callback get StopAnim,
+	% call(StopAnim),
 	fx:start(effect_def(remove_trait, invulnerable), B, _),
 	fx:start(effect_def(explosion, 3), B, _).
 

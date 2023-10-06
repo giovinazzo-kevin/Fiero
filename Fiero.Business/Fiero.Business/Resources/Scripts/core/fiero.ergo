@@ -1,17 +1,18 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2, set_data/2, unset_data/1, update_data/3, data/2]).
+:- module(fiero, [as/2, '='/2, ':='/2, set_data/2, unset_data/1, update_data/3, data/2, uuid/1, position/2, move/2]).
 
 :- op(40, yfx, ['as']).
 
 %%% Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
-	@owner :- owner(O)
-)).
-:- expand([O] >> (
 	@player :- player as actor is O
 )).
+:- expand([O] >> (
+	@owner :- owner(O)
+)).
+:- dynamic(last_uuid/1).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
 %: NOTE: 'as' has a higher precedence than 'is', so this doesn't break arithmetic expressions
@@ -41,3 +42,9 @@ position(_{ id: Id }, P) :-
 move(_{ id: Id }, P) :-
 	position(_{ id: Id }, Old),
 	raise(action, actor_moved, _{ actor: actor{ id: Id }, old_position: Old, new_position: P }).
+
+%: Generate UUID
+uuid(Id) :-
+	(last_uuid(Last), retract(last_uuid(Last)) ; Last = 0), !,
+	Id := Last + 1,
+	assertz(last_uuid(Id)).

@@ -33,10 +33,10 @@
             .WithTraitTracking()
             ;
 
-        public EntityBuilder<Script> Script(string scriptPath, string name = null)
+        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false)
             => Entities.CreateBuilder<Script>()
             .WithName(name ?? scriptPath)
-            .WithScriptInfo(scriptPath)
+            .WithScriptInfo(scriptPath, trace: trace)
             .WithEffectTracking()
             ;
 

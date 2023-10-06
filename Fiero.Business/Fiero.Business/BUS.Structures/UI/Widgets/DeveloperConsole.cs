@@ -1,9 +1,5 @@
 ﻿using Ergo.Shell;
-using Fiero.Core;
-
-using System;
 using System.Text;
-using System.Threading;
 using Unconcern;
 using Unconcern.Common;
 
@@ -73,7 +69,16 @@ namespace Fiero.Business
         protected virtual void OnOutputAvailable(DeveloperConsole self, string chunk)
         {
             if (Layout is null)
+            {
+                var opened = default(Action<UIWindow>);
+                opened = w =>
+                {
+                    Opened -= opened;
+                    Pane.Write(chunk);
+                };
+                Opened += opened;
                 return;
+            }
             Pane.Write(chunk);
         }
 
@@ -85,7 +90,7 @@ namespace Fiero.Business
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
-                //.After(TimeSpan.FromMilliseconds(50))
+                .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();

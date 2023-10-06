@@ -10,8 +10,4 @@ test:began :-
 	.
 test:ended :- unbind(_, _, _).
 
-action:actor_moved(_ { actor: @owner }) :- 
-	position(@owner, P),
-	(data:anim_id get OldId -> anim:stop(OldId) ; true),
-	anim:play(P, [explosion{radius: 1, tint: light_green, repeat: -1}], [Id]),
-	data:anim_id set Id.
+action:actor_moved(_ { actor: @owner }) :- true.

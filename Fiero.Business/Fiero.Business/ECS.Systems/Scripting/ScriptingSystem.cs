@@ -9,6 +9,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Shell;
 using Ergo.Solver;
 using LightInject;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.IO.Pipelines;
 using System.Text;
@@ -44,6 +45,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
+        private readonly ConcurrentDictionary<string, Script> Cache = new();
 
         public void ResetPipes()
         {
@@ -107,14 +109,32 @@ namespace Fiero.Business
                     script.ScriptProperties.LastError = ex;
                     Shell.WriteLine(ex.Message, Ergo.Shell.LogLevel.Err);
                 }));
+            if (Cache.TryGetValue(script.ScriptProperties.ScriptPath, out var cached))
+            {
+                Init(script, cached.ScriptProperties.Solver, cached.ScriptProperties.Scope.InterpreterScope);
+                return true;
+            }
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
-                .TryGetValue(out var module))
+                .TryGetValue(out _))
             {
                 var solver = Facade.BuildSolver(
                     localScope.BuildKnowledgeBase(),
                     SolverFlags.Default
                 );
-                var solverScope = solver.CreateScope(localScope);
+                Init(script, solver, localScope);
+                Cache.TryAdd(script.ScriptProperties.ScriptPath, script);
+                //_unload += () => UnloadScript(script);
+                return true;
+            }
+            return false;
+
+            void Init(Script script, ErgoSolver solver, InterpreterScope scope)
+            {
+                var solverScope = solver.CreateScope(scope);
+                if (script.ScriptProperties.ShowTrace)
+                {
+                    solverScope.Tracer.Trace += Tracer_Trace;
+                }
                 script.ScriptProperties.Solver = solver;
                 script.ScriptProperties.Scope = solverScope;
                 // Scripts subscribe to events via the subscribe/2 directive
@@ -124,15 +144,18 @@ namespace Fiero.Business
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
                 solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
-                //_unload += () => UnloadScript(script);
-                return true;
             }
-            return false;
+
+            void Tracer_Trace(Tracer _, SolverScope __, SolverTraceType type, string trace)
+            {
+                Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
+            }
         }
 
         public void UnloadAllScripts()
         {
             _unload?.Invoke();
+            Cache.Clear();
         }
 
         // TODO: Figure out script lifetime and call this method!!

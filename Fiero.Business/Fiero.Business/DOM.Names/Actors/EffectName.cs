@@ -2,6 +2,7 @@
 {
     public enum EffectName
     {
+        None,
         Script,
         Confusion,
         Sleep,

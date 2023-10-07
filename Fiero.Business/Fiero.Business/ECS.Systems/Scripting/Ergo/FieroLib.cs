@@ -21,6 +21,8 @@ public partial class FieroLib : Library
     public FieroLib(IServiceFactory sp)
     {
         ServiceFactory = sp;
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<At>());
+        _exportedBuiltIns.Add(ServiceFactory.GetInstance<Shape>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<Spawn>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<Despawn>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<RaiseEvent>());

@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-
-using LightInject;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using LightInject;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -148,7 +143,7 @@ namespace Fiero.Business
         public bool TryGetClosestFreeTile(FloorId id, Coord pos, out MapCell closest, float maxDistance = 10, Func<MapCell, bool> pred = null)
         {
             closest = default;
-            pred ??= cell => !cell.Items.Any() && !cell.Actors.Any();
+            pred ??= cell => !cell.Items.Any() && !cell.Actors.Any() && !cell.Features.Any();
 
             var openSet = new Queue<MapCell>();
             var closedSet = new HashSet<MapCell>();

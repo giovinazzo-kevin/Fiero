@@ -58,13 +58,17 @@ public sealed class Shape : SolverBuiltIn
             yield return False();
             yield break;
         }
+        var any = false;
         foreach (var p in enumerable)
         {
-            var term = TermMarshall.ToTerm(p);
+            var term = TermMarshall.ToTerm(p, functor: new Atom(nameof(p)), mode: TermMarshalling.Positional);
             if (args[2].Unify(term).TryGetValue(out var subs))
             {
                 yield return True(subs);
+                any = true;
             }
         }
+        if (!any)
+            yield return False();
     }
 }

@@ -37,10 +37,12 @@ public sealed class At : SolverBuiltIn
             yield return False();
             yield break;
         }
+        var any = false;
         var term = TermMarshall.ToTerm(cell.Tile);
         if (args[2].Unify(term).TryGetValue(out var subs))
         {
             yield return True(subs);
+            any = true;
         }
         foreach (var A in cell.Actors)
         {
@@ -48,6 +50,7 @@ public sealed class At : SolverBuiltIn
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);
+                any = true;
             }
         }
         foreach (var F in cell.Features)
@@ -56,6 +59,7 @@ public sealed class At : SolverBuiltIn
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);
+                any = true;
             }
         }
         foreach (var I in cell.Items)
@@ -64,7 +68,10 @@ public sealed class At : SolverBuiltIn
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);
+                any = true;
             }
         }
+        if (!any)
+            yield return False();
     }
 }

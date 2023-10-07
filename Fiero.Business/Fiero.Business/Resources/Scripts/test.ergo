@@ -3,8 +3,16 @@
 :- use_module(data).
 :- subscribe(action, [actor_moved]).
 
+coolio :-
+	position(@owner, FId, Po),
+	shape(square, 5, Ps),
+	P := Po + Ps,
+	\+at(FId, P, actor{}),
+	spawn([npc_rat{}], [R]),
+	move(R, P).
+
 test:began :- 
-	bind(k, pressed, [_]>>(spawn([npc_rat{}], _))),
+	bind(k, pressed, [_]>>coolio),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999}], _))),
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
 	.

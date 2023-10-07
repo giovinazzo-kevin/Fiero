@@ -1,7 +1,7 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, position/2, move/2]).
+:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, position/2, position/3, move/2]).
 
 :- op(40, yfx, ['as']).
 :- dynamic(owner/1).
@@ -39,6 +39,9 @@ D.Key := Val :-
 %: Get entity position
 position(_{ id: Id }, P) :-
 	Id as physical_entity is _{ physics: _{ position: P } }, !.
+%: Get entity position and floor id
+position(_{ id: Id }, F, P) :-
+	Id as physical_entity is _{ physics: _{ floor_id: F, position: P } }, !.
 
 move(_{ id: Id }, P) :-
 	position(_{ id: Id }, Old),
@@ -46,10 +49,11 @@ move(_{ id: Id }, P) :-
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-
 	(owner(O) ; player as actor is O),
-	at(&O.physics.floor_id, &O.physics.position, E).
+    at(O, E).
 %: Unify with all entities on the same tile as another physical entity
-at(P, E) :-
-	at(&P.physics.floor_id, &P.physics.position, E).
+at(O, E) :-
+    position(O, FloorId, Pos), % May have changed
+	at(FloorId, Pos, E).
 
 %: Generate UUID
 uuid(Id) :-

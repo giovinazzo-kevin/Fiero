@@ -1,7 +1,7 @@
 :- module(bomb, []).
 :- use_module(anim).
 :- use_module(data).
-:- subscribe(action, [actor_turn_started]).
+:- subscribe(action, [actor_turn_started, actor_attacked]).
 
 % Bombs leave a fake solid 'bomb' dummy on the ground for as long as the fuse is lit.
 % Dummies are a special type of actor that do basically nothing while being inserted in the flow of turns.
@@ -10,6 +10,7 @@
 % This trait is removed when the fuse runs out and the effect ends. As soon as the trait is removed, an explosion is triggered.
 % The explosion automatically takes care of killing the now-vulnerable dummy.
 % Since the dummy is NOT impassible, effects work on it! You can teleport a lit bomb around and it will explode elsewhere.
+% When a bomb is attacked, it will roll one tile in the opposite direction.
 began :- 
 	position(@owner, P),
 	data:fuse set 3, 
@@ -44,3 +45,13 @@ tock :-
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise
 action:actor_turn_started(_{actor: @player}) :- 
 	tick, tock.
+
+action:actor_attacked(_{attacker: A, victim: V}) :-
+	data:dummy get D, 
+	&D.id = V.id,
+	position(A, Ap),
+	position(V, Vp),
+	Dir := Vp - Ap,
+	clamp(-1, 1, Dir, NormDir),
+	NewPos := Vp + Dir,
+	move(V, NewPos).

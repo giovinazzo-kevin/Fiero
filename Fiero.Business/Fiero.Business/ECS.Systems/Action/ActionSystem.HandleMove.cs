@@ -53,7 +53,7 @@
                     {
                         var target = actorsHere
                             // Fake entities such as dummies may overlap the same tile as another actor.
-                            .Single(x => x.ActorProperties.Type != ActorName.None || x.Physics.BlocksMovement);
+                            .First(x => x.ActorProperties.Type != ActorName.None || x.Physics.BlocksMovement);
                         var relationship = _factionSystem.GetRelations(t.Actor, target).Left;
                         if (relationship.MayAttack())
                         {

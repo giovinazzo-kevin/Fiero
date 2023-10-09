@@ -132,3 +132,9 @@ p(X3,Y3) := Op1 * Op2 :-
 %: Divide points or scalars
 p(X3,Y3) := Op1 / Op2 :-
     eval_point(Op1 / Op2, p(X3, Y3)), !.
+
+clamp(Min, Max, p(X1, Y1), p(X2, Y2)) :-
+    max(Min, X1, Xm),
+    max(Min, Y1, Ym),
+    min(Xm, Max, X2),
+    min(Ym, Max, Y2).

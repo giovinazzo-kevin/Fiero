@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
@@ -11,14 +8,12 @@ namespace Fiero.Business
             if (action is MeleeAttackOtherAction oth)
             {
                 victim = oth.Victim;
-                return MayTarget(t.Actor, victim)
-                    && HandleMeleeAttack(ref cost, oth.Weapons);
+                return HandleMeleeAttack(ref cost, oth.Weapons);
             }
             else if (action is MeleeAttackPointAction dir)
             {
                 var newPos = t.Actor.Position() + dir.Point;
                 return TryFindVictim(newPos, t.Actor, out victim)
-                    && MayTarget(t.Actor, victim)
                     && HandleMeleeAttack(ref cost, dir.Weapons);
             }
             else throw new NotSupportedException(action.GetType().Name);

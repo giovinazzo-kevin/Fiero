@@ -213,6 +213,7 @@ namespace Fiero.Business
             }
             else if (ret == false)
             {
+                action = new FailAction();
                 ActorIntentFailed.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
             return cost;
@@ -239,7 +240,8 @@ namespace Fiero.Business
 
         private bool MayTarget(Actor attacker, Actor victim)
         {
-            return victim.IsAlive() && attacker.IsAffectedBy(EffectName.Confusion) || _factionSystem.GetRelations(attacker, victim).Left.IsHostile();
+            return victim.IsAlive() && (attacker.IsAffectedBy(EffectName.Confusion)
+                || _factionSystem.GetRelations(attacker, victim).Left.IsHostile());
         }
 
         private bool TryFindVictim(Coord p, Actor attacker, out Actor victim)

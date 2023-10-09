@@ -9,16 +9,29 @@
 
 :- dynamic(d_/2).
 
-delete(Name) :-
-	(retractall(d_(Name, _)) ; true), !.
+key(Name, key(Name, Id)) :-
+	(owner(_{id:Id}) ; player as actor is _{id:Id}), !.
 
+delete_(Key) :-
+	(retractall(d_(Key, _)) ; true), !.
+delete(Name) :- 
+	key(Name, Key),
+	delete_(Key).
+
+set_(Key, Value) :-
+	delete_(Key),
+	assertz(d_(Key, Value)).
 set(Name, Value) :-
-	delete(Name),
-	assertz(d_(Name, Value)).
+	key(Name, Key),
+	set_(Key, Value).
 
-get(Name, Value) :- d_(Name, Value).
+get_(Key, Value) :- d_(Key, Value).
+get(Name, Value) :- 
+	key(Name, Key),
+	get_(Key, Value).
 
 update(Name, Lambda) :-
-	d_(Name, OldValue), 
+	key(Name, Key),
+	d_(Key, OldValue), 
 	call(Lambda, OldValue, NewValue),
-	set(Name, NewValue).
+	set_(Key, NewValue).

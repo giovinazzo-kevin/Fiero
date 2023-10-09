@@ -9,7 +9,7 @@ namespace Fiero.Business
         [RequiredComponent]
         public ActionComponent Action { get; private set; }
         [RequiredComponent]
-        [Term(Key = "actor", Marshalling = TermMarshalling.Named)]
+        [Term(Key = "props", Marshalling = TermMarshalling.Named)]
         public ActorComponent ActorProperties { get; private set; }
         [NonTerm]
         [RequiredComponent]

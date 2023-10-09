@@ -1,4 +1,4 @@
-﻿using Fiero.Core;
+﻿using Ergo.Lang;
 
 namespace Fiero.Business
 {
@@ -6,6 +6,7 @@ namespace Fiero.Business
     public class Tile : PhysicalEntity, IPathNode<PhysicalEntity>
     {
         [RequiredComponent]
+        [Term(Key = "props", Marshalling = TermMarshalling.Named)]
         public TileComponent TileProperties { get; private set; }
 
         public double GetCost(PhysicalEntity e) => TileProperties.PathingCost;

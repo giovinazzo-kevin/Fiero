@@ -387,7 +387,10 @@ namespace Fiero.Business.Scenes
             {
                 if (e.Actor.IsInvalid())
                     return true;
-                var floor = Systems.Dungeon.GetFloor(e.Actor.FloorId());
+                if (!Systems.Dungeon.TryGetFloor(e.Actor.FloorId(), out var floor)
+                || !floor.Cells.ContainsKey(e.OldPosition)
+                || !floor.Cells.ContainsKey(e.NewPosition))
+                    return false;
                 floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);
                 var itemsHere = Systems.Dungeon.GetItemsAt(floor.Id, e.NewPosition);

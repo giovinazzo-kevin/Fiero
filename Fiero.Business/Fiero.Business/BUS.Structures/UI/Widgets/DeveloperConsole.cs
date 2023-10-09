@@ -90,7 +90,7 @@ namespace Fiero.Business
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
                 .UseAsynchronousTimer()
-                .After(TimeSpan.FromMilliseconds(50))
+                //.After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();

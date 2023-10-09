@@ -797,7 +797,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.AnimateViewport(false, e.Actor.FloorId(), e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    Systems.Render.AnimateViewport(false, e.Item.FloorId(), e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {

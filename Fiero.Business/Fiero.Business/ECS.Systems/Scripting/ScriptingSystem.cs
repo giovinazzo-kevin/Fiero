@@ -23,6 +23,7 @@ namespace Fiero.Business
         public static readonly Atom AnimationModule = new("anim");
         public static readonly Atom SoundModule = new("sound");
         public static readonly Atom EffectModule = new("fx");
+        public static readonly Atom DataModule = new("data");
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 
@@ -45,7 +46,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
 
-        private readonly ConcurrentDictionary<string, Script> Cache = new();
+        public readonly ConcurrentDictionary<string, Script> Cache = new();
 
         public void ResetPipes()
         {
@@ -65,7 +66,7 @@ namespace Fiero.Business
             InReader = TextReader.Synchronized(new StreamReader(In.Reader.AsStream(), Encoding));
             AsyncInputReader = reader;
             FieroLib = new(sp);
-            Facade = GetErgoFacade();
+            Facade = GetErgoFacade(sp);
             Shell = Facade.BuildShell();
             Interpreter = Shell.Interpreter;
             StdlibScope = Interpreter.CreateScope()
@@ -89,12 +90,13 @@ namespace Fiero.Business
         /// <summary>
         /// Configures the Ergo environment before the interpreter is created.
         /// </summary>
-        protected virtual ErgoFacade GetErgoFacade()
+        protected virtual ErgoFacade GetErgoFacade(IServiceFactory sp)
         {
             return ErgoFacade.Standard
                 .AddLibrary(() => FieroLib)
                 .SetOutput(OutWriter)
                 .SetInput(InReader, Maybe.Some(AsyncInputReader))
+                .AddCommand(sp.GetInstance<SelectScript>())
                 ;
         }
 
@@ -109,7 +111,8 @@ namespace Fiero.Business
                     script.ScriptProperties.LastError = ex;
                     Shell.WriteLine(ex.Message, Ergo.Shell.LogLevel.Err);
                 }));
-            if (script.ScriptProperties.Cached && Cache.TryGetValue(script.ScriptProperties.ScriptPath, out var cached))
+            var cacheKey = $"{script.ScriptProperties.ScriptPath}{script.ScriptProperties.CacheKey}";
+            if (script.ScriptProperties.Cached && Cache.TryGetValue(cacheKey, out var cached))
             {
                 Init(script, cached.ScriptProperties.Solver, cached.ScriptProperties.Scope.InterpreterScope);
                 return true;
@@ -121,8 +124,9 @@ namespace Fiero.Business
                     localScope.BuildKnowledgeBase(),
                     SolverFlags.Default
                 );
+                solver.Initialize(localScope);
                 Init(script, solver, localScope);
-                Cache.TryAdd(script.ScriptProperties.ScriptPath, script);
+                Cache.TryAdd(cacheKey, script);
                 //_unload += () => UnloadScript(script);
                 return true;
             }
@@ -142,7 +146,6 @@ namespace Fiero.Business
                     subbedEvents = Enumerable.Empty<Signature>();
                 // Effects can then read this list and bind the subbed events
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
-                solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
 
                 void Tracer_Trace(Tracer _, SolverScope scope, SolverTraceType type, string trace)

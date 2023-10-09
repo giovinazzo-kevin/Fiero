@@ -15,20 +15,16 @@ namespace Fiero.Business
             where T : Entity => builder.AddOrTweak<EffectsComponent>((s, c) =>
             {
                 c.Intrinsic.Add(def);
-                // Delegate starting the effect to the next turn, so that the game is in a known valid state
                 builder.Built += OnBuilt;
                 void OnBuilt(EntityBuilder<T> b, T o)
                 {
                     builder.Built -= OnBuilt;
                     var systems = s.GetInstance<GameSystems>();
                     var sub = new Subscription(throwOnDoubleDispose: false);
-                    sub.Add(systems.Action.TurnStarted.SubscribeHandler(ts =>
-                    {
-                        wrap ??= (e => e.Resolve(o));
-                        var fx = wrap(def);
-                        fx.Start(systems, o);
-                        sub.Dispose();
-                    }));
+                    wrap ??= (e => e.Resolve(o));
+                    var fx = wrap(def);
+                    fx.Start(systems, o);
+                    sub.Dispose();
                 }
             });
         public static EntityBuilder<T> WithPhysics<T>(this EntityBuilder<T> builder, Coord pos, bool canMove = false, bool blocksMovement = false, bool blocksLight = false)

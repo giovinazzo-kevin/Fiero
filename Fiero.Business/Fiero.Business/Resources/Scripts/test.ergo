@@ -10,9 +10,17 @@ coolio :-
 	\+at(FId, P, actor{}),
 	spawn([npc_rat{}], [R]),
 	move(R, P).
+boom(N) :-
+	P = @player, Id = &P.id,
+	position(P, Pos),
+	spawn([throwable_bomb{charges:N, radius: 20, fuse: 0}], [_{id: NukeId }]),
+	for(I, 1, N), 
+	Q := Pos + p(I, I),
+	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
 
 test:began :- 
 	bind(k, pressed, [_]>>coolio),
+	bind(u, pressed, [_]>>boom(2)),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
 	.

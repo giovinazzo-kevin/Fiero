@@ -7,6 +7,7 @@ namespace Fiero.Business
     public class ErgoScriptComponent : EcsComponent
     {
         public ErgoException LastError { get; set; }
+        public string CacheKey { get; set; } = string.Empty;
         public string ScriptPath { get; set; }
         public bool ShowTrace { get; set; }
         public bool Cached { get; set; }

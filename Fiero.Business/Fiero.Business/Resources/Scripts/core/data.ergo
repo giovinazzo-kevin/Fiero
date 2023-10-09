@@ -30,6 +30,8 @@ get(Name, Value) :-
 	key(Name, Key),
 	get_(Key, Value).
 
+clear :- delete(_).
+
 update(Name, Lambda) :-
 	key(Name, Key),
 	d_(Key, OldValue), 

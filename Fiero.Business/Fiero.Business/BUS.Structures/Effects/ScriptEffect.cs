@@ -136,6 +136,7 @@ namespace Fiero.Business
         public readonly string Description;
         public readonly Hook EffectStartedHook;
         public readonly Hook EffectEndedHook;
+        public readonly Hook ClearDataHook;
         public readonly string ArgumentsString;
 
         public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
@@ -150,6 +151,7 @@ namespace Fiero.Business
             var module = Script.ScriptProperties.Scope.Module;
             EffectStartedHook = new(new(new("began"), Maybe.Some(0), module, default));
             EffectEndedHook = new(new(new("ended"), Maybe.Some(0), module, default));
+            ClearDataHook = new(new(new("clear"), Maybe.Some(0), ErgoScriptingSystem.DataModule, default));
         }
 
         public override EffectName Name => EffectName.Script;
@@ -191,6 +193,11 @@ namespace Fiero.Business
             if (EffectEndedHook.IsDefined(ctx))
             {
                 foreach (var _ in EffectEndedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
+                    ;
+            }
+            if (ClearDataHook.IsDefined(ctx))
+            {
+                foreach (var _ in ClearDataHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
                     ;
             }
             Contexts.Remove(owner.Id, out _);

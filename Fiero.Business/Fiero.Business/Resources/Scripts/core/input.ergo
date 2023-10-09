@@ -16,3 +16,4 @@ keyboard_event(E) :-
     E = key_event { type: Type, key: Key },
     key_route(Key, Type, Predicate),
     call(Predicate, E).
+

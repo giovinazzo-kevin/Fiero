@@ -144,11 +144,11 @@ namespace Fiero.Business
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
                 solver.Initialize(localScope);
                 ScriptLoaded.Handle(new(script));
-            }
 
-            void Tracer_Trace(Tracer _, SolverScope __, SolverTraceType type, string trace)
-            {
-                Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
+                void Tracer_Trace(Tracer _, SolverScope scope, SolverTraceType type, string trace)
+                {
+                    Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
+                }
             }
         }
 

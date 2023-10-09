@@ -2,18 +2,18 @@
 
 :- module(data, []).
 
-:- op(1001, xf, [delete]).
-:- op(1001, xfy, [set]).
-:- op(1001, xfy, [get]).
-:- op(1001, xfy, [update]).
+:- op(700, xf, [delete]).
+:- op(700, xfy, [set]).
+:- op(700, xfy, [get]).
+:- op(700, xfy, [update]).
 
 :- dynamic(d_/2).
 
 delete(Name) :-
-	retractall(d_(Name, _)).
+	(retractall(d_(Name, _)) ; true), !.
 
 set(Name, Value) :-
-	(delete(Name) ; true), !,
+	delete(Name),
 	assertz(d_(Name, Value)).
 
 get(Name, Value) :- d_(Name, Value).

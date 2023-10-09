@@ -13,7 +13,8 @@
 % When a bomb is attacked, it will roll one tile in the opposite direction.
 began :- 
 	position(@owner, P),
-	data:fuse set 3, 
+	args(_{fuse: Fuse}),
+	data:fuse set Fuse, 
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]),
 	data:dummy set B,
 	move(B, P),
@@ -25,7 +26,8 @@ ended :-
 	data:stop_callback get StopAnim,
 	call(StopAnim),
 	fx:start(effect_def(remove_trait, invulnerable), B, _),
-	fx:start(effect_def(explosion, 3), B, _).
+	args(_{radius: ExplosionRadius}),
+	fx:start(effect_def(explosion, ExplosionRadius), B, _).
 
 tick :-
 	data:fuse get T,

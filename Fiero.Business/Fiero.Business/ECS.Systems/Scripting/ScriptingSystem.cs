@@ -109,7 +109,7 @@ namespace Fiero.Business
                     script.ScriptProperties.LastError = ex;
                     Shell.WriteLine(ex.Message, Ergo.Shell.LogLevel.Err);
                 }));
-            if (Cache.TryGetValue(script.ScriptProperties.ScriptPath, out var cached))
+            if (script.ScriptProperties.Cached && Cache.TryGetValue(script.ScriptProperties.ScriptPath, out var cached))
             {
                 Init(script, cached.ScriptProperties.Solver, cached.ScriptProperties.Scope.InterpreterScope);
                 return true;

@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public class Floor
@@ -36,16 +31,19 @@ namespace Fiero.Business
 
         public void SetTile(Tile tile)
         {
-            if (!_cells.TryGetValue(tile.Position(), out var cell))
+            var pos = tile.Position();
+            if (!_cells.KeyInBounds(pos))
+                return;
+            if (!_cells.TryGetValue(pos, out var cell))
             {
-                cell = _cells[tile.Position()] = new(tile);
+                cell = _cells[pos] = new(tile);
             }
             var oldTile = cell.Tile;
             cell.Tile = tile;
             TileChanged?.Invoke(this, oldTile, tile);
             if (Pathfinder != null)
             {
-                Pathfinder.Update(tile.Position(), cell, out var old);
+                Pathfinder.Update(pos, cell, out var old);
                 old?.Tile?.TryRefresh(tile.Id); // Update old references that are stored in pathfinding lists
             }
         }

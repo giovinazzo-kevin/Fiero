@@ -33,10 +33,10 @@
             .WithTraitTracking()
             ;
 
-        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false)
+        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
             => Entities.CreateBuilder<Script>()
             .WithName(name ?? scriptPath)
-            .WithScriptInfo(scriptPath, trace: trace)
+            .WithScriptInfo(scriptPath, trace: trace, cache: cache)
             .WithEffectTracking()
             ;
 
@@ -621,7 +621,7 @@
                 throwsUseCharges: true
             )
             ;
-        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1)
+        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1, int fuse = 3, int radius = 3)
             => Throwable<Throwable>(
                 name: ThrowableName.Bomb,
                 itemRarity: 1,
@@ -634,7 +634,7 @@
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Script, "1", chance: 1f, script: Script("bomb").Build()),
+            .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb").Build()),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion

@@ -70,22 +70,52 @@ namespace Fiero.Business
                 yield break;
             }
         }
+        internal class Args : SolverBuiltIn
+        {
+            protected readonly string _args;
+
+            public Args(string args, Atom module) : base(string.Empty, new Atom("args"), 1, module)
+            {
+                _args = args;
+            }
+
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            {
+                if (!solver.Solver.Facade.Parse<ITerm>(scope.InterpreterScope, _args)
+                    .TryGetValue(out var term))
+                {
+                    yield return False();
+                    yield break;
+                }
+                if (arguments[0].Unify(term).TryGetValue(out var subs))
+                {
+                    yield return True(subs);
+                    yield break;
+                }
+                yield return False();
+                yield break;
+            }
+        }
+
 
         private readonly Atom _module;
         public override Atom Module => _module;
         protected readonly ScriptEffect _source;
         protected readonly GameSystems _systems;
         protected readonly Entity _owner;
-        public ScriptEffectLib(GameSystems systems, ScriptEffect source, Entity owner, Atom module)
+        protected readonly string _args;
+        public ScriptEffectLib(GameSystems systems, ScriptEffect source, Entity owner, string arguments, Atom module)
         {
             _module = module;
             _source = source;
             _owner = owner;
             _systems = systems;
+            _args = arguments;
         }
         public override IEnumerable<SolverBuiltIn> GetExportedBuiltins()
         {
             yield return new End(_systems, _source, _owner, _module);
+            yield return new Args(_args, _module);
             yield return new Owner(_owner, _module);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
@@ -106,12 +136,14 @@ namespace Fiero.Business
         public readonly string Description;
         public readonly Hook EffectStartedHook;
         public readonly Hook EffectEndedHook;
+        public readonly string ArgumentsString;
 
         public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
 
-        public ScriptEffect(Script script, string description = null)
+        public ScriptEffect(Script script, string arguments, string description = null)
         {
             Script = script;
+            ArgumentsString = arguments;
             var s = script.ScriptProperties.Scope.InterpreterScope;
             var m = s.Modules[script.ScriptProperties.Scope.Module];
             Description = description ?? string.Empty;
@@ -131,7 +163,7 @@ namespace Fiero.Business
             var m = Script.ScriptProperties.Scope.Module;
             var newScope = Script.ScriptProperties.Scope.InterpreterScope;
             newScope = newScope.WithModule(newScope.Modules[m]
-                .WithLinkedLibrary(new ScriptEffectLib(systems, this, owner, m)));
+                .WithLinkedLibrary(new ScriptEffectLib(systems, this, owner, ArgumentsString, m)));
             return Contexts[owner.Id] = SolverContext.Create(Script.ScriptProperties.Solver, newScope);
         }
 

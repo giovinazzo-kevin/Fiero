@@ -1,8 +1,5 @@
-﻿using Fiero.Core;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Fiero.Business
 {
@@ -42,6 +39,7 @@ namespace Fiero.Business
             _keys = new HashSet<Coord>();
         }
 
+        public bool KeyInBounds(Coord key) => key.X >= 0 && key.Y >= 0 && key.X < Size.X && key.Y < Size.Y;
         public bool ContainsKey(Coord key) => _keys.Contains(key);
         public bool TryGetValue(Coord key, [MaybeNullWhen(false)] out V value)
         {

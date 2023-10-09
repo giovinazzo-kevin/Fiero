@@ -323,11 +323,12 @@ namespace Fiero.Business
             {
                 c.Type = type;
             });
-        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false)
+        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false, bool cache = true)
             where T : Script => builder.AddOrTweak<ErgoScriptComponent>((s, c) =>
             {
                 c.ScriptPath = fileName;
                 c.ShowTrace = trace;
+                c.Cached = cache;
                 // Delegate the actual loading of the script to when the entity is built
                 builder.Built += OnBuilt;
                 void OnBuilt(EntityBuilder<T> b, T e)

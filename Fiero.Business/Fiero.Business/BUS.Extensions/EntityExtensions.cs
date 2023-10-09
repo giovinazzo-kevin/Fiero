@@ -94,9 +94,10 @@
         public static bool IsRooted(this PhysicalEntity a) => a.IsAlive() && a.Physics.Roots > 0;
         public static bool IsImmobile(this PhysicalEntity a) => a.IsAlive() && !a.Physics.CanMove || a.Physics.Roots > 0;
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
-        public static bool Knows(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
-        public static bool CanSee(this Actor a, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var tiles) && tiles.Contains(c);
-        public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.Position()) && a.Fov.Sight.HasFlag(e.Render.Visibility);
+        public static bool Knows(this Actor a, FloorId f, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
+        public static bool CanSee(this Actor a, FloorId f, Coord c) => a.IsAlive() && a.FloorId() == f && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
+        public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && a.CanSee(e.FloorId(), e.Position()) && a.Fov.Sight.HasFlag(e.Render.Visibility);
+        public static bool CanHear(this Actor a, PhysicalEntity e) => a.IsAlive() && e != null && e.FloorId() == a.FloorId();
         public static bool IsAffectedBy(this Actor a, EffectName effect) => a.IsAlive() && a.Effects != null && a.Effects.Active.Any(e => e.Name == effect);
         public static bool TryIdentify(this Actor a, Item i) => a.Inventory != null && a.Inventory.TryIdentify(i);
         public static bool TryUseItem(this Actor actor, Item item, out bool consumed)

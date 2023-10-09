@@ -277,7 +277,7 @@ namespace Fiero.Business.Scenes
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
-                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
+                    Systems.Render.AnimateViewport(true, floorId, e.Actor.Position(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
                 }
             });
             // ActionSystem.ActorIntentEvaluated:
@@ -299,7 +299,8 @@ namespace Fiero.Business.Scenes
             // - Show animation and play sound
             yield return Systems.Action.ActorTeleporting.SubscribeResponse(e =>
             {
-                var (seeOld, seeNew) = (Player.CanSee(e.OldPosition), Player.CanSee(e.NewPosition));
+                var floorId = e.Actor.FloorId();
+                var (seeOld, seeNew) = (Player.CanSee(floorId, e.OldPosition), Player.CanSee(floorId, e.NewPosition));
 
                 if (seeOld && !seeNew)
                 {
@@ -341,7 +342,7 @@ namespace Fiero.Business.Scenes
                         Player.Log?.Write($"{e.Actor.Info.Name} $Action.TeleportsAway$.");
                     e.Actor.Log?.Write($"$Action.YouTeleportAway$.");
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, e.OldPosition, tpOut);
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.OldPosition, tpOut);
                 }
 
                 void TpIn()
@@ -349,7 +350,7 @@ namespace Fiero.Business.Scenes
                     var tpIn = Animation.TeleportIn(e.Actor)
                         .OnFirstFrame(() =>
                         {
-                            if (e.Actor.IsPlayer() || Player.CanSee(e.NewPosition))
+                            if (e.Actor.IsPlayer() || Player.CanSee(floorId, e.NewPosition))
                             {
                                 e.Actor.Render.Hidden = true;
                                 Systems.Render.CenterOn(Player);
@@ -358,7 +359,7 @@ namespace Fiero.Business.Scenes
                         .OnLastFrame(() =>
                         {
                             if (e.Actor.IsInvalid()) return;
-                            if (e.Actor.IsPlayer() || Player.CanSee(e.NewPosition))
+                            if (e.Actor.IsPlayer() || Player.CanSee(floorId, e.NewPosition))
                             {
                                 e.Actor.Render.Hidden = false;
                                 Systems.Render.CenterOn(Player);
@@ -374,7 +375,7 @@ namespace Fiero.Business.Scenes
                         Player.Log.Write($"{e.Actor.Info.Name} $Action.TeleportsIn$.");
                     }
                     Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, e.NewPosition, tpIn);
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.NewPosition, tpIn);
                 }
             });
             // ActionSystem.ActorMoved:
@@ -428,13 +429,19 @@ namespace Fiero.Business.Scenes
                 Systems.Render.CenterOn(Player);
                 if (flags.IsBuff)
                 {
-                    Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Buff(ColorName.LightCyan));
+                    if (Player.CanHear(e.Actor))
+                    {
+                        Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
+                    }
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.Actor.Position(), Animation.Buff(ColorName.LightCyan));
                 }
                 if (flags.IsDebuff)
                 {
-                    Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, e.Actor.Position(), Animation.Debuff(ColorName.LightMagenta));
+                    if (Player.CanHear(e.Actor))
+                    {
+                        Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
+                    }
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.Actor.Position(), Animation.Debuff(ColorName.LightMagenta));
                 }
                 Systems.Render.CenterOn(Player);
             });
@@ -453,7 +460,10 @@ namespace Fiero.Business.Scenes
                 var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
                 if (e.Type == AttackName.Melee)
                 {
-                    Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
+                    if (Player.CanHear(e.Attacker) || Player.CanHear(e.Victim))
+                    {
+                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
+                    }
                     if (Player.CanSee(e.Attacker))
                     {
                         Systems.Render.CenterOn(Player);
@@ -468,7 +478,7 @@ namespace Fiero.Business.Scenes
                                 e.Attacker.Render.Hidden = false;
                                 Systems.Render.CenterOn(Player);
                             });
-                        Systems.Render.AnimateViewport(true, e.Attacker.Position(), anim);
+                        Systems.Render.AnimateViewport(true, e.Attacker.FloorId(), e.Attacker.Position(), anim);
                     }
                 }
                 foreach (var weapon in e.Weapons)
@@ -503,7 +513,7 @@ namespace Fiero.Business.Scenes
                 var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target))
                 {
-                    Systems.Render.AnimateViewport(false, e.Target.Position(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
+                    Systems.Render.AnimateViewport(false, e.Target.FloorId(), e.Target.Position(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
                 }
                 return true;
             });
@@ -527,7 +537,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Victim))
                 {
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                    Systems.Render.AnimateViewport(false, e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
+                    Systems.Render.AnimateViewport(false, e.Victim.FloorId(), e.Victim.Position(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
                 }
                 return true;
             });
@@ -564,13 +574,16 @@ namespace Fiero.Business.Scenes
                     return true;
 
                 e.Actor.Log?.Write($"$Action.YouDie$.");
-                if (e.Actor.IsPlayer())
+                if (e.Actor.FloorId() == Player.FloorId())
                 {
-                    Resources.Sounds.Get(SoundName.PlayerDeath).Play();
-                }
-                else
-                {
-                    Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
+                    if (e.Actor.IsPlayer())
+                    {
+                        Resources.Sounds.Get(SoundName.PlayerDeath).Play();
+                    }
+                    else if (Player.CanHear(e.Actor))
+                    {
+                        Resources.Sounds.Get(SoundName.EnemyDeath, e.Actor.Position() - Player.Position()).Play();
+                    }
                 }
                 e.Actor.Render.Hidden = true;
 
@@ -586,7 +599,7 @@ namespace Fiero.Business.Scenes
                 {
                     if (corpse != null) corpse.Render.Hidden = true;
                     Systems.Render.CenterOn(Player);
-                    Systems.Render.AnimateViewport(false, e.Actor.Position(), Animation.Death(e.Actor)
+                    Systems.Render.AnimateViewport(false, e.Actor.FloorId(), e.Actor.Position(), Animation.Death(e.Actor)
                         .OnLastFrame(() => { if (corpse != null) corpse.Render.Hidden = false; }));
                 }
 
@@ -660,8 +673,14 @@ namespace Fiero.Business.Scenes
                     necro?.Log?.Write($"$Action.NoRoomToRaiseUndead$.");
                     Entities.FlagEntityForRemoval(undead.Id);
                 }
-                Resources.Sounds.Get(SoundName.Buff, undead.Position() - Player.Position()).Play();
-                Systems.Render.AnimateViewport(false, undead.Position(), Animation.Buff(ColorName.Magenta));
+                if (Player.CanHear(undead))
+                {
+                    Resources.Sounds.Get(SoundName.Buff, undead.Position() - Player.Position()).Play();
+                }
+                if (Player.CanSee(undead))
+                {
+                    Systems.Render.AnimateViewport(false, undead.FloorId(), undead.Position(), Animation.Buff(ColorName.Magenta));
+                }
                 undead.TryJoinParty(necro);
                 return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
 
@@ -697,7 +716,7 @@ namespace Fiero.Business.Scenes
                         Entities.FlagEntityForRemoval(e.Item.Id);
                     }
                     e.Actor.Log?.Write($"$Action.YouPickUpA$ {e.Item.DisplayName}.");
-                    if (e.Actor.IsPlayer())
+                    if (e.Actor.IsPlayer() && Player.CanHear(Player))
                     {
                         Resources.Sounds.Get(SoundName.ItemPickedUp).Play();
                     }
@@ -745,7 +764,10 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.ItemThrown.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
-                Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
+                if (Player.CanHear(e.Actor))
+                {
+                    Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
+                }
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     Systems.Render.CenterOn(Player);
@@ -754,8 +776,11 @@ namespace Fiero.Business.Scenes
                         ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color),
                         _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color)
                     };
-                    Systems.Render.AnimateViewport(true, e.Actor.Position(), anim);
-                    Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.Actor.Position(), anim);
+                    if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
+                    {
+                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    }
                 }
                 if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance)
                 {
@@ -769,7 +794,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Systems.Render.AnimateViewport(false, e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    Systems.Render.AnimateViewport(false, e.Actor.FloorId(), e.Position, Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {
@@ -784,12 +809,18 @@ namespace Fiero.Business.Scenes
             yield return Systems.Action.WandZapped.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouZap$ {e.Wand.DisplayName}.");
-                Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
+                if (Player.CanHear(e.Actor))
+                {
+                    Resources.Sounds.Get(SoundName.MagicAttack, e.Actor.Position() - Player.Position()).Play();
+                }
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
-                    Systems.Render.AnimateViewport(true, e.Actor.Position(), anim);
-                    Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    Systems.Render.AnimateViewport(true, e.Actor.FloorId(), e.Actor.Position(), anim);
+                    if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
+                    {
+                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    }
                 }
                 if (e.Victim != null)
                 {
@@ -914,7 +945,7 @@ namespace Fiero.Business.Scenes
                     var pos = e.Feature.Position();
                     Systems.Render.CenterOn(Player);
                     Resources.Sounds.Get(SoundName.TrapSpotted, pos - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(false, pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
+                    Systems.Render.AnimateViewport(false, e.Actor.FloorId(), pos, Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }
             });
             // ActionSystem.ExplosionHappened:
@@ -922,10 +953,12 @@ namespace Fiero.Business.Scenes
             // - Damage all affected entities
             yield return Systems.Action.ExplosionHappened.SubscribeResponse(e =>
             {
+                if (Player.FloorId() != e.FloorId)
+                    return true;
                 Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
-                if (Player.CanSee(e.Center))
+                if (Player.CanSee(e.FloorId, e.Center))
                 {
-                    Systems.Render.AnimateViewport(false, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
+                    Systems.Render.AnimateViewport(false, e.FloorId, e.Center, e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
                 }
                 return true;
             });

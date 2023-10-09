@@ -15,7 +15,7 @@ stick_to_(Entity, Animations, Stop, UUID) :-
 		forall(member(StopId, StopIds), stop(StopId))
 	),
 	position(Entity, Floor, Pos),
-	anim:play(Pos, Animations, Ids),
+	anim:play(Floor, Pos, Animations, Ids),
 	data:UUID set Ids,
 	data:on_actor_moved(EntityId, UUID) set ([]>>(
 		member(Id, Ids),

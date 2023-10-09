@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly struct Timeline
     {
@@ -13,13 +9,15 @@ namespace Fiero.Business
         };
 
         public readonly Animation Animation;
-        public readonly Coord ScreenPosition;
+        public readonly FloorId Floor;
+        public readonly Coord WorldPosition;
         public readonly List<Frame> Frames = new();
 
-        public Timeline(Animation anim, Coord pos, TimeSpan startAt)
+        public Timeline(Animation anim, FloorId floor, Coord pos, TimeSpan startAt)
         {
             Animation = anim;
-            ScreenPosition = pos;
+            WorldPosition = pos;
+            Floor = floor;
             Frames.AddRange(Get(anim, startAt));
         }
 

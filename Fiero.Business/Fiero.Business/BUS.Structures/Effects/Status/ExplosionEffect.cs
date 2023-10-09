@@ -30,7 +30,7 @@ namespace Fiero.Business
             var actualShape = Shape
                 .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
                 .ToArray();
-            systems.Action.ExplosionHappened.HandleOrThrow(new(owner, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
+            systems.Action.ExplosionHappened.HandleOrThrow(new(owner, floorId, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
             // TODO: Make this a handler of ExplosionHappened?
             foreach (var p in actualShape)
             {

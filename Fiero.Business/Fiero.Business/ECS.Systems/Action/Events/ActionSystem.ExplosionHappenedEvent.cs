@@ -1,9 +1,7 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem
     {
-        public readonly record struct ExplosionHappenedEvent(Entity Source, Coord Center, Coord[] Points, int BaseDamage);
+        public readonly record struct ExplosionHappenedEvent(Entity Source, FloorId FloorId, Coord Center, Coord[] Points, int BaseDamage);
     }
 }

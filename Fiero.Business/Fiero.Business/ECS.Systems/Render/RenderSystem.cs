@@ -142,6 +142,7 @@ namespace Fiero.Business
             }
             var time = _sw.Elapsed;
             var keys = new List<int>(Timelines.Keys);
+            var playerFloor = Viewport.Following.V.FloorId();
             foreach (var id in keys)
             {
                 if (!Timelines.TryGetValue(id, out var timeline))
@@ -157,17 +158,20 @@ namespace Fiero.Business
                         Timelines.Remove(id);
                         if (timeline.Animation.RepeatCount < 0 || timeline.Animation.RepeatCount > 0 && timeline.Animation.RepeatCount-- > 0)
                         {
-                            Timelines[id] = new Timeline(timeline.Animation, timeline.ScreenPosition, _sw.Elapsed);
+                            Timelines[id] = new Timeline(timeline.Animation, timeline.Floor, timeline.WorldPosition, _sw.Elapsed);
                         }
                         continue;
                     }
                 }
                 if (time > currentFrame.Start && !Vfx.ContainsKey(id))
                 {
-                    var myVfx = Vfx[id] = new();
-                    foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
+                    if (Viewport.Following.V.CanSee(timeline.Floor, timeline.WorldPosition))
                     {
-                        myVfx.Enqueue(new(timeline.ScreenPosition, spriteDef));
+                        var myVfx = Vfx[id] = new();
+                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
+                        {
+                            myVfx.Enqueue(new(timeline.WorldPosition, spriteDef));
+                        }
                     }
                     timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
                 }
@@ -189,17 +193,17 @@ namespace Fiero.Business
             return false;
         }
 
-        public int AnimateViewport(bool blocking, Coord worldPos, params Animation[] animations)
+        public int AnimateViewport(bool blocking, FloorId floor, Coord worldPos, params Animation[] animations)
         {
             var t = _sw.Elapsed;
-            var batch = animations.Select(a => new Timeline(a, worldPos, t)).ToList();
+            var batch = animations.Select(a => new Timeline(a, floor, worldPos, t)).ToList();
             foreach (var anim in batch)
             {
                 if (!anim.Frames.Any())
                     continue;
                 Timelines[Interlocked.Increment(ref _id)] = anim;
             }
-            if (blocking)
+            if (blocking && Viewport.Following.V.CanSee(floor, worldPos))
             {
                 Loop.WaitAndDraw(animations.Select(x => x.Duration).Max(), onUpdate: (t, ts) => UI.Input.Update());
             }

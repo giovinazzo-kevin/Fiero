@@ -15,6 +15,8 @@ public sealed class TriggerSound : SolverBuiltIn
     internal readonly record struct SoundDefStub()
     {
         [Term(Marshalling = TermMarshalling.Positional)]
+        public FloorId FloorId { get; init; }
+        [Term(Marshalling = TermMarshalling.Positional)]
         public Coord Position { get; init; }
         public float Pitch { get; init; } = 1f;
         public float Volume { get; init; } = 2f;
@@ -50,13 +52,18 @@ public sealed class TriggerSound : SolverBuiltIn
         {
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(SoundDefStub), args[0]);
         }
+        var player = _services.GetInstance<GameSystems>().Render.Viewport.Following.V;
         var pos = stub.Position;
         if (stub.Relative)
         {
-            var center = _services.GetInstance<GameSystems>().Render.Viewport.Following.V.Position();
+            var center = player.Position();
             pos -= center;
         }
-        _services.GetInstance<GameResources>().Sounds.Get(sound, pos, stub.Volume, stub.Pitch).Play();
+        if (stub.FloorId == player.FloorId())
+        {
+            _services.GetInstance<GameResources>().Sounds
+                .Get(sound, pos, stub.Volume, stub.Pitch).Play();
+        }
         yield return True();
     }
 }

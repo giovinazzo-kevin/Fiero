@@ -1,6 +1,7 @@
 % Do not modify unless you know what you are doing.
 
 :- module(anim, []).
+:- use_module(data).
 :- subscribe(action, [actor_moved]).
 
 action:actor_moved(_ { actor: A }) :- 

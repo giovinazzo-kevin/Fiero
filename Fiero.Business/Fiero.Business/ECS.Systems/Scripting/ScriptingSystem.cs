@@ -72,16 +72,13 @@ namespace Fiero.Business
             StdlibScope = Interpreter.CreateScope()
                 .WithSearchDirectory(@".\Resources\Scripts\");
             var fiero = Interpreter.Load(ref StdlibScope, FieroModule)
-                .GetOrThrow(new InvalidOperationException())
-                .WithLinkedLibrary(FieroLib);
-            var stdlib = StdlibScope.Modules[WellKnown.Modules.Stdlib];
+                .GetOrThrow(new InvalidOperationException());
             StdlibScope = StdlibScope
                 .WithModule(fiero)
-                .WithModule(stdlib
+                .WithModule(new Module(WellKnown.Modules.User, runtime: true)
                     .WithImport(FieroModule))
                 .WithCurrentModule(WellKnown.Modules.User)
-                .WithModule(new Module(WellKnown.Modules.User, runtime: true)
-                    .WithImport(WellKnown.Modules.Stdlib));
+                .WithBaseModule(FieroModule);
             ScriptLoaded = new(this, nameof(ScriptLoaded));
             ScriptUnloaded = new(this, nameof(ScriptUnloaded));
             InputAvailable = new(this, nameof(InputAvailable));

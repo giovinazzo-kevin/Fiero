@@ -33,9 +33,13 @@ public class SelectScript : ShellCommand
         else
         {
             var val = scripting.Cache[key].ScriptProperties.Solver.KnowledgeBase;
+            var mod = scripting.Cache[key].ScriptProperties.Scope.Module;
+            var scp = scripting.Cache[key].ScriptProperties.Scope.InterpreterScope;
             shell.WriteLine($"Selected script: {key}", LogLevel.Inf);
             yield return scope
-                .WithKnowledgeBase(val);
+                .WithKnowledgeBase(val)
+                .WithInterpreterScope(scp
+                    .WithCurrentModule(mod));
         }
     }
 }

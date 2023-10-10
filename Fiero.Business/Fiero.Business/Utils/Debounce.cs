@@ -1,12 +1,8 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Fiero.Business.Utils;
+﻿namespace Fiero.Business.Utils;
 
 public class Debounce
 {
-    public readonly TimeSpan Cooldown;
+    public TimeSpan Cooldown { get; protected set; }
     protected DateTime LastHit;
 
     public bool IsOnCooldown => DateTime.UtcNow - LastHit < Cooldown;
@@ -20,7 +16,7 @@ public class Debounce
     public Debounce(TimeSpan cooldown)
     {
         Cooldown = cooldown;
-        Hit();
+        LastHit = DateTime.UtcNow;
     }
 
     public virtual void Hit()

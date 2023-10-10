@@ -89,8 +89,8 @@ namespace Fiero.Business
             shell.UseUnicodeSymbols = false;
             var cts = new CancellationTokenSource();
             var outExpr = Concern.Defer()
+                //.After(TimeSpan.FromMilliseconds(20))
                 .UseAsynchronousTimer()
-                //.After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     var sb = new StringBuilder();

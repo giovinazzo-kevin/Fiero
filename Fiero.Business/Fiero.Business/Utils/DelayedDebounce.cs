@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Fiero.Business.Utils;
+﻿namespace Fiero.Business.Utils;
 
 /// <summary>
 /// Like a debounce, but it allows a fixed number of hits per cooldown period before kicking in.

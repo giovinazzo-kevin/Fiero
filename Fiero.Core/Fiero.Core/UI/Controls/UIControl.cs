@@ -34,6 +34,7 @@ namespace Fiero.Core
 
         public event Action<UIControl> Invalidated;
         protected bool IsDirty { get; set; } = true;
+        protected bool IsFrozen { get; set; } = false;
 
 
         private object _redrawChildrenLock = new();
@@ -341,57 +342,63 @@ namespace Fiero.Core
             if (IsHidden)
                 return;
             if (_target is null) return;
-            lock (_redrawChildrenLock)
+            var innerStates = RenderStates.Default;
+            innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
+            if (!IsFrozen)
             {
-                var innerStates = RenderStates.Default;
-                innerStates.Transform.Translate((Position.V * Coord.NegativeOne).ToVector2f());
-                if (IsDirty)
+                lock (_redrawChildrenLock)
                 {
-                    IsDirty = false;
-                    _target.Clear(Color.Transparent);
-                    Repaint(_target, innerStates);
-                    foreach (var child in Children)
-                        child.IsDirty = false;
-                    _redrawChildren.Clear();
-                }
-                if (_redrawChildren.Count > 0)
-                {
-                    var toRepaintAnyway = Children.Except(_redrawChildren)
-                        .Where(otherChild => _redrawChildren.Any(rd => rd.Intersects(otherChild)));
-                    var drawList = _redrawChildren
-                        .Concat(toRepaintAnyway)
-                        .OrderByDescending(x => x.ZOrder.V)
-                        .ThenByDescending(x => x.IsActive.V ? 0 : 1)
-                        .ThenBy(Children.IndexOf) // Preserves the natural ordering where z-order is implicit
-                        .ToArray();
-                    // If a child has a semitransparent background, we need to physically erase its shape from the texture
-                    // There's no need to do this for opaque objects
-                    foreach (var child in drawList
-                        .Where(c => c.Background.V.A < 255))
+                    if (IsDirty)
                     {
-                        using var rect = new RectangleShape(child.BorderRenderSize)
+                        IsDirty = false;
+                        _target.Clear(Color.Transparent);
+                        Repaint(_target, innerStates);
+                        foreach (var child in Children)
+                            child.IsDirty = false;
+                        _redrawChildren.Clear();
+                    }
+                    if (_redrawChildren.Count > 0)
+                    {
+                        var toRepaintAnyway = Children.Except(_redrawChildren)
+                            .Where(otherChild => _redrawChildren.Any(rd => rd.Intersects(otherChild)));
+                        var drawList = _redrawChildren
+                            .Concat(toRepaintAnyway)
+                            .OrderByDescending(x => x.ZOrder.V)
+                            .ThenByDescending(x => x.IsActive.V ? 0 : 1)
+                            .ThenBy(Children.IndexOf) // Preserves the natural ordering where z-order is implicit
+                            .ToArray();
+                        // If a child has a semitransparent background, we need to physically erase its shape from the texture
+                        // There's no need to do this for opaque objects
+                        foreach (var child in drawList
+                            .Where(c => c.Background.V.A < 255))
                         {
-                            FillColor = Color.Transparent,
-                            Position = (child.BorderRenderPos - BorderRenderPos).ToVector2f()
-                        };
-                        var eraser = RenderStates.Default;
-                        eraser.BlendMode = BlendMode.None;
-                        _target.Draw(rect, eraser);
+                            using var rect = new RectangleShape(child.BorderRenderSize)
+                            {
+                                FillColor = Color.Transparent,
+                                Position = (child.BorderRenderPos - BorderRenderPos).ToVector2f()
+                            };
+                            var eraser = RenderStates.Default;
+                            eraser.BlendMode = BlendMode.None;
+                            _target.Draw(rect, eraser);
+                        }
+                        foreach (var child in drawList)
+                        {
+                            child.Repaint(_target, innerStates);
+                            child.IsDirty = false;
+                        }
+                        _redrawChildren.Clear();
                     }
-                    foreach (var child in drawList)
-                    {
-                        child.Repaint(_target, innerStates);
-                        child.IsDirty = false;
-                    }
-                    _redrawChildren.Clear();
                 }
                 _target.Display();
                 using var sprite = new Sprite(_target.Texture) { Position = Position.V };
                 target.Draw(sprite, states);
-                PostDraw(target, states);
-                foreach (var c in Children)
+                if (!IsFrozen)
                 {
-                    c.PostDraw(target, states);
+                    PostDraw(target, states);
+                    foreach (var c in Children)
+                    {
+                        c.PostDraw(target, states);
+                    }
                 }
             }
         }

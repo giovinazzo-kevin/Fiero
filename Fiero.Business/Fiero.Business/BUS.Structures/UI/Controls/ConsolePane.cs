@@ -1,9 +1,6 @@
 ﻿using Ergo.Lang.Extensions;
 using Fiero.Business.Utils;
-using Fiero.Core;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace Fiero.Business
@@ -19,7 +16,13 @@ namespace Fiero.Business
         public readonly UIControlProperty<int> ScrollAmount = new(nameof(ScrollAmount), 8, invalidate: true);
         public TextBox Caret { get; private set; }
 
-        private readonly Debounce _debounce = new(TimeSpan.FromMilliseconds(10)) { Enabled = true };
+        private readonly RampingDebounce _writeDebounce = new(
+            minCooldown: TimeSpan.FromMilliseconds(50),
+            maxCooldown: TimeSpan.FromMilliseconds(500),
+            rampUpFactor: TimeSpan.FromMilliseconds(50),
+            decayFactor: TimeSpan.FromMilliseconds(1000)
+        )
+        { Enabled = true };
         public ConsolePane(GameInput input, KeyboardInputReader reader) : base(input)
         {
             Caret = new(input, reader);
@@ -141,7 +144,7 @@ namespace Fiero.Business
             Caret.IsHidden.V = false;
         }
 
-        public void Put(char c)
+        public void Put(char c, bool invalidate = true)
         {
             while (Lines.Count <= Cursor.V.Y)
                 Lines.Add(new StringBuilder());
@@ -163,7 +166,7 @@ namespace Fiero.Business
                 case '\t':
                     int nextTabStop = ((Cursor.V.X / TabSize) + 1) * TabSize;
                     while (Cursor.V.X < nextTabStop)
-                        Put(' ');
+                        Put(' ', invalidate);
                     break;
                 default:
                     if (Cursor.V.X <= stringBuilder.Length)
@@ -173,26 +176,39 @@ namespace Fiero.Business
                     }
                     break;
             }
-            OnTextInvalidated();
-            ScrollToCursor();
+            if (invalidate)
+            {
+                OnTextInvalidated();
+                ScrollToCursor();
+            }
         }
-        public void Write(string s)
+        public void Write(string s, bool invalidate = true)
         {
             foreach (var c in s)
-                Put(c);
+                Put(c, false);
+            if (invalidate)
+            {
+                OnTextInvalidated();
+                ScrollToCursor();
+            }
         }
 
-        public void WriteLine(string s) => Write(s + Environment.NewLine);
+        public void WriteLine(string s, bool invalidate = true) => Write(s + Environment.NewLine, invalidate);
 
         protected override void OnTextInvalidated()
         {
             base.OnTextInvalidated();
-            if (!_debounce.IsDebouncing)
-                _debounce.Fire += _debounce_Fire;
-            _debounce.Hit();
+            IsFrozen = true;
+            if (!_writeDebounce.Enabled)
+                _debounce_Fire(null);
+            if (!_writeDebounce.IsDebouncing)
+                _writeDebounce.Fire += _debounce_Fire;
+            _writeDebounce.Hit();
             void _debounce_Fire(Debounce obj)
             {
-                _debounce.Fire -= _debounce_Fire;
+                if (obj != null)
+                    obj.Fire -= _debounce_Fire;
+                IsFrozen = false;
                 Text.V = Lines
                     .Skip(Scroll.V)
                     .Take(CalculatedRows)

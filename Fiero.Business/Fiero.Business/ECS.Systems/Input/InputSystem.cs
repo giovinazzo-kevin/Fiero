@@ -24,13 +24,16 @@ namespace Fiero.Business
 
         public void Update(TimeSpan t, TimeSpan dt)
         {
-            foreach (var key in Input.KeysPressed)
+            if (Input.IsKeyboardFocusAvailable)
             {
-                KeyboardEvent.Handle(new(key, KeyEventType.Pressed));
-            }
-            foreach (var key in Input.KeysReleased)
-            {
-                KeyboardEvent.Handle(new(key, KeyEventType.Released));
+                foreach (var key in Input.KeysPressed)
+                {
+                    KeyboardEvent.Handle(new(key, KeyEventType.Pressed));
+                }
+                foreach (var key in Input.KeysReleased)
+                {
+                    KeyboardEvent.Handle(new(key, KeyEventType.Released));
+                }
             }
         }
     }

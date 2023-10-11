@@ -181,6 +181,8 @@ namespace Fiero.Business
             var sysRegex = NormalizeSystemName();
             var reqRegex = NormalizeRequestName();
             var evtRegex = NormalizeEventName();
+            // Ensures that events are cached by the term marshall
+            var marshallingCtx = new TermMarshallingContext();
 
             var finalDict = new Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>>();
             foreach (var (sys, field, isReq) in MetaSystem.GetSystemEventFields())
@@ -196,7 +198,7 @@ namespace Fiero.Business
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
-                            .SubscribeResponse(evt => Respond(self, evt, reqType, hook));
+                            .SubscribeResponse(evt => Respond(self, evt, reqType, hook, marshallingCtx));
                     });
                 }
                 else
@@ -208,16 +210,16 @@ namespace Fiero.Business
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
                         return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                            .SubscribeHandler(evt => Respond(self, evt, evtType, hook));
+                            .SubscribeHandler(evt => Respond(self, evt, evtType, hook, marshallingCtx));
                     });
                 }
             }
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook, TermMarshallingContext marshallingCtx)
             {
-                var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named);
+                var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: marshallingCtx);
                 try
                 {
                     // TODO: Figure out a way for scripts to return complex EventResults?

@@ -7,6 +7,8 @@ using Ergo.Solver.BuiltIns;
 
 namespace Fiero.Business;
 
+// NOTE: Possibly superseded by EntityAsTerm, though it could still be useful.
+
 [SingletonDependency]
 public sealed class CastEntity : GameEntitiesBuiltIn
 {

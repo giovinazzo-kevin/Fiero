@@ -43,14 +43,18 @@ public sealed class EntityAsTerm : IAbstractTerm
         EntityId = entityId;
     }
 
-    private ITerm ToCanonical()
+    public Maybe<EcsEntity> GetProxy()
     {
         if (_entities.TryGetProxy(Type, EntityId, out var entity))
         {
-            return TermMarshall.ToTerm(entity, Type);
+            return entity;
         }
-        return __invalidEntity;
+        return default;
     }
+
+    private ITerm ToCanonical() => GetProxy()
+        .Select(x => TermMarshall.ToTerm(x, Type))
+        .GetOr(__invalidEntity);
 
     public ITerm CanonicalForm => ToCanonical();
     public Signature Signature => _simple.GetSignature();

@@ -60,6 +60,7 @@ namespace Fiero.Core
             Director = director;
             Localization = localization;
             // Hydrate entities when parsed from terms
+            // TODO: Figure out overlap with EntityAsTerm
             TermMarshall.RegisterTransform<EcsEntity>(e =>
             {
                 var proxyType = e.GetType();

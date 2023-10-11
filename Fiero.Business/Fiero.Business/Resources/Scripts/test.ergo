@@ -3,6 +3,7 @@
 :- use_module(data).
 :- use_module(event).
 :- use_module(bomb_commands).
+:- subscribe(action, [corpse_created]).
 
 test:began :- 
 	bind(k, pressed, [_]>>(coolio)),
@@ -26,3 +27,7 @@ boom(N) :-
 	for(I, 1, N), 
 	Q := Pos + p(I, I),
 	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
+
+action:corpse_created(_{actor: A}):-
+X = A,
+write(X), nl.

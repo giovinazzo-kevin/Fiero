@@ -10,7 +10,7 @@ namespace Unconcern.Delegation
         IDelegateExpressionBuilder Send<T, U>(Func<EventBus.Message<T>, EventBus.Message<U>> transform);
         IDelegateExpressionBuilder Reply<T, U>(Func<EventBus.Message<T>, EventBus.Message<U>> transform)
             => Send<T, U>(msg => transform(msg));
-        IDelegateExpressionBuilder Do<T>(Action<EventBus.Message<T>> handle, EventBus.MessageHandlerTiming timing);
+        IDelegateExpressionBuilder Do<T>(Action<EventBus.Message<T>> handle);
         IDelegateExpression Build();
     }
 }

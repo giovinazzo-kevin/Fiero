@@ -16,8 +16,6 @@ namespace Unconcern
                     Enumerable.Empty<Func<EventBus.Message, bool>>(),
                     Enumerable.Empty<Func<EventBus.Message, EventBus.Message>>(),
                     Enumerable.Empty<Action<EventBus.Message>>(),
-                    Enumerable.Empty<Action<EventBus.Message>>(),
-                    Enumerable.Empty<Action<EventBus.Message>>(),
                     Enumerable.Empty<IDelegateExpression>()));
         }
 

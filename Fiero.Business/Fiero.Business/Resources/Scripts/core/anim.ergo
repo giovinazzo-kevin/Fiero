@@ -2,9 +2,9 @@
 
 :- module(anim, []).
 :- use_module(data).
-:- subscribe(action, [post_actor_moved]).
+:- subscribe(action, [actor_moved]).
 
-action:post_actor_moved(_ { actor: A }) :- 
+action:actor_moved(_ { actor: A }) :- 
 	data:on_actor_moved(&A.id, _) get Lambda,
 	call(Lambda).
 stick_to_(Entity, Animations, Stop, UUID) :- 

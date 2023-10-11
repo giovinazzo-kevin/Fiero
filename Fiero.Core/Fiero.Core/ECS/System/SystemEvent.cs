@@ -6,7 +6,7 @@ namespace Fiero.Core
 {
     public interface ISystemEvent
     {
-        Subscription SubscribeHandler(Action<object> handle, EventBus.MessageHandlerTiming timing);
+        Subscription SubscribeHandler(Action<object> handle);
     }
     public class SystemEvent<TSystem, TArgs> : ISystemEvent
         where TSystem : EcsSystem
@@ -25,16 +25,15 @@ namespace Fiero.Core
             Owner.EventBus.Send(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName);
         }
 
-        public Subscription SubscribeHandler(Action<TArgs> handle, EventBus.MessageHandlerTiming timing = EventBus.MessageHandlerTiming.Exact)
+        public Subscription SubscribeHandler(Action<TArgs> handle)
         {
             return Concern.Delegate(Owner.EventBus)
                 .When<SystemMessage<TSystem, TArgs>>(x => Name.Equals(x.Content.Sender))
-                .Do<SystemMessage<TSystem, TArgs>>(msg => handle(msg.Content.Data), timing)
+                .Do<SystemMessage<TSystem, TArgs>>(msg => handle(msg.Content.Data))
                 .Build()
                 .Listen(Owner.EventHubName);
         }
 
-        Subscription ISystemEvent.SubscribeHandler(Action<object> handle, EventBus.MessageHandlerTiming timing = EventBus.MessageHandlerTiming.Exact)
-            => SubscribeHandler(x => handle(x), timing);
+        Subscription ISystemEvent.SubscribeHandler(Action<object> handle) => SubscribeHandler(x => handle(x));
     }
 }

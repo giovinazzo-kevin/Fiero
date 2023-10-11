@@ -189,31 +189,11 @@ namespace Fiero.Business
                     var reqName = new Atom(field.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
                     var reqType = field.FieldType.GetGenericArguments()[1];
-                    var preHookName = new Atom($"pre_{reqName.Value}");
-                    var preHook = new Hook(new(preHookName, 1, sysName, default));
                     var hook = new Hook(new(reqName, 1, sysName, default));
-                    var postHookName = new Atom($"post_{reqName.Value}");
-                    var postHook = new Hook(new(postHookName, 1, sysName, default));
-                    finalDict.Add(new(preHookName, 1, sysName, default), (self, systems) =>
-                    {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(preHook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, reqType, preHook), EventBus.MessageHandlerTiming.Before);
-                        return new Subscription();
-                    });
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(hook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, reqType, hook), EventBus.MessageHandlerTiming.Exact);
-                        return new Subscription();
-                    });
-                    finalDict.Add(new(postHookName, 1, sysName, default), (self, systems) =>
-                    {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(postHook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, reqType, postHook), EventBus.MessageHandlerTiming.After);
-                        return new Subscription();
+                        return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
+                            .SubscribeResponse(evt => Respond(self, evt, reqType, hook));
                     });
                 }
                 else
@@ -221,31 +201,11 @@ namespace Fiero.Business
                     var evtName = new Atom(field.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
                         .ToErgoCase());
                     var evtType = field.FieldType.GetGenericArguments()[1];
-                    var preHookName = new Atom($"pre_{evtName.Value}");
-                    var preHook = new Hook(new(preHookName, 1, sysName, default));
                     var hook = new Hook(new(evtName, 1, sysName, default));
-                    var postHookName = new Atom($"post_{evtName.Value}");
-                    var postHook = new Hook(new(postHookName, 1, sysName, default));
-                    finalDict.Add(new(preHookName, 1, sysName, default), (self, systems) =>
-                    {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(preHook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, evtType, preHook), EventBus.MessageHandlerTiming.Before);
-                        return new Subscription();
-                    });
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(hook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, evtType, hook), EventBus.MessageHandlerTiming.Exact);
-                        return new Subscription();
-                    });
-                    finalDict.Add(new(postHookName, 1, sysName, default), (self, systems) =>
-                    {
-                        if (self.Script.ScriptProperties.SubscribedEvents.Contains(postHook.Signature))
-                            return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
-                                .SubscribeHandler(evt => Respond(self, evt, evtType, postHook), EventBus.MessageHandlerTiming.After);
-                        return new Subscription();
+                        return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
+                            .SubscribeHandler(evt => Respond(self, evt, evtType, hook));
                     });
                 }
             }

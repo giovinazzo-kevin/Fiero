@@ -59,29 +59,7 @@ namespace Unconcern.Delegation
                         ;
                     }
                 }
-                foreach (var handler in expression.PreHandlers)
-                {
-                    try
-                    {
-                        handler(msg);
-                    }
-                    catch (InvalidCastException e) when (e.Message == "wrong_handler")
-                    {
-                        ;
-                    }
-                }
                 foreach (var handler in expression.Handlers)
-                {
-                    try
-                    {
-                        handler(msg);
-                    }
-                    catch (InvalidCastException e) when (e.Message == "wrong_handler")
-                    {
-                        ;
-                    }
-                }
-                foreach (var handler in expression.PostHandlers)
                 {
                     try
                     {
@@ -96,13 +74,15 @@ namespace Unconcern.Delegation
         }
 
         internal static IDelegateExpression WithCondition(this IDelegateExpression expr, Func<EventBus.Message, bool> cond)
-            => new DelegateExpression(expr.Bus, expr.Triggers.Append(cond), expr.Replies, expr.PreHandlers, expr.Handlers, expr.PostHandlers, expr.Siblings);
+            => new DelegateExpression(expr.Bus, expr.Triggers.Append(cond), expr.Replies, expr.Handlers, expr.Siblings);
+
         internal static IDelegateExpression WithReply(this IDelegateExpression expr, Func<EventBus.Message, EventBus.Message> reply)
-            => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies.Append(reply), expr.PreHandlers, expr.Handlers, expr.PostHandlers, expr.Siblings);
-        internal static IDelegateExpression WithPreHandler(this IDelegateExpression expr, Action<EventBus.Message> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.PreHandlers.Append(handler), expr.Handlers, expr.PostHandlers, expr.Siblings);
-        internal static IDelegateExpression WithHandler(this IDelegateExpression expr, Action<EventBus.Message> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.PreHandlers, expr.Handlers.Append(handler), expr.PostHandlers, expr.Siblings);
-        internal static IDelegateExpression WithPostHandler(this IDelegateExpression expr, Action<EventBus.Message> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.PreHandlers, expr.Handlers, expr.PostHandlers.Append(handler), expr.Siblings);
-        internal static IDelegateExpression WithSibling(this IDelegateExpression expr, IDelegateExpression other) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.PreHandlers, expr.Handlers, expr.PostHandlers, expr.Siblings.Append(other));
+            => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies.Append(reply), expr.Handlers, expr.Siblings);
+
+        internal static IDelegateExpression WithHandler(this IDelegateExpression expr, Action<EventBus.Message> handler) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.Handlers.Append(handler), expr.Siblings);
+
+        internal static IDelegateExpression WithSibling(this IDelegateExpression expr, IDelegateExpression other) => new DelegateExpression(expr.Bus, expr.Triggers, expr.Replies, expr.Handlers, expr.Siblings.Append(other));
+
         public static bool IsFrom<T>(this EventBus.Message<T> msg, string hub) => msg.Sender == hub;
         public static bool HasRecipient<T>(this EventBus.Message<T> msg, string hub) => msg.Recipients.Contains(hub);
     }

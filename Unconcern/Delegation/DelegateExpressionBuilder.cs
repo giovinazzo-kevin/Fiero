@@ -18,12 +18,8 @@ namespace Unconcern.Delegation
         }
 
 
-        public IDelegateExpressionBuilder Do<T>(Action<EventBus.Message<T>> handle, EventBus.MessageHandlerTiming timing)
+        public IDelegateExpressionBuilder Do<T>(Action<EventBus.Message<T>> handle)
         {
-            if (timing == EventBus.MessageHandlerTiming.Before)
-                return DoBefore(handle);
-            if (timing == EventBus.MessageHandlerTiming.After)
-                return DoAfter(handle);
             return new DelegateExpressionBuilder(Expression.WithHandler(msg =>
             {
                 if (!msg.Type.IsAssignableTo(typeof(T)))
@@ -32,26 +28,7 @@ namespace Unconcern.Delegation
                 handle(new EventBus.Message<T>(msg.Timestamp, content, msg.Sender, msg.Recipients));
             }));
         }
-        protected IDelegateExpressionBuilder DoBefore<T>(Action<EventBus.Message<T>> handle)
-        {
-            return new DelegateExpressionBuilder(Expression.WithPreHandler(msg =>
-            {
-                if (!msg.Type.IsAssignableTo(typeof(T)))
-                    throw new InvalidCastException("wrong_handler");
-                var content = (T)msg.Content;
-                handle(new EventBus.Message<T>(msg.Timestamp, content, msg.Sender, msg.Recipients));
-            }));
-        }
-        protected IDelegateExpressionBuilder DoAfter<T>(Action<EventBus.Message<T>> handle)
-        {
-            return new DelegateExpressionBuilder(Expression.WithPostHandler(msg =>
-            {
-                if (!msg.Type.IsAssignableTo(typeof(T)))
-                    throw new InvalidCastException("wrong_handler");
-                var content = (T)msg.Content;
-                handle(new EventBus.Message<T>(msg.Timestamp, content, msg.Sender, msg.Recipients));
-            }));
-        }
+
         public IDelegateExpressionBuilder Send<T, U>(Func<EventBus.Message<T>, EventBus.Message<U>> transform)
         {
             return new DelegateExpressionBuilder(Expression.WithReply(msg =>
@@ -63,6 +40,7 @@ namespace Unconcern.Delegation
                 return new EventBus.Message(DateTime.Now, typeof(U), transformed.Content, transformed.Sender, transformed.Recipients);
             }));
         }
+
         public IDelegateExpressionBuilder When<T>(Func<EventBus.Message<T>, bool> cond)
         {
             return new DelegateExpressionBuilder(Expression.WithCondition(msg =>

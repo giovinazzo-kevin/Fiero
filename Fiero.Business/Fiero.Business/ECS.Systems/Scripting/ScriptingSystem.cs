@@ -13,17 +13,19 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.IO.Pipelines;
 using System.Text;
+using System.Text.RegularExpressions;
 using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public partial class ErgoScriptingSystem : EcsSystem
+    public partial class ScriptingSystem : EcsSystem
     {
         public static readonly Atom FieroModule = new("fiero");
         public static readonly Atom AnimationModule = new("anim");
         public static readonly Atom SoundModule = new("sound");
-        public static readonly Atom EffectModule = new("fx");
+        public static readonly Atom EffectModule = new("effect");
         public static readonly Atom DataModule = new("data");
+        public static readonly Atom EventModule = new("event");
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 
@@ -42,10 +44,9 @@ namespace Fiero.Business
         private event Action _unload;
 
         public readonly Encoding Encoding = Encoding.GetEncoding(437);
-        public readonly SystemRequest<ErgoScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
-        public readonly SystemRequest<ErgoScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
-        public readonly SystemEvent<ErgoScriptingSystem, InputAvailableEvent> InputAvailable;
-
+        public readonly SystemRequest<ScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
+        public readonly SystemRequest<ScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
+        public readonly SystemEvent<ScriptingSystem, ScriptEventRaisedEvent> ScriptEventRaised;
         public readonly ConcurrentDictionary<string, Script> Cache = new();
 
         public void ResetPipes()
@@ -58,7 +59,7 @@ namespace Fiero.Business
             Out.Reset();
         }
 
-        public ErgoScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
+        public ScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
             OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), Encoding));
             OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), Encoding));
@@ -79,9 +80,9 @@ namespace Fiero.Business
                     .WithImport(FieroModule))
                 .WithCurrentModule(WellKnown.Modules.User)
                 .WithBaseModule(FieroModule);
-            ScriptLoaded = new(this, nameof(ScriptLoaded));
-            ScriptUnloaded = new(this, nameof(ScriptUnloaded));
-            InputAvailable = new(this, nameof(InputAvailable));
+            ScriptLoaded = new(this, nameof(ScriptLoaded), asynchronous: true);
+            ScriptUnloaded = new(this, nameof(ScriptUnloaded), asynchronous: true);
+            ScriptEventRaised = new(this, nameof(ScriptEventRaised), asynchronous: true);
         }
 
         /// <summary>
@@ -179,14 +180,18 @@ namespace Fiero.Business
             if (CachedRoutes != null)
                 return CachedRoutes;
 
+            var sysRegex = NormalizeSystemName();
+            var reqRegex = NormalizeRequestName();
+            var evtRegex = NormalizeEventName();
+
             var finalDict = new Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>>();
             foreach (var (sys, field, isReq) in MetaSystem.GetSystemEventFields())
             {
-                var sysName = new Atom(sys.Name.Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase)
+                var sysName = new Atom(sysRegex.Replace(sys.Name, string.Empty)
                     .ToErgoCase());
                 if (isReq)
                 {
-                    var reqName = new Atom(field.Name.Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    var reqName = new Atom(reqRegex.Replace(field.Name, string.Empty)
                         .ToErgoCase());
                     var reqType = field.FieldType.GetGenericArguments()[1];
                     var hook = new Hook(new(reqName, 1, sysName, default));
@@ -198,7 +203,7 @@ namespace Fiero.Business
                 }
                 else
                 {
-                    var evtName = new Atom(field.Name.Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    var evtName = new Atom(evtRegex.Replace(field.Name, string.Empty)
                         .ToErgoCase());
                     var evtType = field.FieldType.GetGenericArguments()[1];
                     var hook = new Hook(new(evtName, 1, sysName, default));
@@ -241,5 +246,12 @@ namespace Fiero.Business
                 }
             }
         }
+
+        [GeneratedRegex("System$", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex NormalizeSystemName();
+        [GeneratedRegex("Request$", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex NormalizeRequestName();
+        [GeneratedRegex("Event$", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex NormalizeEventName();
     }
 }

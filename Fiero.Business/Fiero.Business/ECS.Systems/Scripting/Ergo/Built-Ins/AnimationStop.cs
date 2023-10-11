@@ -13,7 +13,7 @@ public sealed class AnimationStop : SolverBuiltIn
     protected readonly IServiceFactory Services;
     public AnimationStop(IServiceFactory services)
         // repeat(id, times).
-        : base("", new("stop"), 1, ErgoScriptingSystem.AnimationModule)
+        : base("", new("stop_animation"), 1, ScriptingSystem.AnimationModule)
     {
         Services = services;
     }

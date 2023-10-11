@@ -32,7 +32,7 @@ public abstract class GameEntitiesBuiltIn : SolverBuiltIn
 
 
     public GameEntitiesBuiltIn(string doc, Atom functor, Maybe<int> arity, GameEntities entities, GameDataStore store)
-        : base(doc, functor, arity, ErgoScriptingSystem.FieroModule)
+        : base(doc, functor, arity, ScriptingSystem.FieroModule)
     {
         Entities = entities;
         Store = store;

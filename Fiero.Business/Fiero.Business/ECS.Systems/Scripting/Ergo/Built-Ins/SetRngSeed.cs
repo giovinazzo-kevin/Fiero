@@ -11,7 +11,7 @@ public sealed class SetRngSeed : SolverBuiltIn
     public readonly GameDataStore Store;
 
     public SetRngSeed(GameDataStore store)
-        : base("", new("set_rng_seed"), 1, ErgoScriptingSystem.FieroModule)
+        : base("", new("set_rng_seed"), 1, ScriptingSystem.FieroModule)
     {
         Store = store;
     }

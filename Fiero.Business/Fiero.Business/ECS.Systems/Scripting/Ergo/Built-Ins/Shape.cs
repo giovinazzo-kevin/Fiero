@@ -14,7 +14,7 @@ public sealed class Shape : SolverBuiltIn
     public readonly IServiceFactory Services;
 
     public Shape(IServiceFactory services)
-        : base("", new("shape"), 3, ErgoScriptingSystem.FieroModule)
+        : base("", new("shape"), 3, ScriptingSystem.FieroModule)
     {
         Services = services;
     }

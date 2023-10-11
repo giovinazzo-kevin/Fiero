@@ -13,7 +13,7 @@ public sealed class At : SolverBuiltIn
     public readonly IServiceFactory Services;
 
     public At(IServiceFactory services)
-        : base("", new("at"), 3, ErgoScriptingSystem.FieroModule)
+        : base("", new("at"), 3, ScriptingSystem.FieroModule)
     {
         Services = services;
     }

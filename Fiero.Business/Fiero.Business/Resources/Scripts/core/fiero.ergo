@@ -42,10 +42,6 @@ position(_{ id: Id }, P) :-
 %: Get entity position and floor id
 position(_{ id: Id }, F, P) :-
 	Id as physical_entity is _{ physics: _{ floor_id: F, position: P } }, !.
-
-move(_{ id: Id }, P) :-
-	position(_{ id: Id }, Old),
-	raise(action, actor_moved, _{ actor: actor{ id: Id }, old_position: Old, new_position: P }).
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-
 	(owner(O) ; player as actor is O),

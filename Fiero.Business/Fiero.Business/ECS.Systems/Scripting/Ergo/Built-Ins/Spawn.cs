@@ -18,7 +18,7 @@ public sealed class Spawn : SolverBuiltIn
     private readonly Dictionary<string, MethodInfo> BuilderMethods;
 
     public Spawn(IServiceFactory services, GameEntityBuilders builders)
-        : base("", new("spawn"), 2, ErgoScriptingSystem.FieroModule)
+        : base("", new("spawn"), 2, ScriptingSystem.FieroModule)
     {
         Services = services;
         Builders = builders;

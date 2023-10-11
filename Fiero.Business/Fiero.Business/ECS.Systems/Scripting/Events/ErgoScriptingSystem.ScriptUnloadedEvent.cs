@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public partial class ErgoScriptingSystem
+    public partial class ScriptingSystem
     {
         public readonly struct ScriptUnloadedEvent
         {

@@ -18,7 +18,7 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
 
     public TriggerAnimationBase(IServiceFactory services, string name)
         // play(pos, anim_list, IdsList).
-        : base("", new(name), 4, ErgoScriptingSystem.AnimationModule)
+        : base("", new(name), 4, ScriptingSystem.AnimationModule)
     {
         Services = services;
         Methods = typeof(Animation)

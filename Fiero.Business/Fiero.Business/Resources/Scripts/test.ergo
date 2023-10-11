@@ -1,7 +1,8 @@
 :- module(test, []).
 :- use_module(input).
 :- use_module(data).
-:- subscribe(action, [actor_moved]).
+:- use_module(event).
+:- subscribe(bomb, [exploding]).
 
 coolio :-
 	position(@owner, FId, Po),
@@ -26,4 +27,5 @@ test:began :-
 	.
 test:ended :- unbind(_, _, _).
 
-action:actor_moved(_ { actor: @owner }) :- true.
+bomb:exploding(B) :-
+	write(B), nl.

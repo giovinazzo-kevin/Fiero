@@ -12,7 +12,7 @@ public sealed class Despawn : SolverBuiltIn
     protected readonly IServiceFactory _services;
 
     public Despawn(IServiceFactory services)
-        : base("", new Atom("despawn"), 1, ErgoScriptingSystem.FieroModule)
+        : base("", new Atom("despawn"), 1, ScriptingSystem.FieroModule)
     {
         _services = services;
     }

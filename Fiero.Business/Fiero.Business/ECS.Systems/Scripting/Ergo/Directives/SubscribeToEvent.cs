@@ -5,7 +5,6 @@ using Ergo.Interpreter.Directives;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
-using Fiero.Core;
 
 namespace Fiero.Business;
 
@@ -19,7 +18,7 @@ public class SubscribeToEvent : InterpreterDirective
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
-        var lib = scope.GetLibrary<FieroLib>(ErgoScriptingSystem.FieroModule);
+        var lib = scope.GetLibrary<FieroLib>(ScriptingSystem.FieroModule);
         if (args[0] is not Atom module)
         {
             throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, args[0].Explain());

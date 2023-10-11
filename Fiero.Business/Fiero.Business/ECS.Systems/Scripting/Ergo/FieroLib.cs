@@ -9,7 +9,7 @@ using LightInject;
 namespace Fiero.Business;
 public partial class FieroLib : Library
 {
-    public override Atom Module => ErgoScriptingSystem.FieroModule;
+    public override Atom Module => ScriptingSystem.FieroModule;
 
     protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
 

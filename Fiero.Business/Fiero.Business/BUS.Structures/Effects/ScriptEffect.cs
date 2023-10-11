@@ -96,6 +96,40 @@ namespace Fiero.Business
                 yield break;
             }
         }
+        internal class Subscribed : SolverBuiltIn
+        {
+            private readonly List<Signature> _subs;
+
+            public Subscribed(List<Signature> subs, Atom module) : base(string.Empty, new Atom("subscribed"), 2, module)
+            {
+                _subs = subs;
+            }
+
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            {
+                var any = false;
+                foreach (var sign in _subs)
+                {
+                    if (!arguments[0].Unify(sign.Module.GetOrThrow(new InvalidOperationException())).TryGetValue(out var subs0))
+                    {
+                        yield return False();
+                        yield break;
+                    }
+                    if (!arguments[1].Unify(sign.Functor).TryGetValue(out var subs1))
+                    {
+                        yield return False();
+                        yield break;
+                    }
+                    yield return True(SubstitutionMap.MergeRef(subs0, subs1));
+                    any = true;
+                }
+                if (!any)
+                {
+                    yield return False();
+                    yield break;
+                }
+            }
+        }
 
 
         private readonly Atom _module;
@@ -117,6 +151,7 @@ namespace Fiero.Business
             yield return new End(_systems, _source, _owner, _module);
             yield return new Args(_args, _module);
             yield return new Owner(_owner, _module);
+            yield return new Subscribed(_source.Script.ScriptProperties.SubscribedEvents, _module);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {
@@ -151,7 +186,7 @@ namespace Fiero.Business
             var module = Script.ScriptProperties.Scope.Module;
             EffectStartedHook = new(new(new("began"), Maybe.Some(0), module, default));
             EffectEndedHook = new(new(new("ended"), Maybe.Some(0), module, default));
-            ClearDataHook = new(new(new("clear"), Maybe.Some(0), ErgoScriptingSystem.DataModule, default));
+            ClearDataHook = new(new(new("clear"), Maybe.Some(0), ScriptingSystem.DataModule, default));
         }
 
         public override EffectName Name => EffectName.Script;
@@ -213,8 +248,11 @@ namespace Fiero.Business
 
                By wiring each event to a call to the script's solver, we can interpret
                the result of that call as the EventResult to pass to the owning system.
+
+                Additionally, Ergo scripts may raise and handle events of their own.
+                The mechanism is the same, but these events are asynchronous.
             */
-            var routes = ErgoScriptingSystem.GetScriptRoutes();
+            var routes = ScriptingSystem.GetScriptRoutes();
             var subbedEvents = Script.ScriptProperties.SubscribedEvents;
             foreach (var sig in subbedEvents)
             {
@@ -224,8 +262,9 @@ namespace Fiero.Business
                 }
                 else
                 {
+                    // Could be from a script, maybe I should figure out a naming convention for those or remove the warning
                     Script.ScriptProperties.Solver.Out
-                        .WriteLine($"ERR: Unknown route: {sig.Explain()}");
+                        .WriteLine($"WRN: Unknown event route: {sig.Explain()}");
                     Script.ScriptProperties.Solver.Out.Flush();
                 }
             }

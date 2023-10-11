@@ -330,7 +330,7 @@ namespace Fiero.Business
                 void OnBuilt(EntityBuilder<T> b, T e)
                 {
                     builder.Built -= OnBuilt;
-                    var scriptSystem = s.GetInstance<ErgoScriptingSystem>();
+                    var scriptSystem = s.GetInstance<ScriptingSystem>();
                     if (!scriptSystem.LoadScript(e))
                     {
                         // Flag script as invalid

@@ -10,7 +10,7 @@ public sealed class MsgBox : SolverBuiltIn
     public readonly GameUI UI;
 
     public MsgBox(GameUI ui)
-        : base("", new("msg_box"), 2, ErgoScriptingSystem.FieroModule)
+        : base("", new("msg_box"), 2, ScriptingSystem.FieroModule)
     {
         UI = ui;
     }

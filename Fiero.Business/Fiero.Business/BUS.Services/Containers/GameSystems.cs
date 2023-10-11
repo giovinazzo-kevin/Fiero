@@ -8,7 +8,7 @@
         public readonly FactionSystem Faction;
         public readonly DungeonSystem Dungeon;
         public readonly RenderSystem Render;
-        public readonly ErgoScriptingSystem Scripting;
+        public readonly ScriptingSystem Scripting;
         public readonly MetaSystem Meta;
         public readonly InputSystem Input;
 
@@ -18,7 +18,7 @@
             FactionSystem faction,
             DungeonSystem dungeon,
             RenderSystem render,
-            ErgoScriptingSystem scripting,
+            ScriptingSystem scripting,
             MetaSystem meta,
             InputSystem input
 

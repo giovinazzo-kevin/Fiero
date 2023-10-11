@@ -1,0 +1,14 @@
+% Do not modify unless you know what you are doing.
+:- module(event, [move/2]).
+:- subscribe(scripting, [script_event_raised]).
+
+%: Moves an entity to the desired location by raising the actor_moved event from the action system.
+move(_{ id: Id }, P) :-
+	position(_{ id: Id }, Old),
+	raise(action, actor_moved, _{ actor: actor{ id: Id }, old_position: Old, new_position: P }).
+
+scripting:script_event_raised(_{system: S, event: E, data: D}) :-
+	subscribed(S, E),
+	term(E, [D], Event),
+	term(':', [S, Event], Qualified),
+	ignore(Qualified).

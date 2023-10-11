@@ -13,7 +13,7 @@ public sealed class AnimationRepeatCount : SolverBuiltIn
     protected readonly IServiceFactory Services;
     public AnimationRepeatCount(IServiceFactory services)
         // repeat(id, times).
-        : base("", new("repeat"), 2, ErgoScriptingSystem.AnimationModule)
+        : base("", new("repeat"), 2, ScriptingSystem.AnimationModule)
     {
         Services = services;
     }

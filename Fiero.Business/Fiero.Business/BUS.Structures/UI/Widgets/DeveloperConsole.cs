@@ -16,13 +16,13 @@ namespace Fiero.Business
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
-        public readonly ErgoScriptingSystem ScriptingSystem;
+        public readonly ScriptingSystem ScriptingSystem;
 
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        public DeveloperConsole(ErgoScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
+        public DeveloperConsole(ScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
             : base(ui)
         {
             EventBus = bus;

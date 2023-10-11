@@ -19,8 +19,7 @@ public sealed class EntityAsTerm : IAbstractTerm
     internal static IServiceFactory ServiceFactory { get; set; }
     internal static readonly Dictionary<Atom, Type> TypeMap;
     public static readonly Atom Id = new("id");
-    public static readonly Atom Functor = new("entity");
-    private static readonly ITerm __invalidEntity = new Dict(Functor, new[]
+    private static readonly ITerm __invalidEntity = new Dict(new Atom("entity"), new[]
     {
         new KeyValuePair<Atom, ITerm>(new Atom("invalid"), new Atom("true"))
     }).CanonicalForm;
@@ -40,7 +39,6 @@ public sealed class EntityAsTerm : IAbstractTerm
     public EntityAsTerm(int entityId, Atom type)
     {
         _entities = ServiceFactory.GetInstance<GameEntities>();
-        _simple = new Complex(Functor, type, new Atom(entityId));
         Type = TypeMap[type];
         EntityId = entityId;
     }
@@ -60,23 +58,8 @@ public sealed class EntityAsTerm : IAbstractTerm
     {
         return _simple.Explain();
     }
-    public static bool IsCanonical(Complex c) =>
-        c.Functor.Equals(Functor)
-        && c.Arity == 2
-        && c.Arguments[0] is Atom id
-        && id.Value is EDecimal
-        && c.Arguments[1] is Atom type
-        && TypeMap.ContainsKey(type);
 
     public Maybe<IAbstractTerm> FromCanonicalTerm(ITerm c) => FromCanonical(c).Select(x => (IAbstractTerm)x);
-    public static Maybe<EntityAsTerm> FromSimple(ITerm term)
-    {
-        if (term is Complex c && IsCanonical(c))
-        {
-            return new EntityAsTerm(((EDecimal)((Atom)c.Arguments[0]).Value).ToInt32Unchecked(), (Atom)c.Arguments[1]);
-        }
-        return default;
-    }
     public static Maybe<EntityAsTerm> FromCanonical(ITerm term)
     {
         if (term.IsAbstract<Dict>().TryGetValue(out var dict)

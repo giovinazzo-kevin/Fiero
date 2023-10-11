@@ -112,8 +112,7 @@ namespace Fiero.Business
                 {
                     if (!arguments[0].Unify(sign.Module.GetOrThrow(new InvalidOperationException())).TryGetValue(out var subs0))
                     {
-                        yield return False();
-                        yield break;
+                        continue;
                     }
                     if (!arguments[1].Unify(sign.Functor).TryGetValue(out var subs1))
                     {

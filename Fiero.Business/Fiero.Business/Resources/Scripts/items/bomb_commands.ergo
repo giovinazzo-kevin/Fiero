@@ -1,0 +1,6 @@
+:- module(bomb_commands, [set_fuse/2, set_radius/2]).
+:- use_module(event).
+%: Allows other scripts to set the fuse of a bomb given its dummy's id
+set_fuse(DummyId, F) :- raise(bomb, set_fuse_, _{dummy: _{ id: DummyId }, fuse: F}).
+%: Allows other scripts to set the radius of a bomb given its dummy's id
+set_radius(DummyId, R) :- raise(bomb, set_radius_, _{dummy: _{ id: DummyId }, radius: R}).

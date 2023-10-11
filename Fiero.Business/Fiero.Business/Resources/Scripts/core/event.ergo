@@ -8,7 +8,7 @@ move(_{ id: Id }, P) :-
 	raise(action, actor_moved, _{ actor: actor{ id: Id }, old_position: Old, new_position: P }).
 
 scripting:script_event_raised(_{system: S, event: E, data: D}) :-
-	subscribed(S, E),
+	subscribed(S, E), !,
 	term(E, [D], Event),
 	term(':', [S, Event], Qualified),
-	ignore(Qualified).
+	ignore_all(Qualified).

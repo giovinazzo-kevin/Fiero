@@ -1,0 +1,11 @@
+:- module(monsplosion, []).
+:- use_module(event).
+:- subscribe(bomb, [exploding]).
+
+bomb:exploding(_{dummy: D}) :-
+	position(D, FId, Po),
+	shape(square, 3, Ps),
+	P := Po + Ps,
+	\+at(FId, P, actor{}),
+	spawn([npc_rat{}], [R]),
+	move(R, P).

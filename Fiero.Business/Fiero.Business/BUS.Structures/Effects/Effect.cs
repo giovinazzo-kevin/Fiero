@@ -21,7 +21,7 @@ namespace Fiero.Business
         }
         public void Start(GameSystems systems, Entity owner)
         {
-            if (owner.Effects?.Lock ?? false)
+            if (owner?.Effects?.Lock ?? false)
                 return;
             Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(systems, owner); }));
             if (!(this is ModifierEffect))

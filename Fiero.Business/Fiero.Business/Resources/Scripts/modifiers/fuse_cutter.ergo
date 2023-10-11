@@ -1,0 +1,7 @@
+:- module(fuse_cutter, []).
+:- use_module(event).
+:- use_module(bomb_commands).
+:- subscribe(bomb, [ticking]).
+%: Prevents a bomb's fuse from ticking down, effectively freezing all bombs on screen until this effect ends.
+bomb:ticking(_{dummy: _{id: Id}, initial_fuse: F }) :-
+	set_fuse(Id, F).

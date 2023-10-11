@@ -74,7 +74,7 @@ namespace Fiero.Business
                 .WithBaseModule(FieroModule);
             ScriptLoaded = new(this, nameof(ScriptLoaded), asynchronous: true);
             ScriptUnloaded = new(this, nameof(ScriptUnloaded), asynchronous: true);
-            ScriptEventRaised = new(this, nameof(ScriptEventRaised), asynchronous: true);
+            ScriptEventRaised = new(this, nameof(ScriptEventRaised), asynchronous: false);
             _visibleScripts = Directory.EnumerateFiles(ScriptsPath, "*.ergo", SearchOption.AllDirectories)
                 .Select(Path.GetFileNameWithoutExtension)
                 .ToArray();

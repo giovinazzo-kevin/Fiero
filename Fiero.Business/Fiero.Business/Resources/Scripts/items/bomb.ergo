@@ -37,8 +37,8 @@ bomb:ended :-
 	dummy get B, radius get R,
 	% Strip bomb of invulnerability, so it can be hit again
 	effect(effect_def(remove_trait, invulnerable), B, _),
-	% Let other scripts be aware that this bomb has exploded (script-raised events are asynchronous unlike system events)
-	raise(bomb, exploded, _{ dummy: B, radius: R }),
+	% Let other scripts be aware that this bomb is about to explode
+	raise(bomb, exploding, _{ dummy: B, radius: R }),
 	% Cause an explosion and kill the bomb in the process
 	effect(effect_def(explosion, R), B, _).
 
@@ -77,13 +77,9 @@ action:actor_attacked(_{attacker: A, victim: V}) :-
 	clamp(-1, 1, Dir, NormDir),
 	NewPos := Vp + Dir,
 	move(V, NewPos).
-%: Allows other scripts to set the fuse of a bomb given its dummy's id
-set_fuse(DummyId, F) :- raise(bomb, set_fuse_, _{dummy: _{ id: DummyId }, fuse: F}).
 bomb:set_fuse_(_{dummy: _{ id: Id }, fuse: F}) :-
 	dummy get _ { id: Id },
 	fuse set F.
-%: Allows other scripts to set the radius of a bomb given its dummy's id
-set_radius(DummyId, R) :- raise(bomb, set_radius_, _{dummy: _{ id: DummyId }, radius: R}).
 bomb:set_radius_(_{dummy: _{ id: Id }, radius: R}) :- 
 	dummy get _ { id: Id },
 	radius set R.

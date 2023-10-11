@@ -54,7 +54,7 @@ namespace Fiero.Business
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             int repeat = 0,
-            int resolution = 50
+            int resolution = 10
         )
         {
             return new(Enumerable.Range(0, resolution).Select(i => new AnimationFrame(

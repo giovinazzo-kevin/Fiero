@@ -17,8 +17,8 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
     protected bool IsBlocking { get; set; } = false;
 
     public TriggerAnimationBase(IServiceFactory services, string name)
-        // play(pos, anim_list, IdsList).
-        : base("", new(name), 4, ScriptingSystem.AnimationModule)
+        // play(pos or physical_entity, anim_list, IdsList).
+        : base("", new(name), 3, ScriptingSystem.AnimationModule)
     {
         Services = services;
         Methods = typeof(Animation)
@@ -29,17 +29,23 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
 
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
     {
-        if (!args[0].Matches(out FloorId floor))
+        var at = default(Either<Location, PhysicalEntity>);
+        if (args[0].Matches(out Location location))
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(FloorId), args[0]);
+            at = location;
+        }
+        else if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)
+            && entityAsTerm.GetProxy().TryGetValue(out var proxy)
+            && proxy is PhysicalEntity pe)
+        {
+            at = pe;
+        }
+        else
+        {
+            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Location), args[0]);
             yield break;
         }
-        if (!args[1].Matches(out Coord pos))
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Coord), args[1]);
-            yield break;
-        }
-        if (!args[2].IsAbstract<List>().TryGetValue(out var list))
+        if (!args[1].IsAbstract<List>().TryGetValue(out var list))
         {
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.List, args[2]);
             yield break;
@@ -85,9 +91,9 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
             animList.Add((Animation)method.Invoke(null, newParams));
         }
         var renderSystem = Services.GetInstance<RenderSystem>();
-        var lastId = renderSystem.AnimateViewport(IsBlocking, floor, pos, animList.ToArray());
+        var lastId = renderSystem.AnimateViewport(IsBlocking, at, animList.ToArray());
         var idList = Enumerable.Range(lastId - animList.Count, animList.Count);
-        if (args[3].Unify(new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>()).CanonicalForm).TryGetValue(out var subs))
+        if (args[2].Unify(new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>()).CanonicalForm).TryGetValue(out var subs))
         {
             yield return True(subs);
             yield break;

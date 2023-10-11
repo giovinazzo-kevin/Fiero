@@ -7,9 +7,10 @@ namespace Fiero.Business
         public static bool Handle<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload)
             where TSys : EcsSystem
         {
-            return req.Request(payload)
-                .ToBlockingEnumerable()
+            var ret = req.Request(payload)
+                .ToEnumerable()
                 .All(x => x);
+            return ret;
         }
         public static ValueTask<bool> HandleAsync<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload, CancellationToken ct = default)
             where TSys : EcsSystem

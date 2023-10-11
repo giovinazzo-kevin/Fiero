@@ -1,5 +1,8 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang;
+
+namespace Fiero.Business
 {
+    [Term(Marshalling = TermMarshalling.Positional, Functor = "f")]
     public readonly record struct FloorId(DungeonBranchName Branch, int Depth)
     {
         public override int GetHashCode()

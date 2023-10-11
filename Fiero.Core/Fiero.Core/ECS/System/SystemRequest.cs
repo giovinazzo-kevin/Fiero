@@ -44,7 +44,13 @@ namespace Fiero.Core
             else
             {
                 _ = Raise(args);
-                AllResponsesReceived?.Invoke(this, args, sieve.Messages.Select(x => x.Content));
+                var responses = sieve.Messages.Select(x => x.Content).ToArray();
+                foreach (var msg in responses)
+                {
+                    ResponsesReceived?.Invoke(this, args, msg);
+                    yield return msg;
+                }
+                AllResponsesReceived?.Invoke(this, args, responses);
             }
         }
 

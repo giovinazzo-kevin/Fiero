@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang;
+
+namespace Fiero.Business
 {
     public static class EntityExtensions
     {
@@ -96,6 +98,10 @@
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
         public static bool Knows(this Actor a, FloorId f, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, FloorId f, Coord c) => a.IsAlive() && a.FloorId() == f && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
+        public static bool CanSee(this Actor a, Location l) =>
+            CanSee(a, l.FloorId, l.Position);
+        public static bool CanSeeEither(this Actor a, Either<Location, PhysicalEntity> l) =>
+            l.Reduce(a.CanSee, a.CanSee);
         public static bool CanSee(this Actor a, PhysicalEntity e) => a.IsAlive() && !e.IsInvalid() && a.CanSee(e.FloorId(), e.Position()) && a.Fov.Sight.HasFlag(e.Render.Visibility);
         public static bool CanHear(this Actor a, PhysicalEntity e) => a.IsAlive() && !e.IsInvalid() && e.FloorId() == a.FloorId();
         public static bool IsAffectedBy(this Actor a, EffectName effect) => a.IsAlive() && a.Effects != null && a.Effects.Active.Any(e => e.Name == effect);

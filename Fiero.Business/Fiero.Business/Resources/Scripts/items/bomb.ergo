@@ -24,8 +24,8 @@ bomb:began :-
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
 	position(@owner, P), move(B, P),
-	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling StopAnim, which is stored for later
-	stick_animations_to(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], StopAnim), stop_callback set StopAnim,
+	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
+	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
 	% Make the dummy invulnerable to damage
 	effect(effect_def(bestow_trait, invulnerable), B, _),
 	% Let other scripts be aware that this bomb was created
@@ -48,7 +48,7 @@ tick :-
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
 	position(B, F, P),
 	% Play the damage number animation, which will be blocking if the player can see the dummy
-	play_animations_blocking(F, P, [damage_number{damage: T1, tint: light_red}], _),
+	play_animations_blocking(B, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound with gradually increasing pitch as the fuse gets shorter
 	(	T1 = 0, !
 	;   Pitch := 1 - T1 / (T0 + 1),

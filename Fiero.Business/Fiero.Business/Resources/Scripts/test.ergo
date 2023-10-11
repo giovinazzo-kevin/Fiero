@@ -2,32 +2,24 @@
 :- use_module(input).
 :- use_module(data).
 :- use_module(event).
+:- use_module(anim).
 :- use_module(bomb_commands).
-:- subscribe(action, [corpse_created]).
 
 test:began :- 
 	bind(k, pressed, [_]>>(coolio)),
-	bind(u, pressed, [_]>>(boom(2))),
+	bind(u, pressed, [_]>>(boom(3))),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
 	.
 test:ended :- unbind(_, _, _).
 
 coolio :-
-	position(@owner, FId, Po),
-	shape(square, 5, Ps),
-	P := Po + Ps,
-	\+at(FId, P, actor{}),
-	spawn([npc_rat{}], [R]),
-	move(R, P).
+	@player = _{ render: _{ sprite: S, texture: T }},
+	play_animations(@player, [fade{texture: T, sprite: S, tint: light_red, repeat: -1}], _).
 boom(N) :-
 	P = @player, Id = &P.id,
+	shape(square, N, Ps),
 	position(P, Pos),
+	Q := Pos + Ps,
 	spawn([throwable_bomb{charges:N, radius: 20, fuse: 0}], [_{id: NukeId }]),
-	for(I, 1, N), 
-	Q := Pos + p(I, I),
 	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
-
-action:corpse_created(_{actor: A}):-
-X = A,
-write(X), nl.

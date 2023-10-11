@@ -1,31 +1,3 @@
 % Do not modify unless you know what you are doing.
 
 :- module(anim, []).
-:- use_module(data).
-:- subscribe(action, [actor_moved]).
-
-action:actor_moved(_ { actor: A }) :- 
-	on_actor_moved(&A.id, _) get Lambda,
-	call(Lambda).
-stick_to_(Entity, Animations, Stop, UUID) :- 
-	EntityId = &Entity.id,
-	Stop = []>>(
-		UUID get StopIds,
-		UUID delete,
-		on_actor_moved(EntityId, UUID) delete,
-		forall(member(StopId, StopIds), stop_animation(StopId))
-	),
-	position(Entity, Floor, Pos),
-	play_animations(Floor, Pos, Animations, Ids),
-	UUID set Ids,
-	on_actor_moved(EntityId, UUID) set ([]>>(
-		member(Id, Ids),
-		stop_animation(Id),
-		stick_to_(Entity, Animations, _, UUID)
-	)).
-%: Attaches a list of animations to an entity. 
-%: If it's an actor, the animations will follow its position.
-%: Binds 'Stop' to a callable that undoes the effect of the stick_to call.
-stick_animations_to(Entity, Animations, Stop) :- 
-	uuid(UUID), !,
-	stick_to_(Entity, Animations, Stop, UUID).

@@ -1,8 +1,10 @@
-﻿using SFML.System;
+﻿using Ergo.Lang;
+using SFML.System;
 using System.Drawing;
 
 namespace Fiero.Core
 {
+    [Term(Functor = "p", Marshalling = TermMarshalling.Positional)]
     public readonly record struct Coord(int X, int Y) : IComparable<Coord>
     {
         public static Coord operator +(Coord self, Coord other)

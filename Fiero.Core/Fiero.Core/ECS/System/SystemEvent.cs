@@ -1,4 +1,5 @@
-﻿using Unconcern;
+﻿using Ergo.Lang;
+using Unconcern;
 using Unconcern.Common;
 using Unconcern.Delegation;
 
@@ -6,6 +7,7 @@ namespace Fiero.Core
 {
     public interface ISystemEvent
     {
+        TermMarshallingContext MarshallingContext { get; }
         Subscription SubscribeHandler(Action<object> handle);
     }
     public class SystemEvent<TSystem, TArgs> : ISystemEvent
@@ -14,6 +16,7 @@ namespace Fiero.Core
         public readonly string Name;
         public readonly TSystem Owner;
         public readonly bool Asynchronous;
+        public TermMarshallingContext MarshallingContext { get; private set; }
 
         public SystemEvent(TSystem owner, string name, bool asynchronous = false)
         {
@@ -24,6 +27,8 @@ namespace Fiero.Core
 
         public async ValueTask Raise(TArgs args, CancellationToken ct = default)
         {
+            // Ensure that all handlers use the same cache when calling ToTerm
+            MarshallingContext = new();
             if (Asynchronous)
                 await Owner.EventBus.Post(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName, ct: ct);
             else

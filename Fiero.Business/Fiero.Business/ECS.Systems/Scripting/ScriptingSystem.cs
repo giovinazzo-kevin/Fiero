@@ -20,6 +20,7 @@ namespace Fiero.Business
 {
     public partial class ScriptingSystem : EcsSystem
     {
+        private const string ScriptsPath = @".\Resources\Scripts\";
         public static readonly Atom FieroModule = new("fiero");
         public static readonly Atom AnimationModule = new("anim");
         public static readonly Atom SoundModule = new("sound");
@@ -42,22 +43,13 @@ namespace Fiero.Business
         public readonly IAsyncInputReader AsyncInputReader;
 
         private event Action _unload;
+        private string[] _visibleScripts;
 
         public readonly Encoding Encoding = Encoding.GetEncoding(437);
         public readonly SystemRequest<ScriptingSystem, ScriptLoadedEvent, EventResult> ScriptLoaded;
         public readonly SystemRequest<ScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ScriptingSystem, ScriptEventRaisedEvent> ScriptEventRaised;
         public readonly ConcurrentDictionary<string, Script> Cache = new();
-
-        public void ResetPipes()
-        {
-            In.Writer.Complete();
-            In.Reader.Complete();
-            Out.Writer.Complete();
-            Out.Reader.Complete();
-            In.Reset();
-            Out.Reset();
-        }
 
         public ScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
@@ -71,7 +63,7 @@ namespace Fiero.Business
             Shell = Facade.BuildShell();
             Interpreter = Shell.Interpreter;
             StdlibScope = Interpreter.CreateScope()
-                .WithSearchDirectory(@".\Resources\Scripts\");
+                .WithSearchDirectory(ScriptsPath);
             var fiero = Interpreter.Load(ref StdlibScope, FieroModule)
                 .GetOrThrow(new InvalidOperationException());
             StdlibScope = StdlibScope
@@ -83,6 +75,9 @@ namespace Fiero.Business
             ScriptLoaded = new(this, nameof(ScriptLoaded), asynchronous: true);
             ScriptUnloaded = new(this, nameof(ScriptUnloaded), asynchronous: true);
             ScriptEventRaised = new(this, nameof(ScriptEventRaised), asynchronous: true);
+            _visibleScripts = Directory.EnumerateFiles(ScriptsPath, "*.ergo", SearchOption.AllDirectories)
+                .Select(Path.GetFileNameWithoutExtension)
+                .ToArray();
         }
 
         /// <summary>
@@ -168,6 +163,8 @@ namespace Fiero.Business
             script.ScriptProperties.Solver = default;
             return true;
         }
+
+        public IEnumerable<string> GetVisibleScripts() => _visibleScripts;
 
         /// <summary>
         /// Maps every SystemRequest and SystemEvent defined in all systems to a wrapper that

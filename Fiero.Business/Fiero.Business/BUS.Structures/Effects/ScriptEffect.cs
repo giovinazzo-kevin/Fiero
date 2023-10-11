@@ -253,6 +253,7 @@ namespace Fiero.Business
                 The mechanism is the same, but these events are asynchronous.
             */
             var routes = ScriptingSystem.GetScriptRoutes();
+            var visibleScripts = systems.Scripting.GetVisibleScripts();
             var subbedEvents = Script.ScriptProperties.SubscribedEvents;
             foreach (var sig in subbedEvents)
             {
@@ -260,9 +261,9 @@ namespace Fiero.Business
                 {
                     yield return sub(this, systems);
                 }
-                else
+                // Could be from a script, in which case it's not unknown so much as it's dynamic
+                else if (!visibleScripts.Contains(sig.Module.GetOrThrow(new InvalidOperationException()).Explain()))
                 {
-                    // Could be from a script, maybe I should figure out a naming convention for those or remove the warning
                     Script.ScriptProperties.Solver.Out
                         .WriteLine($"WRN: Unknown event route: {sig.Explain()}");
                     Script.ScriptProperties.Solver.Out.Flush();

@@ -14,9 +14,9 @@
 % The explosion automatically takes care of killing the now-vulnerable dummy.
 % Since the dummy is NOT impassible, effects work on it! You can teleport a lit bomb around and it will explode elsewhere.
 % When a bomb is attacked, it will roll one tile in the opposite direction.
-began :- 
-	% Parse fuse duration from args and store it in the script's local storage
-	args(_{fuse: Fuse}), fuse set Fuse, 
+bomb:began :- 
+	% Parse fuse duration and explosion radius from args and store them in the script's local storage
+	args(_{fuse: Fuse, radius: Radius}), fuse set Fuse, radius set Radius,
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
@@ -24,14 +24,18 @@ began :-
 	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling StopAnim, which is stored for later
 	stick_animations_to(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], StopAnim), stop_callback set StopAnim,
 	% Make the dummy invulnerable to damage
-	effect(effect_def(bestow_trait, invulnerable), B, _).
-ended :-
+	effect(effect_def(bestow_trait, invulnerable), B, _),
+	% Let other scripts be aware that this bomb was created
+	raise(bomb, spawned, bomb_spawned_event{ dummy: B }).
+bomb:ended :-
 	% Stop the red blinking animation
 	stop_callback get StopAnim, call(StopAnim),
-	% Retrieve dummy and explosion radius from storage/args
-	dummy get B, args(_{radius: R}), 
+	% Retrieve dummy and explosion radius from storage
+	dummy get B, radius get R,
 	% Strip bomb of invulnerability, so it can be hit again
 	effect(effect_def(remove_trait, invulnerable), B, _),
+	% Let other scripts be aware that this bomb has exploded (script-raised events are asynchronous unlike system events)
+	raise(bomb, exploded, bomb_event{ dummy: B, radius: R }),
 	% Cause an explosion and kill the bomb in the process
 	effect(effect_def(explosion, R), B, _).
 
@@ -43,10 +47,12 @@ tick :-
 	% Play the damage number animation, which will be blocking if the player can see the dummy
 	play_animations_blocking(F, P, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound with gradually increasing pitch as the fuse gets shorter
-	(	T1 = 0 
-	;   Pitch := 1 - T1 / T0,
+	(	T1 = 0, !
+	;   Pitch := 1 - T1 / (T0 + 1),
 		play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: Pitch})
-	).
+	),
+	% Let other scripts be aware that this bomb is ticking
+	raise(bomb, ticking, bomb_event{ dummy: B, fuse: T1, initial_fuse: T0 }).
 
 tock :-
 	% Decrement the fuse

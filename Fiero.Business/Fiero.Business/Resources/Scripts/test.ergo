@@ -2,7 +2,15 @@
 :- use_module(input).
 :- use_module(data).
 :- use_module(event).
-:- subscribe(bomb, [exploding]).
+:- subscribe(bomb, [ticking]).
+
+test:began :- 
+	bind(k, pressed, [_]>>(coolio)),
+	bind(u, pressed, [_]>>(boom(2))),
+	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
+	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
+	.
+test:ended :- unbind(_, _, _).
 
 coolio :-
 	position(@owner, FId, Po),
@@ -19,13 +27,5 @@ boom(N) :-
 	Q := Pos + p(I, I),
 	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
 
-test:began :- 
-	bind(k, pressed, [_]>>coolio),
-	bind(u, pressed, [_]>>boom(2)),
-	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
-	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
-	.
-test:ended :- unbind(_, _, _).
-
-bomb:exploding(B) :-
-	write(B), nl.
+bomb:ticking(_{fuse: F}) :-
+	msg_box(F, 'Boom!'), nl.

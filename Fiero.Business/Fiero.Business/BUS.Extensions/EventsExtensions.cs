@@ -8,13 +8,27 @@ namespace Fiero.Business
             where TSys : EcsSystem
         {
             return req.Request(payload)
+                .ToBlockingEnumerable()
                 .All(x => x);
+        }
+        public static ValueTask<bool> HandleAsync<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload, CancellationToken ct = default)
+            where TSys : EcsSystem
+        {
+            return req.Request(payload)
+                .AllAsync(x => x, ct);
         }
 
         public static void HandleOrThrow<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload)
             where TSys : EcsSystem
         {
             if (!req.Handle(payload))
+                throw new InvalidOperationException();
+        }
+
+        public static async ValueTask HandleOrThrowAsync<TSys, TArgs>(this SystemRequest<TSys, TArgs, EventResult> req, TArgs payload, CancellationToken ct = default)
+            where TSys : EcsSystem
+        {
+            if (!await req.HandleAsync(payload, ct))
                 throw new InvalidOperationException();
         }
 

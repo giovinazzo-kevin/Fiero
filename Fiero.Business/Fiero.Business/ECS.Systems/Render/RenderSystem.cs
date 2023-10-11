@@ -58,17 +58,17 @@ namespace Fiero.Business
             ActorSelected = new(this, nameof(ActorSelected));
             PointSelected = new(this, nameof(PointSelected));
             ActorDeselected = new(this, nameof(ActorDeselected));
-            PointSelected.ResponseReceived += (req, evt, res) =>
+            PointSelected.AllResponsesReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
                     Window.OnPointSelected(evt.Point);
             };
-            ActorSelected.ResponseReceived += (req, evt, res) =>
+            ActorSelected.AllResponsesReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
                     Window.OnActorSelected(evt.Actor);
             };
-            ActorDeselected.ResponseReceived += (req, evt, res) =>
+            ActorDeselected.AllResponsesReceived += (req, evt, res) =>
             {
                 if (res.All(x => x))
                     Window.OnActorDeselected();

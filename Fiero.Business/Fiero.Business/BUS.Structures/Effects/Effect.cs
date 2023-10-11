@@ -30,8 +30,8 @@ namespace Fiero.Business
                 Ended += e => owner.Effects?.Active.Remove(e);
                 if (owner.TryCast<Actor>(out var actor))
                 {
-                    Started += e => systems.Action.ActorGainedEffect.Raise(new(actor, this));
-                    Ended += e => systems.Action.ActorLostEffect.Raise(new(actor, this));
+                    Started += e => _ = systems.Action.ActorGainedEffect.Raise(new(actor, this));
+                    Ended += e => _ = systems.Action.ActorLostEffect.Raise(new(actor, this));
                 }
             }
             Subscriptions.UnionWith(RouteEvents(systems, owner));

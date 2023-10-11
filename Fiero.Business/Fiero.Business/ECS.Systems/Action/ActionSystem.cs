@@ -117,14 +117,14 @@ namespace Fiero.Business
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
 
-            ActorAttacked.ResponseReceived += (_, e, r) =>
+            ActorAttacked.AllResponsesReceived += (_, e, r) =>
             {
                 if (r.All(x => x))
                 {
                     ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapons, e.Damage));
                 }
             };
-            ActorDamaged.ResponseReceived += (_, e, r) =>
+            ActorDamaged.AllResponsesReceived += (_, e, r) =>
             {
                 if (r.All(x => x))
                 {
@@ -141,14 +141,14 @@ namespace Fiero.Business
                     }
                 }
             };
-            ActorKilled.ResponseReceived += (_, e, r) =>
+            ActorKilled.AllResponsesReceived += (_, e, r) =>
             {
                 if (r.All(x => x))
                 {
                     ActorDied.HandleOrThrow(new(e.Victim));
                 }
             };
-            ActorDied.ResponseReceived += (_, e, r) =>
+            ActorDied.AllResponsesReceived += (_, e, r) =>
             {
                 if (r.All(x => x))
                 {
@@ -209,12 +209,12 @@ namespace Fiero.Business
             t.Actor.Action.LastAction = action;
             if (ret == true)
             {
-                ActorIntentEvaluated.Raise(new(t.Actor, action, CurrentTurn, t.Time));
+                _ = ActorIntentEvaluated.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
             else if (ret == false)
             {
                 action = new FailAction();
-                ActorIntentFailed.Raise(new(t.Actor, action, CurrentTurn, t.Time));
+                _ = ActorIntentFailed.Raise(new(t.Actor, action, CurrentTurn, t.Time));
             }
             return cost;
         }
@@ -225,17 +225,17 @@ namespace Fiero.Business
             _actorQueue.Clear();
             _actorQueue.Add(new ActorTime(TURN_ACTOR_ID, null, () => new WaitAction(), 0));
             CurrentTurn = 0;
-            GameStarted.Raise(new());
+            _ = GameStarted.Raise(new());
         }
 
         public void Spawn(Actor a)
         {
-            ActorSpawned.Raise(new(a));
+            _ = ActorSpawned.Raise(new(a));
         }
 
         public void Despawn(Entity e)
         {
-            EntityDespawned.Raise(new(e));
+            _ = EntityDespawned.Raise(new(e));
         }
 
         private bool MayTarget(Actor attacker, Actor victim)
@@ -330,6 +330,7 @@ namespace Fiero.Business
             {
                 // Some effects might want to hook into this request to change the intent of an actor right before it's evaluated
                 var altIntents = ActorIntentSelected.Request(new(next.Actor, intent, CurrentTurn, next.Time))
+                    .ToBlockingEnumerable()
                     .Where(i => i.Result)
                     .OrderByDescending(i => i.Priority);
                 if (altIntents.FirstOrDefault() is { } altIntent)
@@ -381,11 +382,11 @@ namespace Fiero.Business
             {
                 if (actorId == TURN_ACTOR_ID)
                 {
-                    TurnStarted.Raise(new(++CurrentTurn));
+                    _ = TurnStarted.Raise(new(++CurrentTurn));
                 }
                 else if (next.LastActedTime < next.Time)
                 {
-                    ActorTurnStarted.Raise(new(next.Actor, CurrentTurn, next.Time));
+                    _ = ActorTurnStarted.Raise(new(next.Actor, CurrentTurn, next.Time));
                 }
             }
 
@@ -393,11 +394,11 @@ namespace Fiero.Business
             {
                 if (actorId == TURN_ACTOR_ID)
                 {
-                    TurnEnded.Raise(new(CurrentTurn));
+                    _ = TurnEnded.Raise(new(CurrentTurn));
                 }
                 else
                 {
-                    ActorTurnEnded.Raise(new(next.Actor, CurrentTurn, next.Time));
+                    _ = ActorTurnEnded.Raise(new(next.Actor, CurrentTurn, next.Time));
                 }
             }
         }

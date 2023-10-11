@@ -43,7 +43,7 @@
                         else
                         {
                             var feature = featuresHere.Single();
-                            ActorBumpedObstacle.Raise(new(t.Actor, feature));
+                            _ = ActorBumpedObstacle.Raise(new(t.Actor, feature));
                             // you can bump shrines and chests to interact with them
                             action = new InteractWithFeatureAction(feature);
                             cost = HandleAction(t, ref action);
@@ -78,14 +78,14 @@
                 }
                 else
                 {
-                    ActorBumpedObstacle.Raise(new(t.Actor, cell.Tile));
+                    _ = ActorBumpedObstacle.Raise(new(t.Actor, cell.Tile));
                     return false;
                 }
             }
             else
             {
                 // Bumped "nothingness"
-                ActorBumpedObstacle.Raise(new(t.Actor, null));
+                _ = ActorBumpedObstacle.Raise(new(t.Actor, null));
                 return false;
             }
             return true;

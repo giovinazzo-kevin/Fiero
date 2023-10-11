@@ -13,16 +13,21 @@ namespace Fiero.Core
     {
         public readonly string Name;
         public readonly TSystem Owner;
+        public readonly bool Asynchronous;
 
-        public SystemEvent(TSystem owner, string name)
+        public SystemEvent(TSystem owner, string name, bool asynchronous = false)
         {
             Name = name;
             Owner = owner;
+            Asynchronous = asynchronous;
         }
 
-        public void Raise(TArgs args)
+        public async ValueTask Raise(TArgs args, CancellationToken ct = default)
         {
-            Owner.EventBus.Send(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName);
+            if (Asynchronous)
+                await Owner.EventBus.Post(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName, ct: ct);
+            else
+                Owner.EventBus.Send(new SystemMessage<TSystem, TArgs>(Name, Owner, args), Owner.EventHubName);
         }
 
         public Subscription SubscribeHandler(Action<TArgs> handle)

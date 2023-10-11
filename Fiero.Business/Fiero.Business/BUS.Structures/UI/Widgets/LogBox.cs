@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [TransientDependency]
     public class LogBox : Widget
@@ -21,7 +17,7 @@ namespace Fiero.Business
 
         private void UpdateParagraph(LogComponent component)
         {
-            if (Paragraph == null) return;
+            if (Paragraph == null || component == null) return;
             var messages = component.GetMessages().TakeLast(NumRowsDisplayed);
             Paragraph.Rows.V = NumRowsDisplayed;
             Paragraph.Text.V = string.Join("\n", messages);

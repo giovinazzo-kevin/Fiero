@@ -62,13 +62,13 @@ namespace Fiero.Business
 
         private void RouteEvents(Floor floor)
         {
-            floor.TileChanged += (f, oldTile, newTile) => TileChanged.Raise(new(floor, oldTile, newTile));
-            floor.ActorAdded += (f, a) => ActorAdded.Raise(new(f, null, a));
-            floor.ActorRemoved += (f, a) => ActorRemoved.Raise(new(f, a, null));
-            floor.ItemAdded += (f, a) => ItemAdded.Raise(new(f, null, a));
-            floor.ItemRemoved += (f, a) => ItemRemoved.Raise(new(f, a, null));
-            floor.FeatureAdded += (f, a) => FeatureAdded.Raise(new(f, null, a));
-            floor.FeatureRemoved += (f, a) => FeatureRemoved.Raise(new(f, a, null));
+            floor.TileChanged += (f, oldTile, newTile) => _ = TileChanged.Raise(new(floor, oldTile, newTile));
+            floor.ActorAdded += (f, a) => _ = ActorAdded.Raise(new(f, null, a));
+            floor.ActorRemoved += (f, a) => _ = ActorRemoved.Raise(new(f, a, null));
+            floor.ItemAdded += (f, a) => _ = ItemAdded.Raise(new(f, null, a));
+            floor.ItemRemoved += (f, a) => _ = ItemRemoved.Raise(new(f, a, null));
+            floor.FeatureAdded += (f, a) => _ = FeatureAdded.Raise(new(f, null, a));
+            floor.FeatureRemoved += (f, a) => _ = FeatureRemoved.Raise(new(f, a, null));
         }
 
         public void AddFloor(FloorId id, Coord size, Func<FloorBuilder, FloorBuilder> configure)

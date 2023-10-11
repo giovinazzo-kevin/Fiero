@@ -8,6 +8,13 @@ namespace Unconcern.Common
     {
         public static readonly EventBus Default = new();
 
+        public enum MessageHandlerTiming
+        {
+            Exact,
+            Before,
+            After,
+        }
+
         public readonly struct Message
         {
             public readonly DateTime Timestamp;
@@ -73,17 +80,41 @@ namespace Unconcern.Common
         }
 
 
+        protected event Action<Message> PreMessageSent = _ => { };
         protected event Action<Message> OnMessageSent = _ => { };
+        protected event Action<Message> PostMessageSent = _ => { };
 
         public EventBus()
         {
 
         }
 
-        public Subscription Register(Action<Message> a)
+
+        protected Subscription RegisterBefore(Action<Message> a)
+        {
+            PreMessageSent += a;
+            return new Subscription(new Action[] { () => { PreMessageSent -= a; } }, throwOnDoubleDispose: false);
+        }
+
+        protected Subscription Register(Action<Message> a)
         {
             OnMessageSent += a;
             return new Subscription(new Action[] { () => { OnMessageSent -= a; } }, throwOnDoubleDispose: false);
+        }
+        protected Subscription RegisterAfter(Action<Message> a)
+        {
+            PostMessageSent += a;
+            return new Subscription(new Action[] { () => { PostMessageSent -= a; } }, throwOnDoubleDispose: false);
+        }
+
+        public Subscription Register(Action<Message> a, MessageHandlerTiming timing = MessageHandlerTiming.Exact)
+        {
+            return timing switch
+            {
+                MessageHandlerTiming.Before => RegisterBefore(a),
+                MessageHandlerTiming.After => RegisterAfter(a),
+                _ => Register(a),
+            };
         }
 
         public void Send<T>(T msg, string fromHub, params string[] toHubs)
@@ -94,12 +125,19 @@ namespace Unconcern.Common
         /// </summary>
         public void Send(Message m)
         {
-            var handlers = OnMessageSent
-                .GetInvocationList()
-                .OfType<Action<Message>>();
-            foreach (var handle in handlers)
+            Handle(PreMessageSent, m);
+            Handle(OnMessageSent, m);
+            Handle(PostMessageSent, m);
+            void Handle(Action<Message> @event, Message m)
             {
-                handle(m);
+                var handlers = @event
+                    .GetInvocationList()
+                    .OfType<Action<Message>>();
+                foreach (var handle in handlers)
+                {
+                    handle(m);
+                }
+
             }
         }
 

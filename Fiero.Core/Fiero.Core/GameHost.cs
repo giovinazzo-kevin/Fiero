@@ -1,6 +1,4 @@
-﻿
-using Fiero.Core.Structures;
-using System.Reflection;
+﻿using System.Reflection;
 using Unconcern.Common;
 
 namespace Fiero.Core

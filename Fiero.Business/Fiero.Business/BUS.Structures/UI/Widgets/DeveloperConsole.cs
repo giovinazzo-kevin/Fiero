@@ -107,15 +107,13 @@ namespace Fiero.Business
                 })
                 .Build();
             var replExpr = Concern.Defer()
-                .UseAsynchronousTimer()
-                .After(TimeSpan.FromMilliseconds(50))
                 .Do(async token =>
                 {
                     await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, ct: token)) ;
                 })
                 .Build();
             _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
-            _ = Concern.Deferral.LoopForever(replExpr, cts.Token);
+            _ = Concern.Deferral.Once(replExpr, cts.Token);
             var closure = new ShellClosure(shell, ScriptingSystem.InWriter);
             CharAvailable += closure.OnCharAvailable;
             LineAvailable += closure.OnLineAvailable;

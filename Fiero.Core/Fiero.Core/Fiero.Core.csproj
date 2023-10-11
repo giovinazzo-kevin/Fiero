@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Ergo\Ergo\Ergo.csproj" />
-    <ProjectReference Include="..\..\Unconcern\Unconcern.csproj" />
+    <ProjectReference Include="..\..\..\Unconcern\Unconcern\Unconcern.csproj" />
   </ItemGroup>
 
 </Project>

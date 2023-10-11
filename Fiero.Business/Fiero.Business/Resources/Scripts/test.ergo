@@ -1,4 +1,5 @@
 :- module(test, []).
+:- use_module(bomb).
 :- use_module(input).
 :- use_module(data).
 :- use_module(event).
@@ -27,5 +28,5 @@ boom(N) :-
 	Q := Pos + p(I, I),
 	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
 
-bomb:ticking(_{fuse: F}) :-
-	msg_box(F, 'Boom!'), nl.
+bomb:ticking(_{dummy: _{id: Id}, fuse: 1}) :-
+	set_fuse(Id, 10).

@@ -128,6 +128,8 @@ namespace Fiero.Business
 
         void UpdateAnimations()
         {
+            if (Viewport.Following.V is null)
+                return;
             while (_toRemove.TryDequeue(out var id))
             {
                 if (Timelines.TryGetValue(id, out var timeline))

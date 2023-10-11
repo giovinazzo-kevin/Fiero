@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business
 {
@@ -74,6 +72,8 @@ namespace Fiero.Business
                 if (!Bake())
                     return;
             }
+            if (_renderSprite is null)
+                return;
             target.Draw(_renderSprite);
             bool Bake()
             {

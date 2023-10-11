@@ -1,10 +1,13 @@
-:- module(bomb, []).
-:- use_module(anim).
+:- module(bomb, [set_fuse/2, set_radius/2]).
 :- use_module(data).
 :- use_module(sound).
 :- use_module(event).
 :- use_module(effect).
+:- use_module(anim).
+% Scripts can subscribe to system events and to events sent from other scripts.
 :- subscribe(action, [actor_turn_started, actor_attacked]).
+% This pattern can be used to allow scripts to manipulate other scripts, and to act as libraries that hide the complexity of doing so.
+:- subscribe(bomb, [set_fuse_, set_radius_]).
 
 % Bombs leave a fake solid 'bomb' dummy on the ground for as long as the fuse is lit.
 % Dummies are a special type of actor that do basically nothing while being inserted in the flow of turns.
@@ -26,7 +29,7 @@ bomb:began :-
 	% Make the dummy invulnerable to damage
 	effect(effect_def(bestow_trait, invulnerable), B, _),
 	% Let other scripts be aware that this bomb was created
-	raise(bomb, spawned, bomb_spawned_event{ dummy: B }).
+	raise(bomb, spawned, _{ dummy: B }).
 bomb:ended :-
 	% Stop the red blinking animation
 	stop_callback get StopAnim, call(StopAnim),
@@ -35,7 +38,7 @@ bomb:ended :-
 	% Strip bomb of invulnerability, so it can be hit again
 	effect(effect_def(remove_trait, invulnerable), B, _),
 	% Let other scripts be aware that this bomb has exploded (script-raised events are asynchronous unlike system events)
-	raise(bomb, exploded, bomb_event{ dummy: B, radius: R }),
+	raise(bomb, exploded, _{ dummy: B, radius: R }),
 	% Cause an explosion and kill the bomb in the process
 	effect(effect_def(explosion, R), B, _).
 
@@ -52,7 +55,7 @@ tick :-
 		play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: Pitch})
 	),
 	% Let other scripts be aware that this bomb is ticking
-	raise(bomb, ticking, bomb_event{ dummy: B, fuse: T1, initial_fuse: T0 }).
+	raise(bomb, ticking, _{ dummy: B, fuse: T1, initial_fuse: T0 }).
 
 tock :-
 	% Decrement the fuse
@@ -66,7 +69,7 @@ action:actor_turn_started(_{actor: @player}) :-
 	tick, tock.
 %: Make the bomb roll in the opposite direction whenever an actor attacks it.
 action:actor_attacked(_{attacker: A, victim: V}) :-
-	data:dummy get D, 
+	dummy get D, 
 	&D.id = V.id,
 	position(A, Ap),
 	position(V, Vp),
@@ -74,3 +77,13 @@ action:actor_attacked(_{attacker: A, victim: V}) :-
 	clamp(-1, 1, Dir, NormDir),
 	NewPos := Vp + Dir,
 	move(V, NewPos).
+%: Allows other scripts to set the fuse of a bomb given its dummy's id
+set_fuse(DummyId, F) :- raise(bomb, set_fuse_, _{dummy: _{ id: DummyId }, fuse: F}).
+bomb:set_fuse_(_{dummy: _{ id: Id }, fuse: F}) :-
+	dummy get _ { id: Id },
+	fuse set F.
+%: Allows other scripts to set the radius of a bomb given its dummy's id
+set_radius(DummyId, R) :- raise(bomb, set_radius_, _{dummy: _{ id: DummyId }, radius: R}).
+bomb:set_radius_(_{dummy: _{ id: Id }, radius: R}) :- 
+	dummy get _ { id: Id },
+	radius set R.

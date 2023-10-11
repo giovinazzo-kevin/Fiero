@@ -30,14 +30,14 @@ ended :-
 	fx:start(effect_def(explosion, ExplosionRadius), B, _).
 
 tick :-
+	args(_{fuse: Fuse}),
 	data:fuse get T,
 	data:dummy get B,
 	position(B, F, P),
 	anim:play_blocking(F, P, [damage_number{damage: T, tint: light_red}], _),
 	(	T = 0 
-	;   range(0 < T <= 3), Pitch := T / 3,
-		atom_concat(countdown, T, Sound),
-		sound:play(Sound{floor_id: F, position:P, volume:100, pitch: Pitch})
+	;   Pitch := T / Fuse,
+		sound:play(countdown1{floor_id: F, position:P, volume:100, pitch: Pitch})
 	).
 
 tock :-

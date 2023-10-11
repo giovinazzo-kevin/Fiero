@@ -90,6 +90,7 @@ namespace Fiero.Business
                 .SetOutput(OutWriter)
                 .SetInput(InReader, Maybe.Some(AsyncInputReader))
                 .AddCommand(sp.GetInstance<SelectScript>())
+                .AddAbstractParser(new EntityAsTermParser(sp))
                 ;
         }
 

@@ -7,6 +7,7 @@ using Ergo.Solver.BuiltIns;
 using LightInject;
 
 namespace Fiero.Business;
+
 public partial class FieroLib : Library
 {
     public override Atom Module => ScriptingSystem.FieroModule;

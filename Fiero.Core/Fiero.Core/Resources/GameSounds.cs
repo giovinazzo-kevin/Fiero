@@ -31,7 +31,7 @@ namespace Fiero.Core
                         sound.Dispose();
                     }
                 }
-                await Task.Delay(120);
+                await Task.Delay(60);
             }
         }
 

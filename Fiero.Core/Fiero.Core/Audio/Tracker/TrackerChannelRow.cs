@@ -2,7 +2,7 @@
 {
     public readonly struct TrackerChannelRow
     {
-        public static TrackerChannelRow Empty() => new(TrackerNote.None, 4, 1, 255);
+        public static TrackerChannelRow Empty() => new(TrackerNote.__, 4, 1, 255);
 
         public readonly TrackerNote Note;
         public readonly byte Octave;

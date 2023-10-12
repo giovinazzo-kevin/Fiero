@@ -1113,6 +1113,7 @@ namespace Fiero.Business.Scenes
             Systems.Action.Update(Player.Id);
             Systems.Render.Update(t, dt);
             Systems.Input.Update(t, dt);
+            Systems.Music.Update(t, dt);
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(VirtualKeys.R))
             {
                 if (UI.Input.IsKeyDown(VirtualKeys.Shift))

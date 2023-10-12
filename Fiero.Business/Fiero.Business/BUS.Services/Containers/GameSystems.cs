@@ -10,6 +10,7 @@
         public readonly RenderSystem Render;
         public readonly ScriptingSystem Scripting;
         public readonly MetaSystem Meta;
+        public readonly MusicSystem Music;
         public readonly InputSystem Input;
 
         public GameSystems(
@@ -20,6 +21,7 @@
             RenderSystem render,
             ScriptingSystem scripting,
             MetaSystem meta,
+            MusicSystem music,
             InputSystem input
 
         )
@@ -31,6 +33,7 @@
             Render = render;
             Scripting = scripting;
             Meta = meta;
+            Music = music;
             Input = input;
         }
     }

@@ -31,7 +31,7 @@
         {
             const float C0 = 16.35f;
             const float A = 1.059463094359f;
-            return C0 * (float)Math.Pow(A, (int)n + 12 * octave);
+            return C0 * (float)Math.Pow(A, (int)(n - 1) + 12 * octave);
         }
 
         public bool NextSample(int sr, float time, out double sample)

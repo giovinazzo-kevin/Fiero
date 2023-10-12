@@ -2,19 +2,19 @@
 {
     public enum TrackerNote : byte
     {
-        None = 0,
-        A = 10,
+        __ = 0,
+        A_ = 10,
         As = 11,
-        B = 12,
-        C = 1,
+        B_ = 12,
+        C_ = 1,
         Cs = 2,
-        D = 3,
+        D_ = 3,
         Ds = 4,
-        E = 5,
-        F = 6,
+        E_ = 5,
+        F_ = 6,
         Fs = 7,
-        G = 8,
+        G_ = 8,
         Gs = 9,
-        Stop = 13,
+        _S = 13,
     }
 }

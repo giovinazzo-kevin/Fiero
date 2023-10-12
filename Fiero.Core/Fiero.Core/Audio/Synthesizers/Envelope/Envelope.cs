@@ -19,8 +19,17 @@
 
         public EnvelopeState State { get; private set; }
 
-        public Envelope()
+        public Envelope(
+            float delay = 0f, float attack = 0.02f, float hold = 0.1f, float decay = 0.8f, float sustain = 0.5f, float release = 0.4f,
+            bool invert = false)
         {
+            Delay.V = delay;
+            Attack.V = attack;
+            Hold.V = hold;
+            Decay.V = decay;
+            Sustain.V = sustain;
+            Release.V = release;
+            Invert.V = invert;
         }
 
         public void Engage()

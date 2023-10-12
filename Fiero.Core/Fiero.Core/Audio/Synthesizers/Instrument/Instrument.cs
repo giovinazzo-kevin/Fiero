@@ -7,28 +7,30 @@ namespace Fiero.Core
         private int _sampleRate = 44100;
 
         protected readonly Func<Oscillator> GetOscillator;
+        protected readonly Func<Envelope> GetEnvelope;
 
         protected readonly ConcurrentQueue<(Oscillator Osc, Envelope Env, int Duration)> Sounds = new();
         public bool IsPlaying => Sounds.Count > 0;
 
         public Knob<int> MaxVoices = new(1, 16, 16);
 
-        public Instrument(Func<Oscillator> getOsc)
+        public Instrument(Func<Oscillator> getOsc = null, Func<Envelope> getEnvelope = null)
         {
             GetOscillator = getOsc ?? (() => new Oscillator(OscillatorShape.Square));
+            GetEnvelope = getEnvelope ?? (() => new Envelope());
         }
 
-        public void Play(Note note, int octave, float durationInSeconds, float volume = 1)
+        public void Play(Note note, int octave, TimeSpan duration, float volume = 1)
         {
             if (Sounds.Count >= MaxVoices)
             {
                 Sounds.TryDequeue(out _);
             }
             var osc = GetOscillator();
-            var env = new Envelope();
+            var env = GetEnvelope();
             osc.Frequency.V = Oscillator.CalculateFrequency(note, octave);
             osc.Amplitude.V = volume;
-            var durationInSamples = (int)(durationInSeconds * _sampleRate);
+            var durationInSamples = (int)(duration.TotalSeconds * _sampleRate);
             Sounds.Enqueue((osc, env, durationInSamples));
             env.Engage();
         }

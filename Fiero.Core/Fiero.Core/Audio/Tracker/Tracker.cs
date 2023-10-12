@@ -2,7 +2,7 @@
 {
     public class Tracker
     {
-        private float _accumulator, _interval;
+        private TimeSpan _accumulator, _interval;
         private readonly TrackerChannel[] _channels;
 
         public readonly Mixer Mixer;
@@ -10,7 +10,7 @@
         public IReadOnlyList<TrackerChannel> Channels => _channels;
         public readonly List<Instrument> Instruments = new();
 
-        public float Time { get; private set; }
+        public TimeSpan Time { get; private set; }
         public int Row { get; private set; }
 
         public event Action<Tracker, TrackerState> StateChanged;
@@ -35,8 +35,8 @@
 
         protected virtual void OnTempoChanged(int tempo)
         {
-            // tempo is BPM, but we want BPS
-            _interval = 1f / (tempo / 60f);
+            // tempo is BPM, but we want BPS and then we divide that by 4 to get quarter note rhythms
+            _interval = TimeSpan.FromSeconds(60f / tempo) / 4;
         }
 
         protected virtual void OnRowsPerPatternChanged(int rowsPerPattern)
@@ -51,6 +51,7 @@
         {
             State = TrackerState.Playing;
             StateChanged?.Invoke(this, State);
+            Mixer.Play();
         }
 
         public void Stop()
@@ -58,6 +59,7 @@
             Row = 0;
             State = TrackerState.Stopped;
             StateChanged?.Invoke(this, State);
+            Mixer.Stop();
         }
 
         public void Pause()
@@ -66,7 +68,7 @@
             StateChanged?.Invoke(this, State);
         }
 
-        protected bool UpdateChannels(float delta, out TrackerChannelRow[] rowsToPlay)
+        protected bool UpdateChannels(TimeSpan delta, out TrackerChannelRow[] rowsToPlay)
         {
             rowsToPlay = Array.Empty<TrackerChannelRow>();
             if (State != TrackerState.Playing)
@@ -74,8 +76,9 @@
 
             if ((_accumulator += delta) >= _interval)
             {
-                _accumulator = 0;
-                rowsToPlay = Channels.Select(c => c.GetRow(Row))
+                _accumulator = TimeSpan.Zero;
+                var row = Row;
+                rowsToPlay = Channels.Select(c => c.GetRow(row))
                     .ToArray();
                 return true;
             }
@@ -93,9 +96,9 @@
             var instrument = Instruments[row.Instrument - 1];
             switch (row.Note)
             {
-                case TrackerNote.None:
+                case TrackerNote.__:
                     break;
-                case TrackerNote.Stop:
+                case TrackerNote._S:
                     instrument.StopAll();
                     break;
                 default:
@@ -104,7 +107,7 @@
             }
         }
 
-        public bool Update(float delta, out int playedRow)
+        public bool Update(TimeSpan delta, out int playedRow)
         {
             playedRow = Row;
             if (UpdateChannels(delta, out var rowsToPlay))

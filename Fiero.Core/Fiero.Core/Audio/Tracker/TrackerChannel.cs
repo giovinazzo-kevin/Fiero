@@ -20,17 +20,18 @@
 
         public void Resize(int newRows)
         {
-            if (newRows > Rows.Count)
+            int currentRows = Rows.Count;
+            // Expand the list
+            if (newRows > currentRows)
             {
-                for (int i = 0; i < newRows - Rows.Count; i++)
-                {
-                    Rows.Add(TrackerChannelRow.Empty());
-                }
+                Rows.AddRange(Enumerable.Repeat(TrackerChannelRow.Empty(), newRows - currentRows));
             }
-            else if (newRows < Rows.Count)
+            // Shrink the list
+            else if (newRows < currentRows)
             {
-                Rows.RemoveRange(newRows, Rows.Count - newRows);
+                Rows.RemoveRange(newRows, currentRows - newRows);
             }
+            // No change needed if newRows == currentRows
         }
     }
 }

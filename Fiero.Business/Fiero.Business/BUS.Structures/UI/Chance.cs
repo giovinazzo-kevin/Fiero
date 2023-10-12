@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-
-using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly record struct Chance(int Numerator, int Denominator)
     {

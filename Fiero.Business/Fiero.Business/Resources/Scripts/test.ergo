@@ -3,23 +3,25 @@
 :- use_module(data).
 :- use_module(event).
 :- use_module(anim).
+:- use_module(effect).
+:- use_module(random).
 :- use_module(bomb_commands).
 
 test:began :- 
 	bind(k, pressed, [_]>>(coolio)),
-	bind(u, pressed, [_]>>(boom(3))),
+	bind(u, pressed, [_]>>(boom(5))),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
-	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _)))
-	.
+	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))),
+	bagof(T, d(6, 24, T), Ts),
+	sum(Ts, Sum),
+	write(Sum), nl.
 test:ended :- unbind(_, _, _).
 
 coolio :-
 	@player = _{ render: _{ sprite: S, texture: T }},
 	play_animations(@player, [fade{texture: T, sprite: S, tint: light_red, repeat: -1}], _).
 boom(N) :-
-	P = @player, Id = &P.id,
-	shape(square, N, Ps),
-	position(P, Pos),
-	Q := Pos + Ps,
-	spawn([throwable_bomb{charges:N, radius: 20, fuse: 0}], [_{id: NukeId }]),
-	raise(action, item_thrown, _{ actor: actor{id: Id}, position: Q, item: throwable {id: NukeId} }).
+	position(@player, FloorId, Po),
+	shape(disc, N, Ps),
+	Q := Po + Ps,
+	effect(effect_def(explosion, 1), l(FloorId, Q), _).

@@ -6,11 +6,11 @@ using Ergo.Solver.BuiltIns;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class SetRngSeed : SolverBuiltIn
+public sealed class SetRandomSeed : SolverBuiltIn
 {
     public readonly GameDataStore Store;
 
-    public SetRngSeed(GameDataStore store)
+    public SetRandomSeed(GameDataStore store)
         : base("", new("set_rng_seed"), 1, ScriptingSystem.FieroModule)
     {
         Store = store;

@@ -27,6 +27,7 @@ namespace Fiero.Business
         public static readonly Atom EffectModule = new("effect");
         public static readonly Atom DataModule = new("data");
         public static readonly Atom EventModule = new("event");
+        public static readonly Atom RandomModule = new("random");
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 

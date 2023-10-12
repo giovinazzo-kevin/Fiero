@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly record struct Dice(int NumberOfDice, int NumberOfSides, Func<int, int, double> Weights = null)
     {

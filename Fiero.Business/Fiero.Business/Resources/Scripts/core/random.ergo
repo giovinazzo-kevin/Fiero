@@ -1,0 +1,36 @@
+% Do not modify unless you know what you are doing.
+:- module(random, [n_in/2, flip_coin/0, rng/3, rng/2, d/3, ':='/2]).
+
+:- op(750, fx, [roll]).
+:- op(760, xfy, [d]).
+
+rng(Min, Max, R) :-
+	rng(N),
+	R := Min + N * (Max - Min).
+rng(Max, R) :- rng(0, Max, R).
+
+n_in(0, _) :- false, !.
+n_in(_, 0) :- false, !.
+n_in(Num, Num) :- !.
+n_in(Num, Den) :- Num \== Den, rng(N), (N < Num / Den).
+
+flip_coin :- n_in(1, 2).
+
+d(Sides, Throws, Throw) :-
+	for(_, 1, Throws),
+	rng(1, Sides, D),
+	Throw := floor D. 
+	
+Bind := roll N d S :-
+	d(S, N, Bind).
+_ := roll _ d _ :- !, false.
+List := [roll N d S] :-
+	bagof(T, d(S, N, T), List), !.
+Set  := {roll N d S} :-
+	setof(T, d(S, N, T), Set), !.
+Sum  := +[roll N d S] :-
+	bagof(T, d(S, N, T), List),
+	reduce([A,B,C]>>(C:=A+B), List, Sum), !.
+Sum  := *[roll N d S] :-
+	bagof(T, d(S, N, T), List),
+	reduce([A,B,C]>>(C:=A*B), List, Sum), !.

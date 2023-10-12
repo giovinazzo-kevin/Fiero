@@ -24,13 +24,29 @@ public sealed class TriggerEffect : SolverBuiltIn
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
     {
         var gameEntities = _services.GetInstance<GameEntities>();
-        if (arguments[0].Matches<EffectDefStub>(out var stub)
-        && gameEntities.TryParseTerm(arguments[1], out var e))
+        var floorSys = _services.GetInstance<DungeonSystem>();
+        if (arguments[0].Matches<EffectDefStub>(out var stub))
         {
-            var def = new EffectDef(stub.Name, stub.Arguments, source: (Entity)e);
-            var effect = def.Resolve(null);
-            // TODO: bind effect.end as callable to args[2]
-            effect.Start(_services.GetInstance<GameSystems>(), (Entity)e);
+            if (arguments[1].IsAbstract<EntityAsTerm>().Map(e => e.GetProxy()).TryGetValue(out var e))
+            {
+                var def = new EffectDef(stub.Name, stub.Arguments, source: (Entity)e);
+                var effect = def.Resolve(null);
+                // TODO: bind effect.end as callable to args[2]
+                effect.Start(_services.GetInstance<GameSystems>(), (Entity)e);
+            }
+            else if (arguments[1].Matches(out Location loc)
+                && floorSys.TryGetTileAt(loc.FloorId, loc.Position, out var tile))
+            {
+                var def = new EffectDef(stub.Name, stub.Arguments, source: tile);
+                var effect = def.Resolve(null);
+                // TODO: bind effect.end as callable to args[2]
+                effect.Start(_services.GetInstance<GameSystems>(), tile);
+            }
+            else
+            {
+                yield return False();
+                yield break;
+            }
         }
         yield return True();
     }

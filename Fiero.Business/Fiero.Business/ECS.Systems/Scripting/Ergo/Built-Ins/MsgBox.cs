@@ -21,15 +21,7 @@ public sealed class MsgBox : SolverBuiltIn
     {
         var modal = UI.NecessaryChoice(Array.Empty<string>(), arguments[0].AsQuoted(false).Explain(), arguments[1].AsQuoted(false).Explain());
         // Block this thread until the user closes this modal
-        ModalWindowButton choice;
-        if (!GameThread.IsMainThread.Value)
-        {
-            choice = modal.WaitForClose().GetAwaiter().GetResult();
-        }
-        else
-        {
-
-        }
+        var choice = modal.WaitForClose().GetAwaiter().GetResult();
         var term = TermMarshall.ToTerm(choice);
         if (arguments[2].Unify(term).TryGetValue(out var subs))
         {

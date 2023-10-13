@@ -120,6 +120,18 @@
         public abstract void Maximize();
         public abstract void Minimize();
 
+        public Task<ModalWindowButton> WaitForClose()
+        {
+            var tcs = new TaskCompletionSource<ModalWindowButton>();
+            Closed += SetResult;
+            return tcs.Task;
+            void SetResult(UIWindow win, ModalWindowButton btn)
+            {
+                tcs.SetResult(btn);
+                Closed -= SetResult;
+            }
+        }
+
         public override void Close(ModalWindowButton buttonPressed)
         {
             base.Close(buttonPressed);

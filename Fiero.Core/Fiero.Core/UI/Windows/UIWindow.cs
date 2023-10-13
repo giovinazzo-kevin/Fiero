@@ -86,14 +86,14 @@ namespace Fiero.Core
 
         public virtual void Update(TimeSpan t, TimeSpan dt)
         {
-            if (!IsOpen) return;
+            if (!IsOpen || Layout is null) return;
             Layout.Update(t, dt);
             Updated?.Invoke(this);
         }
 
         public virtual void Draw(RenderTarget target, RenderStates states)
         {
-            if (!IsOpen) return;
+            if (!IsOpen || Layout is null) return;
             Layout.Draw(target, states);
         }
     }

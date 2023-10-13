@@ -1,5 +1,11 @@
 % Do not modify unless you know what you are doing.
-:- module(random, [n_in/2, flip_coin/0, rng/3, rng/2, d/3, ':='/2]).
+:- module(random, [
+	one_chance_in/1, n_chances_in/2, 
+	dice/3, 
+	flip_coin/0, always/0, never/0, 
+	rng/3, rng/2, 
+	':='/2
+]).
 
 :- op(750, fx, [roll]).
 :- op(760, xfy, [d]).
@@ -9,28 +15,37 @@ rng(Min, Max, R) :-
 	R := Min + N * (Max - Min).
 rng(Max, R) :- rng(0, Max, R).
 
-n_in(0, _) :- false, !.
-n_in(_, 0) :- false, !.
-n_in(Num, Num) :- !.
-n_in(Num, Den) :- Num \== Den, rng(N), (N < Num / Den).
+n_chances_in(0, _) :- false, !.
+n_chances_in(_, 0) :- false, !.
+n_chances_in(Num, Num) :- !.
+n_chances_in(Num, Den) :- Num \== Den, rng(N), (N < Num / Den).
 
-flip_coin :- n_in(1, 2).
+one_chance_in(Den) :- n_chances_in(1, Den).
 
-d(Sides, Throws, Throw) :-
+flip_coin :- n_chances_in(1, 2).
+always :- n_chances_in(1, 1).
+never :- n_chances_in(0, 0).
+
+dice(Throws, Sides, Throw) :-
 	for(_, 1, Throws),
 	rng(1, Sides, D),
 	Throw := floor D. 
 	
+%: Binds each roll to a variable.
 Bind := roll N d S :-
-	d(S, N, Bind).
+	dice(S, N, Bind).
 _ := roll _ d _ :- !, false.
+%: Gathers all rolls into a list.
 List := [roll N d S] :-
-	bagof(T, d(S, N, T), List), !.
+	bagof(T, dice(S, N, T), List), !.
+%: Gathers all rolls into an ordered set.
 Set  := {roll N d S} :-
-	setof(T, d(S, N, T), Set), !.
+	setof(T, dice(S, N, T), Set), !.
+%: Sums all rolls.
 Sum  := +[roll N d S] :-
-	bagof(T, d(S, N, T), List),
+	bagof(T, dice(S, N, T), List),
 	reduce([A,B,C]>>(C:=A+B), List, Sum), !.
-Sum  := *[roll N d S] :-
-	bagof(T, d(S, N, T), List),
-	reduce([A,B,C]>>(C:=A*B), List, Sum), !.
+%: Calculates the product of all rolls.
+Prod := *[roll N d S] :-
+	bagof(T, dice(S, N, T), List),
+	reduce([A,B,C]>>(C:=A*B), List, Prod), !.

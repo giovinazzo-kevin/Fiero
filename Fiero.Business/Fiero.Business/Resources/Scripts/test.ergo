@@ -17,9 +17,7 @@ test:began :-
 	write(Sum), nl.
 test:ended :- unbind(_, _, _).
 
-coolio :-
-	@player = _{ render: _{ sprite: S, texture: T }},
-	play_animations(@player, [fade{texture: T, sprite: S, tint: light_red, repeat: -1}], _).
+coolio :- msg_box('we', 'we', _).
 boom(N) :-
 	position(@player, FloorId, Po),
 	shape(disc, N, Ps),

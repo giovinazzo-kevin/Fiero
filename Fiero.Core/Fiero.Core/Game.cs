@@ -121,7 +121,6 @@ namespace Fiero.Core
         {
             await InitializeAsync();
             ValidateResources();
-            GameThread.IsMainThread.Value = true;
             using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty))
             {
                 InitializeWindow(Window.RenderWindow);

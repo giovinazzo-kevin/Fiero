@@ -1,6 +1,4 @@
-﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Extensions;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Fiero.Core
 {
@@ -110,12 +108,11 @@ namespace Fiero.Core
             return entity;
         }
 
-        public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
-            where T : EcsEntity
+        public IEnumerable<PropertyInfo> GetProxyableProperties(Type type)
         {
-            if (!ProxyablePropertyCache.TryGetValue(typeof(T), out var props))
+            if (!ProxyablePropertyCache.TryGetValue(type, out var props))
             {
-                ProxyablePropertyCache[typeof(T)] = props = typeof(T).GetProperties()
+                ProxyablePropertyCache[type] = props = type.GetProperties()
                     .Where(p => p.PropertyType.IsAssignableTo(typeof(EcsComponent)))
                     .Select(p => p.DeclaringType.GetProperty(p.Name))
                     .ToHashSet();
@@ -123,42 +120,45 @@ namespace Fiero.Core
             return props;
         }
 
+        public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
+            where T : EcsEntity => GetProxyableProperties(typeof(T));
+
         public EntityBuilder<T> CreateBuilder<T>() where T : EcsEntity => new(this);
 
-        public bool TryParseTerm(ITerm term, out EcsEntity entity)
-        {
-            entity = default;
-            if (!term.IsAbstract<Dict>().TryGetValue(out var dict))
-                return false;
-            if (!dict.Functor.TryGetA(out var functor))
-                return false;
-            if (!dict.Dictionary.TryGetValue(new Atom("id"), out var id))
-                return false;
-            var knownTypes = ProxyablePropertyCache.Keys
-                .SelectMany(t =>
-                {
-                    return Inner();
-                    IEnumerable<Type> Inner()
-                    {
-                        var b = t;
-                        while (b != typeof(EcsEntity))
-                        {
-                            yield return b;
-                            b = b.BaseType;
-                        }
-                    }
-                })
-                .Distinct();
-            var expl = functor.Explain();
-            if (knownTypes.FirstOrDefault(t => t.Name.ToErgoCase().Equals(expl))
-                is { } proxyType)
-            {
-                if (!TryGetProxy(proxyType, int.Parse(id.Explain()), out entity))
-                    return false;
-                return true;
-            }
-            return false;
-        }
+        //public bool TryParseTerm(ITerm term, out EcsEntity entity)
+        //{
+        //    entity = default;
+        //    if (!term.IsAbstract<Dict>().TryGetValue(out var dict))
+        //        return false;
+        //    if (!dict.Functor.TryGetA(out var functor))
+        //        return false;
+        //    if (!dict.Dictionary.TryGetValue(new Atom("id"), out var id))
+        //        return false;
+        //    var knownTypes = ProxyablePropertyCache.Keys
+        //        .SelectMany(t =>
+        //        {
+        //            return Inner();
+        //            IEnumerable<Type> Inner()
+        //            {
+        //                var b = t;
+        //                while (b != typeof(EcsEntity))
+        //                {
+        //                    yield return b;
+        //                    b = b.BaseType;
+        //                }
+        //            }
+        //        })
+        //        .Distinct();
+        //    var expl = functor.Explain();
+        //    if (knownTypes.FirstOrDefault(t => t.Name.ToErgoCase().Equals(expl))
+        //        is { } proxyType)
+        //    {
+        //        if (!TryGetProxy(proxyType, int.Parse(id.Explain()), out entity))
+        //            return false;
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         public bool TryGetProxy(Type t, int entityId, out EcsEntity entity, bool createRequiredComponents = false)
         {

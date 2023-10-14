@@ -9,7 +9,6 @@
 :- subscribe(action, [item_thrown]).
 
 test:began :- 
-	write('we'),
 	bind(u, pressed, [_]>>(boom(5))),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))).

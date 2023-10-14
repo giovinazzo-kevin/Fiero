@@ -1,5 +1,6 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Ergo.Lang.Ast.Terms.Interfaces;
 using Ergo.Lang.Extensions;
 using LightInject;
 using PeterO.Numbers;
@@ -7,10 +8,8 @@ using PeterO.Numbers;
 namespace Fiero.Business;
 
 /// <summary>
-/// Represents a game entity dynamically as a term, implementing a duality between the following representations:
-/// entity(Id, Type)
+/// Represents a game entity dynamically as a term, automatically refreshing it in-between accesses. It has the form of a dictionary:
 /// Type { id: Id, component: component_type { ... }, ...  }
-/// Additionally guarantees that components always contain the latest state when accessed.
 /// </summary>
 public sealed class EntityAsTerm : Dict
 {
@@ -20,7 +19,8 @@ public sealed class EntityAsTerm : Dict
     public static readonly Atom Id = new("id");
     private static ITerm GetInvalidEntity(int id, Atom type) => new Dict(type, new[]
     {
-        new KeyValuePair<Atom, ITerm>(new Atom("id"), new Atom(id))
+        new KeyValuePair<Atom, ITerm>(new Atom("id"), new Atom(id)),
+        new KeyValuePair<Atom, ITerm>(new Atom("invalid"), new Atom(true))
     });
 
     private readonly GameEntities _entities;
@@ -42,14 +42,7 @@ public sealed class EntityAsTerm : Dict
         Type = TypeMap[type];
         TypeAsAtom = type;
         EntityId = entityId;
-    }
-    private ITerm ToCanonical() => GetProxy()
-        .Select(x => TermMarshall.ToTerm(x, Type))
-        .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
-
-    public override Maybe<SubstitutionMap> Unify(ITerm other)
-    {
-        return base.Unify(other);
+        Refresh();
     }
 
     public Maybe<EcsEntity> GetProxy()
@@ -60,6 +53,34 @@ public sealed class EntityAsTerm : Dict
         }
         return default;
     }
+    private ITerm ToCanonical() => GetProxy()
+        .Select(x => TermMarshall.ToTerm(x, Type))
+        .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
+
+    private void Refresh()
+    {
+        var proxy = ToCanonical();
+        if (proxy is Dict d)
+        {
+            Dictionary = Dictionary.Clear().AddRange(d.Dictionary);
+            KeyValuePairs = BuildKVPs();
+            Argument = new Set(KeyValuePairs);
+            CanonicalForm = BuildCanonical();
+        }
+    }
+
+    public override Maybe<SubstitutionMap> Unify(ITerm other)
+    {
+        Refresh();
+        return base.Unify(other);
+    }
+
+    public override AbstractTerm Instantiate(InstantiationContext ctx, Dictionary<string, Variable> vars = null)
+    {
+        Refresh();
+        return this;
+    }
+
     public static Maybe<EntityAsTerm> FromCanonical(ITerm term)
     {
         if (term is Dict dict

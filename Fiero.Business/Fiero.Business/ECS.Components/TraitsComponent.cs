@@ -1,10 +1,13 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang;
+
+namespace Fiero.Business
 {
     public class TraitsComponent : EcsComponent
     {
         private readonly HashSet<Trait> Intrinsic = new();
         private readonly HashSet<Trait> Extrinsic = new();
 
+        [NonTerm]
         public IEnumerable<Trait> Active => Intrinsic
             .Where(i => !Extrinsic.Contains(i)).Concat(Extrinsic);
 

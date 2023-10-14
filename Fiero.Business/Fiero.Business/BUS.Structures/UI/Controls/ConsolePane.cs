@@ -17,7 +17,7 @@ namespace Fiero.Business
         public TextBox Caret { get; private set; }
 
         private readonly RampingDebounce _writeDebounce = new(
-            minCooldown: TimeSpan.FromMilliseconds(50),
+            minCooldown: TimeSpan.FromMilliseconds(10),
             maxCooldown: TimeSpan.FromMilliseconds(50),
             rampUpFactor: TimeSpan.FromMilliseconds(50),
             decayFactor: TimeSpan.FromMilliseconds(1000)

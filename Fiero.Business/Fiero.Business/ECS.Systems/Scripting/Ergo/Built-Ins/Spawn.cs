@@ -31,7 +31,7 @@ public sealed class Spawn : SolverBuiltIn
     public override IEnumerable<Evaluation> Apply(SolverContext context, SolverScope scope, ITerm[] args)
     {
         var spawned = new List<EcsEntity>();
-        if (args[0].IsAbstract<List>().TryGetValue(out var list))
+        if (args[0] is List list)
         {
             var systems = Services.GetInstance<GameSystems>();
             // TODO: better way of determining floorID
@@ -40,7 +40,7 @@ public sealed class Spawn : SolverBuiltIn
             var position = player?.Position() ?? default;
             foreach (var item in list.Contents)
             {
-                if (!item.IsAbstract<Dict>().TryGetValue(out var dict))
+                if (item is not Dict dict)
                 {
                     yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, item);
                     yield break;
@@ -110,7 +110,7 @@ public sealed class Spawn : SolverBuiltIn
                 }
             }
             systems.Render.CenterOn(player);
-            if (args[1].Unify(new List(spawned.Select(x => TermMarshall.ToTerm(x, x.GetType())))).TryGetValue(out var subs))
+            if (args[1].Unify(new List(spawned.Select(x => new EntityAsTerm(x.Id, new Atom(x.GetType().Name.ToErgoCase()))))).TryGetValue(out var subs))
             {
                 yield return True(subs);
             }

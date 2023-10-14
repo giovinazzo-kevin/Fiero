@@ -227,7 +227,8 @@ namespace Fiero.Business
                         tint,
                         ofs + new Vec(i * s.X - text.Length * s.X / 4, 0),
                         s,
-                        1
+                        1,
+                        Z: 1
                     ))
                     .ToArray();
             }

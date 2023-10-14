@@ -16,6 +16,7 @@ namespace Fiero.Business
             => a.Position().DistSq(pos);
         public static Atom ErgoType(this EcsEntity e) => new(e.GetType().Name.ToErgoCase());
         public static FloorId FloorId(this PhysicalEntity a) => a.Physics.FloorId;
+        public static Location Location(this PhysicalEntity a) => new(a.Physics.FloorId, a.Physics.Position);
         public static Coord Position(this PhysicalEntity a) => a.Physics.Position;
         public static bool IsInvalid(this Entity e) => e is null || e.Id == 0;
         public static bool IsAlive(this PhysicalEntity a) => !a.IsInvalid() && a.FloorId() != default;

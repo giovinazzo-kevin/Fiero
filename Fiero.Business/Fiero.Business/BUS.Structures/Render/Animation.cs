@@ -11,20 +11,30 @@
 
         public Animation OnFirstFrame(Action a)
         {
-            FramePlaying += (_, i, f) =>
-            {
-                if (i == 0) a();
-            };
+            FramePlaying += On;
             return this;
+            void On(Animation _, int i, AnimationFrame f)
+            {
+                if (i == 0)
+                {
+                    a();
+                    FramePlaying -= On;
+                }
+            }
         }
 
         public Animation OnLastFrame(Action a)
         {
-            FramePlaying += (_, i, f) =>
-            {
-                if (i == Frames.Length - 1) a();
-            };
+            FramePlaying += On;
             return this;
+            void On(Animation _, int i, AnimationFrame f)
+            {
+                if (i == Frames.Length - 1)
+                {
+                    a();
+                    FramePlaying -= On;
+                }
+            }
         }
         public Animation(AnimationFrame[] frames, int repeat = 0)
         {

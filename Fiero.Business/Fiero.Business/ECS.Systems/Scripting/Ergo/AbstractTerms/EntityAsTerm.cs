@@ -10,17 +10,19 @@ namespace Fiero.Business;
 /// <summary>
 /// Represents a game entity dynamically as a term, automatically refreshing it in-between accesses. It has the form of a dictionary:
 /// Type { id: Id, component: component_type { ... }, ...  }
+/// Clearly, this is impure and mutable by all counts, but it simplifies scripts that act on entities a great deal.
 /// </summary>
 public sealed class EntityAsTerm : Dict
 {
     // Hack, TODO: figure out a way to do away with this dependency?
     internal static IServiceFactory ServiceFactory { get; set; }
     internal static readonly Dictionary<Atom, Type> TypeMap;
-    public static readonly Atom Id = new("id");
+    public static readonly Atom Key_Id = new("id");
+    public static readonly Atom Key_Invalid = new("invalid");
     private static ITerm GetInvalidEntity(int id, Atom type) => new Dict(type, new[]
     {
-        new KeyValuePair<Atom, ITerm>(new Atom("id"), new Atom(id)),
-        new KeyValuePair<Atom, ITerm>(new Atom("invalid"), new Atom(true))
+        new KeyValuePair<Atom, ITerm>(Key_Id, new Atom(id)),
+        new KeyValuePair<Atom, ITerm>(Key_Invalid, new Atom(true))
     });
 
     private readonly GameEntities _entities;
@@ -36,7 +38,7 @@ public sealed class EntityAsTerm : Dict
     public readonly Atom TypeAsAtom;
 
     public EntityAsTerm(int entityId, Atom type)
-        : base(type, new[] { new KeyValuePair<Atom, ITerm>(Id, new Atom(entityId)) })
+        : base(type, new[] { new KeyValuePair<Atom, ITerm>(Key_Invalid, new Atom(entityId)) })
     {
         _entities = ServiceFactory.GetInstance<GameEntities>();
         Type = TypeMap[type];
@@ -89,7 +91,7 @@ public sealed class EntityAsTerm : Dict
         if (term is Dict dict
             && dict.Functor.TryGetA(out var functor)
             && TypeMap.TryGetValue(functor, out _)
-            && dict.Dictionary.TryGetValue(Id, out var id)
+            && dict.Dictionary.TryGetValue(Key_Invalid, out var id)
             && id is Atom a && a.Value is EDecimal d)
         {
             return new EntityAsTerm(d.ToInt32Unchecked(), functor);

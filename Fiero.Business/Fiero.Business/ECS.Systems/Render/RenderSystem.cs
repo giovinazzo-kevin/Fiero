@@ -102,7 +102,9 @@ namespace Fiero.Business
         {
             Window.Draw(target, states);
             UpdateAnimations();
-            foreach (var anim in Vfx.Values)
+            foreach (var anim in Vfx.Values
+                .Where(x => x.Any())
+                .OrderBy(x => x.Min(x => x.Right.Z)))
             {
                 for (int j = 0, animCount = anim.Count; j < animCount && anim.TryDequeue(out var pair); j++)
                 {
@@ -171,7 +173,8 @@ namespace Fiero.Business
                     if (timeline.Visible && Viewport.Following.V.CanSeeEither(timeline.At))
                     {
                         var myVfx = Vfx[id] = new();
-                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites)
+                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites
+                            .OrderBy(x => x.Z))
                         {
                             myVfx.Enqueue(new(worldPos, spriteDef with { Offset = spriteDef.Offset + timeline.Offset }));
                         }

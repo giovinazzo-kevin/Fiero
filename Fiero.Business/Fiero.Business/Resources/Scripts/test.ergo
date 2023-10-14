@@ -6,20 +6,18 @@
 :- use_module(effect).
 :- use_module(random).
 :- use_module(bomb_commands).
+:- subscribe(action, [item_thrown]).
 
 test:began :- 
-	bind(k, pressed, [_]>>(coolio)),
+	write('we'),
 	bind(u, pressed, [_]>>(boom(5))),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
-	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))),
-	bagof(T, d(6, 24, T), Ts),
-	sum(Ts, Sum),
-	write(Sum), nl.
+	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))).
 test:ended :- unbind(_, _, _).
-
-coolio :- msg_box('we', 'we', _).
 boom(N) :-
 	position(@player, FloorId, Po),
 	shape(disc, N, Ps),
 	Q := Po + Ps,
 	effect(effect_def(explosion, 1), l(FloorId, Q), _).
+
+action:item_thrown(_{actor:_}) :- true.

@@ -18,7 +18,7 @@ namespace Fiero.Business
 
         private readonly RampingDebounce _writeDebounce = new(
             minCooldown: TimeSpan.FromMilliseconds(50),
-            maxCooldown: TimeSpan.FromMilliseconds(500),
+            maxCooldown: TimeSpan.FromMilliseconds(50),
             rampUpFactor: TimeSpan.FromMilliseconds(50),
             decayFactor: TimeSpan.FromMilliseconds(1000)
         )

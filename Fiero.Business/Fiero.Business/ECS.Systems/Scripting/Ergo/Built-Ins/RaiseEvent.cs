@@ -70,7 +70,7 @@ public sealed class RaiseEvent : SolverBuiltIn
         // It can be sent from any module, even the modules of other scripts, with the system name acting as a conventional tag.
         if (!anySystem)
         {
-            _ = gameSystems.Scripting.ScriptEventRaised.Raise(new(sysName, eventname, dict.CanonicalForm));
+            _ = gameSystems.Scripting.ScriptEventRaised.Raise(new(sysName, eventname, dict));
             yield return True();
             yield break;
         }

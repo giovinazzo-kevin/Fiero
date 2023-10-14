@@ -110,7 +110,7 @@ public sealed class Spawn : SolverBuiltIn
                 }
             }
             systems.Render.CenterOn(player);
-            if (args[1].Unify(new List(spawned.Select(x => TermMarshall.ToTerm(x, x.GetType()))).CanonicalForm).TryGetValue(out var subs))
+            if (args[1].Unify(new List(spawned.Select(x => TermMarshall.ToTerm(x, x.GetType())))).TryGetValue(out var subs))
             {
                 yield return True(subs);
             }

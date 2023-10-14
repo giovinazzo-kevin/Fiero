@@ -1,6 +1,5 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Ast.Terms.Interfaces;
 using Ergo.Lang.Extensions;
 using LightInject;
 using PeterO.Numbers;
@@ -13,16 +12,16 @@ namespace Fiero.Business;
 /// Type { id: Id, component: component_type { ... }, ...  }
 /// Additionally guarantees that components always contain the latest state when accessed.
 /// </summary>
-public sealed class EntityAsTerm : IAbstractTerm
+public sealed class EntityAsTerm : Dict
 {
     // Hack, TODO: figure out a way to do away with this dependency?
     internal static IServiceFactory ServiceFactory { get; set; }
     internal static readonly Dictionary<Atom, Type> TypeMap;
     public static readonly Atom Id = new("id");
-    private static readonly ITerm __invalidEntity = new Dict(new Atom("entity"), new[]
+    private static ITerm GetInvalidEntity(int id, Atom type) => new Dict(type, new[]
     {
-        new KeyValuePair<Atom, ITerm>(new Atom("invalid"), new Atom("true"))
-    }).CanonicalForm;
+        new KeyValuePair<Atom, ITerm>(new Atom("id"), new Atom(id))
+    });
 
     private readonly GameEntities _entities;
     static EntityAsTerm()
@@ -32,15 +31,25 @@ public sealed class EntityAsTerm : IAbstractTerm
             .ToDictionary(x => new Atom(x.Name.ToString().ToErgoCase()));
     }
 
-    private readonly ITerm _simple;
     public readonly int EntityId;
     public readonly Type Type;
+    public readonly Atom TypeAsAtom;
 
     public EntityAsTerm(int entityId, Atom type)
+        : base(type, new[] { new KeyValuePair<Atom, ITerm>(Id, new Atom(entityId)) })
     {
         _entities = ServiceFactory.GetInstance<GameEntities>();
         Type = TypeMap[type];
+        TypeAsAtom = type;
         EntityId = entityId;
+    }
+    private ITerm ToCanonical() => GetProxy()
+        .Select(x => TermMarshall.ToTerm(x, Type))
+        .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
+
+    public override Maybe<SubstitutionMap> Unify(ITerm other)
+    {
+        return base.Unify(other);
     }
 
     public Maybe<EcsEntity> GetProxy()
@@ -51,22 +60,9 @@ public sealed class EntityAsTerm : IAbstractTerm
         }
         return default;
     }
-
-    private ITerm ToCanonical() => GetProxy()
-        .Select(x => TermMarshall.ToTerm(x, Type))
-        .GetOr(__invalidEntity);
-
-    public ITerm CanonicalForm => ToCanonical();
-    public Signature Signature => _simple.GetSignature();
-    public string Explain()
-    {
-        return _simple.Explain();
-    }
-
-    public Maybe<IAbstractTerm> FromCanonicalTerm(ITerm c) => FromCanonical(c).Select(x => (IAbstractTerm)x);
     public static Maybe<EntityAsTerm> FromCanonical(ITerm term)
     {
-        if (term.IsAbstract<Dict>().TryGetValue(out var dict)
+        if (term is Dict dict
             && dict.Functor.TryGetA(out var functor)
             && TypeMap.TryGetValue(functor, out _)
             && dict.Dictionary.TryGetValue(Id, out var id)
@@ -74,16 +70,6 @@ public sealed class EntityAsTerm : IAbstractTerm
         {
             return new EntityAsTerm(d.ToInt32Unchecked(), functor);
         }
-        return default;
-    }
-    public IAbstractTerm Instantiate(InstantiationContext ctx, Dictionary<string, Variable> vars = null)
-        => this;
-    public IAbstractTerm Substitute(Substitution s)
-        => this;
-    public Maybe<SubstitutionMap> Unify(IAbstractTerm other)
-    {
-        if (other is EntityAsTerm e)
-            return _simple.Unify(e._simple);
         return default;
     }
 }

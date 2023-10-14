@@ -93,7 +93,7 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
         var renderSystem = Services.GetInstance<RenderSystem>();
         var lastId = renderSystem.AnimateViewport(IsBlocking, at, animList.ToArray());
         var idList = Enumerable.Range(lastId - animList.Count, animList.Count);
-        if (args[2].Unify(new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>()).CanonicalForm).TryGetValue(out var subs))
+        if (args[2].Unify(new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>())).TryGetValue(out var subs))
         {
             yield return True(subs);
             yield break;

@@ -20,6 +20,6 @@ public class EntityAsTermParser : IAbstractTermParser<EntityAsTerm>
     }
     public Maybe<EntityAsTerm> Parse(ErgoParser parser)
         => new DictParser().Parse(parser)
-               .Map(d => EntityAsTerm.FromCanonical(d.CanonicalForm));
+               .Map(EntityAsTerm.FromCanonical);
 
 }

@@ -51,7 +51,7 @@ namespace Fiero.Business
 
             public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
             {
-                var term = TermMarshall.ToTerm(_owner);
+                var term = new EntityAsTerm(_owner.Id, _owner.ErgoType());
                 if (arguments[0].Unify(term).TryGetValue(out var subs))
                 {
                     yield return True(subs);

@@ -110,7 +110,7 @@ public sealed class Spawn : SolverBuiltIn
                 }
             }
             systems.Render.CenterOn(player);
-            if (args[1].Unify(new List(spawned.Select(x => new EntityAsTerm(x.Id, new Atom(x.GetType().Name.ToErgoCase()))))).TryGetValue(out var subs))
+            if (args[1].Unify(new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType())))).TryGetValue(out var subs))
             {
                 yield return True(subs);
             }

@@ -46,7 +46,7 @@ public sealed class At : SolverBuiltIn
         }
         foreach (var A in cell.Actors)
         {
-            term = TermMarshall.ToTerm(A);
+            term = new EntityAsTerm(A.Id, A.ErgoType());
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);
@@ -55,7 +55,7 @@ public sealed class At : SolverBuiltIn
         }
         foreach (var F in cell.Features)
         {
-            term = TermMarshall.ToTerm(F);
+            term = new EntityAsTerm(F.Id, F.ErgoType());
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);
@@ -64,7 +64,7 @@ public sealed class At : SolverBuiltIn
         }
         foreach (var I in cell.Items)
         {
-            term = TermMarshall.ToTerm(I);
+            term = new EntityAsTerm(I.Id, I.ErgoType());
             if (args[2].Unify(term).TryGetValue(out subs))
             {
                 yield return True(subs);

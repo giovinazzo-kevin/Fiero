@@ -57,8 +57,9 @@ public sealed class RaiseEvent : SolverBuiltIn
             var tArgs = field.Field.FieldType.BaseType.GetGenericArguments()[1];
             var obj = field.Field.GetValue(field.System.GetValue(gameSystems));
             var arg = TermMarshall.FromTerm(arguments[2], tArgs, TermMarshalling.Named);
-            field.Field.FieldType.GetMethod("Raise", BindingFlags.Public | BindingFlags.Instance)
+            var ret = field.Field.FieldType.GetMethod("Raise", BindingFlags.Public | BindingFlags.Instance)
                 .Invoke(obj, new[] { arg, default(CancellationToken) });
+            // TODO: call Handle if it's a request and return false if Handle does so
             any = true;
         }
         if (any)

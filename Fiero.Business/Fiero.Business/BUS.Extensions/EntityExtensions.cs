@@ -1,4 +1,6 @@
 ﻿using Ergo.Lang;
+using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
 
 namespace Fiero.Business
 {
@@ -12,6 +14,7 @@ namespace Fiero.Business
             => a.Position().Dist(pos);
         public static double SquaredDistanceFrom(this PhysicalEntity a, Coord pos)
             => a.Position().DistSq(pos);
+        public static Atom ErgoType(this EcsEntity e) => new(e.GetType().Name.ToErgoCase());
         public static FloorId FloorId(this PhysicalEntity a) => a.Physics.FloorId;
         public static Coord Position(this PhysicalEntity a) => a.Physics.Position;
         public static bool IsInvalid(this Entity e) => e is null || e.Id == 0;

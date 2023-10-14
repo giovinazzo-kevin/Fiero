@@ -12,7 +12,7 @@ public class SelectScript : ShellCommand
     private readonly IServiceFactory Services;
 
     public SelectScript(IServiceFactory services)
-        : base(new[] { "select" }, "", @"(?<script>.*)", true, 1000)
+        : base(new[] { "select" }, "Loads the current knowledge base of a script to let you inspect it.", @"(?<script>.*)", true, 1000)
     {
         Services = services;
     }

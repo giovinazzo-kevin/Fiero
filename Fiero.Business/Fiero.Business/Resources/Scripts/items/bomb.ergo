@@ -19,7 +19,8 @@
 % When a bomb is attacked, it will roll one tile in the opposite direction.
 bomb:began :- 
 	% Parse fuse duration and explosion radius from args and store them in the script's local storage
-	args(_{fuse: Fuse, radius: Radius}), fuse set Fuse, radius set Radius,
+	args(_{fuse: Fuse, radius: Radius}), 
+	fuse set Fuse, radius set Radius,
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)

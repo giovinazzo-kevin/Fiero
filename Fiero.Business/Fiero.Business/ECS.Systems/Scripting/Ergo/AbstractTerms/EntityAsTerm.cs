@@ -53,13 +53,11 @@ public sealed class EntityAsTerm : Dict
         }
         return default;
     }
-    private ITerm ToCanonical() => GetProxy()
-        .Select(x => TermMarshall.ToTerm(x, Type))
-        .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
-
     private void Refresh()
     {
-        var proxy = ToCanonical();
+        var proxy = GetProxy()
+            .Select(x => TermMarshall.ToTerm(x, Type))
+            .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
         if (proxy is Dict d)
         {
             Dictionary = Dictionary.Clear().AddRange(d.Dictionary);
@@ -78,6 +76,11 @@ public sealed class EntityAsTerm : Dict
     public override AbstractTerm Instantiate(InstantiationContext ctx, Dictionary<string, Variable> vars = null)
     {
         Refresh();
+        return this;
+    }
+
+    public override AbstractTerm Substitute(Substitution s)
+    {
         return this;
     }
 

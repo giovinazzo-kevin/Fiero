@@ -33,14 +33,14 @@ public sealed class CastEntity : GameEntitiesBuiltIn
                 maybeId = special.Id;
             else if (int.TryParse(expl, out var id_))
                 maybeId = id_;
-            else if (entityId.IsAbstract<Dict>().TryGetValue(out var dict) && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
+            else if (entityId is Dict dict && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
                 maybeId = id_;
             if (maybeId.TryGetValue(out var id))
             {
                 var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type), false };
                 if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
                 {
-                    yield return Unify(tryGetProxyArgs[1]);
+                    yield return Unify((EcsEntity)tryGetProxyArgs[1]);
                     yield break;
                 }
                 yield return False();
@@ -55,7 +55,7 @@ public sealed class CastEntity : GameEntitiesBuiltIn
             var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };
             if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
             {
-                var ret = Unify(tryGetProxyArgs[1]);
+                var ret = Unify((EcsEntity)tryGetProxyArgs[1]);
                 if (!ret.Result.Equals(WellKnown.Literals.False))
                 {
                     yield return ret;
@@ -67,9 +67,9 @@ public sealed class CastEntity : GameEntitiesBuiltIn
             yield return False();
         yield break;
 
-        Evaluation Unify(object entity)
+        Evaluation Unify(EcsEntity entity)
         {
-            var term = TermMarshall.ToTerm(entity, type);
+            var term = new EntityAsTerm(entity.Id, entity.ErgoType());
             if (cast.Unify(term).TryGetValue(out var subs))
             {
                 return True(subs);

@@ -19,11 +19,16 @@ public sealed class EntityAsTerm : Dict
     internal static readonly Dictionary<Atom, Type> TypeMap;
     public static readonly Atom Key_Id = new("id");
     public static readonly Atom Key_Invalid = new("invalid");
-    private static ITerm GetInvalidEntity(int id, Atom type) => new Dict(type, new[]
+    public static ITerm GetInvalidEntity(int id, Atom type) => new Dict(type, new[]
     {
         new KeyValuePair<Atom, ITerm>(Key_Id, new Atom(id)),
         new KeyValuePair<Atom, ITerm>(Key_Invalid, new Atom(true))
     });
+    public static ITerm GetEntityStub(int id, Atom type) => new Dict(type, new[]
+    {
+        new KeyValuePair<Atom, ITerm>(Key_Id, new Atom(id))
+    });
+
 
     private readonly GameEntities _entities;
     static EntityAsTerm()
@@ -46,6 +51,10 @@ public sealed class EntityAsTerm : Dict
         EntityId = entityId;
         Refresh();
     }
+
+    public Maybe<T> GetProxy<T>()
+        where T : EcsEntity
+    => GetProxy().Map(x => x is T t ? Maybe.Some(t) : default);
 
     public Maybe<EcsEntity> GetProxy()
     {

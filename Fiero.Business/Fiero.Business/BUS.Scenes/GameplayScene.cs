@@ -179,7 +179,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
                             .WithDescription("Lorem ipsum dolor\nsit amet.\nThis sword is cool wtf.\nNice.")
-                            .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"monsplosion").Build()),
+                            .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"fuse_cutter").Build()),
                                 e => new GrantedOnEquip(e))
                             .WithIntrinsicEffect(new EffectDef(EffectName.UncontrolledTeleport),
                                 e => new GrantedWhenHitByMeleeWeapon(e))

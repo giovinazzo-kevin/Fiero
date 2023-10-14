@@ -18,7 +18,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
     {
         var (component, property, newValue) = (arguments[0], arguments[1], arguments[2]);
-        if (component.IsAbstract<Dict>().TryGetValue(out var dict) && dict.Signature.Tag.TryGetValue(out var tag))
+        if (component is Dict dict && dict.Signature.Tag.TryGetValue(out var tag))
         {
             var key = tag.Explain();
             if (ProxyableComponentTypes.TryGetValue(key, out var type))
@@ -67,14 +67,14 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
                         yield return True();
                         yield break;
                     }
-                    yield return ThrowFalse(scope, Ergo.Lang.Exceptions.SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentProperty, property.Explain());
+                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentProperty, property.Explain());
                     yield break;
                 }
             }
-            yield return ThrowFalse(scope, Ergo.Lang.Exceptions.SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentType, tag.Explain());
+            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentType, tag.Explain());
             yield break;
         }
-        yield return ThrowFalse(scope, Ergo.Lang.Exceptions.SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, component.Explain());
+        yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, component.Explain());
         yield break;
     }
 }

@@ -3,7 +3,7 @@
 :- subscribe(bomb, [exploding]).
 
 bomb:exploding(_{dummy: D}) :-
-	position(D, FId, Po),
+	location(D, l(FId, Po)),
 	shape(square, 3, Ps),
 	P := Po + Ps,
 	\+at(FId, P, actor{}),

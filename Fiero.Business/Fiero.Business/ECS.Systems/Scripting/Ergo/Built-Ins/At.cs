@@ -13,25 +13,25 @@ public sealed class At : SolverBuiltIn
     public readonly IServiceFactory Services;
 
     public At(IServiceFactory services)
-        : base("", new("at"), 3, ScriptingSystem.FieroModule)
+        : base("", new("at"), 2, ScriptingSystem.FieroModule)
     {
         Services = services;
     }
 
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
     {
-        if (!args[0].Matches<FloorId>(out var f))
+        Location loc;
+        if (args[0].IsEntity<PhysicalEntity>().TryGetValue(out var entity))
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(FloorId), args[0]);
-            yield break;
+            loc = entity.Location();
         }
-        if (!args[1].Matches<Coord>(out var p))
+        else if (!args[0].Matches(out loc))
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Coord), args[1]);
+            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Location), args[0]);
             yield break;
         }
         var systems = Services.GetInstance<GameSystems>();
-        var cell = systems.Dungeon.GetCellAt(f, p);
+        var cell = systems.Dungeon.GetCellAt(loc.FloorId, loc.Position);
         if (cell is null)
         {
             yield return False();

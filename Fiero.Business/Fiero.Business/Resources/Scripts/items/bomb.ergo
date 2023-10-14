@@ -24,7 +24,7 @@ bomb:began :-
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
-	position(@owner, P), move(B, P),
+	P = @owner.physics.position, move(B, P),
 	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
 	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
 	% Make the dummy invulnerable to damage
@@ -47,7 +47,7 @@ tick :-
 	% Retrieve original fuse duration, current fuse, and dummy
 	args(_{fuse: T0}), fuse get T1, dummy get B,
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
-	position(B, F, P),
+	location(B, l(F, P)),
 	% Play the damage number animation, which will be blocking if the player can see the dummy
 	play_animations_blocking(B, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound with gradually increasing pitch as the fuse gets shorter
@@ -72,9 +72,8 @@ action:actor_turn_started(_{actor: @player}) :-
 action:actor_attacked(_{attacker: A, victim: V}) :-
 	dummy get D, 
 	&D.id = V.id,
-	position(A, Ap),
-	position(V, Vp),
-	Dir := Vp - Ap,
+	Vp = V.physics.position,
+	Dir := Vp - &A.physics.position,
 	clamp(-1, 1, Dir, NormDir),
 	NewPos := Vp + Dir,
 	move(V, NewPos).

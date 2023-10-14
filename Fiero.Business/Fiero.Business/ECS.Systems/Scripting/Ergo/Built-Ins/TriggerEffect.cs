@@ -27,12 +27,12 @@ public sealed class TriggerEffect : SolverBuiltIn
         var floorSys = _services.GetInstance<DungeonSystem>();
         if (arguments[0].Matches<EffectDefStub>(out var stub))
         {
-            if (arguments[1].IsAbstract<EntityAsTerm>().Map(e => e.GetProxy()).TryGetValue(out var e))
+            if (arguments[1].IsEntity<Entity>().TryGetValue(out var e))
             {
-                var def = new EffectDef(stub.Name, stub.Arguments, source: (Entity)e);
+                var def = new EffectDef(stub.Name, stub.Arguments, source: e);
                 var effect = def.Resolve(null);
                 // TODO: bind effect.end as callable to args[2]
-                effect.Start(_services.GetInstance<GameSystems>(), (Entity)e);
+                effect.Start(_services.GetInstance<GameSystems>(), e);
             }
             else if (arguments[1].Matches(out Location loc)
                 && floorSys.TryGetTileAt(loc.FloorId, loc.Position, out var tile))

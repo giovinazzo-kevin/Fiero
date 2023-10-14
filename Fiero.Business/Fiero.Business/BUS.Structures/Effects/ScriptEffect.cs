@@ -57,15 +57,6 @@ namespace Fiero.Business
                     yield return True(subs);
                     yield break;
                 }
-                else if (arguments[0].IsAbstract<Dict>().TryGetValue(out var d1)
-                      && term.IsAbstract<Dict>().TryGetValue(out var d2)
-                      && d1.Dictionary.TryGetValue(new("id"), out var id1)
-                      && d2.Dictionary.TryGetValue(new("id"), out var id2)
-                      && id1.Equals(id2))
-                {
-                    yield return True();
-                    yield break;
-                }
                 yield return False();
                 yield break;
             }

@@ -14,7 +14,7 @@ test:began :-
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))).
 test:ended :- unbind(_, _, _).
 boom(N) :-
-	position(@player, FloorId, Po),
+	location(@owner, l(FloorId, Po)),
 	shape(disc, N, Ps),
 	Q := Po + Ps,
 	effect(effect_def(explosion, 1), l(FloorId, Q), _).

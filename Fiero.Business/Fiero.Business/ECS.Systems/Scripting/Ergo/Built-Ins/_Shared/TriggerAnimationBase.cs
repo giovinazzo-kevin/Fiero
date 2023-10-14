@@ -45,7 +45,7 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Location), args[0]);
             yield break;
         }
-        if (!args[1].IsAbstract<List>().TryGetValue(out var list))
+        if (args[1] is not List list)
         {
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.List, args[2]);
             yield break;
@@ -53,7 +53,7 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
         var animList = new List<Animation>();
         foreach (var anim in list.Contents)
         {
-            if (!anim.IsAbstract<Dict>().TryGetValue(out var dict))
+            if (anim is not Dict dict)
             {
                 yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, anim);
                 yield break;

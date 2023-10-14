@@ -6,6 +6,13 @@ namespace Fiero.Business
 {
     public static class EntityExtensions
     {
+        public static Maybe<T> IsEntity<T>(this ITerm term)
+            where T : EcsEntity
+        {
+            if (term is EntityAsTerm _t && _t.GetProxy<T>().TryGetValue(out var entity))
+                return entity;
+            return default;
+        }
         public static double DistanceFrom(this PhysicalEntity a, PhysicalEntity b)
             => a.DistanceFrom(b.Position());
         public static double SquaredDistanceFrom(this PhysicalEntity a, PhysicalEntity b)

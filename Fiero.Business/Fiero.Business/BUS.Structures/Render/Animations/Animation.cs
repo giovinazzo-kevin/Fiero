@@ -59,7 +59,7 @@ namespace Fiero.Business
         {
             return new(Enumerable.Range(0, resolution).Select(i => new AnimationFrame(
                 frameDuration ?? TimeSpan.FromMilliseconds(1000f / resolution),
-                new SpriteDef(texture, sprite, tint, new(), scale ?? new(1, 1), 1 - i / (float)resolution)))
+                new SpriteDef(texture, sprite, tint, new(), scale ?? new(1, 1), (float)Math.Sin(i / (float)resolution * Math.PI) * 2 - 1)))
             .ToArray(), repeat);
         }
 

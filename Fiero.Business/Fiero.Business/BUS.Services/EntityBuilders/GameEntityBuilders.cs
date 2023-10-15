@@ -621,7 +621,7 @@
                 throwsUseCharges: true
             )
             ;
-        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1, int fuse = 3, int radius = 3)
+        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1, int fuse = 300, int radius = 3)
             => Throwable<Throwable>(
                 name: ThrowableName.Bomb,
                 itemRarity: 1,

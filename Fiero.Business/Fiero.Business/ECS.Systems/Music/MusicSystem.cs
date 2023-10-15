@@ -24,7 +24,7 @@ namespace Fiero.Business
             Tracker.Mixer.Tracks[0].Attach(Tracker.Instruments[0]);
             Tracker.Mixer.Tracks[1].Attach(Tracker.Instruments[1]);
             Tracker.Mixer.Tracks[2].Attach(Tracker.Instruments[2]);
-            Tracker.Play();
+            //Tracker.Play();
             void SetRow(int channel, int rowNum, TrackerChannelRow row)
             {
                 Tracker.Channels[channel].SetRow(rowNum, row);

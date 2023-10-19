@@ -82,7 +82,7 @@ namespace Fiero.Core
             {
                 FlagEntityForRemoval(e.Id);
             }
-            RemoveFlagged(propagate);
+            RemoveFlaggedItems(propagate);
             _lastComponentId = 0;
             _lastEntityId = 0;
         }
@@ -314,53 +314,57 @@ namespace Fiero.Core
             return Parent?.FlagComponentForRemoval(entityId, componentId) ?? true;
         }
 
-        public IEnumerable<int> RemoveFlagged(bool propagate = true) // Don't call while enumerating, obviously
+        public IEnumerable<int> RemoveFlaggedItems(bool propagate = true) // Don't call while enumerating, obviously
         {
-            while (ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup))
+            return Inner().ToArray();
+            IEnumerable<int> Inner()
             {
-                var equalEntity = new TrackedEntity(tup.EntityId);
-                if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+                while (ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup))
                 {
-                    continue;
+                    var equalEntity = new TrackedEntity(tup.EntityId);
+                    if (!Entities.TryGetValue(equalEntity, out var trackedEntity))
+                    {
+                        continue;
+                    }
+                    if (!(trackedEntity.Components.FirstOrDefault(c => c.Id == tup.ComponentId) is { } component))
+                    {
+                        continue;
+                    }
+                    var tComponent = component.GetType();
+                    if (!Components.TryGetValue(tComponent, out var hashSet))
+                    {
+                        throw new InvalidOperationException($"Component cache is in an invalid state");
+                    }
+                    trackedEntity.Components.Remove(component);
+                    hashSet.Remove(trackedEntity);
+                    if (hashSet.Count == 0)
+                    {
+                        Components.Remove(tComponent);
+                    }
+                    ComponentsLookup.Remove(component.Id);
+                    yield return tup.EntityId;
                 }
-                if (!(trackedEntity.Components.FirstOrDefault(c => c.Id == tup.ComponentId) is { } component))
+                while (EntityRemovalQueue.TryDequeue(out var entityId))
                 {
-                    continue;
+                    var equalEntity = new TrackedEntity(entityId);
+                    if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id))
+                    {
+                        continue;
+                    }
+                    if (trackedEntity.Components.Count > 0)
+                    {
+                        throw new InvalidOperationException($"Component cache is in an invalid state");
+                    }
+                    Entities.Remove(trackedEntity);
+                    foreach (var key in ProxyCache.Keys.Where(k => k.Left == entityId).ToArray())
+                    {
+                        ProxyCache.Remove(key);
+                    }
                 }
-                var tComponent = component.GetType();
-                if (!Components.TryGetValue(tComponent, out var hashSet))
+                if (propagate)
                 {
-                    throw new InvalidOperationException($"Component cache is in an invalid state");
+                    Parent?.RemoveFlaggedItems();
                 }
-                trackedEntity.Components.Remove(component);
-                hashSet.Remove(trackedEntity);
-                if (hashSet.Count == 0)
-                {
-                    Components.Remove(tComponent);
-                }
-                ComponentsLookup.Remove(component.Id);
-                yield return tup.EntityId;
-            }
-            while (EntityRemovalQueue.TryDequeue(out var entityId))
-            {
-                var equalEntity = new TrackedEntity(entityId);
-                if (!Entities.TryGetValue(equalEntity, out var trackedEntity) || EntityRemovalQueue.Contains(equalEntity.Id))
-                {
-                    continue;
-                }
-                if (trackedEntity.Components.Count > 0)
-                {
-                    throw new InvalidOperationException($"Component cache is in an invalid state");
-                }
-                Entities.Remove(trackedEntity);
-                foreach (var key in ProxyCache.Keys.Where(k => k.Left == entityId).ToArray())
-                {
-                    ProxyCache.Remove(key);
-                }
-            }
-            if (propagate)
-            {
-                Parent?.RemoveFlagged();
             }
         }
 
@@ -456,7 +460,7 @@ namespace Fiero.Core
             {
                 FlagEntityForRemoval(e.Id);
             }
-            RemoveFlagged(propagate: true);
+            RemoveFlaggedItems(propagate: true);
             _diposed = true;
             GC.SuppressFinalize(this);
         }

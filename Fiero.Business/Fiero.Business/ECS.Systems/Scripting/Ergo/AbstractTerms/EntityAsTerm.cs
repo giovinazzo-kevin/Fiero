@@ -92,7 +92,6 @@ public sealed class EntityAsTerm : Dict
 
     public override AbstractTerm Instantiate(InstantiationContext ctx, Dictionary<string, Variable> vars = null)
     {
-        Refresh();
         return this;
     }
 

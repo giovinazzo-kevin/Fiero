@@ -413,7 +413,7 @@ namespace Fiero.Business
             {
                 // If the player dies and is removed from the entities, it will pass by RemoveFlagged.
                 // This way we can avoid constantly looking for the player id in a collection.
-                foreach (var e in _entities.RemoveFlagged(true))
+                foreach (var e in _entities.RemoveFlaggedItems(true))
                 {
                     if (e == playerId)
                         return;

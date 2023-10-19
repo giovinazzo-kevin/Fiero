@@ -66,7 +66,7 @@ tock :-
 
 %: Make the bomb tick and eventually explode.
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.
-action:actor_turn_started(_{actor: @player}) :- 
+action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
 	tick, tock.
 %: Make the bomb roll in the opposite direction whenever an actor attacks it.
 action:actor_attacked(_{attacker: A, victim: V}) :-

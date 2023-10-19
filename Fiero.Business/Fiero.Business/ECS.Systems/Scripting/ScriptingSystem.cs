@@ -226,7 +226,6 @@ namespace Fiero.Business
 
             static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook, TermMarshallingContext mctx)
             {
-                Debug.WriteLine($"{self.DisplayName}: {evt}");
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
                 var arg = ImmutableArray.Create(term);
                 try
@@ -238,9 +237,12 @@ namespace Fiero.Business
                             .WithInterpreterScope(ctx.Scope);
                         if (hook.IsDefined(ctx))
                         {
+                            var sw = new Stopwatch(); sw.Start();
                             foreach (var _ in hook.Call(ctx, scope, arg))
                             {
                             }
+                            sw.Stop();
+                            Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

@@ -52,7 +52,7 @@ namespace Fiero.Business
                     }
                 }
             }
-            Entities.RemoveFlagged(propagate: true);
+            Entities.RemoveFlaggedItems(propagate: true);
             Floors.Clear();
         }
 

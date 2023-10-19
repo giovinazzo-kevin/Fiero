@@ -67,7 +67,7 @@ public sealed class RaiseEvent : SolverBuiltIn
             yield return True();
             yield break;
         }
-        // If this event doesn't pertain to any builtin system, then the event will be sent as an asynchronous script event.
+        // If this event doesn't pertain to any builtin system, then the event will be sent as a script event.
         // It can be sent from any module, even the modules of other scripts, with the system name acting as a conventional tag.
         if (!anySystem)
         {

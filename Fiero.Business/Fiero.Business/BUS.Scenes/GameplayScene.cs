@@ -574,7 +574,7 @@ namespace Fiero.Business.Scenes
                         TrySetState(SceneState.Main);
                     }
                 }
-                Entities.RemoveFlagged(true);
+                Entities.RemoveFlaggedItems(true);
                 return true;
             });
             // ActionSystem.ActorDied:

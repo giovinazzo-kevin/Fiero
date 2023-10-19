@@ -42,17 +42,16 @@ namespace Fiero.Business
         }
         internal class Owner : SolverBuiltIn
         {
-            protected readonly Entity _owner;
+            protected readonly EntityAsTerm _owner;
 
             public Owner(Entity owner, Atom module) : base(string.Empty, new Atom("owner"), 1, module)
             {
-                _owner = owner;
+                _owner = new(owner.Id, owner.ErgoType());
             }
 
             public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
             {
-                var term = new EntityAsTerm(_owner.Id, _owner.ErgoType());
-                if (arguments[0].Unify(term).TryGetValue(out var subs))
+                if (arguments[0].Unify(_owner).TryGetValue(out var subs))
                 {
                     yield return True(subs);
                     yield break;

@@ -403,14 +403,24 @@ namespace Fiero.Business
             }
         }
 
-        public void Update(int playerId)
+        /// <summary>
+        /// Processes ticks until it's the player's turn, then yields control.
+        /// </summary>
+        /// <param name="playerId"></param>
+        public void ElapseTurn(int playerId)
         {
             do
             {
-                _entities.RemoveFlagged(true);
+                // If the player dies and is removed from the entities, it will pass by RemoveFlagged.
+                // This way we can avoid constantly looking for the player id in a collection.
+                foreach (var e in _entities.RemoveFlagged(true))
+                {
+                    if (e == playerId)
+                        return;
+                }
                 ElapseTick();
             }
-            while (ActorIds.Contains(playerId) && CurrentActorId != playerId);
+            while (CurrentActorId != playerId);
         }
     }
 }

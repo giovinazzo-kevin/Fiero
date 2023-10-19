@@ -22,6 +22,12 @@ namespace Fiero.Business.Scenes
         protected readonly OffButton OffButton;
         protected readonly QuickSlotHelper QuickSlots;
         protected readonly GameUI UI;
+        /// <summary>
+        /// The action system is only updated once per frame to ensure that scripts don't stall the rendering.
+        /// This flags gets reset after drawing the scene.
+        /// NOTE: An action system update is not equal to one turn, but to one tick.
+        /// </summary>
+        private bool _newFrame = true;
 
         public Actor Player { get; private set; }
 
@@ -1115,7 +1121,11 @@ namespace Fiero.Business.Scenes
 
         public override void Update(TimeSpan t, TimeSpan dt)
         {
-            Systems.Action.Update(Player.Id);
+            if (_newFrame)
+            {
+                Systems.Action.ElapseTurn(Player.Id);
+                _newFrame = false;
+            }
             Systems.Render.Update(t, dt);
             Systems.Input.Update(t, dt);
             Systems.Music.Update(t, dt);
@@ -1141,6 +1151,7 @@ namespace Fiero.Business.Scenes
 
         public override void DrawForeground(RenderTarget target, RenderStates states)
         {
+            _newFrame = true;
         }
 
         protected override bool CanChangeState(SceneState newState) => true;

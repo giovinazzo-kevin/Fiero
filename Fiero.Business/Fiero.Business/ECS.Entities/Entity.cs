@@ -10,6 +10,6 @@ namespace Fiero.Business
         [NonTerm]
         public EffectsComponent Effects { get; private set; }
         public TraitsComponent Traits { get; private set; }
-        public override string ToString() => Info?.Name;
+        public override string ToString() => $"{Info?.Name} ({Id})";
     }
 }

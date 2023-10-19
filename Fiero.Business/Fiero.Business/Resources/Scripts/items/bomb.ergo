@@ -48,8 +48,8 @@ tick :-
 	args(_{fuse: T0}), fuse get T1, dummy get B,
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
 	location(B, l(F, P)),
-	% Play the damage number animation, which will be blocking if the player can see the dummy
-	play_animations_blocking(B, [damage_number{damage: T1, tint: light_red}], _),
+	% Play the damage number animation
+	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound with gradually increasing pitch as the fuse gets shorter
 	(	T1 = 0, !
 	;   Pitch := 1 - T1 / (T0 + 1),

@@ -41,6 +41,7 @@ public sealed class EntityAsTerm : Dict
     public readonly int EntityId;
     public readonly Type Type;
     public readonly Atom TypeAsAtom;
+    private EcsEntity _proxy;
 
     public EntityAsTerm(int entityId, Atom type)
         : base(type, new[] { new KeyValuePair<Atom, ITerm>(Key_Invalid, new Atom(entityId)) })
@@ -58,8 +59,13 @@ public sealed class EntityAsTerm : Dict
 
     public Maybe<EcsEntity> GetProxy()
     {
+        if (_proxy != null && _proxy.TryRefresh(EntityId))
+        {
+            return _proxy;
+        }
         if (_entities.TryGetProxy(Type, EntityId, out var entity))
         {
+            _proxy = entity;
             return entity;
         }
         return default;

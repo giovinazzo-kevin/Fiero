@@ -13,11 +13,13 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Invulnerable.Desc$";
         protected override void TypedOnStarted(GameSystems systems, Actor target)
         {
-            target.ActorProperties.Health.Lock = true;
+            if (!target.IsInvalid())
+                target.ActorProperties.Health.Lock = true;
         }
         protected override void TypedOnEnded(GameSystems systems, Actor target)
         {
-            target.ActorProperties.Health.Lock = false;
+            if (!target.IsInvalid())
+                target.ActorProperties.Health.Lock = false;
         }
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {

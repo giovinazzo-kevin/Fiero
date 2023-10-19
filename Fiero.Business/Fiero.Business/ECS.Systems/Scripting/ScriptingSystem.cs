@@ -11,6 +11,7 @@ using Ergo.Solver;
 using LightInject;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -225,7 +226,9 @@ namespace Fiero.Business
 
             static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook, TermMarshallingContext mctx)
             {
+                Debug.WriteLine($"{self.DisplayName}: {evt}");
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
+                var arg = ImmutableArray.Create(term);
                 try
                 {
                     // TODO: Figure out a way for scripts to return complex EventResults?
@@ -235,11 +238,11 @@ namespace Fiero.Business
                             .WithInterpreterScope(ctx.Scope);
                         if (hook.IsDefined(ctx))
                         {
-                            foreach (var _ in hook.Call(ctx, scope, ImmutableArray.Create(term)))
+                            foreach (var _ in hook.Call(ctx, scope, arg))
                             {
-                                if (self.Script.ScriptProperties.LastError != null)
-                                    return false;
                             }
+                            if (self.Script.ScriptProperties.LastError != null)
+                                return false;
                         }
                     }
                     return true;

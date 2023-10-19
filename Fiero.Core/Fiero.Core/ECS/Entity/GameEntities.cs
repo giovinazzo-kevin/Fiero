@@ -314,7 +314,7 @@ namespace Fiero.Core
             return Parent?.FlagComponentForRemoval(entityId, componentId) ?? true;
         }
 
-        public void RemoveFlagged(bool propagate = true) // Don't call while enumerating, obviously
+        public IEnumerable<int> RemoveFlagged(bool propagate = true) // Don't call while enumerating, obviously
         {
             while (ComponentRemovalQueue.TryDequeue(out (int EntityId, int ComponentId) tup))
             {
@@ -339,6 +339,7 @@ namespace Fiero.Core
                     Components.Remove(tComponent);
                 }
                 ComponentsLookup.Remove(component.Id);
+                yield return tup.EntityId;
             }
             while (EntityRemovalQueue.TryDequeue(out var entityId))
             {

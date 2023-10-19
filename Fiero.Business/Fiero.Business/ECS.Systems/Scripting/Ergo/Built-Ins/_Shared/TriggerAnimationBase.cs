@@ -30,15 +30,15 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
     {
         var at = default(Either<Location, PhysicalEntity>);
-        if (args[0].Matches(out Location location))
-        {
-            at = location;
-        }
-        else if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)
+        if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)
             && entityAsTerm.GetProxy().TryGetValue(out var proxy)
             && proxy is PhysicalEntity pe)
         {
             at = pe;
+        }
+        else if (args[0].Matches(out Location location))
+        {
+            at = location;
         }
         else
         {

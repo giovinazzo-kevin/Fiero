@@ -10,7 +10,7 @@
 :- dynamic(d_/2).
 
 key(Name, key(Name, Id)) :-
-	(owner(_{id:Id}) ; player as actor is _{id:Id}), !.
+	(owner(_{id:Id}), ! ; player as actor is _{id:Id}), !.
 
 delete_(Key) :-
 	(retractall(d_(Key, _)) ; true), !.

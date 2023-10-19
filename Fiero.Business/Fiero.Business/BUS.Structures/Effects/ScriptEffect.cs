@@ -239,7 +239,6 @@ namespace Fiero.Business
                the result of that call as the EventResult to pass to the owning system.
 
                 Additionally, Ergo scripts may raise and handle events of their own.
-                The mechanism is the same, but these events are asynchronous.
             */
             var routes = ScriptingSystem.GetScriptRoutes();
             var visibleScripts = systems.Scripting.GetVisibleScripts();

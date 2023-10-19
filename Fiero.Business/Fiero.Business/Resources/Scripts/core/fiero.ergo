@@ -36,9 +36,7 @@ D.Key := Val :-
 	Eval := Val,
 	component_set_value(OldVal, Key, Eval),
 	!.
-location(E, l(FloorId, Pos)) :-
-    FloorId = E.physics.floor_id,
-    Pos = E.physics.position.
+location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-
 	(owner(O) ; player as actor is O),

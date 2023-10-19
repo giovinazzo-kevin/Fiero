@@ -7,33 +7,25 @@
 :- op(700, xfy, [get]).
 :- op(700, xfy, [update]).
 
-:- dynamic(d_/2).
-
 key(Name, key(Name, Id)) :-
 	owner(_{id:Id}), !.
 
-delete_(Key) :-
-	(retractall(d_(Key, _)) ; true), !.
 delete(Name) :- 
 	key(Name, Key),
-	delete_(Key).
+	db(Key, del, _).
 
-set_(Key, Value) :-
-	delete_(Key),
-	assertz(d_(Key, Value)).
 set(Name, Value) :-
 	key(Name, Key),
-	set_(Key, Value).
+	db(Key, set, Value).
 
-get_(Key, Value) :- d_(Key, Value).
 get(Name, Value) :- 
 	key(Name, Key),
-	get_(Key, Value).
+	db(Key, get, Value).
 
 clear :- delete(_).
 
 update(Name, Lambda) :-
 	key(Name, Key),
-	d_(Key, OldValue), 
+	db(Key, get, OldValue), 
 	call(Lambda, OldValue, NewValue),
-	set_(Key, NewValue).
+	db(Key, set, NewValue).

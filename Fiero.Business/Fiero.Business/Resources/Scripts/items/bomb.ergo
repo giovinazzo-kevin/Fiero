@@ -50,10 +50,9 @@ tick :-
 	location(B, l(F, P)),
 	% Play the damage number animation
 	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
-	% If the fuse is > 0, play a sound with gradually increasing pitch as the fuse gets shorter
+	% If the fuse is > 0, play a sound
 	(	T1 = 0, !
-	;   Pitch := 1 - T1 / (T0 + 1),
-		play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: Pitch})
+	;   play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1})
 	),
 	% Let other scripts be aware that this bomb is ticking
 	raise(bomb, ticking, _{ dummy: B, fuse: T1, initial_fuse: T0 }).

@@ -1,7 +1,7 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, move/2]).
+:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, move/2, location/2]).
 
 :- op(40, yfx, ['as']).
 :- dynamic(owner/1).

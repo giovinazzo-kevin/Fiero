@@ -7,6 +7,8 @@
 :- op(700, xfy, [get]).
 :- op(700, xfy, [update]).
 
+:- inline([key/2]).
+
 key(Name, key(Name, Id)) :-
 	owner(_{id:Id}), !.
 

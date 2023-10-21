@@ -26,14 +26,14 @@ public sealed class Database : SolverBuiltIn
 
     public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
     {
-        if (!args[0].IsGround)
-        {
-            yield return ThrowFalse(scope, SolverError.TermNotSufficientlyInstantiated, args[0].Explain());
-            yield break;
-        }
         if (!args[1].Matches<AccessMode>(out var mode))
         {
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(AccessMode), args[1]);
+            yield break;
+        }
+        if (!args[0].IsGround && mode != AccessMode.Del)
+        {
+            yield return ThrowFalse(scope, SolverError.TermNotSufficientlyInstantiated, args[0].Explain());
             yield break;
         }
         switch (mode)
@@ -50,11 +50,27 @@ public sealed class Database : SolverBuiltIn
                 yield return True();
                 yield break;
             case AccessMode.Del:
-                Store.TryRemove(args[0], out var d);
-                if (args[2].Unify(d).TryGetValue(out subs))
+                if (args[0].IsGround)
                 {
-                    yield return True(subs);
-                    yield break;
+                    Store.TryRemove(args[0], out var d);
+                    if (args[2].Unify(d).TryGetValue(out subs))
+                    {
+                        yield return True(subs);
+                        yield break;
+                    }
+                }
+                else
+                {
+                    foreach (var key in Store.Keys
+                        .Where(key => args[0].Unify(key).TryGetValue(out _)))
+                    {
+                        Store.TryRemove(key, out var d);
+                        if (args[2].Unify(d).TryGetValue(out subs))
+                        {
+                            yield return True(subs);
+                            yield break;
+                        }
+                    }
                 }
                 break;
         }

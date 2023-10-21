@@ -634,7 +634,7 @@
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb", trace: true).Build()),
+            .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb").Build()),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion

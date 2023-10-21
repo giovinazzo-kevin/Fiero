@@ -4,7 +4,7 @@
 :- module(input, [bind/3, unbind/3]).
 :- subscribe(input, [keyboard_event]).
 :- dynamic(key_route/3).
-
+:- inline([bind/3, unbind/3]).
 bind(Key, Event, Predicate) :-
     assertz(key_route(Key, Event, Predicate)).
 

@@ -242,7 +242,7 @@ namespace Fiero.Business
                             {
                             }
                             sw.Stop();
-                            Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
+                            // Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

@@ -1,7 +1,7 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, move/2, location/2]).
+:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, location/2, clamp/4]).
 
 :- op(40, yfx, ['as']).
 :- dynamic(owner/1).
@@ -14,6 +14,8 @@
 	@owner :- owner(O)
 )).
 :- dynamic(last_uuid/1).
+
+:- inline([as/2,clamp/4]).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
 %: NOTE: 'as' has a higher precedence than 'is', so this doesn't break arithmetic expressions

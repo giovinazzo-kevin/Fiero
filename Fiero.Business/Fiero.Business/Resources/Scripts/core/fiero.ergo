@@ -4,7 +4,6 @@
 :- module(fiero, [as/2, '='/2, ':='/2, uuid/1, location/2, clamp/4]).
 
 :- op(40, yfx, ['as']).
-:- dynamic(owner/1).
 %: Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
 	@player :- player as actor is O
@@ -14,7 +13,6 @@
 	@owner :- owner(O)
 )).
 :- dynamic(last_uuid/1).
-
 :- inline([as/2,clamp/4]).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
@@ -38,6 +36,7 @@ D.Key := Val :-
 	Eval := Val,
 	component_set_value(OldVal, Key, Eval),
 	!.
+% TODO: Figure out why this can't be inlined
 location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-

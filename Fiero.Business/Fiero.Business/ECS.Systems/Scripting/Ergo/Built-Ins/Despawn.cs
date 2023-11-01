@@ -3,6 +3,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -17,7 +18,7 @@ public sealed class Despawn : SolverBuiltIn
         _services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         if (arguments[0].Matches<int>(out var id))
         {

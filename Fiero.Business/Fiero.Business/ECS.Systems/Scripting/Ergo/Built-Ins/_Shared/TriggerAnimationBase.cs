@@ -5,6 +5,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -27,7 +28,7 @@ public abstract class TriggerAnimationBase : SolverBuiltIn
             .ToDictionary(m => m.Name.ToErgoCase());
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
     {
         var at = default(Either<Location, PhysicalEntity>);
         if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)

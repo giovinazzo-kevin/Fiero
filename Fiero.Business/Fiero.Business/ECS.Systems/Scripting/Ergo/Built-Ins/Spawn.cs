@@ -5,6 +5,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -28,7 +29,7 @@ public sealed class Spawn : SolverBuiltIn
             .ToDictionary(m => m.Name.ToErgoCase());
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext context, SolverScope scope, ITerm[] args)
+    public override IEnumerable<Evaluation> Apply(SolverContext context, SolverScope scope, ImmutableArray<ITerm> args)
     {
         var spawned = new List<EcsEntity>();
         if (args[0] is List list)

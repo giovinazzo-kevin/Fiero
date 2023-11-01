@@ -2,6 +2,7 @@
 using Ergo.Lang.Exceptions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -16,7 +17,7 @@ public sealed class SetRandomSeed : SolverBuiltIn
         Store = store;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         if (int.TryParse(arguments[0].Explain(), System.Globalization.NumberStyles.HexNumber, null, out int result))
         {

@@ -3,6 +3,7 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -17,7 +18,7 @@ public sealed class MsgBox : SolverBuiltIn
         UI = ui;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         var modal = UI.NecessaryChoice(Array.Empty<string>(), arguments[0].AsQuoted(false).Explain(), arguments[1].AsQuoted(false).Explain());
         // Block this thread until the user closes this modal

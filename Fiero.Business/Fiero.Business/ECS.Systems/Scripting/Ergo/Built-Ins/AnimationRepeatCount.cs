@@ -4,6 +4,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -18,7 +19,7 @@ public sealed class AnimationRepeatCount : SolverBuiltIn
         Services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
     {
         if (!args[0].Matches(out int id))
         {

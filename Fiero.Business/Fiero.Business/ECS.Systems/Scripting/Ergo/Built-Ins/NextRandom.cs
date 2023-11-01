@@ -2,6 +2,7 @@
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -13,7 +14,7 @@ public sealed class NextRandom : SolverBuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         var N = Rng.Random.NextDouble();
         if (arguments[0].Unify(new Atom(N)).TryGetValue(out var subs))

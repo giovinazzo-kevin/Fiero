@@ -4,6 +4,7 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -17,7 +18,7 @@ public sealed class CastEntity : GameEntitiesBuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         var (entityId, proxyType, cast) = (arguments[0], arguments[1], arguments[2]);
         if (!proxyType.IsGround || !ProxyableEntityTypes.TryGetValue(proxyType.Explain(), out var type))

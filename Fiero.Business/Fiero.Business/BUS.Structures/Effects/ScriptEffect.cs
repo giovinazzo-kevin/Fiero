@@ -28,7 +28,7 @@ namespace Fiero.Business
                 _systems = systems;
             }
 
-            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
             {
                 if (_ended)
                 {
@@ -49,7 +49,7 @@ namespace Fiero.Business
                 _owner = new(owner.Id, owner.ErgoType());
             }
 
-            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
             {
                 if (arguments[0].Unify(_owner).TryGetValue(out var subs))
                 {
@@ -69,7 +69,7 @@ namespace Fiero.Business
                 _args = args;
             }
 
-            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
             {
                 if (!solver.Solver.Facade.Parse<ITerm>(scope.InterpreterScope, _args)
                     .TryGetValue(out var term))
@@ -95,7 +95,7 @@ namespace Fiero.Business
                 _subs = subs;
             }
 
-            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+            public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
             {
                 var any = false;
                 foreach (var sign in _subs)

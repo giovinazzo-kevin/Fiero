@@ -4,6 +4,7 @@ using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -15,7 +16,7 @@ public sealed class ComponentSetValue : GameEntitiesBuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         var (component, property, newValue) = (arguments[0], arguments[1], arguments[2]);
         if (component is Dict dict && dict.Signature.Tag.TryGetValue(out var tag))

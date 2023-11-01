@@ -5,6 +5,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -19,7 +20,7 @@ public sealed class RaiseEvent : SolverBuiltIn
         _services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] arguments)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
     {
         if (!arguments[0].Matches(out string sysName))
         {

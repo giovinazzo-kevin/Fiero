@@ -5,6 +5,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using LightInject;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 [SingletonDependency]
@@ -18,7 +19,7 @@ public sealed class At : SolverBuiltIn
         Services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
     {
         Location loc;
         if (args[0].IsEntity<PhysicalEntity>().TryGetValue(out var entity))

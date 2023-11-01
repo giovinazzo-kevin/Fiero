@@ -4,6 +4,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Solver;
 using Ergo.Solver.BuiltIns;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -24,7 +25,7 @@ public sealed class Database : SolverBuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ITerm[] args)
+    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
     {
         if (!args[1].Matches<AccessMode>(out var mode))
         {

@@ -158,9 +158,9 @@ namespace Fiero.Business
         public readonly Script Script;
         public readonly InterpreterScope Scope;
         public readonly string Description;
-        public readonly Hook EffectStartedHook;
-        public readonly Hook EffectEndedHook;
-        public readonly Hook ClearDataHook;
+        public readonly Maybe<CompiledHook> EffectStartedHook;
+        public readonly Maybe<CompiledHook> EffectEndedHook;
+        public readonly Maybe<CompiledHook> ClearDataHook;
         public readonly string ArgumentsString;
 
         public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
@@ -170,12 +170,14 @@ namespace Fiero.Business
             Script = script;
             ArgumentsString = arguments;
             var s = script.ScriptProperties.Scope.InterpreterScope;
-            var m = s.Modules[script.ScriptProperties.Scope.Module];
             Description = description ?? string.Empty;
             var module = Script.ScriptProperties.Scope.Module;
-            EffectStartedHook = new(new(new("began"), Maybe.Some(0), module, default));
-            EffectEndedHook = new(new(new("ended"), Maybe.Some(0), module, default));
-            ClearDataHook = new(new(new("clear"), Maybe.Some(0), ScriptingSystem.DataModule, default));
+            EffectStartedHook = new Hook(new(new("began"), Maybe.Some(1), module, default))
+                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
+            EffectEndedHook = new Hook(new(new("ended"), Maybe.Some(1), module, default))
+                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
+            ClearDataHook = new Hook(new(new("clear"), Maybe.Some(1), ScriptingSystem.DataModule, default))
+                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
         }
 
         public override EffectName Name => EffectName.Script;
@@ -188,8 +190,9 @@ namespace Fiero.Business
                 return ctx;
             var m = Script.ScriptProperties.Scope.Module;
             var newScope = Script.ScriptProperties.Scope.InterpreterScope;
+            var lib = new ScriptEffectLib(systems, this, owner, ArgumentsString, m);
             newScope = newScope.WithModule(newScope.Modules[m]
-                .WithLinkedLibrary(new ScriptEffectLib(systems, this, owner, ArgumentsString, m)));
+                .WithLinkedLibrary(lib));
             return Contexts[owner.Id] = SolverContext.Create(Script.ScriptProperties.Solver, newScope);
         }
 
@@ -201,9 +204,10 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            if (EffectStartedHook.IsDefined(ctx))
+            var args = ImmutableArray.Create<ITerm>(new EntityAsTerm(owner.Id, owner.ErgoType()));
+            if (EffectStartedHook.TryGetValue(out var hook))
             {
-                foreach (var _ in EffectStartedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
+                foreach (var _ in hook.Call(ctx, scope, args))
                     ;
             }
         }
@@ -214,14 +218,15 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            if (EffectEndedHook.IsDefined(ctx))
+            var args = ImmutableArray.Create<ITerm>(new EntityAsTerm(owner.Id, owner.ErgoType()));
+            if (EffectEndedHook.TryGetValue(out var hook))
             {
-                foreach (var _ in EffectEndedHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
+                foreach (var _ in hook.Call(ctx, scope, args))
                     ;
             }
-            if (ClearDataHook.IsDefined(ctx))
+            if (ClearDataHook.TryGetValue(out hook))
             {
-                foreach (var _ in ClearDataHook.Call(ctx, scope, ImmutableArray.Create<ITerm>()))
+                foreach (var _ in hook.Call(ctx, scope, args))
                     ;
             }
             Contexts.Remove(owner.Id, out _);

@@ -11,7 +11,6 @@ using Ergo.Solver;
 using LightInject;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -70,6 +69,8 @@ namespace Fiero.Business
                 .GetOrThrow(new InvalidOperationException());
             StdlibScope = StdlibScope
                 .WithModule(fiero)
+                .WithModule(new Module(new Atom("action"), runtime: true)
+                    .WithImport(FieroModule))
                 .WithModule(new Module(WellKnown.Modules.User, runtime: true)
                     .WithImport(FieroModule))
                 .WithCurrentModule(WellKnown.Modules.User)
@@ -196,11 +197,12 @@ namespace Fiero.Business
                     var hook = new Hook(new(reqName, 1, sysName, default));
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
+                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
                         return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
                             .SubscribeResponse(evt =>
                             {
-                                return Respond(self, evt, reqType, hook, systemEvent.MarshallingContext);
+                                return Respond(self, evt, reqType, compiledHook.GetEither(hook), systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -212,11 +214,12 @@ namespace Fiero.Business
                     var hook = new Hook(new(evtName, 1, sysName, default));
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
+                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
                         return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
                             .SubscribeHandler(evt =>
                             {
-                                Respond(self, evt, evtType, hook, systemEvent.MarshallingContext);
+                                Respond(self, evt, evtType, compiledHook.GetEither(hook), systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -224,7 +227,7 @@ namespace Fiero.Business
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook, TermMarshallingContext mctx)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, Either<CompiledHook, Hook> hook, TermMarshallingContext mctx)
             {
                 var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
                 var arg = ImmutableArray.Create(term);
@@ -235,14 +238,14 @@ namespace Fiero.Business
                     {
                         var scope = self.Script.ScriptProperties.Scope
                             .WithInterpreterScope(ctx.Scope);
-                        if (hook.IsDefined(ctx))
+                        if (hook.Reduce(a => true, b => b.IsDefined(ctx)))
                         {
-                            var sw = new Stopwatch(); sw.Start();
-                            foreach (var _ in hook.Call(ctx, scope, arg))
+                            //var sw = new Stopwatch(); sw.Start();
+                            foreach (var _ in hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg)))
                             {
                             }
-                            sw.Stop();
-                            Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
+                            //sw.Stop();
+                            //Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

@@ -1,7 +1,7 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '='/2, ':='/2, uuid/1, location/2, clamp/4]).
+:- module(fiero, [as/2, '&='/2, ':='/2, uuid/1, location/2, clamp/4]).
 
 :- op(40, yfx, ['as']).
 %: Shorthand macro for retrieving the player as an actor
@@ -21,22 +21,22 @@
 Entity as Type is Proxy :-
 	cast_entity(Entity, Type, Proxy).
 %: Assignment of component property, mirrors dict access. Impure, modifies the state of the component.
-D.Key = Val :-
-	nonvar(D), 
-	term_type(Key, atom),
-	OldVal = D, % Calls dict_deref/2
-	component_set_value(OldVal, Key, Val),
-	!.
-%: Assignment of component property with automatic arithmetic evaluation of the rhs.
-D.Key := Val :-
-	nonvar(D), 
-	term_type(Key, atom),
-	ground(Val),
-	OldVal = D,
-	Eval := Val,
-	component_set_value(OldVal, Key, Eval),
-	!.
-% TODO: Figure out why this can't be inlined
+%D.Key &= Val :-
+%	nonvar(D), 
+%	term_type(Key, atom),
+%	OldVal = D, % Calls dict_deref/2
+%	component_set_value(OldVal, Key, Val),
+%	!.
+%%: Assignment of component property with automatic arithmetic evaluation of the rhs.
+%D.Key := Val :-
+%	nonvar(D), 
+%	term_type(Key, atom),
+%	ground(Val),
+%	OldVal = D,
+%	Eval := Val,
+%	component_set_value(OldVal, Key, Eval),
+%	!.
+%: TODO: Figure out why this can't be inlined
 location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-

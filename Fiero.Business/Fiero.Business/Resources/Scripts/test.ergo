@@ -5,18 +5,20 @@
 :- use_module(anim).
 :- use_module(effect).
 :- use_module(random).
+:- use_module(sound).
 :- use_module(bomb_commands).
-:- subscribe(action, [item_thrown]).
+:- subscribe(action, [actor_turn_started]).
 
-test:began(_) :- 
-	bind(u, pressed, [_]>>(boom(5))),
+test:began(O) :- 
+	bind(u, pressed, [_]>>(boom(O, 5))),
 	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))).
 test:ended(_) :- unbind(_, _, _).
-boom(N) :-
-	location(@owner, l(FloorId, Po)),
+boom(O, N) :-
+	location(O, l(FloorId, Po)),
 	shape(disc, N, Ps),
 	Q := Po + Ps,
 	effect(effect_def(explosion, 1), l(FloorId, Q), _).
 
-action:item_thrown(_{actor:A}) :- write(A).
+action:actor_turn_started(_{actor: _{ props: _{ type: player }, physics: _ { floor_id: F, position: P }}}) :-
+	sound:play_sound(countdown1{floor_id: F, position: P, volume:100, pitch: 1}).

@@ -6,10 +6,10 @@
 :- dynamic(key_route/3).
 :- inline([bind/3, unbind/3]).
 bind(Key, Event, Predicate) :-
-    assertz(key_route(Key, Event, Predicate)).
+    assertz(input:key_route(Key, Event, Predicate)).
 
 unbind(Key, Event, Predicate) :-
-    retractall(key_route(Key, Event, Predicate)).
+    retractall(input:key_route(Key, Event, Predicate)).
 
 %: Intercept keyboard events sent by the game and route them to Ergo
 keyboard_event(E) :-

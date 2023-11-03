@@ -68,7 +68,7 @@ action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
 %: Make the bomb roll in the opposite direction whenever an actor attacks it.
 action:actor_attacked(_{attacker: _ { physics: _ {position: Ap}}, victim: actor{id : Id, physics: _{position: Vp}}}) :-
 	dummy get _{id: Id},
-	Dir := Vp - Ap, !,
+	Dir := Vp - Ap,
 	clamp(-1, 1, Dir, NormDir),
 	NewPos := Vp + NormDir,
 	move(actor{id : Id, physics: _{position: Vp}}, NewPos).

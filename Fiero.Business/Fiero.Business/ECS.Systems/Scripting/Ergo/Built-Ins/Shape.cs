@@ -15,7 +15,7 @@ public sealed class Shape : SolverBuiltIn
     public readonly IServiceFactory Services;
 
     public Shape(IServiceFactory services)
-        : base("", new("shape"), 3, ScriptingSystem.FieroModule)
+        : base("", new("shape"), 4, ScriptingSystem.FieroModule)
     {
         Services = services;
     }
@@ -27,8 +27,13 @@ public sealed class Shape : SolverBuiltIn
             yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(ShapeName), args[0]);
             yield break;
         }
+        if (!args[1].Matches<Coord>(out var center))
+        {
+            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Coord), args[1]);
+            yield break;
+        }
         var enumerable = Enumerable.Empty<Coord>();
-        if (args[1].Matches<int>(out var iSize))
+        if (args[2].Matches<int>(out var iSize))
         {
             enumerable = shape switch
             {
@@ -40,7 +45,7 @@ public sealed class Shape : SolverBuiltIn
                 _ => enumerable
             };
         }
-        else if (args[1].Matches<Coord>(out var pSize))
+        else if (args[2].Matches<Coord>(out var pSize))
         {
             enumerable = shape switch
             {
@@ -60,10 +65,11 @@ public sealed class Shape : SolverBuiltIn
             yield break;
         }
         var any = false;
-        foreach (var p in enumerable)
+        foreach (var p in enumerable
+            .Select(x => x + center))
         {
             var term = TermMarshall.ToTerm(p, functor: new Atom(nameof(p)), mode: TermMarshalling.Positional);
-            if (args[2].Unify(term).TryGetValue(out var subs))
+            if (args[3].Unify(term).TryGetValue(out var subs))
             {
                 yield return True(subs);
                 any = true;

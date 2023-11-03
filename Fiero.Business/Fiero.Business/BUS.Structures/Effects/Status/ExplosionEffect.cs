@@ -40,10 +40,6 @@ namespace Fiero.Business
                     systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
                 }
             }
-            foreach (var p in Shape)
-            {
-                systems.Dungeon.SetTileAt(floorId, p + pos, systems.Dungeon.EntityBuilders.Tile_Corridor().WithColor(ColorName.Gray).Build());
-            }
             End(systems, owner);
         }
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)

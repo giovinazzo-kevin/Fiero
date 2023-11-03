@@ -51,7 +51,7 @@ namespace Fiero.Business
 
             public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
             {
-                if (arguments[0].Unify(_owner).TryGetValue(out var subs))
+                if (_owner.Unify(arguments[0]).TryGetValue(out var subs))
                 {
                     yield return True(subs);
                     yield break;
@@ -158,9 +158,9 @@ namespace Fiero.Business
         public readonly Script Script;
         public readonly InterpreterScope Scope;
         public readonly string Description;
-        public readonly Maybe<CompiledHook> EffectStartedHook;
-        public readonly Maybe<CompiledHook> EffectEndedHook;
-        public readonly Maybe<CompiledHook> ClearDataHook;
+        public Maybe<CompiledHook> EffectStartedHook { get; private set; }
+        public Maybe<CompiledHook> EffectEndedHook { get; private set; }
+        public Maybe<CompiledHook> ClearDataHook { get; private set; }
         public readonly string ArgumentsString;
 
         public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
@@ -169,15 +169,7 @@ namespace Fiero.Business
         {
             Script = script;
             ArgumentsString = arguments;
-            var s = script.ScriptProperties.Scope.InterpreterScope;
             Description = description ?? string.Empty;
-            var module = Script.ScriptProperties.Scope.Module;
-            EffectStartedHook = new Hook(new(new("began"), Maybe.Some(1), module, default))
-                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
-            EffectEndedHook = new Hook(new(new("ended"), Maybe.Some(1), module, default))
-                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
-            ClearDataHook = new Hook(new(new("clear"), Maybe.Some(1), ScriptingSystem.DataModule, default))
-                .Compile(script.ScriptProperties.Solver.KnowledgeBase);
         }
 
         public override EffectName Name => EffectName.Script;
@@ -191,8 +183,20 @@ namespace Fiero.Business
             var m = Script.ScriptProperties.Scope.Module;
             var newScope = Script.ScriptProperties.Scope.InterpreterScope;
             var lib = new ScriptEffectLib(systems, this, owner, ArgumentsString, m);
-            newScope = newScope.WithModule(newScope.Modules[m]
-                .WithLinkedLibrary(lib));
+            // Since the kb is already created by now, we need to assert these builtins manually
+            foreach (var b in lib.GetExportedBuiltins())
+            {
+                var pred = new Predicate(b);
+                Script.ScriptProperties.Solver.KnowledgeBase.AssertZ(pred);
+                Script.ScriptProperties.Solver.KnowledgeBase.DependencyGraph.AddNode(pred);
+            }
+            var module = Script.ScriptProperties.Scope.Module;
+            EffectStartedHook = new Hook(new(new("began"), Maybe.Some(0), module, default))
+                .Compile(Script.ScriptProperties.Solver.KnowledgeBase);
+            EffectEndedHook = new Hook(new(new("ended"), Maybe.Some(0), module, default))
+                .Compile(Script.ScriptProperties.Solver.KnowledgeBase);
+            ClearDataHook = new Hook(new(new("clear"), Maybe.Some(0), ScriptingSystem.DataModule, default))
+                .Compile(Script.ScriptProperties.Solver.KnowledgeBase);
             return Contexts[owner.Id] = SolverContext.Create(Script.ScriptProperties.Solver, newScope);
         }
 
@@ -204,7 +208,7 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            var args = ImmutableArray.Create<ITerm>(new EntityAsTerm(owner.Id, owner.ErgoType()));
+            var args = ImmutableArray.Create<ITerm>();
             if (EffectStartedHook.TryGetValue(out var hook))
             {
                 foreach (var _ in hook.Call(ctx, scope, args))
@@ -218,7 +222,7 @@ namespace Fiero.Business
             var ctx = GetOrCreateContext(systems, owner);
             var scope = Script.ScriptProperties.Scope
                 .WithInterpreterScope(ctx.Scope);
-            var args = ImmutableArray.Create<ITerm>(new EntityAsTerm(owner.Id, owner.ErgoType()));
+            var args = ImmutableArray.Create<ITerm>();
             if (EffectEndedHook.TryGetValue(out var hook))
             {
                 foreach (var _ in hook.Call(ctx, scope, args))
@@ -235,6 +239,7 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
+            _ = GetOrCreateContext(systems, owner);
             /* Ergo scripts can subscribe to Fiero events via the subscribe/2 directive.
                All the directive does is prepare a list for this method, which is
                called whenever an effect that is tied to a script resolves. The list

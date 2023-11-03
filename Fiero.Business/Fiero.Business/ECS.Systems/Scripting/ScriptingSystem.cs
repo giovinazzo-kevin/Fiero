@@ -11,6 +11,7 @@ using Ergo.Solver;
 using LightInject;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -197,12 +198,13 @@ namespace Fiero.Business
                     var hook = new Hook(new(reqName, 1, sysName, default));
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
-                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase);
+                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase)
+                            .GetEither(hook);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
                         return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
                             .SubscribeResponse(evt =>
                             {
-                                return Respond(self, evt, reqType, compiledHook.GetEither(hook), systemEvent.MarshallingContext);
+                                return Respond(self, evt, reqType, compiledHook, systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -214,12 +216,13 @@ namespace Fiero.Business
                     var hook = new Hook(new(evtName, 1, sysName, default));
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
-                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase);
+                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase)
+                            .GetEither(hook);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
                         return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
                             .SubscribeHandler(evt =>
                             {
-                                Respond(self, evt, evtType, compiledHook.GetEither(hook), systemEvent.MarshallingContext);
+                                Respond(self, evt, evtType, compiledHook, systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -240,12 +243,12 @@ namespace Fiero.Business
                             .WithInterpreterScope(ctx.Scope);
                         if (hook.Reduce(a => true, b => b.IsDefined(ctx)))
                         {
-                            //var sw = new Stopwatch(); sw.Start();
+                            var sw = new Stopwatch(); sw.Start();
                             foreach (var _ in hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg)))
                             {
                             }
-                            //sw.Stop();
-                            //Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Signature.Explain()}");
+                            sw.Stop();
+                            Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Reduce(x => x.Signature, y => y.Signature).Explain()}");
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

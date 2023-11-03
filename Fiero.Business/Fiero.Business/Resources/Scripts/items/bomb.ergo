@@ -24,7 +24,9 @@ bomb:began :-
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
-	P = @owner.physics.position, move(B, P),
+	P = &(@owner.physics.position), 
+	write(P), nl,
+	move(B, P),
 	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
 	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
 	% Make the dummy invulnerable to damage

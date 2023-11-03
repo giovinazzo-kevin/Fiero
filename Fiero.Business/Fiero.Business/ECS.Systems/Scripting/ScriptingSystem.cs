@@ -119,7 +119,8 @@ namespace Fiero.Business
             {
                 var solver = Facade.BuildSolver(
                     localScope.BuildKnowledgeBase(),
-                    SolverFlags.Default | SolverFlags.UseFastDecimals
+                    SolverFlags.Default,
+                    DecimalType.Binary16
                 );
                 solver.Initialize(localScope);
                 Init(script, solver, localScope);

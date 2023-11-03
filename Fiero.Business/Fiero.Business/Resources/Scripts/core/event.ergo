@@ -1,11 +1,10 @@
 % Do not modify unless you know what you are doing.
 :- module(event, [move/2]).
 :- subscribe(scripting, [script_event_raised]).
-:- inline([move/2]).
 %: Moves an entity to the desired location by raising the actor_moved event from the action system.
-move(A, P) :-
+move(actor{ id: Id, physics: _ { position: OldPos }}, NewPos) :-
 	% TODO: Fix RaiseEvent and replace _{ id: (&A.id) } with A
-	raise(action, actor_moved, _{ actor: _{ id: (&A.id) }, old_position: (&A.physics.position), new_position: P }).
+	raise(action, actor_moved, _{ actor: _{ id: Id }, old_position: OldPos, new_position: NewPos }).
 
 scripting:script_event_raised(_{system: S, event: E, data: D}) :-
 	subscribed(S, E), !,

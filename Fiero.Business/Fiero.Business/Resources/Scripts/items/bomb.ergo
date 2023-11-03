@@ -5,7 +5,7 @@
 :- use_module(effect).
 :- use_module(anim).
 % Scripts can subscribe to system events and to events sent from other scripts.
-:- subscribe(action, [actor_turn_started, actor_attacked]).
+:- subscribe(action, [actor_turn_started]).
 % This pattern can be used to allow scripts to manipulate other scripts, and to act as libraries that hide the complexity of doing so.
 :- subscribe(bomb, [set_fuse_, set_radius_]).
 
@@ -24,7 +24,7 @@ bomb:began :-
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
-	owner(O), location(O, l(_, P)),
+	location(@owner, l(_, P)),
 	move(B, P),
 	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
 	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
@@ -66,15 +66,15 @@ tock :-
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.
 action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
 	tick, tock.
-%: Make the bomb roll in the opposite direction whenever an actor attacks it.
-action:actor_attacked(_{attacker: A, victim: V}) :-
-	dummy get D, 
-	&D.id = V.id,
-	Vp &= V.physics.position,
-	Dir := Vp - &A.physics.position,
-	clamp(-1, 1, Dir, NormDir),
-	NewPos := Vp + Dir,
-	move(V, NewPos).
+% %: Make the bomb roll in the opposite direction whenever an actor attacks it.
+% action:actor_attacked(_{attacker: A, victim: V}) :-
+% 	dummy get D, 
+% 	&D.id = V.id,
+% 	Vp &= V.physics.position,
+% 	Dir := Vp - &A.physics.position,
+% 	clamp(-1, 1, Dir, NormDir),
+% 	NewPos := Vp + Dir,
+% 	move(V, NewPos).
 bomb:set_fuse_(_{dummy: _{ id: Id }, fuse: F}) :-
 	dummy get _ { id: Id },
 	fuse set F.

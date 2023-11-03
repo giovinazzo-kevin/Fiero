@@ -44,7 +44,7 @@ namespace Fiero.Business
         {
             protected readonly EntityAsTerm _owner;
 
-            public Owner(Entity owner, Atom module) : base(string.Empty, new Atom("owner"), 1, module)
+            public Owner(Entity owner, Atom module) : base(string.Empty, new Atom("owner_"), 1, module)
             {
                 _owner = new(owner.Id, owner.ErgoType());
             }

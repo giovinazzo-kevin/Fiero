@@ -11,7 +11,6 @@ using Ergo.Solver;
 using LightInject;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -243,12 +242,9 @@ namespace Fiero.Business
                             .WithInterpreterScope(ctx.Scope);
                         if (hook.Reduce(a => true, b => b.IsDefined(ctx)))
                         {
-                            var sw = new Stopwatch(); sw.Start();
                             foreach (var _ in hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg)))
                             {
                             }
-                            sw.Stop();
-                            Debug.WriteLine($"[{self.DisplayName}] [{sw.Elapsed.TotalMilliseconds}ms] {hook.Reduce(x => x.Signature, y => y.Signature).Explain()}");
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

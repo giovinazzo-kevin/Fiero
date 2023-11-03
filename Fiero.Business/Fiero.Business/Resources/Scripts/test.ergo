@@ -15,9 +15,11 @@ test:began(O) :-
 	bind(h, pressed, [_]>>(spawn([potion_of_healing{}], _))).
 test:ended(_) :- unbind(_, _, _).
 boom(O, N) :-
+	write(O), nl,
 	location(O, l(FloorId, Po)),
 	shape(disc, N, Ps),
 	Q := Po + Ps,
+	write(Q), nl,
 	effect(effect_def(explosion, 1), l(FloorId, Q), _).
 
 action:actor_turn_started(_{actor: _{ props: _{ type: player }, physics: _ { floor_id: F, position: P }}}) :-

@@ -24,8 +24,7 @@ bomb:began :-
 	% Spawn the dummy and store it
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
 	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
-	P = &(@owner.physics.position), 
-	write(P), nl,
+	owner(O), location(O, l(_, P)),
 	move(B, P),
 	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
 	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
@@ -53,7 +52,7 @@ tick :-
 	% Play the damage number animation
 	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound
-	(	T1 = 0, !
+	(	T1 == 0, !
 	;   play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1})
 	).
 

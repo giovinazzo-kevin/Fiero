@@ -232,7 +232,8 @@ namespace Fiero.Business
 
             static EventResult Respond(ScriptEffect self, object evt, Type type, Either<CompiledHook, Hook> hook, TermMarshallingContext mctx)
             {
-                var term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
+                if (!mctx.TryGetCached(TermMarshalling.Named, evt, type, default, out var term))
+                    term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
                 var arg = ImmutableArray.Create(term);
                 try
                 {
@@ -243,9 +244,8 @@ namespace Fiero.Business
                             .WithInterpreterScope(ctx.Scope);
                         if (hook.Reduce(a => true, b => b.IsDefined(ctx)))
                         {
-                            foreach (var _ in hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg)))
-                            {
-                            }
+                            var call = hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg));
+                            foreach (var _ in call) ;
                             if (self.Script.ScriptProperties.LastError != null)
                                 return false;
                         }

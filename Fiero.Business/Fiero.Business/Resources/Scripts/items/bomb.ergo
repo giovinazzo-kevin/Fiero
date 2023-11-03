@@ -45,26 +45,21 @@ bomb:ended :-
 
 tick :-
 	% Retrieve original fuse duration, current fuse, and dummy
-	args(_{fuse: T0}), fuse get T1, dummy get B,
+	fuse get T1, dummy get B,
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
 	location(B, l(F, P)),
 	% Play the damage number animation
 	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
-	% If the fuse is > 0, play a sound
-	(	T1 == 0, !
-	;   play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1})
-	).
-
-tock :-
+	% If the fuse is > 0, play a sound, otherwise explode
+	(T1 \== 0 -> play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}) ; end),
 	% Decrement the fuse
-	fuse get F, F1 := F - 1,
-	% If it's equal to -1, end the script, causing bomb:ended to be called and thus the bomb to explode
-	(F1 == -1, end ; fuse set F1).
+	eval(T2, T1 - 1),
+	fuse set T2.
 
 %: Make the bomb tick and eventually explode.
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.
 action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
-	tick, tock.
+	tick.
 %: Make the bomb roll in the opposite direction whenever an actor attacks it.
 action:actor_attacked(_{attacker: _ { physics: _ {position: Ap}}, victim: actor{id : Id, physics: _{position: Vp}}}) :-
 	dummy get _{id: Id},

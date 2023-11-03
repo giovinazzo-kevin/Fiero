@@ -1,7 +1,7 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(fiero, [as/2, '&='/2, ':='/2, uuid/1, location/2, clamp/4]).
+:- module(fiero, [as/2, '&='/2, ':='/2, uuid/1, location/2, clamp/4, owner_t/1]).
 
 :- op(40, yfx, ['as']).
 %: Shorthand macro for retrieving the player as an actor
@@ -14,6 +14,8 @@
 )).
 :- dynamic(last_uuid/1).
 :- inline([as/2,clamp/4]).
+:- table(owner_t/1).
+owner_t(O) :- owner(O).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type
 %: NOTE: 'as' has a higher precedence than 'is', so this doesn't break arithmetic expressions
@@ -40,7 +42,7 @@ Entity as Type is Proxy :-
 location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
 %: Unify with all entities on the owner's tile (or the player if this is the shell)
 here(E) :-
-	(owner(O) ; player as actor is O),
+	(owner_t(O) ; player as actor is O),
     at(O, E).
 %: Unify with all entities on the same tile as another physical entity
 at(O, E) :-

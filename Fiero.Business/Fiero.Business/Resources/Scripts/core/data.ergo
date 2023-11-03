@@ -8,7 +8,7 @@
 :- op(700, xfy, [update]).
 
 key(Name, key(Name, Id)) :-
-	owner(_{id:Id}), !.
+	owner_t(_{id:Id}).
 
 delete(Name) :- 
 	key(Name, Key),

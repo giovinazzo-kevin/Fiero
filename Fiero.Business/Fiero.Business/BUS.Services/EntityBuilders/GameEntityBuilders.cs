@@ -33,7 +33,7 @@
             .WithTraitTracking()
             ;
 
-        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
+        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = false)
             => Entities.CreateBuilder<Script>()
             .WithName(name ?? scriptPath)
             .WithScriptInfo(scriptPath, trace: trace, cache: cache)

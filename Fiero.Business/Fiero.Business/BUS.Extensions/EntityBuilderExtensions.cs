@@ -319,7 +319,7 @@ namespace Fiero.Business
             {
                 c.Type = type;
             });
-        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false, bool cache = true)
+        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false, bool cache = false)
             where T : Script => builder.AddOrTweak<ErgoScriptComponent>((s, c) =>
             {
                 c.ScriptPath = fileName;

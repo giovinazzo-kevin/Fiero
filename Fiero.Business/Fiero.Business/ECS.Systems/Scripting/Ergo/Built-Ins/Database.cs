@@ -40,7 +40,7 @@ public sealed class Database : SolverBuiltIn
         switch (mode)
         {
             case AccessMode.Get when Store.TryGetValue(args[0], out var v):
-                if (args[2].Unify(v).TryGetValue(out var subs))
+                if (v.Unify(args[2]).TryGetValue(out var subs))
                 {
                     yield return True(subs);
                     yield break;

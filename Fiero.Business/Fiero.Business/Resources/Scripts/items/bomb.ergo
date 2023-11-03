@@ -5,7 +5,7 @@
 :- use_module(effect).
 :- use_module(anim).
 % Scripts can subscribe to system events and to events sent from other scripts.
-:- subscribe(action, [actor_turn_started]).
+:- subscribe(action, [actor_turn_started, actor_attacked]).
 % This pattern can be used to allow scripts to manipulate other scripts, and to act as libraries that hide the complexity of doing so.
 :- subscribe(bomb, [set_fuse_, set_radius_]).
 
@@ -49,7 +49,7 @@ tick :-
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
 	location(B, l(F, P)),
 	% Play the damage number animation
-	play_animations(l(F, P), [damage_number{damage: T1, tint: light_red}], _),
+	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
 	% If the fuse is > 0, play a sound
 	(	T1 == 0, !
 	;   play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1})
@@ -65,15 +65,13 @@ tock :-
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.
 action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
 	tick, tock.
-% %: Make the bomb roll in the opposite direction whenever an actor attacks it.
-% action:actor_attacked(_{attacker: A, victim: V}) :-
-% 	dummy get D, 
-% 	&D.id = V.id,
-% 	Vp &= V.physics.position,
-% 	Dir := Vp - &A.physics.position,
-% 	clamp(-1, 1, Dir, NormDir),
-% 	NewPos := Vp + Dir,
-% 	move(V, NewPos).
+%: Make the bomb roll in the opposite direction whenever an actor attacks it.
+action:actor_attacked(_{attacker: _ { physics: _ {position: Ap}}, victim: actor{id : Id, physics: _{position: Vp}}}) :-
+	dummy get _{id: Id},
+	Dir := Vp - Ap, !,
+	clamp(-1, 1, Dir, NormDir),
+	NewPos := Vp + NormDir,
+	move(actor{id : Id, physics: _{position: Vp}}, NewPos).
 bomb:set_fuse_(_{dummy: _{ id: Id }, fuse: F}) :-
 	dummy get _ { id: Id },
 	fuse set F.

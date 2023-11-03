@@ -13,7 +13,7 @@
 	@owner :- owner(O)
 )).
 :- dynamic(last_uuid/1).
-:- inline([as/2,clamp/4]).
+:- inline([as/2]).
 :- table(owner/1).
 owner(O) :- owner_(O).
 

@@ -44,7 +44,7 @@ bomb:ended :-
 	effect(effect_def(explosion, R), B, _).
 
 tick :-
-	% Retrieve original fuse duration, current fuse, and dummy
+	% Retrieve current fuse and dummy
 	fuse get T1, dummy get B,
 	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
 	location(B, l(F, P)),
@@ -53,8 +53,7 @@ tick :-
 	% If the fuse is > 0, play a sound, otherwise explode
 	(T1 \== 0 -> play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}) ; end),
 	% Decrement the fuse
-	eval(T2, T1 - 1),
-	fuse set T2.
+	eval(T2, T1 - 1), fuse set T2.
 
 %: Make the bomb tick and eventually explode.
 %: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.

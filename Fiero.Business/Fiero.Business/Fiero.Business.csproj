@@ -5,6 +5,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <StartupObject>Fiero.Business.Program</StartupObject>
 	<ImplicitUsings>enable</ImplicitUsings>
+	<Configurations>Debug;Release;Diagnostics</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

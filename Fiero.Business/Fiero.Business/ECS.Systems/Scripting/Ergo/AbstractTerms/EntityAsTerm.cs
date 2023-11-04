@@ -77,10 +77,10 @@ public sealed class EntityAsTerm : Dict
             .GetOr(GetInvalidEntity(EntityId, TypeAsAtom));
         if (proxy is Dict d)
         {
-            Dictionary = Dictionary.Clear().AddRange(d.Dictionary);
-            KeyValuePairs = BuildKVPs();
-            Argument = new Set(KeyValuePairs);
-            CanonicalForm = BuildCanonical();
+            Dictionary = d.Dictionary;
+            KeyValuePairs = d.KeyValuePairs;
+            Argument = d.Argument;
+            CanonicalForm = d.CanonicalForm;
         }
     }
 

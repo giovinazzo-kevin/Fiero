@@ -38,8 +38,8 @@ namespace Fiero.Business
             Dialogues = dialogues;
             Scenes = gameScenes;
             Store = store;
-            loop.TimeStep = TimeSpan.FromSeconds(1 / 144f);
-            loop.MaxTimeStep = loop.TimeStep * 2;
+            loop.TimeStep = TimeSpan.FromSeconds(1 / 300f);
+            loop.MaxTimeStep = loop.TimeStep * 1;
             CreateGlobalTheme();
             Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)

@@ -4,6 +4,7 @@ using Ergo.Lang;
 using Fiero.Core.Exceptions;
 using SFML.Graphics;
 using SFML.Window;
+using System.Runtime;
 
 namespace Fiero.Core
 {
@@ -119,6 +120,7 @@ namespace Fiero.Core
 
         public async Task RunAsync(CancellationToken token = default)
         {
+            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             await InitializeAsync();
             ValidateResources();
             using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty))

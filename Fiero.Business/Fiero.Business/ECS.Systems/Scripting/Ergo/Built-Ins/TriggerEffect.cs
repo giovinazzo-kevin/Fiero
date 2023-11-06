@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class TriggerEffect : SolverBuiltIn
+public sealed class TriggerEffect : BuiltIn
 {
     [Term(Functor = "effect_def", Marshalling = TermMarshalling.Positional)]
     internal readonly record struct EffectDefStub(EffectName Name, string Arguments);

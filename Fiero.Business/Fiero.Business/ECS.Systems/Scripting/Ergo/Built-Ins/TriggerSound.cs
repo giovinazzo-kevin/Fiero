@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class TriggerSound : SolverBuiltIn
+public sealed class TriggerSound : BuiltIn
 {
     [Term(Functor = "sound_def", Marshalling = TermMarshalling.Named)]
     internal readonly record struct SoundDefStub()

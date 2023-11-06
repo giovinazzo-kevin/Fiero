@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class Database : SolverBuiltIn
+public sealed class Database : BuiltIn
 {
     public enum AccessMode
     {

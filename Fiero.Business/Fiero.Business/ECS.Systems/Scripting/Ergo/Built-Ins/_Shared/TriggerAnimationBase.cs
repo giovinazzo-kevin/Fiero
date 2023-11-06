@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Fiero.Business;
 
-public abstract class TriggerAnimationBase : SolverBuiltIn
+public abstract class TriggerAnimationBase : BuiltIn
 {
     protected readonly IServiceFactory Services;
     private readonly Dictionary<string, MethodInfo> Methods;

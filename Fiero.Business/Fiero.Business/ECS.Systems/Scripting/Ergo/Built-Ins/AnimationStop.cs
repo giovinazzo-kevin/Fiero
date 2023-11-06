@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class AnimationStop : SolverBuiltIn
+public sealed class AnimationStop : BuiltIn
 {
     protected readonly IServiceFactory Services;
     public AnimationStop(IServiceFactory services)

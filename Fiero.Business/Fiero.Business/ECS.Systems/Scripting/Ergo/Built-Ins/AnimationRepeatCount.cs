@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class AnimationRepeatCount : SolverBuiltIn
+public sealed class AnimationRepeatCount : BuiltIn
 {
     protected readonly IServiceFactory Services;
     public AnimationRepeatCount(IServiceFactory services)

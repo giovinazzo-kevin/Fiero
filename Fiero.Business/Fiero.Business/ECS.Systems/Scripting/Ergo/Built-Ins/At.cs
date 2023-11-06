@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Fiero.Business;
 [SingletonDependency]
-public sealed class At : SolverBuiltIn
+public sealed class At : BuiltIn
 {
     public readonly IServiceFactory Services;
 

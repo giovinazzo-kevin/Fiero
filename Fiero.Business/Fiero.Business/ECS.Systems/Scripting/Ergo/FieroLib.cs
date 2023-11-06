@@ -16,7 +16,7 @@ public partial class FieroLib : Library
 
     public readonly IServiceFactory ServiceFactory;
 
-    private readonly List<SolverBuiltIn> _exportedBuiltIns = new();
+    private readonly List<BuiltIn> _exportedBuiltIns = new();
     private readonly List<InterpreterDirective> _exportedDirectives = new();
 
     public FieroLib(IServiceFactory sp)
@@ -43,7 +43,7 @@ public partial class FieroLib : Library
     }
 
 
-    public override IEnumerable<SolverBuiltIn> GetExportedBuiltins() => _exportedBuiltIns;
+    public override IEnumerable<BuiltIn> GetExportedBuiltins() => _exportedBuiltIns;
     public override IEnumerable<InterpreterDirective> GetExportedDirectives() => _exportedDirectives;
     public override void OnErgoEvent(ErgoEvent evt)
     {

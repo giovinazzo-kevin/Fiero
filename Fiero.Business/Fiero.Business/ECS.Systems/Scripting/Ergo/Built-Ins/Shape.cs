@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class Shape : SolverBuiltIn
+public sealed class Shape : BuiltIn
 {
     public readonly IServiceFactory Services;
 

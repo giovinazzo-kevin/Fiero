@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Fiero.Business;
 
-public abstract class GameEntitiesBuiltIn : SolverBuiltIn
+public abstract class GameEntitiesBuiltIn : BuiltIn
 {
     public readonly GameDataStore Store;
     public readonly GameEntities Entities;

@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class NextRandom : SolverBuiltIn
+public sealed class NextRandom : BuiltIn
 {
     public NextRandom()
         : base("", new("rng"), 1, ScriptingSystem.RandomModule)

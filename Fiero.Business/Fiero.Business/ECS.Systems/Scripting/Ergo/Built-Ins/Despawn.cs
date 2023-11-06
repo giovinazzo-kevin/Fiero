@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class Despawn : SolverBuiltIn
+public sealed class Despawn : BuiltIn
 {
     protected readonly IServiceFactory _services;
 

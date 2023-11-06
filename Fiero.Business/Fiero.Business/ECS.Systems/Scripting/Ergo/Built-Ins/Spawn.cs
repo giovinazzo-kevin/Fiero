@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class Spawn : SolverBuiltIn
+public sealed class Spawn : BuiltIn
 {
     public readonly IServiceFactory Services;
     public readonly GameEntityBuilders Builders;

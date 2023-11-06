@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class RaiseEvent : SolverBuiltIn
+public sealed class RaiseEvent : BuiltIn
 {
     private IServiceFactory _services;
     public RaiseEvent(IServiceFactory services)

@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class MsgBox : SolverBuiltIn
+public sealed class MsgBox : BuiltIn
 {
     public readonly GameUI UI;
 

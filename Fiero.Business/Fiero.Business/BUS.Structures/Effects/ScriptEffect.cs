@@ -14,7 +14,7 @@ namespace Fiero.Business
 {
     internal class ScriptEffectLib : Library
     {
-        internal class End : SolverBuiltIn
+        internal class End : BuiltIn
         {
             protected readonly ScriptEffect _source;
             protected readonly Entity _owner;
@@ -40,7 +40,7 @@ namespace Fiero.Business
                 yield return True();
             }
         }
-        internal class Owner : SolverBuiltIn
+        internal class Owner : BuiltIn
         {
             protected readonly EntityAsTerm _owner;
 
@@ -60,7 +60,7 @@ namespace Fiero.Business
                 yield break;
             }
         }
-        internal class Args : SolverBuiltIn
+        internal class Args : BuiltIn
         {
             protected readonly string _args;
 
@@ -86,7 +86,7 @@ namespace Fiero.Business
                 yield break;
             }
         }
-        internal class Subscribed : SolverBuiltIn
+        internal class Subscribed : BuiltIn
         {
             private readonly List<Signature> _subs;
 
@@ -135,7 +135,7 @@ namespace Fiero.Business
             _systems = systems;
             _args = arguments;
         }
-        public override IEnumerable<SolverBuiltIn> GetExportedBuiltins()
+        public override IEnumerable<BuiltIn> GetExportedBuiltins()
         {
             yield return new End(_systems, _source, _owner, _module);
             yield return new Args(_args, _module);

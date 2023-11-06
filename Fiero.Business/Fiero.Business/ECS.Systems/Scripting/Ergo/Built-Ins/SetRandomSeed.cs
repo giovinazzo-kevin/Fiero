@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class SetRandomSeed : SolverBuiltIn
+public sealed class SetRandomSeed : BuiltIn
 {
     public readonly GameDataStore Store;
 

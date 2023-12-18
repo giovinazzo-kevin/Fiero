@@ -111,41 +111,29 @@ namespace Fiero.Business
             var cacheKey = $"{script.ScriptProperties.ScriptPath}{script.ScriptProperties.CacheKey}";
             if (script.ScriptProperties.Cached && Cache.TryGetValue(cacheKey, out var cached))
             {
-                Init(script, cached.ScriptProperties.VM, cached.ScriptProperties.VM.KnowledgeBase.Scope);
+                Init(script, cached.ScriptProperties.KnowledgeBase);
                 return true;
             }
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
                 .TryGetValue(out _))
             {
-                var ergoVM = Facade.BuildVM(
-                    localScope.BuildKnowledgeBase(CompilerFlags.Default),
-                    DecimalType.FastDecimal
-                );
-                Init(script, ergoVM, localScope);
+                var kb = localScope.BuildKnowledgeBase(CompilerFlags.Default);
+                Init(script, kb);
                 Cache.TryAdd(cacheKey, script);
                 //_unload += () => UnloadScript(script);
                 return true;
             }
             return false;
 
-            void Init(Script script, ErgoVM vm, InterpreterScope scope)
+            void Init(Script script, KnowledgeBase kb)
             {
-                if (script.ScriptProperties.ShowTrace)
-                {
-                    // solverScope.Tracer.Trace += Tracer_Trace;
-                }
-                script.ScriptProperties.VM = vm;
+                script.ScriptProperties.KnowledgeBase = kb;
                 // Scripts subscribe to events via the subscribe/2 directive
                 if (!FieroLib.GetScriptSubscriptions(script).TryGetValue(out var subbedEvents))
                     subbedEvents = Enumerable.Empty<Signature>();
                 // Effects can then read this list and bind the subbed events
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
                 ScriptLoaded.Handle(new(script));
-
-                //void Tracer_Trace(Tracer _, SolverScope scope, SolverTraceType type, string trace)
-                //{
-                //    Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
-                //}
             }
         }
 
@@ -160,7 +148,7 @@ namespace Fiero.Business
         {
             if (script.IsInvalid())
                 return false;
-            script.ScriptProperties.VM = default;
+            //script.ScriptProperties.KnowledgeBase.Clear();
             return true;
         }
 
@@ -233,15 +221,10 @@ namespace Fiero.Business
                     // TODO: Figure out a way for scripts to return complex EventResults?
                     foreach (var ctx in self.Contexts.Values)
                     {
-                        var scope = self.Script.ScriptProperties.Scope
-                            .WithInterpreterScope(ctx.Scope);
-                        if (hook.Reduce(a => true, b => b.IsDefined(ctx)))
-                        {
-                            var call = hook.Reduce(x => x.Call(ctx, scope, arg), y => y.Call(ctx, scope, arg));
-                            foreach (var _ in call) ;
-                            if (self.Script.ScriptProperties.LastError != null)
-                                return false;
-                        }
+                        ctx.Query = hook;
+                        ctx.Run();
+                        if (self.Script.ScriptProperties.LastError != null)
+                            return false;
                     }
                     return true;
                 }

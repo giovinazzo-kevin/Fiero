@@ -1,6 +1,6 @@
-﻿using Ergo.Lang.Ast;
+﻿using Ergo.Lang;
+using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
-using Ergo.Runtime;
 
 namespace Fiero.Business
 {
@@ -12,7 +12,7 @@ namespace Fiero.Business
         public bool ShowTrace { get; set; }
         public bool Cached { get; set; }
         public List<Signature> SubscribedEvents { get; set; } = new();
-        public ErgoVM VM { get; set; }
+        public KnowledgeBase KnowledgeBase { get; set; }
         /// <summary>
         /// Output pipe for the Solver's Out stream. You read here what is written there.
         /// </summary>

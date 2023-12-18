@@ -21,7 +21,7 @@ public sealed class ComponentSetValue(GameEntities entities, GameDataStore store
                 if (ProxyableComponentTypes.TryGetValue(key, out var type))
                 {
                     // This is a copy of the original for now
-                    if (!vm.KnowledgeBase.Scope.ExceptionHandler.TryGet(() =>
+                    if (!vm.KB.Scope.ExceptionHandler.TryGet(() =>
                     {
                         try
                         {
@@ -45,7 +45,7 @@ public sealed class ComponentSetValue(GameEntities entities, GameDataStore store
                         if (property.Matches(out string propName) && ProxyableComponentProperties[key].TryGetValue(propName, out var prop))
                         {
                             var ergoType = prop.PropertyType.Name.ToErgoCase();
-                            if (!vm.KnowledgeBase.Scope.ExceptionHandler.Try(() =>
+                            if (!vm.KB.Scope.ExceptionHandler.Try(() =>
                                     {
                                         var newValueObject = TermMarshall.FromTerm(newValue, prop.PropertyType);
                                         try

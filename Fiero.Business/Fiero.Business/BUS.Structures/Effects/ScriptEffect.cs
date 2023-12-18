@@ -258,9 +258,9 @@ namespace Fiero.Business
                 // Could be from a script, in which case it's not unknown so much as it's dynamic
                 else if (!visibleScripts.Contains(sig.Module.GetOrThrow(new InvalidOperationException()).Explain()))
                 {
-                    Script.ScriptProperties.Solver.Out
+                    Script.ScriptProperties.VM.Out
                         .WriteLine($"WRN: Unknown event route: {sig.Explain()}");
-                    Script.ScriptProperties.Solver.Out.Flush();
+                    Script.ScriptProperties.VM.Out.Flush();
                 }
             }
         }

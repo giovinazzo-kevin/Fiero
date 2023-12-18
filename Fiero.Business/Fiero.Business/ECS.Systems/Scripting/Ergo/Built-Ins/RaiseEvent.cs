@@ -2,8 +2,8 @@
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
-using Ergo.Solver;
-using Ergo.Solver.BuiltIns;
+using Ergo.Runtime;
+using Ergo.Runtime.BuiltIns;
 using LightInject;
 using System.Collections.Immutable;
 using System.Reflection;

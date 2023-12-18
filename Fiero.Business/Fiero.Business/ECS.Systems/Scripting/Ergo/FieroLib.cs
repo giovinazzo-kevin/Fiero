@@ -3,7 +3,7 @@ using Ergo.Events;
 using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
-using Ergo.Solver.BuiltIns;
+using Ergo.Runtime.BuiltIns;
 using LightInject;
 
 namespace Fiero.Business;

@@ -1,7 +1,7 @@
 ﻿using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
-using Ergo.Solver;
-using Ergo.Solver.BuiltIns;
+using Ergo.Runtime;
+using Ergo.Runtime.BuiltIns;
 using System.Collections.Immutable;
 
 namespace Fiero.Business;

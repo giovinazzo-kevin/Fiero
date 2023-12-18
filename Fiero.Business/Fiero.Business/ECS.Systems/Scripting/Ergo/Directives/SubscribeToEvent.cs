@@ -21,17 +21,17 @@ public class SubscribeToEvent : InterpreterDirective
         var lib = scope.GetLibrary<FieroLib>(ScriptingSystem.FieroModule);
         if (args[0] is not Atom module)
         {
-            throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, args[0].Explain());
+            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, args[0].Explain());
         }
         if (!args[1].IsAbstract<List>().TryGetValue(out var list))
         {
-            throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[1].Explain());
+            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[1].Explain());
         }
         foreach (var item in list.Contents)
         {
             if (item is not Atom atom)
             {
-                throw new InterpreterException(InterpreterError.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, item.Explain());
+                throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, item.Explain());
             }
             lib.SubscribeScriptToEvent(scope.Entry, module, atom);
         }

@@ -1,8 +1,6 @@
 ﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -17,19 +15,20 @@ public sealed class SetRandomSeed : BuiltIn
         Store = store;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
+    public override ErgoVM.Op Compile()
     {
-        if (int.TryParse(arguments[0].Explain(), System.Globalization.NumberStyles.HexNumber, null, out int result))
+        return vm =>
         {
-            Store.SetValue(Data.Global.RngSeed, result);
-            Rng.SetGlobalSeed(result);
-            yield return True();
-        }
-        else
-        {
-            scope.Throw(SolverError.ExpectedTermOfTypeAt, WellKnown.Types.HexString, arguments[0].Explain());
-            yield return False();
-            yield break;
-        }
+            var arguments = vm.Args;
+            if (int.TryParse(arguments[0].Explain(), System.Globalization.NumberStyles.HexNumber, null, out int result))
+            {
+                Store.SetValue(Data.Global.RngSeed, result);
+                Rng.SetGlobalSeed(result);
+            }
+            else
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.HexString, arguments[0].Explain());
+            }
+        };
     }
 }

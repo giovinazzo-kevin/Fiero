@@ -4,9 +4,7 @@ using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
-using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Unconcern.Common;
 
@@ -158,12 +156,10 @@ namespace Fiero.Business
         public readonly Script Script;
         public readonly InterpreterScope Scope;
         public readonly string Description;
-        public Maybe<CompiledHook> EffectStartedHook { get; private set; }
-        public Maybe<CompiledHook> EffectEndedHook { get; private set; }
-        public Maybe<CompiledHook> ClearDataHook { get; private set; }
+        public Hook EffectStartedHook { get; private set; }
+        public Hook EffectEndedHook { get; private set; }
+        public Hook ClearDataHook { get; private set; }
         public readonly string ArgumentsString;
-
-        public readonly ConcurrentDictionary<int, SolverContext> Contexts = new();
 
         public ScriptEffect(Script script, string arguments, string description = null)
         {

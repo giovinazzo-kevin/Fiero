@@ -1,11 +1,9 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using LightInject;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -32,39 +30,45 @@ public sealed class TriggerSound : BuiltIn
         _services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
+    public override ErgoVM.Op Compile()
     {
-        if (!args[0].IsAbstract<Dict>().TryGetValue(out var dict))
+        var systems = _services.GetInstance<GameSystems>();
+        var resources = _services.GetInstance<GameResources>();
+        return vm =>
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, args[0]);
-            yield break;
-        }
-        if (!dict.Functor.TryGetA(out var functor))
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Functor, args[0]);
-            yield break;
-        }
-        if (!functor.Matches(out SoundName sound))
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(SoundName), args[0]);
-            yield break;
-        }
-        if (!args[0].Matches(out SoundDefStub stub, matchFunctor: false))
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(SoundDefStub), args[0]);
-        }
-        var player = _services.GetInstance<GameSystems>().Render.Viewport.Following.V;
-        var pos = stub.Position;
-        if (stub.Relative)
-        {
-            var center = player.Position();
-            pos -= center;
-        }
-        if (stub.FloorId == player.FloorId())
-        {
-            _services.GetInstance<GameResources>().Sounds
-                .Get(sound, pos, stub.Volume, stub.Pitch).Play();
-        }
-        yield return True();
+            var args = vm.Args;
+            if (!args[0].IsAbstract<Dict>().TryGetValue(out var dict))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, args[0]);
+                return;
+            }
+            if (!dict.Functor.TryGetA(out var functor))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Functor, args[0]);
+                return;
+            }
+            if (!functor.Matches(out SoundName sound))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundName), args[0]);
+                return;
+            }
+            if (!args[0].Matches(out SoundDefStub stub, matchFunctor: false))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundDefStub), args[0]);
+                return;
+            }
+            var player = systems.Render.Viewport.Following.V;
+            var pos = stub.Position;
+            if (stub.Relative)
+            {
+                var center = player.Position();
+                pos -= center;
+            }
+            if (stub.FloorId == player.FloorId())
+            {
+                resources.Sounds
+                    .Get(sound, pos, stub.Volume, stub.Pitch).Play();
+            }
+        };
     }
 }

@@ -1,10 +1,8 @@
 ﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -25,57 +23,64 @@ public sealed class Database : BuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
+    public override ErgoVM.Op Compile()
     {
-        if (!args[1].Matches<AccessMode>(out var mode))
+        return vm =>
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(AccessMode), args[1]);
-            yield break;
-        }
-        if (!args[0].IsGround && mode != AccessMode.Del)
-        {
-            yield return ThrowFalse(scope, SolverError.TermNotSufficientlyInstantiated, args[0].Explain());
-            yield break;
-        }
-        switch (mode)
-        {
-            case AccessMode.Get when Store.TryGetValue(args[0], out var v):
-                if (v.Unify(args[2]).TryGetValue(out var subs))
-                {
-                    yield return True(subs);
-                    yield break;
-                }
-                break;
-            case AccessMode.Set:
-                Store[args[0]] = args[2];
-                yield return True();
-                yield break;
-            case AccessMode.Del:
-                if (args[0].IsGround)
-                {
-                    Store.TryRemove(args[0], out var d);
-                    if (args[2].Unify(d).TryGetValue(out subs))
+            var args = vm.Args;
+            if (!args[1].Matches<AccessMode>(out var mode))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(AccessMode), args[1]);
+                return;
+            }
+            if (!args[0].IsGround && mode != AccessMode.Del)
+            {
+                vm.Throw(ErgoVM.ErrorType.TermNotSufficientlyInstantiated, args[0].Explain());
+                return;
+            }
+            switch (mode)
+            {
+                default:
+                    vm.Fail();
+                    break;
+                case AccessMode.Get when Store.TryGetValue(args[0], out var v):
+                    vm.SetArg(0, v);
+                    vm.SetArg(1, args[2]);
+                    ErgoVM.Goals.Unify2(vm);
+                    break;
+                case AccessMode.Set:
+                    Store[args[0]] = args[2];
+                    break;
+                case AccessMode.Del:
+                    if (args[0].IsGround)
                     {
-                        yield return True(subs);
-                        yield break;
+                        Store.TryRemove(args[0], out var d);
+                        vm.SetArg(0, args[2]);
+                        vm.SetArg(1, d);
+                        ErgoVM.Goals.Unify2(vm);
                     }
-                }
-                else
-                {
-                    foreach (var key in Store.Keys
-                        .Where(key => args[0].Unify(key).TryGetValue(out _)))
+                    else
                     {
-                        Store.TryRemove(key, out var d);
-                        if (args[2].Unify(d).TryGetValue(out subs))
+                        int i = 0;
+                        var a2 = args[2];
+                        DeleteNextKey(vm);
+                        void DeleteNextKey(ErgoVM vm)
                         {
-                            yield return True(subs);
-                            yield break;
+                            var key = Store.Keys.ElementAt(i++);
+                            if (i < Store.Keys.Count)
+                                vm.PushChoice(DeleteNextKey);
+                            vm.SetArg(1, key);
+                            ErgoVM.Goals.Unify2(vm);
+                            if (vm.State == ErgoVM.VMState.Fail)
+                                return;
+                            Store.TryRemove(key, out var d);
+                            vm.SetArg(0, a2);
+                            vm.SetArg(1, d);
+                            ErgoVM.Goals.Unify2(vm);
                         }
                     }
-                }
-                break;
-        }
-        yield return False();
-        yield break;
+                    break;
+            }
+        };
     }
 }

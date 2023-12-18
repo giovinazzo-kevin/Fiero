@@ -1,81 +1,70 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
-using Ergo.Lang.Extensions;
 using Ergo.Runtime;
-using Ergo.Runtime.BuiltIns;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
 // NOTE: Possibly superseded by EntityAsTerm, though it could still be useful.
 
 [SingletonDependency]
-public sealed class CastEntity : GameEntitiesBuiltIn
+public sealed class CastEntity(GameEntities entities, GameDataStore store) : GameEntitiesBuiltIn("", new("cast_entity"), 3, entities, store)
 {
-    public CastEntity(GameEntities entities, GameDataStore store)
-        : base("", new("cast_entity"), 3, entities, store)
+    public override ErgoVM.Op Compile()
     {
-    }
-
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
-    {
-        var (entityId, proxyType, cast) = (arguments[0], arguments[1], arguments[2]);
-        if (!proxyType.IsGround || !ProxyableEntityTypes.TryGetValue(proxyType.Explain(), out var type))
+        return vm =>
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.EntityType, proxyType.Explain());
-            yield break;
-        }
-        if (entityId.IsGround)
-        {
-            var expl = entityId.Explain();
-            var maybeId = Maybe<int>.None;
-            if (TryParseSpecial(expl, out var special))
-                maybeId = special.Id;
-            else if (int.TryParse(expl, out var id_))
-                maybeId = id_;
-            else if (entityId is Dict dict && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
-                maybeId = id_;
-            if (maybeId.TryGetValue(out var id))
+            var arguments = vm.Args;
+            var (entityId, proxyType, cast) = (arguments[0], arguments[1], arguments[2]);
+            if (!proxyType.IsGround || !ProxyableEntityTypes.TryGetValue(proxyType.Explain(), out var type))
             {
-                var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type), false };
-                if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
-                {
-                    yield return Unify((EcsEntity)tryGetProxyArgs[1]);
-                    yield break;
-                }
-                yield return False();
-                yield break;
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.EntityType, proxyType.Explain());
+                return;
             }
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.EntityID, entityId);
-            yield break;
-        }
-        var any = false;
-        foreach (var id in Entities.GetEntities())
-        {
-            var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };
-            if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
+            if (entityId.IsGround)
             {
-                var ret = Unify((EcsEntity)tryGetProxyArgs[1]);
-                if (!ret.Result.Equals(WellKnown.Literals.False))
+                var expl = entityId.Explain();
+                var maybeId = Maybe<int>.None;
+                if (TryParseSpecial(expl, out var special))
+                    maybeId = special.Id;
+                else if (int.TryParse(expl, out var id_))
+                    maybeId = id_;
+                else if (entityId is Dict dict && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
+                    maybeId = id_;
+                if (maybeId.TryGetValue(out var id))
                 {
-                    yield return ret;
-                    any = true;
+                    var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type), false };
+                    if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
+                        Unify(vm, cast, (EcsEntity)tryGetProxyArgs[1]);
+                    else vm.Fail();
+                }
+                else
+                {
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.EntityID, entityId);
+                    return;
                 }
             }
-        }
-        if (!any)
-            yield return False();
-        yield break;
-
-        Evaluation Unify(EcsEntity entity)
-        {
-            var term = new EntityAsTerm(entity.Id, entity.ErgoType());
-            if (cast.Unify(term).TryGetValue(out var subs))
+            else
             {
-                return True(subs);
+                int i = 0;
+                var entityIds = Entities.GetEntities().ToArray();
+                vm.PushChoice(NextSolution);
+                NextSolution(vm);
+                void NextSolution(ErgoVM vm)
+                {
+                    var id = entityIds[i++];
+                    var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type) };
+                    if ((bool)TryGetProxy.MakeGenericMethod(type).Invoke(Entities, tryGetProxyArgs))
+                        Unify(vm, cast, (EcsEntity)tryGetProxyArgs[1]);
+                    else vm.Fail();
+                }
             }
-            return False();
+        };
+
+        static void Unify(ErgoVM vm, ITerm cast, EcsEntity entity)
+        {
+            vm.SetArg(0, cast);
+            vm.SetArg(1, new EntityAsTerm(entity.Id, entity.ErgoType()));
+            ErgoVM.Goals.Unify2(vm);
         }
     }
 }

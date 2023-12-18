@@ -1,108 +1,95 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using LightInject;
-using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Fiero.Business;
 
-public abstract class TriggerAnimationBase : BuiltIn
+public abstract class TriggerAnimationBase(IServiceFactory services, string name) : BuiltIn("", new(name), 3, ScriptingSystem.AnimationModule)
 {
-    protected readonly IServiceFactory Services;
-    private readonly Dictionary<string, MethodInfo> Methods;
-
-    protected bool IsBlocking { get; set; } = false;
-
-    public TriggerAnimationBase(IServiceFactory services, string name)
-        // play(pos or physical_entity, anim_list, IdsList).
-        : base("", new(name), 3, ScriptingSystem.AnimationModule)
-    {
-        Services = services;
-        Methods = typeof(Animation)
+    protected readonly IServiceFactory Services = services;
+    private readonly Dictionary<string, MethodInfo> Methods = typeof(Animation)
             .GetMethods(BindingFlags.Static | BindingFlags.Public)
             .Where(m => m.ReturnType == typeof(Animation))
             .ToDictionary(m => m.Name.ToErgoCase());
-    }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
+    protected bool IsBlocking { get; set; } = false;
+
+    public override ErgoVM.Op Compile()
     {
-        var at = default(Either<Location, PhysicalEntity>);
-        if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)
-            && entityAsTerm.GetProxy().TryGetValue(out var proxy)
-            && proxy is PhysicalEntity pe)
+        return vm =>
         {
-            at = pe;
-        }
-        else if (args[0].Matches(out Location location))
-        {
-            at = location;
-        }
-        else
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Location), args[0]);
-            yield break;
-        }
-        if (args[1] is not List list)
-        {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.List, args[2]);
-            yield break;
-        }
-        var animList = new List<Animation>();
-        foreach (var anim in list.Contents)
-        {
-            if (anim is not Dict dict)
+            var args = vm.Args;
+            var at = default(Either<Location, PhysicalEntity>);
+            if (args[0].IsAbstract<EntityAsTerm>().TryGetValue(out var entityAsTerm)
+                && entityAsTerm.GetProxy().TryGetValue(out var proxy)
+                && proxy is PhysicalEntity pe)
             {
-                yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, anim);
-                yield break;
+                at = pe;
             }
-            if (!dict.Functor.TryGetA(out var functor))
+            else if (args[0].Matches(out Location location))
             {
-                yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Functor, anim);
-                yield break;
+                at = location;
             }
-            if (!Methods.TryGetValue(functor.Explain(), out var method))
+            else
             {
-                yield return False();
-                yield break;
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Location), args[0]);
+                return;
             }
-            var oldParams = method.GetParameters();
-            var newParams = new object[oldParams.Length];
-            for (int i = 0; i < oldParams.Length; i++)
+            if (args[1] is not List list)
             {
-                var p = oldParams[i];
-                if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
-                && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.List, args[2]);
+                return;
+            }
+            var animList = new List<Animation>();
+            foreach (var anim in list.Contents)
+            {
+                if (anim is not Dict dict)
                 {
-                    newParams[i] = val;
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, anim);
+                    return;
                 }
-                else if (p.HasDefaultValue)
+                if (!dict.Functor.TryGetA(out var functor))
                 {
-                    newParams[i] = p.DefaultValue;
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Functor, anim);
+                    return;
                 }
-                else
+                if (!Methods.TryGetValue(functor.Explain(), out var method))
                 {
-                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
-                    yield break;
+                    vm.Fail();
+                    return;
                 }
+                var oldParams = method.GetParameters();
+                var newParams = new object[oldParams.Length];
+                for (int i = 0; i < oldParams.Length; i++)
+                {
+                    var p = oldParams[i];
+                    if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
+                    && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
+                    {
+                        newParams[i] = val;
+                    }
+                    else if (p.HasDefaultValue)
+                    {
+                        newParams[i] = p.DefaultValue;
+                    }
+                    else
+                    {
+                        vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
+                        return;
+                    }
+                }
+                animList.Add((Animation)method.Invoke(null, newParams));
             }
-            animList.Add((Animation)method.Invoke(null, newParams));
-        }
-        var renderSystem = Services.GetInstance<RenderSystem>();
-        var lastId = renderSystem.AnimateViewport(IsBlocking, at, animList.ToArray());
-        var idList = Enumerable.Range(lastId - animList.Count, animList.Count);
-        if (args[2].Unify(new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>())).TryGetValue(out var subs))
-        {
-            yield return True(subs);
-            yield break;
-        }
-        else
-        {
-            yield return False();
-            yield break;
-        }
+            var renderSystem = Services.GetInstance<RenderSystem>();
+            var lastId = renderSystem.AnimateViewport(IsBlocking, at, [.. animList]);
+            var idList = Enumerable.Range(lastId - animList.Count, animList.Count);
+            vm.SetArg(0, args[2]);
+            vm.SetArg(1, new List(idList.Select(x => new Atom(x + 1)).Cast<ITerm>()));
+            ErgoVM.Goals.Unify2(vm);
+        };
     }
 }

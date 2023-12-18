@@ -3,79 +3,83 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
-using Ergo.Runtime.BuiltIns;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class ComponentSetValue : GameEntitiesBuiltIn
+public sealed class ComponentSetValue(GameEntities entities, GameDataStore store) : GameEntitiesBuiltIn("", new("component_set_value"), 3, entities, store)
 {
-    public ComponentSetValue(GameEntities entities, GameDataStore store)
-        : base("", new("component_set_value"), 3, entities, store)
+    public override ErgoVM.Op Compile()
     {
-    }
-
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
-    {
-        var (component, property, newValue) = (arguments[0], arguments[1], arguments[2]);
-        if (component is Dict dict && dict.Signature.Tag.TryGetValue(out var tag))
+        return vm =>
         {
-            var key = tag.Explain();
-            if (ProxyableComponentTypes.TryGetValue(key, out var type))
+            var arguments = vm.Args;
+            var (component, property, newValue) = (arguments[0], arguments[1], arguments[2]);
+            if (component is Dict dict && dict.Signature.Tag.TryGetValue(out var tag))
             {
-                // This is a copy of the original for now
-                if (!scope.InterpreterScope.ExceptionHandler.TryGet(() =>
+                var key = tag.Explain();
+                if (ProxyableComponentTypes.TryGetValue(key, out var type))
                 {
-                    try
+                    // This is a copy of the original for now
+                    if (!vm.KnowledgeBase.Scope.ExceptionHandler.TryGet(() =>
                     {
-                        return (EcsComponent)TermMarshall.FromTerm(component, type);
-                    }
-                    catch (Exception x)
-                    {
-                        throw new InternalErgoException($"Can not convert term {component.Explain()} to type {type}");
-                    }
-                })
-                    .TryGetValue(out var actualComponent))
-                {
-                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, property.Explain());
-                    yield break;
-                }
-                var args = new object[] { actualComponent.Id, default(EcsComponent) };
-                if ((bool)TryGetComponent.MakeGenericMethod(type).Invoke(Entities, args))
-                {
-                    // Now it's the actual one so we can change its properties
-                    actualComponent = (EcsComponent)args[1];
-                    if (property.Matches(out string propName) && ProxyableComponentProperties[key].TryGetValue(propName, out var prop))
-                    {
-                        var ergoType = prop.PropertyType.Name.ToErgoCase();
-                        if (!scope.InterpreterScope.ExceptionHandler.Try(() =>
+                        try
                         {
-                            var newValueObject = TermMarshall.FromTerm(newValue, prop.PropertyType);
-                            try
-                            {
-                                prop.SetValue(actualComponent, newValueObject);
-                            }
-                            catch (Exception)
-                            {
-                                throw new InternalErgoException($"Can not convert atom {newValue.Explain()} to type {ergoType}");
-                            }
-                        }))
-                        {
-                            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, ergoType, property.Explain());
-                            yield break;
+                            return (EcsComponent)TermMarshall.FromTerm(component, type);
                         }
-                        yield return True();
-                        yield break;
+                        catch (Exception x)
+                        {
+                            throw new InternalErgoException($"Can not convert term {component.Explain()} to type {type}");
+                        }
+                    })
+                        .TryGetValue(out var actualComponent))
+                    {
+                        vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Component, property.Explain());
+                        return;
                     }
-                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentProperty, property.Explain());
-                    yield break;
+                    var args = new object[] { actualComponent.Id, default(EcsComponent) };
+                    if ((bool)TryGetComponent.MakeGenericMethod(type).Invoke(Entities, args))
+                    {
+                        // Now it's the actual one so we can change its properties
+                        actualComponent = (EcsComponent)args[1];
+                        if (property.Matches(out string propName) && ProxyableComponentProperties[key].TryGetValue(propName, out var prop))
+                        {
+                            var ergoType = prop.PropertyType.Name.ToErgoCase();
+                            if (!vm.KnowledgeBase.Scope.ExceptionHandler.Try(() =>
+                                    {
+                                        var newValueObject = TermMarshall.FromTerm(newValue, prop.PropertyType);
+                                        try
+                                        {
+                                            prop.SetValue(actualComponent, newValueObject);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            throw new InternalErgoException($"Can not convert atom {newValue.Explain()} to type {ergoType}");
+                                        }
+                                    }))
+                            {
+                                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, ergoType, property.Explain());
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.ComponentProperty, property.Explain());
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.ComponentType, tag.Explain());
+                    return;
                 }
             }
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.ComponentType, tag.Explain());
-            yield break;
-        }
-        yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, FieroLib.Types.Component, component.Explain());
-        yield break;
+            else
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Component, component.Explain());
+                return;
+            }
+        };
     }
 }

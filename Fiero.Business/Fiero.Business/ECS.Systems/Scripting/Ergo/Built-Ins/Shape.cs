@@ -1,9 +1,9 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
+using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using LightInject;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -18,20 +18,20 @@ public sealed class Shape : BuiltIn
         Services = services;
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
+    public override ErgoVM.Op Compile() => vm =>
     {
-        if (!args[0].Matches<ShapeName>(out var shape))
+        if (!vm.Arg(0).Matches<ShapeName>(out var shape))
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(ShapeName), args[0]);
-            yield break;
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(ShapeName), vm.Arg(0));
+            return;
         }
-        if (!args[1].Matches<Coord>(out var center))
+        if (!vm.Arg(1).Matches<Coord>(out var center))
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, nameof(Coord), args[1]);
-            yield break;
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Coord), vm.Arg(1));
+            return;
         }
         var enumerable = Enumerable.Empty<Coord>();
-        if (args[2].Matches<int>(out var iSize))
+        if (vm.Arg(2).Matches<int>(out var iSize))
         {
             enumerable = shape switch
             {
@@ -43,7 +43,7 @@ public sealed class Shape : BuiltIn
                 _ => enumerable
             };
         }
-        else if (args[2].Matches<Coord>(out var pSize))
+        else if (vm.Arg(2).Matches<Coord>(out var pSize))
         {
             enumerable = shape switch
             {
@@ -54,26 +54,22 @@ public sealed class Shape : BuiltIn
         }
         else
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[1]);
-            yield break;
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, vm.Arg(2));
+            return;
         }
         if (!enumerable.Any())
         {
-            yield return False();
-            yield break;
+            vm.Fail();
+            return;
         }
-        var any = false;
         foreach (var p in enumerable
             .Select(x => x + center))
         {
             var term = TermMarshall.ToTerm(p, functor: new Atom(nameof(p)), mode: TermMarshalling.Positional);
-            if (args[3].Unify(term).TryGetValue(out var subs))
-            {
-                yield return True(subs);
-                any = true;
-            }
+            vm.SetArg(0, vm.Arg(3));
+            vm.SetArg(1, term);
+            ErgoVM.Goals.Unify2(vm);
+            vm.SuccessToSolution();
         }
-        if (!any)
-            yield return False();
-    }
+    };
 }

@@ -1,33 +1,29 @@
 ﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using LightInject;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class AnimationStop : BuiltIn
+public sealed class AnimationStop(IServiceFactory services)
+    : BuiltIn("", new("stop_animation"), 1, ScriptingSystem.AnimationModule)
 {
-    protected readonly IServiceFactory Services;
-    public AnimationStop(IServiceFactory services)
-        // repeat(id, times).
-        : base("", new("stop_animation"), 1, ScriptingSystem.AnimationModule)
-    {
-        Services = services;
-    }
+    private readonly IServiceFactory _services = services;
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> args)
+    public override ErgoVM.Op Compile()
     {
-        if (!args[0].Matches(out int id))
+        var render = _services.GetInstance<RenderSystem>();
+        return vm =>
         {
-            yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[0]);
-            yield break;
-        }
-        var render = Services.GetInstance<RenderSystem>();
-        render.StopAnimation(id);
-        yield return True();
+            var args = vm.Args;
+            if (!args[0].Matches(out int id))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[0]);
+                return;
+            }
+            render.StopAnimation(id);
+        };
     }
 }

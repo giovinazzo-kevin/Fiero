@@ -111,34 +111,30 @@ namespace Fiero.Business
             var cacheKey = $"{script.ScriptProperties.ScriptPath}{script.ScriptProperties.CacheKey}";
             if (script.ScriptProperties.Cached && Cache.TryGetValue(cacheKey, out var cached))
             {
-                Init(script, cached.ScriptProperties.Solver, cached.ScriptProperties.Scope.InterpreterScope);
+                Init(script, cached.ScriptProperties.VM, cached.ScriptProperties.VM.KnowledgeBase.Scope);
                 return true;
             }
             if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
                 .TryGetValue(out _))
             {
-                var solver = Facade.BuildSolver(
-                    localScope.BuildKnowledgeBase(),
-                    SolverFlags.Default,
+                var ergoVM = Facade.BuildVM(
+                    localScope.BuildKnowledgeBase(CompilerFlags.Default),
                     DecimalType.FastDecimal
                 );
-                solver.Initialize(localScope);
-                Init(script, solver, localScope);
+                Init(script, ergoVM, localScope);
                 Cache.TryAdd(cacheKey, script);
                 //_unload += () => UnloadScript(script);
                 return true;
             }
             return false;
 
-            void Init(Script script, ErgoSolver solver, InterpreterScope scope)
+            void Init(Script script, ErgoVM vm, InterpreterScope scope)
             {
-                var solverScope = solver.CreateScope(scope);
                 if (script.ScriptProperties.ShowTrace)
                 {
-                    solverScope.Tracer.Trace += Tracer_Trace;
+                    // solverScope.Tracer.Trace += Tracer_Trace;
                 }
-                script.ScriptProperties.Solver = solver;
-                script.ScriptProperties.Scope = solverScope;
+                script.ScriptProperties.VM = vm;
                 // Scripts subscribe to events via the subscribe/2 directive
                 if (!FieroLib.GetScriptSubscriptions(script).TryGetValue(out var subbedEvents))
                     subbedEvents = Enumerable.Empty<Signature>();
@@ -146,10 +142,10 @@ namespace Fiero.Business
                 script.ScriptProperties.SubscribedEvents.AddRange(subbedEvents);
                 ScriptLoaded.Handle(new(script));
 
-                void Tracer_Trace(Tracer _, SolverScope scope, SolverTraceType type, string trace)
-                {
-                    Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
-                }
+                //void Tracer_Trace(Tracer _, SolverScope scope, SolverTraceType type, string trace)
+                //{
+                //    Shell.WriteLine(trace, Ergo.Shell.LogLevel.Trc, type);
+                //}
             }
         }
 
@@ -164,8 +160,7 @@ namespace Fiero.Business
         {
             if (script.IsInvalid())
                 return false;
-            script.ScriptProperties.Solver?.Dispose();
-            script.ScriptProperties.Solver = default;
+            script.ScriptProperties.VM = default;
             return true;
         }
 
@@ -196,12 +191,11 @@ namespace Fiero.Business
                         .ToErgoCase());
                     var reqType = field.FieldType.GetGenericArguments()[1];
                     var hook = new Hook(new(reqName, 1, sysName, default));
+                    var compiledHook = hook.Compile();
                     finalDict.Add(new(reqName, 1, sysName, default), (self, systems) =>
                     {
-                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase)
-                            .GetEither(hook);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
-                        return ((ISystemRequest)field.GetValue(sys.GetValue(systems)))
+                        return ((ISystemRequest)systemEvent)
                             .SubscribeResponse(evt =>
                             {
                                 return Respond(self, evt, reqType, compiledHook, systemEvent.MarshallingContext);
@@ -214,12 +208,11 @@ namespace Fiero.Business
                         .ToErgoCase());
                     var evtType = field.FieldType.GetGenericArguments()[1];
                     var hook = new Hook(new(evtName, 1, sysName, default));
+                    var compiledHook = hook.Compile();
                     finalDict.Add(new(evtName, 1, sysName, default), (self, systems) =>
                     {
-                        var compiledHook = hook.Compile(self.Script.ScriptProperties.Solver.KnowledgeBase)
-                            .GetEither(hook);
                         var systemEvent = ((ISystemEvent)field.GetValue(sys.GetValue(systems)));
-                        return ((ISystemEvent)field.GetValue(sys.GetValue(systems)))
+                        return systemEvent
                             .SubscribeHandler(evt =>
                             {
                                 Respond(self, evt, evtType, compiledHook, systemEvent.MarshallingContext);
@@ -230,7 +223,7 @@ namespace Fiero.Business
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Type type, Either<CompiledHook, Hook> hook, TermMarshallingContext mctx)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, ErgoVM.Op hook, TermMarshallingContext mctx)
             {
                 if (!mctx.TryGetCached(TermMarshalling.Named, evt, type, default, out var term))
                     term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);

@@ -1,11 +1,9 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using LightInject;
-using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Fiero.Business;
@@ -29,108 +27,111 @@ public sealed class Spawn : BuiltIn
             .ToDictionary(m => m.Name.ToErgoCase());
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext context, SolverScope scope, ImmutableArray<ITerm> args)
+    public override ErgoVM.Op Compile()
     {
-        var spawned = new List<EcsEntity>();
-        if (args[0] is List list)
+        return vm =>
         {
-            var systems = Services.GetInstance<GameSystems>();
-            // TODO: better way of determining floorID
-            var player = systems.Render.Viewport.Following.V;
-            var floorId = player?.FloorId() ?? default;
-            var position = player?.Position() ?? default;
-            foreach (var item in list.Contents)
+            var args = vm.Args;
+            var spawned = new List<EcsEntity>();
+            if (args[0] is List list)
             {
-                if (item is not Dict dict)
+                var systems = Services.GetInstance<GameSystems>();
+                // TODO: better way of determining floorID
+                var player = systems.Render.Viewport.Following.V;
+                var floorId = player?.FloorId() ?? default;
+                var position = player?.Position() ?? default;
+                foreach (var item in list.Contents)
                 {
-                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, item);
-                    yield break;
-                }
-                if (!dict.Functor.TryGetA(out var functor))
-                {
-                    yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, WellKnown.Types.Functor, item);
-                    yield break;
-                }
-                if (!BuilderMethods.TryGetValue(functor.Explain(), out var method))
-                {
-                    yield return False();
-                    yield break;
-                }
-                var oldParams = method.GetParameters();
-                var newParams = new object[oldParams.Length];
-                for (int i = 0; i < oldParams.Length; i++)
-                {
-                    var p = oldParams[i];
-                    if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
-                    && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
+                    if (item is not Dict dict)
                     {
-                        newParams[i] = val;
+                        vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, item);
+                        return;
                     }
-                    else if (p.HasDefaultValue)
+                    if (!dict.Functor.TryGetA(out var functor))
                     {
-                        newParams[i] = p.DefaultValue;
+                        vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Functor, item);
+                        return;
                     }
-                    else
+                    if (!BuilderMethods.TryGetValue(functor.Explain(), out var method))
                     {
-                        yield return ThrowFalse(scope, SolverError.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
-                        yield break;
+                        vm.Fail();
+                        return;
+                    }
+                    var oldParams = method.GetParameters();
+                    var newParams = new object[oldParams.Length];
+                    for (int i = 0; i < oldParams.Length; i++)
+                    {
+                        var p = oldParams[i];
+                        if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
+                        && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
+                        {
+                            newParams[i] = val;
+                        }
+                        else if (p.HasDefaultValue)
+                        {
+                            newParams[i] = p.DefaultValue;
+                        }
+                        else
+                        {
+                            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
+                            return;
+                        }
+                    }
+                    var builder = (IEntityBuilder)method.Invoke(Builders, newParams);
+                    var entity = builder.Build();
+                    spawned.Add(entity);
+                    if (entity is PhysicalEntity e)
+                        e.Physics.Position = position;
+                    if (entity is Actor a)
+                    {
+                        if (!systems.TrySpawn(floorId, a))
+                        {
+                            vm.Fail();
+                            return;
+                        }
+                    }
+                    else if (entity is Item i)
+                    {
+                        if (!systems.TryPlace(floorId, i))
+                        {
+                            vm.Fail();
+                            return;
+                        }
+                    }
+                    else if (entity is Feature f)
+                    {
+                        if (!systems.Dungeon.AddFeature(floorId, f))
+                        {
+                            vm.Fail();
+                            return;
+                        }
+                    }
+                    else if (entity is Tile t)
+                    {
+                        systems.Dungeon.SetTileAt(floorId, t.Position(), t);
                     }
                 }
-                var builder = (IEntityBuilder)method.Invoke(Builders, newParams);
-                var entity = builder.Build();
-                spawned.Add(entity);
-                if (entity is PhysicalEntity e)
-                    e.Physics.Position = position;
-                if (entity is Actor a)
-                {
-                    if (!systems.TrySpawn(floorId, a))
-                    {
-                        yield return False();
-                        yield break;
-                    }
-                }
-                else if (entity is Item i)
-                {
-                    if (!systems.TryPlace(floorId, i))
-                    {
-                        yield return False();
-                        yield break;
-                    }
-                }
-                else if (entity is Feature f)
-                {
-                    if (!systems.Dungeon.AddFeature(floorId, f))
-                    {
-                        yield return False();
-                        yield break;
-                    }
-                }
-                else if (entity is Tile t)
-                {
-                    systems.Dungeon.SetTileAt(floorId, t.Position(), t);
-                }
-            }
-            systems.Render.CenterOn(player);
-            if (args[1].Unify(new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType())))).TryGetValue(out var subs))
-            {
-                yield return True(subs);
+                systems.Render.CenterOn(player);
+                vm.SetArg(0, args[1]);
+                vm.SetArg(1, new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType()))));
+                ErgoVM.Goals.Unify2(vm);
+                vm.Success();
+                return;
             }
             else
             {
-                yield return True();
+                int k = 0;
+                NextKey(vm);
+                void NextKey(ErgoVM vm)
+                {
+                    var key = BuilderMethods.Keys.ElementAt(k++);
+                    if (k < BuilderMethods.Keys.Count)
+                        vm.PushChoice(NextKey);
+                    vm.SetArg(1, new Atom(k));
+                    ErgoVM.Goals.Unify2(vm);
+                }
+                return;
             }
-            yield break;
-        }
-        else
-        {
-            foreach (var k in BuilderMethods.Keys)
-            {
-                if (args[0].Unify(new Atom(k)).TryGetValue(out var subs))
-                    yield return True(subs);
-            }
-            yield break;
-        }
-        yield return False();
-        yield break;
+        };
     }
 }

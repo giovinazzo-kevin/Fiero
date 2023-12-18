@@ -1,34 +1,26 @@
 ﻿using Ergo.Lang;
-using Ergo.Lang.Ast;
-using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class MsgBox : BuiltIn
+public sealed class MsgBox(GameUI ui) : BuiltIn("", new("msg_box"), 3, ScriptingSystem.FieroModule)
 {
-    public readonly GameUI UI;
+    public readonly GameUI UI = ui;
 
-    public MsgBox(GameUI ui)
-        : base("", new("msg_box"), 3, ScriptingSystem.FieroModule)
+    public override ErgoVM.Op Compile()
     {
-        UI = ui;
-    }
-
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
-    {
-        var modal = UI.NecessaryChoice(Array.Empty<string>(), arguments[0].AsQuoted(false).Explain(), arguments[1].AsQuoted(false).Explain());
-        // Block this thread until the user closes this modal
-        var choice = modal.WaitForClose().GetAwaiter().GetResult();
-        var term = TermMarshall.ToTerm(choice);
-        if (arguments[2].Unify(term).TryGetValue(out var subs))
+        return vm =>
         {
-            yield return True(subs);
-            yield break;
-        }
-        yield return False();
+            var args = vm.Args;
+            var modal = UI.NecessaryChoice(Array.Empty<string>(), args[0].AsQuoted(false).Explain(), args[1].AsQuoted(false).Explain());
+            // Block this thread until the user closes this modal
+            var choice = modal.WaitForClose().GetAwaiter().GetResult();
+            var term = TermMarshall.ToTerm(choice);
+            vm.SetArg(0, args[2]);
+            vm.SetArg(1, term);
+            ErgoVM.Goals.Unify2(vm);
+        };
     }
 }

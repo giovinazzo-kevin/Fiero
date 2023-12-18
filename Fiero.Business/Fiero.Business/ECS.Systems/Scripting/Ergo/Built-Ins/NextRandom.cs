@@ -1,8 +1,6 @@
 ﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
-using System.Collections.Immutable;
 
 namespace Fiero.Business;
 
@@ -14,17 +12,13 @@ public sealed class NextRandom : BuiltIn
     {
     }
 
-    public override IEnumerable<Evaluation> Apply(SolverContext solver, SolverScope scope, ImmutableArray<ITerm> arguments)
+    public override ErgoVM.Op Compile()
     {
-        var N = Rng.Random.NextDouble();
-        if (arguments[0].Unify(new Atom(N)).TryGetValue(out var subs))
+        return vm =>
         {
-            yield return True(subs);
-        }
-        else
-        {
-            yield return False();
-            yield break;
-        }
+            var N = Rng.Random.NextDouble();
+            vm.SetArg(1, new Atom(N));
+            ErgoVM.Goals.Unify2(vm);
+        };
     }
 }

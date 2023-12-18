@@ -11,9 +11,8 @@ namespace Fiero.Business
         public string ScriptPath { get; set; }
         public bool ShowTrace { get; set; }
         public bool Cached { get; set; }
-        public SolverScope Scope { get; set; }
-        public ErgoSolver Solver { get; set; }
         public List<Signature> SubscribedEvents { get; set; } = new();
+        public ErgoVM VM { get; set; }
         /// <summary>
         /// Output pipe for the Solver's Out stream. You read here what is written there.
         /// </summary>

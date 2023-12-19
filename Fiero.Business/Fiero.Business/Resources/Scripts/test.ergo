@@ -9,7 +9,4 @@
 :- use_module(bomb_commands).
 
 test:began :- 
-	write('we').
-
-io:portray(X) :-
-	write_raw('TEST: ', X, '\n').
+	write('we'), nl.

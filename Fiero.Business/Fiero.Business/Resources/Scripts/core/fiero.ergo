@@ -138,3 +138,9 @@ clamp(Min, Max, p(X1, Y1), p(X2, Y2)) :-
     max(Min, Y1, Ym),
     min(Xm, Max, X2),
     min(Ym, Max, Y2).
+
+%: Overrides term writing to include module name.
+io:portray(X) :-
+    X \== '\n', 
+    current_module(M),
+    write_raw(M, ': ', X).

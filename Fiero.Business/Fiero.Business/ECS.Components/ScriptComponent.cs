@@ -13,13 +13,5 @@ namespace Fiero.Business
         public bool Cached { get; set; }
         public List<Signature> SubscribedEvents { get; set; } = new();
         public KnowledgeBase KnowledgeBase { get; set; }
-        /// <summary>
-        /// Output pipe for the Solver's Out stream. You read here what is written there.
-        /// </summary>
-        public TextReader Out { get; set; }
-        /// <summary>
-        /// Input pipe for the Solver's In stream. You write here what the solver reads there.
-        /// </summary>
-        public TextWriter In { get; set; }
     }
 }

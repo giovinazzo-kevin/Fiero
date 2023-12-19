@@ -165,12 +165,15 @@ namespace Fiero.Business
             }
             var module = newScope.Entry;
             EffectStartedHook = new Hook(new(new("began"), Maybe.Some(0), module, default))
-                .Compile(throwIfNotDefined: false);
+                .Compile(throwIfNotDefined: true);
             EffectEndedHook = new Hook(new(new("ended"), Maybe.Some(0), module, default))
-                .Compile(throwIfNotDefined: false);
+                .Compile(throwIfNotDefined: true);
             ClearDataHook = new Hook(new(new("clear"), Maybe.Some(0), ScriptingSystem.DataModule, default))
                 .Compile(throwIfNotDefined: false);
-            return Contexts[owner.Id] = newScope.Facade.BuildVM(Script.ScriptProperties.KnowledgeBase, DecimalType.CliDecimal);
+            return Contexts[owner.Id] = newScope.Facade
+                .SetInput(systems.Scripting.InReader, newScope.Facade.InputReader)
+                .SetOutput(systems.Scripting.OutWriter)
+                .BuildVM(Script.ScriptProperties.KnowledgeBase, DecimalType.CliDecimal);
         }
 
         protected override void OnStarted(GameSystems systems, Entity owner)

@@ -12,6 +12,12 @@
 :- expand([O] >> (
 	@owner :- owner(O)
 )).
+%: Stubs for ScriptEffectLib
+:- dynamic(end/0).
+:- dynamic(owner_/1).
+:- dynamic(args/1).
+:- dynamic(subscribed/2).
+
 :- dynamic(last_uuid/1).
 :- inline([as/2]).
 :- table(owner/1).

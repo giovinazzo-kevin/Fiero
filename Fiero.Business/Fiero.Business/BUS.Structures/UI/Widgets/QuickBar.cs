@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     [TransientDependency]

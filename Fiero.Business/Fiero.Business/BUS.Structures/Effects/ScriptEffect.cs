@@ -114,6 +114,8 @@ namespace Fiero.Business
                 return ctx;
             var newScope = Script.ScriptProperties.Scope;
             var scriptModule = newScope.Modules[ScriptingSystem.ScriptModule];
+            // Clone the script module and assert some special predicates in it
+            scriptModule = scriptModule.WithProgram(scriptModule.Program.Clone());
             Assert(new Owner(ScriptingSystem.ScriptModule, owner));
             Assert(new EndEffect(ScriptingSystem.ScriptModule, this, systems, owner));
             Assert(new ScriptId(ScriptingSystem.ScriptModule, new Atom(Script.ScriptProperties.ScriptPath + Script.ScriptProperties.CacheKey)));
@@ -123,6 +125,7 @@ namespace Fiero.Business
                     Assert(new Args(ScriptingSystem.ScriptModule, args));
             }
             Assert(new Subscribed(ScriptingSystem.ScriptModule, Script.ScriptProperties.SubscribedEvents));
+            newScope = newScope.WithModule(scriptModule);
             var newKb = newScope.BuildKnowledgeBase(CompilerFlags.Default);
             return Contexts[owner.Id] = newScope.Facade
                 .SetInput(systems.Scripting.InReader, newScope.Facade.InputReader)
@@ -130,8 +133,7 @@ namespace Fiero.Business
                 .BuildVM(newKb, DecimalType.CliDecimal);
             void Assert(BuiltIn builtIn)
             {
-                var p = new Predicate(builtIn);
-                scriptModule.Program.KnowledgeBase.AssertZ(p);
+                scriptModule.Program.KnowledgeBase.AssertA(new Predicate(builtIn));
             }
         }
 
@@ -149,7 +151,8 @@ namespace Fiero.Business
         protected override void OnEnded(GameSystems systems, Entity owner)
         {
             base.OnEnded(systems, owner);
-            var ctx = GetOrCreateContext(systems, owner);
+            if (!Contexts.TryGetValue(owner.Id, out var ctx))
+                throw new InvalidOperationException();
             ctx = ctx.ScopedInstance();
             ctx.Query = EffectEndedHook;
             ctx.Run();
@@ -160,7 +163,6 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
         {
-            _ = GetOrCreateContext(systems, owner);
             /* Ergo scripts can subscribe to Fiero events via the subscribe/2 directive.
                All the directive does is prepare a list for this method, which is
                called whenever an effect that is tied to a script resolves. The list

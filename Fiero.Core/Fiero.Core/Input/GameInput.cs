@@ -18,7 +18,7 @@ namespace Fiero.Core
         private volatile bool _focusStolen;
         private object _focusHolder;
         public bool IsKeyboardFocusAvailable => !_focusStolen;
-        public int KeyRepeatIntervalMs { get; set; } = 20;
+        public int KeyRepeatIntervalMs { get; set; } = 0;
         public int KeyRepeatDelayMs { get; set; } = 600;
         public readonly byte[] KeyboardState;
 

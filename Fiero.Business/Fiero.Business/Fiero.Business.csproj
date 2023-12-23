@@ -82,6 +82,9 @@
     <None Update="Resources\Scripts\core\input.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\core\__shared\ui.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\core\__shared\script.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

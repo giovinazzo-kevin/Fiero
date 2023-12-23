@@ -28,9 +28,6 @@ namespace Fiero.Business
         public static readonly Atom EventModule = new("event");
         public static readonly Atom RandomModule = new("random");
 
-        public static readonly Hook Owner1Hook = new Hook(new(new("owner_"), Maybe.Some(1), FieroModule, default));
-        public static readonly Hook Script1Hook = new Hook(new(new("script_"), Maybe.Some(1), FieroModule, default));
-
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 
@@ -73,8 +70,6 @@ namespace Fiero.Business
                 .GetOrThrow(new InvalidOperationException());
             StdlibScope = StdlibScope
                 .WithModule(fiero)
-                .WithModule(new Module(new Atom("action"), runtime: true)
-                    .WithImport(FieroModule))
                 .WithModule(new Module(WellKnown.Modules.User, runtime: true)
                     .WithImport(FieroModule))
                 .WithCurrentModule(WellKnown.Modules.User)

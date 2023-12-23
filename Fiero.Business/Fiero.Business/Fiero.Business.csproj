@@ -82,6 +82,12 @@
     <None Update="Resources\Scripts\core\input.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\core\__shared\script.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\core\__shared\geometry.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\items\bomb_commands.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -97,7 +103,7 @@
     <None Update="Resources\Scripts\test.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\fiero.ergo">
+    <None Update="Resources\Scripts\core\__shared\fiero.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Shaders\test.frag">

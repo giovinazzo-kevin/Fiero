@@ -21,6 +21,7 @@ namespace Fiero.Business
     {
         private const string ScriptsPath = @".\Resources\Scripts\";
         public static readonly Atom FieroModule = new("fiero");
+        public static readonly Atom ScriptModule = new("script");
         public static readonly Atom AnimationModule = new("anim");
         public static readonly Atom SoundModule = new("sound");
         public static readonly Atom EffectModule = new("effect");

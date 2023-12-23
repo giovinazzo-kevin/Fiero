@@ -1,0 +1,20 @@
+% This module is imported implicitly by all game scripts.
+% Do not modify unless you know what you are doing.
+
+:- module(script, [end__/1, end/0, owner/1, args/1, subscribed/2]).
+
+:- dynamic(owner/1).
+:- dynamic(args/1).
+:- dynamic(subscribed/2).
+:- dynamic(end__/1).
+
+%: Shorthand macro for retrieving the script's owner
+:- expand([O] >> (
+	@owner :- owner(O)
+)).
+
+
+%: Ends a ScriptEffect
+end :- 
+    end__(End),
+    invoke(End).

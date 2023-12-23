@@ -73,7 +73,7 @@ namespace Fiero.Business
 
             void Assert(string functor, params ITerm[] args)
             {
-                var p = new Predicate("", ScriptingSystem.FieroModule, new Complex(new(functor), args), NTuple.Empty, dynamic: true, exported: false, graph: default);
+                var p = new Predicate("", ScriptingSystem.ScriptModule, new Complex(new(functor), args), NTuple.Empty, dynamic: true, exported: false, graph: default);
                 p = p
                     .WithExecutionGraph(p.ToExecutionGraph(newKb.DependencyGraph));
                 newKb.AssertZ(p);

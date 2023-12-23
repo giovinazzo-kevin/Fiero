@@ -1,6 +1,8 @@
 ﻿using Ergo.Interpreter;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
+using Ergo.Lang.Ast;
+using Ergo.Lang.Compiler;
 using Ergo.Runtime;
 using System.Collections.Immutable;
 using Unconcern.Common;
@@ -43,17 +45,39 @@ namespace Fiero.Business
         public override string DisplayName => Script.Info.Name;
         public override string DisplayDescription => Description;
 
-        private ScriptEffectLib Lib => Script.ScriptProperties.KnowledgeBase.Scope.GetLibrary<ScriptEffectLib>();
-
         protected ErgoVM GetOrCreateContext(GameSystems systems, Entity owner)
         {
             if (Contexts.TryGetValue(owner.Id, out var ctx))
                 return ctx;
             var newScope = Script.ScriptProperties.KnowledgeBase.Scope;
+            var newKb = Script.ScriptProperties.KnowledgeBase.Clone();
+            Assert("owner", new EntityAsTerm(owner.Id, owner.ErgoType()));
+            Assert("end__", new Atom((ErgoVM.Op)((ErgoVM _) => { End(systems, owner); })));
+            if (!string.IsNullOrEmpty(ArgumentsString))
+            {
+                if (newKb.Scope.Parse<ITerm>(ArgumentsString).TryGetValue(out var args))
+                    Assert("args", args);
+                else
+                    Assert("args", new Atom(ArgumentsString));
+            }
+            var invOp = new InvalidOperationException();
+            foreach (var e in Script.ScriptProperties.SubscribedEvents)
+            {
+                Assert("subscribed", e.Module.GetOrThrow(invOp), e.Functor);
+            }
+            newKb.DependencyGraph.Rebuild();
             return Contexts[owner.Id] = newScope.Facade
                 .SetInput(systems.Scripting.InReader, newScope.Facade.InputReader)
                 .SetOutput(systems.Scripting.OutWriter)
-                .BuildVM(Script.ScriptProperties.KnowledgeBase, DecimalType.CliDecimal);
+                .BuildVM(newKb, DecimalType.CliDecimal);
+
+            void Assert(string functor, params ITerm[] args)
+            {
+                var p = new Predicate("", ScriptingSystem.FieroModule, new Complex(new(functor), args), NTuple.Empty, dynamic: true, exported: false, graph: default);
+                p = p
+                    .WithExecutionGraph(p.ToExecutionGraph(newKb.DependencyGraph));
+                newKb.AssertZ(p);
+            }
         }
 
         protected override void OnStarted(GameSystems systems, Entity owner)
@@ -62,7 +86,7 @@ namespace Fiero.Business
             if (Script.ScriptProperties.LastError != null)
                 return;
             var ctx = GetOrCreateContext(systems, owner);
-            Lib.SetCurrentOwner(this, owner, ArgumentsString);
+            ctx = ctx.ScopedInstance();
             ctx.Query = EffectStartedHook;
             ctx.Run();
         }
@@ -71,11 +95,11 @@ namespace Fiero.Business
         {
             base.OnEnded(systems, owner);
             var ctx = GetOrCreateContext(systems, owner);
-            Lib.SetCurrentOwner(this, owner, ArgumentsString);
+            ctx = ctx.ScopedInstance();
             ctx.Query = EffectEndedHook;
             ctx.Run();
-            ctx.Query = ClearDataHook;
-            ctx.Run();
+            //ctx.Query = ClearDataHook;
+            //ctx.Run();
             Contexts.Remove(owner.Id, out _);
         }
 

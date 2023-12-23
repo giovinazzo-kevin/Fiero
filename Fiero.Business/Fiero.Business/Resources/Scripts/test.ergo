@@ -1,5 +1,4 @@
 :- module(test, [boom/1]).
-:- use_module(input).
 :- use_module(data).
 :- use_module(event).
 :- use_module(anim).

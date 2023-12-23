@@ -40,6 +40,7 @@ public partial class FieroLib : Library
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<AnimationStop>());
         _exportedBuiltIns.Add(ServiceFactory.GetInstance<TriggerSound>());
         _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
+        _exportedDirectives.Add(ServiceFactory.GetInstance<SubscribeToEvent>());
     }
 
 

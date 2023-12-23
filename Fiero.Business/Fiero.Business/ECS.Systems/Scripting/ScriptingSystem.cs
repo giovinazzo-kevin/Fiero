@@ -28,6 +28,10 @@ namespace Fiero.Business
         public static readonly Atom DataModule = new("data");
         public static readonly Atom EventModule = new("event");
         public static readonly Atom RandomModule = new("random");
+
+        public static readonly Hook Owner1Hook = new Hook(new(new("owner_"), Maybe.Some(1), FieroModule, default));
+        public static readonly Hook Script1Hook = new Hook(new(new("script_"), Maybe.Some(1), FieroModule, default));
+
         protected static readonly Dictionary<Signature, Func<ScriptEffect, GameSystems, Subscription>> CachedRoutes =
             GetScriptRoutes();
 
@@ -52,7 +56,6 @@ namespace Fiero.Business
         public readonly SystemRequest<ScriptingSystem, ScriptUnloadedEvent, EventResult> ScriptUnloaded;
         public readonly SystemEvent<ScriptingSystem, ScriptEventRaisedEvent> ScriptEventRaised;
         public readonly ConcurrentDictionary<string, Script> Cache = new();
-
         public ScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
             _services = sp;
@@ -120,15 +123,13 @@ namespace Fiero.Business
             if (Interpreter.Load(ref localScope, module)
                 .TryGetValue(out _))
             {
-                var lib = new ScriptEffectLib(_services.GetInstance<GameSystems>(), module);
                 var kb = localScope
-                    .WithModule(localScope.Modules[module]
-                        .WithLinkedLibrary(lib))
+                    .WithModule(localScope.Modules[module])
                     .BuildKnowledgeBase(CompilerFlags.Default);
                 Init(script, kb);
                 Cache.TryAdd(cacheKey, script);
-                //_unload += () => UnloadScript(script);
                 return true;
+                //_unload += () => UnloadScript(script);
             }
             return false;
 

@@ -10,7 +10,6 @@ using Ergo.Runtime;
 using Ergo.Shell;
 using LightInject;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -194,7 +193,7 @@ namespace Fiero.Business
                         return ((ISystemRequest)systemEvent)
                             .SubscribeResponse(evt =>
                             {
-                                return Respond(self, evt, reqType, compiledHook, systemEvent.MarshallingContext);
+                                return Respond(self, evt, reqType, hook, compiledHook, systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -211,7 +210,7 @@ namespace Fiero.Business
                         return systemEvent
                             .SubscribeHandler(evt =>
                             {
-                                Respond(self, evt, evtType, compiledHook, systemEvent.MarshallingContext);
+                                Respond(self, evt, evtType, hook, compiledHook, systemEvent.MarshallingContext);
                             });
                     });
                 }
@@ -219,18 +218,19 @@ namespace Fiero.Business
             return finalDict;
 
 
-            static EventResult Respond(ScriptEffect self, object evt, Type type, ErgoVM.Op hook, TermMarshallingContext mctx)
+            static EventResult Respond(ScriptEffect self, object evt, Type type, Hook hook, ErgoVM.Op op, TermMarshallingContext mctx)
             {
                 if (!mctx.TryGetCached(TermMarshalling.Named, evt, type, default, out var term))
                     term = TermMarshall.ToTerm(evt, type, mode: TermMarshalling.Named, ctx: mctx);
-                var arg = ImmutableArray.Create(term);
+                hook.SetArg(0, term);
                 try
                 {
                     // TODO: Figure out a way for scripts to return complex EventResults?
                     foreach (var ctx in self.Contexts.Values)
                     {
-                        ctx.Query = hook;
-                        ctx.Run();
+                        var scope = ctx.ScopedInstance();
+                        scope.Query = op;
+                        scope.Run();
                         if (self.Script.ScriptProperties.LastError != null)
                             return false;
                     }

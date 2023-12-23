@@ -23,9 +23,7 @@
 
 %: Ends a ScriptEffect
 end :- 
-    write('ending'),
     end__(End),
-    write('we'),
     invoke(End).
 
 %: AS-IS expressions are used to cast an entity-proxy to a specific type

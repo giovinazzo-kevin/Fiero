@@ -9,3 +9,6 @@
 
 test:began :- 
 	write('hi'), nl, end.
+
+test:ended :-
+	write('bye'), nl.

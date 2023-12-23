@@ -194,7 +194,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Throwable_Rock(charges: 100).Build(),
                         Resources.Entities.Scroll_OfMassConfusion().Build(),
                         Resources.Entities.Potion_OfHealing().Build(),
-                        Resources.Entities.Throwable_Bomb(10).Build(),
+                        Resources.Entities.Throwable_Bomb(100).Build(),
                         Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build(),
                         Resources.Entities.Scroll_OfMassExplosion().Build(),

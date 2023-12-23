@@ -1,4 +1,4 @@
-﻿using Ergo.Lang;
+﻿using Ergo.Interpreter;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 
@@ -12,6 +12,6 @@ namespace Fiero.Business
         public bool ShowTrace { get; set; }
         public bool Cached { get; set; }
         public List<Signature> SubscribedEvents { get; set; } = new();
-        public KnowledgeBase KnowledgeBase { get; set; }
+        public InterpreterScope Scope { get; set; }
     }
 }

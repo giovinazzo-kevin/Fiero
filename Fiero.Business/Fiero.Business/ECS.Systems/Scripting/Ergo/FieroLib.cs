@@ -61,7 +61,7 @@ public partial class FieroLib : Library
     public Ergo.Lang.Maybe<IEnumerable<Signature>> GetScriptSubscriptions(Script script)
     {
         var set = new HashSet<Signature>();
-        var modules = script.ScriptProperties.KnowledgeBase.Scope.VisibleModules;
+        var modules = script.ScriptProperties.Scope.VisibleModules;
         foreach (var m in modules)
         {
             if (Subscribptions.TryGetValue(m, out var inner))

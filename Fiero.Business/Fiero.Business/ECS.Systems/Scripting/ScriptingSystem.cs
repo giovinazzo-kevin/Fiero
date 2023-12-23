@@ -111,26 +111,25 @@ namespace Fiero.Business
             var cacheKey = $"{script.ScriptProperties.ScriptPath}{script.ScriptProperties.CacheKey}";
             if (script.ScriptProperties.Cached && Cache.TryGetValue(cacheKey, out var cached))
             {
-                Init(script, cached.ScriptProperties.KnowledgeBase);
+                Init(script, cached.ScriptProperties.Scope);
                 return true;
             }
             var module = new Atom(script.ScriptProperties.ScriptPath);
             if (Interpreter.Load(ref localScope, module)
                 .TryGetValue(out _))
             {
-                var kb = localScope
-                    .WithModule(localScope.Modules[module])
-                    .BuildKnowledgeBase(CompilerFlags.Default);
-                Init(script, kb);
+                var scope = localScope
+                    .WithModule(localScope.Modules[module]);
+                Init(script, scope);
                 Cache.TryAdd(cacheKey, script);
                 return true;
                 //_unload += () => UnloadScript(script);
             }
             return false;
 
-            void Init(Script script, KnowledgeBase kb)
+            void Init(Script script, InterpreterScope scope)
             {
-                script.ScriptProperties.KnowledgeBase = kb;
+                script.ScriptProperties.Scope = scope;
                 // Scripts subscribe to events via the subscribe/2 directive
                 if (!FieroLib.GetScriptSubscriptions(script).TryGetValue(out var subbedEvents))
                     subbedEvents = Enumerable.Empty<Signature>();

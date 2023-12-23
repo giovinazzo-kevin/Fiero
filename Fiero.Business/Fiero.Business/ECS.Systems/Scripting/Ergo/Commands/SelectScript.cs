@@ -32,12 +32,12 @@ public class SelectScript : ShellCommand
         }
         else
         {
-            var val = scripting.Cache[key].ScriptProperties.KnowledgeBase;
-            var scp = val.Scope;
-            shell.WriteLine($"Selected script: {key}", LogLevel.Inf);
-            yield return scope
-                .WithKnowledgeBase(val)
-                .WithInterpreterScope(scp);
+            //var val = scripting.Cache[key].ScriptProperties.KnowledgeBase;
+            //var scp = val.Scope;
+            //shell.WriteLine($"Selected script: {key}", LogLevel.Inf);
+            //yield return scope
+            //    .WithKnowledgeBase(val)
+            //    .WithInterpreterScope(scp);
         }
     }
 }

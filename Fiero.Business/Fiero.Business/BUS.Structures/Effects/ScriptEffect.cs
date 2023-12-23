@@ -45,7 +45,7 @@ namespace Fiero.Business
         public override string DisplayName => Script.Info.Name;
         public override string DisplayDescription => Description;
 
-        class Owner(Atom module, Entity owner) : BuiltIn("", new("owner"), 1, module)
+        class Owner(Atom module, Entity owner) : BuiltIn("", new("owner_"), 1, module)
         {
             public readonly EntityAsTerm Term = new(owner.Id, owner.ErgoType());
             public override ErgoVM.Op Compile() => vm =>
@@ -68,6 +68,14 @@ namespace Fiero.Business
             public override ErgoVM.Op Compile() => vm =>
             {
                 vm.SetArg(1, args);
+                ErgoVM.Goals.Unify2(vm);
+            };
+        }
+        class ScriptId(Atom module, Atom id) : BuiltIn("", new("script_id"), 1, module)
+        {
+            public override ErgoVM.Op Compile() => vm =>
+            {
+                vm.SetArg(1, id);
                 ErgoVM.Goals.Unify2(vm);
             };
         }
@@ -108,13 +116,13 @@ namespace Fiero.Business
             var scriptModule = newScope.Modules[ScriptingSystem.ScriptModule];
             Assert(new Owner(ScriptingSystem.ScriptModule, owner));
             Assert(new EndEffect(ScriptingSystem.ScriptModule, this, systems, owner));
+            Assert(new ScriptId(ScriptingSystem.ScriptModule, new Atom(Script.ScriptProperties.ScriptPath + Script.ScriptProperties.CacheKey)));
             if (!string.IsNullOrEmpty(ArgumentsString))
             {
                 if (newScope.Parse<ITerm>(ArgumentsString).TryGetValue(out var args))
                     Assert(new Args(ScriptingSystem.ScriptModule, args));
             }
             Assert(new Subscribed(ScriptingSystem.ScriptModule, Script.ScriptProperties.SubscribedEvents));
-
             var newKb = newScope.BuildKnowledgeBase(CompilerFlags.Default);
             return Contexts[owner.Id] = newScope.Facade
                 .SetInput(systems.Scripting.InReader, newScope.Facade.InputReader)

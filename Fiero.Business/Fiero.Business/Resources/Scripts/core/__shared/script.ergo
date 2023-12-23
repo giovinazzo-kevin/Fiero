@@ -1,9 +1,9 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(script, []).
-
+:- module(script, [owner/1]).
 %: Shorthand macro for retrieving the script's owner
 :- expand([O] >> (
 	@owner :- owner(O)
 )).
+owner(X) :- owner_(X).

@@ -9,4 +9,4 @@
 :- use_module(bomb_commands).
 
 test:began :- 
-	write('we'), nl.
+	write('hi'), nl, end.

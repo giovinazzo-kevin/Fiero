@@ -43,6 +43,7 @@ namespace Fiero.Business
         public readonly TextReader OutReader;
         public readonly IAsyncInputReader AsyncInputReader;
 
+        private readonly IServiceFactory _services;
         private event Action _unload;
         private string[] _visibleScripts;
 
@@ -54,6 +55,7 @@ namespace Fiero.Business
 
         public ScriptingSystem(EventBus bus, IServiceFactory sp, IAsyncInputReader reader) : base(bus)
         {
+            _services = sp;
             OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), Encoding));
             OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), Encoding));
             InWriter = TextWriter.Synchronized(new StreamWriter(In.Writer.AsStream(), Encoding));
@@ -114,10 +116,15 @@ namespace Fiero.Business
                 Init(script, cached.ScriptProperties.KnowledgeBase);
                 return true;
             }
-            if (Interpreter.Load(ref localScope, new Atom(script.ScriptProperties.ScriptPath))
+            var module = new Atom(script.ScriptProperties.ScriptPath);
+            if (Interpreter.Load(ref localScope, module)
                 .TryGetValue(out _))
             {
-                var kb = localScope.BuildKnowledgeBase(CompilerFlags.Default);
+                var lib = new ScriptEffectLib(_services.GetInstance<GameSystems>(), module);
+                var kb = localScope
+                    .WithModule(localScope.Modules[module]
+                        .WithLinkedLibrary(lib))
+                    .BuildKnowledgeBase(CompilerFlags.Default);
                 Init(script, kb);
                 Cache.TryAdd(cacheKey, script);
                 //_unload += () => UnloadScript(script);

@@ -1,6 +1,5 @@
 ﻿using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
-using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Runtime.BuiltIns;
 
@@ -16,7 +15,7 @@ namespace Fiero.Core
                 set = Subscribptions[scriptModule] = new();
             set.Add(new(@event, 1, eventModule, default));
         }
-        public Maybe<IEnumerable<Signature>> GetScriptSubscriptions(ErgoScript script)
+        public IEnumerable<Signature> GetScriptSubscriptions(ErgoScript script)
         {
             var set = new HashSet<Signature>();
             var modules = script.VM.KB.Scope.VisibleModules;

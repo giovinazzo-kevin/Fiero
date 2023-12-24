@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Text.RegularExpressions;
 using Unconcern;
 using Unconcern.Common;
 using Unconcern.Delegation;
@@ -127,12 +126,5 @@ namespace Fiero.Core
         //        }
         //    }
         //}
-
-        [GeneratedRegex("System$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeSystemName();
-        [GeneratedRegex("Request$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeRequestName();
-        [GeneratedRegex("Event$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeEventName();
     }
 }

@@ -2,6 +2,7 @@
 using Ergo.Interpreter;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Shell;
 using System.IO.Pipelines;
@@ -60,6 +61,33 @@ namespace Fiero.Core
                 return false;
             script = new ErgoScript(localScope);
             return true;
+        }
+
+        public bool Respond(Script sender, Script.EventHook @event, object payload)
+        {
+            if (sender is not ErgoScript ergoScript || payload is null)
+                return true;
+            var type = payload.GetType();
+            if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, payload, type, default, out var term))
+                term = TermMarshall.ToTerm(payload, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
+            if (!ergoScript.ErgoHooks.TryGetValue(@event, out var hook))
+            {
+                var evtName = new Atom(@event.Event.ToErgoCase());
+                var sysName = new Atom(@event.System.ToErgoCase());
+                hook = ergoScript.ErgoHooks[@event] = new(new(evtName, 1, sysName, default));
+            }
+            hook.SetArg(0, term);
+            var scope = ergoScript.VM.ScopedInstance();
+            try
+            {
+                scope.Query = hook.Compile(throwIfNotDefined: true);
+                scope.Run();
+                return true;
+            }
+            catch (ErgoException)
+            {
+                return false;
+            }
         }
     }
 }

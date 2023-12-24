@@ -35,17 +35,18 @@ namespace Fiero.Core
             CoreScope = Interpreter.CreateScope()
                 .WithSearchDirectory(SearchPath);
             CoreScope = CoreScope
-                .WithModule(Interpreter.Load(ref CoreScope, Modules.Core)
+                .WithModule(Interpreter.Load(ref CoreScope, ErgoModules.Core)
                     .GetOrThrow())
                 .WithModule(new Module(WellKnown.Modules.User, runtime: true)
-                    .WithImport(Modules.Core))
+                    .WithImport(ErgoModules.Core))
                 .WithCurrentModule(WellKnown.Modules.User)
-                .WithBaseModule(Modules.Core);
+                .WithBaseModule(ErgoModules.Core);
         }
 
         protected virtual ErgoFacade GetErgoFacade()
         {
             return ErgoFacade.Standard
+                .AddLibrary(() => new CoreLib())
                 .SetInput(InReader, Maybe.Some(AsyncInputReader))
                 .SetOutput(OutWriter)
                 ;

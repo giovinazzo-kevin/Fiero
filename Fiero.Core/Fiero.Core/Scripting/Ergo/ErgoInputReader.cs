@@ -2,6 +2,7 @@
 
 namespace Fiero.Core
 {
+
     public sealed class ErgoInputReader(KeyboardInputReader r) : IAsyncInputReader
     {
         public readonly KeyboardInputReader Reader = r;

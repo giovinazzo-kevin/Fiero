@@ -27,4 +27,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ECS\System\Meta\Events\" />
+  </ItemGroup>
+
 </Project>

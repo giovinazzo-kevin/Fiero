@@ -32,8 +32,9 @@ namespace Fiero.Business
             GameShaders<ShaderName> shaders,
             GameLocalizations<LocaleName> localization,
             IEnumerable<IGameScene> gameScenes,
-            GameEntities entities)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, scripts, localization, ui, win, director, entities)
+            GameEntities entities,
+            MetaSystem meta)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, scripts, localization, ui, win, director, entities, meta)
         {
             Bus = bus;
             Dialogues = dialogues;

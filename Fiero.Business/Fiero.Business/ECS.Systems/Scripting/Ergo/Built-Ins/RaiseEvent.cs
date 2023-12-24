@@ -20,6 +20,7 @@ public sealed class RaiseEvent : BuiltIn
 
     public override ErgoVM.Op Compile()
     {
+        var meta = _services.GetInstance<MetaSystem>();
         var gameSystems = _services.GetInstance<GameSystems>();
         return vm =>
         {
@@ -40,9 +41,9 @@ public sealed class RaiseEvent : BuiltIn
                 return;
             }
             var any = false; var anySystem = false;
-            foreach (var field in MetaSystem.GetSystemEventFields())
+            foreach (var field in meta.GetSystemEventFields())
             {
-                if (field.System.Name.ToErgoCase().Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase) != sysName)
+                if (field.System.GetType().Name.ToErgoCase().Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase) != sysName)
                     continue;
                 anySystem = true;
                 if (field.Field.Name.ToErgoCase()
@@ -57,7 +58,7 @@ public sealed class RaiseEvent : BuiltIn
                     return;
                 }
                 var tArgs = field.Field.FieldType.BaseType.GetGenericArguments()[1];
-                var obj = field.Field.GetValue(field.System.GetValue(gameSystems));
+                var obj = field.Field.GetValue(field.System);
                 var arg = TermMarshall.FromTerm(arguments[2], tArgs, TermMarshalling.Named);
                 var ret = field.Field.FieldType.GetMethod("Raise", BindingFlags.Public | BindingFlags.Instance)
                     .Invoke(obj, new[] { arg, default(CancellationToken) });

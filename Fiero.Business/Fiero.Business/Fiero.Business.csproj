@@ -460,7 +460,6 @@
     <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
-    <Folder Include="ECS.Systems\Meta\Events\" />
     <Folder Include="ECS.Systems\Scripting\Ergo\Libraries\" />
     <Folder Include="Resources\Scripts\effects\" />
   </ItemGroup>

@@ -40,6 +40,7 @@ namespace Fiero.Core
             _ioc.Register<GameLocalizations<TLocales>>(new PerContainerLifetime());
             _ioc.Register<GameUI>(new PerContainerLifetime());
             _ioc.Register<GameWindow>(new PerContainerLifetime());
+            _ioc.Register<MetaSystem>(new PerContainerLifetime());
             _ioc.Register<GameScripts<TScripts>>(new PerContainerLifetime());
             _ioc.Register<IScriptHost<TScripts>, ErgoScriptHost<TScripts>>(new PerContainerLifetime());
             _ioc.Register<IAsyncInputReader, ErgoInputReader>(new PerContainerLifetime());

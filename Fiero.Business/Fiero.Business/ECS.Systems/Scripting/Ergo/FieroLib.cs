@@ -12,7 +12,6 @@ public partial class FieroLib : Library
 {
     public override Atom Module => ScriptingSystem.FieroModule;
 
-    protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
 
     public readonly IServiceFactory ServiceFactory;
 
@@ -49,25 +48,6 @@ public partial class FieroLib : Library
     public override void OnErgoEvent(ErgoEvent evt)
     {
         base.OnErgoEvent(evt);
-    }
-
-    public void SubscribeScriptToEvent(Atom scriptModule, Atom eventModule, Atom @event)
-    {
-        if (!Subscribptions.TryGetValue(scriptModule, out var set))
-            set = Subscribptions[scriptModule] = new();
-        set.Add(new(@event, 1, eventModule, default));
-    }
-
-    public Ergo.Lang.Maybe<IEnumerable<Signature>> GetScriptSubscriptions(Script script)
-    {
-        var set = new HashSet<Signature>();
-        var modules = script.ScriptProperties.Scope.VisibleModules;
-        foreach (var m in modules)
-        {
-            if (Subscribptions.TryGetValue(m, out var inner))
-                set.UnionWith(inner);
-        }
-        return set;
     }
 }
 

@@ -33,6 +33,7 @@ namespace Fiero.Core
         public readonly GameUI UI;
         public readonly GameWindow Window;
         public readonly GameLocalizations<TLocales> Localization;
+        public readonly MetaSystem Meta;
 
         public Game(
             OffButton off,
@@ -49,7 +50,8 @@ namespace Fiero.Core
             GameUI ui,
             GameWindow window,
             GameDirector director,
-            GameEntities entities)
+            GameEntities entities,
+            MetaSystem meta)
         {
             OffButton = off;
             Loop = loop;
@@ -65,6 +67,7 @@ namespace Fiero.Core
             Window = window;
             Director = director;
             Localization = localization;
+            Meta = meta;
             // Hydrate entities when parsed from terms
             // TODO: Figure out overlap with EntityAsTerm
             TermMarshall.RegisterTransform<EcsEntity>(e =>

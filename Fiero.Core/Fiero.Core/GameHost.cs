@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Ergo.Shell;
+using System.Reflection;
 using Unconcern.Common;
 
 namespace Fiero.Core
@@ -12,14 +13,15 @@ namespace Fiero.Core
             _ioc = new ServiceContainer();
         }
 
-        public TGame BuildGame<TGame, TFonts, TTextures, TLocales, TSounds, TColors, TShaders>(Action<ServiceContainer> configureServices = null)
-            where TGame : Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
+        public TGame BuildGame<TGame, TFonts, TTextures, TLocales, TSounds, TColors, TShaders, TScripts>(Action<ServiceContainer> configureServices = null)
+            where TGame : Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders, TScripts>
             where TFonts : struct, Enum
             where TTextures : struct, Enum
             where TLocales : struct, Enum
             where TSounds : struct, Enum
             where TColors : struct, Enum
             where TShaders : struct, Enum
+            where TScripts : struct, Enum
         {
             _ioc.Register<IServiceFactory>(_ => _ioc.BeginScope());
             _ioc.Register<EventBus>(new PerContainerLifetime());
@@ -38,6 +40,9 @@ namespace Fiero.Core
             _ioc.Register<GameLocalizations<TLocales>>(new PerContainerLifetime());
             _ioc.Register<GameUI>(new PerContainerLifetime());
             _ioc.Register<GameWindow>(new PerContainerLifetime());
+            _ioc.Register<GameScripts<TScripts>>(new PerContainerLifetime());
+            _ioc.Register<IScriptHost<TScripts>, ErgoScriptHost<TScripts>>(new PerContainerLifetime());
+            _ioc.Register<IAsyncInputReader, ErgoInputReader>(new PerContainerLifetime());
             _ioc.Register<TGame>(new PerContainerLifetime());
             _ioc.Register<IGame, TGame>(new PerContainerLifetime());
 

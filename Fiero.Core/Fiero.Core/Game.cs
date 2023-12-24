@@ -9,7 +9,7 @@ using System.Runtime;
 namespace Fiero.Core
 {
 
-    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
+    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders, TScripts>
         : IGame
         where TFonts : struct, Enum
         where TTextures : struct, Enum
@@ -17,6 +17,7 @@ namespace Fiero.Core
         where TSounds : struct, Enum
         where TColors : struct, Enum
         where TShaders : struct, Enum
+        where TScripts : struct, Enum
     {
         public readonly OffButton OffButton;
         public readonly GameLoop Loop;
@@ -27,6 +28,7 @@ namespace Fiero.Core
         public readonly GameFonts<TFonts> Fonts;
         public readonly GameSounds<TSounds> Sounds;
         public readonly GameShaders<TShaders> Shaders;
+        public readonly GameScripts<TScripts> Scripts;
         public readonly GameDirector Director;
         public readonly GameUI UI;
         public readonly GameWindow Window;
@@ -42,6 +44,7 @@ namespace Fiero.Core
             GameSounds<TSounds> sounds,
             GameColors<TColors> colors,
             GameShaders<TShaders> shaders,
+            GameScripts<TScripts> scripts,
             GameLocalizations<TLocales> localization,
             GameUI ui,
             GameWindow window,
@@ -54,6 +57,7 @@ namespace Fiero.Core
             Colors = colors;
             Shaders = shaders;
             Textures = resources;
+            Scripts = scripts;
             Sprites = sprites;
             Sounds = sounds;
             Fonts = fonts;
@@ -104,6 +108,10 @@ namespace Fiero.Core
             if (!ValidateResources<TLocales>(f => Localization.HasLocale(f), out var missingLocales))
             {
                 throw new AggregateException(missingLocales.Select(x => new ResourceNotFoundException<TLocales>(x)));
+            }
+            if (!ValidateResources<TScripts>(f => Scripts.TryGet(f, out _), out var missingScripts))
+            {
+                throw new AggregateException(missingScripts.Select(x => new ResourceNotFoundException<TScripts>(x)));
             }
         }
 

@@ -18,7 +18,8 @@ namespace Fiero.Business
                 LocaleName,
                 SoundName,
                 ColorName,
-                ShaderName
+                ShaderName,
+                ScriptName
             >(Register);
             await game.RunAsync(game.OffButton.Token);
         }

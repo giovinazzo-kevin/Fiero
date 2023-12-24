@@ -5,7 +5,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName>
+    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName, ScriptName>
     {
         protected readonly IEnumerable<IGameScene> Scenes;
 
@@ -27,12 +27,13 @@ namespace Fiero.Business
             GameSprites<TextureName, ColorName> sprites,
             GameFonts<FontName> fonts,
             GameSounds<SoundName> sounds,
+            GameScripts<ScriptName> scripts,
             GameColors<ColorName> colors,
             GameShaders<ShaderName> shaders,
             GameLocalizations<LocaleName> localization,
             IEnumerable<IGameScene> gameScenes,
             GameEntities entities)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, ui, win, director, entities)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, scripts, localization, ui, win, director, entities)
         {
             Bus = bus;
             Dialogues = dialogues;
@@ -158,6 +159,9 @@ namespace Fiero.Business
             Sprites.BuildIndex(TextureName.FontLight, new(8, 12));
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
+
+            foreach (var script in Enum.GetValues<ScriptName>())
+                Scripts.TryLoad(script, out _);
 
             Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);

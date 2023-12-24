@@ -42,13 +42,13 @@ namespace Fiero.Business
         protected virtual void OnEnded(GameSystems systems, Entity owner) { }
         public void End(GameSystems systems, Entity owner)
         {
-            OnEnded(systems, owner);
             foreach (var sub in Subscriptions)
             {
                 sub.Dispose();
             }
             Subscriptions.Clear();
             Ended?.Invoke(this);
+            OnEnded(systems, owner);
         }
 
         public override int GetHashCode() => this is ModifierEffect ? base.GetHashCode() : Name.GetHashCode();

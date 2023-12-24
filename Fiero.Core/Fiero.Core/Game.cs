@@ -78,7 +78,11 @@ namespace Fiero.Core
                 return e;
             });
         }
-        protected abstract Task InitializeAsync();
+        protected virtual async Task InitializeAsync()
+        {
+            Meta.Initialize();
+            await Task.CompletedTask;
+        }
         protected bool ValidateResources<TEnum>(Func<TEnum, bool> validate, out IEnumerable<TEnum> failures)
             where TEnum : struct, Enum
         {

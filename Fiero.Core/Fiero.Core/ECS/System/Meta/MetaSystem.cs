@@ -8,13 +8,16 @@ namespace Fiero.Core
     /// <summary>
     /// Core system that interfaces with all the other systems and acts as a central repository.
     /// </summary>
+    [SingletonDependency]
     public partial class MetaSystem : EcsSystem
     {
         public record struct SystemEventField(EcsSystem System, FieldInfo Field, bool IsRequest);
         protected readonly Dictionary<Type, EcsSystem> TrackedSystems = new();
+        protected readonly IServiceFactory ServiceFactory;
 
-        public MetaSystem(EventBus bus) : base(bus)
+        public MetaSystem(EventBus bus, IServiceFactory fac) : base(bus)
         {
+            ServiceFactory = fac;
             Subscriptions.Add(Intercept<SystemCreatedEvent>(x => TrackedSystems.Add(x.System.GetType(), x.System)));
             Subscriptions.Add(Intercept<SystemDisposedEvent>(x => TrackedSystems.Remove(x.System.GetType())));
             Subscription Intercept<T>(Action<T> handle)
@@ -25,6 +28,12 @@ namespace Fiero.Core
                     .Build()
                     .Listen(EventHubName);
             }
+        }
+
+        public void Initialize()
+        {
+            // Populate TrackedSystems by listening to SystemCreatedEvent
+            _ = ServiceFactory.GetAllInstances<EcsSystem>();
         }
 
         public T Get<T>() where T : EcsSystem => (T)TrackedSystems[typeof(T)];

@@ -105,6 +105,7 @@ namespace Fiero.Business
 
         protected override async Task InitializeAsync()
         {
+            await base.InitializeAsync();
             Textures.CreateScratchTexture(new(16, 16));
             Textures.Add(TextureName.Creatures, new Texture("Resources/Textures/16x16_creatures.png"));
             Textures.Add(TextureName.Items, new Texture("Resources/Textures/16x16_items.png"));

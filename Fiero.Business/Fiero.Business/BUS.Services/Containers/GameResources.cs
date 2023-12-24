@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameResources
@@ -12,6 +10,7 @@ namespace Fiero.Business
         public readonly GameSprites<TextureName, ColorName> Sprites;
         public readonly GameTextures<TextureName> Textures;
         public readonly GameFonts<FontName> Fonts;
+        public readonly GameScripts<ScriptName> Scripts;
         public readonly GameDialogues Dialogues;
         public readonly GameEntityBuilders Entities;
 
@@ -23,6 +22,7 @@ namespace Fiero.Business
             GameSprites<TextureName, ColorName> sprites,
             GameTextures<TextureName> textures,
             GameFonts<FontName> fonts,
+            GameScripts<ScriptName> scripts,
             GameDialogues dialogues,
             GameEntityBuilders entities
         )
@@ -36,6 +36,7 @@ namespace Fiero.Business
             Fonts = fonts;
             Dialogues = dialogues;
             Entities = entities;
+            Scripts = scripts;
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Fiero.Core
         public readonly Encoding Encoding = Encoding.GetEncoding(437);
         public readonly IAsyncInputReader AsyncInputReader;
 
+        public readonly ErgoShell Shell;
         public readonly ErgoInterpreter Interpreter;
         public readonly InterpreterScope CoreScope;
 
@@ -32,7 +33,8 @@ namespace Fiero.Core
             InReader = TextReader.Synchronized(new StreamReader(In.Reader.AsStream(), Encoding));
             AsyncInputReader = inputReader;
             Facade = GetErgoFacade();
-            Interpreter = Facade.BuildInterpreter(InterpreterFlags.Default);
+            Shell = Facade.BuildShell(encoding: Encoding);
+            Interpreter = Shell.Interpreter;
             CoreScope = Interpreter.CreateScope()
                 .WithSearchDirectory(SearchPath);
             CoreScope = CoreScope

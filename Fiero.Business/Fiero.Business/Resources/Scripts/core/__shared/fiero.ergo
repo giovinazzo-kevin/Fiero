@@ -31,9 +31,3 @@ uuid(Id) :-
 	(last_uuid(Last), retract(last_uuid(Last)) ; Last = 0), !,
 	Id := Last + 1,
 	assertz(last_uuid(Id)).
-
-io:portray('\n') :- write_raw('\n'), !.
-%: Overrides stdout writing to automagically include the name of the calling script.
-io:portray(X) :-
-    current_module(M),
-    write_raw(M, ': ', X).

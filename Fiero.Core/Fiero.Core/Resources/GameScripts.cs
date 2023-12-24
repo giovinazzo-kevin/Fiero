@@ -1,6 +1,8 @@
-﻿namespace Fiero.Core
+﻿using Unconcern.Common;
+
+namespace Fiero.Core
 {
-    public class GameScripts<TScripts>(IScriptHost<TScripts> host)
+    public class GameScripts<TScripts>(IScriptHost<TScripts> host, MetaSystem meta)
         where TScripts : struct, Enum
     {
         protected readonly Dictionary<string, Script> Scripts = new();
@@ -18,5 +20,12 @@
             return false;
         }
         public bool TryGet(TScripts key, out Script script, string cacheKey = null) => Scripts.TryGetValue(CacheKey(key, cacheKey), out script);
+
+        public IEnumerable<Subscription> RouteSubscriptions()
+        {
+            var routes = Host.GetScriptRoutes(meta);
+            foreach (var item in Scripts.Values)
+                yield return item.Run(routes);
+        }
     }
 }

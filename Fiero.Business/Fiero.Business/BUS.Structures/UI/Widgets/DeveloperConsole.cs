@@ -1,4 +1,5 @@
-﻿using Ergo.Shell;
+﻿using System.Text;
+using Unconcern;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -14,20 +15,22 @@ namespace Fiero.Business
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
-        public readonly ScriptingSystem ScriptingSystem;
+        public readonly ErgoScriptHost<ScriptName> Host;
 
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        public DeveloperConsole(ScriptingSystem scripting, EventBus bus, GameUI ui, GameColors<ColorName> colors)
+        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost<ScriptName> host)
             : base(ui)
         {
             EventBus = bus;
             Colors = colors;
-            ScriptingSystem = scripting;
             OutputAvailable += OnOutputAvailable;
             EnableDragging = false;
+            if (host is not ErgoScriptHost<ScriptName> ergoHost)
+                throw new NotSupportedException();
+            Host = ergoHost;
             Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
             void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
@@ -80,49 +83,49 @@ namespace Fiero.Business
             Pane.Write(chunk);
         }
 
-        public Subscription TrackShell(ErgoShell shell)
+        public Subscription TrackShell()
         {
-            return new();
-            //shell.UseColors = false;
-            //shell.UseANSIEscapeSequences = false;
-            //shell.UseUnicodeSymbols = false;
-            //var cts = new CancellationTokenSource();
-            //var outExpr = Concern.Defer()
-            //    //.After(TimeSpan.FromMilliseconds(20))
-            //    .UseAsynchronousTimer()
-            //    .Do(async token =>
-            //    {
-            //        var sb = new StringBuilder();
-            //        var result = await ScriptingSystem.Out.Reader.ReadAsync(token);
-            //        var buffer = result.Buffer;
-            //        foreach (var segment in buffer)
-            //        {
-            //            var bytes = segment.Span.ToArray();
-            //            var str = ScriptingSystem.OutWriter.Encoding.GetString(bytes);
-            //            sb.Append(str);
-            //        }
-            //        ScriptingSystem.Out.Reader.AdvanceTo(buffer.End);
-            //        OutputAvailable?.Invoke(this, sb.ToString());
-            //    })
-            //    .Build();
-            //var replExpr = Concern.Defer()
-            //    .Do(async token =>
-            //    {
-            //        await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, ct: token)) ;
-            //    })
-            //    .Build();
-            //_ = Concern.Deferral.LoopForever(outExpr, cts.Token);
-            //_ = Concern.Deferral.Once(replExpr, cts.Token);
-            //var closure = new ShellClosure(shell, ScriptingSystem.InWriter);
-            //CharAvailable += closure.OnCharAvailable;
-            //LineAvailable += closure.OnLineAvailable;
-            //return new(new[] { () => {
-            //    CharAvailable -= closure.OnCharAvailable;
-            //    LineAvailable -= closure.OnLineAvailable;
-            //    cts.Cancel();
-            //    ScriptingSystem.In.Reader.CancelPendingRead();
-            //    ScriptingSystem.Out.Reader.CancelPendingRead();
-            //} });
+            Host.Shell.UseColors = false;
+            Host.Shell.UseANSIEscapeSequences = false;
+            Host.Shell.UseUnicodeSymbols = false;
+            var cts = new CancellationTokenSource();
+            var outExpr = Concern.Defer()
+                //.After(TimeSpan.FromMilliseconds(20))
+                .UseAsynchronousTimer()
+                .Do(async token =>
+                {
+                    var sb = new StringBuilder();
+                    var result = await Host.Out.Reader.ReadAsync(token);
+                    var buffer = result.Buffer;
+                    foreach (var segment in buffer)
+                    {
+                        var bytes = segment.Span.ToArray();
+                        var str = Host.OutWriter.Encoding.GetString(bytes);
+                        sb.Append(str);
+                    }
+                    Host.Out.Reader.AdvanceTo(buffer.End);
+                    OutputAvailable?.Invoke(this, sb.ToString());
+                })
+                .Build();
+            var replExpr = Concern.Defer()
+                .Do(async token =>
+                {
+                    await foreach (var ans in Host.Shell.Repl(Host.CoreScope, ct: token))
+                        ;
+                })
+                .Build();
+            _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
+            _ = Concern.Deferral.Once(replExpr, cts.Token);
+            var closure = new ShellClosure(Host.Shell, Host.InWriter);
+            CharAvailable += closure.OnCharAvailable;
+            LineAvailable += closure.OnLineAvailable;
+            return new(new[] { () => {
+                CharAvailable -= closure.OnCharAvailable;
+                LineAvailable -= closure.OnLineAvailable;
+                cts.Cancel();
+                Host.In.Reader.CancelPendingRead();
+                Host.Out.Reader.CancelPendingRead();
+            } });
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
@@ -154,19 +157,19 @@ namespace Fiero.Business
                         Pane.CenterContentV.V = Pane.CenterContentH.V = false;
                         Pane.Caret.CharAvailable += (caret, ch) =>
                         {
-                            //if (ScriptingSystem.Shell.InputReader.Blocking)
-                            //{
-                            //    Put(ch);
-                            //}
+                            if (Host.Shell.InputReader.Blocking)
+                            {
+                                Put(ch);
+                            }
                         };
                         Pane.Caret.EnterPressed += (caret) =>
                         {
-                            //if (!ScriptingSystem.Shell.InputReader.Blocking)
-                            //{
-                            //    Pane.History.Add(Pane.Caret.Text);
-                            //    WriteLine(Pane.Caret.Text);
-                            //    Pane.ScrollToCursor();
-                            //}
+                            if (!Host.Shell.InputReader.Blocking)
+                            {
+                                Pane.History.Add(Pane.Caret.Text);
+                                WriteLine(Pane.Caret.Text);
+                                Pane.ScrollToCursor();
+                            }
                         };
                     })
                 .End()

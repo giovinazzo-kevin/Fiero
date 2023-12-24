@@ -31,6 +31,8 @@ namespace Fiero.Business.Scenes
 
         public Actor Player { get; private set; }
 
+        public readonly IScriptHost<ScriptName> ScriptHost;
+
         public GameplayScene(
             GameDataStore store,
             GameEntities entities,
@@ -147,20 +149,11 @@ namespace Fiero.Business.Scenes
         }
         private IEnumerable<Subscription> RouteScriptingSystemEvents()
         {
-            yield break;
-            // ScriptingSystem.ScriptLoaded:
-            // - Track console output
-            // - Track script in console
-            //yield return renderSystem.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
-            //yield return new Subscription(new[] { Systems.Scripting.UnloadAllScripts });
-            //var scriptLoaded = new Subscription();
-            //scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
-            //{
-            //    scriptLoaded.Add(renderSystem.DeveloperConsole
-            //        .TrackScript(e.Script));
-            //    return true;
-            //}));
-            //yield return scriptLoaded;
+            // Route all scripts
+            foreach (var sub in Resources.Scripts.RouteSubscriptions())
+                yield return sub;
+            // Track the console output
+            yield return Systems.Get<RenderSystem>().DeveloperConsole.TrackShell();
         }
         private IEnumerable<Subscription> RouteActionSystemEvents()
         {

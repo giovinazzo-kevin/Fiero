@@ -15,5 +15,6 @@ unbind(Key, Event, Predicate) :-
 %: Intercept keyboard events sent by the game and route them to Ergo
 keyboard_event(E) :-
     E = key_event { type: Type, key: Key },
+    write(E), nl,
     input:key_route(Key, Type, Predicate),
     call(Predicate, E).

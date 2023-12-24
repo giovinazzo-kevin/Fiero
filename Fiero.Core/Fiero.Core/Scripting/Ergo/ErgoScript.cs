@@ -1,6 +1,7 @@
 ﻿using Ergo.Interpreter;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
+using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Unconcern.Common;
 
@@ -24,7 +25,7 @@ namespace Fiero.Core
                 DecimalType.CliDecimal);
             hooks = scope.GetLibrary<CoreLib>(ErgoModules.Core)
                 .GetScriptSubscriptions(this)
-                .Select(s => new EventHook(s.Module.GetOrThrow().Explain(), s.Functor.Explain()))
+                .Select(s => new EventHook(s.Module.GetOrThrow().Explain().ToCSharpCase(), s.Functor.Explain().ToCSharpCase()))
                 .ToHashSet();
         }
 
@@ -36,7 +37,14 @@ namespace Fiero.Core
             running = true;
             var subs = new Subscription(new Action[] { () => running = false });
             foreach (var hook in hooks)
-                subs.Add(routes[hook](this));
+            {
+                if (routes.TryGetValue(hook, out var route))
+                    subs.Add(route(this));
+                else
+                {
+                    // TODO: Check whether it's a script event or a missing route
+                }
+            }
             return subs;
         }
     }

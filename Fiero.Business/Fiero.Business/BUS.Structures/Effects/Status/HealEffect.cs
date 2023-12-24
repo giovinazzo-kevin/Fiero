@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -18,13 +17,13 @@ namespace Fiero.Business
             Amount = amount;
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
-            systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, Amount));
+            systems.Get<ActionSystem>().ActorHealed.HandleOrThrow(new(target, target, target, Amount));
             End(systems, target);
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class GrantedWhenTargetedByScroll : ReadEffect
     {
@@ -16,7 +13,7 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.GrantedWhenTargetedByScroll$";
         public override EffectName Name => Source.Name;
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor target)
         {
             if (Modifier == ScrollModifierName.Self)
             {
@@ -28,13 +25,13 @@ namespace Fiero.Business
             {
                 var validTargets = Modifier switch
                 {
-                    ScrollModifierName.AreaAffectsItems => systems.Dungeon.GetItemsAt(floorId, p)
+                    ScrollModifierName.AreaAffectsItems => systems.Get<DungeonSystem>().GetItemsAt(floorId, p)
                         .Cast<Entity>(),
-                    _ => systems.Dungeon.GetActorsAt(floorId, p)
+                    _ => systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
                         .Where(a => Modifier switch
                         {
-                            ScrollModifierName.AreaAffectsAllies => systems.Faction.GetRelations(target, a).Left.IsFriendly(),
-                            ScrollModifierName.AreaAffectsEnemies => systems.Faction.GetRelations(target, a).Left.IsHostile(),
+                            ScrollModifierName.AreaAffectsAllies => systems.Get<FactionSystem>().GetRelations(target, a).Left.IsFriendly(),
+                            ScrollModifierName.AreaAffectsEnemies => systems.Get<FactionSystem>().GetRelations(target, a).Left.IsHostile(),
                             ScrollModifierName.AreaAffectsEveryoneButTarget => a != target,
                             ScrollModifierName.AreaAffectsEveryone => true,
                             _ => throw new NotSupportedException(Modifier.ToString())

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -14,14 +13,14 @@ namespace Fiero.Business
         {
         }
 
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
-        protected abstract void OnRemoved(GameSystems systems, Entity owner, Actor target);
+        protected abstract void OnApplied(MetaSystem systems, Entity owner, Actor target);
+        protected abstract void OnRemoved(MetaSystem systems, Entity owner, Actor target);
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (owner.TryCast<Tile>(out var tile))
             {
-                yield return systems.Action.ActorMoved.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ActorMoved.SubscribeHandler(e =>
                 {
                     if (tile.FloorId() != e.Actor.FloorId())
                     {
@@ -37,7 +36,7 @@ namespace Fiero.Business
                     }
                 });
                 // End the effect when this tile is removed or destroyed for any reason
-                yield return systems.Dungeon.TileChanged.SubscribeHandler(e =>
+                yield return systems.Get<DungeonSystem>().TileChanged.SubscribeHandler(e =>
                 {
                     if (e.OldState == tile)
                     {
@@ -47,7 +46,7 @@ namespace Fiero.Business
             }
             if (owner.TryCast<Feature>(out var feature))
             {
-                yield return systems.Action.ActorMoved.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ActorMoved.SubscribeHandler(e =>
                 {
                     if (feature.FloorId() != e.Actor.FloorId())
                     {
@@ -63,7 +62,7 @@ namespace Fiero.Business
                     }
                 });
                 // End the effect when this feature is removed or destroyed for any reason
-                yield return systems.Dungeon.FeatureRemoved.SubscribeHandler(e =>
+                yield return systems.Get<DungeonSystem>().FeatureRemoved.SubscribeHandler(e =>
                 {
                     if (e.OldState == feature)
                     {

@@ -16,24 +16,24 @@ namespace Fiero.Business
             Amount = amount;
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
             target.TryRoot();
             Ended += e => target.TryFree();
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (!owner.TryCast<Actor>(out var actor))
             {
                 yield break;
             }
 
-            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e =>
+            yield return systems.Get<ActionSystem>().ActorIntentSelected.SubscribeResponse(e =>
             {
                 if (e.Actor == owner)
                 {
-                    systems.Action.ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, Amount));
+                    systems.Get<ActionSystem>().ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, Amount));
                 }
                 return new();
             });

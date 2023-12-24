@@ -3,7 +3,7 @@
     [TransientDependency]
     public class IdleActionProvider : ActionProvider
     {
-        public IdleActionProvider(GameSystems sys) : base(sys)
+        public IdleActionProvider(MetaSystem sys) : base(sys)
         {
         }
 
@@ -31,12 +31,12 @@
                 if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var fov)) {
                     return new MoveRandomlyAction();
                 }
-                var target = Systems.Faction.GetRelations(a)
+                var target = Systems.Get<FactionSystem>().GetRelations(a)
                     .Where(r => r.Standing.IsHostile() && fov.Contains(r.Actor.Position()))
                     .Select(r => r.Actor)
                     .FirstOrDefault()
                     ?? fov.SelectMany(c => Systems.Floor.GetActorsAt(floorId, c))
-                    .FirstOrDefault(b => Systems.Faction.GetRelations(a, b).Left.IsHostile());
+                    .FirstOrDefault(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
                 if (target != null) {
                     a.Ai.Target = target;
                 }

@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class GrantedWhenHitByZappedWand : ZapEffect
     {
@@ -12,14 +10,14 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.GrantedWhenHitByZappedWand$";
         public override EffectName Name => Source.Name;
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor source, Actor target)
         {
             Source.Resolve(source).Start(systems, target);
         }
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor source, Coord location)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor source, Coord location)
         {
-            var target = systems.Dungeon.GetTileAt(source.FloorId(), location);
+            var target = systems.Get<DungeonSystem>().GetTileAt(source.FloorId(), location);
             Source.Resolve(source).Start(systems, target);
         }
     }

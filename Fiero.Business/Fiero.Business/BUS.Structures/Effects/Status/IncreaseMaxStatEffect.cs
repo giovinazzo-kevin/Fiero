@@ -19,7 +19,7 @@ namespace Fiero.Business
             GetStat = getStat;
         }
 
-        protected override void OnEnded(GameSystems systems, Entity owner)
+        protected override void OnEnded(MetaSystem systems, Entity owner)
         {
             base.OnEnded(systems, owner);
             foreach (var onEnded in _onEnded)
@@ -27,7 +27,7 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
 
             if (GetStat(target) is not { } stat)
@@ -40,7 +40,7 @@ namespace Fiero.Business
             _onEnded.Add(() => stat.Max -= Amount);
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

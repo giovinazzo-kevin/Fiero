@@ -8,7 +8,7 @@
 
         private StateName _state = StateName.Wandering;
 
-        public AiActionProvider(GameSystems systems)
+        public AiActionProvider(MetaSystem systems)
             : base(systems)
         {
         }
@@ -31,7 +31,7 @@
 
         public override bool TryTarget(Actor a, TargetingShape shape, bool autotargetSuccesful)
         {
-            return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Dungeon.GetActorsAt(a.FloorId(), p).Any());
+            return autotargetSuccesful && shape.GetPoints().Any(p => Systems.Get<DungeonSystem>().GetActorsAt(a.FloorId(), p).Any());
         }
         protected virtual IAction Retreat(Actor a)
         {
@@ -48,7 +48,7 @@
             if (GetClosestHostile(a) is { } hostile)
             {
                 var dir = a.Position() - hostile.Position();
-                if (!Systems.Dungeon.TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell))
+                if (!Systems.Get<DungeonSystem>().TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell))
                 {
                     return Fight(a);
                 }
@@ -122,7 +122,7 @@
             if (a.Party?.Leader is { } leader)
             {
                 // Find a non-occupied tile that either you or the leader know
-                if (Systems.Dungeon.TryGetClosestFreeTile(floorId, leader.Position(), out var closestToPlayer,
+                if (Systems.Get<DungeonSystem>().TryGetClosestFreeTile(floorId, leader.Position(), out var closestToPlayer,
                     pred: c => c.IsWalkable(a) && (a.Fov.KnownTiles[floorId].Contains(c.Tile.Position())
                                                 || leader.Fov.KnownTiles[floorId].Contains(c.Tile.Position()))))
                 {
@@ -192,12 +192,12 @@
                 if (!a.Fov.VisibleTiles.TryGetValue(floorId, out var fov)) {
                     return new MoveRandomlyAction();
                 }
-                var target = Systems.Faction.GetRelations(a)
+                var target = Systems.Get<FactionSystem>().GetRelations(a)
                     .Where(r => r.Standing.IsHostile() && fov.Contains(r.Actor.Position()))
                     .Select(r => r.Actor)
                     .FirstOrDefault()
                     ?? fov.SelectMany(c => Systems.Floor.GetActorsAt(floorId, c))
-                    .FirstOrDefault(b => Systems.Faction.GetRelations(a, b).Left.IsHostile());
+                    .FirstOrDefault(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
                 if (target != null) {
                     a.Ai.Target = target;
                 }

@@ -1,31 +1,29 @@
-﻿using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    public static class GameSystemsExtensions
+    public static class MetaSystemExtensions
     {
-        public static bool TrySpawn(this GameSystems systems, FloorId floorId, Actor actor, float maxDistance = 24)
+        public static bool TrySpawn(this MetaSystem systems, FloorId floorId, Actor actor, float maxDistance = 24)
         {
-            if (!systems.Dungeon.TryGetClosestFreeTile(floorId, actor.Position(), out var spawnTile, maxDistance,
+            if (!systems.Get<DungeonSystem>().TryGetClosestFreeTile(floorId, actor.Position(), out var spawnTile, maxDistance,
                 c => !c.Actors.Any()))
             {
                 return false;
             }
             actor.Physics.Position = spawnTile.Tile.Position();
-            systems.Action.Track(actor.Id);
-            systems.Action.Spawn(actor);
-            systems.Dungeon.AddActor(floorId, actor);
+            systems.Get<ActionSystem>().Track(actor.Id);
+            systems.Get<ActionSystem>().Spawn(actor);
+            systems.Get<DungeonSystem>().AddActor(floorId, actor);
             return true;
         }
-        public static bool TryPlace(this GameSystems systems, FloorId floorId, Item item, float maxDistance = 24)
+        public static bool TryPlace(this MetaSystem systems, FloorId floorId, Item item, float maxDistance = 24)
         {
-            if (!systems.Dungeon.TryGetClosestFreeTile(floorId, item.Position(), out var spawnTile, maxDistance,
+            if (!systems.Get<DungeonSystem>().TryGetClosestFreeTile(floorId, item.Position(), out var spawnTile, maxDistance,
                 c => !c.Items.Any()))
             {
                 return false;
             }
             item.Physics.Position = spawnTile.Tile.Position();
-            systems.Dungeon.AddItem(floorId, item);
+            systems.Get<DungeonSystem>().AddItem(floorId, item);
             return true;
         }
     }

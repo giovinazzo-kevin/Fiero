@@ -15,27 +15,27 @@
         public override string DisplayDescription => "$Trap.Desc$";
         public override EffectName Name => EffectName.Trap;
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor target)
         {
             if (owner.TryCast<Feature>(out var feature))
             {
                 if (IsTrap)
                 {
-                    systems.Action.ActorSteppedOnTrap.Raise(new(target, feature));
+                    systems.Get<ActionSystem>().ActorSteppedOnTrap.Raise(new(target, feature));
                 }
                 if (AutoRemove)
                 {
-                    Subscriptions.Add(systems.Action.TurnEnded.SubscribeHandler(e =>
+                    Subscriptions.Add(systems.Get<ActionSystem>().TurnEnded.SubscribeHandler(e =>
                     {
                         // Removing the feature automatically ends all of its effects, so there's no need to call End()
-                        systems.Dungeon.RemoveFeature(feature);
+                        systems.Get<DungeonSystem>().RemoveFeature(feature);
                     }));
                 }
             }
             Source.Resolve(owner).Start(systems, target);
         }
 
-        protected override void OnRemoved(GameSystems systems, Entity owner, Actor target)
+        protected override void OnRemoved(MetaSystem systems, Entity owner, Actor target)
         {
             // do nothing
         }

@@ -16,7 +16,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
     public override ErgoVM.Op Compile()
     {
         var gameEntities = _services.GetInstance<GameEntities>();
-        var systems = _services.GetInstance<GameSystems>();
+        var systems = _services.GetInstance<MetaSystem>();
         return vm =>
         {
             var args = vm.Args;
@@ -30,7 +30,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
                     effect.Start(systems, e);
                 }
                 else if (args[1].Matches(out Location loc)
-                    && systems.Dungeon.TryGetTileAt(loc.FloorId, loc.Position, out var tile))
+                    && systems.Get<DungeonSystem>().TryGetTileAt(loc.FloorId, loc.Position, out var tile))
                 {
                     var def = new EffectDef(stub.Name, stub.Arguments, source: tile);
                     var effect = def.Resolve(null);

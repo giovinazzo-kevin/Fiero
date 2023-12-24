@@ -20,7 +20,7 @@ public class SelectScript : ShellCommand
     {
         await Task.CompletedTask;
         yield break;
-        //var scripting = Services.GetInstance<GameSystems>().Scripting;
+        //var scripting = Services.GetInstance<MetaSystem>().Scripting;
         //var fuzz = match.Groups["script"].Value;
         //var closest = scripting.Cache.Keys
         //    .Where(k => k.Contains(fuzz, StringComparison.OrdinalIgnoreCase))

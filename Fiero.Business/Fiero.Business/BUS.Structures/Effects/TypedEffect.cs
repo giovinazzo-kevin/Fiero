@@ -15,10 +15,10 @@
             Source = source;
         }
 
-        protected virtual void TypedOnStarted(GameSystems systems, T target) { }
-        protected virtual void TypedOnEnded(GameSystems systems, T target) { }
+        protected virtual void TypedOnStarted(MetaSystem systems, T target) { }
+        protected virtual void TypedOnEnded(MetaSystem systems, T target) { }
 
-        protected override void OnStarted(GameSystems systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner)
         {
             base.OnStarted(systems, owner);
             if (owner.TryCast<T>(out var target))
@@ -27,7 +27,7 @@
             }
         }
 
-        protected override void OnEnded(GameSystems systems, Entity owner)
+        protected override void OnEnded(MetaSystem systems, Entity owner)
         {
             base.OnEnded(systems, owner);
             if (owner.TryCast<T>(out var target))

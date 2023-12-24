@@ -13,13 +13,14 @@ namespace Fiero.Business
         {
         }
 
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor source, Actor target, int damage);
+        protected abstract void OnApplied(MetaSystem systems, Entity owner, Actor source, Actor target, int damage);
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
+            var action = systems.Get<ActionSystem>();
             if (owner.TryCast<Actor>(out var actor))
             {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                yield return action.ActorDamaged.SubscribeHandler(e =>
                 {
                     if (e.Source == actor)
                     {
@@ -27,7 +28,7 @@ namespace Fiero.Business
                     }
                 });
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
-                yield return systems.Action.ActorDied.SubscribeHandler(e =>
+                yield return action.ActorDied.SubscribeHandler(e =>
                 {
                     if (e.Actor == actor)
                     {
@@ -37,7 +38,7 @@ namespace Fiero.Business
             }
             else if (owner.TryCast<Weapon>(out var weapon))
             {
-                yield return systems.Action.ActorDamaged.SubscribeHandler(e =>
+                yield return action.ActorDamaged.SubscribeHandler(e =>
                 {
                     if (e.Weapons.Contains(weapon) && e.Source.TryCast<Actor>(out var source))
                     {

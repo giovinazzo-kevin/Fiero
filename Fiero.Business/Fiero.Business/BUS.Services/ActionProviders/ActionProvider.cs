@@ -22,7 +22,7 @@ namespace Fiero.Business
         protected int TurnsSinceSightingHostile { get; private set; }
         protected int TurnsSinceSightingFriendly { get; private set; }
 
-        public readonly GameSystems Systems;
+        public readonly MetaSystem Systems;
 
         /// <summary>
         /// This should be true whenever the ActionProvider should be monitored in the UI, 
@@ -31,7 +31,7 @@ namespace Fiero.Business
         /// </summary>
         public abstract bool RequestDelay { get; }
 
-        public ActionProvider(GameSystems sys)
+        public ActionProvider(MetaSystem sys)
         {
             Systems = sys;
             Sensors = new() {
@@ -52,22 +52,22 @@ namespace Fiero.Business
                 (NearbyAllies = new((sys, a) => {
                     return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
                     ? set
-                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => a != b && sys.Faction.GetRelations(a, b).Right.IsFriendly() && a.CanSee(b))
+                     .SelectMany(p => sys.Get<DungeonSystem>().GetActorsAt(a.FloorId(), p))
+                     .Where(b => a != b && sys.Get<FactionSystem>().GetRelations(a, b).Right.IsFriendly() && a.CanSee(b))
                     : Enumerable.Empty<Actor>();
                 })),
                 (NearbyEnemies = new((sys, a) => {
                     return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
                     ? set
-                     .SelectMany(p => sys.Dungeon.GetActorsAt(a.FloorId(), p))
-                     .Where(b => a != b && sys.Faction.GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
+                     .SelectMany(p => sys.Get<DungeonSystem>().GetActorsAt(a.FloorId(), p))
+                     .Where(b => a != b && sys.Get<FactionSystem>().GetRelations(a, b).Right.IsHostile() && a.CanSee(b)
                         && NearbyAllies.Values.Count(v => v.Ai != null && v.Ai.Target == b) < 3)
                     : Enumerable.Empty<Actor>();
                 })),
                 (NearbyItems = new((sys, a) => {
                     return a.Fov.VisibleTiles.TryGetValue(a.FloorId(), out var set)
                     ? set
-                     .SelectMany(p => sys.Dungeon.GetItemsAt(a.FloorId(), p))
+                     .SelectMany(p => sys.Get<DungeonSystem>().GetItemsAt(a.FloorId(), p))
                      .OrderBy(i => i.SquaredDistanceFrom(a))
                     : Enumerable.Empty<Item>();
                 }))
@@ -122,7 +122,7 @@ namespace Fiero.Business
             var floorId = a.FloorId();
             if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles))
                 return false;
-            var unknownTiles = Systems.Dungeon.GetAllTiles(floorId)
+            var unknownTiles = Systems.Get<DungeonSystem>().GetAllTiles(floorId)
                 .Where(x => !knownTiles.Contains(x.Physics.Position))
                 .Select(x => x.Physics.Position)
                 .ToHashSet();
@@ -134,7 +134,7 @@ namespace Fiero.Business
                 .Where(t => t.N > 0)
                 .OrderByDescending(t => t.N)
                 .ThenBy(t => t.P.DistSq(a.Physics.Position))
-                .TrySelect(t => Systems.Dungeon.TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
+                .TrySelect(t => Systems.Get<DungeonSystem>().TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
                 .Where(c => c.IsWalkable(a))
                 .Select(t => Maybe.Some(t.Tile))
                 .FirstOrDefault();
@@ -153,7 +153,7 @@ namespace Fiero.Business
                 if (diff > 0 && diff <= 2)
                 {
                     // one tile ahead
-                    if (Systems.Dungeon.TryGetCellAt(a.FloorId(), pos, out var cell)
+                    if (Systems.Get<DungeonSystem>().TryGetCellAt(a.FloorId(), pos, out var cell)
                         && cell.IsWalkable(a) && !cell.Actors.Any())
                     {
                         action = new MoveRelativeAction(dir);
@@ -180,7 +180,7 @@ namespace Fiero.Business
             if (a.Ai.Path != null && a.Ai.Path.Last != null && a.Ai.Path.Last.Value.Tile.Position() == a.Position())
                 return false;
             var currentObjective = a.Ai.Objectives.Peek();
-            var floor = Systems.Dungeon.GetFloor(a.FloorId());
+            var floor = Systems.Get<DungeonSystem>().GetFloor(a.FloorId());
             a.Ai.Path = floor.Pathfinder.Search(a.Position(), currentObjective.Target.Position(), a);
             a.Ai.Path?.RemoveFirst();
             var ret = a.Ai.Path != null && a.Ai.Path.Count > 0;
@@ -234,9 +234,9 @@ namespace Fiero.Business
             var line = Shapes.Line(new(0, 0), new(0, 100)).Skip(1).ToArray();
             var zapShape = new RayTargetingShape(a.Position(), 100);
             var autoTarget = zapShape.TryAutoTarget(
-                p => Systems.Dungeon.GetActorsAt(floorId, p).Any(b =>
+                p => Systems.Get<DungeonSystem>().GetActorsAt(floorId, p).Any(b =>
                 {
-                    var rel = Systems.Faction.GetRelations(a, b);
+                    var rel = Systems.Get<FactionSystem>().GetRelations(a, b);
                     if (!wand.ItemProperties.Identified && rel.Right.IsHostile())
                         return true;
                     if (wand.Effects != null && wand.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
@@ -247,14 +247,14 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(a) ?? true
+                p => !Systems.Get<DungeonSystem>().GetCellAt(floorId, p)?.IsWalkable(a) ?? true
             );
             if (TryTarget(a, zapShape, autoTarget))
             {
                 var points = zapShape.GetPoints().ToArray();
                 foreach (var p in points)
                 {
-                    var target = Systems.Dungeon.GetActorsAt(floorId, p)
+                    var target = Systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
                         .FirstOrDefault();
                     if (target != null)
                     {
@@ -281,11 +281,11 @@ namespace Fiero.Business
             var flags = throwable.GetEffectFlags();
             var throwShape = new RayTargetingShape(a.Position(), len);
             var autoTarget = throwShape.TryAutoTarget(
-                p => Systems.Dungeon.GetActorsAt(floorId, p).Any(b =>
+                p => Systems.Get<DungeonSystem>().GetActorsAt(floorId, p).Any(b =>
                 {
                     if (!throwable.ItemProperties.Identified)
                         return true;
-                    var rel = Systems.Faction.GetRelations(a, b);
+                    var rel = Systems.Get<FactionSystem>().GetRelations(a, b);
                     if (throwable.Effects != null && b.Effects != null && throwable.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
                         return false;
                     if (rel.Left.IsFriendly() && flags.IsDefensive)
@@ -296,15 +296,15 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Dungeon.GetCellAt(floorId, p)?.IsWalkable(a) ?? true
+                p => !Systems.Get<DungeonSystem>().GetCellAt(floorId, p)?.IsWalkable(a) ?? true
             );
             if (TryTarget(a, throwShape, autoTarget))
             {
                 var points = throwShape.GetPoints().ToArray();
                 foreach (var p in points)
                 {
-                    var target = Systems.Dungeon.GetActorsAt(floorId, p)
-                        .FirstOrDefault(b => Systems.Faction.GetRelations(a, b).Left.IsHostile());
+                    var target = Systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
+                        .FirstOrDefault(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
                     if (target != null)
                     {
                         action = new ThrowItemAtOtherAction(target, throwable);

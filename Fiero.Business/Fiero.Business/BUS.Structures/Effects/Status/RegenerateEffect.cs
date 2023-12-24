@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -18,13 +17,13 @@ namespace Fiero.Business
             Percentage = percentage;
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
             var hp = (int)(Percentage * target.ActorProperties.Health.Max);
-            systems.Action.ActorHealed.HandleOrThrow(new(target, target, target, hp));
+            systems.Get<ActionSystem>().ActorHealed.HandleOrThrow(new(target, target, target, hp));
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -17,12 +16,12 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.RaiseUndead.Desc$";
         public override EffectName Name => EffectName.RaiseUndead;
 
-        protected override void TypedOnStarted(GameSystems systems, Corpse target)
+        protected override void TypedOnStarted(MetaSystem systems, Corpse target)
         {
-            systems.Action.CorpseRaised.HandleOrThrow(new(Source, target, Mode));
+            systems.Get<ActionSystem>().CorpseRaised.HandleOrThrow(new(Source, target, Mode));
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

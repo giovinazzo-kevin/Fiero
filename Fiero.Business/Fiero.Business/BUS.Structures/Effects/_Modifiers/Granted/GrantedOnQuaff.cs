@@ -10,7 +10,7 @@
         {
         }
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor target)
         {
             Source.Resolve(owner).Start(systems, target);
         }

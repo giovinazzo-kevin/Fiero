@@ -17,7 +17,7 @@ namespace Fiero.Business
             Trait = trait;
         }
 
-        protected override void OnEnded(GameSystems systems, Entity owner)
+        protected override void OnEnded(MetaSystem systems, Entity owner)
         {
             base.OnEnded(systems, owner);
             foreach (var onEnded in _onEnded)
@@ -25,7 +25,7 @@ namespace Fiero.Business
             _onEnded.Clear();
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Entity target)
+        protected override void TypedOnStarted(MetaSystem systems, Entity target)
         {
             if (target.Traits is null)
                 return;
@@ -43,7 +43,7 @@ namespace Fiero.Business
             _onEnded.Add(killSwitch);
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }
@@ -62,14 +62,14 @@ namespace Fiero.Business
             Trait = trait;
         }
 
-        protected override void TypedOnStarted(GameSystems systems, Entity target)
+        protected override void TypedOnStarted(MetaSystem systems, Entity target)
         {
             if (target.Traits is null)
                 return;
             target.Traits.RemoveExtrinsicTrait(Trait, fireKillSwitch: true);
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

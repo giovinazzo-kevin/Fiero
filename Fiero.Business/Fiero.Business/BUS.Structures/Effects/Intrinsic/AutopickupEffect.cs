@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class AutopickupEffect : IntrinsicEffect
     {
@@ -8,22 +6,22 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Intrinsic.Autopickup.Desc$";
         public override EffectName Name => EffectName.AutoPickup;
 
-        protected override void OnApplied(GameSystems systems, Entity owner, Actor target)
+        protected override void OnApplied(MetaSystem systems, Entity owner, Actor target)
         {
-            Subscriptions.Add(systems.Action.ActorMoved.SubscribeHandler(e =>
+            Subscriptions.Add(systems.Get<ActionSystem>().ActorMoved.SubscribeHandler(e =>
             {
                 if (e.Actor == target)
                 {
-                    var itemsHere = systems.Dungeon.GetItemsAt(target.FloorId(), target.Position());
+                    var itemsHere = systems.Get<DungeonSystem>().GetItemsAt(target.FloorId(), target.Position());
                     if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item)))
                     {
-                        systems.Action.ItemPickedUp.Handle(new(target, item));
+                        systems.Get<ActionSystem>().ItemPickedUp.Handle(new(target, item));
                     }
                 }
             }));
         }
 
-        protected override void OnRemoved(GameSystems systems, Entity owner, Actor target)
+        protected override void OnRemoved(MetaSystem systems, Entity owner, Actor target)
         {
 
         }

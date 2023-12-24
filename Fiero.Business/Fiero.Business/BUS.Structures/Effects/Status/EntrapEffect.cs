@@ -12,13 +12,13 @@ namespace Fiero.Business
 
         public EntrapEffect(Entity source) : base(source) { }
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
             target.TryRoot();
             Ended += e => target.TryFree();
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

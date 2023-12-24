@@ -14,24 +14,25 @@ namespace Fiero.Business
         public abstract string DisplayName { get; }
         public abstract string DisplayDescription { get; }
 
-        protected abstract IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner);
-        protected virtual void OnStarted(GameSystems systems, Entity owner)
+        protected abstract IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner);
+        protected virtual void OnStarted(MetaSystem systems, Entity owner)
         {
 
         }
-        public void Start(GameSystems systems, Entity owner)
+        public void Start(MetaSystem systems, Entity owner)
         {
             if (owner?.Effects?.Lock ?? false)
                 return;
-            Subscriptions.Add(systems.Action.GameStarted.SubscribeHandler(e => { End(systems, owner); }));
+            var action = systems.Get<ActionSystem>();
+            Subscriptions.Add(action.GameStarted.SubscribeHandler(e => { End(systems, owner); }));
             if (!(this is ModifierEffect))
             {
                 Started += e => owner.Effects?.Active.Add(e);
                 Ended += e => owner.Effects?.Active.Remove(e);
                 if (owner.TryCast<Actor>(out var actor))
                 {
-                    Started += e => _ = systems.Action.ActorGainedEffect.Raise(new(actor, this));
-                    Ended += e => _ = systems.Action.ActorLostEffect.Raise(new(actor, this));
+                    Started += e => _ = action.ActorGainedEffect.Raise(new(actor, this));
+                    Ended += e => _ = action.ActorLostEffect.Raise(new(actor, this));
                 }
             }
             Subscriptions.UnionWith(RouteEvents(systems, owner));
@@ -39,8 +40,8 @@ namespace Fiero.Business
             OnStarted(systems, owner);
         }
 
-        protected virtual void OnEnded(GameSystems systems, Entity owner) { }
-        public void End(GameSystems systems, Entity owner)
+        protected virtual void OnEnded(MetaSystem systems, Entity owner) { }
+        public void End(MetaSystem systems, Entity owner)
         {
             foreach (var sub in Subscriptions)
             {

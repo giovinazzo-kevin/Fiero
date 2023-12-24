@@ -18,7 +18,7 @@ namespace Fiero.Business
             Shape = shape.ToArray();
         }
 
-        protected override void OnStarted(GameSystems systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner)
         {
             base.OnStarted(systems, owner);
             if (!owner.TryCast<PhysicalEntity>(out var phys))
@@ -28,21 +28,21 @@ namespace Fiero.Business
             var floorId = phys.FloorId();
             var pos = phys.Position();
             var actualShape = Shape
-                .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
+                .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Get<DungeonSystem>().TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
                 .ToArray();
-            systems.Action.ExplosionHappened.HandleOrThrow(new(owner, floorId, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
+            systems.Get<ActionSystem>().ExplosionHappened.HandleOrThrow(new(owner, floorId, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
             // TODO: Make this a handler of ExplosionHappened?
             foreach (var p in actualShape)
             {
-                foreach (var a in systems.Dungeon.GetActorsAt(floorId, p + pos))
+                foreach (var a in systems.Get<DungeonSystem>().GetActorsAt(floorId, p + pos))
                 {
                     var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
-                    systems.Action.ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
+                    systems.Get<ActionSystem>().ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
                 }
             }
             End(systems, owner);
         }
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

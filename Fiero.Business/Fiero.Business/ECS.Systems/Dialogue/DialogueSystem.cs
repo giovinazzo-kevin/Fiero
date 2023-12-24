@@ -28,7 +28,7 @@ namespace Fiero.Business
             UI = ui;
         }
 
-        public void SetTriggers(GameSystems systems, NpcName type, DialogueComponent component)
+        public void SetTriggers(MetaSystem systems, NpcName type, DialogueComponent component)
         {
             switch (type)
             {
@@ -44,7 +44,7 @@ namespace Fiero.Business
             }
         }
 
-        public void SetTriggers(GameSystems systems, FeatureName type, DialogueComponent component)
+        public void SetTriggers(MetaSystem systems, FeatureName type, DialogueComponent component)
         {
             switch (type)
             {

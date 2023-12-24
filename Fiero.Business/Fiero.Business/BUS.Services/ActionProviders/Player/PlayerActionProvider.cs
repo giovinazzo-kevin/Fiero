@@ -11,7 +11,7 @@ namespace Fiero.Business
 
         protected Modal CurrentModal { get; private set; }
 
-        public PlayerActionProvider(GameUI ui, GameSystems systems, QuickSlotHelper slots)
+        public PlayerActionProvider(GameUI ui, MetaSystem systems, QuickSlotHelper slots)
             : base(systems)
         {
             UI = ui;
@@ -111,7 +111,7 @@ namespace Fiero.Business
                 {
                     // We've explored everything we can see without opening doors
                     // so autoexplore will now find the closest closed door and open it
-                    var closestClosedDoor = Systems.Dungeon.GetAllFeatures(floorId)
+                    var closestClosedDoor = Systems.Get<DungeonSystem>().GetAllFeatures(floorId)
                         .Where(x => x.IsDoorClosed())
                         .Where(x => a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
                         .OrderBy(x => x.DistanceFrom(a))
@@ -125,7 +125,7 @@ namespace Fiero.Business
                             return new InteractWithFeatureAction(door);
                         }
                         // Look for the doorstep, then open the door
-                        else if (Systems.Dungeon.TryGetClosestFreeTile(floorId, door.Position(), out var doorStep,
+                        else if (Systems.Get<DungeonSystem>().TryGetClosestFreeTile(floorId, door.Position(), out var doorStep,
                             pred: cell => a.Fov.KnownTiles[floorId].Contains(cell.Tile.Position()) && cell.IsWalkable(a)))
                         {
                             TryPushObjective(a, doorStep.Tile, () => new InteractWithFeatureAction(door));
@@ -134,7 +134,7 @@ namespace Fiero.Business
                     else
                     {
                         a.Log.Write($"$DoneExploring$");
-                        Systems.Render.CenterOn(a);
+                        Systems.Get<RenderSystem>().CenterOn(a);
                     }
                 }
             }
@@ -305,7 +305,7 @@ namespace Fiero.Business
                 {
                     return new MeleeAttackPointAction(c, a.ActorEquipment.Weapons.ToArray());
                 }
-                if (!Systems.Dungeon.TryGetCellAt(a.FloorId(), a.Position() + c, out var cell))
+                if (!Systems.Get<DungeonSystem>().TryGetCellAt(a.FloorId(), a.Position() + c, out var cell))
                     return new FailAction();
                 // don't check features, we want to bump those
                 // don't check pathing, that's for autoexplore

@@ -11,11 +11,11 @@
         public override EffectName Name => Source.Name;
         public override string DisplayName => $"$Effect.{Source.Name}$";
         public override string DisplayDescription => "$Effect.GrantedOnEquip$";
-        protected override void OnApplied(GameSystems systems, Actor target)
+        protected override void OnApplied(MetaSystem systems, Actor target)
         {
             (Instance = Source.Resolve(target)).Start(systems, target);
         }
-        protected override void OnRemoved(GameSystems systems, Actor target)
+        protected override void OnRemoved(MetaSystem systems, Actor target)
         {
             if (Instance != null)
                 Instance.End(systems, target);

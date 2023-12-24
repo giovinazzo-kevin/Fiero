@@ -21,7 +21,7 @@ public sealed class RaiseEvent : BuiltIn
     public override ErgoVM.Op Compile()
     {
         var meta = _services.GetInstance<MetaSystem>();
-        var gameSystems = _services.GetInstance<GameSystems>();
+        var MetaSystem = _services.GetInstance<MetaSystem>();
         return vm =>
         {
             var arguments = vm.Args;
@@ -73,7 +73,7 @@ public sealed class RaiseEvent : BuiltIn
             // It can be sent from any module, even the modules of other scripts, with the system name acting as a conventional tag.
             if (!anySystem)
             {
-                // _ = gameSystems.Scripting.ScriptEventRaised.Raise(new(sysName, eventname, dict));
+                // _ = MetaSystem.Scripting.ScriptEventRaised.Raise(new(sysName, eventname, dict));
                 return;
             }
         };

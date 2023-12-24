@@ -11,14 +11,14 @@ namespace Fiero.Business
     {
         private readonly TDialogue[] _dialogueOptions;
 
-        public readonly GameSystems Systems;
+        public readonly MetaSystem Systems;
         public TDialogue DialogueNode { get; private set; }
         string IDialogueTrigger.DialogueNode => DialogueNode.ToString();
         public bool Repeatable { get; protected set; }
 
         public event Action<DialogueTrigger<TDialogue>> Triggered;
 
-        public DialogueTrigger(GameSystems systems, bool repeatable, params TDialogue[] nodeChoices)
+        public DialogueTrigger(MetaSystem systems, bool repeatable, params TDialogue[] nodeChoices)
         {
             Systems = systems;
             _dialogueOptions = nodeChoices;

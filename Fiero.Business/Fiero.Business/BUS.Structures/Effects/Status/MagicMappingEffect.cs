@@ -9,16 +9,16 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.MagicMapping.Desc$";
         public override EffectName Name => EffectName.MagicMapping;
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target)
+        protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
             var fid = target.FloorId();
-            foreach (var tile in systems.Dungeon.GetAllTiles(fid))
+            foreach (var tile in systems.Get<DungeonSystem>().GetAllTiles(fid))
                 target.Fov.KnownTiles[fid].Add(tile.Position());
-            systems.Action.ActorUsedMagicMapping.HandleOrThrow(new(target, Source));
+            systems.Get<ActionSystem>().ActorUsedMagicMapping.HandleOrThrow(new(target, Source));
             End(systems, target);
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

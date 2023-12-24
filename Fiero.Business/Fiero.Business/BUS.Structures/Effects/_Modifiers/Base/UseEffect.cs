@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -14,13 +13,13 @@ namespace Fiero.Business
         {
         }
 
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
+        protected abstract void OnApplied(MetaSystem systems, Entity owner, Actor target);
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (owner.TryCast<Consumable>(out var consumable))
             {
-                yield return systems.Action.ItemConsumed.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ItemConsumed.SubscribeHandler(e =>
                 {
                     if (e.Item == owner)
                     {

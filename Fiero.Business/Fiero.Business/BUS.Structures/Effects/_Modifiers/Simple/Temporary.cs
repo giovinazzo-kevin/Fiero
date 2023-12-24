@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -16,7 +15,7 @@ namespace Fiero.Business
             Duration = duration;
         }
 
-        protected override void OnStarted(GameSystems systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner)
         {
             base.OnStarted(systems, owner);
             var effect = Source.Resolve(null);
@@ -30,9 +29,9 @@ namespace Fiero.Business
             }
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
-            yield return systems.Action.TurnEnded.SubscribeHandler(e =>
+            yield return systems.Get<ActionSystem>().TurnEnded.SubscribeHandler(e =>
             {
                 if (Time++ >= Duration)
                 {

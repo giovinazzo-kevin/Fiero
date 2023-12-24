@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-
-using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -13,11 +10,11 @@ namespace Fiero.Business
         public override string DisplayDescription => "$Effect.Confusion.Desc$";
         public override EffectName Name => EffectName.Confusion;
 
-        protected override void TypedOnStarted(GameSystems systems, Actor target) { }
+        protected override void TypedOnStarted(MetaSystem systems, Actor target) { }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
-            yield return systems.Action.ActorIntentSelected.SubscribeResponse(e =>
+            yield return systems.Get<ActionSystem>().ActorIntentSelected.SubscribeResponse(e =>
             {
                 if (e.Actor == owner && Rng.Random.NChancesIn(2, 3))
                 {

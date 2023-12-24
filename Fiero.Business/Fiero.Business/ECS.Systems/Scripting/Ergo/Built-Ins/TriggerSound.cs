@@ -32,7 +32,7 @@ public sealed class TriggerSound : BuiltIn
 
     public override ErgoVM.Op Compile()
     {
-        var systems = _services.GetInstance<GameSystems>();
+        var systems = _services.GetInstance<MetaSystem>();
         var resources = _services.GetInstance<GameResources>();
         return vm =>
         {
@@ -57,7 +57,7 @@ public sealed class TriggerSound : BuiltIn
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundDefStub), args[0]);
                 return;
             }
-            var player = systems.Render.Viewport.Following.V;
+            var player = systems.Get<RenderSystem>().Viewport.Following.V;
             var pos = stub.Position;
             if (stub.Relative)
             {

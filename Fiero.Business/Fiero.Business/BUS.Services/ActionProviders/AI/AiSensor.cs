@@ -6,20 +6,20 @@ namespace Fiero.Business
 {
     public partial class AiSensor<T> : IAISensor
     {
-        protected readonly Func<GameSystems, Actor, IEnumerable<T>> Calculate;
-        protected Func<GameSystems, Actor, T, bool> ShouldRaiseAlert { get; private set; }
+        protected readonly Func<MetaSystem, Actor, IEnumerable<T>> Calculate;
+        protected Func<MetaSystem, Actor, T, bool> ShouldRaiseAlert { get; private set; }
 
         public IList<T> Values { get; private set; }
         public IList<T> AlertingValues { get; private set; }
         public bool RaisingAlert { get; private set; }
 
-        public AiSensor(Func<GameSystems, Actor, IEnumerable<T>> calculate)
+        public AiSensor(Func<MetaSystem, Actor, IEnumerable<T>> calculate)
         {
             Calculate = calculate;
             ShouldRaiseAlert = (_, __, ___) => false;
         }
 
-        public void Update(GameSystems sys, Actor a)
+        public void Update(MetaSystem sys, Actor a)
         {
             Values = Calculate(sys, a)
                 .ToArray();
@@ -29,7 +29,7 @@ namespace Fiero.Business
             RaisingAlert = AlertingValues.Count > 0;
         }
 
-        public void ConfigureAlert(Func<GameSystems, Actor, T, bool> match, bool appendLogic = false)
+        public void ConfigureAlert(Func<MetaSystem, Actor, T, bool> match, bool appendLogic = false)
         {
             if (!appendLogic)
             {

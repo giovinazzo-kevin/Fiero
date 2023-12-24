@@ -7,7 +7,7 @@ namespace Fiero.Business
     public class TalkedToTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
-        public TalkedToTrigger(GameSystems sys, bool repeatable, params TDialogue[] nodeChoices)
+        public TalkedToTrigger(MetaSystem sys, bool repeatable, params TDialogue[] nodeChoices)
             : base(sys, repeatable, nodeChoices)
         {
 

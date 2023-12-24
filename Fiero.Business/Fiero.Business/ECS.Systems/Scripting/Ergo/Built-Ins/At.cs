@@ -25,8 +25,8 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, Scr
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Location), args[0]);
                 return;
             }
-            var systems = _services.GetInstance<GameSystems>();
-            var cell = systems.Dungeon.GetCellAt(loc.FloorId, loc.Position);
+            var systems = _services.GetInstance<MetaSystem>();
+            var cell = systems.Get<DungeonSystem>().GetCellAt(loc.FloorId, loc.Position);
             if (cell is null)
             {
                 vm.Fail();

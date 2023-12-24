@@ -7,7 +7,7 @@ namespace Fiero.Business
     public class BumpedByPlayerDialogueTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
-        public BumpedByPlayerDialogueTrigger(GameSystems sys, bool repeatable, params TDialogue[] nodeChoices)
+        public BumpedByPlayerDialogueTrigger(MetaSystem sys, bool repeatable, params TDialogue[] nodeChoices)
             : base(sys, repeatable, nodeChoices)
         {
 

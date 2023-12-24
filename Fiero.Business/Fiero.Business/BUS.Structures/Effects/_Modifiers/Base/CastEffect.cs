@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -15,17 +14,17 @@ namespace Fiero.Business
         {
         }
 
-        public abstract bool ShouldApply(GameSystems systems, Entity owner, Actor caster);
-        protected abstract bool OnApplied(GameSystems systems, Entity owner, Actor caster, PhysicalEntity[] targets);
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        public abstract bool ShouldApply(MetaSystem systems, Entity owner, Actor caster);
+        protected abstract bool OnApplied(MetaSystem systems, Entity owner, Actor caster, PhysicalEntity[] targets);
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (owner.TryCast<Spell>(out var spell))
             {
-                yield return systems.Action.SpellLearned.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().SpellLearned.SubscribeHandler(e =>
                 {
                     if (e.Spell == spell)
                     {
-                        Subscriptions.Add(systems.Action.SpellTargeted.SubscribeResponse(e =>
+                        Subscriptions.Add(systems.Get<ActionSystem>().SpellTargeted.SubscribeResponse(e =>
                         {
                             if (e.Spell == spell)
                             {
@@ -33,7 +32,7 @@ namespace Fiero.Business
                             }
                             return true;
                         }));
-                        Subscriptions.Add(systems.Action.SpellCast.SubscribeResponse(e =>
+                        Subscriptions.Add(systems.Get<ActionSystem>().SpellCast.SubscribeResponse(e =>
                         {
                             if (e.Spell == spell)
                             {
@@ -43,7 +42,7 @@ namespace Fiero.Business
                         }));
                     }
                 });
-                yield return systems.Action.SpellForgotten.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().SpellForgotten.SubscribeHandler(e =>
                 {
                     if (e.Spell == spell)
                     {

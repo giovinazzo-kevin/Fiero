@@ -13,7 +13,7 @@ namespace Fiero.Business
             {
                 if (SpellTargeted.Handle(new(t.Actor, cast.Spell)))
                 {
-                    var systems = (GameSystems)_entities.ServiceFactory.GetInstance(typeof(GameSystems));
+                    var systems = (MetaSystem)_entities.ServiceFactory.GetInstance(typeof(MetaSystem));
                     var validTargets = cast.TargetingShape.GetPoints()
                         .TrySelect(p => (_floorSystem.TryGetCellAt(t.Actor.FloorId(), p, out var cell), cell))
                         .SelectMany(c => c.GetDrawables())

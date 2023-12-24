@@ -7,7 +7,7 @@ namespace Fiero.Business
     {
         public SpellName Name { get; set; }
         public TargetingShape TargetingShape { get; set; }
-        public Func<GameSystems, Actor, PhysicalEntity, bool> TargetingFilter { get; set; }
+        public Func<MetaSystem, Actor, PhysicalEntity, bool> TargetingFilter { get; set; }
         public int BaseDamage { get; set; }
         public int CastDelay { get; set; }
         // TODO: Targeting filter

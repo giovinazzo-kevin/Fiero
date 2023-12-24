@@ -2,6 +2,6 @@
 {
     public interface IAISensor
     {
-        void Update(GameSystems sys, Actor a);
+        void Update(MetaSystem sys, Actor a);
     }
 }

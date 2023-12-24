@@ -17,7 +17,7 @@ namespace Fiero.Business
         public override string DisplayDescription => $"$Effect.Chance$ ({(int)(Probability * 100)}%)";
         public override EffectName Name => Source.Name;
 
-        protected override void OnStarted(GameSystems systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner)
         {
             if (Rng.Random.NextDouble() < Probability)
             {
@@ -25,7 +25,7 @@ namespace Fiero.Business
             }
         }
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             yield break;
         }

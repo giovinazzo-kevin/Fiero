@@ -15,7 +15,7 @@ namespace Fiero.Business.Scenes
             Exit_SaveAndQuit
         }
 
-        protected readonly GameSystems Systems;
+        protected readonly MetaSystem Systems;
         protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly GameEntities Entities;
@@ -34,7 +34,7 @@ namespace Fiero.Business.Scenes
         public GameplayScene(
             GameDataStore store,
             GameEntities entities,
-            GameSystems systems,
+            MetaSystem systems,
             GameResources resources,
             QuickSlotHelper quickSlots,
             GameUI ui,
@@ -57,6 +57,7 @@ namespace Fiero.Business.Scenes
             // TODO: Move dialogue handlers to Ergo scripts!
             void SubscribeDialogueHandlers()
             {
+                var factionSystem = Systems.Get<FactionSystem>();
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
                     .Triggered += (t, eh) =>
                     {
@@ -67,7 +68,7 @@ namespace Fiero.Business.Scenes
                     {
                         foreach (var player in eh.DialogueListeners.Players())
                         {
-                            Systems.Faction.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Loved);
+                            factionSystem.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Loved);
                         }
                     };
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
@@ -76,8 +77,8 @@ namespace Fiero.Business.Scenes
                         var gkr = (Actor)eh.DialogueStarter;
                         foreach (var player in eh.DialogueListeners.Players())
                         {
-                            Systems.Faction.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Hated);
-                            Systems.Faction.SetBilateralRelation(player, gkr, StandingName.Hated);
+                            factionSystem.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Hated);
+                            factionSystem.SetBilateralRelation(player, gkr, StandingName.Hated);
                         }
                     };
                 Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
@@ -95,7 +96,7 @@ namespace Fiero.Business.Scenes
                             {
                                 if (Systems.TrySpawn(player.FloorId(), f))
                                 {
-                                    //Systems.Faction.SetBilateralRelation(player, f, StandingName.Loved);
+                                    //Systems.Get<FactionSystem>().SetBilateralRelation(player, f, StandingName.Loved);
                                 }
                             }
                         }
@@ -127,15 +128,16 @@ namespace Fiero.Business.Scenes
         }
         private IEnumerable<Subscription> RouteFloorSystemEvents()
         {
+            var dungeonSystem = Systems.Get<DungeonSystem>();
             // FloorSystem.FeatureRemoved:
             // - Mark feature for deletion
-            yield return Systems.Dungeon.FeatureRemoved.SubscribeHandler(e =>
+            yield return dungeonSystem.FeatureRemoved.SubscribeHandler(e =>
             {
                 Entities.FlagEntityForRemoval(e.OldState.Id);
             });
             // FloorSystem.TileChanged:
             // - Mark old tile for deletion
-            yield return Systems.Dungeon.TileChanged.SubscribeHandler(e =>
+            yield return dungeonSystem.TileChanged.SubscribeHandler(e =>
             {
                 if (e.OldState.Id != e.NewState.Id)
                 {
@@ -149,12 +151,12 @@ namespace Fiero.Business.Scenes
             // ScriptingSystem.ScriptLoaded:
             // - Track console output
             // - Track script in console
-            //yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
+            //yield return renderSystem.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
             //yield return new Subscription(new[] { Systems.Scripting.UnloadAllScripts });
             //var scriptLoaded = new Subscription();
             //scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             //{
-            //    scriptLoaded.Add(Systems.Render.DeveloperConsole
+            //    scriptLoaded.Add(renderSystem.DeveloperConsole
             //        .TrackScript(e.Script));
             //    return true;
             //}));
@@ -169,9 +171,14 @@ namespace Fiero.Business.Scenes
             // - Create and spawn player
             // - Set faction Relations to default values
             // - Track player visually in the interface
-            yield return Systems.Action.GameStarted.SubscribeResponse(e =>
+            var actionSystem = Systems.Get<ActionSystem>();
+            var dungeonSystem = Systems.Get<DungeonSystem>();
+            var factionSystem = Systems.Get<FactionSystem>();
+            var renderSystem = Systems.Get<RenderSystem>();
+            var dialogueSystem = Systems.Get<DialogueSystem>();
+            yield return actionSystem.GameStarted.SubscribeResponse(e =>
             {
-                Systems.Dungeon.Reset();
+                dungeonSystem.Reset();
                 Resources.Textures.ClearProceduralTextures();
                 Resources.Sprites.ClearProceduralSprites();
                 QuickSlots.UnsetAll();
@@ -215,7 +222,7 @@ namespace Fiero.Business.Scenes
                 Store.SetValue(Data.Player.Id, Player.Id);
                 // Generate map
                 var entranceFloorId = new FloorId(DungeonBranchName.Sewers, 1);
-                Systems.Dungeon.AddDungeon(d => d.WithStep(ctx =>
+                dungeonSystem.AddDungeon(d => d.WithStep(ctx =>
                 {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
                     ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Sewers, 2);
@@ -223,7 +230,7 @@ namespace Fiero.Business.Scenes
                     ctx.Connect(default, entranceFloorId);
                 }));
 
-                var features = Systems.Dungeon.GetAllFeatures(entranceFloorId);
+                var features = dungeonSystem.GetAllFeatures(entranceFloorId);
                 Player.Physics.Position = features
                     .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
                     .Position();
@@ -237,74 +244,74 @@ namespace Fiero.Business.Scenes
                 foreach (var comp in Entities.GetComponents<ActorComponent>())
                 {
                     var proxy = Entities.GetProxy<Actor>(comp.EntityId);
-                    Systems.Action.Spawn(proxy);
+                    actionSystem.Spawn(proxy);
                 }
 
                 // Track all actors on the first floor since the player's floorId was null during floorgen
                 // Afterwards, this is handled when the player uses a portal or stairs or when a monster spawns
-                foreach (var actor in Systems.Dungeon.GetAllActors(entranceFloorId))
+                foreach (var actor in dungeonSystem.GetAllActors(entranceFloorId))
                 {
-                    Systems.Action.Track(actor.Id);
+                    actionSystem.Track(actor.Id);
                 }
 
                 // Set faction defaults
-                Systems.Faction.SetDefaultRelations();
-                Systems.Dungeon.RecalculateFov(Player);
-                Systems.Render.CenterOn(Player);
+                factionSystem.SetDefaultRelations();
+                dungeonSystem.RecalculateFov(Player);
+                renderSystem.CenterOn(Player);
                 return true;
             });
             // ActionSystem.ActorIntentFailed:
             // - Repaint viewport if actor
-            yield return Systems.Action.ActorIntentFailed.SubscribeHandler(e =>
+            yield return actionSystem.ActorIntentFailed.SubscribeHandler(e =>
             {
                 if (e.Actor.IsPlayer())
                 {
-                    Systems.Render.CenterOn(e.Actor);
+                    renderSystem.CenterOn(e.Actor);
                 }
             });
             // ActionSystem.ActorTurnStarted:
             // - Update Fov
             // - Attempt to auto-identify items that can be seen
             // - Recenter viewport on player and update UI
-            yield return Systems.Action.ActorTurnStarted.SubscribeHandler(e =>
+            yield return actionSystem.ActorTurnStarted.SubscribeHandler(e =>
             {
                 var floorId = e.Actor.FloorId();
-                Systems.Dungeon.RecalculateFov(e.Actor);
+                dungeonSystem.RecalculateFov(e.Actor);
                 foreach (var p in e.Actor.Fov.VisibleTiles[floorId])
                 {
-                    foreach (var item in Systems.Dungeon.GetItemsAt(floorId, p))
+                    foreach (var item in dungeonSystem.GetItemsAt(floorId, p))
                     {
                         e.Actor.TryIdentify(item);
                     }
                 }
                 if (e.Actor.IsPlayer())
                 {
-                    Systems.Render.CenterOn(e.Actor);
+                    renderSystem.CenterOn(e.Actor);
                 }
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
-                    Systems.Render.AnimateViewport(true, e.Actor.Location(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
+                    renderSystem.AnimateViewport(true, e.Actor.Location(), Animation.Wait(TimeSpan.FromMilliseconds(5)));
                 }
             });
             // ActionSystem.ActorIntentEvaluated:
             // - Wait, if the action provider is asking for a delay
-            yield return Systems.Action.ActorIntentEvaluated.SubscribeHandler(e =>
+            yield return actionSystem.ActorIntentEvaluated.SubscribeHandler(e =>
             {
             });
             // ActionSystem.ActorTurnEnded:
             // - Check dialogue triggers when the player's turn ends
-            yield return Systems.Action.ActorTurnEnded.SubscribeResponse(e =>
+            yield return actionSystem.ActorTurnEnded.SubscribeResponse(e =>
             {
                 if (e.Actor.IsPlayer())
                 {
-                    Systems.Dialogue.CheckTriggers();
+                    dialogueSystem.CheckTriggers();
                 }
                 return true;
             });
             // ActionSystem.ActorTeleported:
             // - Show animation and play sound
-            yield return Systems.Action.ActorTeleporting.SubscribeResponse(e =>
+            yield return actionSystem.ActorTeleporting.SubscribeResponse(e =>
             {
                 var floorId = e.Actor.FloorId();
                 var (seeOld, seeNew) = (Player.CanSee(floorId, e.OldPosition), Player.CanSee(floorId, e.NewPosition));
@@ -312,34 +319,34 @@ namespace Fiero.Business.Scenes
                 if (seeOld && !seeNew)
                 {
                     TpOut();
-                    Systems.Action.ActorMoved.HandleOrThrow(e);
+                    actionSystem.ActorMoved.HandleOrThrow(e);
                     return true;
                 }
                 else if (!seeOld && (seeNew || e.Actor.IsPlayer()))
                 {
-                    Systems.Action.ActorMoved.HandleOrThrow(e);
+                    actionSystem.ActorMoved.HandleOrThrow(e);
                     TpIn();
                     return true;
                 }
                 else if (seeOld && seeNew)
                 {
                     TpOut();
-                    Systems.Action.ActorMoved.HandleOrThrow(e);
+                    actionSystem.ActorMoved.HandleOrThrow(e);
                     TpIn();
                     return true;
                 }
-                Systems.Action.ActorMoved.HandleOrThrow(e);
+                actionSystem.ActorMoved.HandleOrThrow(e);
                 return true;
 
                 void TpOut()
                 {
-                    Systems.Render.CenterOn(Player);
+                    renderSystem.CenterOn(Player);
                     var tpOut = Animation.TeleportOut(e.Actor)
                         .OnFirstFrame(() =>
                         {
                             if (!e.Actor.IsInvalid())
                                 e.Actor.Render.Hidden = true;
-                            Systems.Render.CenterOn(Player);
+                            renderSystem.CenterOn(Player);
                         })
                         .OnLastFrame(() =>
                         {
@@ -350,7 +357,7 @@ namespace Fiero.Business.Scenes
                         Player.Log?.Write($"{e.Actor.Info.Name} $Action.TeleportsAway$.");
                     e.Actor.Log?.Write($"$Action.YouTeleportAway$.");
                     Resources.Sounds.Get(SoundName.SpellCast, e.OldPosition - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, new Location(e.Actor.FloorId(), e.OldPosition), tpOut);
+                    renderSystem.AnimateViewport(true, new Location(e.Actor.FloorId(), e.OldPosition), tpOut);
                 }
 
                 void TpIn()
@@ -362,7 +369,7 @@ namespace Fiero.Business.Scenes
                             {
                                 if (!e.Actor.IsInvalid())
                                     e.Actor.Render.Hidden = true;
-                                Systems.Render.CenterOn(Player);
+                                renderSystem.CenterOn(Player);
                             }
                         })
                         .OnLastFrame(() =>
@@ -372,20 +379,20 @@ namespace Fiero.Business.Scenes
                             {
                                 if (!e.Actor.IsInvalid())
                                     e.Actor.Render.Hidden = false;
-                                Systems.Render.CenterOn(Player);
+                                renderSystem.CenterOn(Player);
                             }
                         });
                     if (e.Actor.IsPlayer())
                     {
-                        Systems.Dungeon.RecalculateFov(Player);
-                        Systems.Render.CenterOn(Player);
+                        dungeonSystem.RecalculateFov(Player);
+                        renderSystem.CenterOn(Player);
                     }
                     else if (Player.CanSee(e.Actor))
                     {
                         Player.Log.Write($"{e.Actor.Info.Name} $Action.TeleportsIn$.");
                     }
                     Resources.Sounds.Get(SoundName.SpellCast, e.NewPosition - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(true, new Location(e.Actor.FloorId(), e.NewPosition), tpIn);
+                    renderSystem.AnimateViewport(true, new Location(e.Actor.FloorId(), e.NewPosition), tpIn);
                 }
             });
             // ActionSystem.ActorMoved:
@@ -393,18 +400,18 @@ namespace Fiero.Business.Scenes
             // - Update FloorSystem positional caches
             // - Log stuff that was stepped over
             // - Play animation if enabled in the settings or if this is the AutoPlayer
-            yield return Systems.Action.ActorMoved.SubscribeResponse(e =>
+            yield return actionSystem.ActorMoved.SubscribeResponse(e =>
             {
                 if (e.Actor.IsInvalid())
                     return true;
-                if (!Systems.Dungeon.TryGetFloor(e.Actor.FloorId(), out var floor)
+                if (!dungeonSystem.TryGetFloor(e.Actor.FloorId(), out var floor)
                 || !floor.Cells.ContainsKey(e.OldPosition)
                 || !floor.Cells.ContainsKey(e.NewPosition))
                     return false;
                 floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);
-                var itemsHere = Systems.Dungeon.GetItemsAt(floor.Id, e.NewPosition);
-                var featuresHere = Systems.Dungeon.GetFeaturesAt(floor.Id, e.NewPosition);
+                var itemsHere = dungeonSystem.GetItemsAt(floor.Id, e.NewPosition);
+                var featuresHere = dungeonSystem.GetFeaturesAt(floor.Id, e.NewPosition);
                 foreach (var items in itemsHere.GroupBy(i => i.DisplayName))
                 {
                     var count = items.Count();
@@ -434,19 +441,19 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorLostEffect:
             // - Show an animation and play a sound
-            yield return Systems.Action.ActorGainedEffect.SubscribeHandler(e =>
+            yield return actionSystem.ActorGainedEffect.SubscribeHandler(e =>
             {
                 if (!Player.CanSee(e.Actor))
                     return;
                 var flags = e.Effect.Name.GetFlags();
-                Systems.Render.CenterOn(Player);
+                renderSystem.CenterOn(Player);
                 if (flags.IsBuff)
                 {
                     if (Player.CanHear(e.Actor))
                     {
                         Resources.Sounds.Get(SoundName.Buff, e.Actor.Position() - Player.Position()).Play();
                     }
-                    Systems.Render.AnimateViewport(true, e.Actor, Animation.Buff(ColorName.LightCyan));
+                    renderSystem.AnimateViewport(true, e.Actor, Animation.Buff(ColorName.LightCyan));
                 }
                 if (flags.IsDebuff)
                 {
@@ -454,19 +461,19 @@ namespace Fiero.Business.Scenes
                     {
                         Resources.Sounds.Get(SoundName.Debuff, e.Actor.Position() - Player.Position()).Play();
                     }
-                    Systems.Render.AnimateViewport(true, e.Actor, Animation.Debuff(ColorName.LightMagenta));
+                    renderSystem.AnimateViewport(true, e.Actor, Animation.Debuff(ColorName.LightMagenta));
                 }
-                Systems.Render.CenterOn(Player);
+                renderSystem.CenterOn(Player);
             });
             // ActionSystem.ActorLostEffect:
-            yield return Systems.Action.ActorLostEffect.SubscribeHandler(e =>
+            yield return actionSystem.ActorLostEffect.SubscribeHandler(e =>
             {
             });
             // ActionSystem.ActorAttacked:
             // - Handle Ai aggro and grudges
             // - Show melee attack animation
             // - Identify wands and potions
-            yield return Systems.Action.ActorAttacked.SubscribeResponse(e =>
+            yield return actionSystem.ActorAttacked.SubscribeResponse(e =>
             {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
@@ -479,21 +486,21 @@ namespace Fiero.Business.Scenes
                     }
                     if (Player.CanSee(e.Attacker))
                     {
-                        Systems.Render.CenterOn(Player);
+                        renderSystem.CenterOn(Player);
                         var anim = Animation.MeleeAttack(e.Attacker, dir)
                             .OnFirstFrame(() =>
                             {
                                 if (!e.Attacker.IsInvalid())
                                     e.Attacker.Render.Hidden = true;
-                                Systems.Render.CenterOn(Player);
+                                renderSystem.CenterOn(Player);
                             })
                             .OnLastFrame(() =>
                             {
                                 if (!e.Attacker.IsInvalid())
                                     e.Attacker.Render.Hidden = false;
-                                Systems.Render.CenterOn(Player);
+                                renderSystem.CenterOn(Player);
                             });
-                        Systems.Render.AnimateViewport(true, e.Attacker.Location(), anim);
+                        renderSystem.AnimateViewport(true, e.Attacker.Location(), anim);
                     }
                 }
                 foreach (var weapon in e.Weapons)
@@ -521,14 +528,14 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorHealed 
             // - Heal actor
             // - Show damage numbers
-            yield return Systems.Action.ActorHealed.SubscribeResponse(e =>
+            yield return actionSystem.ActorHealed.SubscribeResponse(e =>
             {
                 int oldHealth = e.Target.ActorProperties.Health;
                 e.Target.ActorProperties.Health.V += e.Heal;
                 var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target))
                 {
-                    Systems.Render.AnimateViewport(false, e.Target.Location(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
+                    renderSystem.AnimateViewport(false, e.Target.Location(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
                 }
                 return true;
             });
@@ -536,7 +543,7 @@ namespace Fiero.Business.Scenes
             // - Deal damage
             // - Handle aggro
             // - Show damage numbers
-            yield return Systems.Action.ActorDamaged.SubscribeResponse(e =>
+            yield return actionSystem.ActorDamaged.SubscribeResponse(e =>
             {
                 if (e.Source.TryCast<Actor>(out var attacker))
                 {
@@ -544,7 +551,7 @@ namespace Fiero.Business.Scenes
                     if (e.Victim.Ai != null)
                         e.Victim.Ai.Objectives.Clear();
                     // make sure that people hold a grudge regardless of factions
-                    Systems.Faction.SetUnilateralRelation(e.Victim, attacker, StandingName.Hated);
+                    factionSystem.SetUnilateralRelation(e.Victim, attacker, StandingName.Hated);
                 }
                 int oldHealth = e.Victim.ActorProperties.Health;
                 e.Victim.ActorProperties.Health.V -= e.Damage;
@@ -552,7 +559,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Victim))
                 {
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                    Systems.Render.AnimateViewport(false, e.Victim.Location(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
+                    renderSystem.AnimateViewport(false, e.Victim.Location(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
                 }
                 return true;
             });
@@ -560,14 +567,14 @@ namespace Fiero.Business.Scenes
             // - Handle game over when the player dies
             // - Remove entity from floor and action systems and handle cleanup
             // - Generate a new RNG seed
-            yield return Systems.Action.EntityDespawned.SubscribeResponse(e =>
+            yield return actionSystem.EntityDespawned.SubscribeResponse(e =>
             {
                 Entities.FlagEntityForRemoval(e.Entity.Id);
                 if (e.Entity.TryCast<Actor>(out var actor))
                 {
                     var wasPlayer = actor.IsPlayer();
-                    Systems.Action.StopTracking(actor.Id);
-                    Systems.Dungeon.RemoveActor(actor);
+                    actionSystem.StopTracking(actor.Id);
+                    dungeonSystem.RemoveActor(actor);
                     actor.TryRefresh(0);
                     if (wasPlayer)
                     {
@@ -582,7 +589,7 @@ namespace Fiero.Business.Scenes
             // - Play death animation
             // - Drop inventory contents
             // - Spawn corpses
-            yield return Systems.Action.ActorDied.SubscribeResponse(e =>
+            yield return actionSystem.ActorDied.SubscribeResponse(e =>
             {
                 // Refresh entity in case a script raised this event
                 if (!Entities.TryGetProxy<Actor>(e.Actor.Id, out var actor))
@@ -607,14 +614,14 @@ namespace Fiero.Business.Scenes
                 if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
                 {
                     corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
-                    Systems.Action.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                    actionSystem.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
                 }
 
                 if (Player.CanSee(e.Actor))
                 {
                     if (corpse != null) corpse.Render.Hidden = true;
-                    Systems.Render.CenterOn(Player);
-                    Systems.Render.AnimateViewport(false, e.Actor.Location(), Animation.Death(e.Actor)
+                    renderSystem.CenterOn(Player);
+                    renderSystem.AnimateViewport(false, e.Actor.Location(), Animation.Death(e.Actor)
                         .OnLastFrame(() => { if (corpse != null) corpse.Render.Hidden = false; }));
                 }
 
@@ -622,13 +629,13 @@ namespace Fiero.Business.Scenes
                 {
                     foreach (var item in e.Actor.Inventory.GetItems().ToList())
                     {
-                        Systems.Action.ItemDropped.HandleOrThrow(new(e.Actor, item));
+                        actionSystem.ItemDropped.HandleOrThrow(new(e.Actor, item));
                     }
                 }
                 return true;
             });
             // ActionSystem.ActorKilled:
-            yield return Systems.Action.ActorKilled.SubscribeResponse(e =>
+            yield return actionSystem.ActorKilled.SubscribeResponse(e =>
             {
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
@@ -636,7 +643,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ItemDropped:
             // - Drop item (remove from actor's inventory and add to floor)
-            yield return Systems.Action.ItemDropped.SubscribeResponse(e =>
+            yield return actionSystem.ItemDropped.SubscribeResponse(e =>
             {
                 if (e.Actor.Inventory.TryTake(e.Item))
                 {
@@ -655,14 +662,14 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.CorpseCreated:
             // - Create corpse item
-            yield return Systems.Action.CorpseCreated.SubscribeResponse(e =>
+            yield return actionSystem.CorpseCreated.SubscribeResponse(e =>
             {
                 e.Corpse.Physics.Position = e.Actor.Position();
                 if (Systems.TryPlace(e.Actor.FloorId(), e.Corpse))
                 {
                     e.Actor.Log?.Write($"$Action.YouLeaveACorpse$.");
                     if (Player.CanSee(e.Corpse))
-                        Systems.Render.CenterOn(Player);
+                        renderSystem.CenterOn(Player);
                 }
                 return true;
             });
@@ -670,7 +677,7 @@ namespace Fiero.Business.Scenes
             // - Spawn undead
             // - Play animation
             // - Destroy leftover corpse
-            yield return Systems.Action.CorpseRaised.SubscribeResponse(e =>
+            yield return actionSystem.CorpseRaised.SubscribeResponse(e =>
             {
                 var faction = e.Source.TryCast<Actor>(out var necro)
                     ? necro.Faction.Name : FactionName.Monsters;
@@ -694,10 +701,10 @@ namespace Fiero.Business.Scenes
                 }
                 if (Player.CanSee(undead))
                 {
-                    Systems.Render.AnimateViewport(false, undead, Animation.Buff(ColorName.Magenta));
+                    renderSystem.AnimateViewport(false, undead, Animation.Buff(ColorName.Magenta));
                 }
                 undead.TryJoinParty(necro);
-                return Systems.Action.CorpseDestroyed.Handle(new(e.Corpse));
+                return actionSystem.CorpseDestroyed.Handle(new(e.Corpse));
 
                 EntityBuilder<Actor> Raise(EntityBuilder<Actor> zombie, EntityBuilder<Actor> skeleton, UndeadRaisingName mode)
                 {
@@ -712,20 +719,20 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.CorpseDestroyed:
             // - Destroy corpse item
-            yield return Systems.Action.CorpseDestroyed.SubscribeResponse(e =>
+            yield return actionSystem.CorpseDestroyed.SubscribeResponse(e =>
             {
-                Systems.Dungeon.RemoveItem(e.Corpse);
+                dungeonSystem.RemoveItem(e.Corpse);
                 Entities.FlagEntityForRemoval(e.Corpse.Id);
                 return true;
             });
             // ActionSystem.ItemPickedUp:
             // - Store item in inventory or fail
             // - Play a sound if it's the player
-            yield return Systems.Action.ItemPickedUp.SubscribeResponse(e =>
+            yield return actionSystem.ItemPickedUp.SubscribeResponse(e =>
             {
                 if (e.Actor.Inventory.TryPut(e.Item, out var fullyMerged))
                 {
-                    Systems.Dungeon.RemoveItem(e.Item);
+                    dungeonSystem.RemoveItem(e.Item);
                     if (fullyMerged)
                     {
                         Entities.FlagEntityForRemoval(e.Item.Id);
@@ -745,7 +752,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ItemEquipped:
             // - Equip item or fail
-            yield return Systems.Action.ItemEquipped.SubscribeResponse(e =>
+            yield return actionSystem.ItemEquipped.SubscribeResponse(e =>
             {
                 if (e.Actor.ActorEquipment.TryEquip(e.Item))
                 {
@@ -760,7 +767,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ItemUnequipped:
             // - Unequip item or fail
-            yield return Systems.Action.ItemUnequipped.SubscribeResponse(e =>
+            yield return actionSystem.ItemUnequipped.SubscribeResponse(e =>
             {
                 if (e.Actor.ActorEquipment.TryUnequip(e.Item))
                 {
@@ -776,7 +783,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ItemThrown:
             // - Spawn a 1-charge item where the consumable lands if it doesn't mulch
             // - Play an animation and a sound as the projectile flies
-            yield return Systems.Action.ItemThrown.SubscribeResponse(e =>
+            yield return actionSystem.ItemThrown.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
                 if (Player.CanHear(e.Actor))
@@ -785,13 +792,13 @@ namespace Fiero.Business.Scenes
                 }
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
-                    Systems.Render.CenterOn(Player);
+                    renderSystem.CenterOn(Player);
                     var anim = e.Item.ThrowableProperties.Throw switch
                     {
                         ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color),
                         _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color)
                     };
-                    Systems.Render.AnimateViewport(true, e.Actor.Location(), anim);
+                    renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
                     {
                         Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
@@ -805,11 +812,11 @@ namespace Fiero.Business.Scenes
                         clone.ConsumableProperties.RemainingUses = 1;
                     }
                     clone.Physics.Position = e.Position;
-                    Systems.Dungeon.AddItem(e.Actor.FloorId(), clone);
+                    dungeonSystem.AddItem(e.Actor.FloorId(), clone);
                 }
                 else
                 {
-                    Systems.Render.AnimateViewport(false, new Location(e.Item.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    renderSystem.AnimateViewport(false, new Location(e.Item.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!e.Item.ThrowableProperties.ThrowsUseCharges)
                 {
@@ -821,7 +828,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.WandZapped:
             // - Play an animation and a sound as the projectile flies
-            yield return Systems.Action.WandZapped.SubscribeResponse(e =>
+            yield return actionSystem.WandZapped.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouZap$ {e.Wand.DisplayName}.");
                 if (Player.CanHear(e.Actor))
@@ -831,7 +838,7 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
-                    Systems.Render.AnimateViewport(true, e.Actor.Location(), anim);
+                    renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
                     {
                         Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
@@ -848,7 +855,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ItemConsumed:
             // - Use up item and remove it from the game when completely consumed
-            yield return Systems.Action.ItemConsumed.SubscribeResponse(e =>
+            yield return actionSystem.ItemConsumed.SubscribeResponse(e =>
             {
                 if (e.Actor.TryUseItem(e.Item, out var consumed))
                 {
@@ -866,7 +873,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.PotionQuaffed:
             // - Identify potions
-            yield return Systems.Action.PotionQuaffed.SubscribeResponse(e =>
+            yield return actionSystem.PotionQuaffed.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouQuaff$ {e.Potion.DisplayName}.");
                 if (e.Actor.Identify(e.Potion, q => q.PotionProperties.QuaffEffect.Name == e.Potion.PotionProperties.QuaffEffect.Name
@@ -878,7 +885,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ScrollRead:
             // - Identify scrolls
-            yield return Systems.Action.ScrollRead.SubscribeResponse(e =>
+            yield return actionSystem.ScrollRead.SubscribeResponse(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouRead$ {e.Scroll.DisplayName}.");
                 if (e.Actor.Identify(e.Scroll, q => q.ScrollProperties.Effect.Name == e.Scroll.ScrollProperties.Effect.Name))
@@ -890,7 +897,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.SpellLearned:
             // - Add spell to actor's library
             // - Play sound and animation if player
-            yield return Systems.Action.SpellLearned.SubscribeResponse(e =>
+            yield return actionSystem.SpellLearned.SubscribeResponse(e =>
             {
                 if (!e.Actor.Spells.Learn(e.Spell))
                     return false;
@@ -904,7 +911,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.SpellForgotten:
             // - Remove spell from actor's library
             // - Play sound and animation if player
-            yield return Systems.Action.SpellForgotten.SubscribeResponse(e =>
+            yield return actionSystem.SpellForgotten.SubscribeResponse(e =>
             {
                 if (!e.Actor.Spells.Forget(e.Spell))
                     return false;
@@ -917,7 +924,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.SpellTargeted:
             // - Check effect preconditions
-            yield return Systems.Action.SpellTargeted.SubscribeResponse(e =>
+            yield return actionSystem.SpellTargeted.SubscribeResponse(e =>
             {
                 foreach (var effect in e.Spell.Effects.Active)
                 {
@@ -929,13 +936,13 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.SpellCast:
-            yield return Systems.Action.SpellCast.SubscribeResponse(e =>
+            yield return actionSystem.SpellCast.SubscribeResponse(e =>
             {
                 return true;
             });
             // ActionSystem.ActorBumpedObstacle:
             // - Play a sound when it's the player
-            yield return Systems.Action.ActorBumpedObstacle.SubscribeHandler(e =>
+            yield return actionSystem.ActorBumpedObstacle.SubscribeHandler(e =>
             {
                 if (e.Obstacle != null)
                 {
@@ -952,28 +959,28 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorSteppedOnTrap:
             // - Show an animation if the player can see this
-            yield return Systems.Action.ActorSteppedOnTrap.SubscribeHandler(e =>
+            yield return actionSystem.ActorSteppedOnTrap.SubscribeHandler(e =>
             {
                 e.Actor.Log?.Write($"$Action.YouTriggerATrap$.");
                 if (Player.CanSee(e.Actor))
                 {
                     var pos = e.Feature.Position();
-                    Systems.Render.CenterOn(Player);
+                    renderSystem.CenterOn(Player);
                     Resources.Sounds.Get(SoundName.TrapSpotted, pos - Player.Position()).Play();
-                    Systems.Render.AnimateViewport(false, new Location(e.Actor.FloorId(), pos), Animation.ExpandingRing(5, tint: ColorName.LightBlue));
+                    renderSystem.AnimateViewport(false, new Location(e.Actor.FloorId(), pos), Animation.ExpandingRing(5, tint: ColorName.LightBlue));
                 }
             });
             // ActionSystem.ExplosionHappened:
             // - Show an animation and play sound
             // - Damage all affected entities
-            yield return Systems.Action.ExplosionHappened.SubscribeResponse(e =>
+            yield return actionSystem.ExplosionHappened.SubscribeResponse(e =>
             {
                 if (Player.FloorId() != e.FloorId)
                     return true;
                 Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
                 if (Player.CanSee(e.FloorId, e.Center))
                 {
-                    Systems.Render.AnimateViewport(false, new Location(e.FloorId, e.Center), e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
+                    renderSystem.AnimateViewport(false, new Location(e.FloorId, e.Center), e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
                 }
                 return true;
             });
@@ -983,7 +990,7 @@ namespace Fiero.Business.Scenes
             // - Handle chest interactions
             // - Handle stair and portal interactions
             // - Empty and fill action queue on player floor change
-            yield return Systems.Action.FeatureInteractedWith.SubscribeResponse(e =>
+            yield return actionSystem.FeatureInteractedWith.SubscribeResponse(e =>
             {
                 if (e.Feature.TryToggleDoor())
                 {
@@ -1067,28 +1074,28 @@ namespace Fiero.Business.Scenes
 
                     void RemoveFeature()
                     {
-                        Systems.Dungeon.RemoveFeature(e.Feature);
+                        dungeonSystem.RemoveFeature(e.Feature);
                         Entities.FlagEntityForRemoval(e.Feature.Id);
                     }
                 }
 
                 bool HandleStairs(FloorId current, FloorId next)
                 {
-                    var currentFloor = Systems.Dungeon.GetFloor(current);
-                    if (!Systems.Dungeon.TryGetFloor(next, out var nextFloor))
+                    var currentFloor = dungeonSystem.GetFloor(current);
+                    if (!dungeonSystem.TryGetFloor(next, out var nextFloor))
                     {
                         e.Actor.Log?.Write($"$Error.NoFloorWithId$ {next}.");
                         return false;
                     }
-                    var stairs = Systems.Dungeon.GetAllFeatures(next)
+                    var stairs = dungeonSystem.GetAllFeatures(next)
                         .TrySelect(f => (f.TryCast<Portal>(out var portal), portal))
                         .Single(f => f.PortalProperties.Connects(current, next));
-                    Systems.Action.StopTracking(e.Actor.Id);
+                    actionSystem.StopTracking(e.Actor.Id);
                     if (e.Actor.IsPlayer())
                     {
-                        foreach (var actor in Systems.Dungeon.GetAllActors(current))
+                        foreach (var actor in dungeonSystem.GetAllActors(current))
                         {
-                            Systems.Action.StopTracking(actor.Id);
+                            actionSystem.StopTracking(actor.Id);
                         }
                     }
                     currentFloor.RemoveActor(e.Actor);
@@ -1098,16 +1105,16 @@ namespace Fiero.Business.Scenes
                     e.Actor.Log?.Write($"$Action.YouTakeTheStairsTo$ {next}.");
                     if (e.Actor.IsPlayer())
                     {
-                        foreach (var actor in Systems.Dungeon.GetAllActors(next))
+                        foreach (var actor in dungeonSystem.GetAllActors(next))
                         {
-                            Systems.Action.Track(actor.Id);
+                            actionSystem.Track(actor.Id);
                         }
                         // Abruptly stop the current turn so that the actor queue is flushed completely
-                        Systems.Action.AbortCurrentTurn();
-                        Systems.Dungeon.RecalculateFov(Player);
-                        Systems.Render.CenterOn(Player);
+                        actionSystem.AbortCurrentTurn();
+                        dungeonSystem.RecalculateFov(Player);
+                        renderSystem.CenterOn(Player);
                     }
-                    Systems.Action.StopTracking(e.Actor.Id);
+                    actionSystem.StopTracking(e.Actor.Id);
                     return true;
                 }
             });
@@ -1124,12 +1131,12 @@ namespace Fiero.Business.Scenes
         {
             if (_newFrame)
             {
-                Systems.Action.ElapseTurn(Player.Id);
+                Systems.Get<ActionSystem>().ElapseTurn(Player.Id);
                 _newFrame = false;
             }
-            Systems.Render.Update(t, dt);
-            Systems.Input.Update(t, dt);
-            Systems.Music.Update(t, dt);
+            Systems.Get<RenderSystem>().Update(t, dt);
+            Systems.Get<InputSystem>().Update(t, dt);
+            Systems.Get<MusicSystem>().Update(t, dt);
             if (UI.Input.IsKeyboardFocusAvailable && UI.Input.IsKeyPressed(VirtualKeys.R))
             {
                 if (UI.Input.IsKeyDown(VirtualKeys.Shift))
@@ -1147,7 +1154,7 @@ namespace Fiero.Business.Scenes
         public override void DrawBackground(RenderTarget target, RenderStates states)
         {
             UI.Window.Clear();
-            Systems.Render.Draw(target, states);
+            Systems.Get<RenderSystem>().Draw(target, states);
         }
 
         public override void DrawForeground(RenderTarget target, RenderStates states)
@@ -1165,9 +1172,9 @@ namespace Fiero.Business.Scenes
             }
             if (State == SceneState.Main)
             {
-                Systems.Action.Reset();
-                Systems.Render.Reset();
-                Systems.Render.CenterOn(Player);
+                Systems.Get<ActionSystem>().Reset();
+                Systems.Get<RenderSystem>().Reset();
+                Systems.Get<RenderSystem>().CenterOn(Player);
             }
         }
     }

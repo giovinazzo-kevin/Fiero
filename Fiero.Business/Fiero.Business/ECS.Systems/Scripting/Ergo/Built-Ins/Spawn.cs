@@ -35,9 +35,9 @@ public sealed class Spawn : BuiltIn
             var spawned = new List<EcsEntity>();
             if (args[0] is List list)
             {
-                var systems = Services.GetInstance<GameSystems>();
+                var systems = Services.GetInstance<MetaSystem>();
                 // TODO: better way of determining floorID
-                var player = systems.Render.Viewport.Following.V;
+                var player = systems.Get<RenderSystem>().Viewport.Following.V;
                 var floorId = player?.FloorId() ?? default;
                 var position = player?.Position() ?? default;
                 foreach (var item in list.Contents)
@@ -100,7 +100,7 @@ public sealed class Spawn : BuiltIn
                     }
                     else if (entity is Feature f)
                     {
-                        if (!systems.Dungeon.AddFeature(floorId, f))
+                        if (!systems.Get<DungeonSystem>().AddFeature(floorId, f))
                         {
                             vm.Fail();
                             return;
@@ -108,10 +108,10 @@ public sealed class Spawn : BuiltIn
                     }
                     else if (entity is Tile t)
                     {
-                        systems.Dungeon.SetTileAt(floorId, t.Position(), t);
+                        systems.Get<DungeonSystem>().SetTileAt(floorId, t.Position(), t);
                     }
                 }
-                systems.Render.CenterOn(player);
+                systems.Get<RenderSystem>().CenterOn(player);
                 vm.SetArg(0, args[1]);
                 vm.SetArg(1, new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType()))));
                 ErgoVM.Goals.Unify2(vm);

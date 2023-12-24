@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -14,15 +13,15 @@ namespace Fiero.Business
     /// </summary>
     public abstract class IntrinsicEffect : Effect
     {
-        protected abstract void OnApplied(GameSystems systems, Entity owner, Actor target);
-        protected abstract void OnRemoved(GameSystems systems, Entity owner, Actor target);
+        protected abstract void OnApplied(MetaSystem systems, Entity owner, Actor target);
+        protected abstract void OnRemoved(MetaSystem systems, Entity owner, Actor target);
 
-        protected override IEnumerable<Subscription> RouteEvents(GameSystems systems, Entity owner)
+        protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (owner.TryCast<Actor>(out var target))
             {
                 var sub = new Subscription(throwOnDoubleDispose: false);
-                sub.Add(systems.Action.ActorTurnStarted.SubscribeHandler(e =>
+                sub.Add(systems.Get<ActionSystem>().ActorTurnStarted.SubscribeHandler(e =>
                 {
                     if (e.Actor == target)
                     {
@@ -32,7 +31,7 @@ namespace Fiero.Business
                 }));
                 yield return sub;
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
-                yield return systems.Action.ActorDied.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ActorDied.SubscribeHandler(e =>
                 {
                     if (e.Actor == target)
                     {
@@ -43,14 +42,14 @@ namespace Fiero.Business
             }
             else if (owner.TryCast<Item>(out var item))
             {
-                yield return systems.Action.ItemPickedUp.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ItemPickedUp.SubscribeHandler(e =>
                 {
                     if (e.Item == item)
                     {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });
-                yield return systems.Action.ItemDropped.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().ItemDropped.SubscribeHandler(e =>
                 {
                     if (e.Item == item)
                     {
@@ -61,14 +60,14 @@ namespace Fiero.Business
             }
             else if (owner.TryCast<Spell>(out var spell))
             {
-                yield return systems.Action.SpellLearned.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().SpellLearned.SubscribeHandler(e =>
                 {
                     if (e.Spell == spell)
                     {
                         OnApplied(systems, owner, e.Actor);
                     }
                 });
-                yield return systems.Action.SpellForgotten.SubscribeHandler(e =>
+                yield return systems.Get<ActionSystem>().SpellForgotten.SubscribeHandler(e =>
                 {
                     if (e.Spell == spell)
                     {

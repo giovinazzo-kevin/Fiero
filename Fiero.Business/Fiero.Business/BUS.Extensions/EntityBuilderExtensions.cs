@@ -19,7 +19,7 @@ namespace Fiero.Business
                 void OnBuilt(EntityBuilder<T> b, T o)
                 {
                     builder.Built -= OnBuilt;
-                    var systems = s.GetInstance<GameSystems>();
+                    var systems = s.GetInstance<MetaSystem>();
                     var sub = new Subscription(throwOnDoubleDispose: false);
                     wrap ??= (e => e.Resolve(o));
                     var fx = wrap(def);
@@ -204,14 +204,14 @@ namespace Fiero.Business
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, NpcName type)
             where T : Actor => builder.AddOrTweak<DialogueComponent>((s, c) =>
             {
-                var gameSystems = (GameSystems)s.GetInstance(typeof(GameSystems));
-                gameSystems.Dialogue.SetTriggers(gameSystems, type, c);
+                var MetaSystem = (MetaSystem)s.GetInstance(typeof(MetaSystem));
+                MetaSystem.Get<DialogueSystem>().SetTriggers(MetaSystem, type, c);
             });
         public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, FeatureName type)
             where T : Feature => builder.AddOrTweak<DialogueComponent>((s, c) =>
             {
-                var gameSystems = (GameSystems)s.GetInstance(typeof(GameSystems));
-                gameSystems.Dialogue.SetTriggers(gameSystems, type, c);
+                var MetaSystem = (MetaSystem)s.GetInstance(typeof(MetaSystem));
+                MetaSystem.Get<DialogueSystem>().SetTriggers(MetaSystem, type, c);
             });
         public static EntityBuilder<T> WithPortalInfo<T>(this EntityBuilder<T> builder, FloorConnection conn)
             where T : Feature => builder.AddOrTweak<PortalComponent>((s, c) =>
@@ -288,7 +288,7 @@ namespace Fiero.Business
             {
                 c.TargetingShape = shape;
             });
-        public static EntityBuilder<T> WithTargetingFilter<T>(this EntityBuilder<T> builder, Func<GameSystems, Actor, PhysicalEntity, bool> targetFilter)
+        public static EntityBuilder<T> WithTargetingFilter<T>(this EntityBuilder<T> builder, Func<MetaSystem, Actor, PhysicalEntity, bool> targetFilter)
             where T : Spell => builder.Tweak<SpellComponent>((s, c) =>
             {
                 c.TargetingFilter = targetFilter;

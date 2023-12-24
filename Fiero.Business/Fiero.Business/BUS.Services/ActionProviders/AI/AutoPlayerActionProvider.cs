@@ -5,13 +5,13 @@
     {
         protected readonly AiSensor<Actor> EnemiesOnFloor;
 
-        public AutoPlayerActionProvider(GameSystems systems) : base(systems)
+        public AutoPlayerActionProvider(MetaSystem systems) : base(systems)
         {
             Sensors.Add(
                 EnemiesOnFloor = new((sys, a) =>
                 {
-                    return sys.Dungeon.GetAllActors(a.FloorId())
-                         .Where(b => sys.Faction.GetRelations(a, b).Right.IsHostile());
+                    return sys.Get<DungeonSystem>().GetAllActors(a.FloorId())
+                         .Where(b => sys.Get<FactionSystem>().GetRelations(a, b).Right.IsHostile());
                 }));
             RepathChance = Chance.Always;
         }

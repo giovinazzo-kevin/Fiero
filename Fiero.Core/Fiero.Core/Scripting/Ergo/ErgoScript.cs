@@ -22,7 +22,7 @@ namespace Fiero.Core
             VM = scope.Facade.BuildVM(
                 scope.BuildKnowledgeBase(CompilerFlags.Default),
                 DecimalType.CliDecimal);
-            hooks = scope.GetLibrary<CoreLib>()
+            hooks = scope.GetLibrary<CoreLib>(ErgoModules.Core)
                 .GetScriptSubscriptions(this)
                 .Select(s => new EventHook(s.Module.GetOrThrow().Explain(), s.Functor.Explain()))
                 .ToHashSet();

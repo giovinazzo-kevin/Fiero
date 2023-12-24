@@ -1,6 +1,4 @@
 ﻿using Ergo.Shell;
-using System.Text;
-using Unconcern;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -84,46 +82,47 @@ namespace Fiero.Business
 
         public Subscription TrackShell(ErgoShell shell)
         {
-            shell.UseColors = false;
-            shell.UseANSIEscapeSequences = false;
-            shell.UseUnicodeSymbols = false;
-            var cts = new CancellationTokenSource();
-            var outExpr = Concern.Defer()
-                //.After(TimeSpan.FromMilliseconds(20))
-                .UseAsynchronousTimer()
-                .Do(async token =>
-                {
-                    var sb = new StringBuilder();
-                    var result = await ScriptingSystem.Out.Reader.ReadAsync(token);
-                    var buffer = result.Buffer;
-                    foreach (var segment in buffer)
-                    {
-                        var bytes = segment.Span.ToArray();
-                        var str = ScriptingSystem.OutWriter.Encoding.GetString(bytes);
-                        sb.Append(str);
-                    }
-                    ScriptingSystem.Out.Reader.AdvanceTo(buffer.End);
-                    OutputAvailable?.Invoke(this, sb.ToString());
-                })
-                .Build();
-            var replExpr = Concern.Defer()
-                .Do(async token =>
-                {
-                    await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, ct: token)) ;
-                })
-                .Build();
-            _ = Concern.Deferral.LoopForever(outExpr, cts.Token);
-            _ = Concern.Deferral.Once(replExpr, cts.Token);
-            var closure = new ShellClosure(shell, ScriptingSystem.InWriter);
-            CharAvailable += closure.OnCharAvailable;
-            LineAvailable += closure.OnLineAvailable;
-            return new(new[] { () => {
-                CharAvailable -= closure.OnCharAvailable;
-                LineAvailable -= closure.OnLineAvailable;
-                cts.Cancel();
-                ScriptingSystem.In.Reader.CancelPendingRead();
-                ScriptingSystem.Out.Reader.CancelPendingRead();
-            } });
+            return new();
+            //shell.UseColors = false;
+            //shell.UseANSIEscapeSequences = false;
+            //shell.UseUnicodeSymbols = false;
+            //var cts = new CancellationTokenSource();
+            //var outExpr = Concern.Defer()
+            //    //.After(TimeSpan.FromMilliseconds(20))
+            //    .UseAsynchronousTimer()
+            //    .Do(async token =>
+            //    {
+            //        var sb = new StringBuilder();
+            //        var result = await ScriptingSystem.Out.Reader.ReadAsync(token);
+            //        var buffer = result.Buffer;
+            //        foreach (var segment in buffer)
+            //        {
+            //            var bytes = segment.Span.ToArray();
+            //            var str = ScriptingSystem.OutWriter.Encoding.GetString(bytes);
+            //            sb.Append(str);
+            //        }
+            //        ScriptingSystem.Out.Reader.AdvanceTo(buffer.End);
+            //        OutputAvailable?.Invoke(this, sb.ToString());
+            //    })
+            //    .Build();
+            //var replExpr = Concern.Defer()
+            //    .Do(async token =>
+            //    {
+            //        await foreach (var ans in shell.Repl(ScriptingSystem.StdlibScope, ct: token)) ;
+            //    })
+            //    .Build();
+            //_ = Concern.Deferral.LoopForever(outExpr, cts.Token);
+            //_ = Concern.Deferral.Once(replExpr, cts.Token);
+            //var closure = new ShellClosure(shell, ScriptingSystem.InWriter);
+            //CharAvailable += closure.OnCharAvailable;
+            //LineAvailable += closure.OnLineAvailable;
+            //return new(new[] { () => {
+            //    CharAvailable -= closure.OnCharAvailable;
+            //    LineAvailable -= closure.OnLineAvailable;
+            //    cts.Cancel();
+            //    ScriptingSystem.In.Reader.CancelPendingRead();
+            //    ScriptingSystem.Out.Reader.CancelPendingRead();
+            //} });
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
@@ -155,19 +154,19 @@ namespace Fiero.Business
                         Pane.CenterContentV.V = Pane.CenterContentH.V = false;
                         Pane.Caret.CharAvailable += (caret, ch) =>
                         {
-                            if (ScriptingSystem.Shell.InputReader.Blocking)
-                            {
-                                Put(ch);
-                            }
+                            //if (ScriptingSystem.Shell.InputReader.Blocking)
+                            //{
+                            //    Put(ch);
+                            //}
                         };
                         Pane.Caret.EnterPressed += (caret) =>
                         {
-                            if (!ScriptingSystem.Shell.InputReader.Blocking)
-                            {
-                                Pane.History.Add(Pane.Caret.Text);
-                                WriteLine(Pane.Caret.Text);
-                                Pane.ScrollToCursor();
-                            }
+                            //if (!ScriptingSystem.Shell.InputReader.Blocking)
+                            //{
+                            //    Pane.History.Add(Pane.Caret.Text);
+                            //    WriteLine(Pane.Caret.Text);
+                            //    Pane.ScrollToCursor();
+                            //}
                         };
                     })
                 .End()

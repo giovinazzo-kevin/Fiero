@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -18,7 +16,7 @@ namespace Fiero.Business
         {
             if (owner.Effects == null || !owner.Effects.Active.Any(e => e.Name switch
             {
-                EffectName.Script when e is ScriptEffect se => se.Script?.ScriptProperties.ScriptPath == Source.Script?.ScriptProperties.ScriptPath,
+                // EffectName.Script when e is ScriptEffect se => se.Script?.ScriptProperties.ScriptPath == Source.Script?.ScriptProperties.ScriptPath,
                 _ => e.Name == Source.Name
             }))
             {

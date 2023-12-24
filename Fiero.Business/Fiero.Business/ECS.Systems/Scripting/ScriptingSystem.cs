@@ -1,4 +1,5 @@
 ﻿using Ergo.Lang.Ast;
+using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -12,5 +13,7 @@ namespace Fiero.Business
         public static readonly Atom DataModule = new("data");
         public static readonly Atom EventModule = new("event");
         public static readonly Atom RandomModule = new("random");
+
+        public ScriptingSystem(EventBus bus) : base(bus) { }
     }
 }

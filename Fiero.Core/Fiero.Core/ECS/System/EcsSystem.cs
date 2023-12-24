@@ -22,12 +22,12 @@ namespace Fiero.Core
             EventBus = bus;
             Created = new(this, nameof(Created));
             Disposed = new(this, nameof(Disposed));
-            _ = Created.Raise(new());
+            _ = Created.Raise(new(this));
         }
 
         public virtual void Dispose()
         {
-            _ = Disposed.Raise(new());
+            _ = Disposed.Raise(new(this));
             foreach (var sub in Subscriptions)
                 sub.Dispose();
         }

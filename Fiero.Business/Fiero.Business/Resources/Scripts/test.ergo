@@ -1,2 +1,7 @@
 :- module(test, []).
 :- use_module(input).
+
+input:key_route(j, pressed, [_] >> j_pressed).
+
+j_pressed :-
+	write(we), nl.

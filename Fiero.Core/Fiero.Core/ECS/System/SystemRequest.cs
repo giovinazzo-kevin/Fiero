@@ -56,7 +56,7 @@ namespace Fiero.Core
 
         Subscription ISystemRequest.SubscribeResponse(Func<object, object> transform)
         {
-            return SubscribeResponse(arg => (TResponseArgs)transform(arg));
+            return SubscribeResponse(arg => (TResponseArgs)(dynamic)transform(arg));
         }
 
         public Subscription SubscribeResponse(Func<TArgs, TResponseArgs> transform)

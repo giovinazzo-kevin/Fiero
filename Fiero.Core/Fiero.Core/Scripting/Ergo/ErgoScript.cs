@@ -13,7 +13,7 @@ namespace Fiero.Core
         private readonly HashSet<EventHook> hooks = new();
 
         public readonly TermMarshallingContext MarshallingContext = new();
-        public readonly Dictionary<EventHook, Hook> ErgoHooks = new();
+        public readonly Dictionary<EventHook, (Hook Hook, ErgoVM.Op Op)> ErgoHooks = new();
 
         private volatile bool running = false;
 

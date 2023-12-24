@@ -1,8 +1,8 @@
 ﻿using Ergo.Facade;
 using Ergo.Interpreter;
+using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
 using Ergo.Lang.Ast;
-using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 using Ergo.Shell;
 using System.IO.Pipelines;
@@ -72,24 +72,18 @@ namespace Fiero.Core
             var type = payload.GetType();
             if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, payload, type, default, out var term))
                 term = TermMarshall.ToTerm(payload, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
-            if (!ergoScript.ErgoHooks.TryGetValue(@event, out var hook))
+            if (!ergoScript.ErgoHooks.TryGetValue(@event, out var hookDef))
             {
                 var evtName = new Atom(@event.Event.ToErgoCase());
                 var sysName = new Atom(@event.System.ToErgoCase());
-                hook = ergoScript.ErgoHooks[@event] = new(new(evtName, 1, sysName, default));
+                var ergoHook = new Hook(new(evtName, 1, sysName, default));
+                hookDef = ergoScript.ErgoHooks[@event] = (ergoHook, ergoHook.Compile(throwIfNotDefined: true));
             }
-            hook.SetArg(0, term);
+            hookDef.Hook.SetArg(0, term);
             var scope = ergoScript.VM.ScopedInstance();
-            try
-            {
-                scope.Query = hook.Compile(throwIfNotDefined: true);
-                scope.Run();
-                return true;
-            }
-            catch (ErgoException)
-            {
-                return false;
-            }
+            scope.Query = hookDef.Op;
+            scope.Run();
+            return true;
         }
     }
 }

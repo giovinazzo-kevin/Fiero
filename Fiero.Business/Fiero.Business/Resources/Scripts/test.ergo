@@ -1,16 +1,2 @@
-:- module(test, [boom/1]).
+:- module(test, []).
 :- use_module(input).
-:- use_module(data).
-:- use_module(event).
-:- use_module(anim).
-:- use_module(effect).
-:- use_module(random).
-:- use_module(sound).
-:- use_module(bomb_commands).
-
-test:began :- 
-	bind(j, pressed, [_]>>(spawn([throwable_bomb{charges:999, radius: 20, fuse: 0}], _))),
-	write('hi'), nl.
-
-test:ended :-
-	write('bye'), nl.

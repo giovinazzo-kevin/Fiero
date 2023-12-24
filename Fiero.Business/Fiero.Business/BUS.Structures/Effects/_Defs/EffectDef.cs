@@ -67,8 +67,8 @@ namespace Fiero.Business
                 EffectName.BestowTrait => new BestowTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
                 EffectName.RemoveTrait => new RemoveTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
                 EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
-                EffectName.Script when Script.ScriptProperties.LastError == null => new ScriptEffect(Script, Arguments.ToErgoCase()),
-                EffectName.Script when Script.ScriptProperties.LastError != null => new NullEffect(),
+                // EffectName.Script when Script.ScriptProperties.LastError == null => new ScriptEffect(Script, Arguments.ToErgoCase()),
+                // EffectName.Script when Script.ScriptProperties.LastError != null => new NullEffect(),
                 EffectName.None => new NullEffect(),
                 _ => throw new NotSupportedException(Name.ToString()),
             };

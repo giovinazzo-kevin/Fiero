@@ -145,11 +145,12 @@ namespace Fiero.Business.Scenes
         }
         private IEnumerable<Subscription> RouteScriptingSystemEvents()
         {
+            yield break;
             // ScriptingSystem.ScriptLoaded:
             // - Track console output
             // - Track script in console
-            yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
-            yield return new Subscription(new[] { Systems.Scripting.UnloadAllScripts });
+            //yield return Systems.Render.DeveloperConsole.TrackShell(Systems.Scripting.Shell);
+            //yield return new Subscription(new[] { Systems.Scripting.UnloadAllScripts });
             //var scriptLoaded = new Subscription();
             //scriptLoaded.Add(Systems.Scripting.ScriptLoaded.SubscribeResponse(e =>
             //{
@@ -185,8 +186,8 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Resource_Gold(5000).Build(),
                         Resources.Entities.Weapon_Sword()
                             .WithDescription("Lorem ipsum dolor\nsit amet.\nThis sword is cool wtf.\nNice.")
-                            .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"fuse_cutter").Build()),
-                                e => new GrantedOnEquip(e))
+                            // .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"fuse_cutter").Build()),
+                            //     e => new GrantedOnEquip(e))
                             .WithIntrinsicEffect(new EffectDef(EffectName.UncontrolledTeleport),
                                 e => new GrantedWhenHitByMeleeWeapon(e))
                             .WithColor(ColorName.LightRed)
@@ -206,7 +207,7 @@ namespace Fiero.Business.Scenes
                         Resources.Entities.Scroll_OfRaiseUndead().Build()
                     )
                     //.WithIntrinsicTrait(Traits.Invulnerable)
-                    .WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
+                    //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     .WithHealth(100000)
                     .Build();

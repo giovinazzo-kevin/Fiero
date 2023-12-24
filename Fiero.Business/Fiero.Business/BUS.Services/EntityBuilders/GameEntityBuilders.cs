@@ -33,12 +33,12 @@
             .WithTraitTracking()
             ;
 
-        public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
-            => Entities.CreateBuilder<Script>()
-            .WithName(name ?? scriptPath)
-            .WithScriptInfo(scriptPath, trace: trace, cache: cache)
-            .WithEffectTracking()
-            ;
+        //public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
+        //    => Entities.CreateBuilder<Script>()
+        //    .WithName(name ?? scriptPath)
+        //    .WithScriptInfo(scriptPath, trace: trace, cache: cache)
+        //    .WithEffectTracking()
+        //    ;
 
         public EntityBuilder<Actor> Player()
             => Entities.CreateBuilder<Actor>()
@@ -634,8 +634,8 @@
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb").Build()),
-                e => new GrantedWhenHitByThrownItem(e))
+            // .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb").Build()),
+            //     e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion
 

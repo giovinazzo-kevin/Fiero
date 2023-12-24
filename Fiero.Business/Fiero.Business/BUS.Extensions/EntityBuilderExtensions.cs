@@ -319,25 +319,25 @@ namespace Fiero.Business
             {
                 c.Type = type;
             });
-        public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false, bool cache = false)
-            where T : Script => builder.AddOrTweak<ErgoScriptComponent>((s, c) =>
-            {
-                c.ScriptPath = fileName;
-                c.ShowTrace = trace;
-                c.Cached = cache;
-                // Delegate the actual loading of the script to when the entity is built
-                builder.Built += OnBuilt;
-                void OnBuilt(EntityBuilder<T> b, T e)
-                {
-                    builder.Built -= OnBuilt;
-                    var scriptSystem = s.GetInstance<ScriptingSystem>();
-                    if (!scriptSystem.LoadScript(e))
-                    {
-                        // Flag script as invalid
-                        return;
-                    }
-                }
-            });
+        //public static EntityBuilder<T> WithScriptInfo<T>(this EntityBuilder<T> builder, string fileName, bool trace = false, bool cache = false)
+        //    where T : Script => builder.AddOrTweak<ErgoScriptComponent>((s, c) =>
+        //    {
+        //        c.ScriptPath = fileName;
+        //        c.ShowTrace = trace;
+        //        c.Cached = cache;
+        //        // Delegate the actual loading of the script to when the entity is built
+        //        builder.Built += OnBuilt;
+        //        void OnBuilt(EntityBuilder<T> b, T e)
+        //        {
+        //            builder.Built -= OnBuilt;
+        //            var scriptSystem = s.GetInstance<ScriptingSystem>();
+        //            if (!scriptSystem.LoadScript(e))
+        //            {
+        //                // Flag script as invalid
+        //                return;
+        //            }
+        //        }
+        //    });
         public static EntityBuilder<T> WithTraitTracking<T>(this EntityBuilder<T> builder)
             where T : Entity => builder.AddOrTweak<TraitsComponent>();
         public static EntityBuilder<T> WithIntrinsicTrait<T>(this EntityBuilder<T> builder, Trait trait)

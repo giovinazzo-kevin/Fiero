@@ -1,4 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Unconcern;
+using Unconcern.Common;
+using Unconcern.Delegation;
 
 
 namespace Fiero.Core
@@ -9,14 +12,40 @@ namespace Fiero.Core
         bool TryLoad(TScripts fileName, out Script script);
 
         bool Respond(Script sender, Script.EventHook @event, object payload);
+        bool Observe(Script sender, GameDataStore store, Script.DataHook datum, object oldValue, object newValue);
 
+        /// <summary>
+        /// Generates a list of routes that can be used to let a script observe a stream of changing values from all the game data types registered in the store.
+        /// </summary>
+        public ScriptDataRoutes GetScriptDataRoutes(GameDataStore store)
+        {
+            var finalDict = new ScriptDataRoutes();
+            foreach (var datum in store.GetRegisteredDatumTypes())
+            {
+                var dataHook = new Script.DataHook(datum.Name);
+                finalDict.Add(dataHook, (script) => SubscribeHandler(datum.Name, msg => Observe(script, store, dataHook, msg.OldValue, msg.NewValue)));
+            }
+            return finalDict;
 
-        public ScriptRoutes GetScriptRoutes(MetaSystem meta)
+            Subscription SubscribeHandler(string datumName, Action<GameDataStore.DatumChangedEvent> handle)
+            {
+                return Concern.Delegate(store.EventBus)
+                    .When<GameDataStore.DatumChangedEvent>(x => datumName.Equals(x.Content.Datum.Name))
+                    .Do<GameDataStore.DatumChangedEvent>(msg => handle(msg.Content))
+                    .Build()
+                    .Listen(GameDataStore.EventHubName);
+            }
+        }
+
+        /// <summary>
+        /// Creates a list of routes that can be used to let a script react to the events sent by the various game systems.
+        /// </summary>
+        public ScriptEventRoutes GetScriptEventRoutes(MetaSystem meta)
         {
             var sysRegex = NormalizeSystemName();
             var reqRegex = NormalizeRequestName();
             var evtRegex = NormalizeEventName();
-            var finalDict = new ScriptRoutes();
+            var finalDict = new ScriptEventRoutes();
             foreach (var (sys, field, isReq) in meta.GetSystemEventFields())
             {
                 var sysName = sysRegex.Replace(sys.GetType().Name, string.Empty);
@@ -24,19 +53,19 @@ namespace Fiero.Core
                 if (isReq)
                 {
                     var eventHook = new Script.EventHook(sysName, reqRegex.Replace(field.Name, string.Empty));
-                    finalDict.Add(eventHook, (self) =>
+                    finalDict.Add(eventHook, (script) =>
                     {
                         return ((ISystemRequest)systemEvent)
-                            .SubscribeResponse(evt => Respond(self, eventHook, evt));
+                            .SubscribeResponse(evt => Respond(script, eventHook, evt));
                     });
                 }
                 else
                 {
                     var eventHook = new Script.EventHook(sysName, reqRegex.Replace(field.Name, string.Empty));
-                    finalDict.Add(eventHook, (self) =>
+                    finalDict.Add(eventHook, (script) =>
                     {
                         return systemEvent
-                            .SubscribeHandler(evt => Respond(self, eventHook, evt));
+                            .SubscribeHandler(evt => Respond(script, eventHook, evt));
                     });
                 }
             }

@@ -1,16 +1,43 @@
-﻿namespace Fiero.Core
+﻿using Unconcern.Common;
+
+namespace Fiero.Core
 {
 
-    public class GameDataStore
+    public class GameDataStore(EventBus bus)
     {
-        protected readonly Dictionary<string, object> Data;
+        public const string EventHubName = nameof(GameDataStore);
+        public readonly record struct DatumChangedEvent(GameDataStore Sender, GameDatum Datum, object OldValue, object NewValue);
 
+        protected readonly Dictionary<string, object> Data = new();
+        protected readonly Dictionary<string, GameDatum> Registry = new();
 
+        public readonly EventBus EventBus = bus;
 
-        public GameDataStore()
+        /// <summary>
+        /// Registers a datum, making it known to the store and enabling script compilation to target specific datum changes.
+        /// </summary>
+        public void Register(GameDatum datum)
         {
-            Data = new Dictionary<string, object>();
+            Registry.Add(datum.Name, datum);
         }
+
+        /// <summary>
+        /// Registers all GameDatum instances defined as static fields in the passed type and its nested types.
+        /// </summary>
+        public void RegisterByReflection(Type lookForFieldsInType)
+        {
+            foreach (var field in lookForFieldsInType.GetFields())
+            {
+                if (field.IsStatic && field.FieldType.IsAssignableTo(typeof(GameDatum)))
+                    Register((GameDatum)field.GetValue(null));
+            }
+
+            foreach (var nestedType in lookForFieldsInType.GetNestedTypes())
+                RegisterByReflection(nestedType);
+        }
+
+        public IEnumerable<GameDatum> GetRegisteredDatumTypes() => Registry.Values;
+        public GameDatum GetRegisteredDatumType(string name) => Registry[name];
 
         public T GetOrDefault<T>(GameDatum<T> datum, T defaultValue = default)
             => TryGetValue(datum, out var val) ? val : defaultValue;
@@ -35,6 +62,7 @@
                 return false;
             }
             Data[datum.Name] = newValue;
+            EventBus.Send(new DatumChangedEvent(this, datum, old, newValue), EventHubName);
             datum.OnValueChanged(compare, newValue);
             return true;
         }

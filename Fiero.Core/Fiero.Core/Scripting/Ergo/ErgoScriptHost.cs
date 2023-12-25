@@ -72,14 +72,37 @@ namespace Fiero.Core
             var type = payload.GetType();
             if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, payload, type, default, out var term))
                 term = TermMarshall.ToTerm(payload, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
-            if (!ergoScript.ErgoHooks.TryGetValue(@event, out var hookDef))
+            if (!ergoScript.ErgoEventHooks.TryGetValue(@event, out var hookDef))
             {
                 var evtName = new Atom(@event.Event.ToErgoCase());
                 var sysName = new Atom(@event.System.ToErgoCase());
                 var ergoHook = new Hook(new(evtName, 1, sysName, default));
-                hookDef = ergoScript.ErgoHooks[@event] = (ergoHook, ergoHook.Compile(throwIfNotDefined: true));
+                hookDef = ergoScript.ErgoEventHooks[@event] = (ergoHook, ergoHook.Compile(throwIfNotDefined: true));
             }
             hookDef.Hook.SetArg(0, term);
+            var scope = ergoScript.VM.ScopedInstance();
+            scope.Query = hookDef.Op;
+            scope.Run();
+            return true;
+        }
+
+        public bool Observe(Script sender, GameDataStore store, Script.DataHook datum, object oldValue, object newValue)
+        {
+            if (sender is not ErgoScript ergoScript)
+                return true;
+            var type = store.GetRegisteredDatumType(datum.Name).T;
+            if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, oldValue, type, default, out var oldTerm))
+                oldTerm = TermMarshall.ToTerm(oldValue, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
+            if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, newValue, type, default, out var newTerm))
+                newTerm = TermMarshall.ToTerm(newValue, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
+            if (!ergoScript.ErgoDataHooks.TryGetValue(datum, out var hookDef))
+            {
+                var datumName = new Atom(datum.Name.ToErgoCase() + "_changed"); // e.g. data:player_name_changed(OldValue, NewValue)
+                var ergoHook = new Hook(new(datumName, 2, ErgoModules.Data, default));
+                hookDef = ergoScript.ErgoDataHooks[datum] = (ergoHook, ergoHook.Compile(throwIfNotDefined: true));
+            }
+            hookDef.Hook.SetArg(0, oldTerm);
+            hookDef.Hook.SetArg(1, newTerm);
             var scope = ergoScript.VM.ScopedInstance();
             scope.Query = hookDef.Op;
             scope.Run();

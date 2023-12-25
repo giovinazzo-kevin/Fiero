@@ -2,7 +2,10 @@
 
 namespace Fiero.Core
 {
-    public class GameScripts<TScripts>(IScriptHost<TScripts> host, MetaSystem meta)
+    /// <summary>
+    /// Handles caching of scripts and their top-level routing through a provided IScriptHost.
+    /// </summary>
+    public class GameScripts<TScripts>(IScriptHost<TScripts> host, MetaSystem meta, GameDataStore store)
         where TScripts : struct, Enum
     {
         protected readonly Dictionary<string, Script> Scripts = new();
@@ -23,9 +26,10 @@ namespace Fiero.Core
 
         public IEnumerable<Subscription> RouteSubscriptions()
         {
-            var routes = Host.GetScriptRoutes(meta);
+            var eventRoutes = Host.GetScriptEventRoutes(meta);
+            var dataRoutes = Host.GetScriptDataRoutes(store);
             foreach (var item in Scripts.Values)
-                yield return item.Run(routes);
+                yield return item.Run(eventRoutes, dataRoutes);
         }
     }
 }

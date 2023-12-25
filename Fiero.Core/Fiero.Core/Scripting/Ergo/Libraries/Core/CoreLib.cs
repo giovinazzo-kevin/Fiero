@@ -9,11 +9,18 @@ namespace Fiero.Core
     {
         public override Atom Module => ErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
-        public void SubscribeScriptToEvent(Atom scriptModule, Atom eventModule, Atom @event)
+        protected readonly Dictionary<Atom, HashSet<string>> ObservedData = new();
+        public void SubscribeToEvent(Atom scriptModule, Atom eventModule, Atom @event)
         {
             if (!Subscribptions.TryGetValue(scriptModule, out var set))
                 set = Subscribptions[scriptModule] = new();
             set.Add(new(@event, 1, eventModule, default));
+        }
+        public void ObserveDatum(Atom scriptModule, string name)
+        {
+            if (!ObservedData.TryGetValue(scriptModule, out var set))
+                set = ObservedData[scriptModule] = new();
+            set.Add(name);
         }
         public IEnumerable<Signature> GetScriptSubscriptions(ErgoScript script)
         {
@@ -26,6 +33,17 @@ namespace Fiero.Core
             }
             return set;
         }
+        public IEnumerable<string> GetObservedData(ErgoScript script)
+        {
+            var set = new HashSet<string>();
+            var modules = script.VM.KB.Scope.VisibleModules;
+            foreach (var m in modules)
+            {
+                if (ObservedData.TryGetValue(m, out var inner))
+                    set.UnionWith(inner);
+            }
+            return set;
+        }
         public override IEnumerable<BuiltIn> GetExportedBuiltins()
         {
             yield break;
@@ -33,6 +51,7 @@ namespace Fiero.Core
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {
             yield return new SubscribeToEvent();
+            yield return new ObserveDatum();
         }
     }
 }

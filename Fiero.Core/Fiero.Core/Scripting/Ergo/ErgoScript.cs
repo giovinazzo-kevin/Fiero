@@ -10,35 +10,48 @@ namespace Fiero.Core
     public class ErgoScript : Script
     {
         public readonly ErgoVM VM;
-        private readonly HashSet<EventHook> hooks = new();
+        private readonly HashSet<EventHook> eventHooks = new();
+        private readonly HashSet<DataHook> dataHooks = new();
 
-        public readonly TermMarshallingContext MarshallingContext = new();
-        public readonly Dictionary<EventHook, (Hook Hook, ErgoVM.Op Op)> ErgoHooks = new();
+        internal readonly TermMarshallingContext MarshallingContext = new();
+        internal readonly Dictionary<EventHook, (Hook Hook, ErgoVM.Op Op)> ErgoEventHooks = new();
+        internal readonly Dictionary<DataHook, (Hook Hook, ErgoVM.Op Op)> ErgoDataHooks = new();
 
         private volatile bool running = false;
-
 
         public ErgoScript(InterpreterScope scope)
         {
             VM = scope.Facade.BuildVM(
                 scope.BuildKnowledgeBase(CompilerFlags.Default),
                 DecimalType.CliDecimal);
-            hooks = scope.GetLibrary<CoreLib>(ErgoModules.Core)
+            var coreLib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
+            eventHooks = coreLib
                 .GetScriptSubscriptions(this)
                 .Select(s => new EventHook(s.Module.GetOrThrow().Explain().ToCSharpCase(), s.Functor.Explain().ToCSharpCase()))
                 .ToHashSet();
+            dataHooks = coreLib
+                .GetObservedData(this)
+                .Select(s => new DataHook(s))
+                .ToHashSet();
         }
-
-        public override IEnumerable<EventHook> Hooks => hooks;
-        public override Subscription Run(ScriptRoutes routes)
+        public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)
         {
             if (running)
                 throw new InvalidOperationException();
             running = true;
             var subs = new Subscription(new Action[] { () => running = false });
-            foreach (var hook in hooks)
+            foreach (var hook in eventHooks)
             {
-                if (routes.TryGetValue(hook, out var route))
+                if (eventRoutes.TryGetValue(hook, out var route))
+                    subs.Add(route(this));
+                else
+                {
+                    // TODO: Check whether it's a script event or a missing route
+                }
+            }
+            foreach (var hook in dataHooks)
+            {
+                if (dataRoutes.TryGetValue(hook, out var route))
                     subs.Add(route(this));
                 else
                 {
@@ -47,5 +60,7 @@ namespace Fiero.Core
             }
             return subs;
         }
+        public override IEnumerable<EventHook> EventHooks => eventHooks;
+        public override IEnumerable<DataHook> DataHooks => dataHooks;
     }
 }

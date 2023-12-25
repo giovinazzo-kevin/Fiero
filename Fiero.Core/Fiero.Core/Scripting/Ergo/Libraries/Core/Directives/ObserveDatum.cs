@@ -9,23 +9,19 @@ using Ergo.Lang.Extensions;
 namespace Fiero.Core;
 
 [SingletonDependency]
-public class SubscribeToEvent : InterpreterDirective
+public class ObserveDatum : InterpreterDirective
 {
-    public SubscribeToEvent()
-        : base("", new("subscribe"), 2, 200)
+    public ObserveDatum()
+        : base("", new("observe"), 1, 210)
     {
     }
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
         var lib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
-        if (args[0] is not Atom module)
+        if (!args[0].IsAbstract<List>().TryGetValue(out var list))
         {
-            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, args[0].Explain());
-        }
-        if (!args[1].IsAbstract<List>().TryGetValue(out var list))
-        {
-            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[1].Explain());
+            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[0].Explain());
         }
         foreach (var item in list.Contents)
         {
@@ -33,7 +29,7 @@ public class SubscribeToEvent : InterpreterDirective
             {
                 throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, item.Explain());
             }
-            lib.SubscribeToEvent(scope.Entry, module, atom);
+            lib.ObserveDatum(scope.Entry, atom.Explain());
         }
         return true;
     }

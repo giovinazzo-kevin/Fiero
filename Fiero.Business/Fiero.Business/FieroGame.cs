@@ -101,6 +101,13 @@ namespace Fiero.Business
                 }
             };
             Store.SetValue(Data.View.WindowSize, win.Size.ToCoord());
+            // This handler lets the window be resized by changing the WindowSize datum. Scripts can do this too.
+            Data.View.WindowSize.ValueChanged += e =>
+            {
+                var size = win.Size.ToCoord();
+                if (e.OldValue.Equals(size) && !e.NewValue.Equals(size))
+                    win.Size = e.NewValue;
+            };
         }
 
         protected override async Task InitializeAsync()

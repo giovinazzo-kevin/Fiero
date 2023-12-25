@@ -9,4 +9,5 @@ data:view_window_size_changed(OldValue, NewValue) :-
 	write(NewValue), nl, nl.
 
 j_pressed :-
-	set(view_window_size, _, p(1200, 1200)).
+	key_state(shift, down),
+	set(view_window_size, _, p(1200, 800)).

@@ -5,7 +5,8 @@ using Ergo.Runtime.BuiltIns;
 
 namespace Fiero.Core
 {
-    public class CoreLib(GameDataStore store, GameInput input) : Library
+    [SingletonDependency]
+    public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta) : Library
     {
         public override Atom Module => ErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
@@ -49,6 +50,7 @@ namespace Fiero.Core
             yield return new Get(store);
             yield return new Set(store);
             yield return new KeyState(input);
+            yield return new Raise(meta);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {

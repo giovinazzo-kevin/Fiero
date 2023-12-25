@@ -3,25 +3,15 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
-using LightInject;
 using System.Reflection;
 
-namespace Fiero.Business;
+namespace Fiero.Core;
 
 [SingletonDependency]
-public sealed class RaiseEvent : BuiltIn
+public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoModules.Event)
 {
-    private IServiceFactory _services;
-    public RaiseEvent(IServiceFactory services)
-        : base("", new("raise"), 3, ScriptingSystem.EventModule)
-    {
-        _services = services;
-    }
-
     public override ErgoVM.Op Compile()
     {
-        var meta = _services.GetInstance<MetaSystem>();
-        var MetaSystem = _services.GetInstance<MetaSystem>();
         return vm =>
         {
             var arguments = vm.Args;
@@ -73,7 +63,7 @@ public sealed class RaiseEvent : BuiltIn
             // It can be sent from any module, even the modules of other scripts, with the system name acting as a conventional tag.
             if (!anySystem)
             {
-                // _ = MetaSystem.Scripting.ScriptEventRaised.Raise(new(sysName, eventname, dict));
+                _ = meta.ScriptEventRaised.Raise(new(sysName, eventname, dict));
                 return;
             }
         };

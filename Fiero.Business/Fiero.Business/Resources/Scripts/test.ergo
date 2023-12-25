@@ -1,8 +1,12 @@
 :- module(test, []).
 :- use_module(input).
+:- use_module(event).
 :- observe([view_window_size]).
+:- subscribe(test, [cool]).
 
 input:key_route(j, pressed, [_] >> j_pressed).
+input:key_route(h, pressed, [_] >> h_pressed).
+input:key_route(k, pressed, [_] >> k_pressed).
 
 data:view_window_size_changed(OldValue, NewValue) :-
 	write(OldValue), nl,
@@ -11,3 +15,14 @@ data:view_window_size_changed(OldValue, NewValue) :-
 j_pressed :-
 	key_state(shift, down),
 	set(view_window_size, _, p(1200, 800)).
+
+h_pressed :-
+	raise(test, cool, cool_event { value: 1 }).
+
+k_pressed :-
+	subscribed(A, B),
+	write(A),
+	write(B), nl.
+
+test:cool(X) :-
+	write(X), nl.

@@ -25,6 +25,9 @@
     <None Update="Resources\Scripts\core.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\optin\event.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\core\data.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

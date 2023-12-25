@@ -1,6 +1,7 @@
 ﻿using Ergo.Interpreter;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang;
+using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Unconcern.Common;
@@ -19,6 +20,8 @@ namespace Fiero.Core
 
         private volatile bool running = false;
 
+        private readonly Atom subscribed = new("subscribed");
+
         public ErgoScript(InterpreterScope scope)
         {
             VM = scope.Facade.BuildVM(
@@ -33,6 +36,12 @@ namespace Fiero.Core
                 .GetObservedData(this)
                 .Select(s => new DataHook(s.ToCSharpCase()))
                 .ToHashSet();
+            foreach (var sub in coreLib
+                .GetScriptSubscriptions(this))
+            {
+                var fact = Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: true, exported: true);
+                VM.KB.AssertZ(fact);
+            }
         }
         public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)
         {

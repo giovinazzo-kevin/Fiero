@@ -25,13 +25,11 @@ namespace Fiero.Core
         public readonly ErgoInterpreter Interpreter;
         public readonly InterpreterScope CoreScope;
 
-        private readonly GameDataStore Store;
-        private readonly GameInput Input;
+        private readonly IServiceFactory ServiceFactory;
 
-        public ErgoScriptHost(IAsyncInputReader inputReader, GameDataStore store, GameInput input)
+        public ErgoScriptHost(IAsyncInputReader inputReader, IServiceFactory fac)
         {
-            Store = store;
-            Input = input;
+            ServiceFactory = fac;
             OutWriter = TextWriter.Synchronized(new StreamWriter(Out.Writer.AsStream(), Encoding));
             OutReader = TextReader.Synchronized(new StreamReader(Out.Reader.AsStream(), Encoding));
             InWriter = TextWriter.Synchronized(new StreamWriter(In.Writer.AsStream(), Encoding));
@@ -54,7 +52,7 @@ namespace Fiero.Core
         protected virtual ErgoFacade GetErgoFacade()
         {
             return ErgoFacade.Standard
-                .AddLibrary(() => new CoreLib(Store, Input))
+                .AddLibrary(() => ServiceFactory.GetInstance<CoreLib>())
                 .SetInput(InReader, Maybe.Some(AsyncInputReader))
                 .SetOutput(OutWriter)
                 ;

@@ -44,6 +44,11 @@ namespace Fiero.Core
         public T Get<T>(GameDatum<T> datum)
             => TryGetValue(datum, out var val) ? val : throw new ArgumentException(datum.Name);
 
+        public object GetOrDefault(GameDatum datum, object defaultValue = default)
+            => Data.TryGetValue(datum.Name, out var val) ? val : defaultValue;
+        public object Get(GameDatum datum)
+            => Data.TryGetValue(datum.Name, out var val) ? val : throw new ArgumentException(datum.Name);
+
         public bool TryGetValue<T>(GameDatum<T> datum, out T value)
         {
             if (Data.TryGetValue(datum.Name, out var obj))
@@ -55,7 +60,8 @@ namespace Fiero.Core
             return false;
         }
 
-        public bool TrySetValue<T>(GameDatum<T> datum, T compare, T newValue)
+        public bool TrySetValue<T>(GameDatum<T> datum, T compare, T newValue) => TrySetValueUntyped(datum, compare, newValue);
+        private bool TrySetValueUntyped(GameDatum datum, object compare, object newValue)
         {
             if (Data.TryGetValue(datum.Name, out var old) && !Equals(old, compare))
             {
@@ -68,6 +74,7 @@ namespace Fiero.Core
         }
 
         public void SetValue<T>(GameDatum<T> datum, T newValue) => TrySetValue(datum, GetOrDefault(datum), newValue);
+        public void SetValue(GameDatum datum, object newValue) => TrySetValueUntyped(datum, GetOrDefault(datum), newValue);
         public void UpdateValue<T>(GameDatum<T> datum, Func<T, T> update)
         {
             var old = GetOrDefault(datum);

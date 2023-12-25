@@ -7,6 +7,8 @@
 
         public GameDatum(Type t, string name) => (T, Name) = (t, name);
 
+        public abstract void OnValueChanged(object oldValue, object newValue);
+
         public void Deconstruct(out Type type, out string name)
         {
             type = T;
@@ -20,8 +22,8 @@
     {
         public event Action<GameDatumChangedEventArgs<T>> ValueChanged;
 
-        internal void OnValueChanged(T oldValue, T newValue)
-            => ValueChanged?.Invoke(new(this, oldValue, newValue));
+        public override void OnValueChanged(object oldValue, object newValue)
+            => ValueChanged?.Invoke(new(this, (T)oldValue, (T)newValue));
 
         public GameDatum(string name) : base(typeof(T), name) { }
     }

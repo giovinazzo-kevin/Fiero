@@ -2,8 +2,8 @@
 % Do not modify unless you know what you are doing.
 :- module(input, [bind/3, unbind/3, key_route/3]).
 :- subscribe(input, [keyboard_event]).
-:- dynamic(key_route/3).
 :- inline([bind/3, unbind/3]).
+:- dynamic(key_route/3).
 
 bind(Key, Event, Predicate) :-
     assertz(input:key_route(Key, Event, Predicate)).

@@ -5,7 +5,7 @@ using Ergo.Runtime.BuiltIns;
 
 namespace Fiero.Core
 {
-    public class CoreLib : Library
+    public class CoreLib(GameDataStore store) : Library
     {
         public override Atom Module => ErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
@@ -46,7 +46,8 @@ namespace Fiero.Core
         }
         public override IEnumerable<BuiltIn> GetExportedBuiltins()
         {
-            yield break;
+            yield return new Get(store);
+            yield return new Set(store);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {

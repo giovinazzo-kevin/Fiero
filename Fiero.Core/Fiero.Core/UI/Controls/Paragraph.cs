@@ -53,9 +53,9 @@ namespace Fiero.Core
         protected virtual void OnSizeInvalidated()
         {
             var lineHeight = CalculatedLineHeight;
-            foreach (var (c, i) in Labels.Select((c, i) => (c, i)))
+            for (int i = Labels.Count - 1; i >= 0; i--)
             {
-                c.Size.V = new(ContentRenderSize.X, lineHeight);
+                Labels[i].Size.V = new(ContentRenderSize.X, lineHeight);
             }
         }
 

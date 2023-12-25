@@ -73,9 +73,6 @@
     <None Update="Resources\Scripts\core\event.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\data.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\Scripts\core\anim.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

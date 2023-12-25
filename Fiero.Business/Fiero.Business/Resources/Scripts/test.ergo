@@ -1,8 +1,12 @@
 :- module(test, []).
 :- use_module(input).
-:- observe([player_name]).
+:- observe([view_window_size]).
 
 input:key_route(j, pressed, [_] >> j_pressed).
+
+data:view_window_size_changed(OldValue, NewValue) :-
+	write(OldValue), nl,
+	write(NewValue), nl, nl.
 
 j_pressed :-
 	write(we), nl.

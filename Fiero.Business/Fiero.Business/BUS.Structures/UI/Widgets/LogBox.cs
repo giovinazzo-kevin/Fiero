@@ -44,7 +44,7 @@
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Rule<Paragraph>(r => r.Apply(p =>
             {
-                var ts = UI.Store.Get(Data.UI.TileSize);
+                var ts = UI.Store.Get(Data.View.TileSize);
                 p.CenterContentH.V = false;
                 p.Background.V = UI.GetColor(ColorName.UIBackground);
                 p.Padding.V = new(ts, ts);

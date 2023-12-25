@@ -11,7 +11,7 @@
 
         public override void Minimize()
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize);
+            Layout.Size.V = UI.Store.Get(Data.View.PopUpSize);
             Layout.Position.V = Layout.Size.V / 2;
         }
     }

@@ -65,7 +65,7 @@ namespace Fiero.Business
             LogBox.EnableDragging = false;
             MiniMap.EnableDragging = false;
 
-            Data.UI.WindowSize.ValueChanged += (e) =>
+            Data.View.WindowSize.ValueChanged += (e) =>
             {
                 if (Layout is null) return;
                 Layout.Size.V = e.NewValue;
@@ -189,8 +189,8 @@ namespace Fiero.Business
 
         public override LayoutGrid CreateLayout(LayoutGrid grid, string title)
         {
-            var sidebarWidth = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).X;
-            var logHeight = (UI.Store.Get(Data.UI.WindowSize) - UI.Store.Get(Data.UI.ViewportSize)).Y;
+            var sidebarWidth = (UI.Store.Get(Data.View.WindowSize) - UI.Store.Get(Data.View.ViewportSize)).X;
+            var logHeight = (UI.Store.Get(Data.View.WindowSize) - UI.Store.Get(Data.View.ViewportSize)).Y;
 
             return ApplyStyles(grid)
             .Row()

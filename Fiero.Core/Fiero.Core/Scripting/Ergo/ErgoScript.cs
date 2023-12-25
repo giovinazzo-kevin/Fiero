@@ -31,7 +31,7 @@ namespace Fiero.Core
                 .ToHashSet();
             dataHooks = coreLib
                 .GetObservedData(this)
-                .Select(s => new DataHook(s))
+                .Select(s => new DataHook(s.ToCSharpCase()))
                 .ToHashSet();
         }
         public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)

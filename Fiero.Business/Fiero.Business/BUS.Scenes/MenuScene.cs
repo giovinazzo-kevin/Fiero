@@ -81,7 +81,7 @@ namespace Fiero.Business.Scenes
                     .End()
                 );
 
-            Data.UI.WindowSize.ValueChanged += e =>
+            Data.View.WindowSize.ValueChanged += e =>
             {
                 if (State == SceneState.Main)
                 {

@@ -52,14 +52,14 @@
 
         public override void Maximize()
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize);
+            Layout.Size.V = UI.Store.Get(Data.View.ViewportSize);
             Layout.Position.V = Coord.Zero;
             IsMaximized = true;
         }
 
         public override void Minimize()
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.PopUpSize) * Coord.PositiveX
+            Layout.Size.V = UI.Store.Get(Data.View.PopUpSize) * Coord.PositiveX
                 + new Coord(0, TitleHeight + DialogueHeight + ChoicesHeight + ButtonsHeight);
             Layout.Position.V = Layout.Size.V / 2 * new Coord(1, 0);
             IsMaximized = false;

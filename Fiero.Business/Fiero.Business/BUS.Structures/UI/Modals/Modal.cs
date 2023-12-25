@@ -25,7 +25,7 @@ namespace Fiero.Business
         {
             Resources = resources;
             Hotkeys = new Dictionary<Hotkey, Action>();
-            Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
+            Data.View.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
             void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 if (IsResponsive && Layout != null)
@@ -67,14 +67,14 @@ namespace Fiero.Business
 
         public override void Maximize()
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.WindowSize);
+            Layout.Size.V = UI.Store.Get(Data.View.WindowSize);
             Layout.Position.V = Coord.Zero;
             IsMaximized = true;
         }
 
         public override void Minimize()
         {
-            var vws = UI.Store.Get(Data.UI.ViewportSize);
+            var vws = UI.Store.Get(Data.View.ViewportSize);
             Layout.Size.V = (vws * new Vec(0.8f, 0.6f)).ToCoord();
             Layout.Position.V = vws / 2 - Layout.Size.V / 2;
             IsMaximized = false;

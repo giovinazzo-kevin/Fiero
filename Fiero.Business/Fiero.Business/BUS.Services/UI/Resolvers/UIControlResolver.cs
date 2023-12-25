@@ -20,10 +20,10 @@ namespace Fiero.Business
             : base(ui)
         {
             Resources = resources;
-            Foreground = UI.Store.Get(Data.UI.DefaultForeground);
-            Background = UI.Store.Get(Data.UI.DefaultBackground);
-            Accent = UI.Store.Get(Data.UI.DefaultAccent);
-            TileSize = UI.Store.Get(Data.UI.TileSize);
+            Foreground = UI.Store.Get(Data.View.DefaultForeground);
+            Background = UI.Store.Get(Data.View.DefaultBackground);
+            Accent = UI.Store.Get(Data.View.DefaultAccent);
+            TileSize = UI.Store.Get(Data.View.TileSize);
         }
 
         protected virtual BitmapFont GetFont(FontName name = FontName.Light)

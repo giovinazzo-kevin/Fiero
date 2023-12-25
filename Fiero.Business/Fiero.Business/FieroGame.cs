@@ -43,10 +43,10 @@ namespace Fiero.Business
             loop.TimeStep = TimeSpan.FromSeconds(1 / 144f);
             loop.MaxTimeStep = loop.TimeStep * 2;
             CreateGlobalTheme();
-            Data.UI.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            Data.View.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
-                UI.Store.SetValue(Data.UI.ViewportSize, obj.NewValue - new Coord(248, 128));
+                UI.Store.SetValue(Data.View.ViewportSize, obj.NewValue - new Coord(248, 128));
             }
         }
 
@@ -89,7 +89,7 @@ namespace Fiero.Business
             base.InitializeWindow(win);
             win.Resized += (s, e) =>
             {
-                var minSize = Store.Get(Data.UI.MinWindowSize);
+                var minSize = Store.Get(Data.View.MinWindowSize);
                 var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(minX: minSize.X, minY: minSize.Y);
                 if (newSize != new Coord((int)e.Width, (int)e.Height))
                 {
@@ -97,10 +97,10 @@ namespace Fiero.Business
                 }
                 else
                 {
-                    Store.SetValue(Data.UI.WindowSize, newSize);
+                    Store.SetValue(Data.View.WindowSize, newSize);
                 }
             };
-            Store.SetValue(Data.UI.WindowSize, win.Size.ToCoord());
+            Store.SetValue(Data.View.WindowSize, win.Size.ToCoord());
         }
 
         protected override async Task InitializeAsync()
@@ -171,13 +171,13 @@ namespace Fiero.Business
             Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
             Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
-            Store.SetValue(Data.UI.TileSize, 16);
-            Store.SetValue(Data.UI.MinWindowSize, new(800, 800));
-            Store.SetValue(Data.UI.WindowSize, new(800, 800));
-            Store.SetValue(Data.UI.PopUpSize, new(400, 400));
-            Store.SetValue(Data.UI.DefaultForeground, Colors.Get(ColorName.UIPrimary));
-            Store.SetValue(Data.UI.DefaultBackground, Colors.Get(ColorName.UIBackground));
-            Store.SetValue(Data.UI.DefaultAccent, Colors.Get(ColorName.UIAccent));
+            Store.SetValue(Data.View.TileSize, 16);
+            Store.SetValue(Data.View.MinWindowSize, new(800, 800));
+            Store.SetValue(Data.View.WindowSize, new(800, 800));
+            Store.SetValue(Data.View.PopUpSize, new(400, 400));
+            Store.SetValue(Data.View.DefaultForeground, Colors.Get(ColorName.UIPrimary));
+            Store.SetValue(Data.View.DefaultBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(Data.View.DefaultAccent, Colors.Get(ColorName.UIAccent));
 
             Store.SetValue(Data.Hotkeys.Cancel, VirtualKeys.Escape);
             Store.SetValue(Data.Hotkeys.Confirm, VirtualKeys.Return);

@@ -31,7 +31,7 @@ namespace Fiero.Business
             if (host is not ErgoScriptHost<ScriptName> ergoHost)
                 throw new NotSupportedException();
             Host = ergoHost;
-            Data.UI.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
+            Data.View.ViewportSize.ValueChanged += ViewportSize_ValueChanged;
             void ViewportSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 if (Layout != null)
@@ -41,7 +41,7 @@ namespace Fiero.Business
 
         protected override void DefaultSize()
         {
-            Layout.Size.V = UI.Store.Get(Data.UI.ViewportSize);
+            Layout.Size.V = UI.Store.Get(Data.View.ViewportSize);
         }
 
         protected void WriteLine(string s)
@@ -131,7 +131,7 @@ namespace Fiero.Business
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Rule<ConsolePane>(r => r.Apply(p =>
             {
-                var ts = UI.Store.Get(Data.UI.TileSize);
+                var ts = UI.Store.Get(Data.View.TileSize);
                 p.Background.V = Colors.Get(ColorName.Black).AddAlpha(-64);
                 p.Foreground.V = Colors.Get(ColorName.White);
                 p.Margin.V = p.Padding.V = new(ts, ts);

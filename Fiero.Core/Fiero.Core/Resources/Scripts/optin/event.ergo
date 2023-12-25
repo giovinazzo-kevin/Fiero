@@ -1,7 +1,7 @@
 % Do not modify unless you know what you are doing.
 :- module(event, []).
 :- subscribe(meta, [script_event_raised]).
-:- dynamic(subscribed/2).
+
 meta:script_event_raised(_{system: S, event: E, data: D}) :-
 	subscribed(S, E), !,
 	term(E, [D], Event),

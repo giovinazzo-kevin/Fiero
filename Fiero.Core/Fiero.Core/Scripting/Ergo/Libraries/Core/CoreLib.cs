@@ -1,4 +1,5 @@
-﻿using Ergo.Interpreter.Directives;
+﻿using Ergo.Interpreter;
+using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
 using Ergo.Runtime.BuiltIns;
@@ -23,10 +24,10 @@ namespace Fiero.Core
                 set = ObservedData[scriptModule] = new();
             set.Add(name);
         }
-        public IEnumerable<Signature> GetScriptSubscriptions(ErgoScript script)
+        public IEnumerable<Signature> GetScriptSubscriptions(InterpreterScope scope)
         {
             var set = new HashSet<Signature>();
-            var modules = script.VM.KB.Scope.VisibleModules;
+            var modules = scope.VisibleModules;
             foreach (var m in modules)
             {
                 if (Subscribptions.TryGetValue(m, out var inner))

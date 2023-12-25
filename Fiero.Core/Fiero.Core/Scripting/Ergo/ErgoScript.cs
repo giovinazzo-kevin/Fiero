@@ -24,24 +24,26 @@ namespace Fiero.Core
 
         public ErgoScript(InterpreterScope scope)
         {
-            VM = scope.Facade.BuildVM(
-                scope.BuildKnowledgeBase(CompilerFlags.Default),
-                DecimalType.CliDecimal);
             var coreLib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
+            VM = scope.Facade.BuildVM(
+                scope.BuildKnowledgeBase(CompilerFlags.Default, beforeCompile: kb =>
+                {
+                    foreach (var sub in coreLib
+                        .GetScriptSubscriptions(scope))
+                    {
+                        var fact = Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: false, exported: true);
+                        kb.AssertZ(fact);
+                    }
+                }),
+                DecimalType.CliDecimal);
             eventHooks = coreLib
-                .GetScriptSubscriptions(this)
+                .GetScriptSubscriptions(scope)
                 .Select(s => new EventHook(s.Module.GetOrThrow().Explain().ToCSharpCase(), s.Functor.Explain().ToCSharpCase()))
                 .ToHashSet();
             dataHooks = coreLib
                 .GetObservedData(this)
                 .Select(s => new DataHook(s.ToCSharpCase()))
                 .ToHashSet();
-            foreach (var sub in coreLib
-                .GetScriptSubscriptions(this))
-            {
-                var fact = Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: true, exported: true);
-                VM.KB.AssertZ(fact);
-            }
         }
         public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)
         {

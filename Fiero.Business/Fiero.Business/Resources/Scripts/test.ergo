@@ -6,7 +6,6 @@
 
 input:key_route(j, pressed, [_] >> j_pressed).
 input:key_route(h, pressed, [_] >> h_pressed).
-input:key_route(k, pressed, [_] >> k_pressed).
 
 data:view_window_size_changed(OldValue, NewValue) :-
 	write(OldValue), nl,
@@ -19,10 +18,5 @@ j_pressed :-
 h_pressed :-
 	raise(test, cool, cool_event { value: 1 }).
 
-k_pressed :-
-	subscribed(A, B),
-	write(A),
-	write(B), nl.
-
-test:cool(X) :-
+test:cool(_{value: X}) :-
 	write(X), nl.

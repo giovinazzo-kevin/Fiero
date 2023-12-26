@@ -22,7 +22,7 @@ namespace Fiero.Core
             var finalDict = new ScriptDataRoutes();
             foreach (var datum in store.GetRegisteredDatumTypes())
             {
-                var dataHook = new Script.DataHook(datum.Name);
+                var dataHook = new Script.DataHook(datum.Module, datum.Name);
                 finalDict.Add(dataHook, (script) => SubscribeHandler(datum.Name, msg => Observe(script, store, dataHook, msg.OldValue, msg.NewValue)));
             }
             return finalDict;

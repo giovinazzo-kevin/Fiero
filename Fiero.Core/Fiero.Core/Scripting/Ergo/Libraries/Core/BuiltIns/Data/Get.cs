@@ -8,19 +8,25 @@ namespace Fiero.Core;
 
 [SingletonDependency]
 public class Get(GameDataStore store)
-    : BuiltIn("Gets the value of a game datum", new Atom("get"), 2, ErgoModules.Data)
+    : BuiltIn("Gets the value of a game datum", new Atom("get"), 3, ErgoModules.Data)
 {
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches(out string name))
+        if (!vm.Arg(0).Matches(out string module))
         {
-            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(GameDatum), vm.Arg(0).Explain());
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(0).Explain());
             return;
         }
-        var datum = store.GetRegisteredDatumType(name.ToCSharpCase());
+        if (!vm.Arg(1).Matches(out string name))
+        {
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(1).Explain());
+            return;
+        }
+        var datum = store.GetRegisteredDatumType(module.ToCSharpCase(), name.ToCSharpCase());
         var val = store.Get(datum);
         var term = TermMarshall.ToTerm(val, datum.T);
         vm.SetArg(0, term);
+        vm.SetArg(1, vm.Arg(2));
         ErgoVM.Goals.Unify2(vm);
     };
 }

@@ -12,16 +12,22 @@ namespace Fiero.Core;
 public class ObserveDatum : InterpreterDirective
 {
     public ObserveDatum()
-        : base("", new("observe"), 1, 210)
+        : base("", new("observe"), 2, 210)
     {
     }
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
         var lib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
-        if (!args[0].IsAbstract<List>().TryGetValue(out var list))
+        if (args[0] is not Atom name)
         {
-            throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[0].Explain());
+            scope.Throw(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.String, args[0].Explain());
+            return false;
+        }
+        if (!args[1].IsAbstract<List>().TryGetValue(out var list))
+        {
+            scope.Throw(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.List, args[1].Explain());
+            return false;
         }
         foreach (var item in list.Contents)
         {
@@ -29,7 +35,7 @@ public class ObserveDatum : InterpreterDirective
             {
                 throw new InterpreterException(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.Atom, item.Explain());
             }
-            lib.ObserveDatum(scope.Entry, atom.Explain());
+            lib.ObserveDatum(scope.Entry, name, atom);
         }
         return true;
     }

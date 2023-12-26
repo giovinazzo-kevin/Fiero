@@ -93,7 +93,7 @@ namespace Fiero.Core
         {
             if (sender is not ErgoScript ergoScript)
                 return true;
-            var type = store.GetRegisteredDatumType(datum.Name).T;
+            var type = store.GetRegisteredDatumType(datum.Module, datum.Name).T;
             if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, oldValue, type, default, out var oldTerm))
                 oldTerm = TermMarshall.ToTerm(oldValue, type, mode: TermMarshalling.Named, ctx: ergoScript.MarshallingContext);
             if (!ergoScript.MarshallingContext.TryGetCached(TermMarshalling.Named, newValue, type, default, out var newTerm))
@@ -101,7 +101,7 @@ namespace Fiero.Core
             if (!ergoScript.ErgoDataHooks.TryGetValue(datum, out var hookDef))
             {
                 var datumName = new Atom(datum.Name.ToErgoCase() + "_changed"); // e.g. data:player_name_changed(OldValue, NewValue)
-                var ergoHook = new Hook(new(datumName, 2, ErgoModules.Data, default));
+                var ergoHook = new Hook(new(datumName, 2, new Atom(datum.Module.ToErgoCase()), default));
                 hookDef = ergoScript.ErgoDataHooks[datum] = (ergoHook, ergoHook.Compile(throwIfNotDefined: true));
             }
             hookDef.Hook.SetArg(0, oldTerm);

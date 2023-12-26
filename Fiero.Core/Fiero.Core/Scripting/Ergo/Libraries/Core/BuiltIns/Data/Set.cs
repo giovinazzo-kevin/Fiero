@@ -8,17 +8,22 @@ namespace Fiero.Core;
 
 [SingletonDependency]
 public class Set(GameDataStore store)
-    : BuiltIn("Sets the value of a game datum if its current value matches the comparison value", new Atom("set"), 3, ErgoModules.Data)
+    : BuiltIn("Sets the value of a game datum if its current value matches the comparison value", new Atom("set"), 4, ErgoModules.Data)
 {
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches(out string name))
+        if (!vm.Arg(0).Matches(out string module))
         {
-            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(GameDatum), vm.Arg(0).Explain());
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(0).Explain());
             return;
         }
-        var datum = store.GetRegisteredDatumType(name.ToCSharpCase());
-        if (!vm.Arg(2).MatchesUntyped(out var obj, datum.T))
+        if (!vm.Arg(1).Matches(out string name))
+        {
+            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(1).Explain());
+            return;
+        }
+        var datum = store.GetRegisteredDatumType(module.ToCSharpCase(), name.ToCSharpCase());
+        if (!vm.Arg(3).MatchesUntyped(out var obj, datum.T))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, datum.T.Name, vm.Arg(2).Explain());
             return;
@@ -27,6 +32,7 @@ public class Set(GameDataStore store)
         var term = TermMarshall.ToTerm(val, datum.T);
         // Unify the current value and the second argument (which can be unbound for an unconditional set).
         vm.SetArg(0, term);
+        vm.SetArg(1, vm.Arg(2));
         ErgoVM.Goals.Unify2(vm);
         if (vm.State == ErgoVM.VMState.Fail)
             return;

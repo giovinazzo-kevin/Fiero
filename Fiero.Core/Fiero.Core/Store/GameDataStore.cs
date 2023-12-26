@@ -18,7 +18,7 @@ namespace Fiero.Core
         /// </summary>
         public void Register(GameDatum datum)
         {
-            Registry.Add(datum.Name, datum);
+            Registry.Add(datum.Module + datum.Name, datum);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Fiero.Core
         }
 
         public IEnumerable<GameDatum> GetRegisteredDatumTypes() => Registry.Values;
-        public GameDatum GetRegisteredDatumType(string name) => Registry[name];
+        public GameDatum GetRegisteredDatumType(string module, string name) => Registry[module + name];
 
         public T GetOrDefault<T>(GameDatum<T> datum, T defaultValue = default)
             => TryGetValue(datum, out var val) ? val : defaultValue;

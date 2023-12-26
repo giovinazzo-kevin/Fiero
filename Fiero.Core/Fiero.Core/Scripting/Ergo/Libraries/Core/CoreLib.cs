@@ -11,18 +11,18 @@ namespace Fiero.Core
     {
         public override Atom Module => ErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
-        protected readonly Dictionary<Atom, HashSet<string>> ObservedData = new();
+        protected readonly Dictionary<Atom, HashSet<Signature>> ObservedData = new();
         public void SubscribeToEvent(Atom scriptModule, Atom eventModule, Atom @event)
         {
             if (!Subscribptions.TryGetValue(scriptModule, out var set))
                 set = Subscribptions[scriptModule] = new();
             set.Add(new(@event, 1, eventModule, default));
         }
-        public void ObserveDatum(Atom scriptModule, string name)
+        public void ObserveDatum(Atom scriptModule, Atom dataModule, Atom datumName)
         {
             if (!ObservedData.TryGetValue(scriptModule, out var set))
                 set = ObservedData[scriptModule] = new();
-            set.Add(name);
+            set.Add(new(datumName, 2, dataModule, default));
         }
         public IEnumerable<Signature> GetScriptSubscriptions(InterpreterScope scope)
         {
@@ -35,9 +35,9 @@ namespace Fiero.Core
             }
             return set;
         }
-        public IEnumerable<string> GetObservedData(ErgoScript script)
+        public IEnumerable<Signature> GetObservedData(ErgoScript script)
         {
-            var set = new HashSet<string>();
+            var set = new HashSet<Signature>();
             var modules = script.VM.KB.Scope.VisibleModules;
             foreach (var m in modules)
             {

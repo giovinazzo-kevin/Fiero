@@ -1,7 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Unconcern;
-using Unconcern.Common;
-using Unconcern.Delegation;
 
 
 namespace Fiero.Core
@@ -23,18 +20,9 @@ namespace Fiero.Core
             foreach (var datum in store.GetRegisteredDatumTypes())
             {
                 var dataHook = new Script.DataHook(datum.Module, datum.Name);
-                finalDict.Add(dataHook, (script) => SubscribeHandler(datum.Name, msg => Observe(script, store, dataHook, msg.OldValue, msg.NewValue)));
+                finalDict.Add(dataHook, (script) => store.SubscribeHandler(datum.Module, datum.Name, msg => Observe(script, store, dataHook, msg.OldValue, msg.NewValue)));
             }
             return finalDict;
-
-            Subscription SubscribeHandler(string datumName, Action<GameDataStore.DatumChangedEvent> handle)
-            {
-                return Concern.Delegate(store.EventBus)
-                    .When<GameDataStore.DatumChangedEvent>(x => datumName.Equals(x.Content.Datum.Name))
-                    .Do<GameDataStore.DatumChangedEvent>(msg => handle(msg.Content))
-                    .Build()
-                    .Listen(GameDataStore.EventHubName);
-            }
         }
 
         /// <summary>

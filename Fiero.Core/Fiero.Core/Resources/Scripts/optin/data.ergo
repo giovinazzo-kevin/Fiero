@@ -1,0 +1,9 @@
+% Do not modify unless you know what you are doing.
+:- module(data, []).
+:- subscribe(meta, [script_datum_changed]).
+
+meta:script_datum_changed(_{module: M, name: N, old_value: V1, new_value: V2}) :-
+	observed(M, N, HandlerName), !,
+	term(HandlerName, [V1, V2], Head),
+	term(':', [M, Head], Qualified),
+	ignore_all(Qualified).

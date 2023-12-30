@@ -39,7 +39,8 @@ namespace Fiero.Core
             Shell = Facade.BuildShell(encoding: Encoding);
             Interpreter = Shell.Interpreter;
             CoreScope = Interpreter.CreateScope()
-                .WithSearchDirectory(SearchPath);
+                .WithSearchDirectory(SearchPath)
+                .WithExceptionHandler(Shell.LoggingExceptionHandler);
             CoreScope = CoreScope
                 .WithModule(Interpreter.Load(ref CoreScope, ErgoModules.Core)
                     .GetOrThrow())

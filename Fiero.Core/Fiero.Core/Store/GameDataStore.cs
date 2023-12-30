@@ -1,4 +1,6 @@
-﻿using Unconcern.Common;
+﻿using Unconcern;
+using Unconcern.Common;
+using Unconcern.Delegation;
 
 namespace Fiero.Core
 {
@@ -13,12 +15,20 @@ namespace Fiero.Core
 
         public readonly EventBus EventBus = bus;
 
+        private static string Key(string module, string name) => module + name;
+        private static string Key(GameDatum datum) => Key(datum.Module, datum.Name);
+
         /// <summary>
         /// Registers a datum, making it known to the store and enabling script compilation to target specific datum changes.
         /// </summary>
         public void Register(GameDatum datum)
         {
-            Registry.Add(datum.Module + datum.Name, datum);
+            Registry.Add(Key(datum), datum);
+        }
+        public void Register<T>(GameDatum<T> datum, T defaultValue)
+        {
+            Registry.Add(Key(datum), datum);
+            TrySetValueUntyped(datum, default(T), defaultValue);
         }
 
         /// <summary>
@@ -37,7 +47,8 @@ namespace Fiero.Core
         }
 
         public IEnumerable<GameDatum> GetRegisteredDatumTypes() => Registry.Values;
-        public GameDatum GetRegisteredDatumType(string module, string name) => Registry[module + name];
+        public GameDatum GetRegisteredDatumType(string module, string name) => Registry[Key(module, name)];
+        public bool TryGetRegisteredDatumType(string module, string name, out GameDatum datum) => Registry.TryGetValue(Key(module, name), out datum);
 
         public T GetOrDefault<T>(GameDatum<T> datum, T defaultValue = default)
             => TryGetValue(datum, out var val) ? val : defaultValue;
@@ -45,13 +56,13 @@ namespace Fiero.Core
             => TryGetValue(datum, out var val) ? val : throw new ArgumentException(datum.Name);
 
         public object GetOrDefault(GameDatum datum, object defaultValue = default)
-            => Data.TryGetValue(datum.Name, out var val) ? val : defaultValue;
+            => Data.TryGetValue(Key(datum), out var val) ? val : defaultValue;
         public object Get(GameDatum datum)
-            => Data.TryGetValue(datum.Name, out var val) ? val : throw new ArgumentException(datum.Name);
+            => Data.TryGetValue(Key(datum), out var val) ? val : throw new ArgumentException(datum.Name);
 
         public bool TryGetValue<T>(GameDatum<T> datum, out T value)
         {
-            if (Data.TryGetValue(datum.Name, out var obj))
+            if (Data.TryGetValue(Key(datum), out var obj))
             {
                 value = (T)obj;
                 return true;
@@ -63,11 +74,12 @@ namespace Fiero.Core
         public bool TrySetValue<T>(GameDatum<T> datum, T compare, T newValue) => TrySetValueUntyped(datum, compare, newValue);
         private bool TrySetValueUntyped(GameDatum datum, object compare, object newValue)
         {
-            if (Data.TryGetValue(datum.Name, out var old) && !Equals(old, compare))
+            var key = Key(datum);
+            if (Data.TryGetValue(key, out var old) && !Equals(old, compare))
             {
                 return false;
             }
-            Data[datum.Name] = newValue;
+            Data[key] = newValue;
             EventBus.Send(new DatumChangedEvent(this, datum, old, newValue), EventHubName);
             datum.OnValueChanged(compare, newValue);
             return true;
@@ -79,6 +91,16 @@ namespace Fiero.Core
         {
             var old = GetOrDefault(datum);
             TrySetValue(datum, old, update(old));
+        }
+
+        public Subscription SubscribeHandler(string datumModule, string datumName, Action<DatumChangedEvent> handle)
+        {
+            return Concern.Delegate(EventBus)
+                .When<DatumChangedEvent>(x => (datumModule == null && datumName == null)
+                    || datumModule.Equals(x.Content.Datum.Module) && datumName.Equals(x.Content.Datum.Name))
+                .Do<DatumChangedEvent>(msg => handle(msg.Content))
+                .Build()
+                .Listen(EventHubName);
         }
     }
 }

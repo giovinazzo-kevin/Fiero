@@ -22,7 +22,9 @@ public class Get(GameDataStore store)
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(1).Explain());
             return;
         }
-        var datum = store.GetRegisteredDatumType(module.ToCSharpCase(), name.ToCSharpCase());
+        var (m, n) = (module.ToCSharpCase(), name.ToCSharpCase());
+        if (!store.TryGetRegisteredDatumType(m, n, out var datum))
+            store.Register((ErgoDatum)(datum = new ErgoDatum(m, n)), WellKnown.Literals.Discard);
         var val = store.Get(datum);
         var term = TermMarshall.ToTerm(val, datum.T);
         vm.SetArg(0, term);

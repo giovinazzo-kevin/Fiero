@@ -35,10 +35,10 @@ namespace Fiero.Core
             }
             return set;
         }
-        public IEnumerable<Signature> GetObservedData(ErgoScript script)
+        public IEnumerable<Signature> GetObservedData(InterpreterScope scope)
         {
             var set = new HashSet<Signature>();
-            var modules = script.VM.KB.Scope.VisibleModules;
+            var modules = scope.VisibleModules;
             foreach (var m in modules)
             {
                 if (ObservedData.TryGetValue(m, out var inner))

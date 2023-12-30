@@ -22,7 +22,9 @@ public class Set(GameDataStore store)
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(1).Explain());
             return;
         }
-        var datum = store.GetRegisteredDatumType(module.ToCSharpCase(), name.ToCSharpCase());
+        var (m, n) = (module.ToCSharpCase(), name.ToCSharpCase());
+        if (!store.TryGetRegisteredDatumType(m, n, out var datum))
+            store.Register((ErgoDatum)(datum = new ErgoDatum(m, n)), WellKnown.Literals.Discard);
         if (!vm.Arg(3).MatchesUntyped(out var obj, datum.T))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, datum.T.Name, vm.Arg(2).Explain());

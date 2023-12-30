@@ -28,7 +28,7 @@
     <None Update="Resources\Scripts\optin\event.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\data.ergo">
+    <None Update="Resources\Scripts\optin\data.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\optin\input.ergo">
@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="ECS\System\Meta\Events\" />
+    <Folder Include="Resources\Scripts\core\" />
   </ItemGroup>
 
 </Project>

@@ -21,19 +21,27 @@ namespace Fiero.Core
         private volatile bool running = false;
 
         private readonly Atom subscribed = new("subscribed");
+        private readonly Atom observed = new("observed");
+        private readonly Signature subscribed2 = new(new Atom("subscribed"), 2, ErgoModules.Event, default);
+        private readonly Signature observed3 = new(new Atom("observed"), 3, ErgoModules.Data, default);
 
         public ErgoScript(InterpreterScope scope)
         {
+            /*
+             Scripts may subscribe to system events through the subscribe/2 directive.
+             They may also subscribe to data change events through observe/2.
+
+             In the case of script-raised events and data changes on datums that are not known at compile time,
+             the predicates subscribed/2 and observed/3 are called by a global event handler (that looks the same for all scripts that import the data or event modules).
+             This handler then builds the correct predicate at runtime and calls it.
+             */
             var coreLib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
+            var facts = new List<Predicate>(GetFacts());
             VM = scope.Facade.BuildVM(
                 scope.BuildKnowledgeBase(CompilerFlags.Default, beforeCompile: kb =>
                 {
-                    foreach (var sub in coreLib
-                        .GetScriptSubscriptions(scope))
-                    {
-                        var fact = Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: false, exported: true);
+                    foreach (var fact in facts)
                         kb.AssertZ(fact);
-                    }
                 }),
                 DecimalType.CliDecimal);
             eventHooks = coreLib
@@ -41,9 +49,29 @@ namespace Fiero.Core
                 .Select(s => new EventHook(s.Module.GetOrThrow().Explain().ToCSharpCase(), s.Functor.Explain().ToCSharpCase()))
                 .ToHashSet();
             dataHooks = coreLib
-                .GetObservedData(this)
+                .GetObservedData(scope)
                 .Select(s => new DataHook(s.Module.GetOrThrow().Explain().ToCSharpCase(), s.Functor.Explain().ToCSharpCase()))
                 .ToHashSet();
+
+            IEnumerable<Predicate> GetFacts()
+            {
+                var any = false;
+                foreach (var sub in coreLib.GetScriptSubscriptions(scope))
+                {
+                    yield return Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: false, exported: true);
+                    any = true;
+                }
+                if (!any)
+                    yield return Predicate.Falsehood(ErgoModules.Event, new Complex(subscribed, WellKnown.Literals.Discard, WellKnown.Literals.Discard), dynamic: false, exported: true);
+                any = false;
+                foreach (var sub in coreLib.GetObservedData(scope))
+                {
+                    yield return Predicate.Fact(ErgoModules.Data, new Complex(observed, sub.Module.GetOrThrow(), sub.Functor, new Atom((string)sub.Functor.Value + "_changed")));
+                    any = true;
+                }
+                if (!any)
+                    yield return Predicate.Falsehood(ErgoModules.Data, new Complex(observed, WellKnown.Literals.Discard, WellKnown.Literals.Discard, WellKnown.Literals.Discard));
+            }
         }
         public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)
         {

@@ -1,5 +1,4 @@
 ﻿:- module(core, []).
-:- use_module(data).
 
 io:portray('\n') :- write_raw('\n'), !.
 %: Overrides stdout writing to automagically include the name of the calling script.

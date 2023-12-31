@@ -20,6 +20,9 @@ namespace Fiero.Core
         protected readonly Dictionary<Type, EcsSystem> TrackedSystems = new();
         protected readonly IServiceFactory ServiceFactory;
 
+        private volatile bool invalidateCache = true;
+        private readonly List<SystemEventField> cachedFields = new();
+
         /// <summary>
         /// Raised when an event that does not exist in any system is raised; allows scripts to define their own events.
         /// </summary>
@@ -33,8 +36,16 @@ namespace Fiero.Core
         {
             ServiceFactory = fac;
             TrackedSystems.Add(GetType(), this);
-            Subscriptions.Add(Intercept<SystemCreatedEvent>(x => TrackedSystems.Add(x.System.GetType(), x.System)));
-            Subscriptions.Add(Intercept<SystemDisposedEvent>(x => TrackedSystems.Remove(x.System.GetType())));
+            Subscriptions.Add(Intercept<SystemCreatedEvent>(x =>
+            {
+                TrackedSystems.Add(x.System.GetType(), x.System);
+                invalidateCache = true;
+            }));
+            Subscriptions.Add(Intercept<SystemDisposedEvent>(x =>
+            {
+                TrackedSystems.Remove(x.System.GetType());
+                invalidateCache = true;
+            }));
             Subscriptions.Add(Concern.Delegate(EventBus)
                     .When<GameDataStore.DatumChangedEvent>(msg => !msg.Content.Datum.IsStatic)
                     .Do<GameDataStore.DatumChangedEvent>(msg =>
@@ -63,16 +74,20 @@ namespace Fiero.Core
 
         public IEnumerable<SystemEventField> GetSystemEventFields()
         {
+            if (!invalidateCache)
+                return cachedFields;
+            cachedFields.Clear();
             foreach (var (type, s) in TrackedSystems)
             {
                 foreach (var f in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
                 {
                     if (f.FieldType.IsAssignableTo(typeof(ISystemRequest)))
-                        yield return new(s, f, true);
+                        cachedFields.Add(new(s, f, true));
                     else if (f.FieldType.IsAssignableTo(typeof(ISystemEvent)))
-                        yield return new(s, f, false);
+                        cachedFields.Add(new(s, f, false));
                 }
             }
+            return cachedFields;
         }
     }
 }

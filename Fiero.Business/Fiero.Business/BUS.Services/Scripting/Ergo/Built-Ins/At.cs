@@ -9,6 +9,7 @@ namespace Fiero.Business;
 public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, FieroLib.Modules.Fiero)
 {
     private readonly IServiceFactory _services = services;
+    private readonly GameEntities _entities = services.GetInstance<GameEntities>();
 
     public override ErgoVM.Op Compile()
     {
@@ -44,7 +45,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, Fie
                     vm.PushChoice(NextActor);
                 else
                     vm.PushChoice(NextFeature);
-                vm.SetArg(1, new EntityAsTerm(A.Id, A.ErgoType()));
+                vm.SetArg(1, new EntityAsTerm(A.Id, A.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }
             void NextFeature(ErgoVM vm)
@@ -54,7 +55,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, Fie
                     vm.PushChoice(NextFeature);
                 else
                     vm.PushChoice(NextItem);
-                vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType()));
+                vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }
             void NextItem(ErgoVM vm)
@@ -62,7 +63,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, Fie
                 var F = cell.Items.ElementAt(i++);
                 if (i < cell.Items.Count)
                     vm.PushChoice(NextItem);
-                vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType()));
+                vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }
         };

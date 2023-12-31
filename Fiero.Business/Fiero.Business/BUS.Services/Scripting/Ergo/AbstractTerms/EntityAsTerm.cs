@@ -43,10 +43,10 @@ public sealed class EntityAsTerm : Dict
     public readonly Atom TypeAsAtom;
     private EcsEntity _proxy;
 
-    public EntityAsTerm(int entityId, Atom type)
+    public EntityAsTerm(int entityId, Atom type, GameEntities entities)
         : base(type, new[] { new KeyValuePair<Atom, ITerm>(Key_Invalid, new Atom(entityId)) })
     {
-        _entities = ServiceFactory.GetInstance<GameEntities>();
+        _entities = entities;
         Type = TypeMap[type];
         TypeAsAtom = type;
         EntityId = entityId;
@@ -108,7 +108,7 @@ public sealed class EntityAsTerm : Dict
             && dict.Dictionary.TryGetValue(Key_Invalid, out var id)
             && id is Atom a && a.Value is EDecimal d)
         {
-            return new EntityAsTerm(d.ToInt32Unchecked(), functor);
+            return new EntityAsTerm(d.ToInt32Unchecked(), functor, ServiceFactory.GetInstance<GameEntities>());
         }
         return default;
     }

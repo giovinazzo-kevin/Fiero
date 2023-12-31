@@ -33,13 +33,15 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoMo
             var any = false; var anySystem = false;
             foreach (var field in meta.GetSystemEventFields())
             {
-                if (field.System.GetType().Name.ToErgoCase().Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase) != sysName)
+                var fieldSysName = field.System.GetType().Name.Replace("System", string.Empty, StringComparison.OrdinalIgnoreCase).ToErgoCase();
+                if (fieldSysName != sysName)
                     continue;
                 anySystem = true;
-                if (field.Field.Name.ToErgoCase()
+                var fieldEventName = field.Field.Name
                     .Replace("Event", string.Empty, StringComparison.OrdinalIgnoreCase)
                     .Replace("Request", string.Empty, StringComparison.OrdinalIgnoreCase)
-                    != eventname)
+                    .ToErgoCase();
+                if (fieldEventName != eventname)
                     continue;
                 var b = field.Field.FieldType.BaseType;
                 if (!b.IsGenericType || !b.GetGenericTypeDefinition().IsAssignableFrom(typeof(SystemEvent<,>)))

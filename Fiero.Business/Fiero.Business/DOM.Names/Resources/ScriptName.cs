@@ -2,6 +2,7 @@
 {
     public enum ScriptName
     {
-        Test
+        Test,
+        Bomb
     }
 }

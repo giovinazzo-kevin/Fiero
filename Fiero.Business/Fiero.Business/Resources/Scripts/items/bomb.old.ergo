@@ -1,0 +1,74 @@
+:- module(bomb, [set_fuse/2, set_radius/2]).
+:- use_module(data).
+:- use_module(sound).
+:- use_module(event).
+:- use_module(effect).
+:- use_module(anim).
+% Scripts can subscribe to system events and to events sent from other scripts.
+:- subscribe(action, [actor_turn_started, actor_attacked]).
+% This pattern can be used to allow scripts to manipulate other scripts, and to act as libraries that hide the complexity of doing so.
+:- subscribe(bomb, [set_fuse_, set_radius_]).
+
+% Bombs leave a fake solid 'bomb' dummy on the ground for as long as the fuse is lit.
+% Dummies are a special type of actor that do basically nothing while being inserted in the flow of turns.
+% The effect of the fuse is attached to this dummy, so if the dummy moves from its original position, so will the fuse animation and explosion.
+% The dummy is given the 'invulnerable' trait when it spawns, which locks its health in place (to 1).
+% This trait is removed when the fuse runs out and the effect ends. As soon as the trait is removed, an explosion is triggered.
+% The explosion automatically takes care of killing the now-vulnerable dummy.
+% Since the dummy is NOT impassible, effects work on it! You can teleport a lit bomb around and it will explode elsewhere.
+% When a bomb is attacked, it will roll one tile in the opposite direction.
+bomb:began :- 
+	% Parse fuse duration and explosion radius from args and store them in the script's local storage
+	args(_{fuse: Fuse, radius: Radius}), 
+	fuse set Fuse, radius set Radius,
+	% Spawn the dummy and store it
+	spawn([dummy{texture: items, sprite: bomb, solid: true}], [B]), dummy set B,
+	% Move the dummy to the script owner's *current* location (i.e. floor tile or victim's tile)
+	location(@owner, l(_, P)), move(B, P),
+	% Stick a red blinking animation to the bomb dummy. It can be stopped by calling stop_animation(StopAnim), which is stored for later
+	play_animations(B, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), stop_callback set stop_animation(StopAnim),
+	% Make the dummy invulnerable to damage
+	effect(effect_def(bestow_trait, invulnerable), B, _),
+	% Let other scripts be aware that this bomb was created
+	raise(bomb, spawned, _{ dummy: B }).
+bomb:ended :-
+	% Stop the red blinking animation
+	stop_callback get StopAnim, call(StopAnim),
+	% Retrieve dummy and explosion radius from storage
+	dummy get B, radius get R,
+	% Strip bomb of invulnerability, so it can be hit again
+	effect(effect_def(remove_trait, invulnerable), B, _),
+	% Let other scripts be aware that this bomb is about to explode
+	%raise(bomb, exploding, _{ dummy: B, radius: R }),
+	% Cause an explosion and kill the bomb in the process
+	effect(effect_def(explosion, R), B, _).
+
+tick :-
+	% Retrieve current fuse and dummy
+	fuse get T1, dummy get B,
+	% Retrieve dummy's *current* position and floor id for positioning the countdown animation and sound
+	location(B, l(F, P)),
+	% Play the damage number animation
+	play_animations(B, [damage_number{damage: T1, tint: light_red}], _),
+	% If the fuse is > 0, play a sound, otherwise explode
+	(T1 \== 0 -> play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}) ; end),
+	% Decrement the fuse
+	eval(T2, T1 - 1), fuse set T2.
+
+%: Make the bomb tick and eventually explode.
+%: The player's turn start is chosen instead of another event because animations won't sync with the viewport otherwise.
+action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
+	tick.
+%: Make the bomb roll in the opposite direction whenever an actor attacks it.
+action:actor_attacked(_{attacker: _ { physics: _ {position: Ap}}, victim: actor{id : Id, physics: _{position: Vp}}}) :-
+	dummy get _{id: Id},
+	Dir := Vp - Ap,
+	clamp(-1, 1, Dir, NormDir),
+	NewPos := Vp + NormDir,
+	move(actor{id : Id, physics: _{position: Vp}}, NewPos).
+bomb:set_fuse_(_{dummy: _{ id: Id }, fuse: F}) :-
+	dummy get _ { id: Id },
+	fuse set F.
+bomb:set_radius_(_{dummy: _{ id: Id }, radius: R}) :- 
+	dummy get _ { id: Id },
+	radius set R.

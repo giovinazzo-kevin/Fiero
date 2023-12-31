@@ -20,16 +20,19 @@ public sealed class CastEntity(GameEntities entities, GameDataStore store) : Gam
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.EntityType, proxyType.Explain());
                 return;
             }
-            if (entityId.IsGround)
+            if (entityId is not Variable)
             {
-                var expl = entityId.Explain();
                 var maybeId = Maybe<int>.None;
-                if (TryParseSpecial(expl, out var special))
-                    maybeId = special.Id;
-                else if (int.TryParse(expl, out var id_))
+                if (entityId is Dict dict && dict.Dictionary.TryGetValue(EntityAsTerm.Key_Id, out var match) && int.TryParse(match.Explain(), out var id_))
                     maybeId = id_;
-                else if (entityId is Dict dict && dict.Dictionary.TryGetValue(new("id"), out var match) && int.TryParse(match.Explain(), out id_))
-                    maybeId = id_;
+                else
+                {
+                    var expl = entityId.Explain();
+                    if (TryParseSpecial(expl, out var special))
+                        maybeId = special.Id;
+                    else if (int.TryParse(expl, out id_))
+                        maybeId = id_;
+                }
                 if (maybeId.TryGetValue(out var id))
                 {
                     var tryGetProxyArgs = new object[] { id, Activator.CreateInstance(type), false };
@@ -60,10 +63,10 @@ public sealed class CastEntity(GameEntities entities, GameDataStore store) : Gam
             }
         };
 
-        static void Unify(ErgoVM vm, ITerm cast, EcsEntity entity)
+        void Unify(ErgoVM vm, ITerm cast, EcsEntity entity)
         {
             vm.SetArg(0, cast);
-            vm.SetArg(1, new EntityAsTerm(entity.Id, entity.ErgoType()));
+            vm.SetArg(1, new EntityAsTerm(entity.Id, entity.ErgoType(), entities));
             ErgoVM.Goals.Unify2(vm);
         }
     }

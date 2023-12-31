@@ -2,6 +2,7 @@
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
 using Ergo.Runtime.BuiltIns;
+using LightInject;
 
 namespace Fiero.Business;
 public partial class FieroLib
@@ -28,7 +29,8 @@ public partial class FieroLib
     }
 }
 
-public partial class FieroLib : Library
+[TransientDependency]
+public partial class FieroLib(IServiceFactory services) : Library
 {
     public override Atom Module => Modules.Fiero;
     public override IEnumerable<InterpreterDirective> GetExportedDirectives()
@@ -37,6 +39,21 @@ public partial class FieroLib : Library
     }
     public override IEnumerable<BuiltIn> GetExportedBuiltins()
     {
-        yield break;
+        yield return services.GetInstance<AnimationRepeatCount>();
+        yield return services.GetInstance<AnimationStop>();
+        yield return services.GetInstance<At>();
+        yield return services.GetInstance<CastEntity>();
+        yield return services.GetInstance<ComponentSetValue>();
+        yield return services.GetInstance<Database>();
+        yield return services.GetInstance<Despawn>();
+        yield return services.GetInstance<MsgBox>();
+        yield return services.GetInstance<NextRandom>();
+        yield return services.GetInstance<SetRandomSeed>();
+        yield return services.GetInstance<Shape>();
+        yield return services.GetInstance<Spawn>();
+        yield return services.GetInstance<TriggerAnimation>();
+        yield return services.GetInstance<TriggerAnimationBlocking>();
+        yield return services.GetInstance<TriggerEffect>();
+        yield return services.GetInstance<TriggerSound>();
     }
 }

@@ -6,15 +6,18 @@
         protected readonly GameEntities Entities;
         protected readonly GameUI UI;
         protected readonly GameColors<ColorName> Colors;
+        protected readonly GameScripts<ScriptName> Scripts;
 
         public GameEntityBuilders(
             GameEntities entities,
             GameUI ui,
-            GameColors<ColorName> colors
+            GameColors<ColorName> colors,
+            GameScripts<ScriptName> scripts
         )
         {
             Entities = entities;
             Colors = colors;
+            Scripts = scripts;
             UI = ui;
         }
 
@@ -634,8 +637,9 @@
                 consumedWhenEmpty: true,
                 throwsUseCharges: true
             )
-            // .WithIntrinsicEffect(new(EffectName.Script, $"_{{radius: {radius}, fuse: {fuse}}}", chance: 1f, script: Script("bomb").Build()),
-            //     e => new GrantedWhenHitByThrownItem(e))
+            .WithIntrinsicEffect(
+                EffectDef.FromScript(Scripts.Get(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
+                e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion
 

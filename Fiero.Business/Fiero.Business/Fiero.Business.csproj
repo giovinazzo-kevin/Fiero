@@ -58,34 +58,31 @@
     <None Update="Resources\Palettes\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\cheats.ergo">
+    <None Update="Resources\Scripts\core\optin\random.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\random.ergo">
+    <None Update="Resources\Scripts\core\optin\actor.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\sound.ergo">
+    <None Update="Resources\Scripts\core\optin\sound.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\anim.ergo">
+    <None Update="Resources\Scripts\core\optin\anim.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\__shared\effect.ergo">
+    <None Update="Resources\Scripts\core\optin\effect.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\__shared\ui.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Scripts\core\__shared\script.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Scripts\core\__shared\geometry.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Scripts\items\bomb_commands.ergo">
+    <None Update="Resources\Scripts\core\geometry.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\items\bomb.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\items\bomb_commands.old.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\items\bomb.old.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\modifiers\monsplosion.ergo">
@@ -97,7 +94,7 @@
     <None Update="Resources\Scripts\test.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\__shared\fiero.ergo">
+    <None Update="Resources\Scripts\core\fiero.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Shaders\test.frag">

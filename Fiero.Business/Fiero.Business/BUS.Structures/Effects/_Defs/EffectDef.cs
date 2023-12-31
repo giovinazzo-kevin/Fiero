@@ -28,7 +28,7 @@ namespace Fiero.Business
         public EffectDef AsStacking() => new(Name, Arguments, Duration, Chance, true, Source, Script);
         public EffectDef WithSource(Entity source) => new(Name, Arguments, Duration, Chance, Stacking, source, Script);
 
-        public static EffectDef FromScript(Script s) => new EffectDef(EffectName.Script, script: (FieroScript)s);
+        public static EffectDef FromScript(Script s, string args = null) => new EffectDef(EffectName.Script, script: (FieroScript)s, arguments: args);
 
         public Effect Resolve(Entity source)
         {

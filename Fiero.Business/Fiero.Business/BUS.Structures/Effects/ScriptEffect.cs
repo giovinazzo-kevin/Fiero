@@ -13,16 +13,18 @@ namespace Fiero.Business
         public override EffectName Name => EffectName.Script;
         public override string DisplayName => Script.Name;
         public override string DisplayDescription => Script.Name;
+        public readonly ITerm Arguments = script.VM.KB.Scope.Parse<ITerm>(args).GetOr(WellKnown.Literals.Discard);
+
 
         [Term(Marshalling = TermMarshalling.Named)]
-        public readonly record struct EffectBeganEvent(int EffectId, Entity Owner, string Arguments);
+        public readonly record struct EffectBeganEvent(int EffectId, Entity Owner, ITerm Arguments);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct EffectEndedEvent(int EffectId);
 
         protected override void OnStarted(MetaSystem systems, Entity owner)
         {
             base.OnStarted(systems, owner);
-            Script.EffectBeganHook.SetArg(0, TermMarshall.ToTerm(new EffectBeganEvent(Id, owner, args)));
+            Script.EffectBeganHook.SetArg(0, TermMarshall.ToTerm(new EffectBeganEvent(Id, owner, Arguments)));
             // Define a temporary virtual predicate end/1 that lets us end this specific effect instance.
             // Calling end(_) will therefore end all instances of an effect!
             var endHead = new Complex(new Atom("end"), new Atom(Id));

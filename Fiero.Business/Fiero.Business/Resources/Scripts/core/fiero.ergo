@@ -2,7 +2,6 @@
 % Do not modify unless you know what you are doing.
 :- module(fiero, [as/2, uuid/1, location/2]).
 :- use_module(geometry).
-:- use_module(script).
 :- op(40, yfx, ['as']).
 %: Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
@@ -18,10 +17,6 @@ Entity as Type is Proxy :-
 	cast_entity(Entity, Type, Proxy).
 %: TODO: Figure out why this can't be inlined
 location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
-%: Unify with all entities on the owner's tile (or the player if this is the shell)
-here(E) :-
-	(owner(O) ; player as actor is O),
-    at(O, E).
 %: Unify with all entities on the same tile as another physical entity
 at(O, E) :-
     location(O, l(FloorId, Pos)),

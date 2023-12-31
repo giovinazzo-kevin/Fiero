@@ -13,14 +13,16 @@ public sealed class Spawn : BuiltIn
 {
     public readonly IServiceFactory Services;
     public readonly GameEntityBuilders Builders;
+    public readonly GameEntities Entities;
 
     private readonly Dictionary<string, MethodInfo> BuilderMethods;
 
-    public Spawn(IServiceFactory services, GameEntityBuilders builders)
+    public Spawn(IServiceFactory services, GameEntityBuilders builders, GameEntities entities)
         : base("", new("spawn"), 2, FieroLib.Modules.Fiero)
     {
         Services = services;
         Builders = builders;
+        Entities = entities;
         BuilderMethods = Builders.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.Public)
             .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(EntityBuilder<>))
@@ -113,7 +115,7 @@ public sealed class Spawn : BuiltIn
                 }
                 systems.Get<RenderSystem>().CenterOn(player);
                 vm.SetArg(0, args[1]);
-                vm.SetArg(1, new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType()))));
+                vm.SetArg(1, new List(spawned.Select(x => new EntityAsTerm(x.Id, x.ErgoType(), Entities))));
                 ErgoVM.Goals.Unify2(vm);
                 vm.Success();
                 return;

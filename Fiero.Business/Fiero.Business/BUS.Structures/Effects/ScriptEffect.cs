@@ -23,9 +23,10 @@ namespace Fiero.Business
         {
             base.OnStarted(systems, owner);
             Script.EffectBeganHook.SetArg(0, TermMarshall.ToTerm(new EffectBeganEvent(Id, owner, args)));
-            // Define a temporary virtual predicate end/1 that lets us end this specific instance.
+            // Define a temporary virtual predicate end/1 that lets us end this specific effect instance.
+            // Calling end(_) will therefore end all instances of an effect!
             var endHead = new Complex(new Atom("end"), new Atom(Id));
-            var endPred = Predicate.Virtual(ErgoModules.Effect, endHead, vm =>
+            var endPred = Predicate.FromOp(ErgoModules.Effect, endHead, vm =>
             {
                 End(systems, owner);
                 vm.KB.Retract(endHead);

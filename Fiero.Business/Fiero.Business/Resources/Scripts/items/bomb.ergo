@@ -3,22 +3,44 @@
 :- use_module(fiero).
 :- use_module(actor).
 :- use_module(anim).
+:- use_module(sound).
 :- dynamic(bomb_data/3).
+:- subscribe(action, [actor_turn_started]).
 
 effect:began(_{effect_id: Id, owner: O, arguments: _{fuse: F, radius: R }}) :-
 	O as physical_entity is PO,
 	location(PO, L), L = l(_, P),
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [D]),
 	move(D, P),
-	play_animations(D, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), 
+	play_animations(D, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [S]), 
 	effect(effect_def(bestow_trait, invulnerable), D, _),
 	raise(bomb, spawned, _{ dummy: D }),
-
+	assertz(bomb_data(Id, id, Id)),
 	assertz(bomb_data(Id, fuse, F)),
+	assertz(bomb_data(Id, dummy, D)),
 	assertz(bomb_data(Id, radius, R)),
 	assertz(bomb_data(Id, location, L)),
-	assertz(bomb_data(Id, stop_anim, StopAnim))
-	.
+	assertz(bomb_data(Id, stop_anim, stop_animation(S))).
 
 effect:ended(_{effect_id: Id}) :-
+	bomb_data(Id, stop_anim, S),
+	call(S),
+	bomb_data(Id, radius, R),
+	bomb_data(Id, dummy, D),
+	effect(effect_def(remove_trait, invulnerable), D, _),
+	effect(effect_def(explosion, R), D, _),
 	retractall(bomb_data(Id, _, _)).
+
+action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
+	bomb_data(_, id, Id),
+	bomb_data(Id, fuse, T1),
+	bomb_data(Id, dummy, D),
+	location(D, l(F, P)),
+	play_animations(D, [damage_number{damage: T1, tint: light_red}], _),
+	(T1 > 0 -> 
+			play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}),
+			T2 := T1 - 1,
+			retract(bomb_data(Id, fuse, _)), !,
+			assertz(bomb_data(Id, fuse, T2))
+		; end(Id)
+	).

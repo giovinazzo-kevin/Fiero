@@ -2,16 +2,23 @@
 :- use_module(effect).
 :- use_module(fiero).
 :- use_module(actor).
+:- use_module(anim).
 :- dynamic(bomb_data/3).
 
 effect:began(_{effect_id: Id, owner: O, arguments: _{fuse: F, radius: R }}) :-
 	O as physical_entity is PO,
 	location(PO, L), L = l(_, P),
+	spawn([dummy{texture: items, sprite: bomb, solid: true}], [D]),
+	move(D, P),
+	play_animations(D, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [StopAnim]), 
+	effect(effect_def(bestow_trait, invulnerable), D, _),
+	raise(bomb, spawned, _{ dummy: D }),
+
 	assertz(bomb_data(Id, fuse, F)),
 	assertz(bomb_data(Id, radius, R)),
 	assertz(bomb_data(Id, location, L)),
-	spawn([dummy{texture: items, sprite: bomb, solid: true}], [D]),
-	move(D, P).
+	assertz(bomb_data(Id, stop_anim, StopAnim))
+	.
 
 effect:ended(_{effect_id: Id}) :-
 	retractall(bomb_data(Id, _, _)).

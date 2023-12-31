@@ -7,7 +7,7 @@ using LightInject;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class Despawn(IServiceFactory services) : BuiltIn("", new Atom("despawn"), 1, ScriptingSystem.FieroModule)
+public sealed class Despawn(IServiceFactory services) : BuiltIn("", new Atom("despawn"), 1, FieroLib.Modules.Fiero)
 {
     private readonly IServiceFactory _services = services;
 

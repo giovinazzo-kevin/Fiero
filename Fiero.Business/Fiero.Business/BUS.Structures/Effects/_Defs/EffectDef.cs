@@ -10,9 +10,9 @@ namespace Fiero.Business
         public readonly float? Chance;
         public readonly bool Stacking;
         public readonly Entity Source;
-        public readonly Script Script;
+        public readonly FieroScript Script;
 
-        public EffectDef(EffectName name, string arguments = null, int? duration = null, float? chance = null, bool canStack = true, Entity source = null, Script script = null)
+        public EffectDef(EffectName name, string arguments = null, int? duration = null, float? chance = null, bool canStack = true, Entity source = null, FieroScript script = null)
         {
             Name = name;
             Arguments = arguments;
@@ -28,7 +28,7 @@ namespace Fiero.Business
         public EffectDef AsStacking() => new(Name, Arguments, Duration, Chance, true, Source, Script);
         public EffectDef WithSource(Entity source) => new(Name, Arguments, Duration, Chance, Stacking, source, Script);
 
-        public static EffectDef FromScript(Script s) => new EffectDef(EffectName.Script, script: s);
+        public static EffectDef FromScript(Script s) => new EffectDef(EffectName.Script, script: (FieroScript)s);
 
         public Effect Resolve(Entity source)
         {
@@ -67,7 +67,7 @@ namespace Fiero.Business
                 EffectName.BestowTrait => new BestowTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
                 EffectName.RemoveTrait => new RemoveTraitEffect(source, Traits.Get(Enum.Parse<TraitName>(Arguments.ToCSharpCase()))),
                 EffectName.Script when Script is null => throw new ArgumentNullException(nameof(Script)),
-                // EffectName.Script when Script.ScriptProperties.LastError == null => new ScriptEffect(Script, Arguments.ToErgoCase()),
+                EffectName.Script /*when Script.ScriptProperties.LastError == null*/ => new ScriptEffect(Script, Arguments.ToErgoCase()),
                 // EffectName.Script when Script.ScriptProperties.LastError != null => new NullEffect(),
                 EffectName.None => new NullEffect(),
                 _ => throw new NotSupportedException(Name.ToString()),

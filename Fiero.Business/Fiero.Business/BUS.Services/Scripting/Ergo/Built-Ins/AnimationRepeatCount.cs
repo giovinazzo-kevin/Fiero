@@ -7,8 +7,7 @@ using LightInject;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class AnimationStop(IServiceFactory services)
-    : BuiltIn("", new("stop_animation"), 1, ScriptingSystem.AnimationModule)
+public sealed class AnimationRepeatCount(IServiceFactory services) : BuiltIn("", new("repeat"), 2, FieroLib.Modules.Animation)
 {
     private readonly IServiceFactory _services = services;
 
@@ -23,7 +22,12 @@ public sealed class AnimationStop(IServiceFactory services)
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[0]);
                 return;
             }
-            render.StopAnimation(id);
+            if (!args[1].Matches(out int times))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[1]);
+                return;
+            }
+            render.AlterAnimation(id, a => a.RepeatCount = times);
         };
     }
 }

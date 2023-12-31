@@ -58,6 +58,9 @@ namespace Fiero.Core
                 .SetOutput(OutWriter)
                 ;
         }
+
+        protected virtual ErgoScript MakeScript(InterpreterScope scope) => new ErgoScript(scope);
+
         public virtual bool TryLoad(TScripts fileName, out Script script)
         {
             script = default;
@@ -65,7 +68,7 @@ namespace Fiero.Core
             if (!Interpreter.Load(ref localScope, new Atom(fileName.ToString().ToErgoCase()))
                 .HasValue)
                 return false;
-            script = new ErgoScript(localScope);
+            script = MakeScript(localScope);
             return true;
         }
 

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Fiero.Business;
 
-public abstract class TriggerAnimationBase(IServiceFactory services, string name) : BuiltIn("", new(name), 3, ScriptingSystem.AnimationModule)
+public abstract class TriggerAnimationBase(IServiceFactory services, string name) : BuiltIn("", new(name), 3, FieroLib.Modules.Animation)
 {
     protected readonly IServiceFactory Services = services;
     private readonly Dictionary<string, MethodInfo> Methods = typeof(Animation)

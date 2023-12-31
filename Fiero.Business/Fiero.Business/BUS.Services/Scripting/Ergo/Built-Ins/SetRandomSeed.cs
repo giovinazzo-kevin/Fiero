@@ -10,7 +10,7 @@ public sealed class SetRandomSeed : BuiltIn
     public readonly GameDataStore Store;
 
     public SetRandomSeed(GameDataStore store)
-        : base("", new("set_rng_seed"), 1, ScriptingSystem.FieroModule)
+        : base("", new("set_rng_seed"), 1, FieroLib.Modules.Fiero)
     {
         Store = store;
     }

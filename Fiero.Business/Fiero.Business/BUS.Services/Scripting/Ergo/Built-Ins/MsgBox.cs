@@ -5,7 +5,7 @@ using Ergo.Runtime.BuiltIns;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class MsgBox(GameUI ui) : BuiltIn("", new("msg_box"), 3, ScriptingSystem.FieroModule)
+public sealed class MsgBox(GameUI ui) : BuiltIn("", new("msg_box"), 3, FieroLib.Modules.Fiero)
 {
     public readonly GameUI UI = ui;
 

@@ -22,10 +22,9 @@ namespace Fiero.Core
 
         private readonly Atom subscribed = new("subscribed");
         private readonly Atom observed = new("observed");
-        private readonly Signature subscribed2 = new(new Atom("subscribed"), 2, ErgoModules.Event, default);
-        private readonly Signature observed3 = new(new Atom("observed"), 3, ErgoModules.Data, default);
 
         public ErgoScript(InterpreterScope scope)
+            : base(scope.Entry.Explain())
         {
             /*
              Scripts may subscribe to system events through the subscribe/2 directive.

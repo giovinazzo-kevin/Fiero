@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Business
 {
+
     /// <summary>
     /// Typed effects can be applied to:
     /// - T:

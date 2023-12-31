@@ -13,7 +13,7 @@ public sealed class Shape : BuiltIn
     public readonly IServiceFactory Services;
 
     public Shape(IServiceFactory services)
-        : base("", new("shape"), 4, ScriptingSystem.FieroModule)
+        : base("", new("shape"), 4, FieroLib.Modules.Fiero)
     {
         Services = services;
     }

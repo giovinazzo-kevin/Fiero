@@ -9,5 +9,6 @@ namespace Fiero.Core
         public static readonly Atom Data = new(nameof(Data).ToErgoCase());
         public static readonly Atom Input = new(nameof(Input).ToErgoCase());
         public static readonly Atom Event = new(nameof(Event).ToErgoCase());
+        public static readonly Atom Effect = new(nameof(Effect).ToErgoCase());
     }
 }

@@ -8,7 +8,7 @@ namespace Fiero.Business;
 public sealed class NextRandom : BuiltIn
 {
     public NextRandom()
-        : base("", new("rng"), 1, ScriptingSystem.RandomModule)
+        : base("", new("rng"), 1, FieroLib.Modules.Random)
     {
     }
 

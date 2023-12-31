@@ -23,6 +23,7 @@ namespace Fiero.Core
             return false;
         }
         public bool TryGet(TScripts key, out Script script, string cacheKey = null) => Scripts.TryGetValue(CacheKey(key, cacheKey), out script);
+        public Script Get(TScripts key, string cacheKey = null) => Scripts[CacheKey(key, cacheKey)];
 
         public IEnumerable<Subscription> RouteSubscriptions()
         {

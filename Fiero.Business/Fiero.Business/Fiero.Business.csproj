@@ -64,13 +64,13 @@
     <None Update="Resources\Scripts\core\random.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\effect.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\Scripts\core\sound.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\core\anim.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\core\__shared\effect.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\core\__shared\ui.ergo">
@@ -445,13 +445,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BUS.Services\Scripting\" />
+    <Folder Include="BUS.Services\Scripting\Ergo\Libraries\" />
     <Folder Include="BUS.Services\Spells\" />
     <Folder Include="BUS.Structures\Effects\Cast\" />
     <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
-    <Folder Include="ECS.Systems\Scripting\Ergo\Libraries\" />
     <Folder Include="Resources\Scripts\effects\" />
   </ItemGroup>
 

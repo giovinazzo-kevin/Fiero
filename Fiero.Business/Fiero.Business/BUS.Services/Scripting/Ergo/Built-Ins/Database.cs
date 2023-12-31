@@ -19,7 +19,7 @@ public sealed class Database : BuiltIn
     private readonly Dictionary<KnowledgeBase, Dictionary<ITerm, ITerm>> Store = new();
 
     public Database()
-        : base("", new("db"), 3, ScriptingSystem.DataModule)
+        : base("", new("db"), 3, FieroLib.Modules.Data)
     {
     }
 

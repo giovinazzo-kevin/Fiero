@@ -7,7 +7,7 @@ using LightInject;
 namespace Fiero.Business;
 
 [SingletonDependency]
-public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("effect"), 3, ScriptingSystem.EffectModule)
+public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("effect"), 3, FieroLib.Modules.Effect)
 {
     [Term(Functor = "effect_def", Marshalling = TermMarshalling.Positional)]
     internal readonly record struct EffectDefStub(EffectName Name, string Arguments);

@@ -26,6 +26,7 @@ namespace Fiero.Business
 
         static void Register(ServiceContainer services)
         {
+            services.Override<IScriptHost<ScriptName>, FieroScriptHost>();
         }
     }
 }

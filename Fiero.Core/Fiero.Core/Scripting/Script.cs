@@ -2,8 +2,10 @@
 
 namespace Fiero.Core
 {
-    public abstract class Script
+    public abstract class Script(string name)
     {
+        public readonly string Name = name;
+
         public readonly record struct EventHook(string System, string Event);
         public readonly record struct DataHook(string Module, string Name);
         public abstract IEnumerable<EventHook> EventHooks { get; }

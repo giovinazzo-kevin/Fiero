@@ -2,11 +2,14 @@
 :- use_module(input).
 :- use_module(event).
 :- use_module(data).
+:- use_module(effect).
 
 :- observe(view, [window_size]).
 :- observe(test, [asd]).
 
 :- subscribe(test, [cool]).
+
+:- dynamic(owner/2).
 
 input:key_route(j, pressed, [_] >> j_pressed).
 input:key_route(h, pressed, [_] >> h_pressed).
@@ -33,3 +36,9 @@ test:asd_changed(Old, New) :-
 
 test:cool(_{value: X}) :-
 	write(X), nl.
+	
+effect:began(_ {effect_id: Id, owner: O}) :-
+	assertz(owner(Id, O)), end(Id).
+effect:ended(_ {effect_id: Id}) :-
+	retract(owner(Id, O)),
+	write_dict(O).

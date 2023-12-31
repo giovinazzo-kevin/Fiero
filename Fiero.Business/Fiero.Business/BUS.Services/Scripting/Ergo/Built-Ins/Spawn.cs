@@ -17,7 +17,7 @@ public sealed class Spawn : BuiltIn
     private readonly Dictionary<string, MethodInfo> BuilderMethods;
 
     public Spawn(IServiceFactory services, GameEntityBuilders builders)
-        : base("", new("spawn"), 2, ScriptingSystem.FieroModule)
+        : base("", new("spawn"), 2, FieroLib.Modules.Fiero)
     {
         Services = services;
         Builders = builders;

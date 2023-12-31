@@ -1,2 +1,3 @@
 % Do not modify unless you know what you are doing.
 :- module(effect, []).
+:- dynamic(end/1).

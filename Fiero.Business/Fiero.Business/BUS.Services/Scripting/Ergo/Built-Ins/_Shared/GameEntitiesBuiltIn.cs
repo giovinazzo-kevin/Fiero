@@ -32,7 +32,7 @@ public abstract class GameEntitiesBuiltIn : BuiltIn
 
 
     public GameEntitiesBuiltIn(string doc, Atom functor, Maybe<int> arity, GameEntities entities, GameDataStore store)
-        : base(doc, functor, arity, ScriptingSystem.FieroModule)
+        : base(doc, functor, arity, FieroLib.Modules.Fiero)
     {
         Entities = entities;
         Store = store;

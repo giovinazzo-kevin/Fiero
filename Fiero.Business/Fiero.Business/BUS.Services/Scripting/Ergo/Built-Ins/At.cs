@@ -6,7 +6,7 @@ using LightInject;
 
 namespace Fiero.Business;
 [SingletonDependency]
-public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, ScriptingSystem.FieroModule)
+public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 3, FieroLib.Modules.Fiero)
 {
     private readonly IServiceFactory _services = services;
 

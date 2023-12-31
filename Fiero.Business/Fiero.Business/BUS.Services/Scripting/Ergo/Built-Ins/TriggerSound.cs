@@ -25,7 +25,7 @@ public sealed class TriggerSound : BuiltIn
     private IServiceFactory _services;
 
     public TriggerSound(IServiceFactory services)
-        : base("", new("play_sound"), 1, ScriptingSystem.SoundModule)
+        : base("", new("play_sound"), 1, FieroLib.Modules.Sound)
     {
         _services = services;
     }

@@ -94,6 +94,9 @@
     <None Update="Resources\Scripts\test.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\test.old.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\core\fiero.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

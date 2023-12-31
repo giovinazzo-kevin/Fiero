@@ -23,7 +23,7 @@ namespace Fiero.Business
                 var sub = new Subscription(throwOnDoubleDispose: false);
                 sub.Add(systems.Get<ActionSystem>().ActorTurnStarted.SubscribeHandler(e =>
                 {
-                    if (e.Actor == target)
+                    if (!sub.IsDisposed && e.Actor == target)
                     {
                         OnApplied(systems, owner, e.Actor);
                         sub.Dispose();

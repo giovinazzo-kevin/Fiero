@@ -56,11 +56,25 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoMo
                 var ret = dispatch.Raise.Invoke(dispatch.Target, new[] { obj, default(CancellationToken) });
             });
         }
-        return node;
+        else
+        {
+            return new VirtualNode(vm =>
+            {
+                var arg = node.Args[2].Substitute(vm.Environment);
+                if (!arg.IsAbstract<Dict>().TryGetValue(out var dict))
+                {
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, arg);
+                    return;
+                }
+                _ = meta.ScriptEventRaised.Raise(new(sysName, eventName, dict));
+            });
+        }
     }
 
     public override ErgoVM.Op Compile()
     {
+        // This will only get called when sysName or eventName are variables at compile-time.
+        // Otherwise, Optimize() replaces this node with a VirtualNode containing the correct Op.
         return vm =>
         {
             var arguments = vm.Args;

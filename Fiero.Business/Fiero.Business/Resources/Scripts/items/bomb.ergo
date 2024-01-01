@@ -19,7 +19,6 @@ effect:began(_{effect_id: Id, owner: O, arguments: _{fuse: F, radius: R }}) :-
 	assertz(bomb_data(Id, fuse, F)),
 	assertz(bomb_data(Id, dummy, D)),
 	assertz(bomb_data(Id, radius, R)),
-	assertz(bomb_data(Id, location, L)),
 	assertz(bomb_data(Id, stop_anim, stop_animation(S))).
 
 effect:ended(_{effect_id: Id}) :-
@@ -32,16 +31,16 @@ effect:ended(_{effect_id: Id}) :-
 	retractall(bomb_data(Id, _, _)).
 
 action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
-	forall(bomb_data(_, id, Id), (
-		bomb_data(Id, fuse, T1),
-		bomb_data(Id, dummy, D),
-		location(D, l(F, P)),
-		play_animations(D, [damage_number{damage: T1, tint: light_red}], _),
-		(T1 > 0 -> 
-				play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}),
-				T2 := T1 - 1,
-				retract(bomb_data(Id, fuse, _)), !,
-				assertz(bomb_data(Id, fuse, T2))
-			; end(Id)
-		)
-	)).
+	forall(bomb_data(_, id, Id), tick(Id)).
+
+tick(Id) :-
+	retract(bomb_data(Id, fuse, T1)), !,
+	bomb_data(Id, dummy, D),
+	location(D, l(F, P)),
+	play_animations(D, [damage_number{damage: T1, tint: light_red}], _),
+	(T1 > 0 -> 
+			play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}),
+			T2 := T1 - 1,
+			assertz(bomb_data(Id, fuse, T2))
+		; end(Id)
+	).

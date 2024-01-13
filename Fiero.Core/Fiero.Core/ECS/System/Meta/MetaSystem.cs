@@ -71,6 +71,7 @@ namespace Fiero.Core
         }
 
         public T Get<T>() where T : EcsSystem => (T)TrackedSystems[typeof(T)];
+        public T Resolve<T>() => ServiceFactory.GetInstance<T>();
 
         public IEnumerable<SystemEventField> GetSystemEventFields()
         {

@@ -25,21 +25,14 @@ namespace Fiero.Business
             {
                 return;
             }
+            var dungeon = systems.Get<DungeonSystem>();
+            var action = systems.Get<ActionSystem>();
             var floorId = phys.FloorId();
             var pos = phys.Position();
             var actualShape = Shape
-                .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !systems.Get<DungeonSystem>().TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
+                .Where(p => !Shapes.Line(pos, p + pos).Skip(1).Any(p => !dungeon.TryGetTileAt(floorId, p, out var t) || !t.IsWalkable(phys)))
                 .ToArray();
-            systems.Get<ActionSystem>().ExplosionHappened.HandleOrThrow(new(owner, floorId, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
-            // TODO: Make this a handler of ExplosionHappened?
-            foreach (var p in actualShape)
-            {
-                foreach (var a in systems.Get<DungeonSystem>().GetActorsAt(floorId, p + pos))
-                {
-                    var damage = (int)(BaseDamage / (a.SquaredDistanceFrom(pos) + 1));
-                    systems.Get<ActionSystem>().ActorDamaged.HandleOrThrow(new(Source, a, new[] { owner }, damage));
-                }
-            }
+            action.ExplosionHappened.HandleOrThrow(new(Source, owner, floorId, pos, actualShape.Select(s => s + pos).ToArray(), BaseDamage));
             End(systems, owner);
         }
         protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)

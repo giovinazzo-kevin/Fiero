@@ -1,9 +1,4 @@
-﻿
-
-using Fiero.Core.Extensions;
-using Fiero.Core.Structures;
-using SFML.Graphics;
-using System.IO;
+﻿using SFML.Graphics;
 using System.Text.Json;
 
 namespace Fiero.Core
@@ -151,7 +146,13 @@ namespace Fiero.Core
                 renderTarget.Clear(Color.Transparent);
                 renderTarget.Draw(mask);
                 renderTarget.Draw(shape, new(BlendMode.Multiply));
+                renderTarget.Display();
+                using var coloredMaskImage = renderTarget.Texture.CopyToImage();
+                using var coloredMaskTex = new Texture(coloredMaskImage);
+                using var coloredMaskSprite = new Sprite(coloredMaskTex);
+                renderTarget.Clear(Color.Transparent);
                 renderTarget.Draw(sprite);
+                renderTarget.Draw(coloredMaskSprite);
                 renderTarget.Display();
                 using var image = renderTarget.Texture.CopyToImage();
                 var tex = new Texture(image);

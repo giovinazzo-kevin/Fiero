@@ -975,6 +975,14 @@ namespace Fiero.Business.Scenes
                 {
                     renderSystem.AnimateViewport(false, new Location(e.FloorId, e.Center), e.Points.Select(p => Animation.Explosion(offset: (p - e.Center).ToVec())).ToArray());
                 }
+                foreach (var p in e.Points)
+                {
+                    foreach (var a in dungeonSystem.GetActorsAt(e.FloorId, p))
+                    {
+                        var damage = (int)(e.BaseDamage / (a.SquaredDistanceFrom(e.Center) + 1));
+                        actionSystem.ActorDamaged.HandleOrThrow(new(e.Cause, a, [e.Source], damage));
+                    }
+                }
                 return true;
             });
             // ActionSystem.FeatureInteractedWith:

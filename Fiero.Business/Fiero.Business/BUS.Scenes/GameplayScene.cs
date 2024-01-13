@@ -234,7 +234,8 @@ namespace Fiero.Business.Scenes
                 }
 
                 // Spawn all actors once at floorgen
-                foreach (var comp in Entities.GetComponents<ActorComponent>())
+                foreach (var comp in Entities.GetComponents<ActorComponent>()
+                    .Except([Player.ActorProperties]))
                 {
                     var proxy = Entities.GetProxy<Actor>(comp.EntityId);
                     actionSystem.Spawn(proxy);
@@ -554,6 +555,13 @@ namespace Fiero.Business.Scenes
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
                     renderSystem.AnimateViewport(false, e.Victim.Location(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
                 }
+                return true;
+            });
+            // ActionSystem.ActorSpawned:
+            // - Test
+            yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
+            {
+                UI.SpeechBubble(e.Actor, "Hello world!");
                 return true;
             });
             // ActionSystem.EntityDespawned:

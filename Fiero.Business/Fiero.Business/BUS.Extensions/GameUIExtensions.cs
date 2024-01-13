@@ -7,6 +7,11 @@ namespace Fiero.Business
     {
         public static Color GetColor(this GameUI ui, ColorName name) =>
             ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
+        public static SpeechBubble SpeechBubble(this GameUI ui, Actor speaker, string text = null)
+            => ui.Open(
+                new SpeechBubble(ui, ui.ServiceProvider.GetInstance<GameResources>(), ui.ServiceProvider.GetInstance<MetaSystem>(), speaker),
+                text
+            );
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
             => ui.Open(
                 new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),

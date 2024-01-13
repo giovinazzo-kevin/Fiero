@@ -155,7 +155,7 @@ namespace Fiero.Business
                     EntityDespawned.HandleOrThrow(new(e.Actor));
                 }
             };
-            Reset();
+            ResetImpl();
         }
 
         private int? HandleAction(ActorTime t, ref IAction action)
@@ -219,12 +219,17 @@ namespace Fiero.Business
             return cost;
         }
 
-        public void Reset()
+        private void ResetImpl()
         {
             AbortCurrentTurn();
             _actorQueue.Clear();
             _actorQueue.Add(new ActorTime(TURN_ACTOR_ID, null, () => new WaitAction(), 0));
             CurrentTurn = 0;
+        }
+
+        public void Reset()
+        {
+            ResetImpl();
             _ = GameStarted.Raise(new());
         }
 

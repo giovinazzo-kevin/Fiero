@@ -50,6 +50,10 @@
   "conversation-bm": "32 16 8 8",
   "conversation-br": "40 16 8 8",
 
+  "speech_bubble-l": "144 64 8 8",
+  "speech_bubble-m": "160 64 8 8",
+  "speech_bubble-r": "176 64 8 8",
+
   "hand-l": "48 8 8 8",
 
   "face-GreatKingRatDead": "144 0 16 16",

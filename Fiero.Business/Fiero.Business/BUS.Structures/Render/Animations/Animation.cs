@@ -191,6 +191,7 @@ namespace Fiero.Business
                 repeat: repeat
             );
 
+
         public static Animation DamageNumber(
             int damage,
             TextureName font = TextureName.FontMonospace,
@@ -204,34 +205,34 @@ namespace Fiero.Business
 
             var startX = 0.25f;
             return new(new[] {
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetSprites(new(startX, +0.00f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.33f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 48), GetSprites(new(AnimateX(), -0.50f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), -0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetSprites(new(AnimateX(), +0.00f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetSprites(new(AnimateX(), +0.25f), tint, str)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 8), GetSprites(new(AnimateX(), +0.50f), tint, str))
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetTextSprites(font, new(startX, +0.00f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.33f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 48), GetTextSprites(font, new(AnimateX(), -0.50f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), +0.00f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetTextSprites(font, new(AnimateX(), +0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 8), GetTextSprites(font, new(AnimateX(), +0.50f), tint, str, s))
             }, repeat);
 
             float AnimateX()
             {
                 return startX;
             }
+        }
 
-            SpriteDef[] GetSprites(Vec ofs, ColorName tint, string text)
-            {
-                return text.Select((c, i) => new SpriteDef(
-                        font,
-                        ((int)c).ToString(),
-                        tint,
-                        ofs + new Vec(i * s.X - text.Length * s.X / 4, 0),
-                        s,
-                        1,
-                        Z: 1
-                    ))
-                    .ToArray();
-            }
+        static SpriteDef[] GetTextSprites(TextureName font, Vec ofs, ColorName tint, string text, Vec s)
+        {
+            return text.Select((c, i) => new SpriteDef(
+                    font,
+                    ((int)c).ToString(),
+                    tint,
+                    ofs + new Vec(i * s.X, 0),
+                    s,
+                    1,
+                    Z: 1
+                ))
+                .ToArray();
         }
 
         public static Animation Explosion(

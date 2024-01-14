@@ -115,15 +115,16 @@ namespace Fiero.Business
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
                     sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                     sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                    var color = sprite.Color;
                     if (spriteDef.Alpha != 1)
                     {
-                        var color = sprite.Color;
-                        sprite.Color = Color.White;
-                        target.Draw(sprite, states);
+                        //sprite.Color = Color.White;
+                        //target.Draw(sprite, states);
                         var alphaDt = (int)((1 - Math.Clamp(spriteDef.Alpha, 0, 1)) * 255);
                         sprite.Color = color.AddAlpha(-alphaDt);
                     }
                     target.Draw(sprite, states);
+                    sprite.Color = color;
                     anim.Enqueue(pair);
                 }
             }

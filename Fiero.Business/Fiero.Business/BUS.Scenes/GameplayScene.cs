@@ -561,7 +561,20 @@ namespace Fiero.Business.Scenes
             // - Test
             yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
             {
-                UI.SpeechBubble(e.Actor, "Hello world!");
+                var text = Rng.Random.Choose([
+                    "hello!",
+                    "hello",
+                    "hey",
+                    "hi",
+                    "ready",
+                    "'sup",
+                    "yo",
+                    "uh-huh",
+                    "let's go!",
+                    "smashing"
+                ]);
+                var speechBubble = new Animation.SpeechBubble(TimeSpan.FromMilliseconds(1000), text);
+                renderSystem.AnimateViewport(false, e.Actor, speechBubble.Animation());
                 return true;
             });
             // ActionSystem.EntityDespawned:

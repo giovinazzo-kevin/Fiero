@@ -50,9 +50,10 @@
   "conversation-bm": "32 16 8 8",
   "conversation-br": "40 16 8 8",
 
-  "speech_bubble-l": "144 64 8 8",
-  "speech_bubble-m": "160 64 8 8",
-  "speech_bubble-r": "176 64 8 8",
+  "speech_bubble-l": "144 64 16 16",
+  "speech_bubble-m": "160 64 16 16",
+  "speech_bubble-r": "176 64 16 16",
+  "speech_bubble-r_odd": "176 80 16 16",
 
   "hand-l": "48 8 8 8",
 

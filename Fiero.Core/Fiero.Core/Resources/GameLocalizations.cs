@@ -65,13 +65,20 @@ namespace Fiero.Core
 
         public bool TryGet<T>(string key, out T value)
         {
+            value = default;
             if (_translations.TryGetValue(CurrentCulture, out var dict))
             {
                 var keyParts = key.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                value = (T)GetInner(dict, keyParts[0], keyParts[1..]);
-                return true;
+                try
+                {
+                    value = (T)GetInner(dict, keyParts[0], keyParts[1..]);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
-            value = default;
             return false;
 
             object GetInner(JsonElement outer, string key, params string[] rest)

@@ -115,6 +115,8 @@ namespace Fiero.Business
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
                     sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                     sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                    if (!spriteDef.Crop.Equals(default))
+                        sprite.TextureRect = spriteDef.Crop;
                     var color = sprite.Color;
                     if (spriteDef.Alpha != 1)
                     {

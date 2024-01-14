@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     [TransientDependency]
@@ -21,9 +18,11 @@ namespace Fiero.Business
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool) => pool
             .Include(() => new EmptyRoom(), 1)
             .Guarantee(() => new TreasureRoom(), minAmount: 1);
+
         protected override void OnRoomDrawn(Room room, FloorGenerationContext ctx)
         {
-
+            ctx.AddObject("enemy", Rng.Random.Choose(room.GetPointCloud().ToArray()), entities =>
+                entities.NPC_Rat());
         }
     }
 }

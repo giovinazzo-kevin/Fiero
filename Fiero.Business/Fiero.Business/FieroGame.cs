@@ -138,7 +138,7 @@ namespace Fiero.Business
             Sounds.Add(SoundName.Blip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
             Sounds.Add(SoundName.Ok, new SoundBuffer("Resources/Sounds/00_start1.wav"));
             Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/77_arrowbounce.wav"));
-            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/62_miss.wav"));
+            Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/tindeck_1.wav"));
             Sounds.Add(SoundName.TrapSpotted, new SoundBuffer("Resources/Sounds/27_respawn2.wav"));
             Sounds.Add(SoundName.ItemUsed, new SoundBuffer("Resources/Sounds/66_drink.wav"));
             Sounds.Add(SoundName.Buff, new SoundBuffer("Resources/Sounds/79_arrowchain.wav"));

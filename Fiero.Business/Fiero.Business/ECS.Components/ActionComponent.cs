@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public class ActionComponent : EcsComponent
@@ -11,6 +9,6 @@ namespace Fiero.Business
 
         public IAction LastAction { get; set; }
         public ActionProvider ActionProvider { get; set; }
-
+        public int TurnsSurvived { get; set; }
     }
 }

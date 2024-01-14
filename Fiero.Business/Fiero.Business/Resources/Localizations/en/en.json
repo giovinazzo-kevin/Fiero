@@ -5,6 +5,23 @@
     "Settings": "Settings",
     "About": "About"
   },
+  "Speech": {
+    "Monster": {
+      "Greeting": []
+    },
+    "Rat": {
+      "Greeting": [ "hi", "hey", "hello!", "squeak!", "yo" ]
+    },
+    "RatSkeleton": {
+      "Greeting": [ "..." ]
+    },
+    "RatZombie": {
+      "Greeting": [ "..." ]
+    },
+    "GreatKingRat": {
+      "Greeting": [ "This evil rat will fight." ]
+    }
+  },
   "Dialogue": {
     "Shrine": {
       "Smintheus": {

@@ -355,6 +355,8 @@ namespace Fiero.Business
                     return cost;
                 }
                 OnTurnEnded(next.ActorId);
+                if (next.Actor is { Action: var a })
+                    a.TurnsSurvived++;
             }
             else
             {

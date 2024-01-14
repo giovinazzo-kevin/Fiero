@@ -55,6 +55,16 @@
   "speech_bubble-r": "176 64 16 16",
   "speech_bubble-r_odd": "176 80 16 16",
 
+  "speech_bubble-l_inv": "192 64 16 16",
+  "speech_bubble-m_inv": "208 64 16 16",
+  "speech_bubble-r_inv": "224 64 16 16",
+  "speech_bubble-r_odd_inv": "224 80 16 16",
+
+  "speech_bubble-l_inv_Mask": "192 96 16 16",
+  "speech_bubble-m_inv_Mask": "208 96 16 16",
+  "speech_bubble-r_inv_Mask": "224 96 16 16",
+  "speech_bubble-r_odd_inv_Mask": "224 112 16 16",
+
   "hand-l": "48 8 8 8",
 
   "face-GreatKingRatDead": "144 0 16 16",

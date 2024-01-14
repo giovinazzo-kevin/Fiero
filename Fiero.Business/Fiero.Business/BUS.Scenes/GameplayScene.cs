@@ -558,23 +558,16 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorSpawned:
-            // - Test
+            // - Speech bubble
             yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
             {
-                var text = Rng.Random.Choose([
-                    "hello!",
-                    "hello",
-                    "hey",
-                    "hi",
-                    "ready",
-                    "'sup",
-                    "yo",
-                    "uh-huh",
-                    "let's go!",
-                    "smashing"
-                ]);
-                var speechBubble = new Animation.SpeechBubble(TimeSpan.FromMilliseconds(1000), text);
-                renderSystem.AnimateViewport(false, e.Actor, speechBubble.Animation());
+                if (Resources.Localizations.GetSpeech(e.Actor.Npc?.Type ?? NpcName.Monster, GenericSpeechDialogueName.Greeting, out var speech))
+                {
+                    var msPerFrame = e.Actor.Npc.IsBoss ? 64 : 24;
+                    var textColor = e.Actor.Npc.IsBoss ? ColorName.LightRed : ColorName.Black;
+                    var speechBubble = new Animation.SpeechBubble(TimeSpan.FromMilliseconds(1000), speech, msPerFrame, textColor);
+                    renderSystem.AnimateViewport(false, e.Actor, speechBubble.Animation());
+                }
                 return true;
             });
             // ActionSystem.EntityDespawned:

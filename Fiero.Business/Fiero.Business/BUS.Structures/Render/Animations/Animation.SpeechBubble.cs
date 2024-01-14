@@ -1,43 +1,56 @@
-﻿namespace Fiero.Business
+﻿using SFML.Graphics;
+
+namespace Fiero.Business
 {
     public partial class Animation
     {
-        public class SpeechBubble(TimeSpan persistDuration, string text)
+        public class SpeechBubble(
+            TimeSpan persistDuration,
+            string text,
+            int msPerChar = 24,
+            ColorName textColor = ColorName.Black,
+            ColorName bubbleColor = ColorName.White,
+            TextureName font = TextureName.FontMonospace,
+            bool invert = false
+        )
         {
+            public static SpeechBubble Alert => new(TimeSpan.FromSeconds(1), "!", 24, ColorName.White, ColorName.LightRed, font: TextureName.FontMonospace, invert: true);
+
             // Y offset of the entire speech bubble, in order to position it above an actor's head
             private const float SPEECH_Y = -0.33f;
             private readonly float variance = (float)Rng.Random.Between(-0.1, 0.1);
-            // How many milliseconds the animation for each character's bounce should last
-            const int MS_PER_CHAR = 24;
             // How many milliseconds should pass between each frame in the fadeout animation
             const int MS_PER_FADE = 4;
             // Base scale of the animation (TODO parametrize)
             private static readonly Vec s = new(0.5f, 0.5f);
             // Duration of the animation that types text one character at a time
-            public readonly TimeSpan TypeAnimDuration = TimeSpan.FromMilliseconds(text.Length * MS_PER_CHAR);
+            public readonly TimeSpan TypeAnimDuration = TimeSpan.FromMilliseconds(text.Length * msPerChar);
             // Total duration of the animation including the time that the bubble should persist
             public TimeSpan TotalDuration => TypeAnimDuration + persistDuration;
             // List of sprites representing the fully typed text
-            private readonly SpriteDef[] textSprites = GetTextSprites(TextureName.FontMonospace, new Vec(0, SPEECH_Y), ColorName.Black, text, s / 2);
+            private readonly SpriteDef[] textSprites = GetTextSprites(font, new Vec(0, SPEECH_Y), textColor, text, s / 2);
             public readonly int TotalFrames = (int)(text.Length + persistDuration.TotalMilliseconds / MS_PER_FADE);
 
             // Generates the speech bubble frame and parametrizes its y value
             protected IEnumerable<SpriteDef> BackgroundSprites(float anim_y)
             {
                 var ofs = new Vec(0, SPEECH_Y + anim_y);
-                yield return new(TextureName.UI, "speech_bubble-l", ColorName.White, ofs, s, 1, 0);
+                yield return new(TextureName.UI, "speech_bubble-l" + (invert ? "_inv" : ""), bubbleColor, ofs, s, 1, 0,
+                    text.Length == 1 ? new IntRect(0, 0, 8, 16) : default);
                 var isOdd = text.Length % 2 == 1;
                 var k = Math.Floor((text.Length - 2) / 2f);
                 for (int i = 0; i < k; i++)
                 {
                     ofs += new Vec(s.X, 0);
-                    yield return new(TextureName.UI, "speech_bubble-m", ColorName.White, ofs, s, 1, 0);
+                    yield return new(TextureName.UI, "speech_bubble-m" + (invert ? "_inv" : ""), bubbleColor, ofs, s, 1, 0);
                 }
                 ofs += new Vec(s.X, 0);
-                if (isOdd)
-                    yield return new(TextureName.UI, "speech_bubble-r_odd", ColorName.White, ofs, s, 1, 0);
+                if (text.Length == 1)
+                    ofs -= new Vec(s.X / 2);
+                if (isOdd && text.Length > 1)
+                    yield return new(TextureName.UI, "speech_bubble-r_odd" + (invert ? "_inv" : ""), bubbleColor, ofs, s, 1, 0);
                 else
-                    yield return new(TextureName.UI, "speech_bubble-r", ColorName.White, ofs, s, 1, 0);
+                    yield return new(TextureName.UI, "speech_bubble-r" + (invert ? "_inv" : ""), bubbleColor, ofs, s, 1, 0);
             }
 
             protected IEnumerable<SpriteDef> PartialText(float anim_y, int currentChar)
@@ -59,7 +72,7 @@
             {
                 // for the TypeAnimDuration we want each character to come out sequentially
                 var progressiveWriteFrames = Enumerable.Range(0, text.Length)
-                    .Select(i => new AnimationFrame(TimeSpan.FromMilliseconds(MS_PER_CHAR),
+                    .Select(i => new AnimationFrame(TimeSpan.FromMilliseconds(msPerChar),
                         BackgroundSprites(anim_y: Y(i))
                         .Concat(PartialText(anim_y: Y(i), i))
                         .ToArray()));

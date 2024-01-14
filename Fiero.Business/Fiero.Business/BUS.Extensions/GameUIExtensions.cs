@@ -5,6 +5,18 @@ namespace Fiero.Business
 {
     public static class GameUIExtensions
     {
+        public static bool GetSpeech<TLocales, T>(this GameLocalizations<TLocales> locale, NpcName npcName, T speech, out string str)
+            where TLocales : struct, Enum
+            where T : struct, Enum
+        {
+            str = default;
+            var arr = locale.GetArray($"Speech.{npcName}.{speech}");
+            if (arr.Length == 0)
+                return false;
+            str = Rng.Random.Choose(arr);
+            return true;
+        }
+
         public static Color GetColor(this GameUI ui, ColorName name) =>
             ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)

@@ -385,6 +385,12 @@
     <None Update="Resources\Sounds\StoneMove.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Sounds\tindeck_1.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Sounds\tindeck_1.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\UIOk.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

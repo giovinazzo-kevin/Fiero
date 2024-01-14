@@ -561,12 +561,9 @@ namespace Fiero.Business.Scenes
             // - Speech bubble
             yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
             {
-                if (Resources.Localizations.GetSpeech(e.Actor.Npc?.Type ?? NpcName.Monster, GenericSpeechDialogueName.Greeting, out var speech))
+                if (Resources.GetSpeechBubble(e.Actor, GenericSpeechDialogueName.Greeting, out var speech))
                 {
-                    var msPerFrame = e.Actor.Npc.IsBoss ? 64 : 24;
-                    var textColor = e.Actor.Npc.IsBoss ? ColorName.LightRed : ColorName.Black;
-                    var speechBubble = new Animation.SpeechBubble(TimeSpan.FromMilliseconds(1000), speech, msPerFrame, textColor);
-                    renderSystem.AnimateViewport(false, e.Actor, speechBubble.Animation());
+                    renderSystem.AnimateViewport(false, e.Actor, speech.Animation());
                 }
                 return true;
             });

@@ -5,8 +5,26 @@ namespace Fiero.Business
 {
     public static class GameUIExtensions
     {
-        public static bool GetSpeech<TLocales, T>(this GameLocalizations<TLocales> locale, NpcName npcName, T speech, out string str)
-            where TLocales : struct, Enum
+        public static bool GetSpeechBubble<T>(this GameResources resources, Actor a, T speech, out Animation.SpeechBubble speechBubble)
+            where T : struct, Enum
+        {
+            if (resources.Localizations.GetSpeech(a.Npc?.Type ?? NpcName.Monster, speech, out var speechText))
+            {
+                var msPerFrame = 48;
+                var textColor = a.Npc.IsBoss ? ColorName.LightRed : ColorName.Black;
+                speechBubble = new Animation.SpeechBubble(TimeSpan.FromMilliseconds(1000), speechText, msPerFrame, textColor);
+                var pitch = a.Npc.IsBoss ? 1f : 2;
+                speechBubble.CharDisplayed += (e, ch) =>
+                {
+                    resources.Sounds.Get(SoundName.Blip, pitch: pitch).Play();
+                };
+                return true;
+            }
+            speechBubble = default;
+            return false;
+        }
+
+        public static bool GetSpeech<T>(this GameLocalizations<LocaleName> locale, NpcName npcName, T speech, out string str)
             where T : struct, Enum
         {
             str = default;

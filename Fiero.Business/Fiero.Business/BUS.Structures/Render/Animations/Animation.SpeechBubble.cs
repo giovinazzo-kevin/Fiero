@@ -31,6 +31,8 @@ namespace Fiero.Business
             private readonly SpriteDef[] textSprites = GetTextSprites(font, new Vec(0, SPEECH_Y), textColor, text, s / 2);
             public readonly int TotalFrames = (int)(text.Length + persistDuration.TotalMilliseconds / MS_PER_FADE);
 
+            public event Action<SpeechBubble, char> CharDisplayed;
+
             // Generates the speech bubble frame and parametrizes its y value
             protected IEnumerable<SpriteDef> BackgroundSprites(float anim_y)
             {
@@ -86,9 +88,11 @@ namespace Fiero.Business
                         .Concat(PartialText(anim_y: Y(i + text.Length), text.Length)
                             .Select((s, j) => s with { Alpha = (float)(alphaDt * (1 - i / numFadeFrames)) }))
                         .ToArray()));
-                return new Animation(progressiveWriteFrames
+                var anim = new Animation(progressiveWriteFrames
                     .Concat(fadeOutFrames)
                     .ToArray());
+                anim.FramePlaying += Anim_FramePlaying;
+                return anim;
                 float Y(int i)
                 {
                     var f = i / (float)TotalFrames;
@@ -103,6 +107,12 @@ namespace Fiero.Business
                           ? 1
                           : Math.Pow(2, -10 * x) * Math.Sin((x * 10 - 0.75) * c4) + 1;
                     }
+                }
+
+                void Anim_FramePlaying(Animation a, int i, AnimationFrame f)
+                {
+                    if (i < text.Length)
+                        CharDisplayed?.Invoke(this, text[i]);
                 }
             }
         }

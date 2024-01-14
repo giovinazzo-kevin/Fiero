@@ -379,6 +379,9 @@
     <None Update="Resources\Sounds\Shutdown.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Sounds\speech\generic.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\StoneDrag.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -135,7 +135,7 @@ namespace Fiero.Business
 
             //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
-            Sounds.Add(SoundName.Blip, new SoundBuffer("Resources/Sounds/00_start1.wav"));
+            Sounds.Add(SoundName.Blip, new SoundBuffer("Resources/Sounds/speech/generic.wav"));
             Sounds.Add(SoundName.Ok, new SoundBuffer("Resources/Sounds/00_start1.wav"));
             Sounds.Add(SoundName.WallBump, new SoundBuffer("Resources/Sounds/77_arrowbounce.wav"));
             Sounds.Add(SoundName.BossSpotted, new SoundBuffer("Resources/Sounds/tindeck_1.wav"));

@@ -1071,10 +1071,13 @@ namespace Fiero.Business.Scenes
                         switch (action)
                         {
                             case ChestActionName.Drop:
+                                item.Physics.Position = e.Feature.Position();
                                 Systems.TryPlace(e.Feature.FloorId(), item);
+                                e.Feature.Inventory.TryTake(item);
                                 break;
                             case ChestActionName.Take:
                                 e.Actor.Inventory.TryPut(item, out var fullyMerged);
+                                e.Feature.Inventory.TryTake(item);
                                 break;
                         }
                         if (e.Feature.Inventory.Empty)

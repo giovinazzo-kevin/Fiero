@@ -103,19 +103,29 @@ namespace Fiero.Business
                 void OnBuilt(EntityBuilder<T> b, T e)
                 {
                     builder.Built -= OnBuilt;
-                    var actionSystem = s.GetInstance<ActionSystem>();
-                    actionSystem.ActorSpawned.SubscribeUntil(e =>
+                    if (e is Actor)
                     {
-                        if (e.Actor.Id != c.EntityId)
+                        var actionSystem = s.GetInstance<ActionSystem>();
+                        actionSystem.ActorSpawned.SubscribeUntil(e =>
                         {
-                            return false;
-                        }
+                            if (e.Actor.Id != c.EntityId)
+                            {
+                                return false;
+                            }
+                            foreach (var item in items)
+                            {
+                                actionSystem.ItemPickedUp.HandleOrThrow(new(e.Actor, item));
+                            }
+                            return true;
+                        });
+                    }
+                    else
+                    {
                         foreach (var item in items)
                         {
-                            actionSystem.ItemPickedUp.HandleOrThrow(new(e.Actor, item));
+                            e.Inventory.TryPut(item, out _);
                         }
-                        return true;
-                    });
+                    }
                 }
 
             });

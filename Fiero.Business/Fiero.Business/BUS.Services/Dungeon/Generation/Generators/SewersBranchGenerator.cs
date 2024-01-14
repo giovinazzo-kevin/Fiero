@@ -21,8 +21,6 @@
 
         protected override void OnRoomDrawn(Room room, FloorGenerationContext ctx)
         {
-            ctx.AddObject("enemy", Rng.Random.Choose(room.GetPointCloud().ToArray()), entities =>
-                entities.NPC_Rat());
         }
     }
 }

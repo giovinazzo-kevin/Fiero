@@ -715,6 +715,9 @@
                 RandomPotion()
             ), 1000);
             yield return new(Loadout(
+                RandomWand()
+            ), 1000);
+            yield return new(Loadout(
                 (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
@@ -725,6 +728,15 @@
                 (Potion_OfTeleport(), Chance.Always),
                 (Potion_OfSilence(), Chance.Always),
                 (Potion_OfEntrapment(), Chance.Always)
+            });
+
+            (EntityBuilder<Wand> Item, Chance Chance) RandomWand() => Rng.Random.Choose(new[] {
+                (Wand_OfConfusion(), Chance.Always),
+                (Wand_OfPoison(), Chance.Always),
+                (Wand_OfSleep(), Chance.Always),
+                (Wand_OfTeleport(), Chance.Always),
+                (Wand_OfSilence(), Chance.Always),
+                (Wand_OfEntrapment(), Chance.Always)
             });
         }
         public EntityBuilder<Feature> Feature_Chest()

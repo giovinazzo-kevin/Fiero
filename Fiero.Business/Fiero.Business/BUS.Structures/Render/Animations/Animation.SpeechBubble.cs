@@ -4,6 +4,63 @@ namespace Fiero.Business
 {
     public partial class Animation
     {
+        public class SpriteBubble(
+            TimeSpan persistDuration,
+            string sprite,
+            ColorName spriteColor = ColorName.White,
+            ColorName bubbleColor = ColorName.White,
+            TextureName texture = TextureName.Items
+        )
+        {
+            private static int _z = 0;
+            private Animation cached;
+            // Y offset of the entire speech bubble, in order to position it above an actor's head
+            private const float SPEECH_Y = -1f;
+            const int MS_PER_FADE = 4;
+            // Base scale of the animation (TODO parametrize)
+            private static readonly Vec s = new(2f, 2f);
+
+            // Generates the speech bubble frame and parametrizes its y value
+            protected IEnumerable<SpriteDef> BackgroundSprites(float anim_y)
+            {
+                var ofs = new Vec(0, SPEECH_Y + anim_y);
+                yield return new(TextureName.UI, "speech_bubble-big", bubbleColor, ofs, s, 1, ++_z, default, false);
+            }
+            public Animation Animation => BakeAnimation();
+            private Animation BakeAnimation()
+            {
+                if (cached != null)
+                    return cached;
+                // For the persistDuration we want a smooth fade out of both the text and the speech bubble
+                var numFadeFrames = (persistDuration.TotalMilliseconds / MS_PER_FADE);
+                var alphaDt = 255f / numFadeFrames;
+                var fadeOutFrames = Enumerable.Range(0, (int)numFadeFrames)
+                    .Select(i => new AnimationFrame(TimeSpan.FromMilliseconds(MS_PER_FADE),
+                        BackgroundSprites(anim_y: Y(i + 1))
+                        .Select((s, j) => s with { Alpha = (float)(alphaDt * (1 - i / numFadeFrames)) })
+                    .Append(new SpriteDef(texture, sprite, spriteColor, new(-0.04f, SPEECH_Y + Y(i + 1) - 0.12f), s, (float)(alphaDt * (1 - i / numFadeFrames)), 1 + _z, default, false))
+                        .ToArray()));
+                var anim = new Animation(fadeOutFrames
+                    .ToArray());
+                return cached = anim;
+                float Y(int i)
+                {
+                    var f = i / (float)numFadeFrames;
+                    var wobble = (float)ease(f * 5);
+                    return wobble * 0.1f;
+                    double ease(float x)
+                    {
+                        const double c4 = (2 * Math.PI) / 3;
+                        return x == 0
+                          ? 0
+                          : x == 1
+                          ? 1
+                          : Math.Pow(2, -10 * x) * Math.Sin((x * 10 - 0.75) * c4) + 1;
+                    }
+                }
+            }
+        }
+
         public class SpeechBubble(
             TimeSpan persistDuration,
             string text,
@@ -25,7 +82,7 @@ namespace Fiero.Business
             // How many milliseconds should pass between each frame in the fadeout animation
             const int MS_PER_FADE = 4;
             // Base scale of the animation (TODO parametrize)
-            private static readonly Vec s = new(0.5f, 0.5f);
+            private static readonly Vec s = new(.5f, .5f);
             // Duration of the animation that types text one character at a time
             public readonly TimeSpan TypeAnimDuration = TimeSpan.FromMilliseconds(text.Length * msPerChar);
             // Total duration of the animation including the time that the bubble should persist

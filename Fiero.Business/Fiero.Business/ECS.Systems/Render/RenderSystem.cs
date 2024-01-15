@@ -113,7 +113,14 @@ namespace Fiero.Business
                     using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Tint));
                     var spriteSize = sprite.GetLocalBounds().Size();
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
-                    sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
+                    if (spriteDef.Relative)
+                    {
+                        sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
+                    }
+                    else
+                    {
+                        sprite.Scale = spriteDef.Scale;
+                    }
                     sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                     if (!spriteDef.Crop.Equals(default))
                         sprite.TextureRect = spriteDef.Crop;

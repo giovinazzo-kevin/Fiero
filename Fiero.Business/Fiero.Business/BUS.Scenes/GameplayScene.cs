@@ -746,6 +746,8 @@ namespace Fiero.Business.Scenes
                     {
                         Resources.Sounds.Get(SoundName.ItemPickedUp).Play();
                     }
+                    var spriteBubble = new Animation.SpriteBubble(TimeSpan.FromSeconds(1), e.Item.Render.Sprite, e.Item.Render.Color);
+                    renderSystem.AnimateViewport(false, e.Actor, spriteBubble.Animation);
                     return true;
                 }
                 else

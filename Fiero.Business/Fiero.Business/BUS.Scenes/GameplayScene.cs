@@ -558,12 +558,12 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorSpawned:
-            // - Speech bubble
+            // - Speech bubble (Spawned)
             yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
             {
-                if (Resources.GetSpeechBubble(e.Actor, GenericSpeechDialogueName.Greeting, out var speech))
+                if (Resources.GetSpeechBubble(e.Actor, GenericSpeechDialogueName.Spawned, out var speech))
                 {
-                    renderSystem.AnimateViewport(false, e.Actor, speech.Animation());
+                    renderSystem.AnimateViewport(false, e.Actor, speech.Animation);
                 }
                 return true;
             });

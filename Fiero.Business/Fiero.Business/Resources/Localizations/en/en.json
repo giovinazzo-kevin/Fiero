@@ -7,19 +7,19 @@
   },
   "Speech": {
     "Monster": {
-      "Greeting": []
+      "Spawned": []
     },
     "Rat": {
-      "Greeting": [ "hi", "hey", "hello!", "squeak!", "yo" ]
+      "Spawned": [ "hi", "hey", "hello!", "squeak!", "yo" ]
     },
     "RatSkeleton": {
-      "Greeting": [ "..." ]
+      "Spawned": [ "..." ]
     },
     "RatZombie": {
-      "Greeting": [ "..." ]
+      "Spawned": [ "..." ]
     },
     "GreatKingRat": {
-      "Greeting": [ "This evil rat will fight." ]
+      "Spawned": [ "This evil rat will fight." ]
     }
   },
   "Dialogue": {

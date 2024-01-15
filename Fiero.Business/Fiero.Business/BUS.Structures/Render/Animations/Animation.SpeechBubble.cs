@@ -15,6 +15,9 @@ namespace Fiero.Business
         )
         {
             public static SpeechBubble Alert => new(TimeSpan.FromSeconds(1), "!", 24, ColorName.White, ColorName.LightRed, font: TextureName.FontMonospace, invert: true);
+            public static SpeechBubble Question => new(TimeSpan.FromSeconds(1), "?", 24, ColorName.White, ColorName.LightBlue, font: TextureName.FontMonospace, invert: true);
+
+            private Animation cached;
 
             // Y offset of the entire speech bubble, in order to position it above an actor's head
             private const float SPEECH_Y = -0.33f;
@@ -70,8 +73,11 @@ namespace Fiero.Business
                 return newSprites;
             }
 
-            public Animation Animation()
+            public Animation Animation => BakeAnimation();
+            private Animation BakeAnimation()
             {
+                if (cached != null)
+                    return cached;
                 // for the TypeAnimDuration we want each character to come out sequentially
                 var progressiveWriteFrames = Enumerable.Range(0, text.Length)
                     .Select(i => new AnimationFrame(TimeSpan.FromMilliseconds(msPerChar),
@@ -92,7 +98,7 @@ namespace Fiero.Business
                     .Concat(fadeOutFrames)
                     .ToArray());
                 anim.FramePlaying += Anim_FramePlaying;
-                return anim;
+                return cached = anim;
                 float Y(int i)
                 {
                     var f = i / (float)TotalFrames;

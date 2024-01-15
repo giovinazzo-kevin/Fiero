@@ -45,7 +45,7 @@ namespace Fiero.Business
                 if (enemy.Action.TurnsSurvived == 0)
                     continue;
                 // When the player spots an enemy, play a "!" animation like in MGS
-                Systems.Get<RenderSystem>().AnimateViewport(false, enemy, Animation.SpeechBubble.Alert.Animation());
+                Systems.Get<RenderSystem>().AnimateViewport(false, enemy, Animation.SpeechBubble.Alert.Animation);
                 Systems.Resolve<GameSounds<SoundName>>().Get(SoundName.BossSpotted, enemy.Position() - a.Position()).Play();
             }
 

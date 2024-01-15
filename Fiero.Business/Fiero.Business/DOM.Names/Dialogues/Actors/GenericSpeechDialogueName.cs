@@ -2,6 +2,8 @@
 {
     public enum GenericSpeechDialogueName
     {
-        Spawned
+        Spawned,
+        Attacking,
+        Attacked
     }
 }

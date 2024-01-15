@@ -10,13 +10,19 @@
       "Spawned": []
     },
     "Rat": {
-      "Spawned": [ "hi", "hey", "hello!", "squeak!", "yo" ]
+      "Spawned": [ "hi", "hey", "hello!", "squeak!", "yo" ],
+      "Attacking": [ "charge!", "take this!", "take that!", "die!", "now!" ],
+      "Attacked": [ "AIEEE!", "no...", "not like this!", "never!", "oof!", "ouch!" ]
     },
     "RatSkeleton": {
-      "Spawned": [ "..." ]
+      "Spawned": [ "..." ],
+      "Attacking": [],
+      "Attacked": []
     },
     "RatZombie": {
-      "Spawned": [ "..." ]
+      "Spawned": [ "..." ],
+      "Attacking": [ "brains..." ],
+      "Attacked": []
     },
     "GreatKingRat": {
       "Spawned": [ "This evil rat will fight." ]

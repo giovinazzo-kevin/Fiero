@@ -467,11 +467,13 @@ namespace Fiero.Business.Scenes
             // - Handle Ai aggro and grudges
             // - Show melee attack animation
             // - Identify wands and potions
+            // - Occasionally play speech bubbles for attacker and victim
             yield return actionSystem.ActorAttacked.SubscribeResponse(e =>
             {
                 e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
                 e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                 var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
+                var speechChance = () => Chance.OneIn(15);
                 if (e.Type == AttackName.Melee)
                 {
                     if (Player.CanHear(e.Attacker) || Player.CanHear(e.Victim))
@@ -497,6 +499,10 @@ namespace Fiero.Business.Scenes
                         renderSystem.AnimateViewport(true, e.Attacker.Location(), anim);
                     }
                 }
+                if (speechChance() && Resources.GetSpeechBubble(e.Attacker, GenericSpeechDialogueName.Attacking, out var speech))
+                    renderSystem.AnimateViewport(false, e.Attacker, speech.Animation);
+                if (speechChance() && Resources.GetSpeechBubble(e.Victim, GenericSpeechDialogueName.Attacked, out speech))
+                    renderSystem.AnimateViewport(false, e.Victim, speech.Animation);
                 foreach (var weapon in e.Weapons)
                 {
                     if (e.Type == AttackName.Ranged && weapon.TryCast<Potion>(out var potion))
@@ -732,6 +738,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ItemPickedUp:
             // - Store item in inventory or fail
             // - Play a sound if it's the player
+            // - Show a sprite bubble on the actor that picked up the item
             yield return actionSystem.ItemPickedUp.SubscribeResponse(e =>
             {
                 if (e.Actor.Inventory.TryPut(e.Item, out var fullyMerged))

@@ -11,8 +11,6 @@ namespace Fiero.Business
 
         protected Modal CurrentModal { get; private set; }
 
-        private HashSet<Actor> KnownEnemies = new();
-
         public PlayerActionProvider(GameUI ui, MetaSystem systems, QuickSlotHelper slots)
             : base(systems)
         {
@@ -37,18 +35,6 @@ namespace Fiero.Business
         public override IAction GetIntent(Actor a)
         {
             base.GetIntent(a);
-            foreach (var enemy in NearbyEnemies.Values)
-            {
-                if (KnownEnemies.Contains(enemy))
-                    continue;
-                KnownEnemies.Add(enemy);
-                if (enemy.Action.TurnsSurvived == 0)
-                    continue;
-                // When the player spots an enemy, play a "!" animation like in MGS
-                Systems.Get<RenderSystem>().AnimateViewport(false, enemy, Animation.SpeechBubble.Alert.Animation);
-                Systems.Resolve<GameSounds<SoundName>>().Get(SoundName.BossSpotted, enemy.Position() - a.Position()).Play();
-            }
-
             if (CurrentModal != null || !UI.Input.IsKeyboardFocusAvailable)
                 return new NoAction();
             _requestDelay = true;

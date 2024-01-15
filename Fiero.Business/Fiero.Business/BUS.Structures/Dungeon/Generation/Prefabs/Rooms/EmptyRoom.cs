@@ -2,6 +2,10 @@
 {
     public class EmptyRoom : Room
     {
-
+        public EmptyRoom()
+        {
+            AllowMonsters = true;
+            AllowFeatures = true;
+        }
     }
 }

@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class TreasureRoom : Room
     {
@@ -17,8 +13,7 @@ namespace Fiero.Business
             theme = base.CustomizeTheme(theme);
             return theme with
             {
-                WallTile = (c => theme.WallTile(c).WithCustomColor(ColorName.Yellow)),
-                RoomTile = (c => theme.RoomTile(c).WithCustomColor(ColorName.Yellow)),
+                WallTile = (c => theme.WallTile(c).WithCustomColor(ColorName.Yellow))
             };
         }
 

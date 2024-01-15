@@ -8,12 +8,14 @@
 
         private StateName _state = StateName.Wandering;
 
+        private HashSet<Actor> KnownPlayers = new();
+
         public AiActionProvider(MetaSystem systems)
             : base(systems)
         {
         }
 
-        protected virtual StateName UpdateState(StateName state)
+        protected virtual StateName UpdateState(Actor a, StateName state)
         {
             if (Panic)
             {
@@ -22,6 +24,19 @@
             if (NearbyEnemies.Values.Count == 0)
             {
                 return StateName.Wandering;
+            }
+            else
+            {
+                foreach (var enemy in NearbyEnemies.Values)
+                {
+                    if (enemy.IsPlayer() && !KnownPlayers.Contains(enemy))
+                    {
+                        KnownPlayers.Add(enemy);
+                        // When the enemy is spotted, play a "!" animation like in MGS
+                        Systems.Get<RenderSystem>().AnimateViewport(false, a, Animation.SpeechBubble.Alert.Animation);
+                        //Systems.Resolve<GameSounds<SoundName>>().Get(SoundName.BossSpotted, enemy.Position() - a.Position()).Play();
+                    }
+                }
             }
             return StateName.Fighting;
         }
@@ -165,7 +180,7 @@
         public override IAction GetIntent(Actor a)
         {
             base.GetIntent(a);
-            return (_state = UpdateState(_state)) switch
+            return (_state = UpdateState(a, _state)) switch
             {
                 StateName.Retreating => Retreat(a),
                 StateName.Fighting => Fight(a),

@@ -14,8 +14,8 @@ namespace Fiero.Business
             bool invert = false
         )
         {
-            public static SpeechBubble Alert => new(TimeSpan.FromSeconds(1), "!", 24, ColorName.White, ColorName.LightRed, font: TextureName.FontMonospace, invert: true);
-            public static SpeechBubble Question => new(TimeSpan.FromSeconds(1), "?", 24, ColorName.White, ColorName.LightBlue, font: TextureName.FontMonospace, invert: true);
+            public static SpeechBubble Alert => new(TimeSpan.FromSeconds(0.5), "!", 24, ColorName.White, ColorName.LightRed, font: TextureName.FontMonospace, invert: true);
+            public static SpeechBubble Question => new(TimeSpan.FromSeconds(0.5), "?", 24, ColorName.White, ColorName.LightBlue, font: TextureName.FontMonospace, invert: true);
 
             private Animation cached;
 

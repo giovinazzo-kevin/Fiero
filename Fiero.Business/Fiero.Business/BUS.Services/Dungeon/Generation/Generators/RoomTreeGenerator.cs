@@ -1,13 +1,9 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public abstract class RoomTreeGenerator : IBranchGenerator
     {
+        public readonly record struct EnemyPoolArgs(Room CurrentRoom, FloorGenerationContext Context, GameEntityBuilders Entities);
+
         public abstract Coord MapSize(FloorId id);
         public abstract Coord GridSize(FloorId id);
         public readonly DungeonTheme Theme;
@@ -39,7 +35,7 @@ namespace Fiero.Business
 
         protected virtual RoomTree BuildTree(Coord mapSize, Coord gridSize)
         {
-            var pool = ConfigureRoomPool(new PoolBuilder<Func<Room>>()).Build(capacity: gridSize.Area() * 8);
+            var pool = ConfigureRoomPool(new()).Build(capacity: gridSize.Area() * 8);
             var roomSectors = RoomSector.CreateTiling(mapSize, gridSize, Theme.RoomSquares, pool)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)
@@ -50,21 +46,45 @@ namespace Fiero.Business
                 corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
             );
             tree.SetTheme(Theme, ShouldApplyTheme);
+            var enemyPool = ConfigureEnemyPool(new()).Build(capacity: roomSectors.SelectMany(x => x.Rooms).Select(x => x.GetRects().Count()).Sum() * 4);
             foreach (var (par, cor, chd) in tree.Traverse())
             {
-                if (par != null)
-                    par.Room.Drawn += OnRoomDrawn;
+                if (par == null)
+                    continue;
+                par.Room.Drawn += OnRoomDrawn_;
             }
+
             return tree;
+
+            void OnRoomDrawn_(Room room, FloorGenerationContext ctx)
+            {
+                OnRoomDrawn(room, ctx, enemyPool);
+            }
         }
 
         protected virtual bool ShouldApplyTheme(IFloorGenerationPrefab prefab) =>
             prefab is EmptyRoom
             || prefab is Corridor;
 
+
+        protected abstract PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> pool);
         protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool);
 
-        protected abstract void OnRoomDrawn(Room room, FloorGenerationContext ctx);
+        protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, EntityBuilder<Actor>>> enemyPool)
+        {
+            if (room.AllowMonsters)
+            {
+                var candidateTiles = room.GetPointCloud()
+                    .Where(p => ctx.GetTile(p).Name == TileName.Room)
+                    .ToList();
+                var numMonsters = new Dice(2, room.GetRects().Count())
+                    .Roll(Rng.Random).Sum();
+                for (int i = 0; i < numMonsters; i++)
+                {
+                    ctx.AddObject("monster", Rng.Random.Choose(candidateTiles), entities => enemyPool.Next()(new(room, ctx, entities)));
+                }
+            }
+        }
 
         protected virtual void PlaceStairs(FloorGenerationContext ctx, RoomTree tree, FloorId floorId)
         {

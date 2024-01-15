@@ -19,8 +19,18 @@
             .Include(() => new EmptyRoom(), 1)
             .Guarantee(() => new TreasureRoom(), minAmount: 1);
 
-        protected override void OnRoomDrawn(Room room, FloorGenerationContext ctx)
-        {
-        }
+        protected override PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> pool) => pool
+            .Include(args => args.Entities.NPC_Rat(), 100)
+            .Include(args => args.Entities.NPC_RatArcher(), 7.5f)
+            .Include(args => args.Entities.NPC_RatArsonist(), 1)
+            .Include(args => args.Entities.NPC_RatCultist(), 1)
+            .Include(args => args.Entities.NPC_RatKnight(), 17.5f)
+            .Include(args => args.Entities.NPC_RatPugilist(), 1)
+            .Include(args => args.Entities.NPC_RatWizard(), 5)
+            .Include(args => args.Entities.NPC_RatThief(), 1)
+            //.Include(args => args.Entities.NPC_RatCheese(), 0.05f)
+            .Include(args => args.Entities.NPC_RatMerchant(), 0.1f)
+            ;
+
     }
 }

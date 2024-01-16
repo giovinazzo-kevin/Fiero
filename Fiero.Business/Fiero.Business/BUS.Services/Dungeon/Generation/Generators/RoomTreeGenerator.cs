@@ -69,6 +69,7 @@
 
         protected abstract PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> pool);
         protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool);
+        protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
 
         protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, EntityBuilder<Actor>>> enemyPool)
         {
@@ -77,7 +78,7 @@
                 var candidateTiles = room.GetPointCloud()
                     .Where(p => ctx.GetTile(p).Name == TileName.Room)
                     .ToList();
-                var numMonsters = new Dice(2, room.GetRects().Count())
+                var numMonsters = GetMonsterDice(room, ctx)
                     .Roll(Rng.Random).Sum();
                 for (int i = 0; i < numMonsters; i++)
                 {

@@ -1,10 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     [TransientDependency]
@@ -28,7 +22,7 @@ namespace Fiero.Business
         public Floor Build(FloorId id, Coord size)
         {
             var floor = new Floor(id, size);
-            var context = new FloorGenerationContext(_entityBuilders, size);
+            var context = new FloorGenerationContext(_entityBuilders, id, size);
             // Run user steps, initializing the context
             foreach (var step in _steps)
             {

@@ -1,29 +1,15 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    public class FloorGenerationContext
+    public class FloorGenerationContext(GameEntityBuilders builders, FloorId id, Coord size)
     {
-        public readonly Coord Size;
+        public readonly FloorId Id = id;
+        public readonly Coord Size = size;
 
         public readonly LogComponent Log;
-        protected readonly GameEntityBuilders EntityBuilders;
-        protected readonly Dictionary<Coord, HashSet<ObjectDef>> Objects;
-        protected readonly Dictionary<Coord, TileDef> Tiles;
-        protected readonly HashSet<FloorConnection> Connections;
-
-
-        public FloorGenerationContext(GameEntityBuilders builders, Coord size)
-        {
-            Size = size;
-            EntityBuilders = builders;
-            Objects = new();
-            Tiles = new();
-            Connections = new();
-        }
+        protected readonly GameEntityBuilders EntityBuilders = builders;
+        protected readonly Dictionary<Coord, HashSet<ObjectDef>> Objects = new();
+        protected readonly Dictionary<Coord, TileDef> Tiles = new();
+        protected readonly HashSet<FloorConnection> Connections = new();
 
         public bool IsPointInBounds(Coord pos)
         {

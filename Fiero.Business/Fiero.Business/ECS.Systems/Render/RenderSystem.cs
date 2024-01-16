@@ -180,16 +180,19 @@ namespace Fiero.Business
                 }
                 if (time > currentFrame.Start && !Vfx.ContainsKey(id))
                 {
-                    if (timeline.Visible && Viewport.Following.V.CanSeeEither(timeline.At))
+                    if (timeline.Visible)
                     {
                         var myVfx = Vfx[id] = new();
-                        foreach (var spriteDef in currentFrame.AnimFrame.Sprites
-                            .OrderBy(x => x.Z))
+                        if (Viewport.Following.V.CanSeeEither(timeline.At))
                         {
-                            myVfx.Enqueue(new(worldPos, spriteDef with { Offset = spriteDef.Offset + timeline.Offset }));
+                            foreach (var spriteDef in currentFrame.AnimFrame.Sprites
+                                .OrderBy(x => x.Z))
+                            {
+                                myVfx.Enqueue(new(worldPos, spriteDef with { Offset = spriteDef.Offset + timeline.Offset }));
+                            }
                         }
+                        timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
                     }
-                    timeline.Animation.OnFramePlaying(timeline.Animation.Frames.Length - timeline.Frames.Count);
                 }
                 if (Vfx.TryGetValue(id, out vfx))
                 {

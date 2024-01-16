@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public readonly record struct Dice(int NumberOfDice, int NumberOfSides, Func<int, int, double> Weights = null)
+    public readonly record struct Dice(int NumberOfDice, int NumberOfSides, Func<int, int, double> Weights = null, int Bias = 0)
     {
         public Dice Unweighted() => new(NumberOfDice, NumberOfSides);
         public Dice Weighted(Func<int, int, double> Weights) => new(NumberOfDice, NumberOfSides, Weights);
@@ -14,7 +14,7 @@
             }
             for (int i = 0; i < NumberOfDice; i++)
             {
-                yield return rng.Next(1, NumberOfSides + 1);
+                yield return rng.Next(1, NumberOfSides + 1) + Bias;
             }
         }
         private IEnumerable<int> RollWeighted(Random rng)
@@ -52,7 +52,7 @@
             {
                 while (true)
                 {
-                    int roll = rng.Next(1, NumberOfSides + 1);
+                    int roll = rng.Next(1, NumberOfSides + 1) + Bias;
                     if (rng.NextDouble() <= memoizedWeightFunction(i, roll))
                     {
                         yield return roll;

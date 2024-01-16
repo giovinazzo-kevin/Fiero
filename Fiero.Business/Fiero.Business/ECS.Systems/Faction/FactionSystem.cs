@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Structures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -12,6 +7,7 @@ namespace Fiero.Business
         public readonly GameEntities Entities;
         protected readonly Dictionary<OrderedPair<FactionName>, StandingName> FactionRelations = new();
         protected readonly Dictionary<OrderedPair<int>, StandingName> ActorRelations = new();
+
 
         public void SetDefaultRelations()
         {

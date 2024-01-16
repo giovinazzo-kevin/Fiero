@@ -1,0 +1,7 @@
+:- module(dialogue, []).
+:- subscribe(dialogue, [dialogue_triggered]).
+:- use_module(fiero).
+:- use_module(sound).
+
+dialogue:dialogue_triggered(_{trigger: _{full_path: 'GreatKingRat.JustMet'}}):-
+	play_sound(boss_spotted{}).

@@ -39,7 +39,7 @@ tick(Id) :-
 	location(D, l(F, P)),
 	play_animations(D, [damage_number{damage: T1, tint: light_red}], _),
 	(T1 > 0 -> 
-		play_sound(countdown1{floor_id: F, position:P, volume:100, pitch: 1}),
+		play_sound(countdown1{floor_id: F, position:P}),
 		T2 := T1 - 1,
 		assertz(bomb_data(Id, fuse, T2))
 	;   end(Id)).

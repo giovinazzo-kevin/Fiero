@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -13,6 +8,10 @@ namespace Fiero.Business
         protected readonly GameDialogues Dialogues;
         protected readonly GameDataStore Store;
         protected readonly GameUI UI;
+
+        public readonly record struct DialogueTriggeredEvent(IDialogueTrigger Trigger, DialogueNode Node, PhysicalEntity Speaker, DrawableEntity[] Listeners);
+        public readonly SystemEvent<DialogueSystem, DialogueTriggeredEvent> DialogueTriggered;
+
 
         public DialogueSystem(
             EventBus bus,
@@ -26,8 +25,10 @@ namespace Fiero.Business
             Entities = entities;
             Store = store;
             UI = ui;
+            DialogueTriggered = new(this, nameof(DialogueTriggered));
         }
 
+        // TODO: make triggers data driven!!
         public void SetTriggers(MetaSystem systems, NpcName type, DialogueComponent component)
         {
             switch (type)
@@ -40,10 +41,11 @@ namespace Fiero.Business
             IEnumerable<IDialogueTrigger> GreatKingRat()
             {
                 yield return new PlayerInSightDialogueTrigger<GKRDialogueName>(
-                    systems, repeatable: false, GKRDialogueName.JustMet);
+                    systems, repeatable: false, nameof(NpcName.GreatKingRat), GKRDialogueName.JustMet);
             }
         }
 
+        // TODO: make triggers data driven!!
         public void SetTriggers(MetaSystem systems, FeatureName type, DialogueComponent component)
         {
             switch (type)
@@ -61,7 +63,7 @@ namespace Fiero.Business
                 IEnumerable<IDialogueTrigger> Smintheus()
                 {
                     yield return new BumpedByPlayerDialogueTrigger<ShrineDialogueName>(
-                        systems, repeatable: true, ShrineDialogueName.Smintheus);
+                        systems, repeatable: true, nameof(FeatureName.Shrine), ShrineDialogueName.Smintheus);
                 }
             }
         }
@@ -94,13 +96,15 @@ namespace Fiero.Business
                 {
                     if (trigger.TryTrigger(floorId, speaker, out var listeners))
                     {
-                        var node = Dialogues.GetDialogue(dialogueKey, trigger.DialogueNode);
+                        var node = Dialogues.GetDialogue(dialogueKey, trigger.Node);
                         if (!trigger.Repeatable)
                         {
                             comp.Triggers.Remove(trigger);
                         }
                         trigger.OnTrigger();
-                        UI.Dialogue(trigger, node, speaker, listeners.ToArray());
+                        var list = listeners.ToArray();
+                        _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
+                        UI.Dialogue(trigger, node, speaker, list);
                         return;
                     }
                 }

@@ -76,6 +76,9 @@
     <None Update="Resources\Scripts\core\geometry.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\dialogue\dialogue.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\items\bomb.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

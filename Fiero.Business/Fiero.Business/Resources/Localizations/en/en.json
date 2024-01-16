@@ -30,13 +30,13 @@
   },
   "Dialogue": {
     "Shrine": {
-      "Smintheus": {
+      "Upgrade": {
         "Face": "GreatKingRatDead",
-        "Lines": [ "You offer a prayer to Smintheus,", "god of rats and pestilence." ],
+        "Lines": [ "You offer a prayer to Armok,", "god of the forge" ],
         "Cancellable": true,
         "Choices": [
           {
-            "Line": "Follow Smintheus",
+            "Line": "Upgrade a weapon",
             "Next": "Smintheus_Follow"
           }
         ],

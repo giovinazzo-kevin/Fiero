@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class LowHealthDialogueTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
         public float PercentageThreshold { get; set; } = 0.5f;
 
-        public LowHealthDialogueTrigger(MetaSystem sys, bool repeatable, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, nodeChoices)
+        public LowHealthDialogueTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
+            : base(sys, repeatable, path, nodeChoices)
         {
 
         }

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Ergo.Lang;
 
 namespace Fiero.Business
 {
+    [Term(Marshalling = TermMarshalling.Named)]
     public class DialogueNode
     {
         public readonly string Id;

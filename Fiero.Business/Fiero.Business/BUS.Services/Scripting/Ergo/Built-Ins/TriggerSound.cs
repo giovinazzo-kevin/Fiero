@@ -18,8 +18,7 @@ public sealed class TriggerSound : BuiltIn
         [Term(Marshalling = TermMarshalling.Positional)]
         public Coord Position { get; init; }
         public float Pitch { get; init; } = 1f;
-        public float Volume { get; init; } = 2f;
-        public bool Relative { get; init; } = true;
+        public float Volume { get; init; } = 100f;
     };
 
     private IServiceFactory _services;
@@ -59,12 +58,13 @@ public sealed class TriggerSound : BuiltIn
             }
             var player = systems.Get<RenderSystem>().Viewport.Following.V;
             var pos = stub.Position;
-            if (stub.Relative)
+            var isRelative = !stub.FloorId.Equals(default);
+            if (isRelative)
             {
                 var center = player.Position();
                 pos -= center;
             }
-            if (stub.FloorId == player.FloorId())
+            if (!isRelative || stub.FloorId == player.FloorId())
             {
                 resources.Sounds
                     .Get(sound, pos, stub.Volume, stub.Pitch).Play();

@@ -1,28 +1,26 @@
-﻿using Fiero.Core;
-using Fiero.Core.Extensions;
-using System;
-using System.Collections.Generic;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public abstract class DialogueTrigger<TDialogue> : IDialogueTrigger
         where TDialogue : struct, Enum
     {
-        private readonly TDialogue[] _dialogueOptions;
+        private readonly TDialogue[] dialogueOptions;
 
         public readonly MetaSystem Systems;
         public TDialogue DialogueNode { get; private set; }
-        string IDialogueTrigger.DialogueNode => DialogueNode.ToString();
+        private readonly string partialPath;
+        string IDialogueTrigger.Node => DialogueNode.ToString();
+        string IDialogueTrigger.FullPath => $"{partialPath}.{((IDialogueTrigger)this).Node}";
         public bool Repeatable { get; protected set; }
 
         public event Action<DialogueTrigger<TDialogue>> Triggered;
 
-        public DialogueTrigger(MetaSystem systems, bool repeatable, params TDialogue[] nodeChoices)
+        public DialogueTrigger(MetaSystem systems, bool repeatable, string path, params TDialogue[] nodeChoices)
         {
             Systems = systems;
-            _dialogueOptions = nodeChoices;
-            DialogueNode = Rng.Random.Choose(_dialogueOptions);
+            partialPath = path;
+            dialogueOptions = nodeChoices;
+            DialogueNode = Rng.Random.Choose(dialogueOptions);
             Repeatable = repeatable;
         }
 
@@ -30,7 +28,7 @@ namespace Fiero.Business
         public virtual void OnTrigger()
         {
             Triggered?.Invoke(this);
-            DialogueNode = Rng.Random.Choose(_dialogueOptions);
+            DialogueNode = Rng.Random.Choose(dialogueOptions);
         }
     }
 }

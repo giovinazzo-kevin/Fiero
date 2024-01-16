@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class TalkedToAllyTrigger<TDialogue> : TalkedToTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
-        public TalkedToAllyTrigger(MetaSystem sys, bool repeatable, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, nodeChoices)
+        public TalkedToAllyTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
+            : base(sys, repeatable, path, nodeChoices)
         {
 
         }

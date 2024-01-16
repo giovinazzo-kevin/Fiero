@@ -60,11 +60,6 @@ namespace Fiero.Business.Scenes
             void SubscribeDialogueHandlers()
             {
                 var factionSystem = Systems.Get<FactionSystem>();
-                Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet)
-                    .Triggered += (t, eh) =>
-                    {
-                        Resources.Sounds.Get(SoundName.BossSpotted).Play();
-                    };
                 Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
                     .Triggered += (t, eh) =>
                     {

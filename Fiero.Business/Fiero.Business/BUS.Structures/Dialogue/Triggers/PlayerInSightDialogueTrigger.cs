@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class PlayerInSightDialogueTrigger<TDialogue> : DialogueTrigger<TDialogue>
         where TDialogue : struct, Enum
     {
         public float DistanceThreshold { get; set; } = 5;
 
-        public PlayerInSightDialogueTrigger(MetaSystem sys, bool repeatable, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, nodeChoices)
+        public PlayerInSightDialogueTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
+            : base(sys, repeatable, path, nodeChoices)
         {
 
         }

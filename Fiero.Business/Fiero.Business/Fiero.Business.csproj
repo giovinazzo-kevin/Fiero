@@ -22,6 +22,9 @@
     <None Update="README.md">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\entities\entities.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Fonts\Amatic-Bold.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -460,6 +463,7 @@
     <Folder Include="BUS.Structures\Effects\OnHitDealt\" />
     <Folder Include="BUS.Structures\Faction\" />
     <Folder Include="BUS.Structures\Spells\" />
+    <Folder Include="Resources\Entities\Actors\" />
     <Folder Include="Resources\Scripts\effects\" />
   </ItemGroup>
 

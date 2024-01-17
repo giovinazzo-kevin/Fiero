@@ -1,10 +1,35 @@
-﻿using LightInject;
+﻿using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
+using LightInject;
 using Unconcern.Common;
-
 namespace Fiero.Business
 {
     public static class EntityBuilderExtensions
     {
+        public static EntityBuilder<T> LoadState<T>(this EntityBuilder<T> builder, string resourceName)
+            where T : Entity
+        {
+            var scripts = builder.Entities.ServiceFactory.GetInstance<GameScripts<ScriptName>>();
+            var entities = (ErgoScript)scripts.Get(ScriptName.Entities);
+            var query = entities.VM.ParseAndCompileQuery($"dict('{resourceName}', X)");
+            entities.VM.Query = query;
+            entities.VM.Run();
+            if (entities.VM.State == Ergo.Runtime.ErgoVM.VMState.Fail)
+                throw new ArgumentException(resourceName);
+            // X == {prop: prop_component{}, other_prop: other_prop_component{}, ...}
+            var X = (Ergo.Lang.Ast.Set)entities.VM.Solutions.Single().Substitutions[new("X")];
+            var kvps = X.Contents
+                .ToDictionary(a => (Atom)((Complex)a).Arguments[0], a => ((Complex)a).Arguments[1]);
+            foreach (var prop in builder.Entities.GetProxyableProperties<T>())
+            {
+                var name = new Atom(prop.Name.ToErgoCase());
+                if (kvps.TryGetValue(name, out var dict))
+                {
+                    builder = builder.Load(prop.PropertyType, (Dict)dict);
+                }
+            }
+            return builder;
+        }
         public static EntityBuilder<T> WithName<T>(this EntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>((s, c) => c.Name = s.GetInstance<GameResources>().Localizations.Translate(name));
         public static EntityBuilder<T> WithDescription<T>(this EntityBuilder<T> builder, string desc)

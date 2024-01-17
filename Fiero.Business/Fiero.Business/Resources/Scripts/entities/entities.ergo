@@ -1,0 +1,10 @@
+﻿:- module(entities, [
+  dict/2
+]).
+
+rat {
+  info: _ {
+    name: 'Rat',
+    description: 'A tiny rodent that dwells in the dungeon sewers.'
+  }
+}.

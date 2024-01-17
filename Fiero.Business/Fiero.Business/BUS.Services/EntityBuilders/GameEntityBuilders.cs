@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang.Extensions;
+
+namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameEntityBuilders
@@ -376,6 +378,7 @@
             .WithFaction(FactionName.Rats)
             .WithCorpse(CorpseName.RatCorpse, chance: Chance.FiftyFifty)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Rat), ColorName.White)
+            .LoadState(nameof(NpcName.Rat).ToErgoCase())
             ;
 
         public EntityBuilder<Actor> NPC_Snake()

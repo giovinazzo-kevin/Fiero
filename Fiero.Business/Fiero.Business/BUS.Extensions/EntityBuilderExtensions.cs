@@ -11,7 +11,8 @@ namespace Fiero.Business
         {
             var scripts = builder.Entities.ServiceFactory.GetInstance<GameScripts<ScriptName>>();
             var entities = (ErgoScript)scripts.Get(ScriptName.Entity);
-            var query = entities.VM.ParseAndCompileQuery($"dict('{resourceName}', X)");
+            var queryStr = $"dict({resourceName.ToErgoCase()}, X)";
+            var query = entities.VM.ParseAndCompileQuery(queryStr);
             entities.VM.Query = query;
             entities.VM.Run();
             if (entities.VM.State == Ergo.Runtime.ErgoVM.VMState.Fail)

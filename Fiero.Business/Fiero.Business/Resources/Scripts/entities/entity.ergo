@@ -13,3 +13,11 @@ great_king_rat {
 } :- 
   % TODO: Figure out a way to handle polymorphism at the TermMarshall level
   dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, T1).
+
+chest {
+  dialogue: _ {
+    triggers: [ T1 ]
+  }
+} :- 
+  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
+  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, T1).

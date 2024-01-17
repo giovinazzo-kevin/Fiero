@@ -1,6 +1,4 @@
-﻿using Ergo.Lang.Extensions;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameEntityBuilders
@@ -378,7 +376,7 @@ namespace Fiero.Business
             .WithFaction(FactionName.Rats)
             .WithCorpse(CorpseName.RatCorpse, chance: Chance.FiftyFifty)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Rat), ColorName.White)
-            .LoadState(nameof(NpcName.Rat).ToErgoCase())
+            .LoadState(nameof(NpcName.Rat))
             ;
 
         public EntityBuilder<Actor> NPC_Snake()
@@ -419,7 +417,7 @@ namespace Fiero.Business
                 i => i.TryCast<Weapon>(out _),
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
-            .LoadState(nameof(NpcName.RatKnight).ToErgoCase())
+            .LoadState(nameof(NpcName.RatKnight))
             ;
         public EntityBuilder<Actor> NPC_RatArcher()
             => NPC_Rat()
@@ -434,7 +432,7 @@ namespace Fiero.Business
                 i => i.TryCast<Throwable>(out var throwable) && throwable.ThrowableProperties.ThrowsUseCharges,
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
-            .LoadState(nameof(NpcName.RatArcher).ToErgoCase())
+            .LoadState(nameof(NpcName.RatArcher))
             ;
         public EntityBuilder<Actor> NPC_RatWizard()
             => NPC_Rat()
@@ -454,7 +452,7 @@ namespace Fiero.Business
                 i => i.TryCast<Scroll>(out _),
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
-            .LoadState(nameof(NpcName.RatWizard).ToErgoCase())
+            .LoadState(nameof(NpcName.RatWizard))
             ;
         public EntityBuilder<Actor> NPC_RatMerchant()
             => NPC_Rat()
@@ -465,7 +463,7 @@ namespace Fiero.Business
             .WithLikedItems(
                 i => true
             )
-            .LoadState(nameof(NpcName.RatMerchant).ToErgoCase())
+            .LoadState(nameof(NpcName.RatMerchant))
             ;
         public EntityBuilder<Actor> NPC_RatMonk()
             => NPC_Rat()
@@ -479,7 +477,7 @@ namespace Fiero.Business
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
             )
-            .LoadState(nameof(NpcName.RatMonk).ToErgoCase())
+            .LoadState(nameof(NpcName.RatMonk))
             ;
         public EntityBuilder<Actor> NPC_RatCultist()
             => NPC_Rat()
@@ -493,7 +491,7 @@ namespace Fiero.Business
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
             )
-            .LoadState(nameof(NpcName.RatCultist).ToErgoCase())
+            .LoadState(nameof(NpcName.RatCultist))
             ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
@@ -501,7 +499,7 @@ namespace Fiero.Business
             .WithName("Rat Pugilist")
             .WithNpcInfo(NpcName.RatPugilist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatPugilist), ColorName.White)
-            .LoadState(nameof(NpcName.RatPugilist).ToErgoCase())
+            .LoadState(nameof(NpcName.RatPugilist))
             ;
         public EntityBuilder<Actor> NPC_RatThief()
             => NPC_Rat()
@@ -512,7 +510,7 @@ namespace Fiero.Business
             .WithLikedItems(
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
-            .LoadState(nameof(NpcName.RatThief).ToErgoCase())
+            .LoadState(nameof(NpcName.RatThief))
             ;
         public EntityBuilder<Actor> NPC_RatCheese()
             => NPC_Rat()
@@ -520,7 +518,7 @@ namespace Fiero.Business
             .WithName("Cheese Enjoyer")
             .WithNpcInfo(NpcName.RatCheese)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCheese), ColorName.White)
-            .LoadState(nameof(NpcName.RatCheese).ToErgoCase())
+            .LoadState(nameof(NpcName.RatCheese))
             ;
         public EntityBuilder<Actor> NPC_RatArsonist()
             => NPC_Rat()
@@ -534,7 +532,7 @@ namespace Fiero.Business
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Explosion) ?? false
             )
-            .LoadState(nameof(NpcName.RatArsonist).ToErgoCase())
+            .LoadState(nameof(NpcName.RatArsonist))
             ;
         public EntityBuilder<Actor> NPC_RatZombie()
             => NPC_Rat()
@@ -543,7 +541,7 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatZombie)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatZombie), ColorName.White)
             .WithCorpse(CorpseName.None, Chance.Never)
-            .LoadState(nameof(NpcName.RatZombie).ToErgoCase())
+            .LoadState(nameof(NpcName.RatZombie))
             ;
         public EntityBuilder<Actor> NPC_RatSkeleton()
             => NPC_Rat()
@@ -552,7 +550,7 @@ namespace Fiero.Business
             .WithNpcInfo(NpcName.RatSkeleton)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatSkeleton), ColorName.White)
             .WithCorpse(CorpseName.None, Chance.Never)
-            .LoadState(nameof(NpcName.RatSkeleton).ToErgoCase())
+            .LoadState(nameof(NpcName.RatSkeleton))
             ;
         public EntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
@@ -591,7 +589,7 @@ namespace Fiero.Business
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.GreatKingRat), ColorName.White)
-            .LoadState(nameof(NpcName.GreatKingRat).ToErgoCase())
+            .LoadState(nameof(NpcName.GreatKingRat))
             ;
         public EntityBuilder<Actor> Boss_NpcKingSerpent()
             => NPC_Rat()
@@ -741,10 +739,12 @@ namespace Fiero.Business
             => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .WithItems(Rng.Random.ChooseWeighted(ChestLootTable().ToArray()))
+            .LoadState(nameof(FeatureName.Chest))
             ;
         public EntityBuilder<Feature> Feature_Shrine()
             => Feature<Feature>(FeatureName.Shrine)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .LoadState(nameof(FeatureName.Shrine))
             ;
         public EntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)

@@ -5,13 +5,15 @@ namespace Fiero.Business
     [Term(Marshalling = TermMarshalling.Named)]
     public class DialogueNode
     {
-        public readonly string Id;
-        public string Face;
-        public string Title;
-        public string[] Lines;
-        public bool Cancellable;
-        public readonly IDictionary<string, DialogueNode> Choices;
+        public string Id { get; init; }
+        public string Face { get; init; }
+        public string Title { get; set; }
+        public string[] Lines { get; init; }
+        public bool Cancellable { get; init; }
+        [NonTerm]
         public DialogueNode Next { get; set; }
+        [NonTerm]
+        public IDictionary<string, DialogueNode> Choices { get; init; }
 
         public event Action<IDialogueTrigger, DialogueTriggeredEventArgs> Triggered;
 

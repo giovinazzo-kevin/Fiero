@@ -54,14 +54,22 @@ namespace Fiero.Business
                     if (trigger.TryTrigger(floorId, speaker, out var listeners))
                     {
                         var node = Dialogues.GetDialogue(trigger.Node);
-                        if (!trigger.Repeatable)
-                        {
-                            comp.Triggers.Remove(trigger);
-                        }
                         trigger.OnTrigger();
                         var list = listeners.ToArray();
                         _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
-                        UI.Dialogue(trigger, node, speaker, list);
+                        var modal = UI.Dialogue(trigger, node, speaker, list);
+                        modal.NextChoice += (m, node) =>
+                        {
+                            _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
+                        };
+                        modal.Closed += (e, m) =>
+                        {
+                            // (not cancelled)
+                            if (m.ResultType == true && !trigger.Repeatable)
+                            {
+                                comp.Triggers.Remove(trigger);
+                            }
+                        };
                         return;
                     }
                 }

@@ -8,16 +8,16 @@
 
 great_king_rat {
   dialogue: _ {
-    triggers: [ T1 ]
+    triggers: [ JustMet ]
   }
 } :- 
   % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, T1).
+  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, JustMet).
 
-chest {
+shrine {
   dialogue: _ {
-    triggers: [ T1 ]
+    triggers: [ BumpedByPlayer ]
   }
 } :- 
   % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, T1).
+  dialogue_trigger(bumped_by_player{choices: ['Shrine_Armok']}, BumpedByPlayer).

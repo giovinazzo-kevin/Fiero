@@ -13,6 +13,8 @@
         protected const int DialogueHeight = 80;
         protected int ChoicesHeight;
 
+        public event Action<DialogueModal, DialogueNode> NextChoice;
+
         static ModalWindowButton[] GetOptions(bool canCancel)
         {
             return Inner(canCancel).ToArray();
@@ -85,6 +87,8 @@
                     next.Title = Node.Title;
                 var dialogue = UI.Dialogue(Trigger, next, Speaker, Listeners);
                 dialogue.Layout.Position.V = Layout.Position.V;
+                dialogue.NextChoice += NextChoice;
+                NextChoice?.Invoke(this, next);
             }
         }
 

@@ -55,55 +55,6 @@ namespace Fiero.Business.Scenes
         {
             await base.InitializeAsync();
             GenerateNewRngSeed();
-            SubscribeDialogueHandlers();
-            // TODO: Move dialogue handlers to Ergo scripts!
-            void SubscribeDialogueHandlers()
-            {
-                //var factionSystem = Systems.Get<FactionSystem>();
-                //Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Friend)
-                //    .Triggered += (t, eh) =>
-                //    {
-                //        foreach (var player in eh.DialogueListeners.Players())
-                //        {
-                //            factionSystem.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Loved);
-                //        }
-                //    };
-                //Resources.Dialogues.GetDialogue(NpcName.GreatKingRat, GKRDialogueName.JustMet_Enemy)
-                //    .Triggered += (t, eh) =>
-                //    {
-                //        var gkr = (Actor)eh.DialogueStarter;
-                //        foreach (var player in eh.DialogueListeners.Players())
-                //        {
-                //            factionSystem.SetBilateralRelation(FactionName.Rats, FactionName.Players, StandingName.Hated);
-                //            factionSystem.SetBilateralRelation(player, gkr, StandingName.Hated);
-                //        }
-                //    };
-                //Resources.Dialogues.GetDialogue(FeatureName.Shrine, ShrineDialogueName.Smintheus_Follow)
-                //    .Triggered += (t, eh) =>
-                //    {
-                //        foreach (var player in eh.DialogueListeners.Players())
-                //        {
-                //            var friends = Enumerable.Range(5, 10)
-                //                .Select(i => Resources.Entities
-                //                    .NPC_RatKnight()
-                //                    .WithFaction(FactionName.Players)
-                //                    .WithPosition(player.Position())
-                //                    .Build());
-                //            foreach (var f in friends)
-                //            {
-                //                if (Systems.TrySpawn(player.FloorId(), f))
-                //                {
-                //                    //Systems.Get<FactionSystem>().SetBilateralRelation(player, f, StandingName.Loved);
-                //                }
-                //            }
-                //        }
-                //        // Remove trigger from the shrine
-                //        if (Entities.TryGetFirstComponent<DialogueComponent>(eh.DialogueStarter.Id, out var dialogue))
-                //        {
-                //            dialogue.Triggers.Remove(t);
-                //        }
-                //    };
-            }
         }
 
         /// <summary>

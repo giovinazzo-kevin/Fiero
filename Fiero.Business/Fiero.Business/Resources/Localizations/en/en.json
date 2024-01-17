@@ -29,23 +29,25 @@
     }
   },
   "Dialogue": {
-    "Shrine_Upgrade": {
+
+    "Shrine_Armok": {
       "Face": "GreatKingRatDead",
       "Lines": [ "You offer a prayer to Armok,", "god of the forge" ],
       "Cancellable": true,
       "Choices": [
         {
-          "Line": "Upgrade a weapon",
-          "Next": "Smintheus_Follow"
+          "Line": "Acquire a weapon",
+          "Next": "Shrine_Armok_Acquire"
         }
       ],
       "Next": ""
     },
-    "Smintheus_Follow": {
+    "Shrine_Armok_Acquire": {
       "Face": "GreatKingRatDead",
-      "Lines": [ "Smintheus grants you... rats!" ],
+      "Lines": [ "Armok grants you a weapon!" ],
       "Next": ""
     },
+
     "GKR_JustMet": {
       "Face": "GreatKingRatCalm",
       "Title": "The Great King Rat says 'Hello'",

@@ -6,13 +6,10 @@
 
 %%% This script configures entity builder definitions, overriding whatever default was set in C#.
 
-rat {
-  info: _ {
-    name: 'Rat',
-    description: 'A tiny rodent that dwells in the dungeon sewers.'
-  },
+great_king_rat {
   dialogue: _ {
     triggers: [ T1 ]
   }
 } :- 
-  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet_Friend']}, T1).
+  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
+  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, T1).

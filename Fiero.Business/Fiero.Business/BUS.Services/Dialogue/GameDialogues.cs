@@ -6,25 +6,20 @@ namespace Fiero.Business
     public class GameDialogues
     {
         protected GameLocalizations<LocaleName> Localizations;
-        protected readonly Dictionary<string, Dictionary<string, DialogueNode>> DialogueNodes;
+        protected readonly Dictionary<string, DialogueNode> DialogueNodes = new();
 
-        public DialogueNode GetDialogue(string owner, string id) => DialogueNodes.TryGetValue(owner, out var dict)
-            && dict.TryGetValue(id, out var node) ? node : null;
-
-        public DialogueNode GetDialogue<T>(NpcName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
-        public DialogueNode GetDialogue<T>(FeatureName owner, T id) where T : struct, Enum => GetDialogue(owner.ToString(), id.ToString());
+        public DialogueNode GetDialogue(string id) => DialogueNodes.TryGetValue(id, out var node) ? node : null;
 
         public GameDialogues(GameLocalizations<LocaleName> localizations)
         {
-            DialogueNodes = new Dictionary<string, Dictionary<string, DialogueNode>>();
             Localizations = localizations;
         }
 
-        protected void LoadDialogues(string actor)
+        public void LoadDialogues()
         {
-            if (!Localizations.TryGet<JsonElement>($"Dialogue.{actor}", out var elem))
+            if (!Localizations.TryGet<JsonElement>($"Dialogue", out var elem))
             {
-                throw new ArgumentException(nameof(actor));
+                throw new ArgumentException();
             }
             var definitions = elem.EnumerateObject()
                 .Select(prop =>
@@ -95,17 +90,10 @@ namespace Fiero.Business
                     }
                 }
             }
-            DialogueNodes.Add(actor, nodes);
-        }
-
-        public void LoadActorDialogues(NpcName actor)
-        {
-            LoadDialogues(actor.ToString());
-        }
-
-        public void LoadFeatureDialogues(FeatureName feature)
-        {
-            LoadDialogues(feature.ToString());
+            foreach (var (key, value) in nodes)
+            {
+                DialogueNodes.Add(key, value);
+            }
         }
     }
 }

@@ -1,24 +1,20 @@
 ﻿namespace Fiero.Business
 {
 
-    public abstract class DialogueTrigger<TDialogue> : IDialogueTrigger
-        where TDialogue : struct, Enum
+    public abstract class DialogueTrigger : IDialogueTrigger
     {
-        private readonly TDialogue[] dialogueOptions;
+        private readonly string[] dialogueOptions;
 
         public readonly MetaSystem Systems;
-        public TDialogue DialogueNode { get; private set; }
-        private readonly string partialPath;
+        public string DialogueNode { get; private set; }
         string IDialogueTrigger.Node => DialogueNode.ToString();
-        string IDialogueTrigger.FullPath => $"{partialPath}.{((IDialogueTrigger)this).Node}";
         public bool Repeatable { get; protected set; }
 
-        public event Action<DialogueTrigger<TDialogue>> Triggered;
+        public event Action<DialogueTrigger> Triggered;
 
-        public DialogueTrigger(MetaSystem systems, bool repeatable, string path, params TDialogue[] nodeChoices)
+        public DialogueTrigger(MetaSystem systems, bool repeatable, params string[] nodeChoices)
         {
             Systems = systems;
-            partialPath = path;
             dialogueOptions = nodeChoices;
             DialogueNode = Rng.Random.Choose(dialogueOptions);
             Repeatable = repeatable;

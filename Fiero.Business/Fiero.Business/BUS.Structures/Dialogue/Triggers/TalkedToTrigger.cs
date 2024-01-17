@@ -1,14 +1,8 @@
 ﻿namespace Fiero.Business
 {
-    public class TalkedToTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
-        where TDialogue : struct, Enum
+    public class TalkedToTrigger(MetaSystem sys, bool repeatable, params string[] nodeChoices)
+        : PlayerInSightDialogueTrigger(sys, repeatable, nodeChoices)
     {
-        public TalkedToTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, path, nodeChoices)
-        {
-
-        }
-
         public override bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners)
         {
             if (base.TryTrigger(floorId, speaker, out listeners))

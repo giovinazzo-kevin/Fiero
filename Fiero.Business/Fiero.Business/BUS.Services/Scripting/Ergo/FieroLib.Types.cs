@@ -22,6 +22,8 @@ public partial class FieroLib
         public static readonly Atom Script = new("script");
         public static readonly Atom Animation = new("anim");
         public static readonly Atom Sound = new("sound");
+        public static readonly Atom Entity = new("entity");
+        public static readonly Atom Dialogue = new("dialogue");
         public static readonly Atom Effect = new("effect");
         public static readonly Atom Data = new("data");
         public static readonly Atom Event = new("event");
@@ -55,5 +57,6 @@ public partial class FieroLib(IServiceFactory services) : Library
         yield return services.GetInstance<TriggerAnimationBlocking>();
         yield return services.GetInstance<TriggerEffect>();
         yield return services.GetInstance<TriggerSound>();
+        yield return services.GetInstance<MakeDialogueTrigger>();
     }
 }

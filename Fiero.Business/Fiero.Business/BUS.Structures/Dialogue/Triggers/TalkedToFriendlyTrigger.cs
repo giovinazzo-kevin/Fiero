@@ -1,10 +1,9 @@
 ﻿namespace Fiero.Business
 {
-    public class TalkedToFriendlyTrigger<TDialogue> : TalkedToTrigger<TDialogue>
-        where TDialogue : struct, Enum
+    public class TalkedToFriendlyTrigger : TalkedToTrigger
     {
-        public TalkedToFriendlyTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, path, nodeChoices)
+        public TalkedToFriendlyTrigger(MetaSystem sys, bool repeatable, params string[] nodeChoices)
+            : base(sys, repeatable, nodeChoices)
         {
 
         }

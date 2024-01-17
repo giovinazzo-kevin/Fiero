@@ -1,10 +1,9 @@
 ﻿namespace Fiero.Business
 {
-    public class BumpedByPlayerDialogueTrigger<TDialogue> : PlayerInSightDialogueTrigger<TDialogue>
-        where TDialogue : struct, Enum
+    public class BumpedByPlayerDialogueTrigger : PlayerInSightDialogueTrigger
     {
-        public BumpedByPlayerDialogueTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, path, nodeChoices)
+        public BumpedByPlayerDialogueTrigger(MetaSystem sys, bool repeatable, params string[] nodeChoices)
+            : base(sys, repeatable, nodeChoices)
         {
 
         }

@@ -133,6 +133,7 @@ namespace Fiero.Business
             Fonts.Add(FontName.Light, new(8, 12), Textures.Get(TextureName.FontLight));
             Fonts.Add(FontName.Terminal, new(8, 12), Textures.Get(TextureName.FontTerminal));
 
+
             //Shaders.Add(ShaderName.Test, new Shader(null, null, "Resources/Shaders/test.frag"));
 
             Sounds.Add(SoundName.Blip, new SoundBuffer("Resources/Sounds/speech/generic.wav"));
@@ -157,6 +158,7 @@ namespace Fiero.Business
 
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
+            Dialogues.LoadDialogues();
 
             await Sprites.LoadJsonAsync(TextureName.Creatures, "Resources/Spritesheets/creatures.json");
             await Sprites.LoadJsonAsync(TextureName.Items, "Resources/Spritesheets/items.json");
@@ -174,9 +176,6 @@ namespace Fiero.Business
 
             foreach (var script in Enum.GetValues<ScriptName>())
                 Scripts.TryLoad(script, out _);
-
-            Dialogues.LoadActorDialogues(NpcName.GreatKingRat);
-            Dialogues.LoadFeatureDialogues(FeatureName.Shrine);
 
             Store.SetValue(Data.View.TileSize, 16);
             Store.SetValue(Data.View.MinWindowSize, new(800, 800));

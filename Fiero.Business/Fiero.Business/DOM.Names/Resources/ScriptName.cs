@@ -3,7 +3,7 @@
     public enum ScriptName
     {
         // Handles serialization of entities
-        Entities,
+        Entity,
         // Handles the consequence of a dialogue node being triggered
         Dialogue,
         Test,

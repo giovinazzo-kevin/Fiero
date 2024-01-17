@@ -6,18 +6,22 @@ namespace Fiero.Business
 {
     public static class EntityBuilderExtensions
     {
-        public static EntityBuilder<T> LoadState<T>(this EntityBuilder<T> builder, string resourceName)
+        public static EntityBuilder<T> LoadState<T>(this EntityBuilder<T> builder, string resourceName, bool throwOnFail = false)
             where T : Entity
         {
             var scripts = builder.Entities.ServiceFactory.GetInstance<GameScripts<ScriptName>>();
-            var entities = (ErgoScript)scripts.Get(ScriptName.Entities);
+            var entities = (ErgoScript)scripts.Get(ScriptName.Entity);
             var query = entities.VM.ParseAndCompileQuery($"dict('{resourceName}', X)");
             entities.VM.Query = query;
             entities.VM.Run();
             if (entities.VM.State == Ergo.Runtime.ErgoVM.VMState.Fail)
-                throw new ArgumentException(resourceName);
+                if (throwOnFail)
+                    throw new ArgumentException(resourceName);
+                else
+                    return builder;
             // X == {prop: prop_component{}, other_prop: other_prop_component{}, ...}
-            var X = (Ergo.Lang.Ast.Set)entities.VM.Solutions.Single().Substitutions[new("X")];
+            var subs = entities.VM.Solutions.Single().Substitutions;
+            var X = (Ergo.Lang.Ast.Set)(subs[new("X")].Substitute(subs));
             var kvps = X.Contents
                 .ToDictionary(a => (Atom)((Complex)a).Arguments[0], a => ((Complex)a).Arguments[1]);
             foreach (var prop in builder.Entities.GetProxyableProperties<T>())
@@ -235,18 +239,6 @@ namespace Fiero.Business
             where T : Actor => builder.AddOrTweak<NpcComponent>((s, c) =>
             {
                 c.Type = type;
-            });
-        public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, NpcName type)
-            where T : Actor => builder.AddOrTweak<DialogueComponent>((s, c) =>
-            {
-                var MetaSystem = (MetaSystem)s.GetInstance(typeof(MetaSystem));
-                MetaSystem.Get<DialogueSystem>().SetTriggers(MetaSystem, type, c);
-            });
-        public static EntityBuilder<T> WithDialogueTriggers<T>(this EntityBuilder<T> builder, FeatureName type)
-            where T : Feature => builder.AddOrTweak<DialogueComponent>((s, c) =>
-            {
-                var MetaSystem = (MetaSystem)s.GetInstance(typeof(MetaSystem));
-                MetaSystem.Get<DialogueSystem>().SetTriggers(MetaSystem, type, c);
             });
         public static EntityBuilder<T> WithPortalInfo<T>(this EntityBuilder<T> builder, FloorConnection conn)
             where T : Feature => builder.AddOrTweak<PortalComponent>((s, c) =>

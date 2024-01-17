@@ -29,58 +29,54 @@
     }
   },
   "Dialogue": {
-    "Shrine": {
-      "Upgrade": {
-        "Face": "GreatKingRatDead",
-        "Lines": [ "You offer a prayer to Armok,", "god of the forge" ],
-        "Cancellable": true,
-        "Choices": [
-          {
-            "Line": "Upgrade a weapon",
-            "Next": "Smintheus_Follow"
-          }
-        ],
-        "Next": ""
-      },
-      "Smintheus_Follow": {
-        "Face": "GreatKingRatDead",
-        "Lines": [ "Smintheus grants you... rats!" ],
-        "Next": ""
-      }
+    "Shrine_Upgrade": {
+      "Face": "GreatKingRatDead",
+      "Lines": [ "You offer a prayer to Armok,", "god of the forge" ],
+      "Cancellable": true,
+      "Choices": [
+        {
+          "Line": "Upgrade a weapon",
+          "Next": "Smintheus_Follow"
+        }
+      ],
+      "Next": ""
     },
-    "GreatKingRat": {
-      "JustMet": {
-        "Face": "GreatKingRatCalm",
-        "Title": "The Great King Rat says 'Hello'",
-        "Lines": [ "I am cheesed to meet you!", "And who might you be?" ],
-        "Choices": [
-          {
-            "Line": "I'm an enemy of the Rats.",
-            "Next": "JustMet_Enemy"
-          },
-          {
-            "Line": "I'm a friend of the Rats.",
-            "Next": "JustMet_Friend"
-          },
-          {
-            "Line": "I'm a nobody."
-          },
-          {
-            "Line": "I'm a developer."
-          }
-        ],
-        "Next": ""
-      },
-      "JustMet_Enemy": {
-        "Face": "GreatKingRatSmirk",
-        "Lines": [ "Ha! A CAT such as yourself, declaring", "themselves enemy of the Rats?", "Very well. We'll see about that." ],
-        "Next": ""
-      },
-      "JustMet_Friend": {
-        "Face": "GreatKingRatCalm",
-        "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
-        "Next": ""
-      }
+    "Smintheus_Follow": {
+      "Face": "GreatKingRatDead",
+      "Lines": [ "Smintheus grants you... rats!" ],
+      "Next": ""
+    },
+    "GKR_JustMet": {
+      "Face": "GreatKingRatCalm",
+      "Title": "The Great King Rat says 'Hello'",
+      "Lines": [ "I am cheesed to meet you!", "And who might you be?" ],
+      "Choices": [
+        {
+          "Line": "I'm an enemy of the Rats.",
+          "Next": "GKR_JustMet_Enemy"
+        },
+        {
+          "Line": "I'm a friend of the Rats.",
+          "Next": "GKR_JustMet_Friend"
+        },
+        {
+          "Line": "I'm a nobody."
+        },
+        {
+          "Line": "I'm a developer."
+        }
+      ],
+      "Next": ""
+    },
+    "GKR_JustMet_Enemy": {
+      "Face": "GreatKingRatSmirk",
+      "Lines": [ "Ha! A CAT such as yourself, declaring", "themselves enemy of the Rats?", "Very well. We'll see about that." ],
+      "Next": ""
+    },
+    "GKR_JustMet_Friend": {
+      "Face": "GreatKingRatCalm",
+      "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
+      "Next": ""
     }
   },
   "Action": {

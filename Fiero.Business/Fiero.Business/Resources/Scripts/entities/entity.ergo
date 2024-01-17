@@ -1,0 +1,18 @@
+﻿:- module(entity, [
+  dict/2
+]).
+
+:- use_module(fiero).
+
+%%% This script configures entity builder definitions, overriding whatever default was set in C#.
+
+rat {
+  info: _ {
+    name: 'Rat',
+    description: 'A tiny rodent that dwells in the dungeon sewers.'
+  },
+  dialogue: _ {
+    triggers: [ T1 ]
+  }
+} :- 
+  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet_Friend']}, T1).

@@ -1,12 +1,11 @@
 ﻿namespace Fiero.Business
 {
-    public class PlayerInSightDialogueTrigger<TDialogue> : DialogueTrigger<TDialogue>
-        where TDialogue : struct, Enum
+    public class PlayerInSightDialogueTrigger : DialogueTrigger
     {
         public float DistanceThreshold { get; set; } = 5;
 
-        public PlayerInSightDialogueTrigger(MetaSystem sys, bool repeatable, string path, params TDialogue[] nodeChoices)
-            : base(sys, repeatable, path, nodeChoices)
+        public PlayerInSightDialogueTrigger(MetaSystem sys, bool repeatable, params string[] nodeChoices)
+            : base(sys, repeatable, nodeChoices)
         {
 
         }

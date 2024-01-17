@@ -22,7 +22,7 @@
     <None Update="README.md">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\entities\entities.ergo">
+    <None Update="Resources\Scripts\entities\entity.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Fonts\Amatic-Bold.ttf">

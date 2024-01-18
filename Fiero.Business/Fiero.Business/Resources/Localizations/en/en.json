@@ -30,21 +30,21 @@
   },
   "Dialogue": {
 
-    "Shrine_Armok": {
+    "Shrine_Urist": {
       "Face": "GreatKingRatDead",
-      "Lines": [ "You offer a prayer to Armok,", "god of the forge" ],
+      "Lines": [ "You offer a prayer to Urist,", "god of the forge" ],
       "Cancellable": true,
       "Choices": [
         {
           "Line": "Acquire a weapon",
-          "Next": "Shrine_Armok_Acquire"
+          "Next": "Shrine_Urist_Acquire"
         }
       ],
       "Next": ""
     },
-    "Shrine_Armok_Acquire": {
+    "Shrine_Urist_Acquire": {
       "Face": "GreatKingRatDead",
-      "Lines": [ "Armok grants you a weapon!" ],
+      "Lines": [ "Urist grants you a weapon!" ],
       "Next": ""
     },
 

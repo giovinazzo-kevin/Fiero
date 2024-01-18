@@ -101,7 +101,21 @@ namespace Fiero.Business
                 if (UI.Look(a, out var cell))
                 {
                     TryPushObjective(a, cell.Tile);
+                    return new NoAction();
                 }
+                return new FailAction();
+            }
+            if (IsKeyPressed(Data.Hotkeys.Talk))
+            {
+                if (UI.Look(a, out var cell))
+                {
+                    var talkTo = cell.Actors
+                        .Where(x => !x.IsPlayer())
+                        .FirstOrDefault();
+                    if (talkTo != null)
+                        return new InitiateConversationAction(talkTo);
+                }
+                return new FailAction();
             }
             if (IsKeyPressed(Data.Hotkeys.AutoExplore))
             {

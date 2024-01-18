@@ -4,7 +4,7 @@
 :- use_module(sound).
 
 
-dialogue:dialogue_triggered(_{node:_{id:'Shrine_Armok_Acquire'}}):-
+dialogue:dialogue_triggered(_{node:_{id:'Shrine_Urist_Acquire'}}):-
 	spawn([weapon_sword{}], [_]).
 
 dialogue:dialogue_triggered(_{node:_{id:'GKR_JustMet'}}):-

@@ -12,7 +12,7 @@ great_king_rat {
   }
 } :- 
   % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, JustMet).
+  dialogue_trigger(talked_to{choices: ['GKR_JustMet']}, JustMet).
 
 shrine {
   dialogue: _ {
@@ -20,4 +20,4 @@ shrine {
   }
 } :- 
   % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(bumped_by_player{choices: ['Shrine_Armok']}, BumpedByPlayer).
+  dialogue_trigger(bumped_by_player{choices: ['Shrine_Urist']}, BumpedByPlayer).

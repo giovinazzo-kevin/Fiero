@@ -10,6 +10,7 @@
             public static readonly GameDatum<VirtualKeys> Inventory = new(nameof(Hotkeys), nameof(Inventory));
             public static readonly GameDatum<VirtualKeys> Interact = new(nameof(Hotkeys), nameof(Interact));
             public static readonly GameDatum<VirtualKeys> Look = new(nameof(Hotkeys), nameof(Look));
+            public static readonly GameDatum<VirtualKeys> Talk = new(nameof(Hotkeys), nameof(Talk));
             public static readonly GameDatum<VirtualKeys> AutoExplore = new(nameof(Hotkeys), nameof(AutoExplore));
             public static readonly GameDatum<VirtualKeys> AutoFight = new(nameof(Hotkeys), nameof(AutoFight));
             public static readonly GameDatum<VirtualKeys> QuickSlot1 = new(nameof(Hotkeys), nameof(QuickSlot1));

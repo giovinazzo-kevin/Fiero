@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public partial class ActionSystem : EcsSystem
     {
@@ -19,6 +15,10 @@ namespace Fiero.Business
             else if (action is PickUpItemAction pickUp)
             {
                 return ItemPickedUp.Handle(new(t.Actor, pickUp.Item));
+            }
+            else if (action is InitiateConversationAction conv)
+            {
+                return ConversationInitiated.Handle(new(t.Actor, conv.Speaker));
             }
             else throw new NotSupportedException();
             bool HandleGenericUse(Coord point, ref IAction action, ref int? cost)

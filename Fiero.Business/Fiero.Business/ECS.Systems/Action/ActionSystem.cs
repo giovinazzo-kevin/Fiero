@@ -47,6 +47,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, ScrollReadEvent, EventResult> ScrollRead;
         public readonly SystemRequest<ActionSystem, PotionQuaffedEvent, EventResult> PotionQuaffed;
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
+        public readonly SystemRequest<ActionSystem, ConversationInitiatedEvent, EventResult> ConversationInitiated;
         public readonly SystemRequest<ActionSystem, ExplosionHappenedEvent, EventResult> ExplosionHappened;
 
         public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
@@ -116,6 +117,7 @@ namespace Fiero.Business
             ActorIntentSelected = new(this, nameof(ActorIntentSelected));
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
+            ConversationInitiated = new(this, nameof(ConversationInitiated));
 
             ActorAttacked.AllResponsesReceived += (_, e, r) =>
             {

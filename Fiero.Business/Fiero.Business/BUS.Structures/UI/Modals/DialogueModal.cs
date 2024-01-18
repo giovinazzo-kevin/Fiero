@@ -15,12 +15,12 @@
 
         public event Action<DialogueModal, DialogueNode> NextChoice;
 
-        static ModalWindowButton[] GetOptions(bool canCancel)
+        static ModalWindowButton[] GetOptions(bool canClose, bool canCancel)
         {
             return Inner(canCancel).ToArray();
             IEnumerable<ModalWindowButton> Inner(bool canCancel)
             {
-                yield return ModalWindowButton.Ok;
+                if (canClose) yield return ModalWindowButton.Ok;
                 if (canCancel) yield return ModalWindowButton.Cancel;
             }
         }
@@ -32,7 +32,9 @@
             DialogueNode node,
             DrawableEntity speaker,
             params DrawableEntity[] listeners
-        ) : base(ui, resources, GetOptions(node.Cancellable), GetDefaultStyles(GetOptions(node.Cancellable)))
+        ) : base(ui, resources,
+            GetOptions(node.Choices.Count == 0, node.Cancellable),
+            GetDefaultStyles(GetOptions(node.Choices.Count == 0, node.Cancellable)))
         {
             Trigger = trigger;
             Node = node;
@@ -45,7 +47,7 @@
                 .ToArray();
             IsResponsive = false;
             ModalWindowStyles? choicesStyle = Node.Choices.Count == 0 ? ModalWindowStyles.None : null;
-            Choices = new ChoicePopUp<string>(UI, Resources, Node.Choices.Keys.ToArray(), Array.Empty<ModalWindowButton>(), styles: choicesStyle);
+            Choices = new ChoicePopUp<string>(UI, Resources, [.. Node.Choices.Keys], [], styles: choicesStyle);
             Choices.Cancelled += (_, btn) => Close(btn);
             Choices.OptionChosen += DialogueModal_OptionChosen;
             Choices.Open(string.Empty);

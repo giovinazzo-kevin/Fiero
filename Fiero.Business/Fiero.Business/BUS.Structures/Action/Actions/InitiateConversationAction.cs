@@ -2,10 +2,10 @@
 {
     public readonly struct InitiateConversationAction : IAction
     {
-        public readonly Actor NPC;
+        public readonly Actor Speaker;
         public InitiateConversationAction(Actor npc)
         {
-            NPC = npc;
+            Speaker = npc;
         }
         ActionName IAction.Name => ActionName.Interact;
         int? IAction.Cost => 0;

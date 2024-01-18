@@ -191,6 +191,7 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.Inventory, VirtualKeys.I);
             Store.SetValue(Data.Hotkeys.Interact, VirtualKeys.G);
             Store.SetValue(Data.Hotkeys.Look, VirtualKeys.X);
+            Store.SetValue(Data.Hotkeys.Talk, VirtualKeys.K);
             Store.SetValue(Data.Hotkeys.AutoExplore, VirtualKeys.E);
             Store.SetValue(Data.Hotkeys.AutoFight, VirtualKeys.Tab);
             Store.SetValue(Data.Hotkeys.MoveNW, VirtualKeys.Numpad7);

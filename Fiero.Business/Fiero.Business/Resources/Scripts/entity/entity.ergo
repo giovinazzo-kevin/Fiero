@@ -6,18 +6,25 @@
 
 %%% This script configures entity builder definitions, overriding whatever default was set in C#.
 
+rat {
+  dialogue: _ {
+    triggers: [ TalkFriend, TalkFoe ]
+  }
+} :- 
+  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
+  dialogue_trigger(talked_to_friendly{choices: ['Rat_TalkFriend'], repeatable: true}, TalkFriend),
+  dialogue_trigger(talked_to_hostile{choices: ['Rat_TalkFoe'], repeatable: true}, TalkFoe).
+
 great_king_rat {
   dialogue: _ {
     triggers: [ JustMet ]
   }
 } :- 
-  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(talked_to{choices: ['GKR_JustMet']}, JustMet).
+  dialogue_trigger(player_in_sight{choices: ['GKR_JustMet']}, JustMet).
 
 shrine {
   dialogue: _ {
     triggers: [ BumpedByPlayer ]
   }
 } :- 
-  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
   dialogue_trigger(bumped_by_player{choices: ['Shrine_Urist']}, BumpedByPlayer).

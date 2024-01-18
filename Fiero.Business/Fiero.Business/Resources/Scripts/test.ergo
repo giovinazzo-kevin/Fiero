@@ -3,5 +3,5 @@
 :- use_module(fiero).
 :- use_module(input).
 
-input:key_route(k, pressed, [_] >> spawn([npc_rat{}], [_])).
+input:key_route(h, pressed, [_] >> spawn([npc_rat{}], [_])).
 input:key_route(j, pressed, [_] >> spawn([boss_npc_great_king_rat{}], [_])).

@@ -21,7 +21,7 @@ public sealed class MakeDialogueTrigger : BuiltIn
     private static readonly Dictionary<Atom, Type> ValidTriggerTypes = Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => t.IsAssignableTo(typeof(IDialogueTrigger)) && !t.IsAbstract)
-        .ToDictionary(t => new Atom(t.Name.Replace("DialogueTrigger", string.Empty).ToErgoCase()));
+        .ToDictionary(t => new Atom(t.Name.Replace("Dialogue", string.Empty).Replace("Trigger", string.Empty).ToErgoCase()));
 
     private IServiceFactory _services;
     public MakeDialogueTrigger(IServiceFactory services)

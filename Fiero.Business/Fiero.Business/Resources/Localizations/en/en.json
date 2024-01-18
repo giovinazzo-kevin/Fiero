@@ -29,7 +29,6 @@
     }
   },
   "Dialogue": {
-
     "Shrine_Urist": {
       "Face": "GreatKingRatDead",
       "Lines": [ "You offer a prayer to Urist,", "god of the forge" ],
@@ -47,7 +46,12 @@
       "Lines": [ "Urist grants you a weapon!" ],
       "Next": ""
     },
-
+    "Rat_TalkFriend": {
+      "Lines": [ "What's up?" ]
+    },
+    "Rat_TalkFoe": {
+      "Lines": [ "I don't like you." ]
+    },
     "GKR_JustMet": {
       "Face": "GreatKingRatCalm",
       "Title": "The Great King Rat says 'Hello'",

@@ -82,7 +82,7 @@ namespace Fiero.Business
         {
             var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
-            frameDuration ??= (_ => TimeSpan.FromMilliseconds(10));
+            frameDuration ??= (_ => TimeSpan.FromMilliseconds(15));
             var rotation = 0;
             if (directional)
                 rotation = GetAngleDegree(to);

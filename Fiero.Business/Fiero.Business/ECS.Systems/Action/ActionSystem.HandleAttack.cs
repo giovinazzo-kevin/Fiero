@@ -25,7 +25,7 @@
                     // out of reach
                     return false;
                 }
-                return HandleAttack(AttackName.Melee, t.Actor, victim, ref cost, weapons, out _, out _);
+                return HandleAttack(AttackName.Melee, t.Actor, [victim], ref cost, weapons, out _, out _);
             }
         }
     }

@@ -42,7 +42,7 @@ namespace Fiero.Business
             {
                 // Merge charges on consumables of the same kind (not wands)
                 var merged = false;
-                merged |= TryMergeCharges<Throwable>((x, y) => y.ThrowableProperties.Name == x.ThrowableProperties.Name, out fullyMerged);
+                merged |= TryMergeCharges<Projectile>((x, y) => y.ProjectileProperties.Name == x.ProjectileProperties.Name, out fullyMerged);
                 if (!merged)
                 {
                     merged |= TryMergeCharges<Potion>((x, y) => y.PotionProperties.QuaffEffect.Name == x.PotionProperties.QuaffEffect.Name

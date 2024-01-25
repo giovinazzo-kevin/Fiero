@@ -12,5 +12,33 @@ namespace Fiero.Core
         protected virtual bool OnMouseMoved(Coord mousePos) { return false; }
         public event Action<UIControl, Coord> MouseLeft;
         protected virtual bool OnMouseLeft(Coord mousePos) { IsMouseOver = false; return false; }
+
+        public void MouseOver(Action<UIControl, Coord> handler)
+        {
+            var restore = new HashSet<Action<UIControl, Coord>>();
+            handler = ((_, __) =>
+            {
+                PropertyChanging += OnPropertyChanging;
+            }) + handler;
+            MouseEntered += handler;
+            MouseLeft += Restore;
+            void OnPropertyChanging(object sender, System.ComponentModel.PropertyChangingEventArgs e)
+            {
+                var prop = Properties.Single(p => p.Name.Equals(e.PropertyName));
+                var value = prop.Value;
+                restore.Add((_, __) => prop.Value = value);
+            }
+            void Restore(UIControl arg1, Coord arg2)
+            {
+                PropertyChanging -= OnPropertyChanging;
+                foreach (var x in restore)
+                    x(arg1, arg2);
+            }
+        }
+        public void MouseOver(Action<UIControl, Coord> mouseEnter, Action<UIControl, Coord> mouseLeft)
+        {
+            MouseEntered += mouseEnter;
+            MouseLeft += mouseLeft;
+        }
     }
 }

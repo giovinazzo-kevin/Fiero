@@ -24,7 +24,7 @@
             .Include(args => args.Entities.NPC_Rat(), 100)
             .Include(args => args.Entities.NPC_RatArcher(), 7.5f)
             .Include(args => args.Entities.NPC_RatArsonist(), 1)
-            //.Include(args => args.Entities.NPC_RatCultist(), 1)
+            //.Include(args => args.Entities.NPC_RatApothecary(), 1)
             .Include(args => args.Entities.NPC_RatKnight(), 17.5f)
             .Include(args => args.Entities.NPC_RatPugilist(), 1)
             .Include(args => args.Entities.NPC_RatWizard(), 5)
@@ -34,7 +34,7 @@
             ;
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>
-            new(ctx.Id.Depth / 5 + 1, room.GetRects().Count() / 2 + 1, Bias: -1);
+            new(4, room.GetRects().Count() / 2 + 1, Bias: -1);
 
     }
 }

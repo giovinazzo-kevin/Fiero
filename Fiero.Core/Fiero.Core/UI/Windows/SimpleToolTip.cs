@@ -3,9 +3,16 @@
     [TransientDependency]
     public class SimpleToolTip : ToolTip
     {
+        private string _text = string.Empty;
         public readonly LayoutRef<Paragraph> Paragraph = new();
 
-        public void SetText(string text) => Paragraph.Control.Text.V = text;
+        public SimpleToolTip SetText(string text)
+        {
+            _text = text;
+            if (Paragraph.Control?.Text is { } ctrl)
+                ctrl.V = text;
+            return this;
+        }
 
         public SimpleToolTip(GameUI ui) : base(ui)
         {
@@ -30,7 +37,7 @@
         {
             return grid
                 .Row(@class: "tooltip")
-                    .Cell(Paragraph)
+                    .Cell(Paragraph, p => p.Text.V = _text)
                 .End()
             ;
         }

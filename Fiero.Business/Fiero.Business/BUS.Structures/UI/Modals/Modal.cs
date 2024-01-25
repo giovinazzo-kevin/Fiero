@@ -37,7 +37,7 @@ namespace Fiero.Business
                 .Match(x => x.HasAnyClass("modal-title", "modal-controls"))
                 .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBorder))
                 .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIBackground))
-                .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
+                .Apply(x => x.OutlineColor.V = UI.GetColor(ColorName.UIBorder))
             )
             .Rule<UIControl>(style => style
                 .Match(x => x.HasAnyClass("modal-close"))

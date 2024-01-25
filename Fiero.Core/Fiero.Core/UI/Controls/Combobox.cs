@@ -2,7 +2,7 @@
 
 namespace Fiero.Core
 {
-    public class Combobox : Label
+    public class ComboBox : Label
     {
         public readonly struct Option
         {
@@ -43,7 +43,7 @@ namespace Fiero.Core
             OnValueChanged(SelectedOption);
         }
 
-        public Combobox AddOption<T>(string label, T value)
+        public ComboBox AddOption<T>(string label, T value)
         {
             IsInteractive.V = true;
             var control = BuildItem();
@@ -73,7 +73,7 @@ namespace Fiero.Core
             }
         }
 
-        public Combobox RemoveOptions(Func<object, bool> predicate)
+        public ComboBox RemoveOptions(Func<object, bool> predicate)
         {
             var toRemove = Options.Where(o => predicate(o.Value));
             for (int j = Children.Count - 1; j >= 0; j--)
@@ -108,7 +108,7 @@ namespace Fiero.Core
             }
         }
 
-        public Combobox(GameInput input, Func<ComboItem> buildItem) : base(input)
+        public ComboBox(GameInput input, Func<ComboItem> buildItem) : base(input)
         {
             BuildItem = buildItem;
             Options = new List<Option>();

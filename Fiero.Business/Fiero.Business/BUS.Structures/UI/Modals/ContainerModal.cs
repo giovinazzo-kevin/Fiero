@@ -7,7 +7,7 @@ namespace Fiero.Business
         where TContainer : PhysicalEntity
         where TActions : struct, Enum
     {
-        public const int RowHeight = 18; // px
+        public const int RowHeight = 34; // px
         public const int PaginatorHeight = 24; // px
 
         public readonly TContainer Container;
@@ -145,7 +145,10 @@ namespace Fiero.Business
             {
                 var letter = text[0];
                 if (!LetterToVK(letter, out vk) || modal.IsMapped(vk))
+                {
+                    text = text[1..];
                     continue;
+                }
                 return true;
             }
             vk = default;
@@ -177,7 +180,7 @@ namespace Fiero.Business
                 {
                     x.Background.V = UI.GetColor(ColorName.UIBorder);
                     x.Foreground.V = UI.GetColor(ColorName.UIBackground);
-                    x.BorderColor.V = UI.GetColor(ColorName.UIBorder);
+                    x.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                     x.OutlineThickness.V = 1;
                 }))
             .Rule<Picture>(s => s
@@ -185,7 +188,7 @@ namespace Fiero.Business
                 .Apply(x =>
                 {
                     x.VerticalAlignment.V = VerticalAlignment.Middle;
-                    x.LockAspectRatio.V = true;
+                    x.LockAspectRatio.V = false;
                 }))
             .Rule<Button>(s => s
                 .Match(x => x.HasClass("item-name"))
@@ -205,7 +208,7 @@ namespace Fiero.Business
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
                             p.OutlineThickness.V = 1;
-                            p.BorderColor.V = UI.GetColor(ColorName.UIBorder);
+                            p.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                         })
                     .End()
                     .Col(@class: "item-name")
@@ -217,7 +220,7 @@ namespace Fiero.Business
                             b.MouseEntered += (x, __) => x.Background.V = UI.GetColor(ColorName.UIBorder);
                             b.MouseLeft += (x, __) => x.Background.V = Color.Transparent;
                             b.OutlineThickness.V = 1;
-                            b.BorderColor.V = UI.GetColor(ColorName.UIBorder);
+                            b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                             b.ToolTip.V = new SimpleToolTip(UI);
                         })
                     .End()
@@ -268,14 +271,9 @@ namespace Fiero.Business
             void RefreshItemSprite(Picture p, int index)
             {
                 var i = CurrentPage.V * PageSize.V + index;
-                if (i >= Items.Count)
-                {
-                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, "None", ColorName.White);
-                }
-                else
-                {
-                    p.Sprite.V = Resources.Sprites.Get(TextureName.Items, Items[i].Render.Sprite, Items[i].Render.Color);
-                }
+                p.Sprite.V = i >= Items.Count
+                    ? Resources.Sprites.Get(TextureName.Items, "None", ColorName.White)
+                    : Resources.Sprites.Get(TextureName.Items, Items[i].Render.Sprite, Items[i].Render.Color);
             }
 
             void RefreshItemButton(Button b, int index)

@@ -8,6 +8,6 @@
             Speaker = npc;
         }
         ActionName IAction.Name => ActionName.Interact;
-        int? IAction.Cost => 0;
+        int? IAction.Cost => 1;
     }
 }

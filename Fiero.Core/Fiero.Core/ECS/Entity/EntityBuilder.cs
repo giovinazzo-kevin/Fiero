@@ -10,7 +10,11 @@ namespace Fiero.Core
         EcsEntity Build();
     }
 
-    public sealed class EntityBuilder<TProxy> : IEntityBuilder
+    public interface IEntityBuilder<out TProxy> : IEntityBuilder
+        where TProxy : EcsEntity
+    {
+    }
+    public sealed class EntityBuilder<TProxy> : IEntityBuilder<TProxy>
         where TProxy : EcsEntity
     {
         private readonly ImmutableHashSet<Type> _componentTypes;

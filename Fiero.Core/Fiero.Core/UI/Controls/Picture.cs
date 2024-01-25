@@ -14,6 +14,7 @@ namespace Fiero.Core
         public Picture(GameInput input)
             : base(input)
         {
+            this.IsInteractive.V = true;
         }
 
         protected override void Repaint(RenderTarget target, RenderStates states)

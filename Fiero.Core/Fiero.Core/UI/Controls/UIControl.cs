@@ -1,11 +1,12 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace Fiero.Core
 {
-    public abstract partial class UIControl : Drawable, IDisposable
+    public abstract partial class UIControl : Drawable, IDisposable, INotifyPropertyChanging
     {
         public readonly GameInput Input;
         public readonly ObservableCollection<UIControl> Children;
@@ -25,7 +26,7 @@ namespace Fiero.Core
         public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
         public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
-        public readonly UIControlProperty<Color> BorderColor = new(nameof(BorderColor), new(255, 255, 255), invalidate: true) { Inherited = false };
+        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
         public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
         public readonly UIControlProperty<ToolTip> ToolTip = new(nameof(ToolTip), null) { Inherited = false };
 
@@ -76,6 +77,12 @@ namespace Fiero.Core
         }
 
         public event Action<UIControl, Coord> MinimumContentSizeChanged;
+        public event PropertyChangingEventHandler PropertyChanging;
+
+        internal void OnPropertyChanging(IUIControlProperty p)
+        {
+            PropertyChanging?.Invoke(this, new(p.Name));
+        }
 
         // Copies all matching and propagating properties from the given control to this control. Used when instantiating children.
         public void InheritProperties(UIControl from)
@@ -317,7 +324,7 @@ namespace Fiero.Core
                 Position = (BorderRenderPos + outline).ToVector2f(),
                 FillColor = Background,
                 OutlineThickness = OutlineThickness,
-                OutlineColor = BorderColor
+                OutlineColor = OutlineColor
             };
             target.Draw(rect, states);
         }

@@ -16,12 +16,6 @@ namespace Fiero.Business
             Amount = amount;
         }
 
-        protected override void TypedOnStarted(MetaSystem systems, Actor target)
-        {
-            target.TryRoot();
-            Ended += e => target.TryFree();
-        }
-
         protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
             if (!owner.TryCast<Actor>(out var actor))
@@ -29,13 +23,21 @@ namespace Fiero.Business
                 yield break;
             }
 
-            yield return systems.Get<ActionSystem>().ActorIntentSelected.SubscribeResponse(e =>
+            yield return systems.Get<ActionSystem>().ActorTurnStarted.SubscribeHandler(e =>
             {
                 if (e.Actor == owner)
                 {
-                    systems.Get<ActionSystem>().ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, Amount));
+                    var amount = Amount;
+                    if (e.Actor.ActorProperties.Health.V == 1)
+                    {
+                        amount = 0;
+                    }
+                    else if (e.Actor.ActorProperties.Health.V <= Amount)
+                    {
+                        amount = e.Actor.ActorProperties.Health.V - 1;
+                    }
+                    systems.Get<ActionSystem>().ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, amount));
                 }
-                return new();
             });
         }
     }

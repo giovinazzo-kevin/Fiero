@@ -56,7 +56,7 @@ namespace Fiero.Business
             var transparentTypes = new[] { typeof(Label), typeof(Paragraph), typeof(Picture) };
             UI.Theme = new LayoutThemeBuilder()
                 .Rule<UIControl>(b => b
-                    .Apply(x => x.BorderColor.V = UI.GetColor(ColorName.UIBorder))
+                    .Apply(x => x.OutlineColor.V = UI.GetColor(ColorName.UIBorder))
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground))
                     .Apply(x => x.Foreground.V = UI.GetColor(ColorName.UIPrimary))
                     .Apply(x => x.Accent.V = UI.GetColor(ColorName.UIAccent))
@@ -78,7 +78,7 @@ namespace Fiero.Business
                     .WithPriority(P - 1))
                 .Rule<UIControl>(style => style
                     .Match(x => x.HasAllClasses("tooltip"))
-                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddAlpha(-128))
+                    .Apply(x => x.Background.V = UI.GetColor(ColorName.UIBackground).AddAlpha(-64))
                     .WithPriority(P - 1))
 
                 .Build();
@@ -218,9 +218,10 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.DeveloperConsole, VirtualKeys.F1);
 
             await Director.AddScenes(Scenes);
-            Director.MapTransition(MenuScene.SceneState.Exit_NewGame, GameplayScene.SceneState.Main);
+            Director.MapTransition(MenuScene.SceneState.Exit_NewGame, CharCreationScene.SceneState.Main);
+            Director.MapTransition(CharCreationScene.SceneState.Exit_StartGame, GameplayScene.SceneState.Main);
+            Director.MapTransition(CharCreationScene.SceneState.Exit_QuitToMenu, MenuScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
-
 #if DEBUG
             // Start logging everything that passes through the global event bus
             var sieve = Bus.Filter<object>();

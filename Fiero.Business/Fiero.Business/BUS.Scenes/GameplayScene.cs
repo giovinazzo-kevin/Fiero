@@ -122,40 +122,24 @@ namespace Fiero.Business.Scenes
                 Resources.Sprites.ClearProceduralSprites();
                 QuickSlots.UnsetAll();
                 Entities.Clear(true);
-
                 // Create player
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
+                Item[] loadout = Store.GetOrDefault(Data.Player.Loadout, LoadoutName.Adventurer) switch
+                {
+                    LoadoutName.Knight => [Resources.Entities.Weapon_Sword().Build()],
+                    LoadoutName.Archer => [Resources.Entities.Weapon_Bow(charges: 25).Build()],
+                    LoadoutName.Wizard => [Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build()],
+                    _ => []
+                };
+
                 Player = Resources.Entities.Player()
                     //.WithAutoPlayerAi()
                     .WithName(playerName)
-                    .WithItems(
-                        Resources.Entities.Resource_Gold(5000).Build(),
-                        Resources.Entities.Weapon_Sword()
-                            .WithDescription("Lorem ipsum dolor\nsit amet.\nThis sword is cool wtf.\nNice.")
-                            .WithIntrinsicEffect(EffectDef.FromScript(Resources.Scripts.Get(ScriptName.Test)),
-                                e => new GrantedOnEquip(e))
-                            .WithIntrinsicEffect(new EffectDef(EffectName.UncontrolledTeleport),
-                                e => new GrantedWhenHitByMeleeWeapon(e))
-                            .WithColor(ColorName.LightRed)
-                            .Build(),
-                        Resources.Entities.Throwable_Rock(charges: 100).Build(),
-                        Resources.Entities.Scroll_OfMassConfusion().Build(),
-                        Resources.Entities.Potion_OfHealing().Build(),
-                        Resources.Entities.Throwable_Bomb(100).Build(),
-                        Resources.Entities.Wand_OfTeleport(Rng.Random.Between(4, 8)).Build(),
-                        Resources.Entities.Wand_OfSleep(Rng.Random.Between(4, 8)).Build(),
-                        Resources.Entities.Scroll_OfMassExplosion().Build(),
-                        Resources.Entities.Scroll_OfMassExplosion().Build(),
-                        Resources.Entities.Scroll_OfMassExplosion().Build(),
-                        Resources.Entities.Scroll_OfMassExplosion().Build(),
-                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
-                        Resources.Entities.Scroll_OfRaiseUndead().Build(),
-                        Resources.Entities.Scroll_OfRaiseUndead().Build()
-                    )
+                    .WithItems(loadout)
                     //.WithIntrinsicTrait(Traits.Invulnerable)
                     //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
-                    .WithHealth(100000)
+                    .WithHealth(10)
                     .Build();
                 Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);
@@ -213,8 +197,11 @@ namespace Fiero.Business.Scenes
             // - Update Fov
             // - Attempt to auto-identify items that can be seen
             // - Recenter viewport on player and update UI
+            // - Restore some HP if not in combat
             yield return actionSystem.ActorTurnStarted.SubscribeHandler(e =>
             {
+                const int REST_DELAY = 5; // How many turns must pass after taking damage before regen starts
+
                 var floorId = e.Actor.FloorId();
                 dungeonSystem.RecalculateFov(e.Actor);
                 foreach (var p in e.Actor.Fov.VisibleTiles[floorId])
@@ -228,6 +215,9 @@ namespace Fiero.Business.Scenes
                 {
                     renderSystem.CenterOn(e.Actor);
                 }
+
+                if (e.TurnId > e.Actor.ActorProperties.LastTookDamageOnTurn + REST_DELAY)
+                    e.Actor.ActorProperties.Health.V++;
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
@@ -416,59 +406,62 @@ namespace Fiero.Business.Scenes
             // - Occasionally play speech bubbles for attacker and victim
             yield return actionSystem.ActorAttacked.SubscribeResponse(e =>
             {
-                e.Attacker.Log?.Write($"$Action.YouAttack$ {e.Victim.Info.Name}.");
-                e.Victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
-                var dir = (e.Victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
-                var speechChance = () => Chance.OneIn(15);
-                if (e.Type == AttackName.Melee)
+                foreach (var victim in e.Victims)
                 {
-                    if (Player.CanHear(e.Attacker) || Player.CanHear(e.Victim))
+                    e.Attacker.Log?.Write($"$Action.YouAttack$ {victim.Info.Name}.");
+                    victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
+                    var dir = (victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
+                    var speechChance = () => Chance.OneIn(15);
+                    if (e.Type == AttackName.Melee)
                     {
-                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
-                    }
-                    if (Player.CanSee(e.Attacker))
-                    {
-                        renderSystem.CenterOn(Player);
-                        var anim = Animation.MeleeAttack(e.Attacker, dir)
-                            .OnFirstFrame(() =>
-                            {
-                                if (!e.Attacker.IsInvalid())
-                                    e.Attacker.Render.Hidden = true;
-                                renderSystem.CenterOn(Player);
-                            })
-                            .OnLastFrame(() =>
-                            {
-                                if (!e.Attacker.IsInvalid())
-                                    e.Attacker.Render.Hidden = false;
-                                renderSystem.CenterOn(Player);
-                            });
-                        renderSystem.AnimateViewport(true, e.Attacker.Location(), anim);
-                    }
-                }
-                if (speechChance() && Resources.GetSpeechBubble(e.Attacker, GenericSpeechDialogueName.Attacking, out var speech))
-                    renderSystem.AnimateViewport(false, e.Attacker, speech.Animation);
-                if (speechChance() && Resources.GetSpeechBubble(e.Victim, GenericSpeechDialogueName.Attacked, out speech))
-                    renderSystem.AnimateViewport(false, e.Victim, speech.Animation);
-                foreach (var weapon in e.Weapons)
-                {
-                    if (e.Type == AttackName.Ranged && weapon.TryCast<Potion>(out var potion))
-                    {
-                        if (e.Attacker.Identify(potion, q => q.PotionProperties.QuaffEffect.Name == potion.PotionProperties.QuaffEffect.Name
-                                                          && q.PotionProperties.ThrowEffect.Name == potion.PotionProperties.ThrowEffect.Name))
+                        if (Player.CanHear(e.Attacker) || Player.CanHear(victim))
                         {
-                            e.Attacker.Log?.Write($"$Action.YouIdentifyAPotion$ {potion.DisplayName}.");
+                            Resources.Sounds.Get(SoundName.MeleeAttack, e.Attacker.Position() - Player.Position()).Play();
+                        }
+                        if (Player.CanSee(e.Attacker))
+                        {
+                            renderSystem.CenterOn(Player);
+                            var anim = Animation.MeleeAttack(e.Attacker, dir)
+                                .OnFirstFrame(() =>
+                                {
+                                    if (!e.Attacker.IsInvalid())
+                                        e.Attacker.Render.Hidden = true;
+                                    renderSystem.CenterOn(Player);
+                                })
+                                .OnLastFrame(() =>
+                                {
+                                    if (!e.Attacker.IsInvalid())
+                                        e.Attacker.Render.Hidden = false;
+                                    renderSystem.CenterOn(Player);
+                                });
+                            renderSystem.AnimateViewport(true, e.Attacker.Location(), anim);
                         }
                     }
-                    else if (e.Type == AttackName.Magic && weapon.TryCast<Wand>(out var wand))
+                    if (speechChance() && Resources.GetSpeechBubble(e.Attacker, GenericSpeechDialogueName.Attacking, out var speech))
+                        renderSystem.AnimateViewport(false, e.Attacker, speech.Animation);
+                    if (speechChance() && Resources.GetSpeechBubble(victim, GenericSpeechDialogueName.Attacked, out speech))
+                        renderSystem.AnimateViewport(false, victim, speech.Animation);
+                    foreach (var weapon in e.Weapons)
                     {
-
-                        if (e.Attacker.Identify(wand, q => q.WandProperties.Effect.Name == wand.WandProperties.Effect.Name))
+                        if (e.Type == AttackName.Ranged && weapon.TryCast<Potion>(out var potion))
                         {
-                            e.Attacker.Log?.Write($"$Action.YouIdentifyAWand$ {wand.DisplayName}.");
+                            if (e.Attacker.Identify(potion, q => q.PotionProperties.QuaffEffect.Name == potion.PotionProperties.QuaffEffect.Name
+                                                              && q.PotionProperties.ThrowEffect.Name == potion.PotionProperties.ThrowEffect.Name))
+                            {
+                                e.Attacker.Log?.Write($"$Action.YouIdentifyAPotion$ {potion.DisplayName}.");
+                            }
+                        }
+                        else if (e.Type == AttackName.Magic && weapon.TryCast<Wand>(out var wand))
+                        {
+
+                            if (e.Attacker.Identify(wand, q => q.WandProperties.Effect.Name == wand.WandProperties.Effect.Name))
+                            {
+                                e.Attacker.Log?.Write($"$Action.YouIdentifyAWand$ {wand.DisplayName}.");
+                            }
                         }
                     }
-                }
 
+                }
                 return true;
             });
             // ActionSystem.ActorHealed 
@@ -501,6 +494,7 @@ namespace Fiero.Business.Scenes
                 }
                 int oldHealth = e.Victim.ActorProperties.Health;
                 e.Victim.ActorProperties.Health.V -= e.Damage;
+                e.Victim.ActorProperties.LastTookDamageOnTurn = actionSystem.CurrentTurn;
                 var actualDdamage = oldHealth - e.Victim.ActorProperties.Health;
                 if (Player.CanSee(e.Victim))
                 {
@@ -744,7 +738,8 @@ namespace Fiero.Business.Scenes
             // - Play an animation and a sound as the projectile flies
             yield return actionSystem.ItemThrown.SubscribeResponse(e =>
             {
-                e.Actor.Log?.Write($"$Action.YouThrow$ {e.Item.DisplayName}.");
+                var proj = e.Projectile;
+                e.Actor.Log?.Write($"$Action.YouThrow$ {proj.DisplayName}.");
                 if (Player.CanHear(e.Actor))
                 {
                     Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
@@ -752,10 +747,10 @@ namespace Fiero.Business.Scenes
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
                     renderSystem.CenterOn(Player);
-                    var anim = e.Item.ThrowableProperties.Throw switch
+                    var anim = proj.ProjectileProperties.Trajectory switch
                     {
-                        ThrowName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color),
-                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Item.Render.Sprite, tint: e.Item.Render.Color)
+                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional)
                     };
                     renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
@@ -763,10 +758,10 @@ namespace Fiero.Business.Scenes
                         Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                     }
                 }
-                if (Rng.Random.NextDouble() >= e.Item.ThrowableProperties.MulchChance)
+                if (Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance)
                 {
-                    var clone = (Throwable)e.Item.Clone();
-                    if (e.Item.ThrowableProperties.ThrowsUseCharges)
+                    var clone = (Projectile)proj.Clone();
+                    if (proj.ProjectileProperties.ThrowsUseCharges)
                     {
                         clone.ConsumableProperties.RemainingUses = 1;
                     }
@@ -775,13 +770,13 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    renderSystem.AnimateViewport(false, new Location(e.Item.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    renderSystem.AnimateViewport(false, new Location(proj.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
-                if (!e.Item.ThrowableProperties.ThrowsUseCharges)
+                if (!proj.ProjectileProperties.ThrowsUseCharges)
                 {
                     // Despawn item
-                    e.Actor.Inventory.TryTake(e.Item);
-                    Entities.FlagEntityForRemoval(e.Item.Id);
+                    e.Actor.Inventory.TryTake(proj);
+                    Entities.FlagEntityForRemoval(proj.Id);
                 }
                 return true;
             });
@@ -796,7 +791,7 @@ namespace Fiero.Business.Scenes
                 }
                 if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
                 {
-                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color);
+                    var anim = Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: e.Wand.Render.Sprite, tint: e.Wand.Render.Color, directional: true);
                     renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
                     {
@@ -808,6 +803,39 @@ namespace Fiero.Business.Scenes
                     if (e.Actor.Identify(e.Wand, q => q.WandProperties.Effect.Name == e.Wand.WandProperties.Effect.Name))
                     {
                         e.Actor.Log?.Write($"$Action.YouIdentify$ {e.Wand.DisplayName}.");
+                    }
+                }
+                return true;
+            });
+            // ActionSystem.LauncherShot:
+            // - Play an animation and a sound as the projectile flies
+            yield return actionSystem.LauncherShot.SubscribeResponse(e =>
+            {
+                e.Actor.Log?.Write($"$Action.YouShoot$ {e.Launcher.DisplayName}.");
+                if (Player.CanHear(e.Actor))
+                {
+                    Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();
+                }
+                var proj = e.Launcher.LauncherProperties.Projectile;
+
+                if (Player.CanSee(e.Actor) || Player.CanSee(e.Victim))
+                {
+                    var anim = proj.ProjectileProperties.Trajectory switch
+                    {
+                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
+                    };
+                    renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
+                    if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
+                    {
+                        Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
+                    }
+                }
+                if (e.Victim != null)
+                {
+                    if (e.Actor.Identify(e.Launcher, q => true))
+                    {
+                        e.Actor.Log?.Write($"$Action.YouIdentify$ {e.Launcher.DisplayName}.");
                     }
                 }
                 return true;

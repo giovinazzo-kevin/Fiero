@@ -5,6 +5,11 @@
     "Settings": "Settings",
     "About": "About"
   },
+  "CharCreation": {
+    "StartGame": "Start Game",
+    "QuitToMenu": "Quit To Menu",
+    "LoadoutKnight": "Knight:\n- Starts with a sword and a shield"
+  },
   "Speech": {
     "Monster": {
       "Spawned": []

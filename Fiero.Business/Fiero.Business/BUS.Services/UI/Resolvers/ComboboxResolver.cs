@@ -2,17 +2,17 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Combobox>))]
-    public class ComboboxResolver : UIControlResolver<Combobox>
+    [SingletonDependency(typeof(IUIControlResolver<ComboBox>))]
+    public class ComboboxResolver : UIControlResolver<ComboBox>
     {
         public ComboboxResolver(GameUI ui, GameResources resources)
             : base(ui, resources)
         {
         }
 
-        public override Combobox Resolve(LayoutGrid dom)
+        public override ComboBox Resolve(LayoutGrid dom)
         {
-            var x = new Combobox(UI.Input, () => new(UI.Input));
+            var x = new ComboBox(UI.Input, () => new(UI.Input));
             x.Font.V = GetFont();
             x.Foreground.V = Foreground;
             x.Background.V = Background;

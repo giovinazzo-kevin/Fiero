@@ -45,7 +45,7 @@ namespace Fiero.Business
                 (MyHelpfulConsumables = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.GetEffectFlags().IsDefensive))),
                 (MyHarmfulConsumables = new((sys, a) => MyConsumables.AlertingValues
-                    .Where(v => v.TryCast<Throwable>(out var t) && t.ThrowableProperties.BaseDamage > 0
+                    .Where(v => v.TryCast<Projectile>(out var t) && t.ProjectileProperties.BaseDamage > 0
                              || v.GetEffectFlags().IsOffensive))),
                 (MyPanicButtons = new((sys, a) => MyConsumables.AlertingValues
                     .Where(v => v.GetEffectFlags().IsPanicButton))),
@@ -219,9 +219,13 @@ namespace Fiero.Business
             {
                 return TryZap(a, wand, out action);
             }
-            if (item.TryCast<Throwable>(out var throwable))
+            if (item.TryCast<Launcher>(out var Launcher))
             {
-                return TryThrow(a, throwable, out action);
+                return TryShoot(a, Launcher, out action);
+            }
+            if (item.TryCast<Projectile>(out var Projectile))
+            {
+                return TryThrow(a, Projectile, out action);
             }
             return false;
         }
@@ -270,29 +274,48 @@ namespace Fiero.Business
             return false;
         }
 
+        protected bool TryShoot(Actor a, Launcher launcher, out IAction action)
+        {
+            action = default;
+            if (!a.ActorEquipment.IsEquipped(launcher))
+                return false;
+            var clone = (Projectile)launcher.LauncherProperties.Projectile.Clone();
+            if (TryThrow(a, clone, out var throwAction))
+            {
+                action = throwAction switch
+                {
+                    ThrowItemAtOtherAction { Item: var i, Victim: var v } => new ShootLauncherAtOtherAction(launcher, v),
+                    ThrowItemAtPointAction { Item: var i, Point: var p } => new ShootLauncherAtPointAction(launcher, p),
+                    _ => throw new NotSupportedException()
+                };
+                return true;
+            }
+            return false;
+        }
 
-        protected bool TryThrow(Actor a, Throwable throwable, out IAction action)
+
+        protected bool TryThrow(Actor a, Projectile proj, out IAction action)
         {
             var floorId = a.FloorId();
-            var len = throwable.ThrowableProperties.MaximumRange + 1;
+            var len = proj.ProjectileProperties.MaximumRange + 1;
             var line = Shapes.Line(new(0, 0), new(0, len))
                 .Skip(1)
                 .ToArray();
-            var flags = throwable.GetEffectFlags();
+            var flags = proj.GetEffectFlags();
             var throwShape = new RayTargetingShape(a.Position(), len);
             var autoTarget = throwShape.TryAutoTarget(
                 p => Systems.Get<DungeonSystem>().GetActorsAt(floorId, p).Any(b =>
                 {
-                    if (!throwable.ItemProperties.Identified)
+                    if (!proj.ItemProperties.Identified)
                         return true;
                     var rel = Systems.Get<FactionSystem>().GetRelations(a, b);
-                    if (throwable.Effects != null && b.Effects != null && throwable.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
+                    if (proj.Effects != null && b.Effects != null && proj.Effects.Intrinsic.All(e => b.Effects.Active.Any(f => f.Name == e.Name)))
                         return false;
                     if (rel.Left.IsFriendly() && flags.IsDefensive)
                         return true;
                     if (rel.Left.IsHostile() && flags.IsOffensive)
                         return true;
-                    if (rel.Left.IsHostile() && throwable.ThrowableProperties.BaseDamage > 0)
+                    if (rel.Left.IsHostile() && proj.ProjectileProperties.BaseDamage > 0)
                         return true;
                     return false;
                 }),
@@ -301,18 +324,22 @@ namespace Fiero.Business
             if (TryTarget(a, throwShape, autoTarget))
             {
                 var points = throwShape.GetPoints().ToArray();
-                foreach (var p in points)
+                if (!proj.ProjectileProperties.Piercing)
                 {
-                    var target = Systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
-                        .FirstOrDefault(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
-                    if (target != null)
+                    foreach (var p in points)
                     {
-                        action = new ThrowItemAtOtherAction(target, throwable);
-                        return true;
+                        var actors = Systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
+                            .Where(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
+                        var target = actors.FirstOrDefault();
+                        if (target != null)
+                        {
+                            action = new ThrowItemAtOtherAction(target, proj);
+                            return true;
+                        }
                     }
                 }
                 // Okay, then
-                action = new ThrowItemAtPointAction(points.Last() - a.Position(), throwable);
+                action = new ThrowItemAtPointAction(points.Last() - a.Position(), proj);
                 return true;
             }
             action = default;

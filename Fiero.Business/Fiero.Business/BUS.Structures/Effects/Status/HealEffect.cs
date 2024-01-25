@@ -19,7 +19,7 @@ namespace Fiero.Business
 
         protected override void TypedOnStarted(MetaSystem systems, Actor target)
         {
-            systems.Get<ActionSystem>().ActorHealed.HandleOrThrow(new(target, target, target, Amount));
+            systems.Get<ActionSystem>().ActorHealed.HandleOrThrow(new(Source, target, Source, Amount));
             End(systems, target);
         }
 

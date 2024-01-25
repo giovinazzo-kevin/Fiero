@@ -14,6 +14,7 @@
         Throw,
         Quaff,
         Zap,
+        Shoot,
         Macro
     }
 }

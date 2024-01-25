@@ -16,7 +16,7 @@ namespace Fiero.Business
                 .Apply(l =>
                 {
                     l.OutlineThickness.V = 2;
-                    l.BorderColor.V = UI.GetColor(ColorName.Cyan);
+                    l.OutlineColor.V = UI.GetColor(ColorName.Cyan);
                 }))
             .Rule<Label>(r => r
                 .Match(l => l.HasAnyClass("neck", "back", "ring"))

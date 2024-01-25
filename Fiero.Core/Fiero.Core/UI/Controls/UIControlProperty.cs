@@ -42,6 +42,7 @@
             set
             {
                 var old = _value;
+                Owner?.OnPropertyChanging(this);
                 _value = _set(value);
                 ValueUpdated?.Invoke(this, old);
                 if (Equals(old, _value))

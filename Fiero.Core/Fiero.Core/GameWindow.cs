@@ -15,7 +15,7 @@ namespace Fiero.Core
                 RenderWindowChanged?.Invoke(this, old);
             }
         }
-        public Coord Size => RenderWindow.Size.ToCoord();
+        public Coord Size => RenderWindow?.Size.ToCoord() ?? Coord.Zero;
         public GameWindow()
         {
         }

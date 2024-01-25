@@ -4,7 +4,7 @@ namespace Fiero.Business
 {
     /// <summary>
     /// Use effects can be applied to:
-    /// - Throwables:
+    /// - Projectiles:
     ///     - The effect is applied to the actor that's hit by the thrown item.
     /// </summary>
     public abstract class ThrowEffect : ModifierEffect
@@ -18,11 +18,11 @@ namespace Fiero.Business
 
         protected override IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner)
         {
-            if (owner.TryCast<Throwable>(out var throwable))
+            if (owner.TryCast<Projectile>(out var Projectile))
             {
                 yield return systems.Get<ActionSystem>().ItemThrown.SubscribeHandler(e =>
                 {
-                    if (e.Item == owner)
+                    if (e.Projectile == owner)
                     {
                         if (e.Victim != null)
                         {

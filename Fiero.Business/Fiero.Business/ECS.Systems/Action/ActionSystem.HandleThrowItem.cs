@@ -16,12 +16,12 @@
                 Actor victim;
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Position() + rDir.Point;
-                switch (rDir.Item.ThrowableProperties.Throw)
+                switch (rDir.Item.ProjectileProperties.Trajectory)
                 {
-                    case ThrowName.Arc:
+                    case TrajectoryName.Arc:
                         TryFindVictim(newPos, t.Actor, out victim);
                         break;
-                    case ThrowName.Line:
+                    case TrajectoryName.Line:
                         victim = Shapes.Line(t.Actor.Position(), newPos)
                             .Skip(1)
                             .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement() ?? false)
@@ -47,36 +47,15 @@
             }
             else throw new NotSupportedException(action.GetType().Name);
 
-            bool Consume(Actor a, Throwable i)
+            bool Consume(Actor a, Projectile i)
             {
-                if (i.ThrowableProperties.ThrowsUseCharges)
+                if (i.ProjectileProperties.ThrowsUseCharges)
                 {
                     return ItemConsumed.Handle(new(a, i));
                 }
                 // TODO
                 return true;
             }
-
-            bool HandleRangedAttack(Actor attacker, Actor victim, ref int? cost, Throwable item)
-            {
-                var floorId = attacker.FloorId();
-                var aPos = attacker.Position();
-                var vPos = victim.Position();
-                switch (item.ThrowableProperties.Throw)
-                {
-                    case { } when _floorSystem.IsLineOfSightBlocked(attacker, aPos, vPos):
-                        return false;
-                    // If the throwable hits in a straight line, we need to figure out the first actor across that line
-                    case ThrowName.Line:
-                        victim = Shapes.Line(aPos, vPos)
-                            .SelectMany(p => _floorSystem.GetActorsAt(floorId, p))
-                            .Except(new[] { attacker })
-                            .First();
-                        break;
-                }
-                return HandleAttack(AttackName.Ranged, t.Actor, victim, ref cost, new[] { item }, out _, out _);
-            }
-
         }
     }
 }

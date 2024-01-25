@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
     public static class EffectExtensions

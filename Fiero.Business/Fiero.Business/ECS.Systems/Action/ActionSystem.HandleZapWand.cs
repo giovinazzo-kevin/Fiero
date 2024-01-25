@@ -38,7 +38,7 @@
             {
                 var vPos = victim.Position();
                 return WandZapped.Handle(new(attacker, victim, vPos, item))
-                    && HandleAttack(AttackName.Magic, t.Actor, victim, ref cost, new[] { item }, out _, out _);
+                    && HandleAttack(AttackName.Magic, t.Actor, [victim], ref cost, new[] { item }, out _, out _);
             }
         }
     }

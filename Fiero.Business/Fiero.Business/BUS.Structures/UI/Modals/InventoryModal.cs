@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class InventoryModal : ContainerModal<Actor, InventoryActionName>
     {
@@ -36,7 +31,7 @@ namespace Fiero.Business
                 }
                 yield return InventoryActionName.Set;
             }
-            if (i.TryCast<Throwable>(out _))
+            if (i.TryCast<Projectile>(out _))
             {
                 yield return InventoryActionName.Throw;
                 yield return InventoryActionName.Set;
@@ -54,6 +49,11 @@ namespace Fiero.Business
             if (i.TryCast<Wand>(out _))
             {
                 yield return InventoryActionName.Zap;
+                yield return InventoryActionName.Set;
+            }
+            if (i.TryCast<Launcher>(out _))
+            {
+                yield return InventoryActionName.Shoot;
                 yield return InventoryActionName.Set;
             }
             if (canDrop)

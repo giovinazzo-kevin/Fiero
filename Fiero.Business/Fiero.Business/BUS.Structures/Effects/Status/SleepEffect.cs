@@ -35,7 +35,7 @@ namespace Fiero.Business
             });
             yield return systems.Get<ActionSystem>().ActorAttacked.SubscribeHandler(e =>
             {
-                if (e.Victim == owner && Rng.Random.NChancesIn(e.Damage, 100))
+                if (e.Victims.Contains(owner) && Rng.Random.NChancesIn(e.Damage, 100))
                 {
                     End(systems, owner);
                 }

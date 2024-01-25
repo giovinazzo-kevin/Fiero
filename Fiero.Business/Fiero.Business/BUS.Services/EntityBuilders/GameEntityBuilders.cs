@@ -95,8 +95,9 @@
             .WithEquipmentInfo(type)
             ;
 
-        public EntityBuilder<Weapon> Weapon(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
-            => Equipment<Weapon>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
+        public EntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
+            where T : Weapon
+            => Equipment<T>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
             .WithName($"$Item.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.Transparent)
             .WithPhysics(Coord.Zero)
@@ -123,10 +124,10 @@
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Throwable<T>(ThrowableName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, ThrowName @throw, string unidentName = null)
-            where T : Throwable
+        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, string unidentName = null)
+            where T : Projectile
             => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, unidentName)
-            .WithThrowableInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw)
+            .WithProjectileInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw, piercing, directional)
             .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
             ;
@@ -174,9 +175,9 @@
             };
             var potionColor = (Adjective: rng.Choose(adjectives), Color: rng.Choose(colors));
 
-            return Throwable<Potion>(
-                @throw: ThrowName.Arc,
-                name: ThrowableName.Misc,
+            return Projectile<Potion>(
+                @throw: TrajectoryName.Arc,
+                name: ProjectileName.Misc,
                 damage: 1,
                 maxRange: 4,
                 mulchChance: 1,
@@ -185,7 +186,9 @@
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
-                throwsUseCharges: false
+                throwsUseCharges: false,
+                piercing: false,
+                directional: false
                 )
                .WithName($"$Item.PotionOf$ $Effect.{quaffEffect}$")
                .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Potion), potionColor.Color)
@@ -197,9 +200,9 @@
 
         public EntityBuilder<Food> Food(FoodName name, EffectDef eatEffect)
         {
-            return Throwable<Food>(
-                @throw: ThrowName.Line,
-                name: ThrowableName.Misc,
+            return Projectile<Food>(
+                @throw: TrajectoryName.Line,
+                name: ProjectileName.Misc,
                 damage: 0,
                 maxRange: 4,
                 mulchChance: 0.75f,
@@ -207,7 +210,9 @@
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
-                throwsUseCharges: false
+                throwsUseCharges: false,
+                piercing: false,
+                directional: false
                 )
                .WithName($"{name}")
                .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
@@ -240,9 +245,9 @@
             };
             var wandColor = (Adjective: rng.Choose(adjectives), Color: rng.Choose(colors));
 
-            return Throwable<Wand>(
-                @throw: ThrowName.Line,
-                name: ThrowableName.Misc,
+            return Projectile<Wand>(
+                @throw: TrajectoryName.Line,
+                name: ProjectileName.Misc,
                 damage: 1,
                 maxRange: 7,
                 mulchChance: .75f,
@@ -251,7 +256,9 @@
                 remainingUses: charges,
                 maxUses: charges,
                 consumedWhenEmpty: false,
-                throwsUseCharges: false
+                throwsUseCharges: false,
+                piercing: false,
+                directional: false
                 )
                .WithName($"$Item.WandOf$ $Effect.{effect}$")
                .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Wand), wandColor.Color)
@@ -280,9 +287,9 @@
                 ColorName.LightMagenta
             };
             var scrollColor = rng.Choose(colors);
-            return Throwable<Scroll>(
-                @throw: ThrowName.Line,
-                name: ThrowableName.Misc,
+            return Projectile<Scroll>(
+                @throw: TrajectoryName.Line,
+                name: ProjectileName.Misc,
                 unidentName: $"scroll labelled '{label}'",
                 damage: 1,
                 maxRange: 10,
@@ -291,7 +298,9 @@
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
-                throwsUseCharges: false
+                throwsUseCharges: false,
+                piercing: false,
+                directional: false
             )
                .WithName($"$Item.ScrollOf$ $Effect.{effect}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, nameof(Scroll), scrollColor)
@@ -369,7 +378,7 @@
         public EntityBuilder<Actor> NPC_Rat()
             => Enemy()
             .WithInventory(5)
-            .WithHealth(3)
+            .WithHealth(5)
             .WithName(nameof(NpcName.Rat))
             .WithRace(RaceName.Rat)
             .WithNpcInfo(NpcName.Rat)
@@ -389,16 +398,15 @@
             ;
         #endregion
 
-        protected Item[] Loadout<T>(params (EntityBuilder<T> Item, Chance Chance)[] options)
-            where T : Item
+        protected Item[] Loadout(params (IEntityBuilder<Item> Item, Chance Chance)[] options)
         {
             return Inner().ToArray();
-            IEnumerable<T> Inner()
+            IEnumerable<Item> Inner()
             {
                 foreach (var (item, chance) in options)
                 {
                     if (chance.Check())
-                        yield return item.Build();
+                        yield return (Item)item.Build();
                 }
             }
         }
@@ -426,10 +434,11 @@
             .WithNpcInfo(NpcName.RatArcher)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArcher), ColorName.White)
             .WithItems(Loadout(
-                (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
+                (Weapon_Bow(), Chance.Always),
+                (Projectile_Rock(Rng.Random.Between(4, 10)), Chance.FiftyFifty)
             ))
             .WithLikedItems(
-                i => i.TryCast<Throwable>(out var throwable) && throwable.ThrowableProperties.ThrowsUseCharges,
+                i => i.TryCast<Projectile>(out var Projectile) && Projectile.ProjectileProperties.ThrowsUseCharges,
                 i => i.TryCast<Resource>(out var res) && res.ResourceProperties.Name == ResourceName.Gold
             )
             .LoadState(nameof(NpcName.RatArcher))
@@ -479,19 +488,19 @@
             )
             .LoadState(nameof(NpcName.RatMonk))
             ;
-        public EntityBuilder<Actor> NPC_RatCultist()
+        public EntityBuilder<Actor> NPC_RatApothecary()
             => NPC_Rat()
             .WithHealth(10)
-            .WithName("Rat Cultist")
-            .WithNpcInfo(NpcName.RatCultist)
-            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCultist), ColorName.White)
+            .WithName("Rat Apothecary")
+            .WithNpcInfo(NpcName.RatApothecary)
+            .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatApothecary), ColorName.White)
             //.WithItems(Loadout(
 
             //))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Heal) ?? false
             )
-            .LoadState(nameof(NpcName.RatCultist))
+            .LoadState(nameof(NpcName.RatApothecary))
             ;
         public EntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
@@ -527,7 +536,7 @@
             .WithNpcInfo(NpcName.RatArsonist)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatArsonist), ColorName.White)
             .WithItems(Loadout(
-                (Throwable_Bomb(Rng.Random.Between(1, 3)), Chance.Always)
+                (Projectile_Bomb(Rng.Random.Between(1, 3)), Chance.Always)
             ))
             .WithLikedItems(
                 i => i.Effects?.Intrinsic.Any(e => e.Name == EffectName.Explosion) ?? false
@@ -601,37 +610,57 @@
 
         #region WEAPONS
         public EntityBuilder<Weapon> Weapon_Sword()
-            => Weapon("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, twoHanded: false)
+            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, twoHanded: false)
             ;
         #endregion
 
-        #region THROWABLES
-        public EntityBuilder<Throwable> Throwable_Rock(int charges = 1)
-            => Throwable<Throwable>(
-                name: ThrowableName.Rock,
+        #region Projectiles
+        public EntityBuilder<Projectile> Projectile_Rock(int charges = 1)
+            => Projectile<Projectile>(
+                name: ProjectileName.Rock,
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: charges,
                 damage: 2,
                 maxRange: 3,
                 mulchChance: 1 / 4f,
-                @throw: ThrowName.Arc,
+                @throw: TrajectoryName.Arc,
                 consumedWhenEmpty: true,
-                throwsUseCharges: true
+                throwsUseCharges: true,
+                piercing: false,
+                directional: false
             )
             ;
-        public EntityBuilder<Throwable> Throwable_Bomb(int charges = 1, int fuse = 50, int radius = 5)
-            => Throwable<Throwable>(
-                name: ThrowableName.Bomb,
+        public EntityBuilder<Projectile> Projectile_Arrow(int charges = 1)
+            => Projectile<Projectile>(
+                name: ProjectileName.Arrow,
+                itemRarity: 1,
+                remainingUses: charges,
+                maxUses: charges,
+                damage: 2,
+                maxRange: 7,
+                mulchChance: 1 / 4f,
+                @throw: TrajectoryName.Line,
+                consumedWhenEmpty: true,
+                throwsUseCharges: true,
+                piercing: true,
+                directional: true
+            )
+            ;
+        public EntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
+            => Projectile<Projectile>(
+                name: ProjectileName.Bomb,
                 itemRarity: 1,
                 remainingUses: charges,
                 maxUses: 99,
                 damage: 0,
                 maxRange: 4,
                 mulchChance: 1f,
-                @throw: ThrowName.Arc,
+                @throw: TrajectoryName.Arc,
                 consumedWhenEmpty: true,
-                throwsUseCharges: true
+                throwsUseCharges: true,
+                piercing: false,
+                directional: false
             )
             .WithIntrinsicEffect(
                 EffectDef.FromScript(Scripts.Get(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
@@ -677,8 +706,8 @@
         #region WANDS
         public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1)
             => Wand(new(EffectName.Confusion, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1)
-            => Wand(new(EffectName.Poison, magnitude.ToString(), duration: 10), charges);
+        public EntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1, int duration = 10)
+            => Wand(new(EffectName.Poison, magnitude.ToString(), duration: duration), charges);
         public EntityBuilder<Wand> Wand_OfSleep(int charges = 1)
             => Wand(new(EffectName.Sleep, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfSilence(int charges = 1)
@@ -687,6 +716,12 @@
             => Wand(new(EffectName.Entrapment, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfTeleport(int charges = 1)
             => Wand(new(EffectName.UncontrolledTeleport), charges);
+        #endregion
+
+        #region LAUNCHERS
+        public EntityBuilder<Launcher> Weapon_Bow(int charges = 1)
+            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, twoHanded: true)
+                .WithLauncherInfo(Projectile_Arrow());
         #endregion
 
         #region RESOURCES
@@ -714,7 +749,7 @@
                 RandomWand()
             ), 1000);
             yield return new(Loadout(
-                (Throwable_Rock(Rng.Random.Between(4, 10)), Chance.Always)
+                (Projectile_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
             (EntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(new[] {

@@ -6,6 +6,7 @@
         {
             public static readonly GameDatum<int> Id = new(nameof(Player), nameof(Id));
             public static readonly GameDatum<string> Name = new(nameof(Player), nameof(Name));
+            public static readonly GameDatum<LoadoutName> Loadout = new(nameof(Player), nameof(Loadout));
         }
     }
 }

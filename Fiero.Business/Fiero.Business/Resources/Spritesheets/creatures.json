@@ -13,8 +13,9 @@
   "RatArcher": "0 48 16 16",
   "RatRebel": "16 48 16 16",
   "RatWizard": "0 64 16 16",
-  "RatMonk": "0 80 16 16",
+  "RatApothecary": "0 80 16 16",
   "RatWarlock": "16 80 16 16",
+  "RatMonk": "16 64 16 16",
   "RatPugilist": "0 96 16 16",
   "RatArsonist": "16 96 16 16",
   "RatAdventurer": "0 112 16 16",
@@ -29,5 +30,5 @@
   "Cobra": "16 32 16 16",
   "Boa": "16 48 16 16",
 
-  "Mimic": "96 0 16 16"
+  "Mimic": "160 0 16 16"
 }

@@ -8,7 +8,8 @@
         Unequip,
         Throw,
         Zap,
+        Shoot,
         Quaff,
-        Read
+        Read,
     }
 }

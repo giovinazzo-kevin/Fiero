@@ -1,6 +1,7 @@
 ﻿namespace Fiero.Business
 {
-    public enum ThrowName
+
+    public enum TrajectoryName
     {
         Arc,
         Line

@@ -41,6 +41,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, CorpseDestroyedEvent, EventResult> CorpseDestroyed;
         public readonly SystemRequest<ActionSystem, ItemThrownEvent, EventResult> ItemThrown;
         public readonly SystemRequest<ActionSystem, WandZappedEvent, EventResult> WandZapped;
+        public readonly SystemRequest<ActionSystem, LauncherShotEvent, EventResult> LauncherShot;
         public readonly SystemRequest<ActionSystem, ItemEquippedEvent, EventResult> ItemEquipped;
         public readonly SystemRequest<ActionSystem, ItemUnequippedEvent, EventResult> ItemUnequipped;
         public readonly SystemRequest<ActionSystem, ItemConsumedEvent, EventResult> ItemConsumed;
@@ -118,12 +119,14 @@ namespace Fiero.Business
             ActorIntentEvaluated = new(this, nameof(ActorIntentEvaluated));
             ActorIntentFailed = new(this, nameof(ActorIntentFailed));
             ConversationInitiated = new(this, nameof(ConversationInitiated));
+            LauncherShot = new(this, nameof(LauncherShot));
 
             ActorAttacked.AllResponsesReceived += (_, e, r) =>
             {
                 if (r.All(x => x))
                 {
-                    ActorDamaged.HandleOrThrow(new(e.Attacker, e.Victim, e.Weapons, e.Damage));
+                    foreach (var victim in e.Victims)
+                        ActorDamaged.HandleOrThrow(new(e.Attacker, victim, e.Weapons, e.Damage));
                 }
             };
             ActorDamaged.AllResponsesReceived += (_, e, r) =>
@@ -191,6 +194,9 @@ namespace Fiero.Business
                     break;
                 case ActionName.Zap:
                     ret = HandleZapWand(t, ref action, ref cost);
+                    break;
+                case ActionName.Shoot:
+                    ret = HandleShootLauncher(t, ref action, ref cost);
                     break;
                 case ActionName.Read:
                     ret = HandleReadScroll(t, ref action, ref cost);
@@ -264,9 +270,9 @@ namespace Fiero.Business
             return true;
         }
 
-        private bool HandleAttack(AttackName type, Actor attacker, Actor victim, ref int? cost, Entity[] weapons, out int damage, out int swingDelay)
+        private bool HandleAttack(AttackName type, Actor attacker, Actor[] victims, ref int? cost, Entity[] weapons, out int damage, out int swingDelay)
         {
-            if (TryAttack(out damage, out swingDelay, type, attacker, victim, weapons))
+            if (TryAttack(out damage, out swingDelay, type, attacker, victims, weapons))
             {
                 cost += swingDelay;
                 return true;
@@ -274,10 +280,10 @@ namespace Fiero.Business
             return false;
         }
 
-        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor victim, Entity[] attackWith)
+        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor[] victims, Entity[] attackWith)
         {
-            damage = 1; swingDelay = 0;
-            if (attackWith != null)
+            damage = 0; swingDelay = 0;
+            if (attackWith != null && attackWith.Length > 0)
             {
                 foreach (var item in attackWith)
                 {
@@ -286,9 +292,9 @@ namespace Fiero.Business
                         swingDelay += w.WeaponProperties.SwingDelay;
                         damage += w.WeaponProperties.BaseDamage;
                     }
-                    else if (type == AttackName.Ranged && item.TryCast<Throwable>(out var t))
+                    else if (type == AttackName.Ranged && item.TryCast<Projectile>(out var t))
                     {
-                        damage += t.ThrowableProperties.BaseDamage;
+                        damage += t.ProjectileProperties.BaseDamage;
                     }
                     else if (type == AttackName.Magic && item.TryCast<Spell>(out var s))
                     {
@@ -301,7 +307,8 @@ namespace Fiero.Business
                     }
                 }
             }
-            return ActorAttacked.Handle(new(type, attacker, victim, attackWith, damage, swingDelay));
+            else damage = 1;
+            return ActorAttacked.Handle(new(type, attacker, victims, attackWith, damage, swingDelay));
         }
 
         public void Track(int actorId)
@@ -357,7 +364,7 @@ namespace Fiero.Business
                     return cost;
                 }
                 OnTurnEnded(next.ActorId);
-                if (next.Actor is { Action: var a })
+                if (next.Actor is { Action: { } a })
                     a.TurnsSurvived++;
             }
             else

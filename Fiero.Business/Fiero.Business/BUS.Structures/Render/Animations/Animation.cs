@@ -62,6 +62,11 @@ namespace Fiero.Business
                 new SpriteDef(texture, sprite, tint, new(), scale ?? new(1, 1), (float)Math.Sin(i / (float)resolution * Math.PI) * 2 - 1)))
             .ToArray(), repeat);
         }
+        static int GetAngleDegree(Coord target)
+        {
+            var n = (int)(270 - (Math.Atan2(-target.Y, target.X)) * 180 / Math.PI) + 90;
+            return n % 360;
+        }
 
         public static Animation StraightProjectile(
             Coord to,
@@ -71,17 +76,21 @@ namespace Fiero.Business
             Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null,
             Vec offset = default,
-            int repeat = 0
+            int repeat = 0,
+            bool directional = false
         )
         {
             var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(10));
+            var rotation = 0;
+            if (directional)
+                rotation = GetAngleDegree(to);
             return new(
             Shapes.Line(new(), to)
                 .Skip(1)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
-                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1)))
+                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1, Rotation: rotation)))
                 .ToArray(), repeat);
         }
 
@@ -93,12 +102,16 @@ namespace Fiero.Business
             Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null,
             Coord offset = default,
-            int repeat = 0
+            int repeat = 0,
+            bool directional = false
         )
         {
             var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(30));
+            var rotation = 0;
+            if (directional)
+                rotation = GetAngleDegree(to);
             var line = Shapes.Line(new(), to)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
                 .Skip(1).SkipLast(1)
@@ -109,7 +122,7 @@ namespace Fiero.Business
                     var v = offset + p;
                     var t = Quadratic(0.66f / line.Length, i, 0, line.Length - 1);
                     v += new Vec(0, t);
-                    return new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1), 1));
+                    return new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, v, scale ?? new(1, 1), 1, Rotation: rotation));
                 })
                 .ToArray(), repeat);
 

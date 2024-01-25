@@ -187,8 +187,11 @@ namespace Fiero.Business
                         case InventoryActionName.Zap when item.TryCast<Wand>(out var wand) && TryZap(a, wand, out var zap):
                             QueuedActions.Enqueue(zap);
                             break;
-                        case InventoryActionName.Throw when item.TryCast<Throwable>(out var throwable) && TryThrow(a, throwable, out var @throw):
+                        case InventoryActionName.Throw when item.TryCast<Projectile>(out var Projectile) && TryThrow(a, Projectile, out var @throw):
                             QueuedActions.Enqueue(@throw);
+                            break;
+                        case InventoryActionName.Shoot when item.TryCast<Launcher>(out var Launcher) && TryShoot(a, Launcher, out var shoot):
+                            QueuedActions.Enqueue(shoot);
                             break;
                         case InventoryActionName.Equip when item.TryCast<Equipment>(out var equip):
                             QueuedActions.Enqueue(new EquipItemAction(equip));
@@ -282,6 +285,23 @@ namespace Fiero.Business
                             }
                         };
                     }
+                    else if (item.TryCast<Launcher>(out var launcher))
+                    {
+                        UI.NecessaryChoice(new[] { InventoryActionName.Shoot, InventoryActionName.Equip }, title: "Which action?").OptionChosen += (popup, choice) =>
+                        {
+                            if (choice == InventoryActionName.Shoot)
+                            {
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Shoot), () => TryShoot(a, launcher, out var action) ? action : new FailAction());
+                            }
+                            else
+                            {
+                                QuickSlots.Set(slot, item, nameof(InventoryActionName.Equip), () =>
+                                {
+                                    return new EquipOrUnequipItemAction(launcher);
+                                });
+                            }
+                        };
+                    }
                     else if (item.TryCast<Weapon>(out var weapon))
                     {
                         QuickSlots.Set(slot, weapon, nameof(InventoryActionName.Equip), () =>
@@ -296,13 +316,13 @@ namespace Fiero.Business
                             return new EquipOrUnequipItemAction(armor);
                         });
                     }
-                    else if (item.TryCast<Throwable>(out var throwable))
+                    else if (item.TryCast<Projectile>(out var Projectile))
                     {
                         QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                         {
-                            if (TryThrow(a, throwable, out action))
+                            if (TryThrow(a, Projectile, out action))
                             {
-                                if (throwable.ThrowableProperties.ThrowsUseCharges)
+                                if (Projectile.ProjectileProperties.ThrowsUseCharges)
                                     UnsetSlotIfConsumed(item, slot);
                                 else
                                     QuickSlots.Unset(slot);

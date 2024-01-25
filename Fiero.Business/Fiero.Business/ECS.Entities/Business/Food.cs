@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class Food : Throwable
+    public class Food : Projectile
     {
         [RequiredComponent]
         public FoodComponent FoodProperties { get; private set; }

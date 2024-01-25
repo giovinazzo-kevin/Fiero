@@ -263,15 +263,24 @@ namespace Fiero.Business
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
             });
-        public static EntityBuilder<T> WithThrowableInfo<T>(this EntityBuilder<T> builder, ThrowableName name, int damage, int maxRange, float mulchChance, bool throwsUseCharges, ThrowName @throw)
-            where T : Throwable => builder.AddOrTweak<ThrowableComponent>((s, c) =>
+        public static EntityBuilder<T> WithProjectileInfo<T>(this EntityBuilder<T> builder, ProjectileName name, int damage, int maxRange, float mulchChance, bool throwsUseCharges, TrajectoryName @throw, bool piercing, bool directional)
+            where T : Projectile => builder.AddOrTweak<ProjectileComponent>((s, c) =>
             {
                 c.Name = name;
                 c.BaseDamage = damage;
                 c.MaximumRange = maxRange;
                 c.MulchChance = mulchChance;
                 c.ThrowsUseCharges = throwsUseCharges;
-                c.Throw = @throw;
+                c.Trajectory = @throw;
+                c.Piercing = piercing;
+                c.Directional = directional;
+            });
+        public static EntityBuilder<T> WithLauncherInfo<T, TProj>(this EntityBuilder<T> builder, EntityBuilder<TProj> projBuilder)
+            where T : Item
+            where TProj : Projectile
+            => builder.AddOrTweak<LauncherComponent>((s, c) =>
+            {
+                c.Projectile = projBuilder.Build();
             });
         public static EntityBuilder<T> WithResourceInfo<T>(this EntityBuilder<T> builder, ResourceName name, int amount, int maxAmount)
             where T : Resource => builder.AddOrTweak<ResourceComponent>((s, c) =>

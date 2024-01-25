@@ -138,7 +138,7 @@ namespace Fiero.Business
             }))
             .Rule<UIControl>(r => r.Apply(x =>
             {
-                x.BorderColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
+                x.OutlineColor.V = Colors.Get(ColorName.White).AddAlpha(-64);
                 x.OutlineThickness.V = 1;
             }))
             ;

@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    public class Wand : Throwable
+    public class Wand : Projectile
     {
         [RequiredComponent]
         public WandComponent WandProperties { get; private set; }

@@ -1,10 +1,10 @@
 ﻿namespace Fiero.Business
 {
-    public enum ThrowableName
+    public enum ProjectileName
     {
         Rock,
         Bomb,
-        Dart,
+        Arrow,
         Misc
     }
 }

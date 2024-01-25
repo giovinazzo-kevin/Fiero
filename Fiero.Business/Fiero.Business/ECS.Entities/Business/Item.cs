@@ -1,7 +1,6 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
+
     public class Item : PhysicalEntity
     {
         [RequiredComponent]

@@ -1,5 +1,4 @@
 ﻿using Ergo.Lang;
-using Fiero.Core;
 
 namespace Fiero.Business
 {
@@ -24,5 +23,6 @@ namespace Fiero.Business
         public int XP { get => Experience?.V ?? 0; set { if (Experience != null) Experience.V = value; } }
         public int MaxXP { get => Experience?.Max ?? 0; set { if (Experience != null) Experience.Max = value; } }
         public CorpseDef Corpse { get; set; }
+        public int LastTookDamageOnTurn { get; set; } = int.MinValue;
     }
 }

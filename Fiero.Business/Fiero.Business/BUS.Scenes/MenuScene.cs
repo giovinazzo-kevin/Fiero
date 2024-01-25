@@ -121,7 +121,6 @@ namespace Fiero.Business.Scenes
                 case SceneState.Main:
                     break;
                 case SceneState.Exit_NewGame:
-                    Store.TrySetValue(Data.Player.Name, "Player", "Player");
                     break;
                 case SceneState.Exit_LoadGame:
                     // TODO: Save/load

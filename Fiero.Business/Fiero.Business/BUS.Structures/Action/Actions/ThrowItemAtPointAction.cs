@@ -1,16 +1,10 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    public readonly struct ThrowItemAtPointAction : IAction
+    public readonly struct ThrowItemAtPointAction(Coord coord, Projectile item) : IAction
     {
-        public readonly Coord Point;
-        public readonly Throwable Item;
-        public ThrowItemAtPointAction(Coord coord, Throwable item)
-        {
-            Point = coord;
-            Item = item;
-        }
+        public readonly Coord Point = coord;
+        public readonly Projectile Item = item;
+
         ActionName IAction.Name => ActionName.Throw;
         int? IAction.Cost => 100;
     }

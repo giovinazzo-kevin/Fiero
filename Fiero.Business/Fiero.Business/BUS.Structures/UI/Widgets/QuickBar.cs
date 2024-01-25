@@ -15,7 +15,7 @@
                 .Apply(l =>
                 {
                     l.OutlineThickness.V = 2;
-                    l.BorderColor.V = UI.GetColor(ColorName.Magenta);
+                    l.OutlineColor.V = UI.GetColor(ColorName.Magenta);
                 }))
             ;
 

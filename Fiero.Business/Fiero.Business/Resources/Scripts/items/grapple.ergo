@@ -24,8 +24,9 @@ pull_actor_towards_user(User, Actor) :-
 	location( User, l(_, P0)),
 	location(Actor, l(_, P1)),
 	write(P0), write(P1),
-	D0 := (P0 - P1),
+	D0 :p= (P0 - P1),
 	clamp(-1, 1, D0, D1),
-	P2 := D1 + P0,
+	P2 :p= P0 - D1,
 	write(P2),
-	move(Actor, P2).
+	move(Actor, P2),
+	effect(effect_def{ name: entrapment, duration: 1 }, Actor, _).

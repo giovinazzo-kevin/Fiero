@@ -13,7 +13,7 @@ effect:began(_{effect_id: Id, owner: O, arguments: _{fuse: F, radius: R }}) :-
 	spawn([dummy{texture: items, sprite: bomb, solid: true}], [D]),
 	move(D, P),
 	play_animations(D, [fade{texture: items, sprite: bomb, tint: light_red, repeat: -1}], [S]), 
-	effect(effect_def(bestow_trait, invulnerable), D, _),
+	effect(effect_def{name: bestow_trait, arguments: invulnerable}, D, _),
 	raise(bomb, spawned, _{ dummy: D }),
 	assertz(bomb_data(Id, id, Id)),
 	assertz(bomb_data(Id, fuse, F)),
@@ -26,8 +26,8 @@ effect:ended(_{effect_id: Id}) :-
 	call(S),
 	bomb_data(Id, radius, R),
 	bomb_data(Id, dummy, D),
-	effect(effect_def(remove_trait, invulnerable), D, _),
-	effect(effect_def(explosion, R), D, _), % this kills the bomb
+	effect(effect_def{name: remove_trait, arguments: invulnerable}, D, _),
+	effect(effect_def{name: explosion, arguments: R}, D, _), % this kills the bomb
 	retractall(bomb_data(Id, _, _)).
 
 action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-

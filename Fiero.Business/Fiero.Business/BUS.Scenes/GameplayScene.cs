@@ -128,8 +128,11 @@ namespace Fiero.Business.Scenes
                 {
                     LoadoutName.Knight => [Resources.Entities.Weapon_Sword().Build()],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow(charges: 25).Build()],
-                    LoadoutName.Wizard => [Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build()],
+                    LoadoutName.Wizard => [Resources.Entities.Wand_OfConfusion(charges: 25, duration: 5).Build()],
                     LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple().Build()],
+                    LoadoutName.Warlock => [
+                            Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build(),
+                        .. Enumerable.Range(0, 3).Select(_ => Resources.Entities.Scroll_OfRaiseUndead().Build()).ToArray()],
                     _ => []
                 };
 

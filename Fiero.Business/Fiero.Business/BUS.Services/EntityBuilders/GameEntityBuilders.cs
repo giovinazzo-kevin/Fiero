@@ -727,7 +727,7 @@
         #endregion
 
         #region WANDS
-        public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1)
+        public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1, int duration = 10)
             => Wand(new(EffectName.Confusion, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1, int duration = 10)
             => Wand(new(EffectName.Poison, magnitude.ToString(), duration: duration), charges);

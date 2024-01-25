@@ -12,7 +12,7 @@
 
         protected override void OnApplied(MetaSystem systems, Entity owner, Actor source, Actor target, int damage)
         {
-            Source.Resolve(source).Start(systems, target);
+            Source.Resolve(source).Start(systems, target, source);
         }
     }
 }

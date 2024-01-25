@@ -53,7 +53,7 @@ namespace Fiero.Business
                     var sub = new Subscription(throwOnDoubleDispose: false);
                     wrap ??= (e => e.Resolve(o));
                     var fx = wrap(def);
-                    fx.Start(systems, o);
+                    fx.Start(systems, o, null);
                     sub.Dispose();
                 }
             });
@@ -266,12 +266,13 @@ namespace Fiero.Business
             {
                 c.Name = type;
             });
-        public static EntityBuilder<T> WithConsumableInfo<T>(this EntityBuilder<T> builder, int remainingUses, int maxUses, bool consumable)
+        public static EntityBuilder<T> WithConsumableInfo<T>(this EntityBuilder<T> builder, int remainingUses, int maxUses, bool consumable, int chargesConsumedPerUse = 1)
             where T : Consumable => builder.AddOrTweak<ConsumableComponent>((s, c) =>
             {
                 c.RemainingUses = remainingUses;
                 c.MaximumUses = maxUses;
                 c.ConsumedWhenEmpty = consumable;
+                c.UsesConsumedPerAction = chargesConsumedPerUse;
             });
         public static EntityBuilder<T> WithProjectileInfo<T>(this EntityBuilder<T> builder, ProjectileName name, int damage, int maxRange, float mulchChance, bool throwsUseCharges, TrajectoryName @throw, bool piercing, bool directional)
             where T : Projectile => builder.AddOrTweak<ProjectileComponent>((s, c) =>

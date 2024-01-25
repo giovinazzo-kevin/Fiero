@@ -114,19 +114,19 @@
             .WithItemInfo(0)
             ;
 
-        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, string unidentName = null)
+        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, int chargesConsumedPerUse = 0, string unidentName = null)
             where T : Consumable
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
             .WithSprite(RenderLayerName.Items, TextureName.Items, "None", ColorName.White)
-            .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty)
+            .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty, chargesConsumedPerUse)
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, string unidentName = null, string trail = null)
+        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, int chargesConsumedPerUse = 0, string unidentName = null, string trail = null)
             where T : Projectile
-            => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, unidentName)
+            => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, chargesConsumedPerUse, unidentName)
             .WithProjectileInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw, piercing, directional)
             .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
@@ -648,23 +648,27 @@
                 directional: true
             )
             ;
-        public EntityBuilder<Projectile> Projectile_Grapple(int charges = 1)
+        public EntityBuilder<Projectile> Projectile_Grapple()
             => Projectile<Projectile>(
                 name: ProjectileName.Grapple,
                 itemRarity: 100,
-                remainingUses: charges,
-                maxUses: charges,
+                remainingUses: 1,
+                maxUses: 1,
                 damage: 0,
                 maxRange: 7,
-                mulchChance: 0f,
+                mulchChance: 1f,
                 @throw: TrajectoryName.Line,
                 consumedWhenEmpty: false,
-                throwsUseCharges: false,
+                throwsUseCharges: true,
+                chargesConsumedPerUse: 0,
                 piercing: false,
                 directional: true,
                 trail: "Grapple_Trail"
             )
             .WithItemSprite("GrapplingHook")
+            .WithIntrinsicEffect(
+                EffectDef.FromScript(Scripts.Get(ScriptName.Grapple)),
+                e => new GrantedWhenHitByThrownItem(e))
             ;
         public EntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
             => Projectile<Projectile>(

@@ -15,12 +15,12 @@ namespace Fiero.Business
             Duration = duration;
         }
 
-        protected override void OnStarted(MetaSystem systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
-            base.OnStarted(systems, owner);
+            base.OnStarted(systems, owner, source);
             var effect = Source.Resolve(null);
             Ended += Temporary_Ended;
-            effect.Start(systems, owner);
+            effect.Start(systems, owner, source);
 
             void Temporary_Ended(Effect _)
             {

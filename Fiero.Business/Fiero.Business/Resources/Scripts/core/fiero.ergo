@@ -15,8 +15,8 @@
 %: Example use: player as actor is _P, write_dict(_P)
 Entity as Type is Proxy :-
 	cast_entity(Entity, Type, Proxy).
-%: TODO: Figure out why this can't be inlined
-location(_{ physics: _{ floor_id: FloorId, position: Pos }}, l(FloorId, Pos)).
+location(E, l(FloorId, Pos)) :-
+	E as physical_entity is _{ physics: _{ floor_id: FloorId, position: Pos }}.
 %: Unify with all entities on the same tile as another physical entity
 at(O, E) :-
     location(O, l(FloorId, Pos)),

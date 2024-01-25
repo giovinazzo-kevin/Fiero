@@ -19,9 +19,9 @@
         protected virtual void TypedOnStarted(MetaSystem systems, T target) { }
         protected virtual void TypedOnEnded(MetaSystem systems, T target) { }
 
-        protected override void OnStarted(MetaSystem systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
-            base.OnStarted(systems, owner);
+            base.OnStarted(systems, owner, source);
             if (owner.TryCast<T>(out var target))
             {
                 TypedOnStarted(systems, target);

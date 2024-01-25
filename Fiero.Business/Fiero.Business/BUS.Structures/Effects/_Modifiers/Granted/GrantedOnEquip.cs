@@ -13,7 +13,7 @@
         public override string DisplayDescription => "$Effect.GrantedOnEquip$";
         protected override void OnApplied(MetaSystem systems, Actor target)
         {
-            (Instance = Source.Resolve(target)).Start(systems, target);
+            (Instance = Source.Resolve(target)).Start(systems, target, null);
         }
         protected override void OnRemoved(MetaSystem systems, Actor target)
         {

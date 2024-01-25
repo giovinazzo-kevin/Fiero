@@ -39,7 +39,7 @@ namespace Fiero.Business
             {
                 removed.KillSwitch();
             }
-            effect.Start(systems, target);
+            effect.Start(systems, target, Source);
             _onEnded.Add(killSwitch);
         }
 

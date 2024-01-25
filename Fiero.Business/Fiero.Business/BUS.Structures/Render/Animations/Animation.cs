@@ -93,13 +93,14 @@ namespace Fiero.Business
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
                 .Select((p, i) =>
                 {
-                    var projSprite = new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1, Rotation: rotation);
+                    var projSprite = new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1, Z: 1, Rotation: rotation);
                     SpriteDef[] trailSprites = [];
                     if (trailSprite != null)
                     {
                         trailSprites = Shapes.Line(new(), p.ToCoord())
                             .Skip(1)
-                            .Select(q => new SpriteDef(texture, trailSprite, tint, offset + q, scale ?? new(1, 1), 1, Rotation: rotation))
+                            .SelectMany(p => new Vec[] { p - a, p.ToVec() })
+                            .Select(q => new SpriteDef(texture, trailSprite, tint, offset + q, scale ?? new(1, 1), 1, Z: 0, Rotation: rotation))
                             .ToArray();
                     }
                     return new AnimationFrame(frameDuration(i), [projSprite, .. trailSprites]);

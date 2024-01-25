@@ -12,13 +12,13 @@
 
         protected override void OnApplied(MetaSystem systems, Entity owner, Actor source, Actor target)
         {
-            Source.Resolve(source).Start(systems, target);
+            Source.Resolve(source).Start(systems, target, source);
         }
 
         protected override void OnApplied(MetaSystem systems, Entity owner, Actor source, Coord location)
         {
             var target = systems.Get<DungeonSystem>().GetTileAt(source.FloorId(), location);
-            Source.Resolve(source).Start(systems, target);
+            Source.Resolve(source).Start(systems, target, source);
         }
     }
 }

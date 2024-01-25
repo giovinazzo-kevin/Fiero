@@ -316,13 +316,13 @@ namespace Fiero.Business
                             return new EquipOrUnequipItemAction(armor);
                         });
                     }
-                    else if (item.TryCast<Projectile>(out var Projectile))
+                    else if (item.TryCast<Projectile>(out var proj))
                     {
                         QuickSlots.Set(slot, item, nameof(InventoryActionName.Throw), () =>
                         {
-                            if (TryThrow(a, Projectile, out action))
+                            if (TryThrow(a, proj, out action))
                             {
-                                if (Projectile.ProjectileProperties.ThrowsUseCharges)
+                                if (proj.ProjectileProperties.ThrowsUseCharges)
                                     UnsetSlotIfConsumed(item, slot);
                                 else
                                     QuickSlots.Unset(slot);

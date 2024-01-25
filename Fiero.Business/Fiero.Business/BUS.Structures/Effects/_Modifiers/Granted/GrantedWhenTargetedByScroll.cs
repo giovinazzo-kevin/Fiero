@@ -17,7 +17,7 @@
         {
             if (Modifier == ScrollModifierName.Self)
             {
-                Source.Resolve(target).Start(systems, target);
+                Source.Resolve(target).Start(systems, target, owner);
                 return;
             }
             var floorId = target.FloorId();
@@ -40,7 +40,7 @@
 
                 foreach (var otherTarget in validTargets)
                 {
-                    Source.Resolve(target).Start(systems, otherTarget);
+                    Source.Resolve(target).Start(systems, otherTarget, owner);
                 }
             }
         }

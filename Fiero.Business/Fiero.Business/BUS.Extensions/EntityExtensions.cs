@@ -139,7 +139,7 @@ namespace Fiero.Business
                 {
                     return false;
                 }
-                if (--consumable.ConsumableProperties.RemainingUses <= 0
+                if ((consumable.ConsumableProperties.RemainingUses -= consumable.ConsumableProperties.UsesConsumedPerAction) <= 0
                  && consumable.ConsumableProperties.ConsumedWhenEmpty)
                 {
                     consumed = true;

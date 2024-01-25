@@ -27,7 +27,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
                     var def = new EffectDef(stub.Name, stub.Arguments, source: e);
                     var effect = def.Resolve(null);
                     // TODO: bind effect.end as callable to args[2]
-                    effect.Start(systems, e);
+                    effect.Start(systems, e, null);
                 }
                 else if (args[1].Matches(out Location loc)
                     && systems.Get<DungeonSystem>().TryGetTileAt(loc.FloorId, loc.Position, out var tile))
@@ -35,7 +35,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
                     var def = new EffectDef(stub.Name, stub.Arguments, source: tile);
                     var effect = def.Resolve(null);
                     // TODO: bind effect.end as callable to args[2]
-                    effect.Start(systems, tile);
+                    effect.Start(systems, tile, null);
                 }
                 else
                 {

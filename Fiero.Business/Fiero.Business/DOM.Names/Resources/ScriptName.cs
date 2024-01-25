@@ -7,6 +7,7 @@
         // Handles the consequence of a dialogue node being triggered
         Dialogue,
         Test,
-        Bomb
+        Bomb,
+        Grapple
     }
 }

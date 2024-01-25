@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-using System.Collections.Generic;
-using Unconcern.Common;
+﻿using Unconcern.Common;
 
 namespace Fiero.Business
 {
@@ -17,11 +15,11 @@ namespace Fiero.Business
         public override string DisplayDescription => $"$Effect.Chance$ ({(int)(Probability * 100)}%)";
         public override EffectName Name => Source.Name;
 
-        protected override void OnStarted(MetaSystem systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
             if (Rng.Random.NextDouble() < Probability)
             {
-                Source.Resolve(null).Start(systems, owner);
+                Source.Resolve(null).Start(systems, owner, source);
             }
         }
 

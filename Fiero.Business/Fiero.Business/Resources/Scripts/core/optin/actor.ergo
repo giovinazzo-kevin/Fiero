@@ -1,7 +1,9 @@
 % Do not modify unless you know what you are doing.
-:- module(actor, []).
+:- module(actor, [move/2]).
 :- use_module(event).
 
 %: Moves an entity to the desired location by raising the actor_moved event from the action system.
-move(actor{ id: Id, physics: _ { position: OldPos }}, p(X, Y)) :-
-	raise(action, actor_moved, _{ actor: _{ id: Id }, old_position: OldPos, new_position: p(X, Y) }).
+move(E, p(X, Y)) :-
+	E as actor is actor{ id: Id, physics: _ { position: OldPos }},
+	raise(action, actor_moved, _{ actor: _{ id: Id }, old_position: OldPos, new_position: p(X, Y) }), 
+	!.

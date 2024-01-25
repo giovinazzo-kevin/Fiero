@@ -15,11 +15,11 @@ namespace Fiero.Business
         public abstract string DisplayDescription { get; }
 
         protected abstract IEnumerable<Subscription> RouteEvents(MetaSystem systems, Entity owner);
-        protected virtual void OnStarted(MetaSystem systems, Entity owner)
+        protected virtual void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
 
         }
-        public void Start(MetaSystem systems, Entity owner)
+        public void Start(MetaSystem systems, Entity owner, Entity source)
         {
             if (owner?.Effects?.Lock ?? false)
                 return;
@@ -37,7 +37,7 @@ namespace Fiero.Business
             }
             Subscriptions.UnionWith(RouteEvents(systems, owner));
             Started?.Invoke(this);
-            OnStarted(systems, owner);
+            OnStarted(systems, owner, source);
         }
 
         protected virtual void OnEnded(MetaSystem systems, Entity owner) { }

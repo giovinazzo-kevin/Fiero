@@ -129,7 +129,7 @@ namespace Fiero.Business.Scenes
                     LoadoutName.Knight => [Resources.Entities.Weapon_Sword().Build()],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow(charges: 25).Build()],
                     LoadoutName.Wizard => [Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build()],
-                    LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple(charges: 1).Build()],
+                    LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple().Build()],
                     _ => []
                 };
 
@@ -759,7 +759,8 @@ namespace Fiero.Business.Scenes
                         Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                     }
                 }
-                if (Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance)
+                var noMulch = Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance;
+                if (noMulch)
                 {
                     var clone = (Projectile)proj.Clone();
                     if (proj.ProjectileProperties.ThrowsUseCharges)

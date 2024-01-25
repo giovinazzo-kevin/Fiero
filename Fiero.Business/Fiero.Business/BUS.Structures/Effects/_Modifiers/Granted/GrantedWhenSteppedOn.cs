@@ -32,7 +32,7 @@
                     }));
                 }
             }
-            Source.Resolve(owner).Start(systems, target);
+            Source.Resolve(owner).Start(systems, target, owner);
         }
 
         protected override void OnRemoved(MetaSystem systems, Entity owner, Actor target)

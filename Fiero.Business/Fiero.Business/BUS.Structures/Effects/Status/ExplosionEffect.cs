@@ -18,9 +18,9 @@ namespace Fiero.Business
             Shape = shape.ToArray();
         }
 
-        protected override void OnStarted(MetaSystem systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
-            base.OnStarted(systems, owner);
+            base.OnStarted(systems, owner, source);
             if (!owner.TryCast<PhysicalEntity>(out var phys))
             {
                 return;

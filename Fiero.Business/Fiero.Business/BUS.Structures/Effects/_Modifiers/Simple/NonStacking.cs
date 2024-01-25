@@ -12,7 +12,7 @@ namespace Fiero.Business
         public override string DisplayDescription => $"$Effect.NonStacking$";
         public override EffectName Name => Source.Name;
 
-        protected override void OnStarted(MetaSystem systems, Entity owner)
+        protected override void OnStarted(MetaSystem systems, Entity owner, Entity source)
         {
             if (owner.Effects == null || !owner.Effects.Active.Any(e => e.Name switch
             {
@@ -20,7 +20,7 @@ namespace Fiero.Business
                 _ => e.Name == Source.Name
             }))
             {
-                Source.Resolve(null).Start(systems, owner);
+                Source.Resolve(null).Start(systems, owner, source);
             }
         }
 

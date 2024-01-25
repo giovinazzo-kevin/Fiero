@@ -1,0 +1,31 @@
+:- module(grapple, []).
+:- use_module(effect).
+:- use_module(fiero).
+:- use_module(actor).
+:- use_module(anim).
+:- use_module(sound).
+
+effect:began(_{effect_id: Id, source: S, owner: O}) :-
+	O as actor is A,
+	pull_actor_towards_user(S, A),
+	end(Id).
+effect:began(_{effect_id: Id, source: S, owner: O}) :-
+	O as tile is T,
+	pull_user_towards_terrain(S, T),
+	end(Id).
+effect:ended(_{effect_id: _}) :-
+	true.
+	
+pull_user_towards_terrain(User, Terrain) :-
+	location(Terrain, l(_, P)),
+	move(User, P).
+
+pull_actor_towards_user(User, Actor) :-
+	location( User, l(_, P0)),
+	location(Actor, l(_, P1)),
+	write(P0), write(P1),
+	D0 := (P0 - P1),
+	clamp(-1, 1, D0, D1),
+	P2 := D1 + P0,
+	write(P2),
+	move(Actor, P2).

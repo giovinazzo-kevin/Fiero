@@ -49,12 +49,18 @@
         };
 
         public bool IsEquipped(Equipment i) => Dict.Values.Any(v => v.Id == i.Id);
+        public bool MayEquip(Equipment i, out EquipmentSlotName? slot)
+        {
+            slot = MapFreeSlot(i.EquipmentProperties.Type);
+            if (slot is null)
+            {
+                return false;
+            }
+            return true;
+        }
         public bool TryEquip(Equipment i)
         {
-            var slot = MapFreeSlot(i.EquipmentProperties.Type);
-            if (slot is null)
-                return false;
-            if (Dict.TryAdd(slot.Value, i))
+            if (MayEquip(i, out var slot) && Dict.TryAdd(slot.Value, i))
             {
                 EquipmentChanged?.Invoke(this);
                 return true;

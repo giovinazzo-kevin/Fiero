@@ -83,6 +83,7 @@ namespace Fiero.Business
         {
             var dir = to.ToVec().Clamp(-1, 1);
             var a = dir * 0.33f;
+            var b = dir * 0.5f;
             frameDuration ??= (_ => TimeSpan.FromMilliseconds(15));
             var rotation = 0;
             if (directional)
@@ -99,7 +100,7 @@ namespace Fiero.Business
                     {
                         trailSprites = Shapes.Line(new(), p.ToCoord())
                             .Skip(1)
-                            .SelectMany(p => new Vec[] { p - a, p.ToVec() })
+                            .SelectMany(p => new Vec[] { p - b, p.ToVec() })
                             .Select(q => new SpriteDef(texture, trailSprite, tint, offset + q, scale ?? new(1, 1), 1, Z: 0, Rotation: rotation))
                             .ToArray();
                     }

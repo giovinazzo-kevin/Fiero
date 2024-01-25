@@ -89,6 +89,12 @@
 
                 if (MyWeapons.AlertingValues.FirstOrDefault() is { } betterWeapon)
                 {
+                    if (!a.ActorEquipment.MayEquip(betterWeapon, out _))
+                    {
+                        if (a.ActorEquipment.Weapons.Any())
+                            return new UnequipItemAction(a.ActorEquipment.Weapons.First());
+                        return new FailAction();
+                    }
                     return new EquipItemAction(betterWeapon);
                 }
                 if (NearbyEnemies.Values.Count > 0 && MyHarmfulConsumables.Values.Count > 0 && Rng.Random.NChancesIn(2, 3))

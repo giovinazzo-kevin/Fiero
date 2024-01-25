@@ -129,6 +129,7 @@ namespace Fiero.Business.Scenes
                     LoadoutName.Knight => [Resources.Entities.Weapon_Sword().Build()],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow(charges: 25).Build()],
                     LoadoutName.Wizard => [Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build()],
+                    LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple(charges: 1).Build()],
                     _ => []
                 };
 
@@ -749,8 +750,8 @@ namespace Fiero.Business.Scenes
                     renderSystem.CenterOn(Player);
                     var anim = proj.ProjectileProperties.Trajectory switch
                     {
-                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
-                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional)
+                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional, trailSprite: proj.ProjectileProperties.TrailSprite),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional, trailSprite: proj.ProjectileProperties.TrailSprite)
                     };
                     renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))
@@ -822,8 +823,8 @@ namespace Fiero.Business.Scenes
                 {
                     var anim = proj.ProjectileProperties.Trajectory switch
                     {
-                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
-                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional),
+                        TrajectoryName.Arc => Animation.ArcingProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional, trailSprite: proj.ProjectileProperties.TrailSprite),
+                        _ => Animation.StraightProjectile(e.Position - e.Actor.Position(), sprite: proj.Render.Sprite, tint: proj.Render.Color, directional: proj.ProjectileProperties.Directional, trailSprite: proj.ProjectileProperties.TrailSprite),
                     };
                     renderSystem.AnimateViewport(true, e.Actor.Location(), anim);
                     if (Player.CanHear(e.Actor) || Player.CanHear(e.Victim))

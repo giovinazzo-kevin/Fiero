@@ -7,6 +7,10 @@
   "Arrow": "16 80 16 16",
   "Bomb": "16 16 16 16",
 
+  "Grapple": "16 64 16 16",
+  "Grapple_Trail": "16 48 16 16",
+  "GrapplingHook": "16 32 16 16",
+
   "Potion": "32 0 16 16",
   "Potion_Mask": "32 16 16 16",
 
@@ -16,8 +20,6 @@
   "EmptyScroll": "64 0 16 16",
   "Scroll": "64 16 16 16",
   "Scroll_Mask": "64 32 16 16",
-
-  "GrapplingHook": "64 48 16 16",
 
   "Sword": "80 0 16 16",
   "Sword_Mask": "80 16 16 16",

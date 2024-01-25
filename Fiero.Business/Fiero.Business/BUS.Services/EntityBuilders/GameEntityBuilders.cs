@@ -124,12 +124,13 @@
             .WithItemInfo(itemRarity, unidentName)
             ;
 
-        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, string unidentName = null)
+        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, string unidentName = null, string trail = null)
             where T : Projectile
             => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, unidentName)
             .WithProjectileInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw, piercing, directional)
             .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
+            .WithTrailSprite(trail)
             ;
 
         private EntityBuilder<T> Resource<T>(ResourceName name, int amount, int? maxAmount = null)
@@ -646,6 +647,24 @@
                 piercing: true,
                 directional: true
             )
+            ;
+        public EntityBuilder<Projectile> Projectile_Grapple(int charges = 1)
+            => Projectile<Projectile>(
+                name: ProjectileName.Grapple,
+                itemRarity: 100,
+                remainingUses: charges,
+                maxUses: charges,
+                damage: 0,
+                maxRange: 7,
+                mulchChance: 0f,
+                @throw: TrajectoryName.Line,
+                consumedWhenEmpty: false,
+                throwsUseCharges: false,
+                piercing: false,
+                directional: true,
+                trail: "Grapple_Trail"
+            )
+            .WithItemSprite("GrapplingHook")
             ;
         public EntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
             => Projectile<Projectile>(

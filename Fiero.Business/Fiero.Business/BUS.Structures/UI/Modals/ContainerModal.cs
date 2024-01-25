@@ -273,7 +273,7 @@ namespace Fiero.Business
                 var i = CurrentPage.V * PageSize.V + index;
                 p.Sprite.V = i >= Items.Count
                     ? Resources.Sprites.Get(TextureName.Items, "None", ColorName.White)
-                    : Resources.Sprites.Get(TextureName.Items, Items[i].Render.Sprite, Items[i].Render.Color);
+                    : Resources.Sprites.Get(TextureName.Items, Items[i].ItemProperties.ItemSprite ?? Items[i].Render.Sprite, Items[i].Render.Color);
             }
 
             void RefreshItemButton(Button b, int index)

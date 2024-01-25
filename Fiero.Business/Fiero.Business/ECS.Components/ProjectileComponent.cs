@@ -10,5 +10,6 @@
         public bool Piercing { get; set; }
         public bool Directional { get; set; }
         public TrajectoryName Trajectory { get; set; }
+        public string TrailSprite { get; set; }
     }
 }

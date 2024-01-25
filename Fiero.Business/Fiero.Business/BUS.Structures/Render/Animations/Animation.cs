@@ -77,7 +77,8 @@ namespace Fiero.Business
             Vec? scale = null,
             Vec offset = default,
             int repeat = 0,
-            bool directional = false
+            bool directional = false,
+            string trailSprite = null
         )
         {
             var dir = to.ToVec().Clamp(-1, 1);
@@ -90,7 +91,19 @@ namespace Fiero.Business
             Shapes.Line(new(), to)
                 .Skip(1)
                 .SelectMany(p => new Vec[] { p - a, p.ToVec(), p + a })
-                .Select((p, i) => new AnimationFrame(frameDuration(i), new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1, Rotation: rotation)))
+                .Select((p, i) =>
+                {
+                    var projSprite = new SpriteDef(texture, sprite, tint, offset + p, scale ?? new(1, 1), 1, Rotation: rotation);
+                    SpriteDef[] trailSprites = [];
+                    if (trailSprite != null)
+                    {
+                        trailSprites = Shapes.Line(new(), p.ToCoord())
+                            .Skip(1)
+                            .Select(q => new SpriteDef(texture, trailSprite, tint, offset + q, scale ?? new(1, 1), 1, Rotation: rotation))
+                            .ToArray();
+                    }
+                    return new AnimationFrame(frameDuration(i), [projSprite, .. trailSprites]);
+                })
                 .ToArray(), repeat);
         }
 
@@ -103,7 +116,8 @@ namespace Fiero.Business
             Vec? scale = null,
             Coord offset = default,
             int repeat = 0,
-            bool directional = false
+            bool directional = false,
+            string trailSprite = null
         )
         {
             var dir = to.ToVec().Clamp(-1, 1);

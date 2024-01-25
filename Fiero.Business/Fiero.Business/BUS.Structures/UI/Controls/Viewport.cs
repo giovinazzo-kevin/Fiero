@@ -217,7 +217,10 @@ namespace Fiero.Business
                         // Draw sprite
                         layers[drawable.Render.Layer] += tex =>
                         {
-                            if (Resources.Sprites.TryGet(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color, out var spriteDef, rngSeed))
+                            var spriteName = drawable.Render.Sprite;
+                            if (drawable.TryCast<Item>(out var item))
+                                spriteName = item.ItemProperties.ItemSprite ?? spriteName;
+                            if (Resources.Sprites.TryGet(drawable.Render.Texture, spriteName, drawable.Render.Color, out var spriteDef, rngSeed))
                             {
                                 using var sprite = new Sprite(spriteDef);
                                 var spriteSize = sprite.GetLocalBounds().Size();

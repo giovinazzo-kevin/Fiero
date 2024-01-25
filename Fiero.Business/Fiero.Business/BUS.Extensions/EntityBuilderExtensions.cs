@@ -82,6 +82,16 @@ namespace Fiero.Business
                 c.Sprite = sprite;
                 c.Color = color;
             });
+        public static EntityBuilder<T> WithItemSprite<T>(this EntityBuilder<T> builder, string sprite)
+            where T : Item => builder.AddOrTweak<ItemComponent>((s, c) =>
+            {
+                c.ItemSprite = sprite;
+            });
+        public static EntityBuilder<T> WithTrailSprite<T>(this EntityBuilder<T> builder, string sprite)
+            where T : Projectile => builder.AddOrTweak<ProjectileComponent>((s, c) =>
+            {
+                c.TrailSprite = sprite;
+            });
         public static EntityBuilder<T> WithColor<T>(this EntityBuilder<T> builder, ColorName color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>((s, c) =>
             {

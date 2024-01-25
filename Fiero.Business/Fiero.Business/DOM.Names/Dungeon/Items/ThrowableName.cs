@@ -5,6 +5,7 @@
         Rock,
         Bomb,
         Arrow,
+        Grapple,
         Misc
     }
 }

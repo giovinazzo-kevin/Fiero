@@ -2,7 +2,7 @@
 % Do not modify unless you know what you are doing.
 
 :- module(geometry, [':p='/2, clamp/4]).
-:- op(50, fx, [':p=']).
+:- op(50, xfx, [':p=']).
 %: Base case: Evaluate a single point
 eval_point(p(X, Y), p(X, Y)) :- !.
 

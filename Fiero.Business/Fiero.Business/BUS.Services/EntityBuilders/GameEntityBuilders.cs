@@ -613,6 +613,18 @@
         public EntityBuilder<Weapon> Weapon_Sword()
             => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, twoHanded: false)
             ;
+        public EntityBuilder<Weapon> Weapon_Dagger()
+            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: 2, swingDelay: 0, itemRarity: 10, twoHanded: false)
+            ;
+        public EntityBuilder<Weapon> Weapon_Hammer()
+            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: 5, swingDelay: 0, itemRarity: 10, twoHanded: false)
+            ;
+        public EntityBuilder<Weapon> Weapon_Spear()
+            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: 5, swingDelay: 0, itemRarity: 10, twoHanded: false)
+            ;
+        public EntityBuilder<Launcher> Weapon_Bow(int charges = 1)
+            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, twoHanded: true)
+                .WithLauncherInfo(Projectile_Arrow());
         #endregion
 
         #region Projectiles
@@ -739,12 +751,6 @@
             => Wand(new(EffectName.Entrapment, duration: 10), charges);
         public EntityBuilder<Wand> Wand_OfTeleport(int charges = 1)
             => Wand(new(EffectName.UncontrolledTeleport), charges);
-        #endregion
-
-        #region LAUNCHERS
-        public EntityBuilder<Launcher> Weapon_Bow(int charges = 1)
-            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, twoHanded: true)
-                .WithLauncherInfo(Projectile_Arrow());
         #endregion
 
         #region RESOURCES

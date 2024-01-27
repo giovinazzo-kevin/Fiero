@@ -126,7 +126,9 @@ namespace Fiero.Business.Scenes
                 var playerName = Store.GetOrDefault(Data.Player.Name, "Player");
                 Item[] loadout = Store.GetOrDefault(Data.Player.Loadout, LoadoutName.Adventurer) switch
                 {
-                    LoadoutName.Knight => [Resources.Entities.Weapon_Sword().Build()],
+                    LoadoutName.Knight => [
+                        Resources.Entities.Weapon_Hammer().Build()
+                    ],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow(charges: 25).Build()],
                     LoadoutName.Wizard => [Resources.Entities.Wand_OfConfusion(charges: 25, duration: 5).Build()],
                     LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple().Build()],

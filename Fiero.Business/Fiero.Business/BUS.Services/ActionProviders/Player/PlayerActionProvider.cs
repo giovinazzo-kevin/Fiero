@@ -55,7 +55,8 @@ namespace Fiero.Business
             }
             _requestDelay = false;
             var floorId = a.FloorId();
-            var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier);
+            var wantToAttack = IsKeyDown(Data.Hotkeys.Modifier)
+                || a.Effects.Active.Any(e => e.Name == EffectName.Entrapment);
             if (IsKeyPressed(Data.Hotkeys.MoveNW))
             {
                 return MoveOrAttack(new(-1, -1));

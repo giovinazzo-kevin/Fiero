@@ -28,3 +28,9 @@ shrine {
   }
 } :- 
   dialogue_trigger(bumped_by_player{choices: ['Shrine_Urist']}, BumpedByPlayer).
+
+hammer {
+    info: _ {
+        description: "A slow but powerful weapon.\nCharge you next attack by standing still."
+    }
+}.

@@ -221,7 +221,7 @@ namespace Fiero.Business
                             b.MouseLeft += (x, __) => x.Background.V = Color.Transparent;
                             b.OutlineThickness.V = 1;
                             b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
-                            b.ToolTip.V = new SimpleToolTip(UI);
+                            b.ToolTip.V = new ItemToolTip(UI);
                         })
                     .End()
                 .End())
@@ -296,8 +296,8 @@ namespace Fiero.Business
                 var letter = WinKeyboardState.GetCharsFromKeys(key, UI.Input.KeyboardState, shift: shift);
                 var text = $"{letter.Last()}) {Items[i].DisplayName}";
                 b.Text.V = text;
-                if (b.ToolTip.V is SimpleToolTip tooltip)
-                    tooltip.SetText(Items[i].Info.Description ?? string.Empty);
+                if (b.ToolTip.V is ItemToolTip tooltip)
+                    tooltip.Item.V = Items[i];
             }
 
             void RefreshPageLabel(Label l)

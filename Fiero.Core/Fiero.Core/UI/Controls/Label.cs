@@ -11,8 +11,6 @@ namespace Fiero.Core
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
         public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
         public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
-        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
-        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
         public string DisplayText => String.IsNullOrEmpty(Text.V)
             ? String.Empty

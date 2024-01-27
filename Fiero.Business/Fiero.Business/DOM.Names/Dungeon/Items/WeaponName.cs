@@ -6,6 +6,7 @@
         Dagger,
         Hammer,
         Spear,
-        Bow
+        Bow,
+        Crossbow
     }
 }

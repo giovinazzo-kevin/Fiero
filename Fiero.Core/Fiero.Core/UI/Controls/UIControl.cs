@@ -29,6 +29,8 @@ namespace Fiero.Core
         public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
         public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
         public readonly UIControlProperty<ToolTip> ToolTip = new(nameof(ToolTip), null) { Inherited = false };
+        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
+        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
         public bool IsMouseOver { get; protected set; }
 
@@ -122,10 +124,14 @@ namespace Fiero.Core
             {
                 if (e.OldItems != null)
                     foreach (UIControl i in e.OldItems)
+                    {
                         i.Invalidated -= PropagateUpwards;
+                    }
                 if (e.NewItems != null)
                     foreach (UIControl i in e.NewItems)
+                    {
                         i.Invalidated += PropagateUpwards;
+                    }
                 Invalidate();
                 void PropagateUpwards(UIControl source)
                 {

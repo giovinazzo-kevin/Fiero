@@ -98,16 +98,13 @@ namespace Fiero.Business
             if (UI.Input.IsButtonPressed(SFML.Window.Mouse.Button.Right))
             {
                 var options = Layout.HitTest(UI.Input.GetMousePosition())
-                    .Select(x => $"{x.GetType()} {x.ToString()}")
+                    .Select(x => $"{x.GetType()} {x}")
                     .ToArray();
-                Layout.HitTest(UI.Input.GetMousePosition())
-                        .Select(x => $"{x.GetType()} {x.ToString()}")
-                        .ToArray();
                 UI.NecessaryChoice(options);
                 foreach (var wnd in UI.GetOpenModals().ToList())
                 {
                     options = wnd.Layout.HitTest(UI.Input.GetMousePosition())
-                        .Select(x => $"{x.GetType()} {x.ToString()}")
+                        .Select(x => $"{x.GetType()} {x}")
                         .ToArray();
                     if (options.Any())
                         UI.NecessaryChoice(options);

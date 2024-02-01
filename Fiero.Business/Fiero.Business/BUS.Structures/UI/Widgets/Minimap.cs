@@ -52,7 +52,7 @@ namespace Fiero.Business
             var floorId = Following.V.FloorId();
             if (!FloorSystem.TryGetFloor(floorId, out var floor))
                 return;
-            _renderTexture = new((uint)floor.Size.X, (uint)floor.Size.Y) { Smooth = false };
+            _renderTexture = new((uint)(floor.Size.X + floor.Size.X % 2), (uint)(floor.Size.Y + floor.Size.Y % 2)) { Smooth = false };
             _renderSprite = new(_renderTexture.Texture);
         }
 

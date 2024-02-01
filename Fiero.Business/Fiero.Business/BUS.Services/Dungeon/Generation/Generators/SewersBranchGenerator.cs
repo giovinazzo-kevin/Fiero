@@ -13,8 +13,16 @@
         };
 
         public SewersBranchGenerator() : base(DefaultTheme) { }
-        public override Coord MapSize(FloorId id) => new(50, 50);
-        public override Coord GridSize(FloorId id) => new(2, 2);
+        public override Coord MapSize(FloorId id) => id.Depth switch
+        {
+            1 => new(25, 25),
+            _ => new(50, 50)
+        };
+        public override Coord GridSize(FloorId id) => id.Depth switch
+        {
+            1 => new(1, 1),
+            _ => new(2, 2)
+        };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool) => pool
             .Include(() => new EmptyRoom(), 1)
             .Guarantee(() => new TreasureRoom(), minAmount: 1)

@@ -21,14 +21,14 @@ namespace Fiero.Business
             if (owner.TryCast<Actor>(out var target))
             {
                 var sub = new Subscription(throwOnDoubleDispose: false);
-                sub.Add(systems.Get<ActionSystem>().ActorTurnStarted.SubscribeHandler(e =>
+                sub.Add([systems.Get<ActionSystem>().ActorTurnStarted.SubscribeHandler(e =>
                 {
                     if (!sub.IsDisposed && e.Actor == target)
                     {
                         OnApplied(systems, owner, e.Actor);
                         sub.Dispose();
                     }
-                }));
+                })]);
                 yield return sub;
                 // Don't bind to the ActorDespawned event, because it invalidates the owner
                 yield return systems.Get<ActionSystem>().ActorDied.SubscribeHandler(e =>

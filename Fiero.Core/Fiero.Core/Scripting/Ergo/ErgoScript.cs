@@ -81,7 +81,7 @@ namespace Fiero.Core
             foreach (var hook in eventHooks)
             {
                 if (eventRoutes.TryGetValue(hook, out var route))
-                    subs.Add(route(this));
+                    subs.Add([route(this)]);
                 else
                 {
                     // TODO: Check whether it's a script event or a missing route
@@ -90,7 +90,7 @@ namespace Fiero.Core
             foreach (var hook in dataHooks)
             {
                 if (dataRoutes.TryGetValue(hook, out var route))
-                    subs.Add(route(this));
+                    subs.Add([route(this)]);
                 else
                 {
                     // TODO: Check whether it's a script event or a missing route

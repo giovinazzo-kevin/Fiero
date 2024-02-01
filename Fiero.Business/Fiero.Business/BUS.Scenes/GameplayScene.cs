@@ -12,7 +12,9 @@ namespace Fiero.Business.Scenes
             [ExitState]
             Exit_GameOver,
             [ExitState]
-            Exit_SaveAndQuit
+            Exit_SaveAndQuit,
+            [ExitState]
+            Exit_QuickRestart
         }
 
         protected readonly MetaSystem Systems;
@@ -103,6 +105,11 @@ namespace Fiero.Business.Scenes
         }
         private IEnumerable<Subscription> RouteActionSystemEvents()
         {
+            var actionSystem = Systems.Get<ActionSystem>();
+            var dungeonSystem = Systems.Get<DungeonSystem>();
+            var factionSystem = Systems.Get<FactionSystem>();
+            var renderSystem = Systems.Get<RenderSystem>();
+            var dialogueSystem = Systems.Get<DialogueSystem>();
             // ActionSystem.GameStarted:
             // - Clear old entities and references if present
             // - Clear scratch textures for procedural sprites
@@ -110,11 +117,6 @@ namespace Fiero.Business.Scenes
             // - Create and spawn player
             // - Set faction Relations to default values
             // - Track player visually in the interface
-            var actionSystem = Systems.Get<ActionSystem>();
-            var dungeonSystem = Systems.Get<DungeonSystem>();
-            var factionSystem = Systems.Get<FactionSystem>();
-            var renderSystem = Systems.Get<RenderSystem>();
-            var dialogueSystem = Systems.Get<DialogueSystem>();
             yield return actionSystem.GameStarted.SubscribeResponse(e =>
             {
                 dungeonSystem.Reset();
@@ -535,7 +537,7 @@ namespace Fiero.Business.Scenes
                     if (wasPlayer)
                     {
                         GenerateNewRngSeed();
-                        TrySetState(SceneState.Main);
+                        TrySetState(SceneState.Exit_QuickRestart);
                     }
                 }
                 Entities.RemoveFlaggedItems(true);
@@ -1152,7 +1154,7 @@ namespace Fiero.Business.Scenes
                 {
                     Rng.SetGlobalSeed(Store.Get(Data.Global.RngSeed));
                 }
-                TrySetState(SceneState.Main);
+                TrySetState(SceneState.Exit_QuickRestart);
             }
         }
 

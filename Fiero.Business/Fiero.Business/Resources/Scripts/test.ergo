@@ -4,4 +4,4 @@
 :- use_module(input).
 
 input:key_route(h, pressed, [_] >> spawn([npc_rat{}], [_])).
-input:key_route(j, pressed, [_] >> spawn([boss_npc_great_king_rat{}], [_])).
+input:key_route(j, pressed, [_] >> spawn([projectile_bomb{charges: 999}], [_])).

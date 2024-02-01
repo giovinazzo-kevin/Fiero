@@ -12,9 +12,7 @@ namespace Fiero.Business.Scenes
             [ExitState]
             Exit_GameOver,
             [ExitState]
-            Exit_SaveAndQuit,
-            [ExitState]
-            Exit_QuickRestart
+            Exit_SaveAndQuit
         }
 
         protected readonly MetaSystem Systems;
@@ -537,7 +535,7 @@ namespace Fiero.Business.Scenes
                     if (wasPlayer)
                     {
                         GenerateNewRngSeed();
-                        TrySetState(SceneState.Exit_QuickRestart);
+                        TrySetState(SceneState.Main);
                     }
                 }
                 Entities.RemoveFlaggedItems(true);
@@ -1154,7 +1152,7 @@ namespace Fiero.Business.Scenes
                 {
                     Rng.SetGlobalSeed(Store.Get(Data.Global.RngSeed));
                 }
-                TrySetState(SceneState.Exit_QuickRestart);
+                TrySetState(SceneState.Main);
             }
         }
 

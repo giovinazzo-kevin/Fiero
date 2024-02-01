@@ -114,7 +114,7 @@
             .WithItemInfo(0)
             ;
 
-        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, int chargesConsumedPerUse = 0, string unidentName = null)
+        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, int chargesConsumedPerUse = 1, string unidentName = null)
             where T : Consumable
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)

@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using SFML.Graphics;
+
+namespace Fiero.Business
 {
 
     [TransientDependency]
@@ -25,7 +27,7 @@
                 .Repeat(9, (i, grid) => grid
                     .Col(w: 2, px: true, @class: "spacer").End()
                     .Col(w: 36, px: true, @class: "quickbar-slot")
-                        .Cell<Picture>()
+                        .Cell<Picture>(p => p.Background.V = Color.Black)
                         .Cell<Label>(l =>
                         {
                             l.Text.V = $"{(i + 1)}";
@@ -69,6 +71,7 @@
             for (int i = 0; i < pictures.Length; i++)
             {
                 pictures[i].Sprite.V = null;
+                pictures[i].Invalidate();
                 labels[i * 3 + 1].Text.V = string.Empty;
                 labels[i * 3 + 2].Text.V = string.Empty;
             }

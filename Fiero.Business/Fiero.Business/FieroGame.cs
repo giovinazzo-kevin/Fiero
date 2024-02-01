@@ -221,7 +221,6 @@ namespace Fiero.Business
             Director.MapTransition(MenuScene.SceneState.Exit_NewGame, CharCreationScene.SceneState.Main);
             Director.MapTransition(CharCreationScene.SceneState.Exit_StartGame, GameplayScene.SceneState.Main);
             Director.MapTransition(CharCreationScene.SceneState.Exit_QuitToMenu, MenuScene.SceneState.Main);
-            Director.MapTransition(GameplayScene.SceneState.Exit_QuickRestart, GameplayScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
 #if DEBUG
             // Start logging everything that passes through the global event bus

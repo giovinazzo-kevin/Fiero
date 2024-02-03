@@ -53,7 +53,8 @@ namespace Fiero.Business
                 {
                     if (trigger.TryTrigger(floorId, speaker, out var listeners))
                     {
-                        var node = Dialogues.GetDialogue(trigger.Node);
+                        var node = Dialogues.GetDialogue(trigger.Node)
+                            .Format(trigger.Arguments);
                         trigger.OnTrigger();
                         var list = listeners.ToArray();
                         _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));

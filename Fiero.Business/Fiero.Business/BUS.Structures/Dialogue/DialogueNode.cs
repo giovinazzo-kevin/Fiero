@@ -15,11 +15,27 @@ namespace Fiero.Business
         [NonTerm]
         public IDictionary<string, DialogueNode> Choices { get; init; }
 
-        public event Action<IDialogueTrigger, DialogueTriggeredEventArgs> Triggered;
-
-        public void Trigger(IDialogueTrigger trigger, DrawableEntity speaker, params DrawableEntity[] listeners)
+        public DialogueNode Format(IList<string> args)
         {
-            Triggered?.Invoke(trigger, new(this, speaker, listeners));
+            var newTitle = Title;
+            var newLines = Lines.ToArray();
+            var newChoices = Choices.ToArray();
+            // Formattable fields: Title, Lines, Choices.Keys
+            for (int i = 0; i < args.Count; i++)
+            {
+                var placeholder = $"{{{i}}}";
+                newTitle = newTitle.Replace(placeholder, args[i]);
+                for (int l = 0; l < Lines.Length; l++)
+                {
+                    newLines[l] = newLines[l].Replace(placeholder, args[i]);
+                }
+                for (int c = 0; c < Choices.Count; c++)
+                {
+                    var n = newChoices[c];
+                    newChoices[c] = new(n.Key.Replace(placeholder, args[i]), n.Value);
+                }
+            }
+            return new DialogueNode(Id, Face, newTitle, newLines, Cancellable, Next, new Dictionary<string, DialogueNode>(newChoices));
         }
 
         public DialogueNode(

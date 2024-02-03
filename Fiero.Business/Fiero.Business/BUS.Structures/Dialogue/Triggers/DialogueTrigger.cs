@@ -9,6 +9,8 @@
         public string DialogueNode { get; private set; }
         string IDialogueTrigger.Node => DialogueNode.ToString();
         public bool Repeatable { get; protected set; }
+        IList<string> IDialogueTrigger.Arguments => Arguments;
+        public string[] Arguments { get; set; } = [];
 
         public event Action<DialogueTrigger> Triggered;
 

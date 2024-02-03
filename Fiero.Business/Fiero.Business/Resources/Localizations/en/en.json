@@ -101,6 +101,12 @@
       "Face": "RatMerchant",
       "Lines": [ "Let's see..." ],
       "Next": ""
+    },
+    "Merchant_CantAfford": {
+      "Face": "RatMerchant",
+      "Title": "You can't afford it!",
+      "Lines": [ "You can't afford my merchandise!", "You're ${0} short!", "Please drop some items in my shop." ]
+
     }
   },
   "Action": {

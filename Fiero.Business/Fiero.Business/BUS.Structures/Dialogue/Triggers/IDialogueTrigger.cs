@@ -5,6 +5,7 @@ namespace Fiero.Business
     [Term(Functor = "dialogue_trigger", Marshalling = TermMarshalling.Named)]
     public interface IDialogueTrigger
     {
+        IList<string> Arguments { get; }
         string Node { get; }
         bool Repeatable { get; }
         bool TryTrigger(FloorId floor, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners);

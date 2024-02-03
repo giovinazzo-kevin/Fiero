@@ -1,10 +1,4 @@
-﻿using Fiero.Core;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class InventoryComponent : EcsComponent
     {
@@ -134,6 +128,7 @@ namespace Fiero.Business
 
         public IEnumerable<Item> GetItems() => Items;
         public IEnumerable<Weapon> GetWeapons() => Items.OfType<Weapon>();
+        public IEnumerable<Resource> GetResources() => Items.OfType<Resource>();
         public IEnumerable<Armor> GetArmors() => Items.OfType<Armor>();
         public IEnumerable<Consumable> GetConsumables() => Items.OfType<Consumable>();
 

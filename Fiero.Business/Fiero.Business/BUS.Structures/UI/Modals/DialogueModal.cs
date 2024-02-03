@@ -71,7 +71,6 @@
 
         public override void Open(string title)
         {
-            Node.Trigger(Trigger, Speaker, Listeners);
             foreach (var (line, actor) in Node.Lines.SelectMany(l => Actors.Select(a => (l, a))))
                 actor.Log?.Write($"{Speaker.Info.Name}: {line}");
             base.Open(title);

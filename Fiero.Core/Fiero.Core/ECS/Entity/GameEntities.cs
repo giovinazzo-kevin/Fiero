@@ -123,7 +123,7 @@ namespace Fiero.Core
         public IEnumerable<PropertyInfo> GetProxyableProperties<T>()
             where T : EcsEntity => GetProxyableProperties(typeof(T));
 
-        public EntityBuilder<T> CreateBuilder<T>() where T : EcsEntity => new(this);
+        public IEntityBuilder<T> CreateBuilder<T>() where T : EcsEntity => new EntityBuilder<T>(this);
 
         //public bool TryParseTerm(ITerm term, out EcsEntity entity)
         //{

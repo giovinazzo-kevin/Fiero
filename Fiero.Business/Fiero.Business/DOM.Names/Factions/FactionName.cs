@@ -4,6 +4,7 @@
     {
         None,
         Players,
+        Merchants,
         Rats,
         Snakes,
         Dogs,

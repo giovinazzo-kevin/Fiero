@@ -5,6 +5,7 @@
         None,
         Room,
         Corridor,
+        Shop,
         Wall,
         Hole,
         Water,

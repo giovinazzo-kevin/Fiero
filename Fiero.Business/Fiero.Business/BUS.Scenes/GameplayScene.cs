@@ -443,9 +443,9 @@ namespace Fiero.Business.Scenes
                             renderSystem.AnimateViewport(true, e.Attacker.Location(), anim);
                         }
                     }
-                    if (speechChance() && Resources.GetSpeechBubble(e.Attacker, GenericSpeechDialogueName.Attacking, out var speech))
+                    if (speechChance() && Resources.GetSpeechBubble(e.Attacker, SpeechName.Attacking, out var speech))
                         renderSystem.AnimateViewport(false, e.Attacker, speech.Animation);
-                    if (speechChance() && Resources.GetSpeechBubble(victim, GenericSpeechDialogueName.Attacked, out speech))
+                    if (speechChance() && Resources.GetSpeechBubble(victim, SpeechName.Attacked, out speech))
                         renderSystem.AnimateViewport(false, victim, speech.Animation);
                     foreach (var weapon in e.Weapons)
                     {
@@ -513,7 +513,7 @@ namespace Fiero.Business.Scenes
             // - Speech bubble (Spawned)
             yield return actionSystem.ActorSpawned.SubscribeResponse(e =>
             {
-                if (Resources.GetSpeechBubble(e.Actor, GenericSpeechDialogueName.Spawned, out var speech))
+                if (Resources.GetSpeechBubble(e.Actor, SpeechName.Spawned, out var speech))
                 {
                     renderSystem.AnimateViewport(false, e.Actor, speech.Animation);
                 }
@@ -662,7 +662,7 @@ namespace Fiero.Business.Scenes
                 undead.TryJoinParty(necro);
                 return actionSystem.CorpseDestroyed.Handle(new(e.Corpse));
 
-                EntityBuilder<Actor> Raise(EntityBuilder<Actor> zombie, EntityBuilder<Actor> skeleton, UndeadRaisingName mode)
+                IEntityBuilder<Actor> Raise(IEntityBuilder<Actor> zombie, IEntityBuilder<Actor> skeleton, UndeadRaisingName mode)
                 {
                     return mode switch
                     {

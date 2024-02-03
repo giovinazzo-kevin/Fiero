@@ -6,6 +6,14 @@
 
 %%% This script configures entity builder definitions, overriding whatever default was set in C#.
 
+merchant {
+  dialogue: _ {
+    triggers: [ TalkFriend, JustMet ]
+  }
+} :- 
+  dialogue_trigger(player_in_sight{choices: ['Merchant_Hello']}, JustMet),
+  dialogue_trigger(talked_to_friendly{choices: ['Merchant_Hello'], repeatable: true}, TalkFriend).
+
 rat {
   dialogue: _ {
     triggers: [ TalkFriend, TalkFoe ]

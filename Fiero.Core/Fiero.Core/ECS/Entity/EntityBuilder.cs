@@ -13,6 +13,14 @@ namespace Fiero.Core
     public interface IEntityBuilder<out TProxy> : IEntityBuilder
         where TProxy : EcsEntity
     {
+        public GameEntities Entities { get; }
+        IEntityBuilder<TProxy> AddOrTweak<T>(Action<IServiceFactory, T> configure = null) where T : EcsComponent;
+        IEntityBuilder<TProxy> Add<T>(Action<IServiceFactory, T> configure = null) where T : EcsComponent;
+        IEntityBuilder<TProxy> Tweak<T>(Action<IServiceFactory, T> configure = null) where T : EcsComponent;
+        IEntityBuilder<TProxy> Load(Type type, Dict from);
+        new TProxy Build();
+        event Action<IEntityBuilder<TProxy>, TProxy> Built;
+        EcsEntity IEntityBuilder.Build() => Build();
     }
     public sealed class EntityBuilder<TProxy> : IEntityBuilder<TProxy>
         where TProxy : EcsEntity
@@ -20,8 +28,8 @@ namespace Fiero.Core
         private readonly ImmutableHashSet<Type> _componentTypes;
         private Action<int> _configure;
 
-        public event Action<EntityBuilder<TProxy>, TProxy> Built;
-        public readonly GameEntities Entities;
+        public event Action<IEntityBuilder<TProxy>, TProxy> Built;
+        public GameEntities Entities { get; init; }
 
         private static readonly MethodInfo __AddOrTweak = typeof(EntityBuilder<TProxy>).GetMethod(nameof(AddOrTweak));
 
@@ -32,7 +40,7 @@ namespace Fiero.Core
             _componentTypes = ImmutableHashSet.CreateRange(compTypes ?? Enumerable.Empty<Type>());
         }
 
-        public EntityBuilder<TProxy> Add<T>(Action<IServiceFactory, T> configure = null)
+        public IEntityBuilder<TProxy> Add<T>(Action<IServiceFactory, T> configure = null)
             where T : EcsComponent
         {
             if (_componentTypes.Contains(typeof(T)))
@@ -58,7 +66,7 @@ namespace Fiero.Core
             return builder;
         }
 
-        public EntityBuilder<TProxy> Tweak<T>(Action<IServiceFactory, T> configure)
+        public IEntityBuilder<TProxy> Tweak<T>(Action<IServiceFactory, T> configure)
             where T : EcsComponent
         {
             var x = typeof(DBNull);
@@ -81,7 +89,7 @@ namespace Fiero.Core
             return builder;
         }
 
-        public EntityBuilder<TProxy> AddOrTweak<T>(Action<IServiceFactory, T> configure = null)
+        public IEntityBuilder<TProxy> AddOrTweak<T>(Action<IServiceFactory, T> configure = null)
             where T : EcsComponent
         {
             if (!_componentTypes.Contains(typeof(T)))
@@ -91,7 +99,7 @@ namespace Fiero.Core
             return Tweak(configure);
         }
 
-        public EntityBuilder<TProxy> Load(Type type, Dict from)
+        public IEntityBuilder<TProxy> Load(Type type, Dict from)
         {
             var ret = (EntityBuilder<TProxy>)__AddOrTweak.MakeGenericMethod([type]).Invoke(this, [null]);
             var props = type.GetProperties()
@@ -141,7 +149,5 @@ namespace Fiero.Core
             Built?.Invoke(this, proxy);
             return proxy;
         }
-
-        EcsEntity IEntityBuilder.Build() => Build();
     }
 }

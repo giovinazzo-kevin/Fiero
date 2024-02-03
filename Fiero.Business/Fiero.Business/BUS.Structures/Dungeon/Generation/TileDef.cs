@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly struct TileDef
     {
@@ -14,7 +12,7 @@ namespace Fiero.Business
         public TileDef WithTileName(TileName newTile) => new(newTile, Position, Color);
         public TileDef WithPosition(Coord newPos) => new(Name, newPos, Color);
 
-        private EntityBuilder<Tile> Decorate(EntityBuilder<Tile> builder, FloorId id)
+        private IEntityBuilder<Tile> Decorate(IEntityBuilder<Tile> builder, FloorId id)
         {
             if (Color.HasValue)
             {
@@ -24,11 +22,12 @@ namespace Fiero.Business
             return builder;
         }
 
-        public EntityBuilder<Tile> Resolve(GameEntityBuilders entities, FloorId id) => Name switch
+        public IEntityBuilder<Tile> Resolve(GameEntityBuilders entities, FloorId id) => Name switch
         {
             TileName.Room => Decorate(entities.Tile_Room(), id),
             TileName.Corridor => Decorate(entities.Tile_Corridor(), id),
             TileName.Wall => Decorate(entities.Tile_Wall(), id),
+            TileName.Shop => Decorate(entities.Tile_Shop(), id),
             TileName.Hole => Decorate(entities.Tile_Hole(), id),
             TileName.Water => Decorate(entities.Tile_Water(), id),
             _ => Decorate(entities.Tile_Unimplemented(), id),

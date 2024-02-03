@@ -22,7 +22,7 @@
         }
 
 
-        public EntityBuilder<Actor> Dummy(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
+        public IEntityBuilder<Actor> Dummy(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
             => Entities.CreateBuilder<Actor>()
             .AddOrTweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
             .WithHealth(1)
@@ -36,14 +36,14 @@
             .WithTraitTracking()
             ;
 
-        //public EntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
+        //public IEntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)
         //    => Entities.CreateBuilder<Script>()
         //    .WithName(name ?? scriptPath)
         //    .WithScriptInfo(scriptPath, trace: trace, cache: cache)
         //    .WithEffectTracking()
         //    ;
 
-        public EntityBuilder<Actor> Player()
+        public IEntityBuilder<Actor> Player()
             => Entities.CreateBuilder<Actor>()
             .WithPlayerAi()
             .WithHealth(maximum: 1, current: 1)
@@ -68,7 +68,7 @@
             .WithTraitTracking()
             ;
 
-        private EntityBuilder<Actor> Enemy()
+        private IEntityBuilder<Actor> Enemy()
             => Entities.CreateBuilder<Actor>()
             .WithInventory(0)
             .WithLogging()
@@ -90,68 +90,68 @@
             .WithTraitTracking()
             ;
 
-        public EntityBuilder<T> Equipment<T>(EquipmentTypeName type)
+        public IEntityBuilder<T> Equipment<T>(EquipmentTypeName type)
             where T : Equipment => Entities.CreateBuilder<T>()
             .WithEquipmentInfo(type)
             ;
 
-        public EntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, bool twoHanded)
+        public IEntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, int goldValue, bool twoHanded)
             where T : Weapon
             => Equipment<T>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
             .WithName($"$Item.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.Transparent)
             .WithPhysics(Coord.Zero)
             .WithWeaponInfo(type, baseDamage, swingDelay)
-            .WithItemInfo(itemRarity, unidentName)
+            .WithItemInfo(itemRarity, goldValue, unidentName)
             ;
 
-        public EntityBuilder<Corpse> Corpse(CorpseName type)
+        public IEntityBuilder<Corpse> Corpse(CorpseName type)
             => Entities.CreateBuilder<Corpse>()
             .WithPhysics(Coord.Zero)
             .WithName($"$Corpse.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
             .WithCorpseInfo(type)
-            .WithItemInfo(0)
+            .WithItemInfo(0, 0)
             ;
 
-        private EntityBuilder<T> Consumable<T>(int itemRarity, int remainingUses, int maxUses, bool consumedWhenEmpty, int chargesConsumedPerUse = 1, string unidentName = null)
+        private IEntityBuilder<T> Consumable<T>(int itemRarity, int goldValue, int remainingUses, int maxUses, bool consumedWhenEmpty, int chargesConsumedPerUse = 1, string unidentName = null)
             where T : Consumable
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
             .WithSprite(RenderLayerName.Items, TextureName.Items, "None", ColorName.White)
             .WithConsumableInfo(remainingUses, maxUses, consumedWhenEmpty, chargesConsumedPerUse)
-            .WithItemInfo(itemRarity, unidentName)
+            .WithItemInfo(itemRarity, goldValue, unidentName)
             ;
 
-        private EntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, int chargesConsumedPerUse = 0, string unidentName = null, string trail = null)
+        private IEntityBuilder<T> Projectile<T>(ProjectileName name, int itemRarity, int goldValue, int remainingUses, int maxUses, int damage, int maxRange, float mulchChance, bool throwsUseCharges, bool consumedWhenEmpty, TrajectoryName @throw, bool piercing, bool directional, int chargesConsumedPerUse = 0, string unidentName = null, string trail = null)
             where T : Projectile
-            => Consumable<T>(itemRarity, remainingUses, maxUses, consumedWhenEmpty, chargesConsumedPerUse, unidentName)
+            => Consumable<T>(itemRarity, goldValue, remainingUses, maxUses, consumedWhenEmpty, chargesConsumedPerUse, unidentName)
             .WithProjectileInfo(name, damage, maxRange, mulchChance, throwsUseCharges, @throw, piercing, directional)
             .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
             .WithTrailSprite(trail)
             ;
 
-        private EntityBuilder<T> Resource<T>(ResourceName name, int amount, int? maxAmount = null)
+        private IEntityBuilder<T> Resource<T>(ResourceName name, int amount, int? maxAmount = null)
             where T : Resource
             => Entities.CreateBuilder<T>()
             .WithPhysics(Coord.Zero)
             .WithName(nameof(Consumable))
-            .WithItemInfo(0, null)
+            .WithItemInfo(0, 0)
             .WithName($"$Item.{name}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, name.ToString(), ColorName.White)
             .WithResourceInfo(name, amount, maxAmount ?? amount)
             ;
 
-        public EntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay, EffectDef castEffect)
+        public IEntityBuilder<Spell> Spell(SpellName type, TargetingShape shape, int baseDamage, int castDelay, EffectDef castEffect)
             => Entities.CreateBuilder<Spell>()
             .WithName($"Spell.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.White)
             .WithSpellInfo(shape, type, baseDamage, castDelay)
             ;
 
-        public EntityBuilder<Potion> Potion(EffectDef quaffEffect, EffectDef throwEffect)
+        public IEntityBuilder<Potion> Potion(EffectDef quaffEffect, EffectDef throwEffect)
         {
             var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
 
@@ -184,6 +184,7 @@
                 mulchChance: 1,
                 unidentName: $"$Descriptor.Potion.{potionColor.Adjective}$ $Color.{potionColor.Color}$ $Item.Potion$",
                 itemRarity: 1,
+                goldValue: 50,
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
@@ -199,7 +200,7 @@
                ;
         }
 
-        public EntityBuilder<Food> Food(FoodName name, EffectDef eatEffect)
+        public IEntityBuilder<Food> Food(FoodName name, EffectDef eatEffect)
         {
             return Projectile<Food>(
                 @throw: TrajectoryName.Line,
@@ -208,6 +209,7 @@
                 maxRange: 4,
                 mulchChance: 0.75f,
                 itemRarity: 1,
+                goldValue: 20,
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
@@ -223,7 +225,7 @@
         }
 
 
-        public EntityBuilder<Wand> Wand(EffectDef effect, int charges)
+        public IEntityBuilder<Wand> Wand(EffectDef effect, int charges)
         {
             var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
 
@@ -254,6 +256,7 @@
                 mulchChance: .75f,
                 unidentName: $"$Descriptor.Wand.{wandColor.Adjective}$ $Color.{wandColor.Color}$ $Item.Wand$",
                 itemRarity: 1,
+                goldValue: 100,
                 remainingUses: charges,
                 maxUses: charges,
                 consumedWhenEmpty: false,
@@ -269,7 +272,7 @@
                ;
         }
 
-        public EntityBuilder<Scroll> Scroll(EffectDef effect, ScrollModifierName modifier)
+        public IEntityBuilder<Scroll> Scroll(EffectDef effect, ScrollModifierName modifier)
         {
             var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
             var label = ScrollLabel();
@@ -296,6 +299,7 @@
                 maxRange: 10,
                 mulchChance: 0,
                 itemRarity: 1,
+                goldValue: 75,
                 remainingUses: 1,
                 maxUses: 1,
                 consumedWhenEmpty: true,
@@ -358,7 +362,7 @@
             }
         }
 
-        private EntityBuilder<TFeature> Feature<TFeature>(FeatureName type)
+        private IEntityBuilder<TFeature> Feature<TFeature>(FeatureName type)
             where TFeature : Feature
             => Entities.CreateBuilder<TFeature>()
             .WithName(type.ToString())
@@ -367,7 +371,7 @@
             .WithFeatureInfo(type)
             ;
 
-        private EntityBuilder<Tile> Tile(TileName type, ColorName color)
+        private IEntityBuilder<Tile> Tile(TileName type, ColorName color)
             => Entities.CreateBuilder<Tile>()
             .WithName(type.ToString())
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, type.ToString(), color)
@@ -376,7 +380,7 @@
             ;
 
         #region NPCs
-        public EntityBuilder<Actor> NPC_Rat()
+        public IEntityBuilder<Actor> NPC_Rat()
             => Enemy()
             .WithInventory(5)
             .WithHealth(5)
@@ -389,7 +393,7 @@
             .LoadState(nameof(NpcName.Rat))
             ;
 
-        public EntityBuilder<Actor> NPC_Snake()
+        public IEntityBuilder<Actor> NPC_Snake()
             => Enemy()
             .WithName(nameof(NpcName.Snake))
             .WithRace(RaceName.Snake)
@@ -413,9 +417,9 @@
         }
 
         #region Sentient NPCs
-        public EntityBuilder<Actor> NPC_RatKnight()
+        public IEntityBuilder<Actor> NPC_RatKnight()
             => NPC_Rat()
-            .WithHealth(20)
+            .WithHealth(10)
             .WithName("Rat Knight")
             .WithNpcInfo(NpcName.RatKnight)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatKnight), ColorName.White)
@@ -428,7 +432,7 @@
             )
             .LoadState(nameof(NpcName.RatKnight))
             ;
-        public EntityBuilder<Actor> NPC_RatArcher()
+        public IEntityBuilder<Actor> NPC_RatArcher()
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Archer")
@@ -444,7 +448,7 @@
             )
             .LoadState(nameof(NpcName.RatArcher))
             ;
-        public EntityBuilder<Actor> NPC_RatWizard()
+        public IEntityBuilder<Actor> NPC_RatWizard()
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Wizard")
@@ -464,7 +468,7 @@
             )
             .LoadState(nameof(NpcName.RatWizard))
             ;
-        public EntityBuilder<Actor> NPC_RatMerchant()
+        public IEntityBuilder<Actor> NPC_RatMerchant()
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Merchant")
@@ -475,7 +479,7 @@
             )
             .LoadState(nameof(NpcName.RatMerchant))
             ;
-        public EntityBuilder<Actor> NPC_RatMonk()
+        public IEntityBuilder<Actor> NPC_RatMonk()
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Monk")
@@ -489,7 +493,7 @@
             )
             .LoadState(nameof(NpcName.RatMonk))
             ;
-        public EntityBuilder<Actor> NPC_RatApothecary()
+        public IEntityBuilder<Actor> NPC_RatApothecary()
             => NPC_Rat()
             .WithHealth(10)
             .WithName("Rat Apothecary")
@@ -503,7 +507,7 @@
             )
             .LoadState(nameof(NpcName.RatApothecary))
             ;
-        public EntityBuilder<Actor> NPC_RatPugilist()
+        public IEntityBuilder<Actor> NPC_RatPugilist()
             => NPC_Rat()
             .WithHealth(20)
             .WithName("Rat Pugilist")
@@ -511,7 +515,7 @@
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatPugilist), ColorName.White)
             .LoadState(nameof(NpcName.RatPugilist))
             ;
-        public EntityBuilder<Actor> NPC_RatThief()
+        public IEntityBuilder<Actor> NPC_RatThief()
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Thief")
@@ -522,7 +526,7 @@
             )
             .LoadState(nameof(NpcName.RatThief))
             ;
-        public EntityBuilder<Actor> NPC_RatCheese()
+        public IEntityBuilder<Actor> NPC_RatCheese()
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Cheese Enjoyer")
@@ -530,7 +534,7 @@
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatCheese), ColorName.White)
             .LoadState(nameof(NpcName.RatCheese))
             ;
-        public EntityBuilder<Actor> NPC_RatArsonist()
+        public IEntityBuilder<Actor> NPC_RatArsonist()
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Arsonist")
@@ -544,7 +548,7 @@
             )
             .LoadState(nameof(NpcName.RatArsonist))
             ;
-        public EntityBuilder<Actor> NPC_RatZombie()
+        public IEntityBuilder<Actor> NPC_RatZombie()
             => NPC_Rat()
             .WithHealth(30)
             .WithName("Rat Zombie")
@@ -553,7 +557,7 @@
             .WithCorpse(CorpseName.None, Chance.Never)
             .LoadState(nameof(NpcName.RatZombie))
             ;
-        public EntityBuilder<Actor> NPC_RatSkeleton()
+        public IEntityBuilder<Actor> NPC_RatSkeleton()
             => NPC_Rat()
             .WithHealth(15)
             .WithName("Rat Skeleton")
@@ -562,28 +566,28 @@
             .WithCorpse(CorpseName.None, Chance.Never)
             .LoadState(nameof(NpcName.RatSkeleton))
             ;
-        public EntityBuilder<Actor> NPC_SandSnake()
+        public IEntityBuilder<Actor> NPC_SandSnake()
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Sand Snake")
             .WithNpcInfo(NpcName.SandSnake)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.SandSnake), ColorName.White)
             ;
-        public EntityBuilder<Actor> NPC_Cobra()
+        public IEntityBuilder<Actor> NPC_Cobra()
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Cobra")
             .WithNpcInfo(NpcName.Cobra)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Cobra), ColorName.White)
             ;
-        public EntityBuilder<Actor> NPC_Boa()
+        public IEntityBuilder<Actor> NPC_Boa()
             => NPC_Snake()
             .WithHealth(7)
             .WithName("Boa")
             .WithNpcInfo(NpcName.Boa)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.Boa), ColorName.White)
             ;
-        public EntityBuilder<Actor> NPC_Mimic()
+        public IEntityBuilder<Actor> NPC_Mimic()
             => Enemy()
             .WithName(nameof(NpcName.Mimic))
             .WithInventory(10)
@@ -594,14 +598,14 @@
         #endregion
 
         #region BOSSES
-        public EntityBuilder<Actor> Boss_NpcGreatKingRat()
+        public IEntityBuilder<Actor> Boss_NpcGreatKingRat()
             => NPC_Rat()
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.GreatKingRat), ColorName.White)
             .LoadState(nameof(NpcName.GreatKingRat))
             ;
-        public EntityBuilder<Actor> Boss_NpcKingSerpent()
+        public IEntityBuilder<Actor> Boss_NpcKingSerpent()
             => NPC_Rat()
             .WithName("Serpentine King")
             .WithNpcInfo(NpcName.KingSerpent)
@@ -610,39 +614,40 @@
         #endregion
 
         #region WEAPONS
-        public EntityBuilder<Weapon> Weapon_Sword()
-            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, twoHanded: false)
+        public IEntityBuilder<Weapon> Weapon_Sword()
+            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Sword))
             ;
-        public EntityBuilder<Weapon> Weapon_Dagger()
-            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: 2, swingDelay: 0, itemRarity: 10, twoHanded: false)
+        public IEntityBuilder<Weapon> Weapon_Dagger()
+            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: 2, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Dagger))
             ;
-        public EntityBuilder<Weapon> Weapon_Hammer()
-            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: 5, swingDelay: 0, itemRarity: 10, twoHanded: false)
+        public IEntityBuilder<Weapon> Weapon_Hammer()
+            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: 5, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Hammer))
             ;
-        public EntityBuilder<Weapon> Weapon_Spear()
-            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: 5, swingDelay: 0, itemRarity: 10, twoHanded: false)
+        public IEntityBuilder<Weapon> Weapon_Spear()
+            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: 5, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Spear))
             ;
-        public EntityBuilder<Launcher> Weapon_Bow()
-            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, twoHanded: true)
+        public IEntityBuilder<Launcher> Weapon_Bow()
+            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Bow))
             ;
-        public EntityBuilder<Launcher> Weapon_Crossbow()
-            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: 1, swingDelay: 5, itemRarity: 10, twoHanded: true)
+        public IEntityBuilder<Launcher> Weapon_Crossbow()
+            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: 1, swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Crossbow))
             ;
         #endregion
 
         #region Projectiles
-        public EntityBuilder<Projectile> Projectile_Rock(int charges = 1)
+        public IEntityBuilder<Projectile> Projectile_Rock(int charges = 1)
             => Projectile<Projectile>(
                 name: ProjectileName.Rock,
                 itemRarity: 1,
+                goldValue: 4,
                 remainingUses: charges,
                 maxUses: charges,
                 damage: 2,
@@ -655,10 +660,11 @@
                 directional: false
             )
             ;
-        public EntityBuilder<Projectile> Projectile_Arrow(int charges = 1)
+        public IEntityBuilder<Projectile> Projectile_Arrow(int charges = 1)
             => Projectile<Projectile>(
                 name: ProjectileName.Arrow,
                 itemRarity: 1,
+                goldValue: 12,
                 remainingUses: charges,
                 maxUses: charges,
                 damage: 2,
@@ -671,10 +677,11 @@
                 directional: true
             )
             ;
-        public EntityBuilder<Projectile> Projectile_Grapple()
+        public IEntityBuilder<Projectile> Projectile_Grapple()
             => Projectile<Projectile>(
                 name: ProjectileName.Grapple,
                 itemRarity: 100,
+                goldValue: 400,
                 remainingUses: 1,
                 maxUses: 1,
                 damage: 0,
@@ -693,10 +700,11 @@
                 EffectDef.FromScript(Scripts.Get(ScriptName.Grapple)),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
-        public EntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
+        public IEntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
             => Projectile<Projectile>(
                 name: ProjectileName.Bomb,
                 itemRarity: 1,
+                goldValue: 30,
                 remainingUses: charges,
                 maxUses: 99,
                 damage: 0,
@@ -718,54 +726,54 @@
         #endregion
 
         #region POTIONS
-        public EntityBuilder<Potion> Potion_OfConfusion()
+        public IEntityBuilder<Potion> Potion_OfConfusion()
             => Potion(new(EffectName.Confusion, duration: 10, canStack: false), new(EffectName.Confusion, duration: 10));
-        public EntityBuilder<Potion> Potion_OfSleep()
+        public IEntityBuilder<Potion> Potion_OfSleep()
             => Potion(new(EffectName.Sleep, duration: 10, canStack: false), new(EffectName.Sleep, duration: 10));
-        public EntityBuilder<Potion> Potion_OfSilence()
+        public IEntityBuilder<Potion> Potion_OfSilence()
             => Potion(new(EffectName.Silence, duration: 10, canStack: false), new(EffectName.Silence, duration: 10));
-        public EntityBuilder<Potion> Potion_OfEntrapment()
+        public IEntityBuilder<Potion> Potion_OfEntrapment()
             => Potion(new(EffectName.Entrapment, duration: 10, canStack: false), new(EffectName.Entrapment, duration: 10));
-        public EntityBuilder<Potion> Potion_OfTeleport()
+        public IEntityBuilder<Potion> Potion_OfTeleport()
             => Potion(new(EffectName.UncontrolledTeleport, canStack: false), new(EffectName.UncontrolledTeleport));
-        public EntityBuilder<Potion> Potion_OfHealing()
+        public IEntityBuilder<Potion> Potion_OfHealing()
             => Potion(new(EffectName.Heal, "2"), new(EffectName.Heal, "2"));
         #endregion
 
         #region SCROLLS
-        public EntityBuilder<Scroll> Scroll_OfRaiseUndead()
+        public IEntityBuilder<Scroll> Scroll_OfRaiseUndead()
             => Scroll(new(EffectName.RaiseUndead, UndeadRaisingName.Random.ToString()), ScrollModifierName.AreaAffectsItems);
-        public EntityBuilder<Scroll> Scroll_OfMassConfusion()
+        public IEntityBuilder<Scroll> Scroll_OfMassConfusion()
             => Scroll(new(EffectName.Confusion, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMassSleep()
+        public IEntityBuilder<Scroll> Scroll_OfMassSleep()
             => Scroll(new(EffectName.Sleep, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMassSilence()
+        public IEntityBuilder<Scroll> Scroll_OfMassSilence()
             => Scroll(new(EffectName.Silence, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMassEntrapment()
+        public IEntityBuilder<Scroll> Scroll_OfMassEntrapment()
             => Scroll(new(EffectName.Entrapment, duration: 10, canStack: false), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMassExplosion()
+        public IEntityBuilder<Scroll> Scroll_OfMassExplosion()
             => Scroll(new(EffectName.Explosion, "2"), ScrollModifierName.AreaAffectsEveryoneButTarget);
-        public EntityBuilder<Scroll> Scroll_OfMagicMapping()
+        public IEntityBuilder<Scroll> Scroll_OfMagicMapping()
             => Scroll(new(EffectName.MagicMapping, canStack: false), ScrollModifierName.Self);
         #endregion
 
         #region WANDS
-        public EntityBuilder<Wand> Wand_OfConfusion(int charges = 1, int duration = 10)
+        public IEntityBuilder<Wand> Wand_OfConfusion(int charges = 1, int duration = 10)
             => Wand(new(EffectName.Confusion, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1, int duration = 10)
+        public IEntityBuilder<Wand> Wand_OfPoison(int magnitude = 1, int charges = 1, int duration = 10)
             => Wand(new(EffectName.Poison, magnitude.ToString(), duration: duration), charges);
-        public EntityBuilder<Wand> Wand_OfSleep(int charges = 1)
+        public IEntityBuilder<Wand> Wand_OfSleep(int charges = 1)
             => Wand(new(EffectName.Sleep, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfSilence(int charges = 1)
+        public IEntityBuilder<Wand> Wand_OfSilence(int charges = 1)
             => Wand(new(EffectName.Silence, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfEntrapment(int charges = 1)
+        public IEntityBuilder<Wand> Wand_OfEntrapment(int charges = 1)
             => Wand(new(EffectName.Entrapment, duration: 10), charges);
-        public EntityBuilder<Wand> Wand_OfTeleport(int charges = 1)
+        public IEntityBuilder<Wand> Wand_OfTeleport(int charges = 1)
             => Wand(new(EffectName.UncontrolledTeleport), charges);
         #endregion
 
         #region RESOURCES
-        public EntityBuilder<Resource> Resource_Gold(int amount)
+        public IEntityBuilder<Resource> Resource_Gold(int amount)
             => Resource<Resource>(ResourceName.Gold, amount, maxAmount: 999999)
             ;
         #endregion
@@ -792,7 +800,7 @@
                 (Projectile_Rock(Rng.Random.Between(4, 10)), Chance.Always)
             ), 1000);
 
-            (EntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(new[] {
+            (IEntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(new[] {
                 (Potion_OfConfusion(), Chance.Always),
                 (Potion_OfHealing(), Chance.Always),
                 (Potion_OfSleep(), Chance.Always),
@@ -801,7 +809,7 @@
                 (Potion_OfEntrapment(), Chance.Always)
             });
 
-            (EntityBuilder<Wand> Item, Chance Chance) RandomWand() => Rng.Random.Choose(new[] {
+            (IEntityBuilder<Wand> Item, Chance Chance) RandomWand() => Rng.Random.Choose(new[] {
                 (Wand_OfConfusion(), Chance.Always),
                 (Wand_OfPoison(), Chance.Always),
                 (Wand_OfSleep(), Chance.Always),
@@ -810,38 +818,38 @@
                 (Wand_OfEntrapment(), Chance.Always)
             });
         }
-        public EntityBuilder<Feature> Feature_Chest()
+        public IEntityBuilder<Feature> Feature_Chest()
             => Feature<Feature>(FeatureName.Chest)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .WithItems(Rng.Random.ChooseWeighted(ChestLootTable().ToArray()))
             .LoadState(nameof(FeatureName.Chest))
             ;
-        public EntityBuilder<Feature> Feature_Shrine()
+        public IEntityBuilder<Feature> Feature_Shrine()
             => Feature<Feature>(FeatureName.Shrine)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .LoadState(nameof(FeatureName.Shrine))
             ;
-        public EntityBuilder<Feature> Feature_Trap()
+        public IEntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
             .WithIntrinsicEffect(new(EffectName.Trap))
             .Tweak<RenderComponent>((s, x) => x.Visibility = VisibilityName.Hidden)
             ;
-        public EntityBuilder<Feature> Feature_Door()
+        public IEntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             ;
-        public EntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
+        public IEntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
             => Feature<Feature>(FeatureName.Door)
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, TileName.Wall.ToString(), color)
             ;
-        public EntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
+        public IEntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)
             => Feature<Portal>(FeatureName.Downstairs)
             .WithColor(GetBranchColor(conn.To.Branch))
             .WithPortalInfo(conn)
             ;
-        public EntityBuilder<Portal> Feature_Upstairs(FloorConnection conn)
+        public IEntityBuilder<Portal> Feature_Upstairs(FloorConnection conn)
             => Feature<Portal>(FeatureName.Upstairs)
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
@@ -849,26 +857,29 @@
         #endregion
 
         #region TILES
-        public EntityBuilder<Tile> Tile_Wall()
+        public IEntityBuilder<Tile> Tile_Wall()
             => Tile(TileName.Wall, ColorName.Gray)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             ;
-        public EntityBuilder<Tile> Tile_Hole()
+        public IEntityBuilder<Tile> Tile_Hole()
             => Tile(TileName.Hole, ColorName.Gray)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
             ;
-        public EntityBuilder<Tile> Tile_Room()
+        public IEntityBuilder<Tile> Tile_Room()
             => Tile(TileName.Room, ColorName.LightGray)
             ;
-        public EntityBuilder<Tile> Tile_Corridor()
+        public IEntityBuilder<Tile> Tile_Shop()
+            => Tile(TileName.Shop, ColorName.LightGray)
+            ;
+        public IEntityBuilder<Tile> Tile_Corridor()
             => Tile(TileName.Corridor, ColorName.LightGray)
             ;
-        public EntityBuilder<Tile> Tile_Unimplemented()
+        public IEntityBuilder<Tile> Tile_Unimplemented()
             => Tile(TileName.Error, ColorName.LightMagenta)
             ;
-        public EntityBuilder<Tile> Tile_Water()
+        public IEntityBuilder<Tile> Tile_Water()
             => Tile(TileName.Water, ColorName.LightBlue)
             // Moving through water is twice as slow 
             .Tweak<TileComponent>((s, x) => { x.MovementCost = 100; })

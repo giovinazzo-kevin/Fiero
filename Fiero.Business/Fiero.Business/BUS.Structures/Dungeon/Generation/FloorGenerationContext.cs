@@ -25,7 +25,7 @@
             Tiles[pos] = tile.WithPosition(pos);
         }
 
-        public void AddObject<T>(string name, Coord pos, Func<GameEntityBuilders, EntityBuilder<T>> build)
+        public void AddObject<T>(string name, Coord pos, Func<GameEntityBuilders, IEntityBuilder<T>> build)
             where T : PhysicalEntity
         {
             if (typeof(T).IsAssignableFrom(typeof(Feature)))
@@ -39,7 +39,7 @@
             list.Add(new(name, false, pos, id => build(EntityBuilders).WithPosition(pos, id).Build()));
         }
 
-        public bool TryAddFeature<T>(string name, IEnumerable<Coord> validPositions, Func<GameEntityBuilders, EntityBuilder<T>> build, out Coord pos)
+        public bool TryAddFeature<T>(string name, IEnumerable<Coord> validPositions, Func<GameEntityBuilders, IEntityBuilder<T>> build, out Coord pos)
             where T : Feature
         {
             foreach (var item in validPositions)
@@ -51,7 +51,7 @@
             return false;
         }
 
-        public bool TryAddFeature<T>(string name, Coord pos, Func<GameEntityBuilders, EntityBuilder<T>> build)
+        public bool TryAddFeature<T>(string name, Coord pos, Func<GameEntityBuilders, IEntityBuilder<T>> build)
             where T : Feature
         {
             if (!IsPointInBounds(pos))

@@ -29,6 +29,9 @@
       "Attacking": [ "brains..." ],
       "Attacked": []
     },
+    "RatMerchant": {
+      "Merchant_ItemPickedUp": ["Fine choice.", "Ah, yes.", "That's handy!"]
+    },
     "GreatKingRat": {
       "Spawned": [ "This evil rat will fight." ]
     }
@@ -87,6 +90,16 @@
     "GKR_JustMet_Friend": {
       "Face": "GreatKingRatCalm",
       "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
+      "Next": ""
+    },
+    "Merchant_Hello": {
+      "Face": "RatMerchant",
+      "Lines": [ "Hello and welcome to my shop.", "Feel free to browse." ],
+      "Next": ""
+    },
+    "Merchant_Pay": {
+      "Face": "RatMerchant",
+      "Lines": [ "Let's see..." ],
       "Next": ""
     }
   },

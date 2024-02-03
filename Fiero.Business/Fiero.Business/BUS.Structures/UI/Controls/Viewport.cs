@@ -218,8 +218,12 @@ namespace Fiero.Business
                         layers[drawable.Render.Layer] += tex =>
                         {
                             var spriteName = drawable.Render.Sprite;
+                            var borderColor = drawable.Render.BorderColor;
+                            var label = drawable.Render.Label;
                             if (drawable.TryCast<Item>(out var item))
+                            {
                                 spriteName = item.ItemProperties.ItemSprite ?? spriteName;
+                            }
                             if (Resources.Sprites.TryGet(drawable.Render.Texture, spriteName, drawable.Render.Color, out var spriteDef, rngSeed))
                             {
                                 using var sprite = new Sprite(spriteDef);
@@ -234,6 +238,30 @@ namespace Fiero.Business
                                     sprite.Color = sprite.Color.AddRgb(-64, -64, -64);
                                 }
                                 tex.Draw(sprite, states);
+                                if (borderColor != null)
+                                {
+                                    using var highlight = new RectangleShape(ViewTileSize.V - Coord.PositiveOne * 2)
+                                    {
+                                        Position = sprite.Position + Coord.PositiveOne,
+                                        Origin = sprite.Origin.ToVec() * sprite.Scale.ToVec(),
+                                        FillColor = new(0, 0, 0, 0),
+                                        OutlineColor = Resources.Colors.Get(borderColor.Value),
+                                        OutlineThickness = 1
+                                    };
+                                    tex.Draw(highlight, states);
+                                }
+                                if (label != null)
+                                {
+                                    var labelColor = borderColor ?? drawable.Render.Color;
+                                    var font = Resources.Fonts.Get(FontName.Monospace);
+                                    var text = new BitmapText(font, label)
+                                    {
+                                        Position = sprite.Position.ToCoord() - ViewTileSize.V / 2
+                                            - new Coord(0, font.Size.Y + 1),
+                                        FillColor = Resources.Colors.Get(labelColor)
+                                    };
+                                    tex.Draw(text, states);
+                                }
                             }
                         };
                         // Draw active effects

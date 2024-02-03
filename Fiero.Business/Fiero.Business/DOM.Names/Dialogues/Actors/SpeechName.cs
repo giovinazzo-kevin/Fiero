@@ -1,9 +1,10 @@
 ﻿namespace Fiero.Business
 {
-    public enum GenericSpeechDialogueName
+    public enum SpeechName
     {
         Spawned,
         Attacking,
-        Attacked
+        Attacked,
+        Merchant_ItemPickedUp
     }
 }

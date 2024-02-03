@@ -67,11 +67,11 @@
             || prefab is Corridor;
 
 
-        protected abstract PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, EntityBuilder<Actor>>> pool);
+        protected abstract PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool);
         protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool);
         protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
 
-        protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, EntityBuilder<Actor>>> enemyPool)
+        protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> enemyPool)
         {
             if (room.AllowMonsters)
             {
@@ -95,7 +95,7 @@
             {
                 // Add upstairs and downstairs to respective floors
                 var emptyTiles = ctx.GetEmptyTiles()
-                    .Where(t => t.Name == TileName.Room && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
+                    .Where(t => (t.Name == TileName.Room || t.Name == TileName.Shop) && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
                     .Select(x => x.Position)
                     .Shuffle(Rng.Random);
                 if (!emptyTiles.Any())

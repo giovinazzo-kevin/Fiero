@@ -23,7 +23,7 @@ namespace Fiero.Core
             base.Repaint(target, states);
             if (Checked.V)
             {
-                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
+                using var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
                 {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
                     FillColor = Accent,
@@ -34,7 +34,7 @@ namespace Fiero.Core
             }
             else
             {
-                var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
+                using var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
                 {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
                     FillColor = Background,

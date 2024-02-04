@@ -15,7 +15,7 @@ namespace Fiero.Business
         [NonTerm]
         public IDictionary<string, DialogueNode> Choices { get; init; }
 
-        public DialogueNode Format(IList<string> args)
+        public DialogueNode Format(IList<object> args)
         {
             var newTitle = Title;
             var newLines = Lines.ToArray();
@@ -24,15 +24,16 @@ namespace Fiero.Business
             for (int i = 0; i < args.Count; i++)
             {
                 var placeholder = $"{{{i}}}";
-                newTitle = newTitle.Replace(placeholder, args[i]);
+                var arg = $"{args[i]}";
+                newTitle = newTitle.Replace(placeholder, arg);
                 for (int l = 0; l < Lines.Length; l++)
                 {
-                    newLines[l] = newLines[l].Replace(placeholder, args[i]);
+                    newLines[l] = newLines[l].Replace(placeholder, arg);
                 }
                 for (int c = 0; c < Choices.Count; c++)
                 {
                     var n = newChoices[c];
-                    newChoices[c] = new(n.Key.Replace(placeholder, args[i]), n.Value);
+                    newChoices[c] = new(n.Key.Replace(placeholder, arg), n.Value);
                 }
             }
             return new DialogueNode(Id, Face, newTitle, newLines, Cancellable, Next, new Dictionary<string, DialogueNode>(newChoices));

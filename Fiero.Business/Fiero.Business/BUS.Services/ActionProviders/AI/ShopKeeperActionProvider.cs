@@ -1,195 +1,225 @@
 ﻿namespace Fiero.Business
 {
     [TransientDependency]
-    public class ShopKeeperActionProvider(MetaSystem sys) : AiActionProvider(sys)
+    public class ShopKeeperActionProvider : AiActionProvider
     {
-        public readonly record struct ShopDef(Location Home, Room Room);
-
+        public readonly record struct ShopDef(Location Home, Room Room, string OwnerTag);
+        public readonly record struct DebtDef(int PlayerId, int AmountOwed);
         public ShopDef Shop { get; set; }
-        private Actor trackedPlayer;
+        public Actor ShopKeeper { get; set; }
+        private readonly List<Actor> playersInShop = new();
+        private readonly List<Item> itemsBeingSold = new();
+        private readonly Dictionary<int, DebtDef> debtTable = new();
 
-        void TrackPlayer(Actor shopKeeper, Actor player)
+        private bool IsInShopArea(Coord c)
+            => Shop.Room.GetRects().Any(r => r.Contains(c.X, c.Y))
+            && Systems.Get<DungeonSystem>().GetTileAt(Shop.Home.FloorId, c) is { TileProperties.Name: TileName.Shop };
+
+        public ShopKeeperActionProvider(MetaSystem sys) : base(sys)
         {
-            if (trackedPlayer != null)
-                return;
-            trackedPlayer = player;
+            var entityBuilders = sys.Resolve<GameEntityBuilders>();
             Systems.Get<ActionSystem>().ItemPickedUp.SubscribeUntil(e =>
             {
-                if (e.Actor != player)
-                    return false;
-                if (e.Item.Render.BorderColor == ColorName.LightMagenta)
+                if (playersInShop.Contains(e.Actor))
                 {
-                    e.Item.Render.BorderColor = null;
-                    e.Item.Render.Label = null;
+                    StoreDebt(e.Actor, e.Item, pickedUp: true);
                 }
-                else if (e.Item.ItemProperties.IsFromShop &&
-                    Chance.OneIn(10)
-                    && Systems.Resolve<GameResources>().GetSpeechBubble(shopKeeper, SpeechName.Merchant_ItemPickedUp, out var speech))
-                {
-                    Systems.Get<RenderSystem>().AnimateViewport(blocking: false, shopKeeper, speech.Animation);
-                }
-                return trackedPlayer == null;
+                return ShopKeeper != null && ShopKeeper.IsInvalid();
             });
             Systems.Get<ActionSystem>().ItemDropped.SubscribeUntil(e =>
             {
-                if (e.Actor != player)
-                    return false;
-                if (!e.Item.ItemProperties.IsFromShop)
+                if (playersInShop.Contains(e.Actor))
                 {
-                    e.Item.Render.BorderColor = ColorName.LightMagenta;
-                    e.Item.Render.Label = $"${e.Item.ItemProperties.SellValue}";
+                    StoreDebt(e.Actor, e.Item, pickedUp: false);
                 }
-                return trackedPlayer == null;
+                return ShopKeeper != null && ShopKeeper.IsInvalid();
+            });
+            // Keep track of players entering and leaving the shop
+            Systems.Get<ActionSystem>().ActorMoved.SubscribeUntil(e =>
+            {
+                if (ShopKeeper == null || ShopKeeper.IsInvalid())
+                    return true;
+                if (!playersInShop.Contains(e.Actor)
+                && e.Actor.IsPlayer() && IsInShopArea(e.Actor.Position()))
+                {
+                    OnPlayerEnteredShop(e.Actor);
+                }
+                else if (playersInShop.Contains(e.Actor)
+                && e.Actor.IsPlayer() && !IsInShopArea(e.Actor.Position()))
+                {
+                    OnPlayerLeftShop(e.Actor);
+                }
+                return false;
+            });
+            // Keep track of players entering and leaving the shop
+            Systems.Get<DialogueSystem>().DialogueTriggered.SubscribeUntil(e =>
+            {
+                if (e.Listeners.OfType<Actor>().FirstOrDefault(x => x.IsPlayer()) is not Actor player
+                || !debtTable.TryGetValue(player.Id, out var debt))
+                    return ShopKeeper != null && ShopKeeper.IsInvalid();
+                switch (e.Node.Id)
+                {
+                    case "Merchant_Transact":
+                        var playerGold = player.Inventory.GetResources()
+                            .SingleOrDefault(r => r.ResourceProperties.Name == ResourceName.Gold)
+                            ?? entityBuilders.Resource_Gold(amount: 0)
+                                .Build();
+                        // shopkeeper pays player
+                        if (debt.AmountOwed < 0)
+                        {
+                            playerGold.ResourceProperties.Amount -= debt.AmountOwed;
+                            // If the player didn't have any gold
+                            if (!player.Inventory.GetResources().Contains(playerGold))
+                            {
+                                // Try to put it in their inventory or drop it on the ground
+                                if (!player.Inventory.TryPut(playerGold, out _))
+                                {
+                                    playerGold.Physics.Position = player.Position();
+                                    Systems.Get<DungeonSystem>().AddItem(Shop.Home.FloorId, playerGold);
+                                }
+                            }
+                            debtTable.Remove(player.Id);
+                            UntagItems(player);
+                        }
+                        // player pays shopkeeper
+                        else
+                        {
+                            if (playerGold.ResourceProperties.Amount < debt.AmountOwed)
+                            {
+                                ShopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, "Merchant_CantAfford")
+                                { Arguments = [debt.AmountOwed - playerGold.ResourceProperties.Amount] });
+                            }
+                            else
+                            {
+                                playerGold.ResourceProperties.Amount -= debt.AmountOwed;
+                                if (playerGold.ResourceProperties.Amount == 0)
+                                    player.Inventory.TryTake(playerGold);
+                                UntagItems(player);
+                            }
+                        }
+                        break;
+                    case "Merchant_Thief":
+                        // now you've done it
+                        Systems.Get<FactionSystem>().SetBilateralRelation(ShopKeeper, player, StandingName.Hated);
+                        break;
+                }
+                return ShopKeeper != null && ShopKeeper.IsInvalid();
+            });
+            // Killing the shopkeeper grants the player ownership over the shop items
+            Systems.Get<ActionSystem>().ActorDied.SubscribeUntil(e =>
+            {
+                if (e.Actor != ShopKeeper)
+                    return false;
+                foreach (var player in playersInShop)
+                    UntagItems(player);
+                playersInShop.Clear();
+                // Also untag any shop items lying on the ground
+                var shopItems = Systems.Get<DungeonSystem>()
+                    .GetAllItems(Shop.Home.FloorId)
+                    .Where(i => i.ItemProperties.OwnerTag == Shop.OwnerTag);
+                foreach (var item in shopItems)
+                {
+                    item.ItemProperties.OwnerTag = null;
+                    ClearLabel(item);
+                }
+                return true;
             });
         }
 
-        bool PaymentSequence(Actor shopKeeper, Actor player)
+        protected void UntagItems(Actor player)
         {
-            var ui = Systems.Resolve<GameUI>();
-            var floor = Systems.Get<DungeonSystem>();
-
-            var pos = shopKeeper.Position();
-            var pPos = player.Position();
-            // The player is trying to leave the shop
-            if (!Shop.Room.GetRects().Any(r => r.Contains(pPos.X, pPos.Y)))
+            foreach (var item in player.Inventory.GetItems())
             {
-                var itemsTaken = player.Inventory.GetItems()
-                    .Where(i => i.ItemProperties.IsFromShop)
-                    .ToHashSet();
-                var itemsLeft = Shop.Room.GetPointCloud()
-                    .SelectMany(p => floor.GetItemsAt(Shop.Home.FloorId, p))
-                    .Where(i => !i.ItemProperties.IsFromShop)
-                    .ToHashSet();
-                if (itemsTaken.Count == 0 && itemsLeft.Count == 0)
-                    return true; // player is just passing 
-                if (shopKeeper.DistanceFrom(pPos) > 3)
+                if (item.ItemProperties.OwnerTag == Shop.OwnerTag)
                 {
-                    TpNextToPlayer(); // not so fast!
-                }
-                var costBuy = itemsTaken.Sum(x => x.ItemProperties.BuyValue);
-                var costSell = itemsLeft.Sum(x => x.ItemProperties.SellValue);
-                var owedGold = costBuy - costSell;
-                var whichDialogue = owedGold switch
-                {
-                    > 0 => "",
-                    < 0 => "",
-                    0 => ""
-                };
-
-                var sellMsg = costSell > 0 ? $"\nFor your items, I can give you ${costSell}." : "";
-                var buyMsg = costBuy > 0 ? $"\nThe items you bought amount to ${costBuy}." : "";
-                var totalMsg = costSell > 0 && costBuy > 0 ?
-                    owedGold > 0
-                        ? $"\nSo... You owe me ${owedGold}, thank you."
-                        : $"\nSo... I owe you ${-owedGold}, here."
-                    : "";
-                var message = $"Let's see.{sellMsg}{buyMsg}{totalMsg}";
-                var opt_pay = owedGold > 0 ? "<Buy>" : "<Accept>";
-                var opt_dontpay = "<Steal>";
-                var choices = new List<string>() { opt_pay };
-                if (owedGold > 0)
-                    choices.Add(opt_dontpay);
-                var modal = ui.NecessaryChoice(choices.ToArray(), message, "Shop");
-                modal.OptionChosen += (e, option) =>
-                {
-                    var ok = true;
-                    var angry = option.Equals(opt_dontpay);
-                    if (!angry)
-                    {
-                        if (owedGold > 0)
-                        {
-                            var playerGold = player.Inventory.GetResources()
-                                .Where(x => x.ResourceProperties.Name == ResourceName.Gold)
-                                .SingleOrDefault();
-                            var goldLeft = (playerGold?.ResourceProperties.Amount ?? 0) - owedGold;
-                            if (goldLeft < 0)
-                            {
-                                shopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, "Merchant_CantAfford")
-                                {
-                                    Arguments = [(-goldLeft).ToString()]
-                                });
-                                ok = false;
-                            }
-                        }
-                    }
-                    if (angry)
-                    {
-                        Systems.Get<FactionSystem>()
-                            .SetBilateralRelation(shopKeeper, player, StandingName.Hated);
-                    }
-                    if (ok)
-                    {
-                        foreach (var item in itemsTaken)
-                        {
-                            item.Render.BorderColor = null;
-                            item.Render.Label = null;
-                            item.ItemProperties.IsFromShop = false;
-                        }
-                        foreach (var item in itemsLeft)
-                        {
-                            item.Render.BorderColor = ColorName.LightCyan;
-                            item.Render.Label = $"${item.ItemProperties.BuyValue}";
-                            item.ItemProperties.IsFromShop = true;
-                        }
-                    }
-                };
-                return true;
-            }
-            return false;
-
-            void TpNextToPlayer()
-            {
-                var nextToPlayer = Shapes.Neighborhood(pPos, 5)
-                    .Shuffle(Rng.Random)
-                    .Where(x => !floor.GetActorsAt(Shop.Home.FloorId, x).Any()
-                            && (floor.GetTileAt(Shop.Home.FloorId, x)?.IsWalkable(shopKeeper) ?? false))
-                    .OrderBy(x => x.DistSq(pPos))
-                    .ToList();
-                if (nextToPlayer.Count != 0)
-                {
-                    Systems.Get<ActionSystem>().ActorTeleporting.HandleOrThrow(new(shopKeeper, pos, nextToPlayer[0]));
+                    item.ItemProperties.OwnerTag = null;
+                    ClearLabel(item);
                 }
             }
+            foreach (var item in itemsBeingSold)
+            {
+                item.ItemProperties.OwnerTag = Shop.OwnerTag;
+                SetBuyLabel(item);
+            }
+            itemsBeingSold.Clear();
+        }
+
+        protected static void SetSellLabel(Item item)
+        {
+            item.Render.Label = $"${item.GetSellValue()}";
+            item.Render.BorderColor = ColorName.LightMagenta;
+        }
+        protected static void SetBuyLabel(Item item)
+        {
+            item.Render.Label = $"${item.GetBuyValue()}";
+            item.Render.BorderColor = ColorName.LightCyan;
+        }
+
+        protected static void ClearLabel(Item item)
+        {
+            item.Render.Label = null;
+            item.Render.BorderColor = null;
+        }
+
+        protected void StoreDebt(Actor player, Item item, bool pickedUp)
+        {
+            if (!debtTable.TryGetValue(player.Id, out var debt))
+                debt = new(player.Id, 0);
+            var isFromShop = item.ItemProperties.OwnerTag == Shop.OwnerTag;
+            var value = isFromShop
+                ? item.GetBuyValue()
+                : -item.GetSellValue();
+            if (!pickedUp && isFromShop || pickedUp && !isFromShop)
+                value = -value;
+            if (pickedUp && !isFromShop)
+            {
+                ClearLabel(item);
+                itemsBeingSold.Remove(item);
+            }
+            else if (!pickedUp && !isFromShop)
+            {
+                SetSellLabel(item);
+                itemsBeingSold.Add(item);
+            }
+            debtTable[player.Id] = debt with { AmountOwed = debt.AmountOwed + value };
+        }
+
+        protected void OnPlayerLeftShop(Actor player)
+        {
+            playersInShop.Remove(player);
+            if (!debtTable.TryGetValue(player.Id, out var debt) || debt.AmountOwed == 0)
+                return; // player is just passing
+            var nodeChoice = debt.AmountOwed > 0 ? "Merchant_YouOweMe" : "Merchant_IOweYou";
+            ShopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, nodeChoice)
+            {
+                Arguments = [Math.Abs(debt.AmountOwed)]
+            });
+        }
+
+        protected void OnPlayerEnteredShop(Actor player)
+        {
+            playersInShop.Add(player);
         }
 
         protected override IAction Wander(Actor a)
         {
-            var pos = a.Position();
-            if (trackedPlayer != null)
-            {
-                if (PaymentSequence(a, trackedPlayer))
-                    trackedPlayer = null;
-            }
-
-            if (Shop.Room.GetRects().Any(r => r.Contains(pos.X, pos.Y)))
-            {
-                if (NearbyAllies.Values
-                    .Where(x => x.IsPlayer())
-                    .FirstOrDefault() is { } player)
-                {
-                    // At this point, the shopkeeper has noticed the player and will follow them around.
-                    if (a.DistanceFrom(player) > 2 && a.CanSee(player))
-                        TryPushObjective(a, player);
-                    TrackPlayer(a, player);
-                }
-            }
+            var floor = Systems.Get<DungeonSystem>();
+            if (playersInShop.Count > 0)
+                TryPushObjective(a, Rng.Random.Choose(playersInShop));
             else
-            {
-                TryPushObjective(a, Systems.Get<DungeonSystem>().GetTileAt(Shop.Home.FloorId, Shop.Home.Position));
-            }
+                TryPushObjective(a, floor.GetTileAt(Shop.Home.FloorId, Shop.Home.Position));
             if (TryFollowPath(a, out var action))
             {
                 return action;
             }
-            if (a.Ai.Target == null && RepathChance.Check(Rng.Random))
-            {
-                Repath(a);
-                if (TryFollowPath(a, out action))
-                {
-                    return action;
-                }
-            }
             return new WaitAction();
+        }
+
+        public override IAction GetIntent(Actor a)
+        {
+            if (!ShopKeeper.IsInvalid() && ShopKeeper != a)
+                throw new InvalidOperationException();
+            return base.GetIntent(a);
         }
     }
 }

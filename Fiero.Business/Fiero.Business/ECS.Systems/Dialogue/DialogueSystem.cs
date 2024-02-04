@@ -55,7 +55,7 @@ namespace Fiero.Business
                     {
                         var node = Dialogues.GetDialogue(trigger.Node)
                             .Format(trigger.Arguments);
-                        trigger.OnTrigger();
+                        trigger.OnTrigger(node);
                         var list = listeners.ToArray();
                         _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
                         var modal = UI.Dialogue(trigger, node, speaker, list);

@@ -79,6 +79,7 @@ namespace Fiero.Business
 
         public void Reset()
         {
+            Window.Close(ModalWindowButton.ImplicitYes);
             Window.Open("");
             UI.Open(DeveloperConsole);
             DeveloperConsole.Hide();

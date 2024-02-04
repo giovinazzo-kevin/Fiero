@@ -1,0 +1,100 @@
+﻿{
+  "Shrine_Urist": {
+    "Face": "GreatKingRatDead",
+    "Title": "$God.Urist.Name$",
+    "Lines": [ "$Dialogue.Shrine.YouOfferAPrayerToUrist$,", "$God.Urist.Description$." ],
+    "Cancellable": true,
+    "Choices": [
+      {
+        "Line": "$Dialogue.Shrine.AcquireAWeapon_$",
+        "Next": "Shrine_Urist_Acquire"
+      }
+    ],
+    "Next": ""
+  },
+  "Shrine_Urist_Acquire": {
+    "Face": "GreatKingRatDead",
+    "Lines": [ "$Dialogue.Shrine.UristGrantsYouAWeapon$" ],
+    "Next": ""
+  },
+  "Rat_TalkFriend": {
+    "Lines": [ "What's up?" ]
+  },
+  "Rat_TalkFoe": {
+    "Lines": [ "I don't like you." ]
+  },
+  "GKR_JustMet": {
+    "Face": "GreatKingRatCalm",
+    "Title": "The Great King Rat says 'Hello'",
+    "Lines": [ "I am cheesed to meet you!", "And who might you be?" ],
+    "Choices": [
+      {
+        "Line": "I'm an enemy of the Rats.",
+        "Next": "GKR_JustMet_Enemy"
+      },
+      {
+        "Line": "I'm a friend of the Rats.",
+        "Next": "GKR_JustMet_Friend"
+      },
+      {
+        "Line": "I'm a nobody."
+      },
+      {
+        "Line": "I'm a developer."
+      }
+    ],
+    "Next": ""
+  },
+  "GKR_JustMet_Enemy": {
+    "Face": "GreatKingRatSmirk",
+    "Lines": [ "Ha! A CAT such as yourself, declaring", "themselves enemy of the Rats?", "Very well. We'll see about that." ],
+    "Next": ""
+  },
+  "GKR_JustMet_Friend": {
+    "Face": "GreatKingRatCalm",
+    "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
+    "Next": ""
+  },
+  "Merchant_Hello": {
+    "Face": "RatMerchant",
+    "Lines": [ "Hello and welcome to my shop.", "Feel free to browse." ],
+    "Next": ""
+  },
+  "Merchant_YouOweMe": {
+    "Face": "RatMerchant",
+    "Lines": [ "$Dialogue.Merchant.LetsSee$", "$Dialogue.Merchant.YouOweMe$ ${0}." ],
+    "Choices": [
+      {
+        "Line": "$Dialogue.Merchant.Pay_$",
+        "Next": "Merchant_Transact"
+      },
+      {
+        "Line": "$Dialogue.Merchant.Steal_$",
+        "Next": "Merchant_Thief"
+      }
+    ]
+  },
+  "Merchant_IOweYou": {
+    "Face": "RatMerchant",
+    "Lines": [ "$Dialogue.Merchant.LetsSee$", "$Dialogue.Merchant.IOweYou$ ${0}." ],
+    "Choices": [
+      {
+        "Line": "$Dialogue.Merchant.Accept$",
+        "Next": "Merchant_Transact"
+      }
+    ]
+  },
+  "Merchant_Transact": {
+    "Face": "RatMerchant",
+    "Lines": [ "$Dialogue.Merchant.PleasureDoingBusiness$" ]
+  },
+  "Merchant_Thief": {
+    "Face": "RatMerchant",
+    "Lines": [ "$Dialogue.Merchant.Thief$", "$Dialogue.Merchant.YouWillPay$" ]
+  },
+  "Merchant_CantAfford": {
+    "Face": "RatMerchant",
+    "Lines": [ "$Dialogue.Merchant.WaitAMinute$", "$Dialogue.Merchant.YouCantAffordMyMerchandise$", "$Dialogue.Merchant.YouStillOweMe$ ${0}!!" ],
+    "Next": "Merchant_Thief"
+  }
+}

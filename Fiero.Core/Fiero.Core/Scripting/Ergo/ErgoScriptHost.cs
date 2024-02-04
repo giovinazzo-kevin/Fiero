@@ -99,6 +99,7 @@ namespace Fiero.Core
             return true;
         }
 
+
         public bool Observe(Script sender, GameDataStore store, Script.DataHook datum, object oldValue, object newValue)
         {
             if (sender is not ErgoScript ergoScript)

@@ -1,9 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class Corridor : ThemedFloorGenerationPrefab
     {
@@ -144,7 +139,7 @@ namespace Fiero.Business
             var startMiddle = (Start.Edge.Left + Start.Edge.Right) / 2;
             var endMiddle = (End.Edge.Left + End.Edge.Right) / 2;
             if (start
-                && Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle)
+                && Start.Owner.Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == startMiddle)
                 && (EffectiveStartThickness) % 2 == 1) // don't draw doors when the thickness is even: they're ugly
             {
                 DrawDoorAndFrame(Start);
@@ -154,7 +149,7 @@ namespace Fiero.Business
                 DrawOpenFrame(Start);
             }
             if (end
-                && Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == endMiddle)
+                && End.Owner.Theme.DoorChance.Check() && !ctx.GetObjects().Any(obj => obj.Position == endMiddle)
                 && (EffectiveEndThickness) % 2 == 1) // TODO: Add double door for 2-wide?
             {
                 DrawDoorAndFrame(End);

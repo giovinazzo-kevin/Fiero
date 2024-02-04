@@ -325,7 +325,7 @@ namespace Fiero.Core
         protected virtual void DrawBackground(RenderTarget target, RenderStates states)
         {
             var outline = new Coord(OutlineThickness.V, OutlineThickness.V);
-            var rect = new RectangleShape((BorderRenderSize - outline * 2).ToVector2f())
+            using var rect = new RectangleShape((BorderRenderSize - outline * 2).ToVector2f())
             {
                 Position = (BorderRenderPos + outline).ToVector2f(),
                 FillColor = Background,

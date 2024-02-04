@@ -30,83 +30,37 @@
       "Attacked": []
     },
     "RatMerchant": {
-      "Merchant_ItemPickedUp": ["Fine choice.", "Ah, yes.", "That's handy!"]
+      "Merchant_ItemPickedUp": [ "Fine choice.", "Ah, yes.", "That's handy!" ]
     },
     "GreatKingRat": {
       "Spawned": [ "This evil rat will fight." ]
     }
   },
   "Dialogue": {
-    "Shrine_Urist": {
-      "Face": "GreatKingRatDead",
-      "Lines": [ "You offer a prayer to Urist,", "god of the forge" ],
-      "Cancellable": true,
-      "Choices": [
-        {
-          "Line": "Acquire a weapon",
-          "Next": "Shrine_Urist_Acquire"
-        }
-      ],
-      "Next": ""
+    "Shrine": {
+      "YouOfferAPrayerToUrist": "You offer a prayer to Urist",
+      "UristGrantsYouAWeapon": "Urist grants you a weapon!",
+      "AcquireAWeapon_": "<Acquire a weapon>"
     },
-    "Shrine_Urist_Acquire": {
-      "Face": "GreatKingRatDead",
-      "Lines": [ "Urist grants you a weapon!" ],
-      "Next": ""
-    },
-    "Rat_TalkFriend": {
-      "Lines": [ "What's up?" ]
-    },
-    "Rat_TalkFoe": {
-      "Lines": [ "I don't like you." ]
-    },
-    "GKR_JustMet": {
-      "Face": "GreatKingRatCalm",
-      "Title": "The Great King Rat says 'Hello'",
-      "Lines": [ "I am cheesed to meet you!", "And who might you be?" ],
-      "Choices": [
-        {
-          "Line": "I'm an enemy of the Rats.",
-          "Next": "GKR_JustMet_Enemy"
-        },
-        {
-          "Line": "I'm a friend of the Rats.",
-          "Next": "GKR_JustMet_Friend"
-        },
-        {
-          "Line": "I'm a nobody."
-        },
-        {
-          "Line": "I'm a developer."
-        }
-      ],
-      "Next": ""
-    },
-    "GKR_JustMet_Enemy": {
-      "Face": "GreatKingRatSmirk",
-      "Lines": [ "Ha! A CAT such as yourself, declaring", "themselves enemy of the Rats?", "Very well. We'll see about that." ],
-      "Next": ""
-    },
-    "GKR_JustMet_Friend": {
-      "Face": "GreatKingRatCalm",
-      "Lines": [ "You don't look like a rat to me.", "But we can be friends." ],
-      "Next": ""
-    },
-    "Merchant_Hello": {
-      "Face": "RatMerchant",
-      "Lines": [ "Hello and welcome to my shop.", "Feel free to browse." ],
-      "Next": ""
-    },
-    "Merchant_Pay": {
-      "Face": "RatMerchant",
-      "Lines": [ "Let's see..." ],
-      "Next": ""
-    },
-    "Merchant_CantAfford": {
-      "Face": "RatMerchant",
-      "Title": "You can't afford it!",
-      "Lines": [ "You can't afford my merchandise!", "You're ${0} short!", "Please drop some items in my shop." ]
-
+    "Merchant": {
+      "LetsSee": "Let's see...",
+      "YouOweMe": "You owe me",
+      "IOweYou": "I owe you",
+      "Thief": "YOU THIEF!!!",
+      "YouWillPay": "You WILL pay one way or another!",
+      "WaitAMinute": "Hey! Wait a minute...",
+      "YouCantAffordMyMerchandise": "You can't afford my merchandise!",
+      "YouStillOweMe": "You still owe me",
+      "Pay_": "<Pay>",
+      "Steal_": "<Steal>",
+      "Accept_": "<Accept>",
+      "Nevermind_": "<Nevermind>"
+    }
+  },
+  "God": {
+    "Urist": {
+      "Name": "Urist",
+      "Description": "God of the Forge"
     }
   },
   "Action": {

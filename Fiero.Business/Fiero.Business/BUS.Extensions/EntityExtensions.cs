@@ -13,6 +13,26 @@ namespace Fiero.Business
                 return entity;
             return default;
         }
+
+        public static int GetAmount(this Item i)
+        {
+            var amount = 1;
+            if (i.TryCast<Consumable>(out var cons))
+                amount = cons.ConsumableProperties.RemainingUses;
+            else if (i.TryCast<Resource>(out var res))
+                amount = res.ResourceProperties.Amount;
+            return amount;
+        }
+
+        public static int GetBuyValue(this Item i)
+        {
+            return i.GetAmount() * i.ItemProperties.BuyValue;
+        }
+        public static int GetSellValue(this Item i)
+        {
+            return i.GetAmount() * i.ItemProperties.SellValue;
+        }
+
         public static double DistanceFrom(this PhysicalEntity a, PhysicalEntity b)
             => a.DistanceFrom(b.Position());
         public static double SquaredDistanceFrom(this PhysicalEntity a, PhysicalEntity b)

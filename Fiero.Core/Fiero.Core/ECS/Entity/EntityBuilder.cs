@@ -124,6 +124,7 @@ namespace Fiero.Core
                         props[key].SetValue(to, val);
                 }
             );
+            builder.Built += (b, e) => Built?.Invoke(b, e);
             return builder;
         }
 

@@ -25,7 +25,8 @@
             Options = options;
             Confirmed += (_, __) =>
             {
-                OptionChosen?.Invoke(this, Options[SelectedIndex]);
+                if (Options.Length > 0)
+                    OptionChosen?.Invoke(this, Options[SelectedIndex]);
             };
 
             _mapping[0] = new(VirtualKeys.N1, "1");

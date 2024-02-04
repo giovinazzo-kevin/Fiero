@@ -9,10 +9,10 @@
         public string DialogueNode { get; private set; }
         string IDialogueTrigger.Node => DialogueNode.ToString();
         public bool Repeatable { get; protected set; }
-        IList<string> IDialogueTrigger.Arguments => Arguments;
-        public string[] Arguments { get; set; } = [];
+        IList<object> IDialogueTrigger.Arguments => Arguments;
+        public object[] Arguments { get; set; } = [];
 
-        public event Action<DialogueTrigger> Triggered;
+        public event Action<DialogueTrigger, DialogueNode> Triggered;
 
         public DialogueTrigger(MetaSystem systems, bool repeatable, params string[] nodeChoices)
         {
@@ -23,9 +23,9 @@
         }
 
         public abstract bool TryTrigger(FloorId floorId, PhysicalEntity speaker, out IEnumerable<DrawableEntity> listeners);
-        public virtual void OnTrigger()
+        public virtual void OnTrigger(DialogueNode node)
         {
-            Triggered?.Invoke(this);
+            Triggered?.Invoke(this, node);
             DialogueNode = Rng.Random.Choose(dialogueOptions);
         }
     }

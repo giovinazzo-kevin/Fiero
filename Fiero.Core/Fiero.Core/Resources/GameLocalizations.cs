@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Fiero.Core
 {
+    [TransientDependency]
     public class GameLocalizations<TLocales>
         where TLocales : struct, Enum
     {
@@ -71,7 +72,9 @@ namespace Fiero.Core
                 var keyParts = key.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
                 try
                 {
-                    value = (T)GetInner(dict, keyParts[0], keyParts[1..]);
+                    value = keyParts.Length == 0
+                        ? (T)(object)dict
+                        : (T)GetInner(dict, keyParts[0], keyParts[1..]);
                     return true;
                 }
                 catch

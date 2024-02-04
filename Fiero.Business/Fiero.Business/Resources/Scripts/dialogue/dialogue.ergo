@@ -6,6 +6,9 @@
 
 dialogue:dialogue_triggered(_{node:_{id:'Shrine_Urist_Acquire'}}):-
 	spawn([weapon_sword{}], [_]).
-
+	
 dialogue:dialogue_triggered(_{node:_{id:'GKR_JustMet'}}):-
+	play_sound(boss_spotted{}).
+
+dialogue:dialogue_triggered(_{node:_{id:'Merchant_Transact'}}):-
 	play_sound(boss_spotted{}).

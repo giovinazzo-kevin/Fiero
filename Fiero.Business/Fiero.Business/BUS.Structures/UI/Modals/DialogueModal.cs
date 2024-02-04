@@ -49,9 +49,31 @@
             ModalWindowStyles? choicesStyle = Node.Choices.Count == 0 ? ModalWindowStyles.None : null;
             Choices = new ChoicePopUp<string>(UI, Resources, [.. Node.Choices.Keys], [], styles: choicesStyle);
             Choices.Cancelled += (_, btn) => Close(btn);
-            Choices.OptionChosen += DialogueModal_OptionChosen;
+            if (Node.Choices.Count == 0)
+            {
+                Closed += (_, btn) =>
+                {
+                    Next(node.Next);
+                };
+            }
+            else
+            {
+                Choices.OptionChosen += DialogueModal_OptionChosen;
+            }
             Choices.Open(string.Empty);
             ChoicesHeight = Choices.Layout.Size.V.Y;
+        }
+
+        void Next(DialogueNode next)
+        {
+            if (next is null)
+                return;
+            if (string.IsNullOrEmpty(next.Title))
+                next.Title = Node.Title;
+            var dialogue = UI.Dialogue(Trigger, next, Speaker, Listeners);
+            dialogue.Layout.Position.V = Layout.Position.V;
+            dialogue.NextChoice += NextChoice;
+            NextChoice?.Invoke(this, next);
         }
 
         public override void Maximize()
@@ -84,12 +106,7 @@
                 actor.Log?.Write($"{player.Info.Name}: {option}");
             if (Node.Choices.TryGetValue(option, out var next) && next != null)
             {
-                if (string.IsNullOrEmpty(next.Title))
-                    next.Title = Node.Title;
-                var dialogue = UI.Dialogue(Trigger, next, Speaker, Listeners);
-                dialogue.Layout.Position.V = Layout.Position.V;
-                dialogue.NextChoice += NextChoice;
-                NextChoice?.Invoke(this, next);
+                Next(next);
             }
         }
 

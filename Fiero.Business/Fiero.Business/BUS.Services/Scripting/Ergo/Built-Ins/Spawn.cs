@@ -25,7 +25,7 @@ public sealed class Spawn : BuiltIn
         Entities = entities;
         BuilderMethods = Builders.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(EntityBuilder<>))
+            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(IEntityBuilder<>))
             .ToDictionary(m => m.Name.ToErgoCase());
     }
 

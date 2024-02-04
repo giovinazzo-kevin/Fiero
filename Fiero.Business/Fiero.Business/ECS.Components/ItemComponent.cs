@@ -8,6 +8,6 @@
         public bool Identified { get; set; }
         public string UnidentifiedName { get; set; }
         public string ItemSprite { get; set; }
-        public bool IsFromShop { get; set; }
+        public string OwnerTag { get; set; }
     }
 }

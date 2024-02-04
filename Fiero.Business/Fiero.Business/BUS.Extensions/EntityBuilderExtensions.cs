@@ -202,12 +202,19 @@ namespace Fiero.Business
                 c.ActionProvider = s.GetInstance<IdleActionProvider>();
             })
                 .AddOrTweak<AiComponent>();
-        public static IEntityBuilder<T> WithShopKeeperAi<T>(this IEntityBuilder<T> builder, Location home, Room room)
+        public static IEntityBuilder<T> WithShopKeeperAi<T>(this IEntityBuilder<T> builder, Location home, Room room, string keeperTag)
             where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
             {
                 var provider = s.GetInstance<ShopKeeperActionProvider>();
-                provider.Shop = new(home, room);
+                provider.Shop = new(home, room, keeperTag);
                 c.ActionProvider = provider;
+
+                builder.Built += OnBuilt;
+                void OnBuilt(IEntityBuilder<T> b, T e)
+                {
+                    builder.Built -= OnBuilt;
+                    provider.ShopKeeper = e;
+                }
             })
                 .AddOrTweak<AiComponent>();
         public static IEntityBuilder<T> WithEnemyAi<T>(this IEntityBuilder<T> builder)
@@ -371,24 +378,13 @@ namespace Fiero.Business
                     c.UnidentifiedName = s.GetInstance<GameResources>().Localizations.Translate(unidentName);
                 c.Identified = String.IsNullOrEmpty(unidentName);
             });
-        public static IEntityBuilder<T> WithShopTag<T>(this IEntityBuilder<T> builder, bool isFromShop = true)
+        public static IEntityBuilder<T> WithShopTag<T>(this IEntityBuilder<T> builder, string ownerTag)
             where T : Item
         {
-            builder = builder.AddOrTweak<ItemComponent>((s, c) =>
-            {
-                c.IsFromShop = isFromShop;
-            })
-            .AddOrTweak<RenderComponent>((s, c) =>
-            {
-                if (isFromShop)
-                    c.BorderColor = ColorName.LightCyan;
-                else if (c.BorderColor == ColorName.LightCyan)
-                    c.BorderColor = null;
-            });
-            builder.Built += (e, f) =>
-            {
-                f.Render.Label = $"${f.ItemProperties.BuyValue}";
-            };
+            builder = builder
+                .AddOrTweak<ItemComponent>((s, c) => c.OwnerTag = ownerTag)
+                .AddOrTweak<RenderComponent>((s, c) => c.BorderColor = ColorName.LightCyan);
+            builder.Built += (e, f) => f.Render.Label = $"${f.GetBuyValue()}";
             return builder;
         }
         public static IEntityBuilder<T> WithEquipmentInfo<T>(this IEntityBuilder<T> builder, EquipmentTypeName type)

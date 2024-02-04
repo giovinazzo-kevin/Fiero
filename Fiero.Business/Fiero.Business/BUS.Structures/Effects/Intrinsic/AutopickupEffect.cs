@@ -13,7 +13,8 @@
                 if (e.Actor == target)
                 {
                     var itemsHere = systems.Get<DungeonSystem>().GetItemsAt(target.FloorId(), target.Position());
-                    if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item)))
+                    if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item))
+                        && item.ItemProperties.OwnerTag == null)
                     {
                         systems.Get<ActionSystem>().ItemPickedUp.Handle(new(target, item));
                     }

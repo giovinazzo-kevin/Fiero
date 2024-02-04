@@ -17,10 +17,12 @@ namespace Fiero.Business
 
         public void LoadDialogues()
         {
-            if (!Localizations.TryGet<JsonElement>($"Dialogue", out var elem))
+            Localizations.CurrentCulture = LocaleName._Dialogue;
+            if (!Localizations.TryGet<JsonElement>(string.Empty, out var elem))
             {
                 throw new ArgumentException();
             }
+            Localizations.CurrentCulture = Localizations.DefaultCulture;
             var definitions = elem.EnumerateObject()
                 .Select(prop =>
                 {
@@ -67,7 +69,10 @@ namespace Fiero.Business
                     {
                         title = String.Empty;
                     }
-                    return new DialogueNodeDefinition(prop.Name, face, title, lines.ToArray(), cancellable, choices.ToArray(), next);
+                    var lTitle = Localizations.Translate(title);
+                    var lLines = lines.Select(Localizations.Translate).ToArray();
+                    var lChoices = choices.Select(x => (Localizations.Translate(x.Line), x.Next)).ToArray();
+                    return new DialogueNodeDefinition(prop.Name, face, lTitle, lLines, cancellable, lChoices, next);
                 })
                 .ToDictionary(x => x.Id);
             var nodes = definitions.Values.Select(d => new DialogueNode(d.Id, d.Face, d.Title, d.Lines, d.Cancellable))
@@ -80,9 +85,9 @@ namespace Fiero.Business
                 }
                 foreach (var choice in definitions[node.Id].Choices)
                 {
-                    if (!String.IsNullOrWhiteSpace(choice.Next))
+                    if (!String.IsNullOrWhiteSpace(choice.Next) && nodes.TryGetValue(choice.Next, out var nextNode))
                     {
-                        node.Choices[choice.Line] = nodes[choice.Next];
+                        node.Choices[choice.Line] = nextNode;
                     }
                     else
                     {

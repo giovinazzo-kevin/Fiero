@@ -22,6 +22,9 @@
     <None Update="README.md">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Dialogues\dialogue.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\entity\entity.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

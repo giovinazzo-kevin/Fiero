@@ -95,7 +95,7 @@
             {
                 // Add upstairs and downstairs to respective floors
                 var emptyTiles = ctx.GetEmptyTiles()
-                    .Where(t => (t.Name == TileName.Room || t.Name == TileName.Shop) && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
+                    .Where(t => (t.Name == TileName.Room) && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
                     .Select(x => x.Position)
                     .Shuffle(Rng.Random);
                 if (!emptyTiles.Any())

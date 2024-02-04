@@ -156,6 +156,7 @@ namespace Fiero.Business
             Sounds.Add(SoundName.Countdown2, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
             Sounds.Add(SoundName.Countdown1, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
 
+            await Localization.LoadJsonAsync(LocaleName._Dialogue, "Resources/Dialogues/dialogue.json");
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");
             await Localization.LoadJsonAsync(LocaleName.Italian, "Resources/Localizations/it/it.json");
             Dialogues.LoadDialogues();
@@ -224,20 +225,20 @@ namespace Fiero.Business
             Director.TrySetState(MenuScene.SceneState.Main);
 #if DEBUG
             // Start logging everything that passes through the global event bus
-            var sieve = Bus.Filter<object>();
-            _ = Task.Run(async () =>
-            {
-                while (true)
-                {
-                    while (sieve.Messages.TryDequeue(out var msg))
-                    {
-                        var log = msg.ToString();
-                        // Console.WriteLine(log);
-                    }
-                    await Task.Delay(100);
-                }
-            }, OffButton.Token);
-            OffButton.Pressed += _ => sieve.Dispose();
+            //var sieve = Bus.Filter<object>();
+            //_ = Task.Run(async () =>
+            //{
+            //    while (true)
+            //    {
+            //        while (sieve.Messages.TryDequeue(out var msg))
+            //        {
+            //            var log = msg.ToString();
+            //            Console.WriteLine(log);
+            //        }
+            //        await Task.Delay(1000);
+            //    }
+            //}, OffButton.Token);
+            //OffButton.Pressed += _ => sieve.Dispose();
 #endif
         }
     }

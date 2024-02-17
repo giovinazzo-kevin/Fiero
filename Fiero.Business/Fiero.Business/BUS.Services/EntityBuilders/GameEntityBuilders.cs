@@ -470,7 +470,7 @@
             ;
         public IEntityBuilder<Actor> NPC_RatMerchant()
             => NPC_Rat()
-            .WithHealth(10)
+            .WithHealth(100)
             .WithName("Rat Merchant")
             .WithNpcInfo(NpcName.RatMerchant)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.RatMerchant), ColorName.White)

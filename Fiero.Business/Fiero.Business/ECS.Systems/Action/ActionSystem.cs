@@ -14,6 +14,8 @@ namespace Fiero.Business
         private readonly DungeonSystem _floorSystem;
         private readonly FactionSystem _factionSystem;
 
+        public int CurrentGeneration { get; private set; }
+
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> GameStarted;
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnStarted;
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnEnded;
@@ -237,6 +239,7 @@ namespace Fiero.Business
 
         public void Reset()
         {
+            CurrentGeneration++;
             ResetImpl();
             _ = GameStarted.Raise(new());
         }

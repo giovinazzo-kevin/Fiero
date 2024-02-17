@@ -59,9 +59,17 @@ namespace Fiero.Business
                         var list = listeners.ToArray();
                         _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
                         var modal = UI.Dialogue(trigger, node, speaker, list);
-                        modal.NextChoice += (m, node) =>
+                        node.ForceClosed += (node) =>
                         {
-                            _ = DialogueTriggered.Raise(new(trigger, node, speaker, list));
+                            modal.Close(ModalWindowButton.ImplicitYes);
+                        };
+                        modal.NextChoice += (nextModal, nextNode) =>
+                        {
+                            nextNode.ForceClosed += (node) =>
+                            {
+                                nextModal.Close(ModalWindowButton.Ok);
+                            };
+                            _ = DialogueTriggered.Raise(new(trigger, nextNode, speaker, list));
                         };
                         modal.Closed += (e, m) =>
                         {

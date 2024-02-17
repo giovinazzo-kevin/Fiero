@@ -15,6 +15,12 @@ namespace Fiero.Business
         [NonTerm]
         public IDictionary<string, DialogueNode> Choices { get; init; }
 
+        public event Action<DialogueNode> ForceClosed;
+        public void ForceClose()
+        {
+            ForceClosed?.Invoke(this);
+        }
+
         public DialogueNode Format(IList<object> args)
         {
             var newTitle = Title;
@@ -36,7 +42,9 @@ namespace Fiero.Business
                     newChoices[c] = new(n.Key.Replace(placeholder, arg), n.Value);
                 }
             }
-            return new DialogueNode(Id, Face, newTitle, newLines, Cancellable, Next, new Dictionary<string, DialogueNode>(newChoices));
+            var newNode = new DialogueNode(Id, Face, newTitle, newLines, Cancellable, Next, new Dictionary<string, DialogueNode>(newChoices));
+            newNode.ForceClosed += _ => ForceClosed?.Invoke(this);
+            return newNode;
         }
 
         public DialogueNode(

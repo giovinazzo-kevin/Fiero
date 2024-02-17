@@ -73,7 +73,7 @@
             var dialogue = UI.Dialogue(Trigger, next, Speaker, Listeners);
             dialogue.Layout.Position.V = Layout.Position.V;
             dialogue.NextChoice += NextChoice;
-            NextChoice?.Invoke(this, next);
+            NextChoice?.Invoke(dialogue, next);
         }
 
         public override void Maximize()

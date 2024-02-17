@@ -18,26 +18,35 @@
         public ShopKeeperActionProvider(MetaSystem sys) : base(sys)
         {
             var entityBuilders = sys.Resolve<GameEntityBuilders>();
-            Systems.Get<ActionSystem>().ItemPickedUp.SubscribeUntil(e =>
+            var action = sys.Get<ActionSystem>();
+            var currentGen = action.CurrentGeneration;
+            action.ItemPickedUp.SubscribeUntil(e =>
             {
+                if (ShopKeeper == null || ShopKeeper.IsInvalid()
+                    || action.CurrentGeneration != currentGen)
+                    return true;
                 if (playersInShop.Contains(e.Actor))
                 {
                     StoreDebt(e.Actor, e.Item, pickedUp: true);
                 }
-                return ShopKeeper != null && ShopKeeper.IsInvalid();
+                return false;
             });
-            Systems.Get<ActionSystem>().ItemDropped.SubscribeUntil(e =>
+            action.ItemDropped.SubscribeUntil(e =>
             {
+                if (ShopKeeper == null || ShopKeeper.IsInvalid()
+                    || action.CurrentGeneration != currentGen)
+                    return true;
                 if (playersInShop.Contains(e.Actor))
                 {
                     StoreDebt(e.Actor, e.Item, pickedUp: false);
                 }
-                return ShopKeeper != null && ShopKeeper.IsInvalid();
+                return false;
             });
             // Keep track of players entering and leaving the shop
-            Systems.Get<ActionSystem>().ActorMoved.SubscribeUntil(e =>
+            action.ActorMoved.SubscribeUntil(e =>
             {
-                if (ShopKeeper == null || ShopKeeper.IsInvalid())
+                if (ShopKeeper == null || ShopKeeper.IsInvalid()
+                    || action.CurrentGeneration != currentGen)
                     return true;
                 if (!playersInShop.Contains(e.Actor)
                 && e.Actor.IsPlayer() && IsInShopArea(e.Actor.Position()))
@@ -54,9 +63,12 @@
             // Keep track of players entering and leaving the shop
             Systems.Get<DialogueSystem>().DialogueTriggered.SubscribeUntil(e =>
             {
+                if (ShopKeeper == null || ShopKeeper.IsInvalid()
+                    || action.CurrentGeneration != currentGen)
+                    return true;
                 if (e.Listeners.OfType<Actor>().FirstOrDefault(x => x.IsPlayer()) is not Actor player
                 || !debtTable.TryGetValue(player.Id, out var debt))
-                    return ShopKeeper != null && ShopKeeper.IsInvalid();
+                    return false;
                 switch (e.Node.Id)
                 {
                     case "Merchant_Transact":
@@ -86,8 +98,10 @@
                         {
                             if (playerGold.ResourceProperties.Amount < debt.AmountOwed)
                             {
+                                e.Node.ForceClose();
                                 ShopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, "Merchant_CantAfford")
                                 { Arguments = [debt.AmountOwed - playerGold.ResourceProperties.Amount] });
+                                Systems.Get<DialogueSystem>().CheckTriggers();
                             }
                             else
                             {
@@ -103,11 +117,13 @@
                         Systems.Get<FactionSystem>().SetBilateralRelation(ShopKeeper, player, StandingName.Hated);
                         break;
                 }
-                return ShopKeeper != null && ShopKeeper.IsInvalid();
+                return false;
             });
             // Killing the shopkeeper grants the player ownership over the shop items
-            Systems.Get<ActionSystem>().ActorDied.SubscribeUntil(e =>
+            action.ActorDied.SubscribeUntil(e =>
             {
+                if (action.CurrentGeneration != currentGen)
+                    return true;
                 if (e.Actor != ShopKeeper)
                     return false;
                 foreach (var player in playersInShop)

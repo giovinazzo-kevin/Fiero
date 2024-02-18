@@ -1,13 +1,11 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class WeaponComponent : EcsComponent
     {
         public WeaponName Type { get; set; }
-        public int BaseDamage { get; set; }
+        public Dice BaseDamage { get; set; }
         public int SwingDelay { get; set; }
 
-        public float DamagePerTurn => (BaseDamage * (100f / (SwingDelay + 100)));
+        public float DamagePerTurn => ((float)BaseDamage.Mean() * (100f / (SwingDelay + 100)));
     }
 }

@@ -58,7 +58,7 @@ namespace Fiero.Business
             EquipmentDisplay = equipmentDisplay;
             EquipmentDisplay.EnableDragging = false;
 
-            Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop);
+            Viewport = new Viewport(ui.Input, MiniMap.FloorSystem, MiniMap.FactionSystem, res, loop, ui.Store);
             Viewport.Background.V = Color.Black;
 
             ActionSystem = act; // TODO: Make CurrentTurn a singleton dependency?

@@ -9,7 +9,7 @@
             WallTile = (c => DungeonTheme.Default.WallTile(c).WithCustomColor(ColorName.Gray)),
             RoomTile = (c => DungeonTheme.Default.RoomTile(c).WithCustomColor(ColorName.Gray)),
             CorridorTile = (c => DungeonTheme.Default.CorridorTile(c).WithCustomColor(ColorName.LightGreen)),
-            RoomSquares = new(2, 4, (d, s) => 1f / Math.Pow(s, 2)),
+            RoomSquares = new(2, 2, (d, s) => 1f / Math.Pow(s, 2)),
         };
 
         public SewersBranchGenerator() : base(DefaultTheme) { }

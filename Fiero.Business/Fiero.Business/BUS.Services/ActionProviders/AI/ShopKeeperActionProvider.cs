@@ -9,7 +9,9 @@
         public Actor ShopKeeper { get; set; }
         private readonly List<Actor> playersInShop = new();
         private readonly List<Item> itemsBeingSold = new();
+        private readonly List<Actor> playersBeingChased = new();
         private readonly Dictionary<int, DebtDef> debtTable = new();
+
 
         private bool IsInShopArea(Coord c)
             => Shop.Room.GetRects().Any(r => r.Contains(c.X, c.Y))
@@ -25,7 +27,7 @@
                 if (ShopKeeper == null || ShopKeeper.IsInvalid()
                     || action.CurrentGeneration != currentGen)
                     return true;
-                if (playersInShop.Contains(e.Actor))
+                if (playersInShop.Contains(e.Actor) && e.Item.ItemProperties.OwnerTag == Shop.OwnerTag)
                 {
                     StoreDebt(e.Actor, e.Item, pickedUp: true);
                 }
@@ -115,6 +117,7 @@
                     case "Merchant_Thief":
                         // now you've done it
                         Systems.Get<FactionSystem>().SetBilateralRelation(ShopKeeper, player, StandingName.Hated);
+                        playersBeingChased.Add(player);
                         break;
                 }
                 return false;
@@ -205,6 +208,8 @@
             playersInShop.Remove(player);
             if (!debtTable.TryGetValue(player.Id, out var debt) || debt.AmountOwed == 0)
                 return; // player is just passing
+            if (playersBeingChased.Contains(player))
+                return; // shopkeeper hates the player
             var nodeChoice = debt.AmountOwed > 0 ? "Merchant_YouOweMe" : "Merchant_IOweYou";
             ShopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, nodeChoice)
             {
@@ -220,7 +225,9 @@
         protected override IAction Wander(Actor a)
         {
             var floor = Systems.Get<DungeonSystem>();
-            if (playersInShop.Count > 0)
+            if (playersBeingChased.Count > 0)
+                TryPushObjective(a, playersBeingChased.Last());
+            else if (playersInShop.Count > 0)
                 TryPushObjective(a, Rng.Random.Choose(playersInShop));
             else
                 TryPushObjective(a, floor.GetTileAt(Shop.Home.FloorId, Shop.Home.Position));

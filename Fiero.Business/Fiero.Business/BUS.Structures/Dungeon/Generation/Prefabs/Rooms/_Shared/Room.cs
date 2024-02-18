@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business
 {

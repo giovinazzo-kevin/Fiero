@@ -1,6 +1,4 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [SingletonDependency(typeof(IUIControlResolver<Viewport>))]
     public class ViewportResolver : UIControlResolver<Viewport>
@@ -19,7 +17,7 @@ namespace Fiero.Business
 
         public override Viewport Resolve(LayoutGrid dom)
         {
-            var view = new Viewport(UI.Input, FloorSystem, FactionSystem, Resources, Loop);
+            var view = new Viewport(UI.Input, FloorSystem, FactionSystem, Resources, Loop, UI.Store);
             view.Background.V = Background;
             view.Foreground.V = Foreground;
             return view;

@@ -181,6 +181,9 @@ namespace Fiero.Business
                     break;
                 case ActionName.Move:
                     ret = HandleMove(t, ref action, ref cost);
+                    // Randomize movement cost slightly
+                    if (cost != null)
+                        cost += (int)(Rng.Random.Between(-1, 1) * cost * 0.1);
                     break;
                 case ActionName.MeleeAttack:
                     ret = HandleMeleeAttack(t, ref action, ref cost);
@@ -293,7 +296,7 @@ namespace Fiero.Business
                     if (type == AttackName.Melee && item.TryCast<Weapon>(out var w))
                     {
                         swingDelay += w.WeaponProperties.SwingDelay;
-                        damage += w.WeaponProperties.BaseDamage;
+                        damage += w.WeaponProperties.BaseDamage.Roll().Sum();
                     }
                     else if (type == AttackName.Ranged && item.TryCast<Projectile>(out var t))
                     {

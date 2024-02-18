@@ -95,7 +95,7 @@
             .WithEquipmentInfo(type)
             ;
 
-        public IEntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, int baseDamage, int swingDelay, int itemRarity, int goldValue, bool twoHanded)
+        public IEntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, Dice baseDamage, int swingDelay, int itemRarity, int goldValue, bool twoHanded)
             where T : Weapon
             => Equipment<T>(twoHanded ? EquipmentTypeName.Weapon2H : EquipmentTypeName.Weapon1H)
             .WithName($"$Item.{type}$")
@@ -615,28 +615,28 @@
 
         #region WEAPONS
         public IEntityBuilder<Weapon> Weapon_Sword()
-            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: 3, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
+            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Sword))
             ;
         public IEntityBuilder<Weapon> Weapon_Dagger()
-            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: 2, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
+            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: new Dice(1, 2), swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Dagger))
             ;
         public IEntityBuilder<Weapon> Weapon_Hammer()
-            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: 5, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
+            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: new Dice(2, 3), swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Hammer))
             ;
         public IEntityBuilder<Weapon> Weapon_Spear()
-            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: 5, swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
+            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100, twoHanded: false)
             .LoadState(nameof(WeaponName.Spear))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()
-            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: 1, swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
+            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: new Dice(1, 1), swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Bow))
             ;
         public IEntityBuilder<Launcher> Weapon_Crossbow()
-            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: 1, swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
+            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: new Dice(2, 1), swingDelay: 5, itemRarity: 10, goldValue: 100, twoHanded: true)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Crossbow))
             ;

@@ -76,5 +76,27 @@
         public void Do(Action<int> @do) => Do(Rng.Random, @do);
         public static void Do(Random rng, int numDice, int numSides, Action<int> @do) => new Dice(numDice, numSides).Do(rng, @do);
         public static void Do(int numDice, int numSides, Action<int> @do) => new Dice(numDice, numSides).Do(@do);
+        public double Mean()
+        {
+            if (Weights == null)
+            {
+                // If no weights are provided, mean is the simple average of all possible rolls
+                return (NumberOfDice * (NumberOfSides + 1) / 2.0) + (NumberOfDice * Bias);
+            }
+            else
+            {
+                // If weights are provided, mean is the sum of weighted averages for each die and face
+                double mean = 0;
+                for (int dieIndex = 0; dieIndex < NumberOfDice; dieIndex++)
+                {
+                    for (int faceIndex = 1; faceIndex <= NumberOfSides; faceIndex++)
+                    {
+                        double weight = Weights(dieIndex, faceIndex);
+                        mean += (faceIndex + Bias) * weight;
+                    }
+                }
+                return mean;
+            }
+        }
     }
 }

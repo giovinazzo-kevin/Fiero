@@ -13,6 +13,7 @@ namespace Fiero.Business
         protected readonly FactionSystem FactionSystem;
         protected readonly GameResources Resources;
         protected readonly GameLoop Loop;
+        protected readonly GameDataStore Store;
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
@@ -30,9 +31,11 @@ namespace Fiero.Business
             DungeonSystem floor,
             FactionSystem faction,
             GameResources res,
-            GameLoop loop
+            GameLoop loop,
+            GameDataStore store
         ) : base(input)
         {
+            Store = store;
             FloorSystem = floor;
             FactionSystem = faction;
             Resources = res;
@@ -155,6 +158,9 @@ namespace Fiero.Business
 
             bool Bake()
             {
+                var tileSize = Store.Get(Data.View.TileSize);
+                var zoom = ViewTileSize.V.X / tileSize;
+
                 var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
                 foreach (var key in Enum.GetValues<RenderLayerName>())
                 {
@@ -264,37 +270,56 @@ namespace Fiero.Business
                                 }
                             }
                         };
-                        // Draw active effects
-                        if (asActor != null && asActor.Effects != null)
+                        if (asActor != null)
                         {
-                            var offs = Coord.Zero;
-                            int _i = 0;
-                            foreach (var effect in asActor.Effects.Active)
+                            // Draw active effects
+                            if (asActor.Effects != null)
                             {
-                                var icon = effect.Name.ToString();
-                                layers[RenderLayerName.ForegroundEffects] += tex =>
+                                var offs = Coord.Zero;
+                                int _i = 0;
+                                foreach (var effect in asActor.Effects.Active)
                                 {
-                                    if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed))
+                                    var icon = effect.Name.ToString();
+                                    layers[RenderLayerName.ForegroundEffects] += tex =>
                                     {
-                                        using var iconSprite = new Sprite(iconDef);
-                                        var iconSize = iconSprite.GetLocalBounds().Size();
-                                        var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
-                                        iconSprite.Position = screenPos + offs - iconSize * scale;
-                                        iconSprite.Origin = new Vec(1f, 1f) * iconSize;
-                                        if (_i++ % 4 == 3)
+                                        if (Resources.Sprites.TryGet(TextureName.Icons, icon, ColorName.White, out var iconDef, rngSeed))
                                         {
-                                            offs += iconSize.ToCoord() * scale * new Coord(0, 1);
-                                            offs *= new Coord(0, 1);
+                                            using var iconSprite = new Sprite(iconDef);
+                                            var iconSize = iconSprite.GetLocalBounds().Size();
+                                            var scale = (iconSprite.Scale = ViewTileSize.V / iconSize / 4).ToCoord();
+                                            iconSprite.Position = screenPos + offs - iconSize * scale;
+                                            iconSprite.Origin = new Vec(1f, 1f) * iconSize;
+                                            if (_i++ % 4 == 3)
+                                            {
+                                                offs += iconSize.ToCoord() * scale * new Coord(0, 1);
+                                                offs *= new Coord(0, 1);
+                                            }
+                                            else
+                                            {
+                                                offs += iconSize.ToCoord() * scale * new Coord(1, 0);
+                                            }
+                                            tex.Draw(iconSprite, states);
                                         }
-                                        else
-                                        {
-                                            offs += iconSize.ToCoord() * scale * new Coord(1, 0);
-                                        }
-                                        tex.Draw(iconSprite, states);
-                                    }
-                                };
+                                    };
 
+                                }
                             }
+                            // Draw HP/MP bars
+                            var hpPct = asActor.ActorProperties.Health?.Percentage ?? 0;
+                            var mpPct = asActor.ActorProperties.Magic?.Percentage ?? 0;
+                            layers[RenderLayerName.ForegroundEffects] += tex =>
+                            {
+                                if (hpPct > 0 && hpPct < 1)
+                                {
+                                    using var hpRect = new RectangleShape()
+                                    {
+                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4),
+                                        FillColor = Resources.Colors.Get(ColorName.LightRed),
+                                        Size = new((ViewTileSize.V.X - zoom * 2) * hpPct, 2)
+                                    };
+                                    tex.Draw(hpRect, states);
+                                }
+                            };
                         }
                     }
                 }

@@ -357,7 +357,7 @@ namespace Fiero.Business
                 c.TargetingFilter = targetFilter;
             });
 
-        public static IEntityBuilder<T> WithWeaponInfo<T>(this IEntityBuilder<T> builder, WeaponName type, int baseDamage, int swingDelay)
+        public static IEntityBuilder<T> WithWeaponInfo<T>(this IEntityBuilder<T> builder, WeaponName type, Dice baseDamage, int swingDelay)
             where T : Weapon => builder.AddOrTweak<WeaponComponent>((s, c) =>
             {
                 c.Type = type;

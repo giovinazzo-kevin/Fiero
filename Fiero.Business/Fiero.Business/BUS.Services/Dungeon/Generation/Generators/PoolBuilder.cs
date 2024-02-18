@@ -37,6 +37,12 @@ namespace Fiero.Business
         private PoolBuilder(ImmutableDictionary<T, GuaranteedWeightedItem<T>> items) => Items = items;
         public PoolBuilder() : this(ImmutableDictionary.Create<T, GuaranteedWeightedItem<T>>()) { }
 
+        public PoolBuilder<T> If(Func<bool> @if, Func<PoolBuilder<T>, PoolBuilder<T>> inner)
+        {
+            if (@if())
+                return inner(this);
+            return this;
+        }
         public PoolBuilder<T> Guarantee(T item, float extraCopyWeight = 0, int minAmount = 1)
         {
             if (minAmount <= 0) throw new ArgumentOutOfRangeException(nameof(minAmount));

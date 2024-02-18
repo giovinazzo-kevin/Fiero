@@ -313,11 +313,21 @@ namespace Fiero.Business
                                 {
                                     using var hpRect = new RectangleShape()
                                     {
-                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4),
+                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4 - 3),
                                         FillColor = Resources.Colors.Get(ColorName.LightRed),
                                         Size = new((ViewTileSize.V.X - zoom * 2) * hpPct, 2)
                                     };
                                     tex.Draw(hpRect, states);
+                                }
+                                if (mpPct > 0 && mpPct < 1)
+                                {
+                                    using var mpRect = new RectangleShape()
+                                    {
+                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4),
+                                        FillColor = Resources.Colors.Get(ColorName.LightBlue),
+                                        Size = new((ViewTileSize.V.X - zoom * 2) * mpPct, 2)
+                                    };
+                                    tex.Draw(mpRect, states);
                                 }
                             };
                         }

@@ -33,9 +33,9 @@
             }
         }
 
-        protected virtual RoomTree BuildTree(Coord mapSize, Coord gridSize)
+        protected virtual RoomTree BuildTree(FloorId id, Coord mapSize, Coord gridSize)
         {
-            var pool = ConfigureRoomPool(new()).Build(capacity: gridSize.Area() * 8);
+            var pool = ConfigureRoomPool(id, new()).Build(capacity: gridSize.Area() * 8);
             var roomSectors = RoomSector.CreateTiling(mapSize, gridSize, Theme.RoomSquares, pool)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)
@@ -68,7 +68,7 @@
 
 
         protected abstract PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool);
-        protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(PoolBuilder<Func<Room>> pool);
+        protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool);
         protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
 
         protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> enemyPool)
@@ -121,7 +121,7 @@
         {
             var mapSize = MapSize(id);
             var gridSize = GridSize(id);
-            var tree = BuildTree(mapSize, gridSize);
+            var tree = BuildTree(id, mapSize, gridSize);
             return builder
                 .WithStep(tree.Draw)
                 .WithStep(ctx => PlaceStairs(ctx, tree, id))

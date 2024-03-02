@@ -861,9 +861,9 @@
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             ;
-        public IEntityBuilder<Tile> Tile_Hole()
-            => Tile(TileName.Hole, ColorName.Gray)
-            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+        public IEntityBuilder<Tile> Tile_WallFront()
+            => Tile(TileName.WallFront, ColorName.Gray)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
             ;
         public IEntityBuilder<Tile> Tile_Room()

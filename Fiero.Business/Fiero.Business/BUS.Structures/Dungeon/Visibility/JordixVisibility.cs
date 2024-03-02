@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     /// <summary>
     /// Kindly adapted from: http://www.adammil.net/blog/v125_Roguelike_Vision_Algorithms.html

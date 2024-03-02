@@ -23,12 +23,12 @@
             CorridorTile: c => new(TileName.Corridor, c),
             ShopTile: c => new(TileName.Shop, c),
             WaterTile: c => new(TileName.Water, c, ColorName.LightBlue),
-            HoleTile: c => new(TileName.Hole, c),
+            HoleTile: c => new(TileName.WallFront, c),
             DoorFeature: (e, c) => e.Feature_Door(),
             Rules: new() {
                 // TODO: Replace with a graphical rule that doesn't actually write to the tile context
                 new((ctx, t) => t.Name == TileName.Wall && (!ctx.TryGetTile(t.Position + Coord.PositiveY, out var below) || below.Name != TileName.Wall),
-                    (ctx, t) => t.WithTileName(TileName.Hole))
+                    (ctx, t) => t.WithTileName(TileName.WallFront))
             },
             CorridorThickness: new(1, 3, (die, side) => 1f / Math.Pow(side, 2)), // thick corridors are rarer
             SecretCorridors: new(0, 0),

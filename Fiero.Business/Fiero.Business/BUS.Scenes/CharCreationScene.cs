@@ -28,6 +28,7 @@ namespace Fiero.Business.Scenes
         protected UIControl Layout { get; private set; }
 
         public readonly LayoutRef<TextBox> PlayerName = new();
+        public readonly LayoutRef<TextBox> Seed = new();
 
 
         public CharCreationScene(
@@ -107,6 +108,12 @@ namespace Fiero.Business.Scenes
                             .End()
                             .Col(id: "playerName")
                                 .Cell(PlayerName, x => x.Text.V = "Player")
+                            .End()
+                            .Col()
+                                .Cell<Label>(x => x.Text.V = L($"$CharCreation.WorldSeed$"))
+                            .End()
+                            .Col(id: "seed")
+                                .Cell(Seed, x => x.Text.V = "")
                             .End()
                         .End()
                         .Row(h: 24, px: true)
@@ -198,8 +205,17 @@ namespace Fiero.Business.Scenes
                 case SceneState.Main:
                     break;
                 case SceneState.Exit_StartGame:
+                    _ = UI.Input.ForceRestoreFocus();
                     Store.SetValue(Data.Player.Name, PlayerName.Control.DisplayText);
                     Store.SetValue(Data.Player.Loadout, selectedLoadout);
+                    if (!string.IsNullOrWhiteSpace(Seed.Control.Text.V))
+                    {
+                        var newRngSeed = Seed.Control.Text.V
+                            .Select(x => (int)x)
+                            .Aggregate((a, b) => a + b * 17);
+                        Store.SetValue(Data.Global.RngSeed, newRngSeed);
+                        Rng.SetGlobalSeed(newRngSeed);
+                    }
                     break;
                 case SceneState.Exit_QuitToMenu:
                     break;

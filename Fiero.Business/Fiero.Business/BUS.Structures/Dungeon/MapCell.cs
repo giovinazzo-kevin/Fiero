@@ -34,11 +34,13 @@
         {
             var cost = 0d;
             if (!IsWalkable(e)) return 1000; // arbitrarily high cost
-            if (e.Physics.Flying && e.Physics.Roots == 0) return 0; // flying units ignore pathing costs unless rooted to the ground
+            if (e.Physics.Phasing) return 1;
+            if (e.Physics.Flying && e.Physics.Roots == 0) return 1; // flying units ignore pathing costs unless rooted to the ground
             cost += Tile.GetCost(e);
             return cost;
         }
         public bool BlocksMovement() => Features.Any(f => f.Physics.BlocksMovement) || Tile.Physics.BlocksMovement;
+        public bool BlocksLight() => Features.Any(f => f.Physics.BlocksLight) || Tile.Physics.BlocksLight;
         public IEnumerable<PhysicalEntity> GetDrawables(VisibilityName visibility = VisibilityName.Visible, bool seen = true)
         {
             yield return Tile;

@@ -17,7 +17,7 @@ namespace Fiero.Business
 
         public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
         public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
-        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(32, 32));
+        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
         public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
@@ -313,9 +313,9 @@ namespace Fiero.Business
                                 {
                                     using var hpRect = new RectangleShape()
                                     {
-                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4 - 3),
+                                        Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4 - zoom - 1),
                                         FillColor = Resources.Colors.Get(ColorName.LightRed),
-                                        Size = new((ViewTileSize.V.X - zoom * 2) * hpPct, 2)
+                                        Size = new((ViewTileSize.V.X - zoom * 2) * hpPct, zoom)
                                     };
                                     tex.Draw(hpRect, states);
                                 }
@@ -325,7 +325,7 @@ namespace Fiero.Business
                                     {
                                         Position = screenPos - ViewTileSize.V / 2 + new Coord(zoom, -ViewTileSize.V.X / 4),
                                         FillColor = Resources.Colors.Get(ColorName.LightBlue),
-                                        Size = new((ViewTileSize.V.X - zoom * 2) * mpPct, 2)
+                                        Size = new((ViewTileSize.V.X - zoom * 2) * mpPct, zoom)
                                     };
                                     tex.Draw(mpRect, states);
                                 }

@@ -836,12 +836,11 @@
             ;
         public IEntityBuilder<Feature> Feature_Door()
             => Feature<Feature>(FeatureName.Door)
+            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             ;
         public IEntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
-            => Feature<Feature>(FeatureName.Door)
-            .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
-            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
+            => Feature_Door()
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, TileName.Wall.ToString(), color)
             ;
         public IEntityBuilder<Portal> Feature_Downstairs(FloorConnection conn)

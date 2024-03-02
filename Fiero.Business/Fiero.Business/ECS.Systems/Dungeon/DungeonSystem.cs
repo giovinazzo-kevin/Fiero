@@ -274,7 +274,7 @@ namespace Fiero.Business
             if (!TryGetFloor(e.FloorId(), out var floor))
                 return true;
             var blocks = Shapes.Line(a, b)
-                .Where(p => !floor.Cells.TryGetValue(p, out var cell) || cell.Tile.Physics.BlocksLight);
+                .Where(p => !floor.Cells.TryGetValue(p, out var cell) || cell.BlocksLight());
             return blocks.Any();
         }
     }

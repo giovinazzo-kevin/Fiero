@@ -42,7 +42,7 @@
             ;
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>
-            new(2, room.GetRects().Count() / 4 + 1, Bias: 0);
+            new(2, room.GetRects().Count() / 4, Bias: 0);
 
     }
 }

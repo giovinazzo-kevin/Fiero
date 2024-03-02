@@ -146,6 +146,7 @@ namespace Fiero.Business.Scenes
                     //.WithIntrinsicTrait(Traits.Invulnerable)
                     //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
                     //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
+                    .Tweak<PhysicsComponent>((s, c) => c.Phasing = true)
                     .WithHealth(10)
                     .Build();
                 Player.TryJoinParty(Player);

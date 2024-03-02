@@ -111,7 +111,8 @@
         {
             var result = new HashSet<Coord>();
             new JordixVisibility(
-                (x, y) => !_cells.TryGetValue(new(x, y), out var cell) || cell.Tile.Physics.BlocksLight || cell.Features.Any(f => f.Physics.BlocksLight),
+                (x, y) =>
+                !_cells.TryGetValue(new(x, y), out var cell) || cell.BlocksLight(),
                 (x, y) => result.Add(new(x, y)),
                 (x, y) => (int)new Coord().DistSq(new(x, y))
             ).Compute(center, radius * radius);

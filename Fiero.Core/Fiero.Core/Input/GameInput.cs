@@ -77,6 +77,16 @@ namespace Fiero.Core
             return !(_focusStolen = false);
         }
 
+        public object ForceRestoreFocus()
+        {
+            if (!_focusStolen)
+                return null;
+            var ret = _focusHolder;
+            _focusHolder = null;
+            _focusStolen = false;
+            return ret;
+        }
+
         public void Clear()
         {
             Array.Clear(_kb1);

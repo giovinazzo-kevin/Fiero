@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Configurations>Debug;Release;Diagnostics</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LightInject" Version="6.6.4" />
+    <PackageReference Include="SFML.Net" Version="2.5.1" />
+    <PackageReference Include="Simplex" Version="2.0.6" />
+    <PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
+    <PackageReference Include="Utf8Json" Version="1.3.7" />
+    <PackageReference Include="ZLogger" Version="1.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Ergo\Ergo\Ergo.csproj" />
+    <ProjectReference Include="..\..\..\Unconcern\Unconcern\Unconcern.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\Scripts\core.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\optin\event.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\optin\data.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\optin\input.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ECS\System\Meta\Events\" />
+    <Folder Include="Resources\Scripts\core\" />
+  </ItemGroup>
+
+</Project>

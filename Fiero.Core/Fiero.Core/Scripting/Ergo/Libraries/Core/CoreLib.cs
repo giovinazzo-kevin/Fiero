@@ -51,6 +51,7 @@ namespace Fiero.Core
             yield return new Get(store);
             yield return new Set(store);
             yield return new KeyState(input);
+            yield return new SimulateKey(input);
             yield return new Raise(meta);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()

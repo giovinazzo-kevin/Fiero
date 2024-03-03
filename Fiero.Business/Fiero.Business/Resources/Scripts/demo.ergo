@@ -1,0 +1,29 @@
+:- module(demo, [start_demo/0, end_demo/0, play_demo/0]).
+:- use_module(input).
+:- subscribe(input, [keyboard_event]).
+:- dynamic(recording_demo/0).
+:- dynamic(demo_frame/2).
+
+start_demo :-
+    \+recording_demo,
+    assertz(recording_demo),
+    retractall(demo_frame(_, _)),
+    write('demo started'), nl.
+
+end_demo :-
+    recording_demo,
+    retractall(recording_demo),
+    write('demo ended'), nl.
+
+play_demo :-
+    \+recording_demo,
+    demo_frame(LastFrame, _),
+    for(I, 0, LastFrame),
+    demo_frame(I, E),
+    input:simulate_key(E).
+
+input:keyboard_event(E) :-
+    recording_demo,
+    (demo_frame(LastFrame, _) ; LastFrame = 0),
+    Frame := LastFrame + 1,
+    assertz(demo_frame(Frame, E)).

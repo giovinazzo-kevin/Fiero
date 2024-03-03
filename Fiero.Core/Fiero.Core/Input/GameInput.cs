@@ -96,6 +96,26 @@ namespace Fiero.Core
             _sw0 = _sw1 = 0;
         }
 
+        public void SimulateKeyDown(VirtualKeys vk)
+        {
+            _kb0[(int)vk] = true;
+        }
+
+        public void SimulateKeyUp(VirtualKeys vk)
+        {
+            _kb0[(int)vk] = false;
+        }
+
+        public void SimulateKeyPress(VirtualKeys vk)
+        {
+            _kb1[(int)vk] = true;
+        }
+
+        public void SimulateKeyRelease(VirtualKeys vk)
+        {
+            _kb1[(int)vk] = false;
+        }
+
         public void Update()
         {
             _mouse = Window.GetMousePosition();

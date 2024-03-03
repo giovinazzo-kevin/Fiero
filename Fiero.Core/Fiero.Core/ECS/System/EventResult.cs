@@ -1,4 +1,4 @@
-﻿namespace Fiero.Business
+﻿namespace Fiero.Core
 {
     public class EventResult
     {

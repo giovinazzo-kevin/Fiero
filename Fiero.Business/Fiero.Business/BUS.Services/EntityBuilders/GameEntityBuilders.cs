@@ -63,6 +63,7 @@
             .WithLogging()
             .WithEffectTracking()
             .WithIntrinsicEffect(new(EffectName.AutoPickup, canStack: false))
+            .WithLikedItems(i => string.IsNullOrEmpty(i.ItemProperties.OwnerTag))
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
             .WithTraitTracking()

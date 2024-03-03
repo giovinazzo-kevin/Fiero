@@ -18,6 +18,7 @@ namespace Fiero.Business
                 {
                     l.OutlineThickness.V = 2;
                     l.OutlineColor.V = UI.GetColor(ColorName.Magenta);
+                    l.Background.V = UI.GetColor(ColorName.UIBackground);
                 }))
             ;
 

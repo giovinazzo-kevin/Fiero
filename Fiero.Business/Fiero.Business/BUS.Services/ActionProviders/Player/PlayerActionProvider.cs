@@ -123,9 +123,9 @@ namespace Fiero.Business
                 var floor = Systems.Get<DungeonSystem>();
                 var visibleItems = a.Fov.VisibleTiles[floorId]
                     .TrySelect(t => (floor.TryGetCellAt(floorId, t, out var c), c))
-                    .SelectMany(c => c.Items.Where(i => a.Ai.LikedItems.Any(f => f(i))))
+                    .SelectMany(c => c.Items.Where(i => a.Ai.LikedItems.Any(f => f(i)) && !a.Ai.DislikedItems.Any(f => f(i))))
                     .ToList();
-                if (visibleItems.Any())
+                if (visibleItems.Count > 0)
                 {
                     TryPushObjective(a, visibleItems.First());
                 }

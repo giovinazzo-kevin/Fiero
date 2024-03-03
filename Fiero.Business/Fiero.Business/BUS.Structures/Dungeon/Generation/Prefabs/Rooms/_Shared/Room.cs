@@ -48,12 +48,15 @@ namespace Fiero.Business
 
         public IEnumerable<RoomConnector> GetConnectors() => Connectors;
 
-        public override void Draw(FloorGenerationContext ctx)
+        protected virtual void DrawRects(FloorGenerationContext ctx)
         {
             foreach (var rect in Rects)
             {
                 ctx.FillBox(rect.Position(), rect.Size(), Theme.RoomTile);
             }
+        }
+        protected virtual void DrawConnectors(FloorGenerationContext ctx)
+        {
             foreach (var conn in Connectors)
             {
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
@@ -64,6 +67,12 @@ namespace Fiero.Business
                     ctx.TryAddFeature("door", p, e => Theme.DoorFeature(e, p));
                 }
             }
+        }
+
+        public override void Draw(FloorGenerationContext ctx)
+        {
+            DrawRects(ctx);
+            DrawConnectors(ctx);
             OnDrawn(ctx);
         }
 

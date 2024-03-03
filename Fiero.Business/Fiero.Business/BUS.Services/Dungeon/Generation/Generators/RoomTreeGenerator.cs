@@ -101,26 +101,39 @@
             }
         }
 
+        protected virtual bool AllowStairsOn(TileName name) => name switch
+        {
+            TileName.Room => true,
+            _ => false
+        };
+
         protected virtual void PlaceStairs(FloorGenerationContext ctx, RoomTree tree, FloorId floorId)
         {
             var centralNode = tree.Nodes
                 .MaxBy(x => x.Centrality);
-            foreach (var conn in ctx.GetConnections())
+            Coord knownStairs = default;
+            foreach (var conn in ctx.GetConnections().OrderBy(c => c.From.Branch).ThenBy(c => c.From.Depth))
             {
                 // Add upstairs and downstairs to respective floors
                 var emptyTiles = ctx.GetEmptyTiles()
-                    .Where(t => (t.Name == TileName.Room) && centralNode.Room.GetRects().Any(r => r.Contains(t.Position.X, t.Position.Y)))
+                    .Where(t => AllowStairsOn(t.Name))
                     .Select(x => x.Position)
                     .Shuffle(Rng.Random);
                 if (!emptyTiles.Any())
                     throw new InvalidOperationException("No empty tiles on which to place stairs");
                 if (conn.From == floorId)
                 {
-                    ctx.TryAddFeature("Downstairs", emptyTiles, e => e.Feature_Downstairs(conn), out _);
+                    var downstairsCandidates = emptyTiles
+                        .OrderByDescending(x => x.DistSq(knownStairs));
+                    ctx.TryAddFeature("Downstairs", downstairsCandidates, e => e.Feature_Downstairs(conn), out knownStairs);
                 }
                 else
                 {
-                    ctx.TryAddFeature("Upstairs", emptyTiles, e => e.Feature_Upstairs(conn), out _);
+                    // Place the upstairs in the most central node of the graph. The downstairs will be placed in the furthest leaf node.
+                    var upstairsCandidates = emptyTiles
+                        .Where(t => centralNode.Room.GetRects().Any(r => r.Contains(t.X, t.Y)))
+                        .OrderByDescending(x => x.DistSq(knownStairs));
+                    ctx.TryAddFeature("Upstairs", upstairsCandidates, e => e.Feature_Upstairs(conn), out knownStairs);
                 }
             }
         }

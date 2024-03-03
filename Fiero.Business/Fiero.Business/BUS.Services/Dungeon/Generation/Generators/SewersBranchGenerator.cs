@@ -24,11 +24,11 @@
             _ => new(2, 2)
         };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool) => pool
-            .Include(() => new EmptyRoom(), 5)
+            .Guarantee(() => new EmptyRoom(), minAmount: 1)
             .Include(() => new WetFloorSewerRoom(), 1)
             .If(() => id.Depth > 1, pool => pool
-                .Include(() => new TreasureRoom(), 1, maxAmount: 1)
                 .Guarantee(() => new ShopRoom(), minAmount: 1, maxAmount: 1)
+                .Include(() => new TreasureRoom(), 1, maxAmount: 1)
                 .Include(() => new ShrineRoom(), 1, maxAmount: 1))
             ;
         protected override PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool) => pool

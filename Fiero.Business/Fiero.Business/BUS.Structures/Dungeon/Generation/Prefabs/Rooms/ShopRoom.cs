@@ -13,7 +13,7 @@
             theme = base.CustomizeTheme(theme);
             return theme with
             {
-                WallTile = (c => theme.RoomTile(c).WithCustomColor(ColorName.LightYellow)),
+                WallTile = (c => theme.WallTile(c).WithCustomColor(ColorName.LightYellow)),
                 RoomTile = (c => theme.ShopTile(c).WithCustomColor(ColorName.Yellow)),
                 DoorChance = Chance.Never
             };

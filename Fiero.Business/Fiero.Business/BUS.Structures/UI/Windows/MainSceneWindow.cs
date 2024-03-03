@@ -143,11 +143,11 @@ namespace Fiero.Business
             {
                 var floorId = following.FloorId();
                 var position = following.Position();
-                // PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
-                // CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
-                // CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
-                // CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
-                // RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
+                PlayerNameLabel.Text.V = $"{following.Info.Name}, lv.{following.ActorProperties.Level.V} {following.ActorProperties.Race}";
+                CurrentTurnLabel.Text.V = $"TURN {ActionSystem.CurrentTurn}";
+                CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
+                CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
+                RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {
@@ -169,11 +169,15 @@ namespace Fiero.Business
         }
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
-            .Rule<Label>(x => x
+            .Rule<UIControl>(x => x
                 .Apply(l =>
                 {
                     if (l is not Header)
                         l.Background.V = UI.GetColor(ColorName.UIBackground);
+                }))
+            .Rule<Label>(x => x
+                .Apply(l =>
+                {
                     l.Padding.V = new(5, 0);
                 }))
             .Rule<Label>(x => x
@@ -196,6 +200,7 @@ namespace Fiero.Business
                         .Cell(Viewport)
                     .End()
                     .Row(h: 36, px: true, id: "quickbar")
+                        .Cell<Layout>()
                         .Cell<UIWindowAsControl>(x => x.Window.V = QuickBar)
                     .End()
                 .End()
@@ -235,9 +240,11 @@ namespace Fiero.Business
                     .End()
                     .Row(h: 16, px: true)
                         .Col(id: "time", @class: "center")
+                            .Cell<Layout>()
                             .Cell<Header>(x => CurrentTurnLabel = x)
                         .End()
                         .Col(id: "pos", @class: "center")
+                            .Cell<Layout>()
                             .Cell<Header>(x => CurrentPosLabel = x)
                         .End()
                     .End()
@@ -247,9 +254,11 @@ namespace Fiero.Business
                     .End()
                     .Row(h: 16, px: true)
                         .Col(id: "place", @class: "center")
+                            .Cell<Layout>()
                             .Cell<Header>(x => CurrentPlaceLabel = x)
                         .End()
                         .Col(id: "seed", @class: "center")
+                            .Cell<Layout>()
                             .Cell<Header>(x => RngSeedLabel = x)
                         .End()
                     .End()

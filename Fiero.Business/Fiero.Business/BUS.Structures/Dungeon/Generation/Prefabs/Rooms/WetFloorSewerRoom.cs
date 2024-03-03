@@ -11,7 +11,7 @@
             };
         }
 
-        public override void Draw(FloorGenerationContext ctx)
+        protected override void DrawRects(FloorGenerationContext ctx)
         {
             var points = Rects
                 .SelectMany(r => Shapes.Rect(r.Position(), r.Size()))
@@ -29,14 +29,6 @@
                         break;
                 }
             }
-            foreach (var conn in Connectors)
-            {
-                if (conn.IsShared)
-                    continue;
-
-                ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
-            }
-            OnDrawn(ctx);
         }
     }
 }

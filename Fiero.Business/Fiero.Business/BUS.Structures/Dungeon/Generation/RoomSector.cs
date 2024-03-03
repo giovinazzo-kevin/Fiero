@@ -360,8 +360,8 @@ namespace Fiero.Business
                 var ci = a.Intersect(b).Count();
                 if (ci == ca || ci == cb)
                 {
-                    pair.Left.IsHidden = true;
-                    pair.Right.IsHidden = true;
+                    pair.Left.IsShared = true;
+                    pair.Right.IsShared = true;
                 }
             }
         }

@@ -4,6 +4,8 @@ namespace Fiero.Core
 {
     public class Paragraph : UIControl
     {
+        private object _lock = new();
+
         public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
         public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12), invalidate: true) { Propagated = true, Inherited = true };
         public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
@@ -81,12 +83,15 @@ namespace Fiero.Core
             {
                 for (int i = Children.Count - 1; i >= 0 && delta++ < 0; i--)
                 {
-                    if (Children[i] is not Label label) continue;
-                    if (Labels.Contains(label))
+                    lock (_lock)
                     {
-                        label.Text.V = string.Empty;
-                        Labels.Remove(label);
-                        Children.RemoveAt(i);
+                        if (Children[i] is not Label label) continue;
+                        if (Labels.Contains(label))
+                        {
+                            label.Text.V = string.Empty;
+                            Labels.Remove(label);
+                            Children.RemoveAt(i);
+                        }
                     }
                 }
             }
@@ -94,9 +99,12 @@ namespace Fiero.Core
             {
                 for (; delta-- > 0;)
                 {
-                    var label = CreateLabel();
-                    Children.Add(label);
-                    Labels.Add(label);
+                    lock (_lock)
+                    {
+                        var label = CreateLabel();
+                        Children.Add(label);
+                        Labels.Add(label);
+                    }
                 }
                 OnTextInvalidated();
             }
@@ -136,16 +144,22 @@ namespace Fiero.Core
                     lines.InsertRange(i + 1, newLines.Skip(1));
                 }
             }
-            foreach (var (c, l) in Labels.Zip(lines.Concat(Enumerable.Repeat(string.Empty, CalculatedRows)).Take(CalculatedRows)))
+            lock (_lock)
             {
-                var len = Math.Min(l.Length, Cols);
-                c.Text.V = l[..len];
+                foreach (var (c, l) in Labels.Zip(lines.Concat(Enumerable.Repeat(string.Empty, CalculatedRows)).Take(CalculatedRows)))
+                {
+                    var len = Math.Min(l.Length, Cols);
+                    c.Text.V = l[..len];
+                }
             }
             OnSizeInvalidated();
             OnPositionInvalidated();
-            MinimumContentSize = Labels.Aggregate(Coord.Zero, (a, b) => b.MinimumContentSize * Coord.PositiveY + a)
-                + new Coord(Labels.Max(x => x.MinimumContentSize.X), 0)
-                + Padding.V * 2;
+            lock (_lock)
+            {
+                MinimumContentSize = Labels.Aggregate(Coord.Zero, (a, b) => b.MinimumContentSize * Coord.PositiveY + a)
+                    + new Coord(Labels.Max(x => x.MinimumContentSize.X), 0)
+                    + Padding.V * 2;
+            }
         }
     }
 }

@@ -56,10 +56,13 @@ namespace Fiero.Business
             }
             foreach (var conn in Connectors)
             {
-                if (conn.IsHidden)
-                    continue;
-
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);
+                if (conn.IsShared)
+                {
+                    var p = (conn.Edge.Left + conn.Edge.Right) / 2;
+                    ctx.Draw(p, Theme.CorridorTile);
+                    ctx.TryAddFeature("door", p, e => Theme.DoorFeature(e, p));
+                }
             }
             OnDrawn(ctx);
         }

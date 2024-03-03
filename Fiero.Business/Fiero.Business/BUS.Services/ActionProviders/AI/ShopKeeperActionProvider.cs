@@ -102,12 +102,15 @@
                             {
                                 e.Node.ForceClose();
                                 ShopKeeper.Dialogue.Triggers.Add(new ManualDialogueTrigger(Systems, "Merchant_CantAfford")
-                                { Arguments = [debt.AmountOwed - playerGold.ResourceProperties.Amount] });
+                                {
+                                    Arguments = [debt.AmountOwed - playerGold.ResourceProperties.Amount]
+                                });
                                 Systems.Get<DialogueSystem>().CheckTriggers();
                             }
                             else
                             {
                                 playerGold.ResourceProperties.Amount -= debt.AmountOwed;
+                                debtTable[player.Id] = debt with { AmountOwed = 0 };
                                 if (playerGold.ResourceProperties.Amount == 0)
                                     player.Inventory.TryTake(playerGold);
                                 UntagItems(player);

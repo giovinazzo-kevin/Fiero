@@ -43,12 +43,12 @@ namespace Fiero.Business
                 return inner(this);
             return this;
         }
-        public PoolBuilder<T> Guarantee(T item, float extraCopyWeight = 0, int minAmount = 1)
+        public PoolBuilder<T> Guarantee(T item, float extraCopyWeight = 0, int minAmount = 1, int maxAmount = int.MaxValue)
         {
             if (minAmount <= 0) throw new ArgumentOutOfRangeException(nameof(minAmount));
-            return new(Items.SetItem(item, new(item, extraCopyWeight, minAmount)));
+            return new(Items.SetItem(item, new(item, extraCopyWeight, minAmount, maxAmount)));
         }
-        public PoolBuilder<T> Include(T item, float weight) => new(Items.SetItem(item, new(item, weight, 0)));
+        public PoolBuilder<T> Include(T item, float weight, int maxAmount = int.MaxValue) => new(Items.SetItem(item, new(item, weight, 0, maxAmount)));
 
         public Pool<T> Build(int capacity) => new(capacity, Items.Values.ToArray());
     }

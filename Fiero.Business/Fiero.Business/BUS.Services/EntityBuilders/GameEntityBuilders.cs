@@ -700,7 +700,7 @@
                 EffectDef.FromScript(Scripts.Get(ScriptName.Grapple)),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
-        public IEntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 50, int radius = 5)
+        public IEntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 3, int radius = 5)
             => Projectile<Projectile>(
                 name: ProjectileName.Bomb,
                 itemRarity: 1,
@@ -789,33 +789,38 @@
 
         private IEnumerable<WeightedItem<Item[]>> ChestLootTable()
         {
+            var items = new List<IEntityBuilder<Item>>();
+            for (int i = 0; i < new Dice(2, 3).Roll().Sum(); i++)
+            {
+                items.Add(Rng.Random.ChooseWeighted<IEntityBuilder<Item>>(
+                    new(RandomPotion(), 1),
+                    new(RandomWand(), 1),
+                    new(Projectile_Rock(Rng.Random.Between(4, 10)), 20),
+                    new(Resource_Gold(Rng.Random.Between(1, 250)), 50)
+                ));
+            }
+
             // COMMON CHESTS: Consumables; some thematic, some mixed bags
             yield return new(Loadout(
-                RandomPotion()
-            ), 1000);
-            yield return new(Loadout(
-                RandomWand()
-            ), 1000);
-            yield return new(Loadout(
-                (Projectile_Rock(Rng.Random.Between(4, 10)), Chance.Always)
+                items.Select(x => (x, Chance.Always)).ToArray()
             ), 1000);
 
-            (IEntityBuilder<Potion> Item, Chance Chance) RandomPotion() => Rng.Random.Choose(new[] {
-                (Potion_OfConfusion(), Chance.Always),
-                (Potion_OfHealing(), Chance.Always),
-                (Potion_OfSleep(), Chance.Always),
-                (Potion_OfTeleport(), Chance.Always),
-                (Potion_OfSilence(), Chance.Always),
-                (Potion_OfEntrapment(), Chance.Always)
+            IEntityBuilder<Potion> RandomPotion() => Rng.Random.Choose(new[] {
+                Potion_OfConfusion(),
+                Potion_OfHealing(),
+                Potion_OfSleep(),
+                Potion_OfTeleport(),
+                Potion_OfSilence(),
+                Potion_OfEntrapment()
             });
 
-            (IEntityBuilder<Wand> Item, Chance Chance) RandomWand() => Rng.Random.Choose(new[] {
-                (Wand_OfConfusion(), Chance.Always),
-                (Wand_OfPoison(), Chance.Always),
-                (Wand_OfSleep(), Chance.Always),
-                (Wand_OfTeleport(), Chance.Always),
-                (Wand_OfSilence(), Chance.Always),
-                (Wand_OfEntrapment(), Chance.Always)
+            IEntityBuilder<Wand> RandomWand() => Rng.Random.Choose(new[] {
+                Wand_OfConfusion(),
+                Wand_OfPoison(),
+                Wand_OfSleep(),
+                Wand_OfTeleport(),
+                Wand_OfSilence(),
+                Wand_OfEntrapment()
             });
         }
         public IEntityBuilder<Feature> Feature_Chest()

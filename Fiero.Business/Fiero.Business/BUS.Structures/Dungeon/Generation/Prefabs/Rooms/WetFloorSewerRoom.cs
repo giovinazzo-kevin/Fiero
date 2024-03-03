@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class WetFloorSewerRoom : Room
     {
@@ -25,7 +22,7 @@ namespace Fiero.Business
                 switch (simplex.Next())
                 {
                     case 0:
-                        ctx.Draw(new(simplex.X, simplex.Y), Theme.HoleTile);
+                        ctx.Draw(new(simplex.X, simplex.Y), Theme.WaterTile);
                         break;
                     case 1:
                         ctx.Draw(new(simplex.X, simplex.Y), Theme.RoomTile);
@@ -34,7 +31,7 @@ namespace Fiero.Business
             }
             foreach (var conn in Connectors)
             {
-                if (conn.IsHidden)
+                if (conn.IsShared)
                     continue;
 
                 ctx.DrawLine(conn.Edge.Left, conn.Edge.Right, Theme.WallTile);

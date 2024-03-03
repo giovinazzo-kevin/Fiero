@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     [TransientDependency]
     public class EquipmentDisplay : Widget
@@ -11,6 +7,10 @@ namespace Fiero.Business
         public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
+            .Rule<UIControl>(c => c.Apply(l =>
+            {
+                l.Background.V = UI.GetColor(ColorName.UIBackground);
+            }))
             .Rule<Picture>(r => r
                 .Match(l => l.HasAnyClass("equipment-slot"))
                 .Apply(l =>

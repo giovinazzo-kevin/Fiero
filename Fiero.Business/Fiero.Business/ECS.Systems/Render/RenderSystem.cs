@@ -28,6 +28,7 @@ namespace Fiero.Business
         public readonly SystemRequest<RenderSystem, ActorDeselectedEvent, EventResult> ActorDeselected;
 
         private readonly Stopwatch _sw = new();
+        private bool _zoom;
 
         public void CenterOn(Actor a)
         {
@@ -97,6 +98,12 @@ namespace Fiero.Business
                 else
                     DeveloperConsole.Hide();
             }
+            if (UI.Input.IsKeyPressed(UI.Store.Get(Hotkeys.ToggleZoom)))
+            {
+                _zoom = !_zoom;
+                Viewport.ViewTileSize.V = !_zoom ? new(16, 16) : new(32, 32);
+                CenterOn(Viewport.Following.V);
+            }
         }
 
         public void Draw(RenderTarget target, RenderStates states)
@@ -115,13 +122,14 @@ namespace Fiero.Business
                     var spriteSize = sprite.GetLocalBounds().Size();
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
                     sprite.Rotation = spriteDef.Rotation;
+                    var zoom = Viewport.ViewTileSize.V / UI.Store.Get(Data.View.TileSize);
                     if (spriteDef.Relative)
                     {
                         sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;
                     }
                     else
                     {
-                        sprite.Scale = spriteDef.Scale;
+                        sprite.Scale = zoom * spriteDef.Scale;
                     }
                     sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                     if (!spriteDef.Crop.Equals(default))

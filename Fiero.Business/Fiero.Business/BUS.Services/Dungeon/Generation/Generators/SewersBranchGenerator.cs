@@ -24,11 +24,13 @@
             _ => new(2, 2)
         };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool) => pool
-            .Include(() => new EmptyRoom(), 1)
+            .Include(() => new EmptyRoom(), 5)
+            .Include(() => new WetFloorSewerRoom(), 1)
             .If(() => id.Depth > 1, pool => pool
-                .Include(() => new TreasureRoom(), 1)
-                .Guarantee(() => new ShopRoom(), minAmount: 1)
-                .Include(() => new ShrineRoom(), 1));
+                .Include(() => new TreasureRoom(), 1, maxAmount: 1)
+                .Guarantee(() => new ShopRoom(), minAmount: 1, maxAmount: 1)
+                .Include(() => new ShrineRoom(), 1, maxAmount: 1))
+            ;
         protected override PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool) => pool
             .Include(args => args.Entities.NPC_Rat(), 100)
             .Include(args => args.Entities.NPC_RatArcher(), 7.5f)
@@ -40,9 +42,28 @@
             .Include(args => args.Entities.NPC_RatThief(), 1)
             .Include(args => args.Entities.NPC_RatCheese(), 0.05f)
             ;
+        protected override PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool) => pool
+            .Include(args => args.Entities.Projectile_Bomb(), 2.5f)
+            .Include(args => args.Entities.Projectile_Arrow(), 5)
+            .Include(args => args.Entities.Projectile_Grapple(), 0.1f)
+            .Include(args => args.Entities.Projectile_Rock(), 20)
+            .Include(args => args.Entities.Resource_Gold(amount: Rng.Random.Between(1, 100)), 10)
+            .Include(args => args.Entities.Potion_OfConfusion(), 3)
+            .Include(args => args.Entities.Potion_OfHealing(), 3)
+            .Include(args => args.Entities.Potion_OfSleep(), 3)
+            .Include(args => args.Entities.Wand_OfEntrapment(), 3)
+            .Include(args => args.Entities.Wand_OfPoison(), 3)
+            .Include(args => args.Entities.Wand_OfTeleport(), 3)
+            .Include(args => args.Entities.Weapon_Hammer(), 1)
+            .Include(args => args.Entities.Weapon_Sword(), 1)
+            .Include(args => args.Entities.Weapon_Dagger(), 1)
+            .Include(args => args.Entities.Weapon_Spear(), 1)
+            .Include(args => args.Entities.Weapon_Bow(), 1)
+            .Include(args => args.Entities.Weapon_Crossbow(), 1)
+            ;
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>
-            new(2, 1, Bias: -1);
+            new(2, 2, Bias: -1);
 
     }
 }

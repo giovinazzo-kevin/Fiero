@@ -17,17 +17,21 @@
         }
         public static List<T> ChooseMultipleGuaranteedWeighted<T>(this Random rng, IList<GuaranteedWeightedItem<T>> source, int numSelections)
         {
-            var sum = source.Sum(s => s.MinAmount);
-            if (numSelections < sum)
-                throw new ArgumentException($"Sum of minimum amounts ({sum}) exceeds total number of selections ({numSelections}).");
+            var minSum = source.Sum(s => s.MinAmount);
+            if (numSelections < minSum)
+                throw new ArgumentException($"Sum of minimum amounts ({minSum}) exceeds total number of selections ({numSelections}).");
 
             var results = new List<T>();
             var remainingItems = new List<WeightedItem<T>>(source);
 
             // Prepare list of guaranteed items
             var guaranteedItems = new List<T>();
+            var countDict = new Dictionary<T, int>();
             foreach (var item in source)
             {
+                if (item.MinAmount > item.MaxAmount)
+                    throw new ArgumentException($"Minimum amount ({item.MinAmount}) exceeds max amount ({item.MaxAmount}).");
+                countDict[item.Item] = item.MaxAmount;
                 for (int i = 0; i < item.MinAmount; i++)
                 {
                     guaranteedItems.Add(item.Item);
@@ -37,21 +41,26 @@
             // Interleave guaranteed items with random selections
             while (results.Count < numSelections)
             {
-                if (rng.NextDouble() < (double)guaranteedItems.Count / (numSelections - results.Count) && guaranteedItems.Count > 0)
+                var roll = rng.NextDouble() < (double)guaranteedItems.Count / (numSelections - results.Count) && guaranteedItems.Count > 0;
+                if (roll)
                 {
                     // Select a random guaranteed item
                     int index = rng.Next(guaranteedItems.Count);
                     T chosenItem = guaranteedItems[index];
                     guaranteedItems.RemoveAt(index);
-
                     results.Add(chosenItem);
                 }
                 else
                 {
                     // Select a weighted random remaining item
-                    var chosenItem = rng.ChooseWeighted(remainingItems);
-
+                    var filteredRemaining = remainingItems
+                        .Where(x => countDict[x.Item] > 0)
+                        .ToList();
+                    if (filteredRemaining.Count == 0)
+                        throw new ArgumentException($"No item left in the pool.");
+                    var chosenItem = rng.ChooseWeighted(filteredRemaining);
                     results.Add(chosenItem);
+                    countDict[chosenItem]--;
                 }
             }
 

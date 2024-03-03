@@ -127,10 +127,10 @@
         }
 
         public IEnumerable<Item> GetItems() => Items;
-        public IEnumerable<Weapon> GetWeapons() => Items.OfType<Weapon>();
-        public IEnumerable<Resource> GetResources() => Items.OfType<Resource>();
-        public IEnumerable<Armor> GetArmors() => Items.OfType<Armor>();
-        public IEnumerable<Consumable> GetConsumables() => Items.OfType<Consumable>();
+        public IEnumerable<Weapon> GetWeapons() => Items.TrySelect(x => (x.TryCast<Weapon>(out var r), r));
+        public IEnumerable<Resource> GetResources() => Items.TrySelect(x => (x.TryCast<Resource>(out var r), r));
+        public IEnumerable<Armor> GetArmors() => Items.TrySelect(x => (x.TryCast<Armor>(out var r), r));
+        public IEnumerable<Consumable> GetConsumables() => Items.TrySelect(x => (x.TryCast<Consumable>(out var r), r));
 
         public InventoryComponent()
         {

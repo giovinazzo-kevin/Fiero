@@ -119,10 +119,11 @@ namespace Fiero.Business
         protected virtual bool TryGetUnexploredCandidate(Actor a, out Tile tile)
         {
             tile = default;
+            var floor = Systems.Get<DungeonSystem>();
             var floorId = a.FloorId();
             if (!a.Fov.KnownTiles.TryGetValue(floorId, out var knownTiles))
                 return false;
-            var unknownTiles = Systems.Get<DungeonSystem>().GetAllTiles(floorId)
+            var unknownTiles = floor.GetAllTiles(floorId)
                 .Where(x => !knownTiles.Contains(x.Physics.Position))
                 .Select(x => x.Physics.Position)
                 .ToHashSet();
@@ -134,7 +135,7 @@ namespace Fiero.Business
                 .Where(t => t.N > 0)
                 .OrderByDescending(t => t.N)
                 .ThenBy(t => t.P.DistSq(a.Physics.Position))
-                .TrySelect(t => Systems.Get<DungeonSystem>().TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
+                .TrySelect(t => floor.TryGetCellAt(floorId, t.P, out var mapCell) ? (true, mapCell) : (false, default))
                 .Where(c => c.IsWalkable(a))
                 .Select(t => Maybe.Some(t.Tile))
                 .FirstOrDefault();

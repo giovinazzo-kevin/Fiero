@@ -120,13 +120,22 @@ namespace Fiero.Business
             }
             if (IsKeyPressed(Data.Hotkeys.AutoExplore))
             {
+                var floor = Systems.Get<DungeonSystem>();
+                var visibleItems = a.Fov.VisibleTiles[floorId]
+                    .TrySelect(t => (floor.TryGetCellAt(floorId, t, out var c), c))
+                    .SelectMany(c => c.Items.Where(i => a.Ai.LikedItems.Any(f => f(i))))
+                    .ToList();
+                if (visibleItems.Any())
+                {
+                    TryPushObjective(a, visibleItems.First());
+                }
                 // Go to the closest tile with the highest number of unexplored neighbors
                 // Stop if you detect any danger at all
-                if (!TryGetUnexploredCandidate(a, out var tile) || !TryPushObjective(a, tile))
+                else if (!TryGetUnexploredCandidate(a, out var tile) || !TryPushObjective(a, tile))
                 {
                     // We've explored everything we can see without opening doors
                     // so autoexplore will now find the closest closed door and open it
-                    var closestClosedDoor = Systems.Get<DungeonSystem>().GetAllFeatures(floorId)
+                    var closestClosedDoor = floor.GetAllFeatures(floorId)
                         .Where(x => x.IsDoorClosed())
                         .Where(x => a.Fov.KnownTiles[floorId].Contains(x.Physics.Position))
                         .OrderBy(x => x.DistanceFrom(a))

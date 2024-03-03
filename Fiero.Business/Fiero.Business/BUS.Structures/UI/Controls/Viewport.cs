@@ -26,6 +26,17 @@ namespace Fiero.Business
         private Sprite _renderSprite;
         private bool _dirty = true;
 
+        public void UpdateViewArea()
+        {
+            var viewPos = ViewArea.V.Position();
+            ViewArea.V = new(
+                viewPos.X,
+                viewPos.Y,
+                Size.V.X / ViewTileSize.V.X,
+                Size.V.Y / ViewTileSize.V.Y
+            );
+        }
+
         public Viewport(
             GameInput input,
             DungeonSystem floor,
@@ -48,19 +59,17 @@ namespace Fiero.Business
                 _renderSprite = new(_renderTexture.Texture);
                 if (AutoUpdateViewArea.V)
                 {
-                    var viewPos = ViewArea.V.Position();
-                    ViewArea.V = new(
-                        viewPos.X,
-                        viewPos.Y,
-                        Size.V.X / ViewTileSize.V.X,
-                        Size.V.Y / ViewTileSize.V.Y
-                    );
+                    UpdateViewArea();
                 }
                 SetDirty();
             };
             ViewArea.ValueChanged += (_, __) => SetDirty();
             Following.ValueChanged += (_, __) => SetDirty();
-            ViewTileSize.ValueChanged += (_, __) => SetDirty();
+            ViewTileSize.ValueChanged += (_, __) =>
+            {
+                UpdateViewArea();
+                SetDirty();
+            };
             TargetingShape.ValueChanged += (_, old) =>
             {
                 if (old != null)

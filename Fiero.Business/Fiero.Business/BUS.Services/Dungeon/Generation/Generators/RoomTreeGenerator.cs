@@ -3,6 +3,7 @@
     public abstract class RoomTreeGenerator : IBranchGenerator
     {
         public readonly record struct EnemyPoolArgs(Room CurrentRoom, FloorGenerationContext Context, GameEntityBuilders Entities);
+        public readonly record struct ItemPoolArgs(Room CurrentRoom, FloorGenerationContext Context, GameEntityBuilders Entities);
 
         public abstract Coord MapSize(FloorId id);
         public abstract Coord GridSize(FloorId id);
@@ -35,8 +36,8 @@
 
         protected virtual RoomTree BuildTree(FloorId id, Coord mapSize, Coord gridSize)
         {
-            var pool = ConfigureRoomPool(id, new()).Build(capacity: gridSize.Area() * 8);
-            var roomSectors = RoomSector.CreateTiling(mapSize, gridSize, Theme.RoomSquares, pool)
+            var roomPool = ConfigureRoomPool(id, new()).Build(capacity: gridSize.Area() * 8);
+            var roomSectors = RoomSector.CreateTiling(mapSize, gridSize, Theme.RoomSquares, roomPool)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)
                 .ToList();
@@ -46,7 +47,9 @@
                 corridors.Concat(roomSectors.SelectMany(s => s.Corridors)).ToArray()
             );
             tree.SetTheme(Theme, ShouldApplyTheme);
-            var enemyPool = ConfigureEnemyPool(new()).Build(capacity: roomSectors.SelectMany(x => x.Rooms).Select(x => x.GetRects().Count()).Sum() * 4);
+            var totalRects = roomSectors.SelectMany(x => x.Rooms).Select(x => x.GetRects().Count()).Sum();
+            var enemyPool = ConfigureEnemyPool(new()).Build(capacity: totalRects * 4);
+            var itemPool = ConfigureItemPool(new()).Build(capacity: totalRects * 4);
             foreach (var (par, cor, chd) in tree.Traverse())
             {
                 if (par == null)
@@ -58,7 +61,7 @@
 
             void OnRoomDrawn_(Room room, FloorGenerationContext ctx)
             {
-                OnRoomDrawn(room, ctx, enemyPool);
+                OnRoomDrawn(room, ctx, enemyPool, itemPool);
             }
         }
 
@@ -69,20 +72,31 @@
 
         protected abstract PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool);
         protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool);
+        protected abstract PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool);
         protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
+        protected virtual Dice GetItemDice(Room room, FloorGenerationContext ctx) => new(3, 2, Bias: -1);
 
-        protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> enemyPool)
+        protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> enemyPool, Pool<Func<ItemPoolArgs, IEntityBuilder<Item>>> itemPool)
         {
+            var candidateTiles = room.GetPointCloud()
+                .Where(p => ctx.GetTile(p).Name == TileName.Room)
+                .ToList();
             if (room.AllowMonsters)
             {
-                var candidateTiles = room.GetPointCloud()
-                    .Where(p => ctx.GetTile(p).Name == TileName.Room)
-                    .ToList();
                 var numMonsters = GetMonsterDice(room, ctx)
                     .Roll(Rng.Random).Sum();
                 for (int i = 0; i < numMonsters; i++)
                 {
                     ctx.AddObject("monster", Rng.Random.Choose(candidateTiles), entities => enemyPool.Next()(new(room, ctx, entities)));
+                }
+            }
+            if (room.AllowItems)
+            {
+                var numItems = GetItemDice(room, ctx)
+                    .Roll(Rng.Random).Sum();
+                for (int i = 0; i < numItems; i++)
+                {
+                    ctx.AddObject("item", Rng.Random.Choose(candidateTiles), entities => itemPool.Next()(new(room, ctx, entities)));
                 }
             }
         }

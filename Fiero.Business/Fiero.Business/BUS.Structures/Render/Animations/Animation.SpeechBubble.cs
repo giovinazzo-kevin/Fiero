@@ -18,7 +18,7 @@ namespace Fiero.Business
             private const float SPEECH_Y = -1f;
             const int MS_PER_FADE = 4;
             // Base scale of the animation (TODO parametrize)
-            private static readonly Vec s = new(2f, 2f);
+            private static readonly Vec s = new(1f, 1f);
 
             // Generates the speech bubble frame and parametrizes its y value
             protected IEnumerable<SpriteDef> BackgroundSprites(float anim_y)
@@ -77,12 +77,12 @@ namespace Fiero.Business
             private Animation cached;
 
             // Y offset of the entire speech bubble, in order to position it above an actor's head
-            private const float SPEECH_Y = -0.33f;
+            private const float SPEECH_Y = -0.66f;
             private readonly float variance = (float)Rng.Random.Between(-0.1, 0.1);
             // How many milliseconds should pass between each frame in the fadeout animation
             const int MS_PER_FADE = 4;
             // Base scale of the animation (TODO parametrize)
-            private static readonly Vec s = new(.5f, .5f);
+            private static readonly Vec s = new(1f, 1f);
             // Duration of the animation that types text one character at a time
             public readonly TimeSpan TypeAnimDuration = TimeSpan.FromMilliseconds(text.Length * msPerChar);
             // Total duration of the animation including the time that the bubble should persist

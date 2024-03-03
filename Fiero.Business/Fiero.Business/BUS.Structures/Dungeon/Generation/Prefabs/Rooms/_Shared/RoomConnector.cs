@@ -1,7 +1,4 @@
-﻿using Fiero.Core;
-using Fiero.Core.Structures;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public class RoomConnector
     {
@@ -15,7 +12,7 @@ namespace Fiero.Business
         /// <summary>
         /// If true, this connector will not be drawn as a wall but as ground
         /// </summary>
-        public bool IsHidden { get; set; }
+        public bool IsShared { get; set; }
 
         public RoomConnector(Room owner, UnorderedPair<Coord> edge)
         {

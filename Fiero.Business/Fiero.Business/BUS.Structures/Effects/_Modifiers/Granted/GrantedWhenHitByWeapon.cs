@@ -1,8 +1,8 @@
 ﻿namespace Fiero.Business
 {
-    public class GrantedWhenHitByMeleeWeapon : HitDealtEffect
+    public class GrantedWhenHitByWeapon : HitDealtEffect
     {
-        public GrantedWhenHitByMeleeWeapon(EffectDef source) : base(source)
+        public GrantedWhenHitByWeapon(EffectDef source) : base(source)
         {
         }
 

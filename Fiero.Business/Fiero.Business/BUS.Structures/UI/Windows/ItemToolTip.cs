@@ -31,7 +31,8 @@ namespace Fiero.Business
                 if (Item.V == null)
                     return;
                 ItemTitle.Control.Text.V = Item.V.Info.Name?.ToUpper() ?? string.Empty;
-                ItemDesc.Control.Text.V = Item.V.Info.Description ?? string.Empty;
+                //ItemDesc.Control.Text.V = Item.V.Info.Description ?? string.Empty;
+                ItemDesc.Control.Text.V = Item.V.Effects?.Description ?? string.Empty;
                 Picture.Control.Sprite.V = resources.Sprites
                     .Get(TextureName.Items, Item.V.ItemProperties.ItemSprite ?? Item.V.Render.Sprite, Item.V.Render.Color);
                 Rescale();

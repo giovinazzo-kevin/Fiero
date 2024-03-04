@@ -1,10 +1,6 @@
 :- module(test, []).
-:- use_module(demo).
 :- use_module(fiero).
 :- use_module(input).
 
 input:key_route(h, pressed, [_] >> spawn([npc_rat{}], [_])).
 input:key_route(j, pressed, [_] >> spawn([projectile_bomb{charges: 999}], [_])).
-input:key_route(b, pressed, [_] >> start_demo).
-input:key_route(n, pressed, [_] >> end_demo).
-input:key_route(m, pressed, [_] >> play_demo).

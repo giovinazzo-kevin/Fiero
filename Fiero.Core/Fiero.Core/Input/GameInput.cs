@@ -24,6 +24,9 @@ namespace Fiero.Core
 
         protected readonly GameWindow Window;
 
+        private Action<GameInput> nextUpdate = _ => { };
+
+
         public GameInput(GameWindow win)
         {
             Window = win;
@@ -98,22 +101,38 @@ namespace Fiero.Core
 
         public void SimulateKeyDown(VirtualKeys vk)
         {
-            _kb0[(int)vk] = true;
+            nextUpdate += _ =>
+            {
+                _kb1[(int)vk] = true;
+                _kb0[(int)vk] = true;
+            };
         }
 
         public void SimulateKeyUp(VirtualKeys vk)
         {
-            _kb0[(int)vk] = false;
+            nextUpdate += _ =>
+            {
+                _kb1[(int)vk] = false;
+                _kb0[(int)vk] = false;
+            };
         }
 
         public void SimulateKeyPress(VirtualKeys vk)
         {
-            _kb1[(int)vk] = true;
+            nextUpdate += _ =>
+            {
+                _kb1[(int)vk] = true;
+                _kb0[(int)vk] = false;
+            };
         }
 
         public void SimulateKeyRelease(VirtualKeys vk)
         {
-            _kb1[(int)vk] = false;
+            nextUpdate += _ =>
+            {
+                _kb1[(int)vk] = false;
+                _kb0[(int)vk] = true;
+            };
         }
 
         public void Update()
@@ -156,6 +175,8 @@ namespace Fiero.Core
             }
             _sw0 = _sw1;
             _sw1 = 0;
+            nextUpdate(this);
+            nextUpdate = _ => { };
         }
 
         public bool IsKeyDown(VirtualKeys k) => _kb1[(int)k] && _kb0[(int)k];

@@ -127,7 +127,8 @@ namespace Fiero.Business.Scenes
                 Item[] loadout = Store.GetOrDefault(Data.Player.Loadout, LoadoutName.Adventurer) switch
                 {
                     LoadoutName.Knight => [
-                        Resources.Entities.Weapon_Hammer().Build()
+                        EntityGenerator.Enchant(EntityGenerator.GenerateMeleeWeapon()(Resources.Entities), magnitude: 1)
+                            .Build()
                     ],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow().Build()],
                     LoadoutName.Wizard => [Resources.Entities.Wand_OfConfusion(charges: 25, duration: 5).Build()],

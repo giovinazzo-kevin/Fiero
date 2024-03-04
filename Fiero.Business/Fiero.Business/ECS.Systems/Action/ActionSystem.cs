@@ -135,7 +135,7 @@ namespace Fiero.Business
             {
                 if (r.All(x => x))
                 {
-                    if (e.Victim.ActorProperties.Health <= 0)
+                    if (e.Victim.IsAlive() && e.Victim.ActorProperties.Health <= 0)
                     {
                         if (e.Source.TryCast<Actor>(out var killer))
                         {

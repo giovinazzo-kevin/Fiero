@@ -58,6 +58,7 @@ namespace Fiero.Business
                 EffectName.UncontrolledTeleport => new UncontrolledTeleportEffect(source),
                 EffectName.MagicMapping => new MagicMappingEffect(source),
                 EffectName.Heal => new HealEffect(source, int.Parse(Arguments) * 10),
+                EffectName.Regenerate => new RegenerateEffect(source, float.Parse(Arguments)),
                 EffectName.Vampirism => new VampirismEffect(this, int.Parse(Arguments)),
                 EffectName.Explosion => new ExplosionEffect(source, int.Parse(Arguments), Shapes.Disc(Coord.Zero, float.Parse(Arguments))),
                 EffectName.Trap => new TrapEffect(),

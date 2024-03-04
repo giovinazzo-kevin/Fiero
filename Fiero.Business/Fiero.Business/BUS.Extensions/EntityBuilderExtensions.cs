@@ -54,6 +54,7 @@ namespace Fiero.Business
                     wrap ??= (e => e.Resolve(o));
                     var fx = wrap(def);
                     fx.Start(systems, o, null);
+                    c.Description += c.Describe(def, fx);
                     sub.Dispose();
                 }
             });

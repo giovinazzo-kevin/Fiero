@@ -2,7 +2,7 @@
 {
     public static class EntityGenerator
     {
-        public static Func<GameEntityBuilders, IEntityBuilder<Weapon>> GenerateMeleeWeapon()
+        public static IEntityBuilder<Weapon> GenerateMeleeWeapon(GameEntityBuilders builders)
         {
             var candidates = new List<Func<GameEntityBuilders, IEntityBuilder<Weapon>>>
             {
@@ -11,20 +11,20 @@
                 entities => entities.Weapon_Hammer(),
                 entities => entities.Weapon_Sword()
             };
-            return Rng.Random.Choose(candidates);
+            return Rng.Random.Choose(candidates)(builders);
         }
-        public static Func<GameEntityBuilders, IEntityBuilder<Weapon>> GenerateRangedWeapon()
+        public static IEntityBuilder<Weapon> GenerateRangedWeapon(GameEntityBuilders builders)
         {
             var candidates = new List<Func<GameEntityBuilders, IEntityBuilder<Weapon>>>
             {
                 entities => entities.Weapon_Bow(),
                 entities => entities.Weapon_Crossbow()
             };
-            return Rng.Random.Choose(candidates);
+            return Rng.Random.Choose(candidates)(builders);
         }
-        public static Func<GameEntityBuilders, IEntityBuilder<Weapon>> GenerateWeapon()
+        public static IEntityBuilder<Weapon> GenerateWeapon(GameEntityBuilders builders)
         {
-            return Rng.Random.Choose([GenerateMeleeWeapon(), GenerateRangedWeapon()]);
+            return Rng.Random.Choose([GenerateMeleeWeapon, GenerateRangedWeapon])(builders);
         }
 
         public static IEntityBuilder<T> Enchant<T>(IEntityBuilder<T> entity, int magnitude = 1)

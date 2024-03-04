@@ -10,7 +10,7 @@
             for (int i = 0; i < source.Count; i++)
             {
                 dist -= source[i].Weight;
-                if (dist < 0)
+                if (dist <= 0)
                     return source[i].Item;
             }
             throw new InvalidOperationException();

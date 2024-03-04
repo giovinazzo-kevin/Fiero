@@ -152,11 +152,11 @@ namespace Fiero.Business.Scenes
                 Player.TryJoinParty(Player);
                 Store.SetValue(Data.Player.Id, Player.Id);
                 // Generate map
-                var entranceFloorId = new FloorId(DungeonBranchName.Sewers, 1);
+                var entranceFloorId = new FloorId(DungeonBranchName.Dungeon, 1);
                 dungeonSystem.AddDungeon(d => d.WithStep(ctx =>
                 {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
-                    ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Sewers, 2);
+                    ctx.AddBranch<TestBranchGenerator>(DungeonBranchName.Dungeon, 10);
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
                 }));
@@ -406,6 +406,16 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorLostEffect:
             yield return actionSystem.ActorLostEffect.SubscribeHandler(e =>
             {
+            });
+            // ActionSystem.ActorLeveledUp:
+            // - Play jingle and animation
+            yield return actionSystem.ActorLeveledUp.SubscribeHandler(e =>
+            {
+                if (e.Actor.IsPlayer())
+                    Resources.Sounds.Get(SoundName.PlayerLevelUp).Play();
+                else
+                    Resources.Sounds.Get(SoundName.MonsterLevelUp, e.Actor.Position() - Player.Position()).Play();
+                renderSystem.AnimateViewport(true, e.Actor, Animation.LevelUp(e.Actor));
             });
             // ActionSystem.ActorAttacked:
             // - Handle Ai aggro and grudges

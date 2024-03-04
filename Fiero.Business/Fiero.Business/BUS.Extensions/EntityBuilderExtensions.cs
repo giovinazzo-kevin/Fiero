@@ -126,7 +126,7 @@ namespace Fiero.Business
         public static IEntityBuilder<T> WithLevel<T>(this IEntityBuilder<T> builder, int maximum, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>((s, c) =>
             {
-                c.Level = new(0, maximum, current ?? 0);
+                c.Level = new(1, maximum, current ?? 1);
             });
         public static IEntityBuilder<T> WithCorpse<T>(this IEntityBuilder<T> builder, CorpseName type, Chance chance)
             where T : Actor => builder.AddOrTweak<ActorComponent>((s, c) =>

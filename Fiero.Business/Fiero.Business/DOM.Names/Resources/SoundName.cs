@@ -20,6 +20,8 @@
         Explosion,
         Countdown3,
         Countdown2,
-        Countdown1
+        Countdown1,
+        MonsterLevelUp,
+        PlayerLevelUp
     }
 }

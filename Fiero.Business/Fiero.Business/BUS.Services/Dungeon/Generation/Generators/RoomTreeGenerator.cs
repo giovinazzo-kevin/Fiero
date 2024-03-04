@@ -48,8 +48,8 @@
             );
             tree.SetTheme(Theme, ShouldApplyTheme);
             var totalRects = roomSectors.SelectMany(x => x.Rooms).Select(x => x.GetRects().Count()).Sum();
-            var enemyPool = ConfigureEnemyPool(new()).Build(capacity: totalRects * 4);
-            var itemPool = ConfigureItemPool(new()).Build(capacity: totalRects * 4);
+            var enemyPool = ConfigureEnemyPool(id, new()).Build(capacity: totalRects * 4);
+            var itemPool = ConfigureItemPool(id, new()).Build(capacity: totalRects * 4);
             foreach (var (par, cor, chd) in tree.Traverse())
             {
                 if (par == null)
@@ -70,9 +70,9 @@
             || prefab is Corridor;
 
 
-        protected abstract PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool);
+        protected abstract PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(FloorId id, PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool);
         protected abstract PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool);
-        protected abstract PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool);
+        protected abstract PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(FloorId id, PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool);
         protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
         protected virtual Dice GetItemDice(Room room, FloorGenerationContext ctx) => new(3, 2, Bias: -1);
 

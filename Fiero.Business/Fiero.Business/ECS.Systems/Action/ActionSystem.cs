@@ -29,6 +29,8 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, EntityDespawnedEvent, EventResult> EntityDespawned;
         public readonly SystemRequest<ActionSystem, ActorDiedEvent, EventResult> ActorDied;
         public readonly SystemRequest<ActionSystem, ActorKilledEvent, EventResult> ActorKilled;
+        public readonly SystemRequest<ActionSystem, ActorGainedExperienceEvent, EventResult> ActorGainedExperience;
+        public readonly SystemRequest<ActionSystem, ActorLeveledUpEvent, EventResult> ActorLeveledUp;
         public readonly SystemRequest<ActionSystem, ActorAttackedEvent, EventResult> ActorAttacked;
         public readonly SystemRequest<ActionSystem, ActorDamagedEvent, EventResult> ActorDamaged;
         public readonly SystemRequest<ActionSystem, ActorHealedEvent, EventResult> ActorHealed;
@@ -92,6 +94,8 @@ namespace Fiero.Business
             ActorWaited = new(this, nameof(ActorWaited));
             ActorDied = new(this, nameof(ActorDied));
             ActorKilled = new(this, nameof(ActorKilled));
+            ActorGainedExperience = new(this, nameof(ActorGainedExperience));
+            ActorLeveledUp = new(this, nameof(ActorLeveledUp));
             ActorAttacked = new(this, nameof(ActorAttacked));
             ActorDamaged = new(this, nameof(ActorDamaged));
             ActorHealed = new(this, nameof(ActorHealed));
@@ -139,12 +143,35 @@ namespace Fiero.Business
                     {
                         if (e.Source.TryCast<Actor>(out var killer))
                         {
+                            var xpFromKill = e.Victim.ActorProperties.LVL * 10 + 10;
+                            var extraXp = xpFromKill;
+                            while (extraXp > 0)
+                            {
+                                var xpToNextLevel = killer.ActorProperties.Experience.Max - killer.ActorProperties.Experience.V;
+                                var xpDetracted = Math.Min(extraXp, xpToNextLevel);
+                                killer.ActorProperties.XP += xpDetracted;
+                                ActorGainedExperience.HandleOrThrow(new(killer, xpDetracted));
+                                extraXp -= xpDetracted;
+                            }
                             ActorKilled.HandleOrThrow(new(killer, e.Victim));
                         }
                         else
                         {
                             ActorDied.HandleOrThrow(new(e.Victim));
                         }
+                    }
+                }
+            };
+            ActorGainedExperience.AllResponsesReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
+                    if (e.Actor.IsAlive() && e.Actor.ActorProperties.XP >= e.Actor.ActorProperties.MaxXP)
+                    {
+                        e.Actor.ActorProperties.LVL += 1;
+                        e.Actor.ActorProperties.XP = 0;
+                        e.Actor.ActorProperties.MaxXP = XpToNextLevel(e.Actor.ActorProperties.LVL, 100, 1.5f);
+                        ActorLeveledUp.HandleOrThrow(new(e.Actor, e.Actor.ActorProperties.Level - 1, e.Actor.ActorProperties.Level));
                     }
                 }
             };
@@ -163,6 +190,11 @@ namespace Fiero.Business
                 }
             };
             ResetImpl();
+        }
+
+        public int XpToNextLevel(int level, int baseXp, float exponent)
+        {
+            return (int)Math.Floor(baseXp * Math.Pow(level, exponent));
         }
 
         private int? HandleAction(ActorTime t, ref IAction action)

@@ -159,6 +159,21 @@ namespace Fiero.Business
             }).ToArray(), repeat);
         }
 
+        public static Animation LevelUp(
+            Actor actor,
+            TimeSpan? frameDuration = null,
+            int repeat = 0,
+            ColorName tint = ColorName.LightYellow
+        )
+        {
+            var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, actor.ActorProperties.Type != ActorName.None ? new Vec(0f, -0.166f) : Vec.Zero, new(1, 1), 1);
+            var frameDur = frameDuration ?? TimeSpan.FromMilliseconds(48);
+            return new(Enumerable.Range(0, 8).SelectMany(i => new[] {
+                new AnimationFrame(frameDur, sprite),
+                new AnimationFrame(frameDur, sprite with {Scale = new(2, 2), Tint = tint})
+            }).ToArray(), repeat);
+        }
+
         public static Animation MeleeAttack(
             Actor actor,
             Coord direction,

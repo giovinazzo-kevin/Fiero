@@ -650,7 +650,7 @@
                 itemRarity: 1,
                 goldValue: 4,
                 remainingUses: charges,
-                maxUses: charges,
+                maxUses: Math.Max(charges, 99),
                 damage: 2,
                 maxRange: 3,
                 mulchChance: 1 / 4f,

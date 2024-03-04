@@ -2,7 +2,6 @@
 
 namespace Fiero.Business
 {
-
     public static class EffectGenerator
     {
         public static Func<EffectDef, Effect> GenerateModifier<T>()

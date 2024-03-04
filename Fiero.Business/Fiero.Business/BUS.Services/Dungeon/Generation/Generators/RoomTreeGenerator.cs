@@ -87,7 +87,9 @@
                     .Roll(Rng.Random).Sum();
                 for (int i = 0; i < numMonsters; i++)
                 {
-                    ctx.AddObject("monster", Rng.Random.Choose(candidateTiles), entities => enemyPool.Next()(new(room, ctx, entities)));
+                    var p = Rng.Random.Choose(candidateTiles);
+                    candidateTiles.Remove(p);
+                    ctx.AddObject("monster", p, entities => enemyPool.Next()(new(room, ctx, entities)));
                 }
             }
             if (room.AllowItems)
@@ -96,7 +98,9 @@
                     .Roll(Rng.Random).Sum();
                 for (int i = 0; i < numItems; i++)
                 {
-                    ctx.AddObject("item", Rng.Random.Choose(candidateTiles), entities => itemPool.Next()(new(room, ctx, entities)));
+                    var p = Rng.Random.Choose(candidateTiles);
+                    candidateTiles.Remove(p);
+                    ctx.AddObject("item", p, entities => itemPool.Next()(new(room, ctx, entities)));
                 }
             }
         }

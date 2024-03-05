@@ -18,6 +18,7 @@ namespace Fiero.Business
         public bool AllowMonsters { get; protected set; } = true;
         public bool AllowItems { get; protected set; } = true;
         public bool AllowFeatures { get; protected set; } = true;
+        public bool AllowTraps { get; protected set; } = true;
 
         public bool Disconnected => !Connectors.Any(x => x.IsUsed);
 

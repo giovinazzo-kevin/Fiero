@@ -65,6 +65,12 @@ namespace Fiero.Business
                     .Filter(x => transparentTypes.Contains(x.GetType()))
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.Transparent))
                     .WithPriority(P - 1))
+                .Rule<TextBox>(b => b
+                    .Apply(x => x.OutlineThickness.V = 1)
+                    .WithPriority(P - 1))
+                .Rule<Button>(b => b
+                    .Apply(x => x.OutlineThickness.V = 1)
+                    .WithPriority(P - 1))
                 .Rule<Header>(b => b
                     .Apply(x => x.Background.V = UI.GetColor(ColorName.White))
                     .WithPriority(P - 1))

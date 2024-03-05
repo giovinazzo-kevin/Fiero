@@ -138,6 +138,8 @@ namespace Fiero.Business
         {
             if (!IsOpen)
                 return;
+            if (Viewport.ToolTip.V is null)
+                Viewport.ToolTip.V = new CellToolTip(UI);
             // TODO: use UI events
             if (Viewport.Following.V is { } following)
             {
@@ -148,6 +150,11 @@ namespace Fiero.Business
                 CurrentPlaceLabel.Text.V = $"{floorId.Branch} {floorId.Depth}";
                 CurrentPosLabel.Text.V = $"X{position.X} Y{position.Y}";
                 RngSeedLabel.Text.V = $"{Rng.GetGlobalSeed():x}";
+
+                if (Viewport.MouseToWorldPos().TryGetValue(out var mouseOver))
+                {
+                    CurrentPosLabel.Text.V = $"X{mouseOver.X} Y{mouseOver.Y}";
+                }
 
                 if (following.ActorProperties.Health is { Min: _, Max: var maxHp, V: var hp })
                 {

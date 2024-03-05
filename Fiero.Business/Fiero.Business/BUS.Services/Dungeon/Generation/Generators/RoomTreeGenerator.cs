@@ -75,6 +75,7 @@
         protected abstract PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(FloorId id, PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool);
         protected virtual Dice GetMonsterDice(Room room, FloorGenerationContext ctx) => new(2, room.GetRects().Count());
         protected virtual Dice GetItemDice(Room room, FloorGenerationContext ctx) => new(3, 2, Bias: -1);
+        protected virtual Dice GetTrapDice(Room room, FloorGenerationContext ctx) => new(1, 2);
 
         protected virtual void OnRoomDrawn(Room room, FloorGenerationContext ctx, Pool<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> enemyPool, Pool<Func<ItemPoolArgs, IEntityBuilder<Item>>> itemPool)
         {
@@ -101,6 +102,17 @@
                     var p = Rng.Random.Choose(candidateTiles);
                     candidateTiles.Remove(p);
                     ctx.AddObject("item", p, entities => itemPool.Next()(new(room, ctx, entities)));
+                }
+            }
+            if (room.AllowTraps)
+            {
+                var numTraps = GetTrapDice(room, ctx)
+                    .Roll(Rng.Random).Sum();
+                for (int i = 0; i < numTraps; i++)
+                {
+                    var p = Rng.Random.Choose(candidateTiles);
+                    candidateTiles.Remove(p);
+                    ctx.TryAddFeature("trap", p, entities => entities.Feature_Trap());
                 }
             }
         }

@@ -7,7 +7,7 @@ namespace Fiero.Business
         where TContainer : PhysicalEntity
         where TActions : struct, Enum
     {
-        public const int RowHeight = 34; // px
+        public const int RowHeight = 32; // px
         public const int PaginatorHeight = 24; // px
 
         public readonly TContainer Container;
@@ -181,7 +181,6 @@ namespace Fiero.Business
                     x.Background.V = UI.GetColor(ColorName.UIBorder);
                     x.Foreground.V = UI.GetColor(ColorName.UIBackground);
                     x.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
-                    x.OutlineThickness.V = 1;
                 }))
             .Rule<Picture>(s => s
                 .Match(x => x.HasClass("item-sprite"))
@@ -196,6 +195,7 @@ namespace Fiero.Business
                 {
                     x.HorizontalAlignment.V = HorizontalAlignment.Left;
                     x.Padding.V = new(2, 0);
+                    x.OutlineThickness.V = 0;
                 }))
             ;
         protected override LayoutGrid RenderContent(LayoutGrid layout)
@@ -207,7 +207,6 @@ namespace Fiero.Business
                         .Cell<Picture>(p =>
                         {
                             Invalidated += () => RefreshItemSprite(p, index);
-                            p.OutlineThickness.V = 1;
                             p.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                         })
                     .End()
@@ -219,7 +218,6 @@ namespace Fiero.Business
                             b.Clicked += (_, __, button) => OnItemClicked(b, index, button);
                             b.MouseEntered += (x, __) => x.Background.V = UI.GetColor(ColorName.UIBorder);
                             b.MouseLeft += (x, __) => x.Background.V = Color.Transparent;
-                            b.OutlineThickness.V = 1;
                             b.OutlineColor.V = UI.GetColor(ColorName.UIBorder);
                             b.ToolTip.V = new ItemToolTip(UI);
                         })

@@ -37,6 +37,21 @@ namespace Fiero.Business
             );
         }
 
+        public override void Update(TimeSpan t, TimeSpan dt)
+        {
+            base.Update(t, dt);
+            if (MouseToWorldPos().TryGetValue(out var mousePos)
+                && ToolTip.V is CellToolTip tooltip)
+            {
+                var floorId = Following.V.FloorId();
+                if (Following.V.Knows(floorId, mousePos)
+                    && FloorSystem.TryGetCellAt(floorId, mousePos, out var cell))
+                    tooltip.Cell.V = cell;
+                else
+                    tooltip.Cell.V = null;
+            }
+        }
+
         public Viewport(
             GameInput input,
             DungeonSystem floor,
@@ -98,7 +113,7 @@ namespace Fiero.Business
             if (!IsMouseOver)
                 return default;
             var pos = TrackedMousePosition - Position.V;
-            var worldPos = pos / ViewTileSize.V + _cachedPos;
+            var worldPos = (pos + ViewTileSize.V / 2) / ViewTileSize.V + _cachedPos + ViewArea.V.Position();
             return worldPos;
         }
 
@@ -131,14 +146,12 @@ namespace Fiero.Business
                 using var darkerSprite = new Sprite(_renderSprite);
                 darkerSprite.Color = new(128, 128, 128);
                 target.Draw(darkerSprite);
-
                 DrawTargetingShape(shape);
             }
             else
             {
                 target.Draw(_renderSprite);
             }
-
 
             void DrawTargetingShape(TargetingShape shape)
             {

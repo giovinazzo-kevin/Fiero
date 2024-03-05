@@ -18,7 +18,7 @@
   "Transparent": "0 0 0 0",
   "UIPrimary": "255 255 255",
   "UISecondary": "128 0 0",
-  "UIBorder": "96 136 144",
+  "UIBorder": "128 128 128",
   "UIDisabled": "128 128 128",
   "UIAccent": "255 0 0",
   "UIBackground": "8 8 16"

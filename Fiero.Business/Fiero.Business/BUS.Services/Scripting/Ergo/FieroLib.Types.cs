@@ -58,5 +58,6 @@ public partial class FieroLib(IServiceFactory services) : Library
         yield return services.GetInstance<TriggerEffect>();
         yield return services.GetInstance<TriggerSound>();
         yield return services.GetInstance<MakeDialogueTrigger>();
+        yield return services.GetInstance<CenterViewOn>();
     }
 }

@@ -24,7 +24,6 @@ namespace Fiero.Business
         public DialogueComponent Dialogue { get; private set; }
         [NonTerm]
         public AiComponent Ai { get; private set; }
-        [NonTerm]
         [RequiredComponent]
         public FieldOfViewComponent Fov { get; private set; }
         [NonTerm]

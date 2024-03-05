@@ -1,6 +1,23 @@
 :- module(test, []).
 :- use_module(fiero).
 :- use_module(input).
+:- use_module(anim).
 
 input:key_route(h, pressed, [_] >> spawn([npc_rat{}], [_])).
 input:key_route(j, pressed, [_] >> spawn([projectile_bomb{charges: 999}], [_])).
+input:key_route(y, pressed, [_] >> toggle_true_sight).
+
+toggle_true_sight :-
+	player as actor is Player,
+	Player = _ {
+		fov: FovComponent
+	},
+	FovComponent = _ {
+		sight: Sight
+	},
+	(Sight = 'visible' -> NewSight = 'true_sight', Tint = light_blue
+					    ; NewSight = 'visible', Tint = light_red),
+	component_set_value(FovComponent, sight, NewSight),
+	center_view_on(Player),
+	play_animations(Player, [expanding_ring{radius: 5, tint: Tint}], _), 
+	write('toggled player sight. new sight: ', NewSight), nl.

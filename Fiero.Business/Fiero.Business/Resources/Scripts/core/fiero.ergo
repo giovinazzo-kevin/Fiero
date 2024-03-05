@@ -2,7 +2,7 @@
 % Do not modify unless you know what you are doing.
 :- module(fiero, [as/2, uuid/1, location/2]).
 :- use_module(geometry).
-:- op(40, yfx, ['as']).
+:- op(45, yfx, ['as']).
 %: Shorthand macro for retrieving the player as an actor
 :- expand([O] >> (
 	@player :- player as actor is O

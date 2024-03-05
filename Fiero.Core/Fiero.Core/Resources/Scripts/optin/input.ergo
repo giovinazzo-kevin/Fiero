@@ -4,6 +4,7 @@
 :- subscribe(input, [keyboard_event]).
 :- inline([bind/3, unbind/3]).
 :- dynamic(key_route/3).
+:- meta_predicate(key_route('?', '?', '+')).
 
 bind(Key, Event, Predicate) :-
     assertz(input:key_route(Key, Event, Predicate)).

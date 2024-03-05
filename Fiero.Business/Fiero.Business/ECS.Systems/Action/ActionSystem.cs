@@ -141,7 +141,7 @@ namespace Fiero.Business
                 {
                     if (e.Victim.IsAlive() && e.Victim.ActorProperties.Health <= 0)
                     {
-                        if (e.Source.TryCast<Actor>(out var killer))
+                        if (e.Source.TryCast<Actor>(out var killer) && killer.ActorProperties.Experience != null)
                         {
                             var xpFromKill = e.Victim.ActorProperties.LVL * 10 + 10;
                             var extraXp = xpFromKill;

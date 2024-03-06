@@ -39,13 +39,36 @@
             {
                 floor.SetTile(tile);
             }
+            var variantsToCheck = new HashSet<Tile>();
             foreach (var tileDef in context.GetTiles())
             {
                 if (tileObjects.Any(t => t.Position() == tileDef.Position))
                     continue;
                 if (tileDef.Name != TileName.None)
                 {
-                    floor.SetTile(tileDef.Resolve(_entityBuilders, id).Build());
+                    var tile = tileDef.Resolve(_entityBuilders, id).Build();
+                    floor.SetTile(tile);
+                    if (tile.TileProperties.Variants.Any())
+                        variantsToCheck.Add(tile);
+                }
+            }
+            // Apply all tile variants
+            foreach (var check in variantsToCheck
+                .OrderBy(x => x.TileProperties.Variants.Max(y => y.Precedence)))
+            {
+                var cells = floor.GetNeighborhood(check.Position(), size: 3, yieldNull: true)
+                    .Select(x => x?.Tile.TileProperties.Name ?? TileName.None)
+                    .ToArray();
+                var matrix = new TileNeighborhood(
+                    cells[0], cells[1], cells[2],
+                    cells[3], cells[4], cells[5],
+                    cells[6], cells[7], cells[8]
+                );
+                foreach (var rule in check.TileProperties.Variants)
+                {
+                    if (!rule.Matrix.Matches(matrix))
+                        continue;
+                    check.Render.Sprite = rule.Variant;
                 }
             }
             // Place all features that were added to the context

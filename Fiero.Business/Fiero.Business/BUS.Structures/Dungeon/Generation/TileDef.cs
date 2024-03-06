@@ -28,7 +28,6 @@
             TileName.Corridor => Decorate(entities.Tile_Corridor(), id),
             TileName.Wall => Decorate(entities.Tile_Wall(), id),
             TileName.Shop => Decorate(entities.Tile_Shop(), id),
-            TileName.WallFront => Decorate(entities.Tile_WallFront(), id),
             TileName.Water => Decorate(entities.Tile_Water(), id),
             _ => Decorate(entities.Tile_Unimplemented(), id),
         };

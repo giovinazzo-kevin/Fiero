@@ -86,7 +86,7 @@
             {
                 var numMonsters = GetMonsterDice(room, ctx)
                     .Roll(Rng.Random).Sum();
-                for (int i = 0; i < numMonsters; i++)
+                for (int i = 0; i < numMonsters && candidateTiles.Any(); i++)
                 {
                     var p = Rng.Random.Choose(candidateTiles);
                     candidateTiles.Remove(p);
@@ -97,7 +97,7 @@
             {
                 var numItems = GetItemDice(room, ctx)
                     .Roll(Rng.Random).Sum();
-                for (int i = 0; i < numItems; i++)
+                for (int i = 0; i < numItems && candidateTiles.Any(); i++)
                 {
                     var p = Rng.Random.Choose(candidateTiles);
                     candidateTiles.Remove(p);
@@ -108,7 +108,7 @@
             {
                 var numTraps = GetTrapDice(room, ctx)
                     .Roll(Rng.Random).Sum();
-                for (int i = 0; i < numTraps; i++)
+                for (int i = 0; i < numTraps && candidateTiles.Any(); i++)
                 {
                     var p = Rng.Random.Choose(candidateTiles);
                     candidateTiles.Remove(p);

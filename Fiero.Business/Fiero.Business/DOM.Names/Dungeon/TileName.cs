@@ -7,7 +7,6 @@
         Corridor,
         Shop,
         Wall,
-        WallFront,
         Water,
         Error,
     }

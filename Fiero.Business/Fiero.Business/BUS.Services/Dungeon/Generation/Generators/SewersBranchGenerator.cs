@@ -25,7 +25,6 @@
         };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool) => pool
             .Guarantee(() => new EmptyRoom(), minAmount: 1)
-            .Include(() => new WetFloorSewerRoom(), 1)
             .If(() => id.Depth > 1, pool => pool
                 .Guarantee(() => new ShopRoom(), minAmount: 1, maxAmount: 1)
                 .Include(() => new TreasureRoom(), 1, maxAmount: 1)

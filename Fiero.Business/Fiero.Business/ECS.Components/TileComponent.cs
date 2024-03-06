@@ -1,7 +1,6 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
+
     public class TileComponent : EcsComponent
     {
         /// <summary>
@@ -13,5 +12,6 @@ namespace Fiero.Business
         /// </summary>
         public int MovementCost { get; set; }
         public TileName Name { get; set; }
+        public List<TileVariant> Variants { get; set; } = new();
     }
 }

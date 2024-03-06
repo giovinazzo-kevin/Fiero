@@ -83,6 +83,13 @@ namespace Fiero.Business
                 c.Sprite = sprite;
                 c.Color = color;
             });
+        public static IEntityBuilder<Tile> WithVariant(this IEntityBuilder<Tile> builder, TileVariant variant)
+            => builder.AddOrTweak<TileComponent>((s, c) =>
+            {
+                if (variant.Matrix.Middle != c.Name)
+                    throw new ArgumentException(nameof(variant));
+                c.Variants.Add(variant);
+            });
         public static IEntityBuilder<T> WithItemSprite<T>(this IEntityBuilder<T> builder, string sprite)
             where T : Item => builder.AddOrTweak<ItemComponent>((s, c) =>
             {

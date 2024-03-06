@@ -256,8 +256,18 @@ namespace Fiero.Business
                             {
                                 using var sprite = new Sprite(spriteDef);
                                 var spriteSize = sprite.GetLocalBounds().Size();
-                                sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
-                                sprite.Scale = ViewTileSize.V / spriteSize;
+                                if (!drawable.TryCast<Tile>(out _))
+                                {
+                                    sprite.Scale = ViewTileSize.V / spriteSize;
+                                    sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
+                                }
+                                else
+                                {
+                                    var tileSize = Store.Get(Data.View.TileSize);
+                                    sprite.Scale = ViewTileSize.V / tileSize;
+                                    // Some tiles are taller than 16px, offset them accordingly
+                                    sprite.Origin = new Vec(0.5f, 0.5f) * tileSize + (spriteSize - tileSize);
+                                }
                                 sprite.Position = screenPos;
                                 if (asActor != null && asActor.Faction.Name != FactionName.None)
                                     sprite.Position -= new Vec(0f, 0.33f) * spriteSize;

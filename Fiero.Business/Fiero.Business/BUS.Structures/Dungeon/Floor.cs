@@ -118,5 +118,20 @@
             ).Compute(center, radius * radius);
             return result;
         }
+
+        public IEnumerable<MapCell> GetNeighborhood(Coord pos, int size = 3, bool yieldNull = false)
+        {
+            size /= 2;
+            for (int y = -size; y <= size; y++)
+            {
+                for (int x = -size; x <= size; x++)
+                {
+                    if (Cells.TryGetValue(new(pos.X + x, pos.Y + y), out var n))
+                        yield return n;
+                    else if (yieldNull)
+                        yield return null;
+                }
+            }
+        }
     }
 }

@@ -9,8 +9,7 @@
         Amulet,
         Cape,
         Ring,
-        Weapon1H,
-        Weapon2H,
+        Weapon,
         Shield,
     }
 

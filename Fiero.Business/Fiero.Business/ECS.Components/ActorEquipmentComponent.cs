@@ -19,15 +19,9 @@
 
         public EquipmentSlotName? MapFreeSlot(EquipmentTypeName va) => va switch
         {
-            EquipmentTypeName.Weapon2H when !Dict.ContainsKey(EquipmentSlotName.LeftHand) && !Dict.ContainsKey(EquipmentSlotName.RightHand)
+            EquipmentTypeName.Weapon when !Dict.ContainsKey(EquipmentSlotName.LeftHand)
                 => EquipmentSlotName.LeftHand,
-            EquipmentTypeName.Weapon1H when !Dict.ContainsKey(EquipmentSlotName.LeftHand)
-                => EquipmentSlotName.LeftHand,
-            EquipmentTypeName.Weapon1H when !Dict.ContainsKey(EquipmentSlotName.RightHand)
-                && Dict[EquipmentSlotName.LeftHand].EquipmentProperties.Type != EquipmentTypeName.Weapon2H
-                => EquipmentSlotName.RightHand,
             EquipmentTypeName.Shield when !Dict.ContainsKey(EquipmentSlotName.RightHand)
-                && Dict[EquipmentSlotName.LeftHand].EquipmentProperties.Type != EquipmentTypeName.Weapon2H
                 => EquipmentSlotName.RightHand,
             EquipmentTypeName.Helmet when !Dict.ContainsKey(EquipmentSlotName.Head)
                 => EquipmentSlotName.Head,

@@ -1,8 +1,8 @@
 % This module is imported implicitly by all game scripts.
 % Do not modify unless you know what you are doing.
 
-:- module(geometry, [':p='/2, clamp/4]).
-:- op(50, xfx, [':p=']).
+:- module(geometry, [':='/2, clamp/4]).
+
 %: Base case: Evaluate a single point
 eval_point(p(X, Y), p(X, Y)) :- !.
 
@@ -10,68 +10,70 @@ eval_point(p(X, Y), p(X, Y)) :- !.
 eval_point(Op1 + Op2, p(X3, Y3)) :-
     eval_point(Op1, p(X1, Y1)),
     eval_point(Op2, p(X2, Y2)),
-    X3 is X1 + X2,
-    Y3 is Y1 + Y2.
+    math:eval(X3, X1 + X2),
+    math:eval(Y3, Y1 + Y2).
 
 %: Evaluation for subtraction of two points
 eval_point(Op1 - Op2, p(X3, Y3)) :-
     eval_point(Op1, p(X1, Y1)),
     eval_point(Op2, p(X2, Y2)),
-    X3 is X1 - X2,
-    Y3 is Y1 - Y2.
+    math:eval(X3, X1 - X2),
+    math:eval(Y3, Y1 - Y2).
 
 %: Evaluation for multiplication of two points
 eval_point(Op1 * Op2, p(X3, Y3)) :-
     eval_point(Op1, p(X1, Y1)),
     eval_point(Op2, p(X2, Y2)),
-    X3 is X1 * X2,
-    Y3 is Y1 * Y2.
+    math:eval(X3, X1 * X2),
+    math:eval(Y3, Y1 * Y2).
 
 %: Evaluation for division of two points
 eval_point(Op1 / Op2, p(X3, Y3)) :-
     eval_point(Op1, p(X1, Y1)),
     eval_point(Op2, p(X2, Y2)),
-    X3 is X1 / X2,
-    Y3 is Y1 / Y2.
+    math:eval(X3, X1 / X2),
+    math:eval(Y3, Y1 / Y2).
 
 %: Evaluation for addition of a point and a scalar
 eval_point(p(X1, Y1) + N, p(X3, Y3)) :-
     number(N),
-    X3 is X1 + N,
-    Y3 is Y1 + N.
+    math:eval(X3, X1 + N),
+    math:eval(Y3, Y1 + N).
 
 %: Evaluation for subtraction of a point and a scalar
 eval_point(p(X1, Y1) - N, p(X3, Y3)) :-
     number(N),
-    X3 is X1 - N,
-    Y3 is Y1 - N.
+    math:eval(X3, X1 - N),
+    math:eval(Y3, Y1 - N).
 
 %: Evaluation for multiplication of a point and a scalar
 eval_point(p(X1, Y1) * N, p(X3, Y3)) :-
+    write('dio can'), nl,
     number(N),
-    X3 is X1 * N,
-    Y3 is Y1 * N.
+    write('dio kek'), nl,
+    math:eval(X3, X1 * N),
+    math:eval(Y3, Y1 * N).
 
 %: Evaluation for division of a point and a scalar
 eval_point(p(X1, Y1) / N, p(X3, Y3)) :-
     number(N),
-    X3 is X1 / N,
-    Y3 is Y1 / N.
+    math:eval(X3, X1 / N),
+    math:eval(Y3, Y1 / N).
 
 %: Add points or scalars
-p(X3,Y3) :p= Op1 + Op2 :-
+p(X3,Y3) := Op1 + Op2 :-
     eval_point(Op1 + Op2, p(X3, Y3)), !.
 
 %: Subtract points or scalars
-p(X3,Y3) :p= Op1 - Op2 :-
+p(X3,Y3) := Op1 - Op2 :-
     eval_point(Op1 - Op2, p(X3, Y3)), !.
 
 %: Multiply points or scalars
-p(X3,Y3) :p= Op1 * Op2 :-
+p(X3,Y3) := Op1 * Op2 :-
     eval_point(Op1 * Op2, p(X3, Y3)), !.
 
 %: Divide points or scalars
-p(X3,Y3) :p= Op1 / Op2 :-
+p(X3,Y3) := Op1 / Op2 :-
     eval_point(Op1 / Op2, p(X3, Y3)), !.
 
 clamp(Min, Max, p(X1, Y1), p(X2, Y2)) :-

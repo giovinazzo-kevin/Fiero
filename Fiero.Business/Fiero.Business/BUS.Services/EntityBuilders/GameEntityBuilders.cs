@@ -630,6 +630,9 @@
         public IEntityBuilder<Weapon> Weapon_Spear()
             => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
+            .WithIntrinsicEffect(
+                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 2}}"),
+                e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()
             => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: new Dice(1, 1), swingDelay: 5, itemRarity: 10, goldValue: 100)

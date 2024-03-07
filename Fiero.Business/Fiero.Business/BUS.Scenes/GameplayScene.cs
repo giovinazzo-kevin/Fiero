@@ -156,7 +156,7 @@ namespace Fiero.Business.Scenes
                 dungeonSystem.AddDungeon(d => d.WithStep(ctx =>
                 {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
-                    ctx.AddBranch<SewersBranchGenerator>(DungeonBranchName.Dungeon, 10);
+                    ctx.AddBranch<TestBranchGenerator>(DungeonBranchName.Dungeon, 3);
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
                 }));

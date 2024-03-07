@@ -1,0 +1,22 @@
+:- module(reach, []).
+:- use_module(fiero).
+:- subscribe(action, [actor_moved]).
+:- dynamic(reach_data/3).
+
+effect:began(_{effect_id: Id, owner: O, arguments: _{ range: R }}) :-
+	assertz(reach_data(Id, O, R)).
+
+effect:ended(_{effect_id: Id}) :-
+	retract(reach_data(Id, _, _)).
+
+action:actor_moved(_{actor: A, old_position: Old, new_position: New}) :-
+	A = _{id: ActorId},
+	reach:reach_data(_, _{id: ActorId}, R),
+	Dir := New - Old,
+	clamp(-1, 1, Dir, ClampedDir),
+	D := ClampedDir * R,
+	Pos := New + D,
+	reach:reach_attack(A, Pos).
+
+reach_attack(_A, _Pos) :-
+	write('reach'), nl.

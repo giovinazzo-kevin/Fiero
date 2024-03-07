@@ -94,6 +94,9 @@
     <None Update="Resources\Scripts\items\bomb_commands.old.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\modifiers\reach.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\modifiers\monsplosion.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

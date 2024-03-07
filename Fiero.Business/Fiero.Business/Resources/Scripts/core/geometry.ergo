@@ -5,6 +5,8 @@
 
 %: Base case: Evaluate a single point
 eval_point(p(X, Y), p(X, Y)) :- !.
+%: Base case: Evaluate a scalar
+eval_point(N, p(N, N)) :- number(N), !.
 
 %: Evaluation for addition of two points
 eval_point(Op1 + Op2, p(X3, Y3)) :-
@@ -34,46 +36,25 @@ eval_point(Op1 / Op2, p(X3, Y3)) :-
     math:eval(X3, X1 / X2),
     math:eval(Y3, Y1 / Y2).
 
-%: Evaluation for addition of a point and a scalar
-eval_point(p(X1, Y1) + N, p(X3, Y3)) :-
-    number(N),
-    math:eval(X3, X1 + N),
-    math:eval(Y3, Y1 + N).
-
-%: Evaluation for subtraction of a point and a scalar
-eval_point(p(X1, Y1) - N, p(X3, Y3)) :-
-    number(N),
-    math:eval(X3, X1 - N),
-    math:eval(Y3, Y1 - N).
-
-%: Evaluation for multiplication of a point and a scalar
-eval_point(p(X1, Y1) * N, p(X3, Y3)) :-
-    write('dio can'), nl,
-    number(N),
-    write('dio kek'), nl,
-    math:eval(X3, X1 * N),
-    math:eval(Y3, Y1 * N).
-
-%: Evaluation for division of a point and a scalar
-eval_point(p(X1, Y1) / N, p(X3, Y3)) :-
-    number(N),
-    math:eval(X3, X1 / N),
-    math:eval(Y3, Y1 / N).
 
 %: Add points or scalars
 p(X3,Y3) := Op1 + Op2 :-
+    (Op1 = p(_, _) ; Op2 = p(_, _)),
     eval_point(Op1 + Op2, p(X3, Y3)), !.
 
 %: Subtract points or scalars
 p(X3,Y3) := Op1 - Op2 :-
+    (Op1 = p(_, _) ; Op2 = p(_, _)),
     eval_point(Op1 - Op2, p(X3, Y3)), !.
 
 %: Multiply points or scalars
 p(X3,Y3) := Op1 * Op2 :-
+    (Op1 = p(_, _) ; Op2 = p(_, _)),
     eval_point(Op1 * Op2, p(X3, Y3)), !.
 
 %: Divide points or scalars
 p(X3,Y3) := Op1 / Op2 :-
+    (Op1 = p(_, _) ; Op2 = p(_, _)),
     eval_point(Op1 / Op2, p(X3, Y3)), !.
 
 clamp(Min, Max, p(X1, Y1), p(X2, Y2)) :-

@@ -14,9 +14,8 @@ action:actor_moved(_{actor: _{id: ActorId}, old_position: Old, new_position: New
 	Dir := New - Old,
 	clamp(-1, 1, Dir, ClampedDir),
 	write(New, ' ', ClampedDir, ' ', R), nl,
-	Pos1 := New + ClampedDir,
-	Pos2 := Pos1 * R,
-	reach:reach_attack(ActorId, Pos2).
+	Pos := New + ClampedDir * R,
+	reach:reach_attack(ActorId, Pos).
 
 reach_attack(_A, _Pos) :-
 	write('reach'), nl.

@@ -17,10 +17,6 @@ Entity as Type is Proxy :-
 	cast_entity(Entity, Type, Proxy).
 location(E, l(FloorId, Pos)) :-
 	E as physical_entity is _{ physics: _{ floor_id: FloorId, position: Pos }}.
-%: Unify with all entities on the same tile as another physical entity
-at(O, E) :-
-    location(O, l(FloorId, Pos)),
-	at(FloorId, Pos, E).
 %: Generate UUID
 uuid(Id) :-
 	(last_uuid(Last), retract(last_uuid(Last)) ; Last = 0), !,

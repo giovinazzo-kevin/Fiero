@@ -9,14 +9,14 @@ effect:began(_{effect_id: Id, owner: O, arguments: _{ range: R }}) :-
 effect:ended(_{effect_id: Id}) :-
 	retract(reach_data(Id, _, _)).
 
-action:actor_moved(_{actor: A, old_position: Old, new_position: New}) :-
-	A = _{id: ActorId},
+action:actor_moved(_{actor: _{id: ActorId}, old_position: Old, new_position: New}) :-
 	reach:reach_data(_, _{id: ActorId}, R),
 	Dir := New - Old,
 	clamp(-1, 1, Dir, ClampedDir),
-	D := ClampedDir * R,
-	Pos := New + D,
-	reach:reach_attack(A, Pos).
+	write(New, ' ', ClampedDir, ' ', R), nl,
+	Pos1 := New + ClampedDir,
+	Pos2 := Pos1 * R,
+	reach:reach_attack(ActorId, Pos2).
 
 reach_attack(_A, _Pos) :-
 	write('reach'), nl.

@@ -247,16 +247,45 @@ namespace Fiero.Business
             var s = scale ?? new(0.5f, 0.5f);
             var str = damage.ToString();
 
-            var startX = 0.25f;
+            var startX = 0;
             return new(new[] {
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetTextSprites(font, new(startX, +0.00f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.33f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 48), GetTextSprites(font, new(AnimateX(), -0.50f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 12), GetTextSprites(font, new(AnimateX(), +0.00f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 10), GetTextSprites(font, new(AnimateX(), +0.25f), tint, str, s)),
-                new AnimationFrame(TimeSpan.FromMilliseconds(2 * 8), GetTextSprites(font, new(AnimateX(), +0.50f), tint, str, s))
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 10), GetTextSprites(font, new(startX, +0.00f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetTextSprites(font, new(AnimateX(), -0.33f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 48), GetTextSprites(font, new(AnimateX(), -0.50f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 12), GetTextSprites(font, new(AnimateX(), +0.00f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 10), GetTextSprites(font, new(AnimateX(), +0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(3 * 8), GetTextSprites(font, new(AnimateX(), +0.50f), tint, str, s))
+            }, repeat);
+
+            float AnimateX()
+            {
+                return startX;
+            }
+        }
+
+        public static Animation DamageNumber_Crit(
+            int damage,
+            TextureName font = TextureName.FontMonospace,
+            ColorName tint = ColorName.White,
+            Vec? scale = null,
+            int repeat = 0
+        )
+        {
+            var s = scale ?? new(0.75f, 0.75f);
+            var str = damage.ToString() + "!";
+
+            var startX = 0;
+            return new(new[] {
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetTextSprites(font, new(startX, +0.00f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), ColorName.White, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetTextSprites(font, new(AnimateX(), -0.33f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 48), GetTextSprites(font, new(AnimateX(), -0.50f), ColorName.White, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetTextSprites(font, new(AnimateX(), -0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 12), GetTextSprites(font, new(AnimateX(), +0.00f), ColorName.White, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 10), GetTextSprites(font, new(AnimateX(), +0.25f), tint, str, s)),
+                new AnimationFrame(TimeSpan.FromMilliseconds(4 * 8), GetTextSprites(font, new(AnimateX(), +0.50f), ColorName.White, str, s))
             }, repeat);
 
             float AnimateX()

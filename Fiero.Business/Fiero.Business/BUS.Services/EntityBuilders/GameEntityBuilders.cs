@@ -98,13 +98,13 @@
             .WithEquipmentInfo(type)
             ;
 
-        public IEntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, Dice baseDamage, int swingDelay, int itemRarity, int goldValue)
+        public IEntityBuilder<T> Weapon<T>(string unidentName, WeaponName type, Dice baseDamage, Chance critChance, int swingDelay, int itemRarity, int goldValue)
             where T : Weapon
             => Equipment<T>(EquipmentTypeName.Weapon)
             .WithName($"$Item.{type}$")
             .WithSprite(RenderLayerName.Items, TextureName.Items, type.ToString(), ColorName.Transparent)
             .WithPhysics(Coord.Zero)
-            .WithWeaponInfo(type, baseDamage, swingDelay)
+            .WithWeaponInfo(type, baseDamage, critChance, swingDelay)
             .WithItemInfo(itemRarity, goldValue, unidentName)
             ;
 
@@ -619,31 +619,31 @@
 
         #region WEAPONS
         public IEntityBuilder<Weapon> Weapon_Sword()
-            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
+            => Weapon<Weapon>("sword", WeaponName.Sword, baseDamage: new Dice(1, 3), critChance: new(15, 100), swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Sword))
             ;
         public IEntityBuilder<Weapon> Weapon_Dagger()
-            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: new Dice(1, 2), swingDelay: 0, itemRarity: 10, goldValue: 100)
+            => Weapon<Weapon>("dagger", WeaponName.Dagger, baseDamage: new Dice(1, 2), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Dagger))
             ;
         public IEntityBuilder<Weapon> Weapon_Hammer()
-            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: new Dice(2, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
+            => Weapon<Weapon>("hammer", WeaponName.Hammer, baseDamage: new Dice(2, 3), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Hammer))
             ;
         public IEntityBuilder<Weapon> Weapon_Spear()
-            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
+            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
                 EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1}}"),
                 e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()
-            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: new Dice(1, 1), swingDelay: 5, itemRarity: 10, goldValue: 100)
+            => Weapon<Launcher>("bow", WeaponName.Bow, baseDamage: new Dice(1, 1), critChance: Chance.Never, swingDelay: 5, itemRarity: 10, goldValue: 100)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Bow))
             ;
         public IEntityBuilder<Launcher> Weapon_Crossbow()
-            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: new Dice(2, 1), swingDelay: 5, itemRarity: 10, goldValue: 100)
+            => Weapon<Launcher>("crossbow", WeaponName.Crossbow, baseDamage: new Dice(2, 1), critChance: Chance.Never, swingDelay: 5, itemRarity: 10, goldValue: 100)
             .WithLauncherInfo(Projectile_Arrow())
             .LoadState(nameof(WeaponName.Crossbow))
             ;

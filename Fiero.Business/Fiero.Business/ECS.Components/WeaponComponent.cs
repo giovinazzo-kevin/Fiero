@@ -4,8 +4,8 @@
     {
         public WeaponName Type { get; set; }
         public Dice BaseDamage { get; set; }
+        public Chance CritChance { get; set; }
         public int SwingDelay { get; set; }
-
         public float DamagePerTurn => ((float)BaseDamage.Mean() * (100f / (SwingDelay + 100)));
     }
 }

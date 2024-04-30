@@ -370,11 +370,12 @@ namespace Fiero.Business
                 c.TargetingFilter = targetFilter;
             });
 
-        public static IEntityBuilder<T> WithWeaponInfo<T>(this IEntityBuilder<T> builder, WeaponName type, Dice baseDamage, int swingDelay)
+        public static IEntityBuilder<T> WithWeaponInfo<T>(this IEntityBuilder<T> builder, WeaponName type, Dice baseDamage, Chance critChance, int swingDelay)
             where T : Weapon => builder.AddOrTweak<WeaponComponent>((s, c) =>
             {
                 c.Type = type;
                 c.BaseDamage = baseDamage;
+                c.CritChance = critChance;
                 c.SwingDelay = swingDelay;
             });
         public static IEntityBuilder<T> WithCorpseInfo<T>(this IEntityBuilder<T> builder, CorpseName type)

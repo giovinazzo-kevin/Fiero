@@ -129,6 +129,7 @@ namespace Fiero.Business
         public static bool IsPlayer(this Actor a) => a.IsAlive() && a.ActorProperties.Type == ActorName.Player;
         public static bool Knows(this Actor a, FloorId f, Coord c) => a.IsAlive() && a?.Fov != null && a.Fov.KnownTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
         public static bool CanSee(this Actor a, FloorId f, Coord c) => a.IsAlive() && a.FloorId() == f && a?.Fov != null && a.Fov.VisibleTiles.TryGetValue(f, out var tiles) && tiles.Contains(c);
+        public static bool CanSee(this Actor a, Coord c) => CanSee(a, a.FloorId(), c);
         public static bool CanSee(this Actor a, Location l) =>
             CanSee(a, l.FloorId, l.Position);
         public static bool CanSeeEither(this Actor a, Either<Location, PhysicalEntity> l) =>

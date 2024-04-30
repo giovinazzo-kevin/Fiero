@@ -127,8 +127,7 @@ namespace Fiero.Business.Scenes
                 Item[] loadout = Store.GetOrDefault(Data.Player.Loadout, LoadoutName.Adventurer) switch
                 {
                     LoadoutName.Knight => [
-                        Resources.Entities.Weapon_Spear().Build()
-                        //EntityGenerator.GenerateMeleeWeapon(Resources.Entities).Build()
+                        EntityGenerator.GenerateMeleeWeapon(Resources.Entities).Build()
                     ],
                     LoadoutName.Archer => [Resources.Entities.Weapon_Bow().Build()],
                     LoadoutName.Wizard => [Resources.Entities.Wand_OfConfusion(charges: 25, duration: 5).Build()],
@@ -145,8 +144,6 @@ namespace Fiero.Business.Scenes
                     .WithName(playerName)
                     .WithItems(loadout)
                     //.WithIntrinsicTrait(Traits.Invulnerable)
-                    //.WithIntrinsicEffect(EffectDef.FromScript(Resources.Entities.Script(@"test").Build()))
-                    //.Tweak<FieldOfViewComponent>(c => c.Sight = VisibilityName.TrueSight)
                     //.Tweak<PhysicsComponent>((s, c) => c.Phasing = true)
                     .WithHealth(10)
                     .Build();
@@ -493,7 +490,7 @@ namespace Fiero.Business.Scenes
                 var actualHeal = e.Target.ActorProperties.Health - oldHealth;
                 if (Player.CanSee(e.Target))
                 {
-                    renderSystem.AnimateViewport(false, e.Target.Location(), Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
+                    renderSystem.AnimateViewport(false, e.Target, Animation.DamageNumber(actualHeal, tint: ColorName.LightGreen));
                 }
                 return true;
             });
@@ -514,11 +511,17 @@ namespace Fiero.Business.Scenes
                 int oldHealth = e.Victim.ActorProperties.Health;
                 e.Victim.ActorProperties.Health.V -= e.Damage;
                 e.Victim.ActorProperties.LastTookDamageOnTurn = actionSystem.CurrentTurn;
-                var actualDdamage = oldHealth - e.Victim.ActorProperties.Health;
+                var actualDamage = oldHealth - e.Victim.ActorProperties.Health;
                 if (Player.CanSee(e.Victim))
                 {
                     var color = e.Victim.IsPlayer() ? ColorName.LightRed : ColorName.LightCyan;
-                    renderSystem.AnimateViewport(false, e.Victim.Location(), Animation.DamageNumber(Math.Abs(actualDdamage), tint: color));
+                    var anim = e.IsCrit
+                        ? Animation.DamageNumber_Crit(Math.Abs(actualDamage), tint: color)
+                        : Animation.DamageNumber(Math.Abs(actualDamage), tint: color);
+                    if (e.Victim.ActorProperties.Health.V <= 0)
+                        renderSystem.AnimateViewport(false, e.Victim.Location(), anim);
+                    else
+                        renderSystem.AnimateViewport(false, e.Victim, anim);
                 }
                 return true;
             });
@@ -994,8 +997,24 @@ namespace Fiero.Business.Scenes
                     foreach (var a in dungeonSystem.GetActorsAt(e.FloorId, p))
                     {
                         var damage = (int)(e.BaseDamage / (a.SquaredDistanceFrom(e.Center) + 1));
-                        actionSystem.ActorDamaged.HandleOrThrow(new(e.Cause, a, [e.Source], damage));
+                        actionSystem.ActorDamaged.HandleOrThrow(new(e.Cause, a, [e.Source], damage, false));
                     }
+                }
+                return true;
+            });
+            // ActionSystem.CriticalHitHappened:
+            // - Log the event
+            // - Show an animation and play sound
+            yield return actionSystem.CriticalHitHappened.SubscribeResponse(e =>
+            {
+                e.Attacker.Log.Write($"$Action.YouCritFor$ {e.Damage} $Action.Damage$.");
+                if (Player.IsAlive() && Player.FloorId() != e.Attacker.FloorId())
+                    return true;
+                var pos = e.Attacker.Position();
+                Resources.Sounds.Get(SoundName.Crit, pos - Player.Position()).Play();
+                if (Player.CanSee(pos))
+                {
+
                 }
                 return true;
             });

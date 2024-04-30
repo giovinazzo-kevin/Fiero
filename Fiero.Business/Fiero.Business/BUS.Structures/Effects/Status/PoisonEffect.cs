@@ -36,7 +36,7 @@ namespace Fiero.Business
                     {
                         amount = e.Actor.ActorProperties.Health.V - 1;
                     }
-                    systems.Get<ActionSystem>().ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, amount));
+                    systems.Get<ActionSystem>().ActorDamaged.Handle(new(e.Actor, e.Actor, new[] { e.Actor }, amount, false));
                 }
             });
         }

@@ -151,6 +151,7 @@ namespace Fiero.Business
             Sounds.Add(SoundName.Buff, new SoundBuffer("Resources/Sounds/79_arrowchain.wav"));
             Sounds.Add(SoundName.Debuff, new SoundBuffer("Resources/Sounds/74_bowrelease2.wav"));
             Sounds.Add(SoundName.Explosion, new SoundBuffer("Resources/Sounds/69_explode.wav"));
+            Sounds.Add(SoundName.Crit, new SoundBuffer("Resources/Sounds/20_bridge.wav"));
             Sounds.Add(SoundName.ItemPickedUp, new SoundBuffer("Resources/Sounds/14_item2.wav"));
             Sounds.Add(SoundName.SpellCast, new SoundBuffer("Resources/Sounds/16_falling.wav"));
             Sounds.Add(SoundName.MeleeAttack, new SoundBuffer("Resources/Sounds/23_ladder.wav"));

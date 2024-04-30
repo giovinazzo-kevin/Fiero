@@ -54,6 +54,7 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, FeatureInteractedWithEvent, EventResult> FeatureInteractedWith;
         public readonly SystemRequest<ActionSystem, ConversationInitiatedEvent, EventResult> ConversationInitiated;
         public readonly SystemRequest<ActionSystem, ExplosionHappenedEvent, EventResult> ExplosionHappened;
+        public readonly SystemRequest<ActionSystem, CriticalHitHappenedEvent, EventResult> CriticalHitHappened;
 
         public readonly SystemEvent<ActionSystem, FeatureInteractedWithEvent> ActorSteppedOnTrap;
         public readonly SystemEvent<ActionSystem, ActorBumpedObstacleEvent> ActorBumpedObstacle;
@@ -117,6 +118,7 @@ namespace Fiero.Business
             ItemConsumed = new(this, nameof(ItemConsumed));
             FeatureInteractedWith = new(this, nameof(FeatureInteractedWith));
             ExplosionHappened = new(this, nameof(ExplosionHappened));
+            CriticalHitHappened = new(this, nameof(CriticalHitHappened));
             ActorSteppedOnTrap = new(this, nameof(ActorSteppedOnTrap));
             ActorBumpedObstacle = new(this, nameof(ActorBumpedObstacle));
             ActorGainedEffect = new(this, nameof(ActorGainedEffect));
@@ -132,7 +134,7 @@ namespace Fiero.Business
                 if (r.All(x => x))
                 {
                     foreach (var victim in e.Victims)
-                        ActorDamaged.HandleOrThrow(new(e.Attacker, victim, e.Weapons, e.Damage));
+                        ActorDamaged.HandleOrThrow(new(e.Attacker, victim, e.Weapons, e.Damage, e.IsCrit));
                 }
             };
             ActorDamaged.AllResponsesReceived += (_, e, r) =>
@@ -308,9 +310,9 @@ namespace Fiero.Business
             return true;
         }
 
-        private bool HandleAttack(AttackName type, Actor attacker, Actor[] victims, ref int? cost, Entity[] weapons, out int damage, out int swingDelay)
+        private bool HandleAttack(AttackName type, Actor attacker, Actor[] victims, ref int? cost, Entity[] weapons, out int damage, out int swingDelay, out bool crit)
         {
-            if (TryAttack(out damage, out swingDelay, type, attacker, victims, weapons))
+            if (TryAttack(out damage, out swingDelay, out crit, type, attacker, victims, weapons))
             {
                 cost += swingDelay;
                 return true;
@@ -318,9 +320,9 @@ namespace Fiero.Business
             return false;
         }
 
-        public bool TryAttack(out int damage, out int swingDelay, AttackName type, Actor attacker, Actor[] victims, Entity[] attackWith)
+        public bool TryAttack(out int damage, out int swingDelay, out bool crit, AttackName type, Actor attacker, Actor[] victims, Entity[] attackWith)
         {
-            damage = 0; swingDelay = 0;
+            damage = 0; swingDelay = 0; crit = false;
             if (attackWith != null && attackWith.Length > 0)
             {
                 foreach (var item in attackWith)
@@ -329,6 +331,13 @@ namespace Fiero.Business
                     {
                         swingDelay += w.WeaponProperties.SwingDelay;
                         damage += w.WeaponProperties.BaseDamage.Roll().Sum();
+                        if (w.WeaponProperties.CritChance.Check())
+                        {
+                            var critDamage = damage * 3;
+                            crit = CriticalHitHappened.Handle(new(attacker, victims, w, critDamage));
+                            if (crit)
+                                damage = critDamage;
+                        }
                     }
                     else if (type == AttackName.Ranged && item.TryCast<Projectile>(out var t))
                     {
@@ -346,7 +355,7 @@ namespace Fiero.Business
                 }
             }
             else damage = 1;
-            return ActorAttacked.Handle(new(type, attacker, victims, attackWith, damage, swingDelay));
+            return ActorAttacked.Handle(new(type, attacker, victims, attackWith, damage, swingDelay, crit));
         }
 
         public void Track(int actorId)

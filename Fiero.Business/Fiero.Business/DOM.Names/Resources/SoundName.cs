@@ -18,6 +18,7 @@
         EnemyDeath,
         PlayerDeath,
         Explosion,
+        Crit,
         Countdown3,
         Countdown2,
         Countdown1,

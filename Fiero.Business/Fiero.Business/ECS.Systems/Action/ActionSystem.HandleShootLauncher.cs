@@ -77,12 +77,12 @@
                     break;
             }
             if (!item.ProjectileProperties.Piercing)
-                return HandleAttack(AttackName.Ranged, attacker, victimAndCollaterals, ref cost, new[] { item }, out _, out _);
+                return HandleAttack(AttackName.Ranged, attacker, victimAndCollaterals, ref cost, new[] { item }, out _, out _, out _);
             else
             {
                 for (int i = 0; i < victimAndCollaterals.Length; i++)
                 {
-                    if (!HandleAttack(AttackName.Ranged, attacker, [victimAndCollaterals[i]], ref cost, new[] { item }, out _, out _))
+                    if (!HandleAttack(AttackName.Ranged, attacker, [victimAndCollaterals[i]], ref cost, new[] { item }, out _, out _, out _))
                         return false;
                 }
                 return true;

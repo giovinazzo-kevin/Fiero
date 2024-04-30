@@ -91,16 +91,7 @@
     <None Update="Resources\Scripts\items\bomb.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\items\bomb_commands.old.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\Scripts\modifiers\reach.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Scripts\modifiers\monsplosion.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Scripts\modifiers\fuse_cutter.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\test.ergo">
@@ -474,6 +465,18 @@
     <Folder Include="BUS.Structures\Spells\" />
     <Folder Include="Resources\Entities\Actors\" />
     <Folder Include="Resources\Scripts\effects\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources\Scripts\items\.old\bomb_commands.old.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Scripts\modifiers\.old\fuse_cutter.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Scripts\modifiers\.old\monsplosion.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -32,15 +32,17 @@ namespace Fiero.Business
                 GrantedWhenTargetedByScroll { Modifier: ScrollModifierName.Self } => "when read, targets the user",
                 _ => ""
             };
-            var targetFx = def.Name switch
+            var targetFx = $" applies {def.Name switch
             {
-                _ => $" applies {def.Name}"
-            };
+                EffectName.Script => def.Script.Name.ToUpperInvariant(),
+                var name => name.ToString().ToUpperInvariant()
+            }}";
             sb.Append(modifierFx);
             sb.Append(targetFx);
+            if (!string.IsNullOrEmpty(def.Arguments))
+                sb.Append($"({def.Arguments})");
             sb.Append(Duration(def));
             sb.Append(Chance(def));
-            sb.Append($" ({def.Arguments})");
             return sb.ToString();
 
             string Duration(EffectDef def)

@@ -24,14 +24,25 @@ action:actor_moved(_{
 	reach:reach_data(_, _{id: ActorId}, R),
 	Dir := New - Old,
 	clamp(-1, 1, Dir, ClampedDir),
-	D := ClampedDir * R, 
+	for(I, R, 0, -1),
+	D := ClampedDir * I, 
 	Pos := New + D,
-	reach:reach_attack(ActorId, Pos, Weapon).
+	reach:reach_attack(ActorId, Pos, Weapon), 
+	!.
 
 reach_attack(ActorId, Pos, Weapon) :-
 	location(ActorId, l(FloorId, _)),
 	at(l(FloorId, Pos), actor { id: OtherId }),
-	Weapon = _{ props: _{ swing_delay: Delay, base_damage: _{ number_of_dice: Throws, number_of_sides: Sides }}},
+	% TODO: Check that OtherId is hostile to ActorId
+	Weapon = _{ 
+		props: _{ 
+			swing_delay: Delay, 
+			base_damage: _{ 
+				number_of_dice: Throws, 
+				number_of_sides: Sides 
+			}
+		}
+	},
 	roll_sum(Throws d Sides, DamageRoll),
 	raise(action, actor_attacked, _{ 
 		attacker: _{id: ActorId}, 

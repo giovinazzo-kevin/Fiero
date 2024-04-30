@@ -631,7 +631,7 @@
             .LoadState(nameof(WeaponName.Hammer))
             ;
         public IEntityBuilder<Weapon> Weapon_Spear()
-            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
+            => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
                 EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1}}"),

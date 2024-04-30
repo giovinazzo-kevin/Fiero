@@ -157,7 +157,7 @@ namespace Fiero.Business
                     if (Systems.Get<DungeonSystem>().TryGetCellAt(a.FloorId(), pos, out var cell)
                         && cell.IsWalkable(a) && !cell.Actors.Any())
                     {
-                        action = new MoveRelativeAction(dir);
+                        action = new MoveRelativeAction(dir, a.Physics.MoveDelay);
                         return true;
                     }
                 }

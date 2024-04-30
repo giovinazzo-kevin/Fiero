@@ -21,8 +21,8 @@ namespace Fiero.Business
                     var dir = new Coord(Rng.Random.Between(-1, 1), Rng.Random.Between(-1, 1));
                     return e.Intent.Name switch
                     {
-                        ActionName.Move => new(new MoveRelativeAction(dir)),
-                        ActionName.MeleeAttack => new(new MoveRelativeAction(dir)),
+                        ActionName.Move => new(new MoveRelativeAction(dir, e.Actor.Physics.MoveDelay)),
+                        ActionName.MeleeAttack => new(new MoveRelativeAction(dir, e.Actor.Physics.MoveDelay)),
                         ActionName.Throw when e.Intent is ThrowItemAtPointAction x => new(new ThrowItemAtPointAction(dir, x.Item)),
                         ActionName.Throw when e.Intent is ThrowItemAtOtherAction x => new(new ThrowItemAtPointAction(dir, x.Item)),
                         ActionName.Read => new(new FailAction()) /* TODO: Log message that you can't read */,

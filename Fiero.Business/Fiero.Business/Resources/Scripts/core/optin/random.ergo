@@ -28,24 +28,29 @@ never :- n_chances_in(0, 0).
 
 dice(Throws, Sides, Throw) :-
 	for(_, 1, Throws),
-	rng(1, Sides, D),
-	Throw := floor D. 
-	
+	rng(1, :=(Sides + 1), D),
+	Throw := floor D.
+
+%Bind := roll N d S :-
 %: Binds each roll to a variable.
-Bind := roll N d S :-
-	dice(S, N, Bind).
+roll(N d S, Bind) :-
+	dice(N, S, Bind).
 _ := roll _ d _ :- !, false.
+%List := [roll N d S] :-
 %: Gathers all rolls into a list.
-List := [roll N d S] :-
-	bagof(T, dice(S, N, T), List), !.
+roll_list(N d S, List) :-
+	bagof(T, dice(N, S, T), List), !.
+%Set  := {roll N d S} :-
 %: Gathers all rolls into an ordered set.
-Set  := {roll N d S} :-
-	setof(T, dice(S, N, T), Set), !.
+roll_set(N d S, Set) :-
+	setof(T, dice(N, S, T), Set), !.
+%Sum  := +[roll N d S] :-
 %: Sums all rolls.
-Sum  := +[roll N d S] :-
-	bagof(T, dice(S, N, T), List),
+roll_sum(N d S, Sum) :-
+	bagof(T, dice(N, S, T), List),
 	reduce([A,B,C]>>(C:=A+B), List, Sum), !.
+%Prod := *[roll N d S] :-
 %: Calculates the product of all rolls.
-Prod := *[roll N d S] :-
-	bagof(T, dice(S, N, T), List),
+roll_mult(N d S, Prod) :-
+	bagof(T, dice(N, S, T), List),
 	reduce([A,B,C]>>(C:=A*B), List, Prod), !.

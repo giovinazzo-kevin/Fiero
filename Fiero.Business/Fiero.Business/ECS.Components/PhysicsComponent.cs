@@ -14,5 +14,6 @@
         public bool BlocksNpcPathing { get; set; }
         public bool BlocksPlayerPathing { get; set; }
         public bool BlocksLight { get; set; }
+        public int MoveDelay { get; set; } = 100; // Ticks per unit
     }
 }

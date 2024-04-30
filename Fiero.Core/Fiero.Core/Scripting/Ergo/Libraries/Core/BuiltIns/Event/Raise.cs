@@ -11,7 +11,16 @@ namespace Fiero.Core;
 [SingletonDependency]
 public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoModules.Event)
 {
-    public readonly record struct EventDispatchInfo(Type ArgType, object Target, MethodInfo Raise);
+    public readonly record struct EventDispatchInfo(Type ArgType, object Target, MethodInfo Raise)
+    {
+        public object Invoke(object Arg)
+        {
+            if (Raise.IsStatic)
+                return Raise.Invoke(null, [Target, Arg, default(CancellationToken)]);
+            else
+                return Raise.Invoke(Target, [Arg, default(CancellationToken)]);
+        }
+    }
 
     private Maybe<EventDispatchInfo> GetDispatchInfo(string sysName, string eventName)
     {
@@ -34,8 +43,18 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoMo
             }
             var tArgs = field.Field.FieldType.BaseType.GetGenericArguments()[1];
             var obj = field.Field.GetValue(field.System);
-            var raise = field.Field.FieldType.GetMethod("Raise", BindingFlags.Public | BindingFlags.Instance);
-            return new EventDispatchInfo(tArgs, obj, raise);
+            if (field.Field.FieldType.GetGenericTypeDefinition().IsAssignableFrom(typeof(SystemRequest<,,>)))
+            {
+                var tSys = field.Field.FieldType.GetGenericArguments()[0];
+                var raise = typeof(EventsExtensions).GetMethod("HandleAsync", BindingFlags.Public | BindingFlags.Static)
+                    .MakeGenericMethod([tSys, tArgs]);
+                return new EventDispatchInfo(tArgs, obj, raise);
+            }
+            else
+            {
+                var raise = field.Field.FieldType.GetMethod("Raise", BindingFlags.Public | BindingFlags.Instance);
+                return new EventDispatchInfo(tArgs, obj, raise);
+            }
         }
         return default;
     }
@@ -53,7 +72,7 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoMo
             {
                 var arg = node.Args[2].Substitute(vm.Environment);
                 var obj = TermMarshall.FromTerm(arg, dispatch.ArgType, TermMarshalling.Named);
-                var ret = dispatch.Raise.Invoke(dispatch.Target, new[] { obj, default(CancellationToken) });
+                var ret = dispatch.Invoke(obj);
             });
         }
         else
@@ -96,7 +115,7 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoMo
             if (GetDispatchInfo(sysName, eventName).TryGetValue(out var dispatch))
             {
                 var arg = TermMarshall.FromTerm(arguments[2], dispatch.ArgType, TermMarshalling.Named);
-                var ret = dispatch.Raise.Invoke(dispatch.Target, new[] { arg, default(CancellationToken) });
+                var ret = dispatch.Invoke(arg);
             }
             else
             {

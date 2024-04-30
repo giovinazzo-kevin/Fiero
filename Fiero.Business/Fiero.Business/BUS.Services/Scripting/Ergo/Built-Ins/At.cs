@@ -33,6 +33,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
                 vm.Fail();
                 return;
             }
+            var lhs = args[1];
             var (a, f, i) = (0, 0, 0);
             if (cell.Actors.Count != 0)
                 vm.PushChoice(NextActor);
@@ -40,7 +41,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
                 vm.PushChoice(NextFeature);
             else if (cell.Items.Count != 0)
                 vm.PushChoice(NextItem);
-            vm.SetArg(0, args[1]);
+            vm.SetArg(0, lhs);
             vm.SetArg(1, TermMarshall.ToTerm(cell.Tile));
             ErgoVM.Goals.Unify2(vm);
             void NextActor(ErgoVM vm)
@@ -52,6 +53,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
                     vm.PushChoice(NextFeature);
                 else if (cell.Items.Count != 0)
                     vm.PushChoice(NextItem);
+                vm.SetArg(0, lhs);
                 vm.SetArg(1, new EntityAsTerm(A.Id, A.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }
@@ -62,6 +64,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
                     vm.PushChoice(NextFeature);
                 else if (cell.Items.Count != 0)
                     vm.PushChoice(NextItem);
+                vm.SetArg(0, lhs);
                 vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }
@@ -70,6 +73,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
                 var F = cell.Items.ElementAt(i++);
                 if (i < cell.Items.Count)
                     vm.PushChoice(NextItem);
+                vm.SetArg(0, lhs);
                 vm.SetArg(1, new EntityAsTerm(F.Id, F.ErgoType(), _entities));
                 ErgoVM.Goals.Unify2(vm);
             }

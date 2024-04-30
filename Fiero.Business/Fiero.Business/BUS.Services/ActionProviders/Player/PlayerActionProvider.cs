@@ -355,7 +355,7 @@ namespace Fiero.Business
                 // don't check pathing, that's for autoexplore
                 if (!cell.Tile.IsWalkable(a))
                     return new FailAction();
-                return new MoveRelativeAction(c);
+                return new MoveRelativeAction(c, a.Physics.MoveDelay);
             }
             bool IsKeyPressed(GameDatum<VirtualKeys> datum) => UI.Input.IsKeyPressed(UI.Store.Get(datum));
             bool IsKeyDown(GameDatum<VirtualKeys> datum) => UI.Input.IsKeyDown(UI.Store.Get(datum));

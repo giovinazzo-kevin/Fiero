@@ -9,7 +9,9 @@ namespace Fiero.Business
         [NonTerm]
         public IEnumerable<KeyValuePair<EquipmentSlotName, Equipment>> EquippedItems => Dict;
         public Weapon Weapon => Dict.Values.TrySelect(e => e.TryCast<Weapon>(out var weap) ? (true, weap) : default).SingleOrDefault();
-        public Armor Armor => Dict.Values.TrySelect(e => e.TryCast<Armor>(out var weap) ? (true, weap) : default).SingleOrDefault();
+        [NonTerm]
+        public IEnumerable<Weapon> Weapons => Weapon != null ? [Weapon] : []; // TODO: refactor out
+        public Armor Armor => Dict.Values.TrySelect(e => e.TryCast<Armor>(out var armor) ? (true, armor) : default).SingleOrDefault();
 
         public event Action<ActorEquipmentComponent> EquipmentChanged;
 

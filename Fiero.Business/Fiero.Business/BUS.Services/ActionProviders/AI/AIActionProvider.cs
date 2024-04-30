@@ -71,7 +71,7 @@
                 {
                     return Fight(a);
                 }
-                return new MoveRelativeAction(dir);
+                return new MoveRelativeAction(dir, a.Physics.MoveDelay);
             }
             return new WaitAction();
         }

@@ -1,17 +1,18 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public readonly struct MoveRelativeAction : IAction
     {
         public readonly Coord Coord;
 
-        public MoveRelativeAction(Coord coord)
+        public readonly int MoveDelay;
+
+        public MoveRelativeAction(Coord coord, int moveDelay)
         {
             Coord = coord;
+            MoveDelay = moveDelay;
         }
 
         ActionName IAction.Name => ActionName.Move;
-        int? IAction.Cost => 100;
+        int? IAction.Cost => MoveDelay;
     }
 }

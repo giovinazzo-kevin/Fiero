@@ -66,6 +66,11 @@ namespace Fiero.Business
                 c.BlocksLight = blocksLight;
                 c.CanMove = canMove;
             });
+        public static IEntityBuilder<T> WithMoveDelay<T>(this IEntityBuilder<T> builder, int moveDelay)
+            where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>((s, c) =>
+            {
+                c.MoveDelay = moveDelay;
+            });
         public static IEntityBuilder<T> WithPosition<T>(this IEntityBuilder<T> builder, Coord pos, FloorId? floorId = null)
             where T : PhysicalEntity => builder.AddOrTweak<PhysicsComponent>((s, c) =>
             {

@@ -60,6 +60,7 @@
             .WithInventory(50)
             .WithSpellLibrary()
             .WithFieldOfView(7)
+            .WithMoveDelay(100)
             .WithLogging()
             .WithEffectTracking()
             .WithIntrinsicEffect(new(EffectName.AutoPickup, canStack: false))
@@ -85,6 +86,7 @@
             .WithPhysics(Coord.Zero, canMove: true)
             .WithActorEquipment()
             .WithFieldOfView(5)
+            .WithMoveDelay(100)
             .WithEffectTracking()
             .WithDislikedItems(i => i.TryCast<Corpse>(out _))
             .WithParty()
@@ -383,6 +385,7 @@
         #region NPCs
         public IEntityBuilder<Actor> NPC_Rat()
             => Enemy()
+            .WithMoveDelay(200)
             .WithInventory(5)
             .WithHealth(5)
             .WithName(nameof(NpcName.Rat))
@@ -631,7 +634,7 @@
             => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(1, 3), swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 2}}"),
+                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1}}"),
                 e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()

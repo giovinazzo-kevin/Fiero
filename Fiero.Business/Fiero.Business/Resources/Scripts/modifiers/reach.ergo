@@ -1,6 +1,7 @@
 :- module(reach, []).
 :- use_module(fiero).
 :- use_module(event).
+:- use_module(random).
 :- subscribe(action, [actor_moved]).
 :- dynamic(reach_data/3).
 
@@ -10,18 +11,32 @@ effect:began(_{effect_id: Id, owner: O, arguments: _{ range: R }}) :-
 effect:ended(_{effect_id: Id}) :-
 	retract(reach_data(Id, _, _)).
 
-action:actor_moved(_{actor: _{id: ActorId}, old_position: Old, new_position: New}) :-
+action:actor_moved(_{
+		actor: _{
+			id: ActorId, 
+			actor_equipment: _{
+				weapon: Weapon
+			}
+		}, 
+		old_position: Old, 
+		new_position: New
+	}) :-
 	reach:reach_data(_, _{id: ActorId}, R),
 	Dir := New - Old,
 	clamp(-1, 1, Dir, ClampedDir),
-	D := ClampedDir * R, Pos := New + D,
-	reach:reach_attack(ActorId, Pos).
+	D := ClampedDir * R, 
+	Pos := New + D,
+	reach:reach_attack(ActorId, Pos, Weapon).
 
-reach_attack(ActorId, Pos) :-
+reach_attack(ActorId, Pos, Weapon) :-
 	location(ActorId, l(FloorId, _)),
 	at(l(FloorId, Pos), actor { id: OtherId }),
+	Weapon = _{ props: _{ swing_delay: Delay, base_damage: _{ number_of_dice: Throws, number_of_sides: Sides }}},
+	roll_sum(Throws d Sides, DamageRoll),
 	raise(action, actor_attacked, _{ 
-		attacker: actor{ id: Id }, 
-		victims: [actor{id: OtherId}],
-		weapons: []
+		attacker: _{id: ActorId}, 
+		victims: [_{id: OtherId}],
+		weapons: [Weapon],
+		damage: DamageRoll,
+		delay: Delay
 	}).

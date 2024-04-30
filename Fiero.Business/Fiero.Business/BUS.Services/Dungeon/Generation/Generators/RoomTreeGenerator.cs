@@ -52,9 +52,9 @@
             var itemPool = ConfigureItemPool(id, new()).Build(capacity: totalRects * 4);
             foreach (var (par, cor, chd) in tree.Traverse())
             {
-                if (par == null)
+                if (chd == null)
                     continue;
-                par.Room.Drawn += OnRoomDrawn_;
+                chd.Room.Drawn += OnRoomDrawn_;
             }
 
             return tree;

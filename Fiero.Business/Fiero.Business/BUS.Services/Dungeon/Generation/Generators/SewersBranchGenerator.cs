@@ -15,7 +15,7 @@
         public SewersBranchGenerator() : base(DefaultTheme) { }
         public override Coord MapSize(FloorId id) => id.Depth switch
         {
-            1 => new(25, 25),
+            1 => new(35, 35),
             _ => new(50, 50)
         };
         public override Coord GridSize(FloorId id) => id.Depth switch
@@ -32,14 +32,15 @@
             ;
         protected override PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(FloorId id, PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool) => pool
             .Include(args => args.Entities.NPC_Rat(), 100)
-            .Include(args => args.Entities.NPC_RatArcher(), 7.5f)
-            .Include(args => args.Entities.NPC_RatArsonist(), 1)
-            //.Include(args => args.Entities.NPC_RatApothecary(), 1)
-            .Include(args => args.Entities.NPC_RatKnight(), 17.5f)
-            .Include(args => args.Entities.NPC_RatPugilist(), 1)
-            .Include(args => args.Entities.NPC_RatWizard(), 5)
-            .Include(args => args.Entities.NPC_RatThief(), 1)
-            .Include(args => args.Entities.NPC_RatCheese(), 0.05f)
+            .If(() => id.Depth > 1, builder => builder
+                .Include(args => args.Entities.NPC_RatArcher(), 7.5f)
+                .Include(args => args.Entities.NPC_RatArsonist(), 1)
+                //.Include(args => args.Entities.NPC_RatApothecary(), 1)
+                .Include(args => args.Entities.NPC_RatKnight(), 17.5f)
+                .Include(args => args.Entities.NPC_RatPugilist(), 1)
+                .Include(args => args.Entities.NPC_RatWizard(), 5)
+                .Include(args => args.Entities.NPC_RatThief(), 1)
+                .Include(args => args.Entities.NPC_RatCheese(), 0.05f))
             ;
         protected override PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> ConfigureItemPool(FloorId id, PoolBuilder<Func<ItemPoolArgs, IEntityBuilder<Item>>> pool) => pool
             //.Include(args => args.Entities.Projectile_Bomb(), 2.5f)
@@ -61,7 +62,7 @@
             //.Include(args => args.Entities.Weapon_Crossbow(), 1)
             .Include(args => args.Entities.Potion_OfHealing(), 2)
             .Include(args => args.Entities.Potion_OfConfusion(), 2)
-            .Include(args => args.Entities.Projectile_Rock(), 100)
+            //.Include(args => args.Entities.Projectile_Rock(), 100)
             ;
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>

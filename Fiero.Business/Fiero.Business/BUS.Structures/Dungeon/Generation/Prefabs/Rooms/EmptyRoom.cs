@@ -6,6 +6,7 @@
         {
             AllowMonsters = true;
             AllowFeatures = true;
+            AllowItems = true;
         }
     }
 }

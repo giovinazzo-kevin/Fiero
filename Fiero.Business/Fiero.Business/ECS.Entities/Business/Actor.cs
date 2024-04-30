@@ -18,7 +18,6 @@ namespace Fiero.Business
         public NpcComponent Npc { get; private set; }
         [NonTerm]
         public LogComponent Log { get; private set; }
-        [NonTerm]
         public ActorEquipmentComponent ActorEquipment { get; private set; }
         [NonTerm]
         public DialogueComponent Dialogue { get; private set; }

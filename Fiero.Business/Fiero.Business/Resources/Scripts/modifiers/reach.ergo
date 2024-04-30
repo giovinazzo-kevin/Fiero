@@ -1,5 +1,6 @@
 :- module(reach, []).
 :- use_module(fiero).
+:- use_module(event).
 :- subscribe(action, [actor_moved]).
 :- dynamic(reach_data/3).
 
@@ -18,4 +19,9 @@ action:actor_moved(_{actor: _{id: ActorId}, old_position: Old, new_position: New
 
 reach_attack(ActorId, Pos) :-
 	location(ActorId, l(FloorId, _)),
-	at(l(FloorId, Pos), _Other).
+	at(l(FloorId, Pos), actor { id: OtherId }),
+	raise(action, actor_attacked, _{ 
+		attacker: actor{ id: Id }, 
+		victims: [actor{id: OtherId}],
+		weapons: []
+	}).

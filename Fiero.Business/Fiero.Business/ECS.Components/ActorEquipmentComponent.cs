@@ -1,11 +1,14 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang;
+
+namespace Fiero.Business
 {
     public class ActorEquipmentComponent : EcsComponent
     {
         protected readonly Dictionary<EquipmentSlotName, Equipment> Dict = new();
 
+        [NonTerm]
         public IEnumerable<KeyValuePair<EquipmentSlotName, Equipment>> EquippedItems => Dict;
-        public IEnumerable<Weapon> Weapons => Dict.Values.TrySelect(e => e.TryCast<Weapon>(out var weap) ? (true, weap) : default);
+        public Weapon Weapon => Dict.Values.TrySelect(e => e.TryCast<Weapon>(out var weap) ? (true, weap) : default).SingleOrDefault();
         public Armor Armor => Dict.Values.TrySelect(e => e.TryCast<Armor>(out var weap) ? (true, weap) : default).SingleOrDefault();
 
         public event Action<ActorEquipmentComponent> EquipmentChanged;

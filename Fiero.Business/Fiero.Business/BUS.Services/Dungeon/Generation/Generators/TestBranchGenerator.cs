@@ -11,11 +11,11 @@
         public TestBranchGenerator() : base(DefaultTheme) { }
         public override Coord MapSize(FloorId id) => id.Depth switch
         {
-            _ => new(35, 35)
+            _ => new(50, 50)
         };
         public override Coord GridSize(FloorId id) => id.Depth switch
         {
-            _ => new(1, 1),
+            _ => new(2, 2),
         };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool) => pool
             .Guarantee(() => new EmptyRoom(), minAmount: 1)
@@ -35,7 +35,7 @@
             ;
 
         protected override Dice GetItemDice(Room room, FloorGenerationContext ctx) =>
-            new(1, 1, Bias: 0);
+            new(5, 10, Bias: -9);
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>
             new(2, 2, Bias: -1);

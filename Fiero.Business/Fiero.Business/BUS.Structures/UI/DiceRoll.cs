@@ -14,7 +14,7 @@
             }
             for (int i = 0; i < NumberOfDice; i++)
             {
-                yield return rng.Next(1, NumberOfSides + 1) + Bias;
+                yield return Math.Max(0, rng.Next(1, NumberOfSides + 1) + Bias);
             }
         }
         private IEnumerable<int> RollWeighted(Random rng)
@@ -52,7 +52,7 @@
             {
                 while (true)
                 {
-                    int roll = rng.Next(1, NumberOfSides + 1) + Bias;
+                    int roll = Math.Max(0, rng.Next(1, NumberOfSides + 1) + Bias);
                     if (rng.NextDouble() <= memoizedWeightFunction(i, roll))
                     {
                         yield return roll;

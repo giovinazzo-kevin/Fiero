@@ -22,11 +22,11 @@ action:actor_moved(_{
 		new_position: New
 	}) :-
 	reach:reach_data(_, _{id: ActorId}, R),
-	Dir := New - Old,
+	eval_point(New - Old, Dir),
 	clamp(-1, 1, Dir, ClampedDir),
 	for(I, R, 0, -1),
-	D := ClampedDir * I, 
-	Pos := New + D,
+	eval_point(ClampedDir * I, D), 
+	eval_point(New + D, Pos),
 	reach:reach_attack(ActorId, Pos, Weapon), 
 	!.
 

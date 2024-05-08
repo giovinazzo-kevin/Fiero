@@ -3,8 +3,7 @@
 	one_chance_in/1, n_chances_in/2, 
 	dice/3, 
 	flip_coin/0, always/0, never/0, 
-	rng/3, rng/2, 
-	':='/2
+	rng/3, rng/2
 ]).
 
 :- op(750, fx, [roll]).
@@ -35,7 +34,6 @@ dice(Throws, Sides, Throw) :-
 %: Binds each roll to a variable.
 roll(N d S, Bind) :-
 	dice(N, S, Bind).
-_ := roll _ d _ :- !, false.
 %List := [roll N d S] :-
 %: Gathers all rolls into a list.
 roll_list(N d S, List) :-

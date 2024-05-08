@@ -8,23 +8,27 @@ namespace Fiero.Business
     [SingletonDependency]
     public class ErgoBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
     {
+        [Term(Marshalling = TermMarshalling.Named)]
+        public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
+
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public readonly DungeonTheme Theme = DungeonTheme.Default;
 
-        public readonly Hook GenerateHook = new(new(new("generate"), 3, FieroLib.Modules.Map, default));
+        public readonly Hook GenerateHook = new(new(new("generate"), 2, FieroLib.Modules.Map, default));
 
         public Floor GenerateFloor(FloorId id, FloorBuilder builder)
         {
             var script = (ErgoScript)Scripts.Get(ScriptName.Map_Test);
             var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(FieroLib.Modules.Fiero);
             var map = fieroLib.Maps[script.VM.KB.Scope.Entry];
+            var step = new Step(id, Coord.Zero, map.Size - Coord.PositiveOne);
+            var arg = TermMarshall.ToTerm(step);
             return builder
                 .WithStep(ctx =>
                 {
                     var var_geometry = new Variable("Geometry");
-                    GenerateHook.SetArg(0, TermMarshall.ToTerm(id));
-                    GenerateHook.SetArg(1, TermMarshall.ToTerm(map.Size - Coord.PositiveOne));
-                    GenerateHook.SetArg(2, var_geometry);
+                    GenerateHook.SetArg(0, arg);
+                    GenerateHook.SetArg(1, var_geometry);
                     script.VM.Query = GenerateHook.Compile();
                     script.VM.Run();
                     if (!script.VM.TryPopSolution(out var sol)
@@ -59,14 +63,41 @@ namespace Fiero.Business
                 "draw_point" => Point(),
                 "draw_rect" => Rect(false),
                 "fill_rect" => Rect(true),
+
+                "place_feature" => Feature(),
+
                 _ => false
             };
+
+            bool Feature()
+            {
+                if (args.Length != 2)
+                {
+                    Throw(Err_ExpectedArity(fun, 1, args.Length));
+                    return false;
+                }
+                if (!args[0].Matches<Coord>(out var l1))
+                {
+                    Throw(Err_ExpectedType(fun, nameof(Coord)));
+                    return false;
+                }
+                if (!args[1].Matches<FeatureName>(out var t))
+                {
+                    Throw(Err_ExpectedType(fun, nameof(FeatureName)));
+                    return false;
+                }
+                return ctx.TryAddFeature(t.ToString(), l1, e => t switch
+                {
+                    FeatureName.Door => e.Feature_Door(),
+                    _ => throw new NotSupportedException()
+                });
+            }
 
             bool Point()
             {
                 if (args.Length != 2)
                 {
-                    Throw(Err_ExpectedArity(fun, 3, args.Length));
+                    Throw(Err_ExpectedArity(fun, 2, args.Length));
                     return false;
                 }
                 if (!args[0].Matches<Coord>(out var l1))

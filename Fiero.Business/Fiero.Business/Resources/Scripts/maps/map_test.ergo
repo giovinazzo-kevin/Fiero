@@ -1,15 +1,25 @@
 :- module(map_test, []).
 :- use_module(fiero).
 :- use_module(random).
-:- map(49, 49).
+:- map(25, 25).
 
-geometry(p(W, H), [fill_rect(p(0, 0), p(W, H), room)]).
-geometry(p(W, H), [draw_rect(p(0, 0), p(W, H), wall)]).
-geometry(p(W, H), [
+:- op(1000, xfy, ['#->']).
+
+step{ size: p(W, H) } #-> [
+	fill_rect(p(0, 0), p(W, H), room),
+	draw_rect(p(0, 0), p(W, H), wall)
+].
+
+step{ size: p(W, H) } #-> [
 	draw_rect(p(5, 5), p(:=(W-5), :=(H-5)), wall),
-	draw_point(p(:=(W/2), 5), room),
-	draw_point(p(:=(W/2), :=(H-5)), room)
-]) :- flip_coin.
 
-map:generate(_FloorId, p(W, H), Geometry) :-
-	findall(G, (geometry(p(W, H), L), member(G, L)), Geometry).
+	draw_point(p(:=(W/2), 5), room),
+	place_feature(p(:=(W/2), 5), door),
+
+	draw_point(p(:=(W/2), :=(H-5)), room),
+	place_feature(p(:=(W/2), :=(H-5)), door)
+] :- flip_coin.
+
+
+map:generate(Arg, EML) :-
+	findall(EML_, ('#->'(Arg, L), member(EML_, L)), EML), !.

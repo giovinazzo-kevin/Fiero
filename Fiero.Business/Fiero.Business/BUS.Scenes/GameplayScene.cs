@@ -154,15 +154,19 @@ namespace Fiero.Business.Scenes
                 dungeonSystem.AddDungeon(d => d.WithStep(ctx =>
                 {
                     // BIG TODO: Once serialization is a thing, generate and load levels one at a time
-                    ctx.AddBranch<TestBranchGenerator>(DungeonBranchName.Dungeon, 3);
+                    ctx.AddBranch<ErgoBranchGenerator>(DungeonBranchName.Dungeon, 3);
                     // Connect branches at semi-random depths
                     ctx.Connect(default, entranceFloorId);
                 }));
 
                 var features = dungeonSystem.GetAllFeatures(entranceFloorId);
-                Player.Physics.Position = features
-                    .Single(t => t.FeatureProperties.Name == FeatureName.Upstairs)
+                var spawnPoint = features
+                    .SingleOrDefault(t => t.FeatureProperties.Name == FeatureName.Upstairs)?
+                    .Position()
+                    ?? dungeonSystem.GetAllTiles(entranceFloorId)
+                    .FirstOrDefault(x => x.IsWalkable(Player))
                     .Position();
+                Player.Physics.Position = spawnPoint;
 
                 if (!Systems.TrySpawn(entranceFloorId, Player, maxDistance: 100))
                 {

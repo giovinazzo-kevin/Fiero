@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Business
 {
+
     public abstract class RoomTreeGenerator : IBranchGenerator
     {
         public readonly record struct EnemyPoolArgs(Room CurrentRoom, FloorGenerationContext Context, GameEntityBuilders Entities);

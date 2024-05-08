@@ -12,6 +12,8 @@
         // Implements the grappling hook's effect
         Grapple,
         // Implements a reach effect for spear-like weapons
-        Reach
+        Reach,
+        // MAPS
+        Map_Test,
     }
 }

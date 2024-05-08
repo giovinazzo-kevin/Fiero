@@ -1,0 +1,12 @@
+:- module(map_test, []).
+:- use_module(fiero).
+:- map(49, 49).
+
+map:generate(_FloorId, p(W, H), [
+	rect(p(0, 0), p(W, H), room),
+	line(p(0, 0), p(W, 0), wall),
+	line(p(0, 0), p(0, H), wall),
+	line(p(W, H), p(W, 0), wall),
+	line(p(W, H), p(0, H), wall)
+]).
+	

@@ -91,6 +91,9 @@
     <None Update="Resources\Scripts\items\bomb.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\maps\map_test.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\modifiers\reach.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

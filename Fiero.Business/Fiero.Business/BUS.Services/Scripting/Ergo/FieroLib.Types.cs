@@ -28,16 +28,31 @@ public partial class FieroLib
         public static readonly Atom Data = new("data");
         public static readonly Atom Event = new("event");
         public static readonly Atom Random = new("random");
+        public static readonly Atom Map = new("map");
     }
 }
 
 [TransientDependency]
 public partial class FieroLib(IServiceFactory services) : Library
 {
+    public readonly record struct MapDef(Atom Name, Coord Size);
+
     public override Atom Module => Modules.Fiero;
+
+    public readonly Dictionary<Atom, MapDef> Maps = new();
+
+    public bool DeclareMap(Atom name, Coord size)
+    {
+        if (Maps.ContainsKey(name))
+            return false;
+        Maps[name] = new(name, size);
+        return true;
+    }
+
+
     public override IEnumerable<InterpreterDirective> GetExportedDirectives()
     {
-        yield break;
+        yield return services.GetInstance<Map>();
     }
     public override IEnumerable<BuiltIn> GetExportedBuiltins()
     {

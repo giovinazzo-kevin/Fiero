@@ -7,18 +7,18 @@
         {
             RoomSquares = new(1, 1),
         };
-
-        public TestBranchGenerator() : base(DefaultTheme) { }
+        public readonly GameScripts<ScriptName> Scripts;
+        public TestBranchGenerator(GameScripts<ScriptName> scripts) : base(DefaultTheme) { Scripts = scripts; }
         public override Coord MapSize(FloorId id) => id.Depth switch
         {
             _ => new(50, 50)
         };
         public override Coord GridSize(FloorId id) => id.Depth switch
         {
-            _ => new(2, 2),
+            _ => new(0, 0),
         };
         protected override PoolBuilder<Func<Room>> ConfigureRoomPool(FloorId id, PoolBuilder<Func<Room>> pool) => pool
-            .Guarantee(() => new EmptyRoom(), minAmount: 1)
+            .Guarantee(() => new EmptyRoom())
             ;
         protected override PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> ConfigureEnemyPool(FloorId id, PoolBuilder<Func<EnemyPoolArgs, IEntityBuilder<Actor>>> pool) => pool
             .Include(args => args.Entities.NPC_Rat(), 100)

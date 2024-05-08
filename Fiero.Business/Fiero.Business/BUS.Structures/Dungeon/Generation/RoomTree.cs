@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 
 namespace Fiero.Business
 {
@@ -130,7 +127,10 @@ namespace Fiero.Business
 
                 seen.Add(node);
             }
-            var tree = new RoomTree(dict.Values.First());
+            var tree = new RoomTree(
+                dict.Count > 0 ? dict.Values.First()
+                               : Node.Root(rooms.Single())
+                );
             // Now that the tree is built we can post-process it in order to:
             // - Calculate the centrality of the graph to determine the spawn point
             foreach (var node in seen)

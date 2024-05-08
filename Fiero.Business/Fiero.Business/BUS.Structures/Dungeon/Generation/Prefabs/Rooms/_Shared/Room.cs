@@ -3,6 +3,7 @@
 namespace Fiero.Business
 {
 
+
     public abstract class Room : ThemedFloorGenerationPrefab
     {
         protected readonly HashSet<IntRect> Rects;

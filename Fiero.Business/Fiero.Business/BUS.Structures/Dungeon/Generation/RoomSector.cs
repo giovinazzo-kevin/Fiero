@@ -75,7 +75,8 @@ namespace Fiero.Business
                         r.AddRect(rect);
                     return r;
                 }));
-            Corridors.AddRange(GenerateIntraSectorCorridors(this));
+            if (!Cells.All(x => x))
+                Corridors.AddRange(GenerateIntraSectorCorridors(this));
         }
 
         public void MarkSecretCorridors(int roll)
@@ -199,6 +200,15 @@ namespace Fiero.Business
         };
         public static IEnumerable<RoomSector> CreateTiling(Coord mapSize, Coord gridSize, Dice maxLength, Pool<Func<Room>> roomPool)
         {
+            if (gridSize == Coord.Zero)
+            {
+                // Special case, return one big sector
+                var sec = new RoomSector(new(Coord.Zero, mapSize), gridSize, [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]);
+                sec.Build(roomPool);
+                yield return sec;
+                yield break;
+            }
+
             var sectorScale = (mapSize - Coord.PositiveOne) / gridSize;
             // Create a grid of sectors such that:
             // - There are no diagonal gaps between rooms of adjacent sectors

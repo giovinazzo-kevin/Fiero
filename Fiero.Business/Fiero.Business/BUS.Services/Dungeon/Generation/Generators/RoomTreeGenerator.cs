@@ -36,7 +36,7 @@
 
         protected virtual RoomTree BuildTree(FloorId id, Coord mapSize, Coord gridSize)
         {
-            var roomPool = ConfigureRoomPool(id, new()).Build(capacity: gridSize.Area() * 8);
+            var roomPool = ConfigureRoomPool(id, new()).Build(capacity: gridSize == Coord.Zero ? 1 : gridSize.Area() * 8);
             var roomSectors = RoomSector.CreateTiling(mapSize, gridSize, Theme.RoomSquares, roomPool)
                 .ToList();
             var corridors = RoomSector.GenerateInterSectorCorridors(roomSectors)

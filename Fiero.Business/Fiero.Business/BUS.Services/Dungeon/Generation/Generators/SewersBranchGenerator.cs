@@ -12,7 +12,12 @@
             RoomSquares = new(2, 2, (d, s) => 1f / Math.Pow(s, 2)),
         };
 
-        public SewersBranchGenerator() : base(DefaultTheme) { }
+        public readonly GameScripts<ScriptName> Scripts;
+
+        public SewersBranchGenerator(GameScripts<ScriptName> scripts) : base(DefaultTheme)
+        {
+            Scripts = scripts;
+        }
         public override Coord MapSize(FloorId id) => id.Depth switch
         {
             1 => new(35, 35),

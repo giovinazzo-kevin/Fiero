@@ -1,12 +1,15 @@
 :- module(map_test, []).
 :- use_module(fiero).
+:- use_module(random).
 :- map(49, 49).
 
-map:generate(_FloorId, p(W, H), [
-	rect(p(0, 0), p(W, H), room),
-	line(p(0, 0), p(W, 0), wall),
-	line(p(0, 0), p(0, H), wall),
-	line(p(W, H), p(W, 0), wall),
-	line(p(W, H), p(0, H), wall)
-]).
-	
+geometry(p(W, H), [fill_rect(p(0, 0), p(W, H), room)]).
+geometry(p(W, H), [draw_rect(p(0, 0), p(W, H), wall)]).
+geometry(p(W, H), [
+	draw_rect(p(5, 5), p(:=(W-5), :=(H-5)), wall),
+	draw_point(p(:=(W/2), 5), room),
+	draw_point(p(:=(W/2), :=(H-5)), room)
+]) :- flip_coin.
+
+map:generate(_FloorId, p(W, H), Geometry) :-
+	findall(G, (geometry(p(W, H), L), member(G, L)), Geometry).

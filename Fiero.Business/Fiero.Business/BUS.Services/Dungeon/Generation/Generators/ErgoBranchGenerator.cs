@@ -55,10 +55,33 @@ namespace Fiero.Business
             var args = term.GetArguments();
             return fun switch
             {
-                "line" => Line(),
-                "rect" => Rect(),
+                "draw_line" => Line(),
+                "draw_point" => Point(),
+                "draw_rect" => Rect(false),
+                "fill_rect" => Rect(true),
                 _ => false
             };
+
+            bool Point()
+            {
+                if (args.Length != 2)
+                {
+                    Throw(Err_ExpectedArity(fun, 3, args.Length));
+                    return false;
+                }
+                if (!args[0].Matches<Coord>(out var l1))
+                {
+                    Throw(Err_ExpectedType(fun, nameof(Coord)));
+                    return false;
+                }
+                if (!args[1].Matches<TileName>(out var t))
+                {
+                    Throw(Err_ExpectedType(fun, nameof(TileName)));
+                    return false;
+                }
+                ctx.Draw(l1, c => new(t, c));
+                return true;
+            }
 
             bool Line()
             {
@@ -86,7 +109,7 @@ namespace Fiero.Business
                 return true;
             }
 
-            bool Rect()
+            bool Rect(bool fill)
             {
                 if (args.Length != 3)
                 {
@@ -108,7 +131,10 @@ namespace Fiero.Business
                     Throw(Err_ExpectedType(fun, nameof(TileName)));
                     return false;
                 }
-                ctx.FillBox(l1, l2, c => new(t, c));
+                if (fill)
+                    ctx.FillBox(l1, l2 - l1 + Coord.PositiveOne, c => new(t, c));
+                else
+                    ctx.DrawBox(l1, l2 - l1 + Coord.PositiveOne, c => new(t, c));
                 return true;
             }
 

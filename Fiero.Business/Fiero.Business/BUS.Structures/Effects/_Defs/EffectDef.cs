@@ -60,7 +60,7 @@ namespace Fiero.Business
                 EffectName.Heal => new HealEffect(source, int.Parse(Arguments) * 10),
                 EffectName.Regenerate => new RegenerateEffect(source, float.Parse(Arguments)),
                 EffectName.Vampirism => new VampirismEffect(this, int.Parse(Arguments)),
-                EffectName.Explosion => new ExplosionEffect(source, int.Parse(Arguments), Shapes.Disc(Coord.Zero, float.Parse(Arguments))),
+                EffectName.Explosion => new ExplosionEffect(source, int.Parse(Arguments) * 2, Shapes.Disc(Coord.Zero, float.Parse(Arguments))),
                 EffectName.Trap => new TrapEffect(),
                 EffectName.AutoPickup => new AutopickupEffect(),
                 EffectName.IncreaseMaxMP => new IncreaseMaxMPEffect(source, int.Parse(Arguments)),

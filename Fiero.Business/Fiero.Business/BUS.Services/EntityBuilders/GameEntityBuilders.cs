@@ -49,7 +49,7 @@
             .WithHealth(maximum: 1, current: 1)
             .WithMagic(maximum: 1, current: 1)
             .WithLevel(maximum: 99, current: 0)
-            .WithExperience(maximum: 100, current: 0)
+            .WithExperience(baseXP: 20)
             .WithPhysics(Coord.Zero, canMove: true)
             .WithName(nameof(Player))
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(Player), ColorName.White)
@@ -77,6 +77,7 @@
             .WithEnemyAi()
             .WithHealth(1)
             .WithLevel(maximum: 99, current: 0)
+            .WithExperience(baseXP: 20)
             .WithName(nameof(Enemy))
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, "None", ColorName.White)
             .WithActorInfo(ActorName.Monster)
@@ -634,7 +635,7 @@
             => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1}}"),
+                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1.0}}"),
                 e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()

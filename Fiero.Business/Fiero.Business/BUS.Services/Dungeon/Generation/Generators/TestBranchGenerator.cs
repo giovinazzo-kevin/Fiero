@@ -38,6 +38,6 @@
             new(5, 10, Bias: -9);
 
         protected override Dice GetMonsterDice(Room room, FloorGenerationContext ctx) =>
-            new(2, 2, Bias: -1);
+            new(2, 10, Bias: -0);
     }
 }

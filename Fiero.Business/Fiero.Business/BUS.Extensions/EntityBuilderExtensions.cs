@@ -130,10 +130,11 @@ namespace Fiero.Business
             {
                 c.Magic = new(0, maximum, current ?? maximum);
             });
-        public static IEntityBuilder<T> WithExperience<T>(this IEntityBuilder<T> builder, int maximum, int? current = null)
+        public static IEntityBuilder<T> WithExperience<T>(this IEntityBuilder<T> builder, int? baseXP = null, int? maximum = null, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>((s, c) =>
             {
-                c.Experience = new(0, maximum, current ?? maximum);
+                c.BaseXP = baseXP ?? c.BaseXP;
+                c.Experience = new(0, maximum ?? c.BaseXP, current ?? maximum ?? 0);
             });
         public static IEntityBuilder<T> WithLevel<T>(this IEntityBuilder<T> builder, int maximum, int? current = null)
             where T : Actor => builder.AddOrTweak<ActorComponent>((s, c) =>

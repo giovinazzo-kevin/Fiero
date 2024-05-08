@@ -172,8 +172,25 @@ namespace Fiero.Business
                     {
                         e.Actor.ActorProperties.LVL += 1;
                         e.Actor.ActorProperties.XP = 0;
-                        e.Actor.ActorProperties.MaxXP = XpToNextLevel(e.Actor.ActorProperties.LVL, 100, 1.5f);
+                        e.Actor.ActorProperties.MaxXP = XpToNextLevel(e.Actor.ActorProperties.LVL, e.Actor.ActorProperties.BaseXP, e.Actor.ActorProperties.XPExponent);
                         ActorLeveledUp.HandleOrThrow(new(e.Actor, e.Actor.ActorProperties.Level - 1, e.Actor.ActorProperties.Level));
+                    }
+                }
+            };
+            ActorLeveledUp.AllResponsesReceived += (_, e, r) =>
+            {
+                if (r.All(x => x))
+                {
+                    var numLevels = e.NewLevel - e.OldLevel;
+                    if (e.Actor.IsAlive())
+                    {
+                        // TODO: Level up popup, increase stats, etc.
+                        var hpIncrease = e.Actor.ActorProperties.HPGrowth.Roll().Sum();
+                        var mpIncrease = e.Actor.ActorProperties.MPGrowth.Roll().Sum();
+                        e.Actor.ActorProperties.MaxHP += hpIncrease;
+                        e.Actor.ActorProperties.HP += hpIncrease;
+                        e.Actor.ActorProperties.MaxMP += mpIncrease;
+                        e.Actor.ActorProperties.MP += mpIncrease;
                     }
                 }
             };

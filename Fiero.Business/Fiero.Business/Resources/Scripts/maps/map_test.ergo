@@ -7,14 +7,18 @@
 
 prefab { name: 'hut_s', size: p(5, 5) } #-> [
 	W,W,W,W,W,
-	W,C,R,R,W,
-	W,R,R,R,W,
-	W,R,R,R,W,
-	W,W,D,W,W
+	W,X,X,C,W,
+	W,X,V,V,W,
+	W,X,X,R,D,
+	W,W,W,W,W
 ] :- 
 	W = [draw_point(wall)]
+  , (flip_coin -> 
+	  V = [draw_point(room), draw_point(wall)] 
+	; V = [draw_point(room)])
   , D = [draw_point(room), place_feature(door)]
   , C = [draw_point(room), place_feature(chest)]
+  , X = [draw_point(room), chance(place_feature(trap), 0.12)]
   , R = [draw_point(room)]
 .
 
@@ -74,11 +78,8 @@ step{ } #-> [
 ].
 
 
-map:get_prefabs(Prefabs) :-
-	findall(
-		prefab { name: N, size: S, canvas: C }, 
-		prefab { name: N, size: S } #-> C, 
-		Prefabs).
+map:get_prefab(N, prefab { name: N, size: S, canvas: C }) :-
+	prefab { name: N, size: S } #-> C.
 
 map:generate(Step, EML) :-
 	findall(

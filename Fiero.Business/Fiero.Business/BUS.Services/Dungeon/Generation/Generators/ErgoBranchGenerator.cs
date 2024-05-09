@@ -2,6 +2,7 @@
 using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
+using Ergo.Runtime;
 
 namespace Fiero.Business
 {
@@ -23,7 +24,7 @@ namespace Fiero.Business
         public readonly DungeonTheme Theme = DungeonTheme.Default;
 
         public readonly Hook GenerateHook = new(new(new("generate"), 2, FieroLib.Modules.Map, default));
-        public readonly Hook GetPrefabsHook = new(new(new("get_prefabs"), 1, FieroLib.Modules.Map, default));
+        public readonly Hook GetPrefabHook = new(new(new("get_prefab"), 2, FieroLib.Modules.Map, default));
 
         public Floor GenerateFloor(FloorId id, FloorBuilder builder)
         {
@@ -35,39 +36,13 @@ namespace Fiero.Business
             return builder
                 .WithStep(ctx =>
                 {
-                    var var_prefabs = new Variable("Prefabs");
-                    GetPrefabsHook.SetArg(0, var_prefabs);
-                    script.VM.Query = GetPrefabsHook.Compile();
-                    script.VM.Run();
-                    var prefabs = new Dictionary<string, Prefab>();
-                    if (script.VM.TryPopSolution(out var sol)
-                        && sol.Substitutions[var_prefabs] is List lst)
-                    {
-                        foreach (var item in lst.Contents)
-                        {
-                            if (!item.Matches<Prefab>(out var prefab)
-                            || prefab.Size.X * prefab.Size.Y != prefab.Canvas.Length)
-                            {
-                                Throw("Invalid prefab.");
-                                // TODO: Log
-                                return;
-                            }
-                            if (prefabs.ContainsKey(prefab.Name))
-                            {
-                                Throw("Prefab with the same name already exists.");
-                                // TODO: Log
-                                return;
-                            }
-                            prefabs.Add(prefab.Name, prefab);
-                        }
-                    }
                     var var_geometry = new Variable("Geometry");
                     GenerateHook.SetArg(0, arg);
                     GenerateHook.SetArg(1, var_geometry);
                     script.VM.Query = GenerateHook.Compile();
                     script.VM.Run();
 
-                    if (!script.VM.TryPopSolution(out sol)
+                    if (!script.VM.TryPopSolution(out var sol)
                     || sol.Substitutions[var_geometry] is not List geometry)
                     {
                         Throw("Invalid geometry.");
@@ -76,7 +51,7 @@ namespace Fiero.Business
                     }
                     foreach (var item in geometry.Contents)
                     {
-                        if (!ParseEML(item, ctx, prefabs))
+                        if (!ParseEML(item, ctx, script.VM))
                             return;
                     }
                 })
@@ -89,13 +64,48 @@ namespace Fiero.Business
             throw new InvalidOperationException(error);
         }
 
-        bool ParseEML(ITerm term, FloorGenerationContext ctx, Dictionary<string, Prefab> prefabs)
+        bool TryGetPrefab(ErgoVM vm, string name, out Prefab prefab)
         {
+            var var_prefab = new Variable("Prefab");
+            GetPrefabHook.SetArg(0, new Atom(name));
+            GetPrefabHook.SetArg(1, var_prefab);
+            vm.Query = GetPrefabHook.Compile();
+            vm.Run();
+            if (vm.TryPopSolution(out var sol))
+            {
+                var item = sol.Substitutions[var_prefab]
+                    .Substitute(sol.Substitutions);
+                if (!item.Matches(out prefab)
+                || prefab.Size.X * prefab.Size.Y != prefab.Canvas.Length)
+                {
+                    Throw("Invalid prefab.");
+                    // TODO: Log
+                    return false;
+                }
+                return true;
+            }
+            prefab = default;
+            return false;
+        }
+
+        bool ParseEML(ITerm term, FloorGenerationContext ctx, ErgoVM vm)
+        {
+            if (term is List lst)
+            {
+                foreach (var item in lst.Contents)
+                {
+                    if (!ParseEML(item, ctx, vm))
+                        return false;
+                }
+                return true;
+            }
+
             var sig = term.GetSignature();
             var fun = sig.Functor.Explain();
             var args = term.GetArguments();
             return fun switch
             {
+                "chance" => Chance(),
                 "draw_line" => Line(),
                 "draw_point" => Point(),
                 "draw_rect" => Rect(false),
@@ -107,11 +117,32 @@ namespace Fiero.Business
                 _ => false
             };
 
+            bool Chance()
+            {
+                if (args.Length != 3)
+                {
+                    Throw(Err_ExpectedArity(fun, 3, args.Length));
+                    return false;
+                }
+                if (!args[1].Matches<float>(out var chance))
+                {
+                    Throw(Err_ExpectedType(fun, WellKnown.Types.Number));
+                    return false;
+                }
+                if (!Rng.Random.NChancesIn(chance, 1))
+                    return true;
+                var arg0 = args[0];
+                if (arg0 is List lst)
+                    arg0 = new List(lst.Contents.Select(x => x.Concat(args[2])));
+                else arg0 = arg0.Concat(args[2]);
+                return ParseEML(arg0, ctx, vm);
+            }
+
             bool Prefab()
             {
                 if (args.Length != 3)
                 {
-                    Throw(Err_ExpectedArity(fun, 1, args.Length));
+                    Throw(Err_ExpectedArity(fun, 3, args.Length));
                     return false;
                 }
                 if (!args[2].Matches<Coord>(out var l1))
@@ -129,7 +160,7 @@ namespace Fiero.Business
                     Throw(Err_ExpectedType(fun, nameof(String)));
                     return false;
                 }
-                if (!prefabs.TryGetValue(prefabName, out var prefab))
+                if (!TryGetPrefab(vm, prefabName, out var prefab))
                 {
                     Throw(Err_DuplicateDefinition(prefabName));
                     return false;
@@ -180,7 +211,7 @@ namespace Fiero.Business
                         foreach (var eml in prefab.Canvas[i])
                         {
                             var arg = eml.Concat(TermMarshall.ToTerm(pos));
-                            if (!ParseEML(arg, ctx, prefabs))
+                            if (!ParseEML(arg, ctx, vm))
                                 return false;
                         }
                     }
@@ -224,6 +255,7 @@ namespace Fiero.Business
                 {
                     FeatureName.Door => e.Feature_Door(),
                     FeatureName.Chest => e.Feature_Chest(),
+                    FeatureName.Trap => e.Feature_Trap(),
                     _ => throw new NotSupportedException()
                 });
             }

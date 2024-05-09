@@ -842,6 +842,11 @@
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .LoadState(nameof(FeatureName.Shrine))
             ;
+        public IEntityBuilder<Feature> Feature_Statue()
+            => Feature<Feature>(FeatureName.Statue)
+            .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
+            .LoadState(nameof(FeatureName.Statue))
+            ;
         public IEntityBuilder<Feature> Feature_Trap()
             => Feature<Feature>(FeatureName.Trap)
             .WithIntrinsicEffect(new(EffectName.Trap))

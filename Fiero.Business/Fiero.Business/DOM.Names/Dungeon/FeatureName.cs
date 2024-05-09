@@ -4,10 +4,12 @@
     {
         None,
         Door,
+        DoorSecret,
         Downstairs,
         Upstairs,
         Chest,
         Shrine,
+        Statue,
         Trap,
         BloodSplatter,
     }

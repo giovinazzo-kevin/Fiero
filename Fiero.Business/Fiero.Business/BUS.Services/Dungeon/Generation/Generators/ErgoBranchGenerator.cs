@@ -13,11 +13,11 @@ namespace Fiero.Business
         public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct PlacePrefabArgs(
-            bool MirrorY, bool MirrorX, int Rotate
+            bool MirrorY, bool MirrorX, int Rotate, bool Randomize
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
-            string Name, Coord Size, Coord Offset, string Group, int Layer, ITerm[][] Canvas
+            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][] Canvas
         );
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
@@ -173,7 +173,9 @@ namespace Fiero.Business
                     }
                     else
                     {
-                        var choice = Rng.Random.Choose(group.ToList());
+                        var choice = Rng.Random.ChooseWeighted(group
+                            .Select(x => new WeightedItem<Prefab>(x, x.Weight / group.Count()))
+                            .ToArray());
                         if (!Inner(choice))
                             return false;
                     }
@@ -183,6 +185,16 @@ namespace Fiero.Business
                 bool Inner(Prefab prefab)
                 {
                     Coord pos = l1;
+                    if (pfbArgs.Randomize)
+                    {
+                        pfbArgs = pfbArgs with
+                        {
+                            MirrorX = Rng.Random.NChancesIn(1, 2),
+                            MirrorY = Rng.Random.NChancesIn(1, 2),
+                            Rotate = Rng.Random.Between(0, 3) * 90,
+                            Randomize = false
+                        };
+                    }
                     if (pfbArgs.MirrorX)
                         pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
                     if (pfbArgs.MirrorY)
@@ -274,6 +286,9 @@ namespace Fiero.Business
                     FeatureName.Door => e.Feature_Door(),
                     FeatureName.Chest => e.Feature_Chest(),
                     FeatureName.Trap => e.Feature_Trap(),
+                    FeatureName.Shrine => e.Feature_Shrine(),
+                    FeatureName.Statue => e.Feature_Statue(),
+                    FeatureName.DoorSecret => e.Feature_SecretDoor(Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
                     _ => throw new NotSupportedException()
                 });
             }

@@ -1,0 +1,15 @@
+% Do not modify unless you know what you are doing.
+:- module(map, [get_prefab/2, generate/2]).
+:- op(1000, xfy, ['#->']).
+
+get_prefab(N, prefab { name: N, size: S, layer: L, group: G, offset: O, canvas: C }) :-
+	prefab { name: N, size: S, layer: L_, group: G_, offset: O_ } #-> C,
+	(ground(O_) -> O = O_ ; O = p(0, 0)),
+	(ground(L_) -> L = L_ ; L = 255),
+	(ground(G_) -> G = G_ ; G = ungrouped).
+
+generate(Step, EML) :-
+	findall(
+		EML_, 
+		('#->'(Step, L), member(EML_, L)), 
+		EML), !.

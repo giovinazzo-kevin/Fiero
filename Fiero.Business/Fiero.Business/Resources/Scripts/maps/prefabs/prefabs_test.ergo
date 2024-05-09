@@ -1,0 +1,77 @@
+:- module(prefabs_test, ['#->'/2]).
+:- use_module(random).
+
+prefab { name: 'hut_s', size: p(5, 5), layer: 0, group: base } #-> [
+	W,W,W,W,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,W,W,W,W
+] :- 
+    W = [draw_point(wall)],
+	R = [draw_point(room)].
+
+prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout } #-> [
+	R,_,D,_,R,
+	_,V,X,V,_,
+	D,X,C,X,D,
+	_,V,X,V,_,
+	R,_,D,_,R
+] :- 
+    D = [draw_point(room), place_feature(door)]
+  , C = [draw_point(room), place_feature(chest)]
+  , X = [draw_point(room), chance(place_feature(trap), 0.16)]
+  , (flip_coin
+	, V = [draw_point(room), draw_point(wall)], R = [draw_point(room)]
+	; V = X, R = _)
+.
+prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout } #-> [
+	_,_,D,_,_,
+	_,_,_,_,_,
+	_,X,X,X,_,
+	_,V,C,V,_,
+	_,_,_,_,_
+] :- 
+    D = [draw_point(room), place_feature(door)]
+  , C = [draw_point(room), place_feature(chest)]
+  , X = [draw_point(room), chance(place_feature(trap), 0.16)]
+  , (flip_coin
+	, V = [draw_point(room), draw_point(wall)] 
+	; V = X)
+.
+
+prefab { name: 'hut_complex', size: p(19, 19) } #-> [ 
+	A,_,_,_,_,R,R,B,_,_,_,_,R,R,C,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	D,_,_,_,_,R,R,E,_,_,_,_,R,R,F,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	G,_,_,_,_,R,R,H,_,_,_,_,R,R,I,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_
+] :- 
+	A = [place_prefab(hut_s, _{ rotate: 90 })]
+  , B = [place_prefab(hut_s, _{ rotate: 180 })]
+  , C = [place_prefab(hut_s, _{ rotate: 270 })]
+
+  , D = [place_prefab(hut_s, _{ mirror_x: true })]
+  , E = [place_prefab(hut_s, _{ mirror_y: true })]
+  , F = [place_prefab(hut_s, _{ mirror_x: true, mirror_y: true })]
+
+  , G = [place_prefab(hut_s, _{ rotate: 90, mirror_x: true })]
+  , H = [place_prefab(hut_s, _{ rotate: 180, mirror_y: true })]
+  , I = [place_prefab(hut_s, _{ rotate: 270, mirror_x: true, mirror_y: true })]
+
+  , R = [draw_point(room)]
+.

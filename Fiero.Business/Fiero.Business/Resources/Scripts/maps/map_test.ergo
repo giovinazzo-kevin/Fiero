@@ -1,88 +1,16 @@
 :- module(map_test, []).
 :- use_module(fiero).
 :- use_module(random).
+
+:- use_module(map).
+:- use_module(prefabs_test).
 :- map(25, 25).
 
-:- op(1000, xfy, ['#->']).
-
-prefab { name: 'hut_s', size: p(5, 5) } #-> [
-	W,W,W,W,W,
-	W,X,X,C,W,
-	W,X,V,V,W,
-	W,X,X,R,D,
-	W,W,W,W,W
-] :- 
-	W = [draw_point(wall)]
-  , (flip_coin -> 
-	  V = [draw_point(room), draw_point(wall)] 
-	; V = [draw_point(room)])
-  , D = [draw_point(room), place_feature(door)]
-  , C = [draw_point(room), place_feature(chest)]
-  , X = [draw_point(room), chance(place_feature(trap), 0.12)]
-  , R = [draw_point(room)]
-.
-
-prefab { name: 'hut_complex', size: p(19, 19) } #-> [ 
-	A,_,_,_,_,R,R,B,_,_,_,_,R,R,C,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	D,_,_,_,_,R,R,E,_,_,_,_,R,R,F,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	G,_,_,_,_,R,R,H,_,_,_,_,R,R,I,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_
-] :- 
-	A = [place_prefab(hut_s, _{ rotate: 90 })]
-  , B = [place_prefab(hut_s, _{ rotate: 180 })]
-  , C = [place_prefab(hut_s, _{ rotate: 270 })]
-
-  , D = [place_prefab(hut_s, _{ mirror_x: true })]
-  , E = [place_prefab(hut_s, _{ mirror_y: true })]
-  , F = [place_prefab(hut_s, _{ mirror_x: true, mirror_y: true })]
-
-  , G = [place_prefab(hut_s, _{ rotate: 90, mirror_x: true })]
-  , H = [place_prefab(hut_s, _{ rotate: 180, mirror_y: true })]
-  , I = [place_prefab(hut_s, _{ rotate: 270, mirror_x: true, mirror_y: true })]
-
-  , R = [draw_point(room)]
-.
-	
 step{ size: p(W, H) } #-> [
 	fill_rect(room, p(W, H), p(0, 0)),
 	draw_rect(wall, p(W, H), p(0, 0))
 ].
 
-step{ size: p(W, H) } #-> [
-	draw_rect(wall, p(:=(W-5), :=(H-5)), p(5, 5)),
-
-	draw_point(room, p(:=(W/2), 5)),
-	place_feature(door, p(:=(W/2), 5)),
-
-	draw_point(room, p(:=(W/2), :=(H-5))),
-	place_feature(door, p(:=(W/2), :=(H-5)))
-] :- false.
-
 step{ } #-> [
 	place_prefab(hut_complex, _{}, p(3, 3))
 ].
-
-
-map:get_prefab(N, prefab { name: N, size: S, canvas: C }) :-
-	prefab { name: N, size: S } #-> C.
-
-map:generate(Step, EML) :-
-	findall(
-		EML_, 
-		('#->'(Step, L), member(EML_, L)), 
-		EML), !.

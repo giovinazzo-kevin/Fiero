@@ -17,7 +17,7 @@ namespace Fiero.Business
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
-            string Name, Coord Size, ITerm[][] Canvas
+            string Name, Coord Size, Coord Offset, string Group, int Layer, ITerm[][] Canvas
         );
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
@@ -64,28 +64,25 @@ namespace Fiero.Business
             throw new InvalidOperationException(error);
         }
 
-        bool TryGetPrefab(ErgoVM vm, string name, out Prefab prefab)
+        IEnumerable<Prefab> GetPrefabRules(ErgoVM vm, string name)
         {
             var var_prefab = new Variable("Prefab");
             GetPrefabHook.SetArg(0, new Atom(name));
             GetPrefabHook.SetArg(1, var_prefab);
             vm.Query = GetPrefabHook.Compile();
-            vm.Run();
-            if (vm.TryPopSolution(out var sol))
+            foreach (var sol in vm.RunInteractive())
             {
                 var item = sol.Substitutions[var_prefab]
                     .Substitute(sol.Substitutions);
-                if (!item.Matches(out prefab)
+                if (!item.Matches(out Prefab prefab)
                 || prefab.Size.X * prefab.Size.Y != prefab.Canvas.Length)
                 {
                     Throw("Invalid prefab.");
                     // TODO: Log
-                    return false;
+                    yield break;
                 }
-                return true;
+                yield return prefab;
             }
-            prefab = default;
-            return false;
         }
 
         bool ParseEML(ITerm term, FloorGenerationContext ctx, ErgoVM vm)
@@ -160,78 +157,99 @@ namespace Fiero.Business
                     Throw(Err_ExpectedType(fun, nameof(String)));
                     return false;
                 }
-                if (!TryGetPrefab(vm, prefabName, out var prefab))
+                var prefabRules = GetPrefabRules(vm, prefabName)
+                    .OrderBy(p => p.Layer)
+                    .GroupBy(x => x.Group)
+                    .ToList();
+                foreach (var group in prefabRules)
                 {
-                    Throw(Err_DuplicateDefinition(prefabName));
-                    return false;
-                }
-                Coord pos = l1;
-                if (pfbArgs.MirrorX)
-                    pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
-                if (pfbArgs.MirrorY)
-                    pos = new(pos.X + prefab.Size.X - 1, pos.Y);
-                var startX = pos.X;
-
-                var i = 0;
-                var inc = (int i) => i + 1;
-                var rot = pfbArgs.Rotate.Mod(360) / 90;
-                switch (rot)
-                {
-                    case 0: break;
-                    case 1:
-                        i = prefab.Size.X * (prefab.Size.Y - 1);
-                        inc = (int i) =>
-                        {
-                            var d = i - prefab.Size.X;
-                            if (d >= 0)
-                                return d;
-                            return d.Mod(prefab.Canvas.Length) + 1;
-                        };
-                        break;
-                    case 2:
-                        i = prefab.Canvas.Length - 1;
-                        inc = (int i) => i - 1;
-                        break;
-                    case 3:
-                        i = prefab.Size.X - 1;
-                        inc = (int i) =>
-                        {
-                            var d = i + prefab.Size.X;
-                            if (d < prefab.Canvas.Length)
-                                return d;
-                            return d.Mod(prefab.Canvas.Length) - 1;
-                        };
-                        break;
-                }
-
-                for (int j = 0; j < prefab.Canvas.Length; i = inc(i), j++)
-                {
-                    if (prefab.Canvas[i] is not null)
+                    if (group.Key == "ungrouped")
                     {
-                        foreach (var eml in prefab.Canvas[i])
+                        foreach (var item in group)
                         {
-                            var arg = eml.Concat(TermMarshall.ToTerm(pos));
-                            if (!ParseEML(arg, ctx, vm))
+                            if (!Inner(item))
                                 return false;
                         }
                     }
-                    if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
-                    {
-                        if (pfbArgs.MirrorX)
-                            pos = new(startX, pos.Y - 1);
-                        else
-                            pos = new(startX, pos.Y + 1);
-                    }
                     else
                     {
-                        if (pfbArgs.MirrorY)
-                            pos += Coord.NegativeX;
-                        else
-                            pos += Coord.PositiveX;
+                        var choice = Rng.Random.Choose(group.ToList());
+                        if (!Inner(choice))
+                            return false;
                     }
-
                 }
                 return true;
+
+                bool Inner(Prefab prefab)
+                {
+                    Coord pos = l1;
+                    if (pfbArgs.MirrorX)
+                        pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
+                    if (pfbArgs.MirrorY)
+                        pos = new(pos.X + prefab.Size.X - 1, pos.Y);
+                    var startX = pos.X;
+
+                    var i = 0;
+                    var inc = (int i) => i + 1;
+                    var rot = pfbArgs.Rotate.Mod(360) / 90;
+                    switch (rot)
+                    {
+                        case 0: break;
+                        case 1:
+                            i = prefab.Size.X * (prefab.Size.Y - 1);
+                            inc = (int i) =>
+                            {
+                                var d = i - prefab.Size.X;
+                                if (d >= 0)
+                                    return d;
+                                return d.Mod(prefab.Canvas.Length) + 1;
+                            };
+                            break;
+                        case 2:
+                            i = prefab.Canvas.Length - 1;
+                            inc = (int i) => i - 1;
+                            break;
+                        case 3:
+                            i = prefab.Size.X - 1;
+                            inc = (int i) =>
+                            {
+                                var d = i + prefab.Size.X;
+                                if (d < prefab.Canvas.Length)
+                                    return d;
+                                return d.Mod(prefab.Canvas.Length) - 1;
+                            };
+                            break;
+                    }
+
+                    for (int j = 0; j < prefab.Canvas.Length; i = inc(i), j++)
+                    {
+                        if (prefab.Canvas[i] is not null)
+                        {
+                            foreach (var eml in prefab.Canvas[i])
+                            {
+                                var arg = eml.Concat(TermMarshall.ToTerm(pos));
+                                if (!ParseEML(arg, ctx, vm))
+                                    return false;
+                            }
+                        }
+                        if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
+                        {
+                            if (pfbArgs.MirrorX)
+                                pos = new(startX, pos.Y - 1);
+                            else
+                                pos = new(startX, pos.Y + 1);
+                        }
+                        else
+                        {
+                            if (pfbArgs.MirrorY)
+                                pos += Coord.NegativeX;
+                            else
+                                pos += Coord.PositiveX;
+                        }
+
+                    }
+                    return true;
+                }
             }
 
             bool Feature()

@@ -5,22 +5,38 @@
 
 :- op(1000, xfy, ['#->']).
 
-prefab { name: 'hut_s', size: p(3, 3) } #-> [
-	W,W,W,
-	W,C,W,
-	W,D,W
+prefab { name: 'hut_s', size: p(5, 5) } #-> [
+	W,W,W,W,W,
+	W,C,R,R,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,W,D,W,W
 ] :- 
 	W = [draw_point(wall)]
   , D = [draw_point(room), place_feature(door)]
   , C = [draw_point(room), place_feature(chest)]
+  , R = [draw_point(room)]
 .
 
-prefab { name: 'hut_n', size: p(3, 3) } #-> [ 
-	P,_,_,
-	_,_,_,
-	_,_,_
+prefab { name: 'hut_complex', size: p(12, 12) } #-> [ 
+	A,_,_,_,_,R,R,B,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	R,R,R,R,R,R,R,R,R,R,R,R,
+	R,R,R,R,R,R,R,R,R,R,R,R,
+	C,_,_,_,_,R,R,D,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_
 ] :- 
-	P = [place_prefab(hut_s, _{ id: 1, mirror_y: true })]
+	A = [place_prefab(hut_s, _{ rotate: 90 })]
+  , B = [place_prefab(hut_s, _{ mirror_y: true, rotate: 90 })]
+  , C = [place_prefab(hut_s, _{ mirror_x: true })]
+  , D = [place_prefab(hut_s, _{ mirror_x: true, mirror_y: true })]
+  , R = [draw_point(room)]
 .
 	
 step{ size: p(W, H) } #-> [
@@ -39,7 +55,7 @@ step{ size: p(W, H) } #-> [
 ] :- false.
 
 step{ } #-> [
-	place_prefab(hut_n, _{}, p(3, 3))
+	place_prefab(hut_complex, _{}, p(3, 3))
 ].
 
 

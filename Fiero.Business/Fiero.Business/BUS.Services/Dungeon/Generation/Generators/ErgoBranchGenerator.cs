@@ -12,7 +12,7 @@ namespace Fiero.Business
         public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct PlacePrefabArgs(
-            int Id, bool MirrorY, bool MirrorX, int Rotate
+            bool MirrorY, bool MirrorX, int Rotate
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
@@ -135,7 +135,45 @@ namespace Fiero.Business
                     return false;
                 }
                 Coord pos = l1;
-                for (int i = 0; i < prefab.Canvas.Length; i++)
+                if (pfbArgs.MirrorX)
+                    pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
+                if (pfbArgs.MirrorY)
+                    pos = new(pos.X + prefab.Size.X - 1, pos.Y);
+                var startX = pos.X;
+
+                var i = 0;
+                var inc = (int i) => i + 1;
+                var rot = pfbArgs.Rotate.Mod(360) / 90;
+                switch (rot)
+                {
+                    case 0: break;
+                    case 1:
+                        i = prefab.Size.X * (prefab.Size.Y - 1);
+                        inc = (int i) =>
+                        {
+                            var d = i - prefab.Size.X;
+                            if (d >= 0)
+                                return d;
+                            return d.Mod(prefab.Canvas.Length) + 1;
+                        };
+                        break;
+                    case 2:
+                        i = prefab.Canvas.Length - 1;
+                        inc = (int i) => i - 1;
+                        break;
+                    case 3:
+                        i = prefab.Size.X - 1;
+                        inc = (int i) =>
+                        {
+                            var d = i + prefab.Size.X;
+                            if (d < prefab.Canvas.Length)
+                                return d;
+                            return d.Mod(prefab.Canvas.Length) - 1;
+                        };
+                        break;
+                }
+
+                for (int j = 0; j < prefab.Canvas.Length; i = inc(i), j++)
                 {
                     if (prefab.Canvas[i] is not null)
                     {
@@ -146,9 +184,21 @@ namespace Fiero.Business
                                 return false;
                         }
                     }
-                    if (i % prefab.Size.X == prefab.Size.X - 1 && i > 0)
-                        pos = new(l1.X, pos.Y + 1);
-                    else pos += Coord.PositiveX;
+                    if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
+                    {
+                        if (pfbArgs.MirrorX)
+                            pos = new(startX, pos.Y - 1);
+                        else
+                            pos = new(startX, pos.Y + 1);
+                    }
+                    else
+                    {
+                        if (pfbArgs.MirrorY)
+                            pos += Coord.NegativeX;
+                        else
+                            pos += Coord.PositiveX;
+                    }
+
                 }
                 return true;
             }

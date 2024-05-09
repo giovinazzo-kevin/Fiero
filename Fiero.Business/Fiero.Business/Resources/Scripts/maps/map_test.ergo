@@ -18,24 +18,39 @@ prefab { name: 'hut_s', size: p(5, 5) } #-> [
   , R = [draw_point(room)]
 .
 
-prefab { name: 'hut_complex', size: p(12, 12) } #-> [ 
-	A,_,_,_,_,R,R,B,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	R,R,R,R,R,R,R,R,R,R,R,R,
-	R,R,R,R,R,R,R,R,R,R,R,R,
-	C,_,_,_,_,R,R,D,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_
+prefab { name: 'hut_complex', size: p(19, 19) } #-> [ 
+	A,_,_,_,_,R,R,B,_,_,_,_,R,R,C,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	D,_,_,_,_,R,R,E,_,_,_,_,R,R,F,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
+	G,_,_,_,_,R,R,H,_,_,_,_,R,R,I,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
+	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_
 ] :- 
 	A = [place_prefab(hut_s, _{ rotate: 90 })]
-  , B = [place_prefab(hut_s, _{ mirror_y: true, rotate: 90 })]
-  , C = [place_prefab(hut_s, _{ mirror_x: true })]
-  , D = [place_prefab(hut_s, _{ mirror_x: true, mirror_y: true })]
+  , B = [place_prefab(hut_s, _{ rotate: 180 })]
+  , C = [place_prefab(hut_s, _{ rotate: 270 })]
+
+  , D = [place_prefab(hut_s, _{ mirror_x: true })]
+  , E = [place_prefab(hut_s, _{ mirror_y: true })]
+  , F = [place_prefab(hut_s, _{ mirror_x: true, mirror_y: true })]
+
+  , G = [place_prefab(hut_s, _{ rotate: 90, mirror_x: true })]
+  , H = [place_prefab(hut_s, _{ rotate: 180, mirror_y: true })]
+  , I = [place_prefab(hut_s, _{ rotate: 270, mirror_x: true, mirror_y: true })]
+
   , R = [draw_point(room)]
 .
 	

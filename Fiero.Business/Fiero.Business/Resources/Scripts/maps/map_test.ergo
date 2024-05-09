@@ -5,21 +5,52 @@
 
 :- op(1000, xfy, ['#->']).
 
+prefab { name: 'hut_s', size: p(3, 3) } #-> [
+	W,W,W,
+	W,C,W,
+	W,D,W
+] :- 
+	W = [draw_point(wall)]
+  , D = [draw_point(room), place_feature(door)]
+  , C = [draw_point(room), place_feature(chest)]
+.
+
+prefab { name: 'hut_n', size: p(3, 3) } #-> [ 
+	P,_,_,
+	_,_,_,
+	_,_,_
+] :- 
+	P = [place_prefab(hut_s, _{ id: 1, mirror_y: true })]
+.
+	
 step{ size: p(W, H) } #-> [
-	fill_rect(p(0, 0), p(W, H), room),
-	draw_rect(p(0, 0), p(W, H), wall)
+	fill_rect(room, p(W, H), p(0, 0)),
+	draw_rect(wall, p(W, H), p(0, 0))
 ].
 
 step{ size: p(W, H) } #-> [
-	draw_rect(p(5, 5), p(:=(W-5), :=(H-5)), wall),
+	draw_rect(wall, p(:=(W-5), :=(H-5)), p(5, 5)),
 
-	draw_point(p(:=(W/2), 5), room),
-	place_feature(p(:=(W/2), 5), door),
+	draw_point(room, p(:=(W/2), 5)),
+	place_feature(door, p(:=(W/2), 5)),
 
-	draw_point(p(:=(W/2), :=(H-5)), room),
-	place_feature(p(:=(W/2), :=(H-5)), door)
-] :- flip_coin.
+	draw_point(room, p(:=(W/2), :=(H-5))),
+	place_feature(door, p(:=(W/2), :=(H-5)))
+] :- false.
+
+step{ } #-> [
+	place_prefab(hut_n, _{}, p(3, 3))
+].
 
 
-map:generate(Arg, EML) :-
-	findall(EML_, ('#->'(Arg, L), member(EML_, L)), EML), !.
+map:get_prefabs(Prefabs) :-
+	findall(
+		prefab { name: N, size: S, canvas: C }, 
+		prefab { name: N, size: S } #-> C, 
+		Prefabs).
+
+map:generate(Step, EML) :-
+	findall(
+		EML_, 
+		('#->'(Step, L), member(EML_, L)), 
+		EML), !.

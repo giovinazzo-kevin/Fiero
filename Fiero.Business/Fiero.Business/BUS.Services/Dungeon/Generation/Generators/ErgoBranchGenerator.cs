@@ -9,6 +9,7 @@ namespace Fiero.Business
     [SingletonDependency]
     public class ErgoBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
     {
+        #region Types
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
         [Term(Marshalling = TermMarshalling.Named)]
@@ -17,13 +18,9 @@ namespace Fiero.Business
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
-            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][] Canvas
+            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas
         );
-
-        [Term(Marshalling = TermMarshalling.Named)]
-        public readonly record struct StairConnection(
-            FloorId To
-        );
+        #endregion
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public readonly DungeonTheme Theme = DungeonTheme.Default;
@@ -54,6 +51,7 @@ namespace Fiero.Business
                         // TODO: Log
                         return;
                     }
+
                     foreach (var item in geometry.Contents)
                     {
                         if (!ParseEML(item, ctx, script.VM))
@@ -63,13 +61,7 @@ namespace Fiero.Business
                 .Build(id, map.Size);
 
         }
-
-        void Throw(string error)
-        {
-            throw new InvalidOperationException(error);
-        }
-
-        IEnumerable<Prefab> GetPrefabRules(ErgoVM vm, string name)
+        protected IEnumerable<Prefab> GetPrefabRules(ErgoVM vm, string name)
         {
             var var_prefab = new Variable("Prefab");
             GetPrefabHook.SetArg(0, new Atom(name));
@@ -80,7 +72,7 @@ namespace Fiero.Business
                 var item = sol.Substitutions[var_prefab]
                     .Substitute(sol.Substitutions);
                 if (!item.Matches(out Prefab prefab)
-                || prefab.Size.X * prefab.Size.Y != prefab.Canvas.Length)
+                || prefab.Canvas.Any(layer => prefab.Size.X * prefab.Size.Y != layer.Length))
                 {
                     Throw("Invalid prefab.");
                     // TODO: Log
@@ -89,8 +81,7 @@ namespace Fiero.Business
                 yield return prefab;
             }
         }
-
-        bool ParseEML(ITerm term, FloorGenerationContext ctx, ErgoVM vm)
+        protected bool ParseEML(ITerm term, FloorGenerationContext ctx, ErgoVM vm)
         {
             if (term is List lst)
             {
@@ -101,24 +92,48 @@ namespace Fiero.Business
                 }
                 return true;
             }
-
             var sig = term.GetSignature();
             var fun = sig.Functor.Explain();
             var args = term.GetArguments();
             return fun switch
             {
+                "if_tile" => IfTile(),
                 "chance" => Chance(),
                 "draw_line" => Line(),
                 "draw_point" => Point(),
                 "draw_rect" => Rect(false),
                 "fill_rect" => Rect(true),
-
                 "place_feature" => Feature(),
                 "place_prefab" => Prefab(),
-
                 _ => false
             };
 
+            #region Functions
+            bool IfTile()
+            {
+                if (args.Length != 3)
+                {
+                    Throw(Err_ExpectedArity(fun, 3, args.Length));
+                    return false;
+                }
+                if (!args[0].Matches<TileName>(out var tile))
+                {
+                    Throw(Err_ExpectedType(fun, FieroLib.Types.Tile));
+                    return false;
+                }
+                if (!args[2].Matches<Coord>(out var l1))
+                {
+                    Throw(Err_ExpectedType(fun, nameof(Coord)));
+                    return false;
+                }
+                if (!ctx.TryGetTile(l1, out var actualTile) || actualTile.Name != tile)
+                    return true;
+                var arg1 = args[1];
+                if (arg1 is List lst)
+                    arg1 = new List(lst.Contents.Select(x => x.Concat(args[2])));
+                else arg1 = arg1.Concat(args[2]);
+                return ParseEML(arg1, ctx, vm);
+            }
             bool Chance()
             {
                 if (args.Length != 3)
@@ -126,20 +141,19 @@ namespace Fiero.Business
                     Throw(Err_ExpectedArity(fun, 3, args.Length));
                     return false;
                 }
-                if (!args[1].Matches<float>(out var chance))
+                if (!args[0].Matches<float>(out var chance))
                 {
                     Throw(Err_ExpectedType(fun, WellKnown.Types.Number));
                     return false;
                 }
                 if (!Rng.Random.NChancesIn(chance, 1))
                     return true;
-                var arg0 = args[0];
-                if (arg0 is List lst)
-                    arg0 = new List(lst.Contents.Select(x => x.Concat(args[2])));
-                else arg0 = arg0.Concat(args[2]);
-                return ParseEML(arg0, ctx, vm);
+                var arg1 = args[1];
+                if (arg1 is List lst)
+                    arg1 = new List(lst.Contents.Select(x => x.Concat(args[2])));
+                else arg1 = arg1.Concat(args[2]);
+                return ParseEML(arg1, ctx, vm);
             }
-
             bool Prefab()
             {
                 if (args.Length != 3)
@@ -200,75 +214,78 @@ namespace Fiero.Business
                             Randomize = false
                         };
                     }
-                    if (pfbArgs.MirrorX)
-                        pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
-                    if (pfbArgs.MirrorY)
-                        pos = new(pos.X + prefab.Size.X - 1, pos.Y);
-                    var startX = pos.X;
-
-                    var i = 0;
-                    var inc = (int i) => i + 1;
-                    var rot = pfbArgs.Rotate.Mod(360) / 90;
-                    switch (rot)
+                    foreach (var layer in prefab.Canvas)
                     {
-                        case 0: break;
-                        case 1:
-                            i = prefab.Size.X * (prefab.Size.Y - 1);
-                            inc = (int i) =>
-                            {
-                                var d = i - prefab.Size.X;
-                                if (d >= 0)
-                                    return d;
-                                return d.Mod(prefab.Canvas.Length) + 1;
-                            };
-                            break;
-                        case 2:
-                            i = prefab.Canvas.Length - 1;
-                            inc = (int i) => i - 1;
-                            break;
-                        case 3:
-                            i = prefab.Size.X - 1;
-                            inc = (int i) =>
-                            {
-                                var d = i + prefab.Size.X;
-                                if (d < prefab.Canvas.Length)
-                                    return d;
-                                return d.Mod(prefab.Canvas.Length) - 1;
-                            };
-                            break;
-                    }
+                        pos = l1;
+                        if (pfbArgs.MirrorX)
+                            pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
+                        if (pfbArgs.MirrorY)
+                            pos = new(pos.X + prefab.Size.X - 1, pos.Y);
+                        var startX = pos.X;
 
-                    for (int j = 0; j < prefab.Canvas.Length; i = inc(i), j++)
-                    {
-                        if (prefab.Canvas[i] is not null)
+                        var i = 0;
+                        var inc = (int i) => i + 1;
+                        var rot = pfbArgs.Rotate.Mod(360) / 90;
+                        switch (rot)
                         {
-                            foreach (var eml in prefab.Canvas[i])
+                            case 0: break;
+                            case 1:
+                                i = prefab.Size.X * (prefab.Size.Y - 1);
+                                inc = (int i) =>
+                                {
+                                    var d = i - prefab.Size.X;
+                                    if (d >= 0)
+                                        return d;
+                                    return d.Mod(layer.Length) + 1;
+                                };
+                                break;
+                            case 2:
+                                i = layer.Length - 1;
+                                inc = (int i) => i - 1;
+                                break;
+                            case 3:
+                                i = prefab.Size.X - 1;
+                                inc = (int i) =>
+                                {
+                                    var d = i + prefab.Size.X;
+                                    if (d < layer.Length)
+                                        return d;
+                                    return d.Mod(layer.Length) - 1;
+                                };
+                                break;
+                        }
+
+                        for (int j = 0; j < layer.Length; i = inc(i), j++)
+                        {
+                            if (layer[i] is not null)
                             {
-                                var arg = eml.Concat(TermMarshall.ToTerm(pos));
-                                if (!ParseEML(arg, ctx, vm))
-                                    return false;
+                                foreach (var eml in layer[i])
+                                {
+                                    var arg = eml.Concat(TermMarshall.ToTerm(pos));
+                                    if (!ParseEML(arg, ctx, vm))
+                                        return false;
+                                }
                             }
-                        }
-                        if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
-                        {
-                            if (pfbArgs.MirrorX)
-                                pos = new(startX, pos.Y - 1);
+                            if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
+                            {
+                                if (pfbArgs.MirrorX)
+                                    pos = new(startX, pos.Y - 1);
+                                else
+                                    pos = new(startX, pos.Y + 1);
+                            }
                             else
-                                pos = new(startX, pos.Y + 1);
-                        }
-                        else
-                        {
-                            if (pfbArgs.MirrorY)
-                                pos += Coord.NegativeX;
-                            else
-                                pos += Coord.PositiveX;
-                        }
+                            {
+                                if (pfbArgs.MirrorY)
+                                    pos += Coord.NegativeX;
+                                else
+                                    pos += Coord.PositiveX;
+                            }
 
+                        }
                     }
                     return true;
                 }
             }
-
             bool Feature()
             {
                 if (args.Length != 2)
@@ -310,7 +327,6 @@ namespace Fiero.Business
                     _ => throw new NotSupportedException()
                 });
             }
-
             bool Point()
             {
                 if (args.Length != 2)
@@ -331,7 +347,6 @@ namespace Fiero.Business
                 ctx.Draw(l1, c => new(t, c));
                 return true;
             }
-
             bool Line()
             {
                 if (args.Length != 3)
@@ -357,7 +372,6 @@ namespace Fiero.Business
                 ctx.DrawLine(l1, l2, c => new(t, c));
                 return true;
             }
-
             bool Rect(bool fill)
             {
                 if (args.Length != 3)
@@ -386,10 +400,17 @@ namespace Fiero.Business
                     ctx.DrawBox(l1, l2 - l1 + Coord.PositiveOne, c => new(t, c));
                 return true;
             }
+            #endregion
 
+            #region Errors
             string Err_ExpectedArity(string fun, int expArity, int actArity) => $"Expected {fun}/{expArity}, found {fun}/{actArity}";
             string Err_ExpectedType(string fun, string type) => $"Expected {type}, found {fun}";
             string Err_DuplicateDefinition(string type) => $"Duplicate definition for prefab {type}";
+            #endregion
+        }
+        protected void Throw(string error)
+        {
+            throw new InvalidOperationException(error);
         }
     }
 }

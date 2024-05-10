@@ -1,7 +1,6 @@
 :- module(map_test, []).
 :- use_module(fiero).
 :- use_module(random).
-
 :- use_module(map).
 :- use_module(prefabs_test).
 :- map(25, 25).
@@ -12,5 +11,5 @@ step{ size: p(W, H) } #-> [
 ].
 
 step{ } #-> [
-	place_prefab(hut_complex, _{}, p(3, 3))
+	place_prefab(spawn, _{}, p(3, 3))
 ].

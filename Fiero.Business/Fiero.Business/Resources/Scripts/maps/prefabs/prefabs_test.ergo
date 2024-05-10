@@ -1,101 +1,22 @@
 :- module(prefabs_test, []).
 :- use_module(random).
 
-prefab { name: 'hut_s', size: p(5, 5), layer: 0, group: base } #-> [
-	W,W,W,W,W,
-	W,R,R,R,W,
-	W,R,R,R,W,
-	W,R,R,R,W,
-	W,W,W,W,W
-] :- 
-    W = [draw_point(wall)],
-	R = [draw_point(room)]
-.
-prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout, weight: 0.25 } #-> [
-	R,_,D,_,R,
-	_,V,X,V,_,
-	D,X,C,X,D,
-	_,V,X,V,_,
-	R,_,D,_,R
-] :- 
-    D = [draw_point(room), chance(place_feature(door), 0.40)],
-	C = [draw_point(room), place_feature(chest)],
-	X = [draw_point(room), chance(place_feature(trap), 0.16)],
-	(flip_coin
-	-> V = [place_feature(statue)], R = [draw_point(room)]
-	; V = X, R = _)
-.
-prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout } #-> [
-	_,_,_,_,_,
-	D,_,_,_,_,
-	_,X,X,X,_,
-	_,V,C,V,_,
-	_,_,_,_,_
-] :- 
-    D = [draw_point(room), chance(place_feature(door), 0.85)],
-	C = [draw_point(room), place_feature(chest)],
-	X = [draw_point(room), chance(place_feature(trap), 0.16)],
-	(flip_coin
-	-> V = [place_feature(statue)] 
-	 ; V = X)
-.
-prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout, weight: 0.15 } #-> [
-	_,_,D,_,_,
-	_,_,_,_,_,
-	_,_,_,_,_,
-	_,_,_,_,_,
-	_,_,_,_,_
-] :- 
-    D = [draw_point(room), chance(place_feature(door), 0.85)]
-.
-prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout, weight: 100.15 } #-> [
-	W,V,R,V,W,
-	V,D,R,R,V,
+prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
 	R,R,R,R,R,
-	V,R,R,U,V,
-	W,V,R,V,W
-] :- 
-    D = [draw_point(room), place_feature(downstairs)],
-    U = [draw_point(room), place_feature(upstairs)],
+	R,R,R,R,R,
+	R,R,U,R,R,
+	R,R,R,R,R,
+	R,R,R,R,R
+], [
+	S,W,D,W,S,
+	W,_,_,_,W,
+	D,_,_,_,D,
+	W,_,_,_,W,
+	S,W,D,W,S
+]) :- 
+	U = [draw_point(room), place_feature(upstairs)],
 	R = [draw_point(room)],
-	(n_chances_in(8, 10)
-	-> V = [draw_point(room), place_feature(statue)] 
-	; V = R),
-	(n_chances_in(4, 10)
-	-> W = [draw_point(wall)] 
-	; W = R)
-.
-prefab { name: 'hut_s', size: p(5, 5), layer: 10, group: layout, weight: 0.05 } #-> [
-	_,_,D,_,_,
-	_,_,_,_,_,
-	_,_,C,_,_,
-	_,_,_,_,_,
-	_,_,_,_,_
-] :- 
-    D = [draw_point(room), place_feature(door_secret)],
-	C = [draw_point(room), place_feature(chest)]
-.
-prefab { name: 'hut_complex', size: p(19, 19) } #-> [ 
-	A,_,_,_,_,R,R,A,_,_,_,_,R,R,A,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	A,_,_,_,_,R,R,A,_,_,_,_,R,R,A,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-	A,_,_,_,_,R,R,A,_,_,_,_,R,R,A,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_,
-	_,_,_,_,_,R,R,_,_,_,_,_,R,R,_,_,_,_,_
-] :- 
-	A = [place_prefab(hut_s, _{ randomize: true })],
-	R = [draw_point(room)]
+	S = [place_feature(statue)],
+	W = [draw_point(wall)],
+	D = [place_feature(door)]
 .

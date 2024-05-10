@@ -20,6 +20,11 @@ namespace Fiero.Business
             string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][] Canvas
         );
 
+        [Term(Marshalling = TermMarshalling.Named)]
+        public readonly record struct StairConnection(
+            FloorId To
+        );
+
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public readonly DungeonTheme Theme = DungeonTheme.Default;
 
@@ -276,10 +281,19 @@ namespace Fiero.Business
                     Throw(Err_ExpectedType(fun, nameof(Coord)));
                     return false;
                 }
+                var featureArgs = new Dict(WellKnown.Literals.Discard);
                 if (!args[0].Matches<FeatureName>(out var t))
                 {
-                    Throw(Err_ExpectedType(fun, nameof(FeatureName)));
-                    return false;
+                    if (args[0] is Dict dict && dict.Functor.TryGetA(out var df)
+                        && df.Matches(out t))
+                    {
+                        featureArgs = dict;
+                    }
+                    else
+                    {
+                        Throw(Err_ExpectedType(fun, nameof(FeatureName)));
+                        return false;
+                    }
                 }
                 return ctx.TryAddFeature(t.ToString(), l1, e => t switch
                 {
@@ -288,6 +302,10 @@ namespace Fiero.Business
                     FeatureName.Trap => e.Feature_Trap(),
                     FeatureName.Shrine => e.Feature_Shrine(),
                     FeatureName.Statue => e.Feature_Statue(),
+                    FeatureName.Downstairs
+                        => e.Feature_Downstairs(new(ctx.Id, new(ctx.Id.Branch, ctx.Id.Depth + 1))),
+                    FeatureName.Upstairs
+                        => e.Feature_Upstairs(new(new(ctx.Id.Branch, ctx.Id.Depth - 1), ctx.Id)),
                     FeatureName.DoorSecret => e.Feature_SecretDoor(Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
                     _ => throw new NotSupportedException()
                 });

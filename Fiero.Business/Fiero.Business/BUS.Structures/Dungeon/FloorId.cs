@@ -12,6 +12,7 @@ namespace Fiero.Business
             hash.Add(Depth);
             return hash.ToHashCode();
         }
+
         public override string ToString() => $"{Branch.ToString()[0]}{Depth}";
     }
 }

@@ -161,7 +161,7 @@ namespace Fiero.Business.Scenes
 
                 var features = dungeonSystem.GetAllFeatures(entranceFloorId);
                 var spawnPoint = features
-                    .SingleOrDefault(t => t.FeatureProperties.Name == FeatureName.Upstairs)?
+                    .FirstOrDefault(t => t.FeatureProperties.Name == FeatureName.Upstairs)?
                     .Position()
                     ?? dungeonSystem.GetAllTiles(entranceFloorId)
                     .FirstOrDefault(x => x.IsWalkable(Player))
@@ -1130,7 +1130,8 @@ namespace Fiero.Business.Scenes
                     }
                     var stairs = dungeonSystem.GetAllFeatures(next)
                         .TrySelect(f => (f.TryCast<Portal>(out var portal), portal))
-                        .Single(f => f.PortalProperties.Connects(current, next));
+                        .OrderBy(x => x.DistanceFrom(e.Feature))
+                        .First(f => f.PortalProperties.Connects(current, next));
                     actionSystem.StopTracking(e.Actor.Id);
                     if (e.Actor.IsPlayer())
                     {

@@ -63,8 +63,6 @@
             {
                 list = Objects[pos] = new();
             }
-            if (list.Any(x => x.IsFeature))
-                return false;
             list.Add(new(name, true, pos, id => build(EntityBuilders).WithPosition(pos, id).Build()));
             return true;
         }
@@ -72,6 +70,19 @@
         public void AddConnections(params FloorConnection[] c) => Connections.UnionWith(c);
 
         public IEnumerable<ObjectDef> GetObjects() => Objects.Values.SelectMany(v => v);
+        public int RemoveObjects(Func<ObjectDef, bool> pred)
+        {
+            var toRemove = new HashSet<Coord>();
+            foreach (var obj in Objects.Values.SelectMany(x => x))
+            {
+                if (pred(obj))
+                    toRemove.Add(obj.Position);
+            }
+            var ret = toRemove.Count;
+            foreach (var key in toRemove)
+                Objects.Remove(key);
+            return ret;
+        }
         public IEnumerable<ObjectDef> GetObjectsAt(Coord p) => Objects.TryGetValue(p, out var set) ? set : Enumerable.Empty<ObjectDef>();
         public IEnumerable<TileDef> GetTiles() => Tiles.Values;
         public TileDef GetTile(Coord p) => Tiles[p];
@@ -81,6 +92,5 @@
                 .Where(x => !GetObjectsAt(x.Key).Where(x => x.IsFeature).Any())
                 .Select(x => x.Value);
         public IEnumerable<FloorConnection> GetConnections() => Connections;
-
     }
 }

@@ -19,6 +19,11 @@
                     if (!eml(script.VM, ctx))
                         return;
                 })
+                .WithStep(ctx =>
+                {
+                    // Remove temporary features used as markers by EML
+                    ctx.RemoveObjects(o => o.Name == nameof(FeatureName.PrefabAnchor));
+                })
                 .Build(id, map.Size);
         }
     }

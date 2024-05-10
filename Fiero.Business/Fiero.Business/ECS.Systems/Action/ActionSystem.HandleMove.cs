@@ -42,7 +42,8 @@
                         }
                         else
                         {
-                            var feature = featuresHere.Single();
+                            var feature = featuresHere
+                                .Single(x => x.Physics.BlocksMovement && !x.Physics.Phasing);
                             _ = ActorBumpedObstacle.Raise(new(t.Actor, feature));
                             // you can bump shrines and chests to interact with them
                             action = new InteractWithFeatureAction(feature);

@@ -7,11 +7,13 @@
         DoorSecret,
         Downstairs,
         Upstairs,
-        SpawnPoint,
         Chest,
         Shrine,
         Statue,
         Trap,
         BloodSplatter,
+        // EML
+        SpawnPoint,
+        PrefabAnchor
     }
 }

@@ -259,12 +259,13 @@ namespace Fiero.Business
                 FeatureName.Trap => e.Feature_Trap(),
                 FeatureName.Shrine => e.Feature_Shrine(),
                 FeatureName.Statue => e.Feature_Statue(),
-                FeatureName.SpawnPoint => e.Feature_SpawnPoint(),
                 FeatureName.Downstairs
                     => e.Feature_Downstairs(new(ctx.Id, new(ctx.Id.Branch, ctx.Id.Depth + 1))),
                 FeatureName.Upstairs
                     => e.Feature_Upstairs(new(new(ctx.Id.Branch, ctx.Id.Depth - 1), ctx.Id)),
                 FeatureName.DoorSecret => e.Feature_SecretDoor(ctx.Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
+                FeatureName.SpawnPoint => e.MapTrigger(FeatureName.SpawnPoint),
+                FeatureName.PrefabAnchor => e.MapTrigger(FeatureName.PrefabAnchor),
                 _ => throw new NotSupportedException()
             });
         };

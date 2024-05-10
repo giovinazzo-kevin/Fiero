@@ -871,8 +871,9 @@
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
             ;
-        public IEntityBuilder<MapTrigger> Feature_SpawnPoint()
-            => Feature<MapTrigger>(FeatureName.SpawnPoint)
+        public IEntityBuilder<MapTrigger> MapTrigger(FeatureName triggerName)
+            => Feature<MapTrigger>(triggerName)
+            .Tweak<RenderComponent>((_, x) => x.Visibility = VisibilityName.Blind)
             ;
         #endregion
 

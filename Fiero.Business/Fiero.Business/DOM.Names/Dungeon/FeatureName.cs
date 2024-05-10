@@ -7,6 +7,7 @@
         DoorSecret,
         Downstairs,
         Upstairs,
+        SpawnPoint,
         Chest,
         Shrine,
         Statue,

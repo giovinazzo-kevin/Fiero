@@ -15,7 +15,7 @@ prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
 	S,W,D,W,S
 ]) :- 
 	R = [draw_point(room)],
-	U = [place_feature(upstairs)],
+	U = [place_feature(spawn_point)],
 	S = [place_feature(statue)],
 	W = [draw_point(wall)],
 	D = [place_feature(door)].

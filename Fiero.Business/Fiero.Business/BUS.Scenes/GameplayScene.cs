@@ -161,7 +161,10 @@ namespace Fiero.Business.Scenes
 
                 var features = dungeonSystem.GetAllFeatures(entranceFloorId);
                 var spawnPoint = features
-                    .FirstOrDefault(t => t.FeatureProperties.Name == FeatureName.Upstairs)?
+                    .OrderBy(t => t.FeatureProperties.Name == FeatureName.SpawnPoint ? -1 : 1)
+                    .ThenBy(t => t.FeatureProperties.Name == FeatureName.Upstairs ? -1 : 1)
+                    .ThenBy(t => t.FeatureProperties.Name == FeatureName.Downstairs ? -1 : 1)
+                    .FirstOrDefault()?
                     .Position()
                     ?? dungeonSystem.GetAllTiles(entranceFloorId)
                     .FirstOrDefault(x => x.IsWalkable(Player))

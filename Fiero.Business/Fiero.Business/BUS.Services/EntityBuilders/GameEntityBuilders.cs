@@ -871,6 +871,9 @@
             .WithColor(GetBranchColor(conn.From.Branch))
             .WithPortalInfo(conn)
             ;
+        public IEntityBuilder<MapTrigger> Feature_SpawnPoint()
+            => Feature<MapTrigger>(FeatureName.SpawnPoint)
+            ;
         #endregion
 
         #region TILES

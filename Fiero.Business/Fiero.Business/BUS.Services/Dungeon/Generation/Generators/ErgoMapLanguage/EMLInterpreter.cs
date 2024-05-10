@@ -161,7 +161,6 @@ namespace Fiero.Business
             ctx.DrawLine(l1, l2, c => new(t, c));
             return true;
         };
-        #endregion
         public const string EML_DrawPoint_Name = "draw_point";
         /// <summary>
         /// Draws a point with Tile arg0 at Coord arg1.
@@ -260,6 +259,7 @@ namespace Fiero.Business
                 FeatureName.Trap => e.Feature_Trap(),
                 FeatureName.Shrine => e.Feature_Shrine(),
                 FeatureName.Statue => e.Feature_Statue(),
+                FeatureName.SpawnPoint => e.Feature_SpawnPoint(),
                 FeatureName.Downstairs
                     => e.Feature_Downstairs(new(ctx.Id, new(ctx.Id.Branch, ctx.Id.Depth + 1))),
                 FeatureName.Upstairs
@@ -413,6 +413,7 @@ namespace Fiero.Business
                 }
             }
         };
+        #endregion
         public static EML InterpretEML(List lst)
         {
             return (vm, ctx) => lst.Contents.Select(InterpretEML).All(x => x(vm, ctx));

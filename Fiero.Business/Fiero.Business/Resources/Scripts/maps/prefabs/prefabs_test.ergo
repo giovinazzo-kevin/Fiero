@@ -4,19 +4,18 @@
 prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
 	R,R,R,R,R,
 	R,R,R,R,R,
-	R,R,U,R,R,
+	R,R,R,R,R,
 	R,R,R,R,R,
 	R,R,R,R,R
 ], [
 	S,W,D,W,S,
 	W,_,_,_,W,
-	D,_,_,_,D,
+	D,_,U,_,D,
 	W,_,_,_,W,
 	S,W,D,W,S
 ]) :- 
-	U = [draw_point(room), place_feature(upstairs)],
 	R = [draw_point(room)],
+	U = [place_feature(upstairs)],
 	S = [place_feature(statue)],
 	W = [draw_point(wall)],
-	D = [place_feature(door)]
-.
+	D = [place_feature(door)].

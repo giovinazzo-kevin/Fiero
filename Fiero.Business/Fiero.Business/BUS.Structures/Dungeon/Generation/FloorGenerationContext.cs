@@ -6,10 +6,13 @@
         public readonly Coord Size = size;
 
         public readonly LogComponent Log;
+        public DungeonTheme Theme { get; set; } = DungeonTheme.Default;
+
         protected readonly GameEntityBuilders EntityBuilders = builders;
         protected readonly Dictionary<Coord, HashSet<ObjectDef>> Objects = new();
         protected readonly Dictionary<Coord, TileDef> Tiles = new();
         protected readonly HashSet<FloorConnection> Connections = new();
+
 
         public bool IsPointInBounds(Coord pos)
         {

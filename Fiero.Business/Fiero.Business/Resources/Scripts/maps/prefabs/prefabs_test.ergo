@@ -4,18 +4,38 @@
 prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
 	R,R,R,R,R,
 	R,R,R,R,R,
-	R,R,R,R,R,
+	R,R,O,R,R,
 	R,R,R,R,R,
 	R,R,R,R,R
-], [
+]) :- 
+	R = [draw_point(room)],
+	O = [draw_point(room), place_feature(spawn_point)].
+	
+prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
 	S,W,D,W,S,
 	W,_,_,_,W,
-	D,_,U,_,D,
+	D,_,_,_,D,
 	W,_,_,_,W,
 	S,W,D,W,S
 ]) :- 
-	R = [draw_point(room)],
-	U = [place_feature(spawn_point)],
-	S = [place_feature(statue)],
+	choose((
+		S = [place_feature(statue)],
+		W = [draw_point(wall)],
+		D = [place_feature(door)]
+	),(
+		W = [place_feature(statue)]
+	),(
+		W = [draw_point(wall)],
+		D = [place_feature(statue)]
+	)).
+	
+prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
+	W,W,D,W,W,
+	W,S,_,S,W,
+	D,_,_,_,D,
+	W,S,_,S,W,
+	W,W,D,W,W
+]) :- 
 	W = [draw_point(wall)],
-	D = [place_feature(door)].
+	choose(S = [place_feature(statue)],()),
+	choose(D = [place_feature(door)],()).

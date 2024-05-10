@@ -21,14 +21,14 @@ prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
 	choose((
 		S = [place_feature(statue)],
 		W = [draw_point(wall)],
-		D = [place_feature(prefab_anchor), place_feature(door)]
+		D = [place_feature(door)]
 	),(
 		W = [place_feature(statue)],
-		D = [place_feature(prefab_anchor)]
+		D = []
 	),(
 		W = [draw_point(wall)],
 		D = [place_feature(statue)],
-		S = [place_feature(prefab_anchor)]
+		S = []
 	)).
 	
 prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
@@ -40,5 +40,4 @@ prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
 ]) :- 
 	W = [draw_point(wall)],
 	choose(S = [place_feature(statue)],()),
-	choose(D = [place_feature(prefab_anchor), place_feature(door)],
-		   D = [place_feature(prefab_anchor)]).
+	choose(D = [place_feature(door)],()).

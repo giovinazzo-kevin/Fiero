@@ -5,6 +5,7 @@
 
 input:key_route(h, pressed, [_] >> spawn([npc_rat{}], [_])).
 input:key_route(j, pressed, [_] >> spawn([projectile_bomb{charges: 999}], [_])).
+input:key_route(n, pressed, [_] >> spawn([scroll_of_raise_undead{}], [_])).
 input:key_route(y, pressed, [_] >> toggle_true_sight).
 
 toggle_true_sight :-

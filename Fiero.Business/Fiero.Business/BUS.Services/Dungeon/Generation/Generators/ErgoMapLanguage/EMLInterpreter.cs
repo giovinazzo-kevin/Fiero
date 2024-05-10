@@ -17,7 +17,7 @@ namespace Fiero.Business
         public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct PlacePrefabArgs(
-            bool MirrorY, bool MirrorX, int Rotate, bool Randomize
+            bool MirrorY, bool MirrorX, int Rotate, bool Randomize, bool CenterX, bool CenterY
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
@@ -265,7 +265,6 @@ namespace Fiero.Business
                     => e.Feature_Upstairs(new(new(ctx.Id.Branch, ctx.Id.Depth - 1), ctx.Id)),
                 FeatureName.DoorSecret => e.Feature_SecretDoor(ctx.Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
                 FeatureName.SpawnPoint => e.MapTrigger(FeatureName.SpawnPoint),
-                FeatureName.PrefabAnchor => e.MapTrigger(FeatureName.PrefabAnchor),
                 _ => throw new NotSupportedException()
             });
         };
@@ -318,7 +317,12 @@ namespace Fiero.Business
 
             bool PlacePrefab(Prefab prefab)
             {
-                Coord pos = l1;
+                var p = l1;
+                if (pfbArgs.CenterX)
+                    p -= new Coord(prefab.Size.X / 2, 0);
+                if (pfbArgs.CenterY)
+                    p -= new Coord(0, prefab.Size.Y / 2);
+                Coord pos = p;
                 // Placement is randomized once at the beginning so that all layers remain consistent.
                 if (pfbArgs.Randomize)
                 {
@@ -343,7 +347,7 @@ namespace Fiero.Business
                 return true;
                 bool PlaceLayer(ITerm[][] layer)
                 {
-                    pos = l1 + prefab.Offset;
+                    pos = p + prefab.Offset;
                     // Mirroring and rotation are implemented as index manipulation. No sorting is required.
                     // Mirroring alters the order in which tiles are placed, rotation alters the grid access pattern.
                     if (pfbArgs.MirrorX)

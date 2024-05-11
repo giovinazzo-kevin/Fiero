@@ -29,6 +29,7 @@ namespace Fiero.Business
         #region Hooks
         public static readonly Hook GenerateHook = new(new(new("generate"), 2, FieroLib.Modules.Map, default));
         public static readonly Hook GetPrefabHook = new(new(new("get_prefab"), 3, FieroLib.Modules.Map, default));
+
         /// <summary>
         /// Calls map:generate/2 and aggregates a list of EML generation steps.
         /// </summary>
@@ -90,6 +91,9 @@ namespace Fiero.Business
                 stuffHere.AddRange(ctx.GetObjectsAt(p)
                     .Where(x => x.IsFeature)
                     .Select(x => (ITerm)new Complex(new(EML_PlaceFeature_Name), new Atom(x.Name.ToErgoCase()))));
+                stuffHere.AddRange(ctx.GetObjectsAt(p)
+                    .Where(x => x.Build == null && x.Name == CTX_MapMarker_Name)
+                    .Select(x => (ITerm)new Complex(new(EML_PlaceMarker_Name), (Dict)x.Data)));
                 if (stuffHere.Count > 0)
                     layer[i] = [.. stuffHere];
             }
@@ -289,9 +293,40 @@ namespace Fiero.Business
                 FeatureName.Upstairs
                     => e.Feature_Upstairs(new(new(ctx.Id.Branch, ctx.Id.Depth - 1), ctx.Id)),
                 FeatureName.DoorSecret => e.Feature_SecretDoor(ctx.Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
-                FeatureName.SpawnPoint => e.MapTrigger(FeatureName.SpawnPoint),
                 _ => throw new NotSupportedException()
             });
+        };
+        public const string EML_PlaceMarker_Name = "place_marker";
+        public const string CTX_MapMarker_Name = "MapMarker";
+        /// <summary>
+        /// Places map marker with Name arg0 and Data arg0 at Coord arg1.
+        /// </summary>
+        private static EML EML_PlaceMarker(ImmutableArray<ITerm> args) => (vm, ctx) =>
+        {
+            if (args.Length != 2)
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 2, args.Length);
+                return false;
+            }
+            if (!args[1].Matches<Coord>(out var l1))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
+                return false;
+            }
+            var markerArgs = new Dict(WellKnown.Literals.Discard);
+            if (!args[0].Matches<MapMarkerName>(out var t))
+            {
+                if (args[0] is not Dict dict || !dict.Functor.TryGetA(out var df)
+                    || !df.Matches(out t))
+                {
+                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(MapMarkerName), args[0].Explain());
+                    return false;
+                }
+                markerArgs = dict;
+            }
+            var fun = t.ToString();
+            ctx.AddMetaObject(CTX_MapMarker_Name, l1, markerArgs.WithFunctor(new Atom(fun.ToErgoCase())));
+            return true;
         };
         public const string EML_PlacePrefab_Name = "place_prefab";
         /// <summary>
@@ -511,6 +546,7 @@ namespace Fiero.Business
                 EML_FillRect_Name => EML_FillRect(args),
                 EML_PlaceFeature_Name => EML_PlaceFeature(args),
                 EML_PlacePrefab_Name => EML_PlacePrefab(args),
+                EML_PlaceMarker_Name => EML_PlaceMarker(args),
                 var unknown => EML_Unknown($"{unknown}/{args.Length}"),
             };
         }

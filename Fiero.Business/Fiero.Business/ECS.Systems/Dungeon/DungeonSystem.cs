@@ -58,6 +58,13 @@ namespace Fiero.Business
 
         public bool TryGetFloor(FloorId id, out Floor floor) => Floors.TryGetValue(id, out floor);
         public Floor GetFloor(FloorId id) => TryGetFloor(id, out var floor) ? floor : null;
+        public Coord GetSpawnPoint(FloorId id)
+        {
+            var spawnPoints = GetFloor(id)?.SpawnPoints ?? [];
+            if (spawnPoints.Count == 0)
+                return Coord.Zero;
+            return Rng.Random.Choose(spawnPoints);
+        }
         public IEnumerable<Floor> GetAllFloors() => Floors.Values;
 
         private void RouteEvents(Floor floor)

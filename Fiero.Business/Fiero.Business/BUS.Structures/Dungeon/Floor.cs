@@ -6,6 +6,8 @@
         public readonly FloorId Id;
         public readonly Coord Size;
 
+        public readonly List<Coord> SpawnPoints = [];
+
         private readonly SpatialDictionary<MapCell, PhysicalEntity> _cells;
         public IReadOnlyDictionary<Coord, MapCell> Cells => _cells;
         public readonly SpatialAStar<MapCell, PhysicalEntity> Pathfinder;
@@ -17,6 +19,7 @@
         public event Action<Floor, Actor> ActorRemoved;
         public event Action<Floor, Item> ItemAdded;
         public event Action<Floor, Item> ItemRemoved;
+
 
         public Floor(FloorId id, Coord size)
         {

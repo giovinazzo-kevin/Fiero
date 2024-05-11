@@ -159,15 +159,7 @@ namespace Fiero.Business.Scenes
                     ctx.Connect(default, entranceFloorId);
                 }));
 
-                var features = dungeonSystem.GetAllFeatures(entranceFloorId);
-                var spawnPoint = features
-                    .Where(t => t.FeatureProperties.Name == FeatureName.SpawnPoint)
-                    .Shuffle(Rng.Random)
-                    .FirstOrDefault()?
-                    .Position()
-                    ?? dungeonSystem.GetAllTiles(entranceFloorId)
-                    .FirstOrDefault(x => x.IsWalkable(Player))
-                    .Position();
+                var spawnPoint = dungeonSystem.GetSpawnPoint(entranceFloorId);
                 Player.Physics.Position = spawnPoint;
 
                 if (!Systems.TrySpawn(entranceFloorId, Player, maxDistance: 100))

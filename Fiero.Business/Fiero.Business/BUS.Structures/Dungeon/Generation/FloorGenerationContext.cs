@@ -12,6 +12,7 @@
         protected readonly Dictionary<Coord, HashSet<ObjectDef>> Objects = new();
         protected readonly Dictionary<Coord, TileDef> Tiles = new();
         protected readonly HashSet<FloorConnection> Connections = new();
+        protected readonly HashSet<Coord> SpawnPoints = new();
 
 
         public FloorGenerationContext CreateSubContext(Coord size)
@@ -45,7 +46,18 @@
             {
                 list = Objects[pos] = new();
             }
-            list.Add(new(name, false, pos, id => build(EntityBuilders).WithPosition(pos, id).Build()));
+            list.Add(new(name, typeof(T), false, pos, null, id => build(EntityBuilders).WithPosition(pos, id).Build()));
+        }
+
+        public void AddMetaObject<T>(string name, Coord pos, T data)
+        {
+            if (pos.X < 0 || pos.Y < 0 || pos.X >= Size.X || pos.Y >= Size.Y)
+                throw new ArgumentOutOfRangeException(nameof(pos));
+            if (!Objects.TryGetValue(pos, out var list))
+            {
+                list = Objects[pos] = new();
+            }
+            list.Add(new(name, typeof(T), false, pos, data, null));
         }
 
         public bool TryAddFeature<T>(string name, IEnumerable<Coord> validPositions, Func<GameEntityBuilders, IEntityBuilder<T>> build, out Coord pos)
@@ -69,7 +81,7 @@
             {
                 list = Objects[pos] = new();
             }
-            list.Add(new(name, true, pos, id => build(EntityBuilders).WithPosition(pos, id).Build()));
+            list.Add(new(name, typeof(T), true, pos, null, id => build(EntityBuilders).WithPosition(pos, id).Build()));
             return true;
         }
 
@@ -89,6 +101,8 @@
                 Objects.Remove(key);
             return ret;
         }
+        public void AddSpawnPoint(Coord c) => SpawnPoints.Add(c);
+        public IEnumerable<Coord> GetSpawnPoints() => SpawnPoints;
         public IEnumerable<ObjectDef> GetObjectsAt(Coord p) => Objects.TryGetValue(p, out var set) ? set : Enumerable.Empty<ObjectDef>();
         public IEnumerable<TileDef> GetTiles() => Tiles.Values;
         public TileDef GetTile(Coord p) => Tiles[p];

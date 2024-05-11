@@ -11,9 +11,6 @@
         Shrine,
         Statue,
         Trap,
-        BloodSplatter,
-        // EML
-        SpawnPoint,
-        PrefabAnchor
+        BloodSplatter
     }
 }

@@ -30,6 +30,7 @@
             }
             // Get all objects that were added to the context, but exclude portals and stairs which need special handling
             var objects = context.GetObjects()
+                .Where(x => x.Build != null)
                 .Select(o => o.Build(id))
                 .ToList();
             // Place all tiles that were set in the context, including objects that eventually resolve to tiles
@@ -90,6 +91,8 @@
             {
                 floor.AddActor(actor);
             }
+            // Set spawn points for the player
+            floor.SpawnPoints.AddRange(context.GetSpawnPoints());
             return floor;
         }
     }

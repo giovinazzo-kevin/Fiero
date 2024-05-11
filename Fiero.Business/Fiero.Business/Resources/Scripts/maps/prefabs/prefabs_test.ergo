@@ -9,7 +9,7 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 0, group: base } #-
 	R,R,R,R,R
 ]) :- 
 	R = [draw_point(room)],
-	O = [draw_point(room), place_feature(spawn_point)].
+	O = [draw_point(room), place_marker(spawn_point)].
 	
 prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout } #-> ([
 	S,W,D,W,S,

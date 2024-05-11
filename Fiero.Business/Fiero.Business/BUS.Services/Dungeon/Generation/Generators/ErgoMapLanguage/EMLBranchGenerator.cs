@@ -1,4 +1,7 @@
-﻿namespace Fiero.Business
+﻿using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
+
+namespace Fiero.Business
 {
     [SingletonDependency]
     public class EMLBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
@@ -19,12 +22,28 @@
                     if (!eml(script.VM, ctx))
                         return;
                 })
-                .WithStep(ctx =>
-                {
-                    // Remove temporary features used as markers by EML
-                    //ctx.RemoveObjects(o => o.Name == nameof(FeatureName.PrefabAnchor));
-                })
+                .WithStep(ProcessMarkers)
                 .Build(id, map.Size);
+        }
+
+        protected virtual void ProcessMarkers(FloorGenerationContext ctx)
+        {
+            // Use then remove temporary features used as markers by EML
+            foreach (var def in ctx.GetObjects()
+                .Where(obj => obj.Name == EMLInterpreter.CTX_MapMarker_Name))
+            {
+                var functor = ((Dict)def.Data).Functor;
+                if (!functor.TryGetA(out var fun))
+                    continue;
+                var markerType = Enum.Parse<MapMarkerName>(fun.Explain().ToCSharpCase());
+                switch (markerType)
+                {
+                    case MapMarkerName.SpawnPoint:
+                        ctx.AddSpawnPoint(def.Position);
+                        break;
+                }
+            }
+            ctx.RemoveObjects(o => o.Name == EMLInterpreter.CTX_MapMarker_Name);
         }
     }
 }

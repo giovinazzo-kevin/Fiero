@@ -337,6 +337,17 @@ namespace Fiero.Business
                 .GroupBy(x => x.Name);
             var prefabRules = Rng.Random.Choose(prefabGroups.ToList())
                 .GroupBy(x => x.Group);
+            // Placement is randomized once at the beginning so that all layers remain consistent.
+            if (pfbArgs.Randomize)
+            {
+                pfbArgs = pfbArgs with
+                {
+                    MirrorX = Rng.Random.NChancesIn(1, 2),
+                    MirrorY = Rng.Random.NChancesIn(1, 2),
+                    Rotate = Rng.Random.Between(0, 3) * 90,
+                    Randomize = false
+                };
+            }
             foreach (var group in prefabRules)
             {
                 if (group.Key == "ungrouped")
@@ -363,17 +374,6 @@ namespace Fiero.Business
                 if (pfbArgs.CenterY)
                     p -= new Coord(0, prefab.Size.Y / 2);
                 Coord pos = p;
-                // Placement is randomized once at the beginning so that all layers remain consistent.
-                if (pfbArgs.Randomize)
-                {
-                    pfbArgs = pfbArgs with
-                    {
-                        MirrorX = Rng.Random.NChancesIn(1, 2),
-                        MirrorY = Rng.Random.NChancesIn(1, 2),
-                        Rotate = Rng.Random.Between(0, 3) * 90,
-                        Randomize = false
-                    };
-                }
                 // Canvas is a 4-dimensional array:
                 //   1. Layers: each prefab definition can contain multiple layers that are drawn sequentially.
                 //   2. Grids: all grids of all layers for a given definition have the same size.

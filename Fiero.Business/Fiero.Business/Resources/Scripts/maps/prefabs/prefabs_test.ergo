@@ -42,7 +42,7 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout }
 	choose(S = [place_feature(statue)],()),
 	choose(D = [place_feature(door)],()).
 	
-prefab { name: 'room_1x1', size: p(5, 5), tags: {generic}, layer: 0, group: base } #-> ([
+prefab { name: 'room_1x1', size: p(5, 5), tags: {generic, base}, layer: 0, group: base } #-> ([
 	W,W,W,W,W,
 	W,R,R,R,W,
 	W,R,R,R,W,
@@ -53,7 +53,7 @@ prefab { name: 'room_1x1', size: p(5, 5), tags: {generic}, layer: 0, group: base
 	R = [draw_point(room)].
 	
 	
-prefab { name: 'room_2x1', size: p(10, 5), tags: {generic}, layer: 0, group: based } #-> ([
+prefab { name: 'room_2x1', size: p(10, 5), tags: {generic, base}, layer: 0, group: base } #-> ([
 	W,W,W,W,W,W,W,W,W,W,
 	W,R,R,R,R,R,R,R,R,W,
 	W,R,R,R,R,R,R,R,R,W,
@@ -63,7 +63,7 @@ prefab { name: 'room_2x1', size: p(10, 5), tags: {generic}, layer: 0, group: bas
 	W = [draw_point(wall)],
 	R = [draw_point(room)].
 	
-prefab { name: '2x2', size: p(10, 10), tags: {generic}, layer: 0, group: based } #-> ([
+prefab { name: '2x2', size: p(10, 10), tags: {generic, base}, layer: 0, group: base } #-> ([
 	P,_,_,_,_,P,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
@@ -75,5 +75,35 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic}, layer: 0, group: based }
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
-	P = [place_prefab(_, p(5,5),  _{tags: {generic} })],
-	Q = [place_prefab(_, p(10,5), _{tags: {generic} })].
+	P = [place_prefab('room_1x1', _, _{tags: {base}})],
+	Q = [place_prefab('room_2x1', _, _{tags: {base}})].
+
+prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
+	_,_,_,_,_,_,_,D,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,R,R,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,R,R,R,_,_,R,R,R,_,
+	_,_,D,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_
+]) :- 
+	D = [draw_point(room), place_feature(door)],
+	R = [draw_point(room)].
+prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,R,R,_,_,_,_,
+	_,_,_,_,R,R,_,_,_,_,
+	_,_,_,_,R,R,_,_,_,_,
+	_,R,R,R,R,R,R,R,R,_,
+	_,_,D,_,R,R,R,R,R,_,
+	_,_,_,W,_,_,_,_,_,_,
+	D,_,_,W,_,_,_,_,_,_,
+	_,_,_,W,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_
+]) :- 
+	D = [draw_point(room), place_feature(door)],
+	R = [draw_point(room)],
+	W = [draw_point(wall)].

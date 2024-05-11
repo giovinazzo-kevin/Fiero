@@ -77,6 +77,24 @@ namespace Fiero.Business
                 yield return prefab;
             }
         }
+        public static ITerm[][] ParseContext(FloorGenerationContext ctx)
+        {
+            var l1 = ctx.Size.X * ctx.Size.Y;
+            var layer = new ITerm[l1][];
+            for (int i = 0; i < l1; i++)
+            {
+                var p = new Coord(i % ctx.Size.X, i / ctx.Size.X);
+                var stuffHere = new List<ITerm>();
+                if (ctx.TryGetTile(p, out var t))
+                    stuffHere.Add(new Complex(new(EML_DrawPoint_Name), TermMarshall.ToTerm(t.Name)));
+                stuffHere.AddRange(ctx.GetObjectsAt(p)
+                    .Where(x => x.IsFeature)
+                    .Select(x => (ITerm)new Complex(new(EML_PlaceFeature_Name), new Atom(x.Name.ToErgoCase()))));
+                if (stuffHere.Count > 0)
+                    layer[i] = [.. stuffHere];
+            }
+            return layer;
+        }
         #endregion
         #region EML Functions
         /// <summary>
@@ -323,7 +341,7 @@ namespace Fiero.Business
             {
                 if (group.Key == "ungrouped")
                 {
-                    if (!group.Select(PlacePrefab).Any(x => !x))
+                    if (!group.Select(x => PlacePrefab(x, pfbArgs)).Any(x => !x))
                         return false;
                 }
                 else
@@ -331,13 +349,13 @@ namespace Fiero.Business
                     var choice = Rng.Random.ChooseWeighted(group
                         .Select(x => new WeightedItem<Prefab>(x, x.Weight / group.Count()))
                         .ToArray());
-                    if (!PlacePrefab(choice))
+                    if (!PlacePrefab(choice, pfbArgs))
                         return false;
                 }
             }
             return true;
 
-            bool PlacePrefab(Prefab prefab)
+            bool PlacePrefab(Prefab prefab, PlacePrefabArgs pfbArgs)
             {
                 var p = l1;
                 if (pfbArgs.CenterX)
@@ -363,13 +381,40 @@ namespace Fiero.Business
                 //   4. EML: the last argument of functions (position) is omitted, as it is curried automatically by place_prefab.
                 foreach (var layer in prefab.Canvas)
                 {
-                    if (!PlaceLayer(layer))
+                    // Since prefabs can be rotated and mirrored, and since they can contain more prefabs in their definition,
+                    // they have to be pre-rendered fully onto a fresh context in a known reference frame (no transformations).
+                    if (!Prerender(layer).TryGetValue(out var renderedLayer))
+                        return false;
+                    if (!PlaceLayer(renderedLayer))
                         return false;
                 }
                 return true;
+                Maybe<ITerm[][]> Prerender(ITerm[][] layer)
+                {
+                    var pos = Coord.Zero;
+                    var freshCtx = ctx.CreateSubContext(prefab.Size);
+                    for (int i = 0; i < layer.Length; i++)
+                    {
+                        if (layer[i] is not null)
+                        {
+                            foreach (var eml in layer[i])
+                            {
+                                // Curry the current position as the last argument to the current statement
+                                var arg = eml.Concat(TermMarshall.ToTerm(pos));
+                                if (!InterpretEML(arg)(vm, freshCtx))
+                                    return default;
+                            }
+                        }
+                        if (i.Mod(prefab.Size.X) == prefab.Size.X - 1)
+                            pos = new(0, pos.Y + 1);
+                        else
+                            pos += Coord.PositiveX;
+                    }
+                    return ParseContext(freshCtx);
+                }
                 bool PlaceLayer(ITerm[][] layer)
                 {
-                    pos = p + prefab.Offset;                    // Used to remember where to go back to once the first length is iterated fully.
+                    pos = p + prefab.Offset; // Used to remember where to go back to once the first length is iterated fully.
                     var size = prefab.Size;
                     // Get the grid access pattern from the provided rotation (in degrees).
                     var inc = Rotate(pfbArgs.Rotate, ref size, out int i);

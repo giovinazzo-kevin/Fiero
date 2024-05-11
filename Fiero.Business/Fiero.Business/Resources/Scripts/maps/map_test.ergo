@@ -15,11 +15,5 @@ step{ size: p(W, H) } #-> [
 ].
 
 step{ } #-> [
-	place_prefab('room_2x1', _, _{ rotate: 90 , mirror_x: true }, p(3, 5)),
-	place_prefab('room_2x1', _, _{ rotate: 180, mirror_x: true }, p(14, 5)),
-	place_prefab('room_2x1', _, _{ rotate: 270, mirror_y: true }, p(25, 5)),
-	place_prefab('room_2x1', _, _{ rotate: 360, mirror_y: true }, p(36, 5)),
-	place_prefab('room_1x1', _, _{ rotate: 90 , mirror_x: true }, p(3, 35)),
-	place_prefab('room_1x1', _, _{ rotate: 180, mirror_x: true }, p(14, 35)),
-	place_prefab('room_1x1', _, _{ rotate: 270, mirror_y: true }, p(25, 35))
+	place_prefab('2x2', _, _{ rotate: 90, mirror_y: true }, p(5, 5))
 ].

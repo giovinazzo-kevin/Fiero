@@ -64,9 +64,9 @@ prefab { name: 'room_2x1', size: p(10, 5), tags: {generic}, layer: 0, group: bas
 	R = [draw_point(room)].
 	
 prefab { name: '2x2', size: p(10, 10), tags: {generic}, layer: 0, group: based } #-> ([
+	P,_,_,_,_,P,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
-	_,_,P,_,_,_,_,P,_,_,
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
 	Q,_,_,_,_,_,_,_,_,_,
@@ -75,5 +75,5 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic}, layer: 0, group: based }
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
-	P = [place_prefab(_, p(5,5),  _{tags: {generic}, center_x: true, center_y: true })],
+	P = [place_prefab(_, p(5,5),  _{tags: {generic} })],
 	Q = [place_prefab(_, p(10,5), _{tags: {generic} })].

@@ -14,6 +14,12 @@
         protected readonly HashSet<FloorConnection> Connections = new();
 
 
+        public FloorGenerationContext CreateSubContext(Coord size)
+        {
+            return new(EntityBuilders, Id, size);
+        }
+
+
         public bool IsPointInBounds(Coord pos)
         {
             if (pos.X < 0 || pos.Y < 0 || pos.X >= Size.X || pos.Y >= Size.Y)

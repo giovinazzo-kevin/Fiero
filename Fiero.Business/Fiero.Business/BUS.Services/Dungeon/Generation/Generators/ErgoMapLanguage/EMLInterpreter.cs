@@ -369,17 +369,17 @@ namespace Fiero.Business
                 return true;
                 bool PlaceLayer(ITerm[][] layer)
                 {
-                    pos = p + prefab.Offset;
+                    pos = p + prefab.Offset;                    // Used to remember where to go back to once the first length is iterated fully.
+                    var size = prefab.Size;
+                    // Get the grid access pattern from the provided rotation (in degrees).
+                    var inc = Rotate(pfbArgs.Rotate, ref size, out int i);
                     // Mirroring and rotation are implemented as index manipulation. No sorting is required.
                     // Mirroring alters the order in which tiles are placed, rotation alters the grid access pattern.
                     if (pfbArgs.MirrorX)
-                        pos = new(pos.X, pos.Y + prefab.Size.Y - 1);
+                        pos = new(pos.X, pos.Y + size.Y - 1);
                     if (pfbArgs.MirrorY)
-                        pos = new(pos.X + prefab.Size.X - 1, pos.Y);
-                    // Used to remember where to go back to once the first length is iterated fully.
+                        pos = new(pos.X + size.X - 1, pos.Y);
                     var startX = pos.X;
-                    // Get the grid access pattern from the provided rotation (in degrees).
-                    var inc = Rotate(pfbArgs.Rotate, prefab.Size, out int i);
                     for (int j = 0; j < layer.Length; i = inc(i), j++)
                     {
                         // Unbound variables can be used to represent empty cells.
@@ -394,45 +394,50 @@ namespace Fiero.Business
                             }
                         }
                         // Change the tile placement order to implement mirroring.
-                        if (j.Mod(prefab.Size.X) == prefab.Size.X - 1)
+                        if (j.Mod(size.X) == size.X - 1)
                             pos = pfbArgs.MirrorX ? new(startX, pos.Y - 1) : new(startX, pos.Y + 1);
                         else
+                        {
                             pos += pfbArgs.MirrorY ? Coord.NegativeX : Coord.PositiveX;
+                        }
                     }
                     return true;
 
-                    static Func<int, int> Rotate(int deg, Coord size, out int i)
+                    static Func<int, int> Rotate(int deg, ref Coord size, out int i)
                     {
                         i = 0;
                         var inc = (int i) => i + 1;
                         var rot = deg.Mod(360) / 90;
-                        var area = size.X * size.Y;
+                        var sizecpy = size;
+                        var area = sizecpy.X * sizecpy.Y;
                         switch (rot)
                         {
                             case 0: break;
                             case 1:
-                                i = size.X * (size.Y - 1);
+                                i = sizecpy.X * (sizecpy.Y - 1);
                                 inc = (int i) =>
                                 {
-                                    var d = i - size.X;
+                                    var d = i - sizecpy.X;
                                     if (d >= 0)
                                         return d;
                                     return d.Mod(area) + 1;
                                 };
+                                size = new(size.Y, size.X);
                                 break;
                             case 2:
                                 i = area - 1;
                                 inc = (int i) => i - 1;
                                 break;
                             case 3:
-                                i = size.X - 1;
+                                i = sizecpy.X - 1;
                                 inc = (int i) =>
                                 {
-                                    var d = i + size.X;
+                                    var d = i + sizecpy.X;
                                     if (d < area)
                                         return d;
                                     return d.Mod(area) - 1;
                                 };
+                                size = new(size.Y, size.X);
                                 break;
                         }
                         return inc;

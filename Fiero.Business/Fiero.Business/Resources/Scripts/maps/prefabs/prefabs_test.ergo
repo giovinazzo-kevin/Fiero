@@ -19,15 +19,15 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout }
 	S,W,D,W,S
 ]) :- 
 	choose((
-		S = [place_marker(feature{type: statue})],
+		S = [place_marker(entity{type: feature_statue})],
 		W = [draw_point(wall)],
-		D = [place_marker(feature{type: door})]
+		D = [place_marker(entity{type: feature_door})]
 	),(
-		W = [place_marker(feature{type: statue})],
+		W = [place_marker(entity{type: feature_statue})],
 		D = []
 	),(
 		W = [draw_point(wall)],
-		D = [place_marker(feature{type: statue})],
+		D = [place_marker(entity{type: feature_statue})],
 		S = []
 	)).
 	
@@ -39,8 +39,8 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout }
 	W,W,D,W,W
 ]) :- 
 	W = [draw_point(wall)],
-	choose(S = [place_marker(feature{type: statue})],()),
-	choose(D = [place_marker(feature{type: door})],()).
+	choose(S = [place_marker(entity{type: feature_statue})],()),
+	choose(D = [place_marker(entity{type: feature_door})],()).
 	
 prefab { name: 'room_1x1', size: p(5, 5), tags: {generic, base}, layer: 0, group: base } #-> ([
 	W,W,W,W,W,
@@ -90,9 +90,9 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
-	D = [draw_point(room), place_marker(feature{type: door})],
+	D = [draw_point(room), place_marker(entity{type: feature_door})],
 	R = [draw_point(room)],
-	M = [place_marker(npc{type: rat})].
+	M = [place_marker(entity{type: npc_rat})].
 prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,R,R,_,_,_,_,
@@ -105,8 +105,8 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,_,_,W,G,G,_,_,M,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
-	D = [draw_point(room), place_marker(feature{type: door})],
+	D = [draw_point(room), place_marker(entity{type: feature_door})],
 	R = [draw_point(room)],
 	W = [draw_point(wall)],
-	M = [place_marker(npc{type: rat})],
-	G = [place_marker(item{type: gold})].
+	M = [place_marker(entity{type: npc_rat})],
+	G = [place_marker(entity{type: weapon_sword})].

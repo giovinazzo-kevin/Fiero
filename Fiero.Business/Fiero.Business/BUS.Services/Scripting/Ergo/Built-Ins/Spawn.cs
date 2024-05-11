@@ -15,7 +15,15 @@ public sealed class Spawn : BuiltIn
     public readonly GameEntityBuilders Builders;
     public readonly GameEntities Entities;
 
-    private readonly Dictionary<string, MethodInfo> BuilderMethods;
+    public static readonly Dictionary<string, MethodInfo> BuilderMethods;
+    static Spawn()
+    {
+        BuilderMethods = typeof(GameEntityBuilders)
+            .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(IEntityBuilder<>))
+            .ToDictionary(m => m.Name.ToErgoCase());
+    }
+
 
     public Spawn(IServiceFactory services, GameEntityBuilders builders, GameEntities entities)
         : base("", new("spawn"), 2, FieroLib.Modules.Fiero)
@@ -23,10 +31,6 @@ public sealed class Spawn : BuiltIn
         Services = services;
         Builders = builders;
         Entities = entities;
-        BuilderMethods = Builders.GetType()
-            .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(m => m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(IEntityBuilder<>))
-            .ToDictionary(m => m.Name.ToErgoCase());
     }
 
     public override ErgoVM.Op Compile()

@@ -3,8 +3,6 @@
     public enum MapMarkerName
     {
         SpawnPoint,
-        Item,
-        Npc,
-        Feature
+        Entity
     }
 }

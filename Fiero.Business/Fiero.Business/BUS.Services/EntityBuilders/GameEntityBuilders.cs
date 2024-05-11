@@ -603,14 +603,14 @@
         #endregion
 
         #region BOSSES
-        public IEntityBuilder<Actor> Boss_NpcGreatKingRat()
+        public IEntityBuilder<Actor> NPC_GreatKingRat()
             => NPC_Rat()
             .WithName("Great King Rat")
             .WithNpcInfo(NpcName.GreatKingRat)
             .WithSprite(RenderLayerName.Actors, TextureName.Creatures, nameof(NpcName.GreatKingRat), ColorName.White)
             .LoadState(nameof(NpcName.GreatKingRat))
             ;
-        public IEntityBuilder<Actor> Boss_NpcKingSerpent()
+        public IEntityBuilder<Actor> NPC_KingSerpent()
             => NPC_Rat()
             .WithName("Serpentine King")
             .WithNpcInfo(NpcName.KingSerpent)

@@ -38,8 +38,8 @@
         public void AddObject<T>(string name, Coord pos, Func<GameEntityBuilders, IEntityBuilder<T>> build)
             where T : PhysicalEntity
         {
-            if (typeof(T).IsAssignableFrom(typeof(Feature)))
-                throw new InvalidOperationException("Use TryAddFeature<T> to add dungeon features");
+            //if (typeof(T).IsAssignableFrom(typeof(Feature)))
+            //    throw new InvalidOperationException("Use TryAddFeature<T> to add dungeon features");
             if (pos.X < 0 || pos.Y < 0 || pos.X >= Size.X || pos.Y >= Size.Y)
                 throw new ArgumentOutOfRangeException(nameof(pos));
             if (!Objects.TryGetValue(pos, out var list))

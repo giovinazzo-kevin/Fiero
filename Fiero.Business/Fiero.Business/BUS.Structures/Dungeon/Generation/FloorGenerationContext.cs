@@ -91,11 +91,13 @@
         public int RemoveObjects(Func<ObjectDef, bool> pred)
         {
             var toRemove = new HashSet<Coord>();
-            foreach (var obj in Objects.Values.SelectMany(x => x))
+            foreach (var (pos, list) in Objects)
             {
-                if (pred(obj))
-                    toRemove.Add(obj.Position);
+                list.RemoveWhere(o => pred(o));
+                if (list.Count == 0)
+                    toRemove.Add(pos);
             }
+
             var ret = toRemove.Count;
             foreach (var key in toRemove)
                 Objects.Remove(key);

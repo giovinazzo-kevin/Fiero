@@ -86,12 +86,13 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,R,R,R,_,_,R,R,R,_,
 	_,_,D,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
+	_,_,M,_,_,_,_,M,_,_,
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
 	D = [draw_point(room), place_feature(door)],
-	R = [draw_point(room)].
+	R = [draw_point(room)],
+	M = [place_marker(enemy{type: rat})].
 prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,R,R,_,_,_,_,
@@ -99,11 +100,13 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,_,_,_,R,R,_,_,_,_,
 	_,R,R,R,R,R,R,R,R,_,
 	_,_,D,_,R,R,R,R,R,_,
-	_,_,_,W,_,_,_,_,_,_,
-	D,_,_,W,_,_,_,_,_,_,
-	_,_,_,W,_,_,_,_,_,_,
+	_,_,_,W,G,G,_,_,_,_,
+	D,_,_,W,G,G,_,_,_,_,
+	_,_,_,W,G,G,_,_,M,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
 	D = [draw_point(room), place_feature(door)],
 	R = [draw_point(room)],
-	W = [draw_point(wall)].
+	W = [draw_point(wall)],
+	M = [place_marker(enemy{type: rat})],
+	G = [place_marker(item{type: gold})].

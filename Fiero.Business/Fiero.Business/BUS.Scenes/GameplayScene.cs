@@ -1024,7 +1024,7 @@ namespace Fiero.Business.Scenes
             // - Empty and fill action queue on player floor change
             yield return actionSystem.FeatureInteractedWith.SubscribeResponse(e =>
             {
-                if (e.Feature.TryToggleDoor())
+                if (e.Actor.IsPlayer() && e.Feature.TryToggleDoor())
                 {
                     if (e.Feature.IsDoorClosed())
                     {

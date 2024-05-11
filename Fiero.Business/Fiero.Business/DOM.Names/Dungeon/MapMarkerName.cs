@@ -3,7 +3,7 @@
     public enum MapMarkerName
     {
         SpawnPoint,
-        Loot,
+        Item,
         Enemy
     }
 }

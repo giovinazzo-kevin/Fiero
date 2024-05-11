@@ -17,18 +17,18 @@ namespace Fiero.Business
         public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct PlacePrefabArgs(
-            bool MirrorY, bool MirrorX, int Rotate, bool Randomize, bool CenterX, bool CenterY
+            bool MirrorY, bool MirrorX, int Rotate, bool Randomize, bool CenterX, bool CenterY, Coord Size, string[] Tags
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
-            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas
+            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas, string[] Tags
         );
 
         public delegate bool EML(ErgoVM vm, FloorGenerationContext ctx);
         #endregion
         #region Hooks
         public static readonly Hook GenerateHook = new(new(new("generate"), 2, FieroLib.Modules.Map, default));
-        public static readonly Hook GetPrefabHook = new(new(new("get_prefab"), 2, FieroLib.Modules.Map, default));
+        public static readonly Hook GetPrefabHook = new(new(new("get_prefab"), 3, FieroLib.Modules.Map, default));
         /// <summary>
         /// Calls map:generate/2 and aggregates a list of EML generation steps.
         /// </summary>
@@ -48,14 +48,21 @@ namespace Fiero.Business
             return InterpretEML(geometry);
         }
         /// <summary>
-        /// Calls map:get_prefab/2 and yields all matching prefabs.
+        /// Calls map:get_prefab/3 and yields all matching prefabs.
         /// NOTE: prefab rules are evaluated each time this is called.
         /// </summary>
-        public static IEnumerable<Prefab> GetPrefabs(ErgoVM vm, string name)
+        public static IEnumerable<Prefab> GetPrefabs(ErgoVM vm, Maybe<string> name, Maybe<Coord> size = default)
         {
             var var_prefab = new Variable("Prefab");
-            GetPrefabHook.SetArg(0, new Atom(name));
-            GetPrefabHook.SetArg(1, var_prefab);
+            var nameArg = name.Reduce(
+                some => TermMarshall.ToTerm(some),
+                () => new Variable("Name"));
+            var sizeArg = size.Reduce(
+                some => TermMarshall.ToTerm(some),
+                () => WellKnown.Literals.Discard);
+            GetPrefabHook.SetArg(0, nameArg);
+            GetPrefabHook.SetArg(1, sizeArg);
+            GetPrefabHook.SetArg(2, var_prefab);
             vm.Query = GetPrefabHook.Compile();
             foreach (var sol in vm.RunInteractive())
             {
@@ -274,28 +281,43 @@ namespace Fiero.Business
         /// </summary>
         private static EML EML_PlacePrefab(ImmutableArray<ITerm> args) => (vm, ctx) =>
         {
-            if (args.Length != 3)
+            if (args.Length != 4)
             {
-                vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
+                vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 4, args.Length);
                 return false;
             }
-            if (!args[2].Matches<Coord>(out var l1))
+            if (!args[3].Matches<Coord>(out var l1))
             {
-                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[2].Explain());
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[3].Explain());
                 return false;
             }
-            if (!args[1].Matches<PlacePrefabArgs>(out var pfbArgs))
+            if (!args[2].Matches<PlacePrefabArgs>(out var pfbArgs))
             {
-                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(PlacePrefabArgs), args[1].Explain());
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(PlacePrefabArgs), args[2].Explain());
                 return false;
             }
-            if (!args[0].Matches<string>(out var prefabName))
+            var desiredSize = Maybe<Coord>.None;
+            if (args[1].Matches<Coord>(out var desiredSize_))
+                desiredSize = desiredSize_;
+            else if (args[1] is not Variable)
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Coord), args[1].Explain());
+                return false;
+            }
+            var desiredName = Maybe<string>.None;
+            if (args[0].Matches<string>(out var desiredName_)
+                && desiredName_ != null)
+                desiredName = desiredName_;
+            else if (args[0] is not Variable)
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(String), args[0].Explain());
                 return false;
             }
-            var prefabRules = GetPrefabs(vm, prefabName)
-                .OrderBy(p => p.Layer)
+            var prefabGroups = GetPrefabs(vm, desiredName, desiredSize)
+                .Where(x => pfbArgs.Tags == null || pfbArgs.Tags.Intersect(x.Tags).Any())
+                .OrderBy(x => x.Layer)
+                .GroupBy(x => x.Name);
+            var prefabRules = Rng.Random.Choose(prefabGroups.ToList())
                 .GroupBy(x => x.Group);
             foreach (var group in prefabRules)
             {

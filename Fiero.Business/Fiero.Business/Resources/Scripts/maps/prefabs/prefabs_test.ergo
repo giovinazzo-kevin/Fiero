@@ -1,7 +1,7 @@
 :- module(prefabs_test, []).
 :- use_module(random).
 
-prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
+prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 0, group: base } #-> ([
 	R,R,R,R,R,
 	R,R,R,R,R,
 	R,R,O,R,R,
@@ -11,7 +11,7 @@ prefab { name: 'spawn', size: p(5, 5), layer: 0, group: base } #-> ([
 	R = [draw_point(room)],
 	O = [draw_point(room), place_feature(spawn_point)].
 	
-prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
+prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout } #-> ([
 	S,W,D,W,S,
 	W,_,_,_,W,
 	D,_,_,_,D,
@@ -31,7 +31,7 @@ prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
 		S = []
 	)).
 	
-prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
+prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout } #-> ([
 	W,W,D,W,W,
 	W,S,_,S,W,
 	D,_,_,_,D,
@@ -41,3 +41,39 @@ prefab { name: 'spawn', size: p(5, 5), layer: 10, group: layout } #-> ([
 	W = [draw_point(wall)],
 	choose(S = [place_feature(statue)],()),
 	choose(D = [place_feature(door)],()).
+	
+prefab { name: 'room_1x1', size: p(5, 5), tags: {generic}, layer: 0, group: base } #-> ([
+	W,W,W,W,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,W,W,W,W
+]) :- 
+	W = [draw_point(wall)],
+	R = [draw_point(room)].
+	
+	
+prefab { name: 'room_2x1', size: p(10, 5), tags: {generic}, layer: 0, group: based } #-> ([
+	W,W,W,W,W,W,W,W,W,W,
+	W,R,R,R,R,R,R,R,R,W,
+	W,R,R,R,R,R,R,R,R,W,
+	W,R,R,R,R,R,R,R,R,W,
+	W,W,W,W,W,W,W,W,W,W
+]) :- 
+	W = [draw_point(wall)],
+	R = [draw_point(room)].
+	
+prefab { name: '2x2', size: p(10, 10), tags: {generic}, layer: 0, group: based } #-> ([
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,P,_,_,_,_,P,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	Q,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_
+]) :- 
+	P = [place_prefab(_, p(5,5),  _{tags: {generic}, center_x: true, center_y: true })],
+	Q = [place_prefab(_, p(10,5), _{tags: {generic} })].

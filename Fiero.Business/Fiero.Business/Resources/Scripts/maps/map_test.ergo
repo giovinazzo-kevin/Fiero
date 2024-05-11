@@ -11,11 +11,10 @@ step{ size: p(W, H) } #-> [
 ].
 
 step{ size: p(W, H) } #-> [
-	place_prefab(spawn, _{center_y: true, center_x: true}, p(:=(W/2), :=(H/2)))
+	place_prefab(_, _, _{ tags: {spawn}, center_y: true, center_x: true}, p(:=(W/2), :=(H/2)))
 ].
 
-step{ size: p(W, H) } #-> [
-	place_prefab(spawn, _{}, p(I, 0)),
-	place_prefab(spawn, _{}, p(I, :=(H-4)))
-] :- 
-	range(0 <= I < W, 5).
+step{ } #-> [
+	place_prefab('room_2x1', _, _{ rotate: 90 }, p(3, 3)),
+	place_prefab('room_2x1', _, _{ }, p(15, 17))
+].

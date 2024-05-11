@@ -4,6 +4,7 @@
     {
         SpawnPoint,
         Item,
-        Enemy
+        Npc,
+        Feature
     }
 }

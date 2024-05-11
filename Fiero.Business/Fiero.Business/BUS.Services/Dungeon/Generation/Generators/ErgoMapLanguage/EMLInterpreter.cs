@@ -89,9 +89,6 @@ namespace Fiero.Business
                 if (ctx.TryGetTile(p, out var t))
                     stuffHere.Add(new Complex(new(EML_DrawPoint_Name), TermMarshall.ToTerm(t.Name)));
                 stuffHere.AddRange(ctx.GetObjectsAt(p)
-                    .Where(x => x.IsFeature)
-                    .Select(x => (ITerm)new Complex(new(EML_PlaceFeature_Name), new Atom(x.Name.ToErgoCase()))));
-                stuffHere.AddRange(ctx.GetObjectsAt(p)
                     .Where(x => x.Build == null && x.Name == CTX_MapMarker_Name)
                     .Select(x => (ITerm)new Complex(new(EML_PlaceMarker_Name), (Dict)x.Data)));
                 if (stuffHere.Count > 0)
@@ -254,48 +251,6 @@ namespace Fiero.Business
         /// </summary>
         private static EML EML_FillRect(ImmutableArray<ITerm> args)
             => EML_DrawOrFillRect(args, fill: true);
-        public const string EML_PlaceFeature_Name = "place_feature";
-        /// <summary>
-        /// Places feature with Name arg0 at Coord arg1.
-        /// </summary>
-        private static EML EML_PlaceFeature(ImmutableArray<ITerm> args) => (vm, ctx) =>
-        {
-            if (args.Length != 2)
-            {
-                vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 2, args.Length);
-                return false;
-            }
-            if (!args[1].Matches<Coord>(out var l1))
-            {
-                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
-                return false;
-            }
-            var featureArgs = new Dict(WellKnown.Literals.Discard);
-            if (!args[0].Matches<FeatureName>(out var t))
-            {
-                if (args[0] is not Dict dict || !dict.Functor.TryGetA(out var df)
-                    || !df.Matches(out t))
-                {
-                    vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(FeatureName), args[0].Explain());
-                    return false;
-                }
-                featureArgs = dict;
-            }
-            return ctx.TryAddFeature(t.ToString(), l1, e => t switch
-            {
-                FeatureName.Door => e.Feature_Door(),
-                FeatureName.Chest => e.Feature_Chest(),
-                FeatureName.Trap => e.Feature_Trap(),
-                FeatureName.Shrine => e.Feature_Shrine(),
-                FeatureName.Statue => e.Feature_Statue(),
-                FeatureName.Downstairs
-                    => e.Feature_Downstairs(new(ctx.Id, new(ctx.Id.Branch, ctx.Id.Depth + 1))),
-                FeatureName.Upstairs
-                    => e.Feature_Upstairs(new(new(ctx.Id.Branch, ctx.Id.Depth - 1), ctx.Id)),
-                FeatureName.DoorSecret => e.Feature_SecretDoor(ctx.Theme.WallTile(Coord.Zero).Color ?? ColorName.Gray),
-                _ => throw new NotSupportedException()
-            });
-        };
         public const string EML_PlaceMarker_Name = "place_marker";
         public const string CTX_MapMarker_Name = "MapMarker";
         /// <summary>
@@ -544,7 +499,6 @@ namespace Fiero.Business
                 EML_DrawPoint_Name => EML_DrawPoint(args),
                 EML_DrawRect_Name => EML_DrawRect(args),
                 EML_FillRect_Name => EML_FillRect(args),
-                EML_PlaceFeature_Name => EML_PlaceFeature(args),
                 EML_PlacePrefab_Name => EML_PlacePrefab(args),
                 EML_PlaceMarker_Name => EML_PlaceMarker(args),
                 var unknown => EML_Unknown($"{unknown}/{args.Length}"),

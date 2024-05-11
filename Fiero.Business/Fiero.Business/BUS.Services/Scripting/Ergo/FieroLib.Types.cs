@@ -37,17 +37,17 @@ public partial class FieroLib
 [TransientDependency]
 public partial class FieroLib(IServiceFactory services) : Library
 {
-    public readonly record struct MapDef(Atom Name, Coord Size);
+    public readonly record struct MapDef(Atom Name, Map.MapInfo Info);
 
     public override Atom Module => Modules.Fiero;
 
     public readonly Dictionary<Atom, MapDef> Maps = new();
 
-    public bool DeclareMap(Atom name, Coord size)
+    public bool DeclareMap(Atom name, Map.MapInfo info)
     {
         if (Maps.ContainsKey(name))
             return false;
-        Maps[name] = new(name, size);
+        Maps[name] = new(name, info);
         return true;
     }
 

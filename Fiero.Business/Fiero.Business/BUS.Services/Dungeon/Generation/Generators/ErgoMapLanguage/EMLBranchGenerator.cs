@@ -1,6 +1,7 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
+using static Fiero.Business.FieroLib;
 
 namespace Fiero.Business
 {
@@ -8,7 +9,7 @@ namespace Fiero.Business
     public class EMLBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
     {
         [Term(Marshalling = TermMarshalling.Named, Functor = "entity")]
-        public readonly record struct GetEntityArgs(string Type);
+        public readonly record struct GetEntityArgs(string Type, bool RandomType);
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public DungeonTheme Theme { get; set; } = DungeonTheme.Default;
@@ -18,29 +19,45 @@ namespace Fiero.Business
             var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(FieroLib.Modules.Fiero);
             var map = fieroLib.Maps[script.VM.KB.Scope.Entry];
             return builder
-                .WithStep(ctx => ctx.FillBox(Coord.Zero, map.Size, Theme.RoomTile))
+                .WithStep(ctx => ctx.FillBox(Coord.Zero, map.Info.Size, Theme.RoomTile))
                 .WithStep(ctx =>
                 {
                     ctx.Theme = Theme;
-                    var eml = EMLInterpreter.GenerateMap(script.VM, new(id, Coord.Zero, map.Size - Coord.PositiveOne));
+                    var eml = EMLInterpreter.GenerateMap(script.VM, new(id, Coord.Zero, map.Info.Size - Coord.PositiveOne));
                     if (!eml(script.VM, ctx))
                         return;
                 })
-                .WithStep(ProcessMarkers)
-                .Build(id, map.Size);
+                .WithStep(ctx => ProcessMarkers(map, ctx))
+                .Build(id, map.Info.Size);
         }
 
-        protected virtual IEntityBuilder<PhysicalEntity> GetEntity(GetEntityArgs args, GameEntityBuilders e)
+        protected virtual string GetRandomEntityKey(MapDef map, GetEntityArgs args, string type)
+        {
+            switch (type)
+            {
+                case "monster" when map.Info.Pools.Monster?.Length > 0:
+                    return Rng.Random.Choose(map.Info.Pools.Monster);
+                case "item" when map.Info.Pools.Item?.Length > 0:
+                    return Rng.Random.Choose(map.Info.Pools.Item);
+            }
+            return type;
+        }
+
+        protected virtual IEntityBuilder<PhysicalEntity> GetEntity(MapDef map, GetEntityArgs args, GameEntityBuilders e)
         {
             var key = args.Type.ToString().ToErgoCase();
+            if (args.RandomType)
+            {
+                key = GetRandomEntityKey(map, args, key);
+            }
             if (Spawn.BuilderMethods.TryGetValue(key, out var builder))
             {
                 return (IEntityBuilder<PhysicalEntity>)builder.Invoke(e, []);
             }
-            return null;
+            throw new NotSupportedException();
         }
 
-        protected virtual void ProcessMarkers(FloorGenerationContext ctx)
+        protected virtual void ProcessMarkers(MapDef map, FloorGenerationContext ctx)
         {
             // Use then remove temporary features used as markers by EML
             var markers = ctx.GetObjects()
@@ -58,7 +75,7 @@ namespace Fiero.Business
                         ctx.AddSpawnPoint(def.Position);
                         break;
                     case MapMarkerName.Entity when dict.Matches<GetEntityArgs>(out var args):
-                        ctx.AddObject(nameof(MapMarkerName.Entity), def.Position, e => GetEntity(args, e));
+                        ctx.AddObject(nameof(MapMarkerName.Entity), def.Position, e => GetEntity(map, args, e));
                         break;
                 }
             }

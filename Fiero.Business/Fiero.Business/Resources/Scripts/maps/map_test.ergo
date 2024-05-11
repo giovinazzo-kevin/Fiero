@@ -3,7 +3,22 @@
 :- use_module(random).
 :- use_module(map).
 :- use_module(prefabs_test).
-:- map(49, 49).
+:- map(_{
+	size: p(49, 49),
+	pools: _{
+		monster: [
+			npc_rat, 
+			npc_rat_knight
+		],
+		item: [
+			potion_of_healing, 
+			potion_of_confusion, 
+			weapon_sword, 
+			weapon_spear, 
+			weapon_hammer
+		]
+	}
+}).
 
 step{ size: p(W, H) } #-> [
 	fill_rect(room, p(W, H), p(0, 0)),

@@ -2,13 +2,14 @@
 :- module(map, [get_prefab/3, generate/2]).
 :- op(1000, xfy, ['#->']).
 
-get_prefab(N, S, prefab { name: N, size: S, layer: L, group: G, offset: O, weight: W, tags: T, canvas: C }) :-
-	prefab { name: N, size: S, layer: L_, group: G_, offset: O_, weight: W_, tags: T_ } #-> Cs,
+get_prefab(N, S, prefab { name: N, size: S, layer: L, group: G, offset: O, grid_size: Z, weight: W, tags: T, canvas: C }) :-
+	prefab { name: N, size: S, layer: L_, group: G_, offset: O_,  grid_size: Z_, weight: W_, tags: T_ } #-> Cs,
 	(ground(O_) -> O = O_ ; O = p(0, 0)),
 	(ground(L_) -> L = L_ ; L = 255),
 	(ground(W_) -> W = W_ ; W = 1),
 	(ground(G_) -> G = G_ ; G = ungrouped),
 	(ground(T_) -> T = T_ ; T = {}),
+	(ground(Z_) -> Z = Z_ ; Z = p(1,1)),
 	comma_list(Cs, C).
 
 generate(Step, EML) :-

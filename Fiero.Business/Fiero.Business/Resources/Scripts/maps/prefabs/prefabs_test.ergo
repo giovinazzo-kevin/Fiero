@@ -1,6 +1,8 @@
 :- module(prefabs_test, []).
 :- use_module(random).
 
+% SPAWN ---------------------------------------------------------------------------------------
+
 prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 0, group: base } #-> ([
 	R,R,R,R,R,
 	R,R,R,R,R,
@@ -41,89 +43,12 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout }
 	W = [draw_point(wall)],
 	choose(S = [place_marker(entity{type: feature_statue})],()),
 	choose(D = [place_marker(entity{type: feature_door})],()).
-	
-prefab { name: 'room_1x1', size: p(5, 5), tags: {generic, base}, layer: 0, group: base } #-> ([
-	W,W,W,W,W,
-	W,R,R,R,W,
-	W,R,R,R,W,
-	W,R,R,R,W,
-	W,W,W,W,W
-]) :- 
-	W = [draw_point(wall)],
-	R = [draw_point(room)].
-	
-	
-prefab { name: 'room_2x1', size: p(10, 5), tags: {generic, base}, layer: 0, group: base } #-> ([
-	W,W,W,W,W,W,W,W,W,W,
-	W,R,R,R,R,R,R,R,R,W,
-	W,R,R,R,R,R,R,R,R,W,
-	W,R,R,R,R,R,R,R,R,W,
-	W,W,W,W,W,W,W,W,W,W
-]) :- 
-	W = [draw_point(wall)],
-	R = [draw_point(room)].
-	
-prefab { name: '2x2', size: p(10, 10), tags: {generic, base}, layer: 0, group: base } #-> ([
-	P,_,_,_,_,P,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	Q,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_
-]) :- 
-	P = [place_prefab('room_1x1', _, _{tags: {base}})],
-	Q = [place_prefab('room_2x1', _, _{tags: {base}})].
 
-prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
-	_,_,_,_,_,_,_,D,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,R,R,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,R,R,R,_,_,R,R,R,_,
-	_,_,D,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,M,_,_,_,_,M,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_
-]) :- 
-	false,
-	D = [draw_point(room), place_marker(entity{type: feature_door})],
-	R = [draw_point(room)],
-	M = [place_marker(entity{type: item, random_type: true})].
-prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,R,R,_,_,_,_,
-	_,_,_,_,R,R,_,_,_,_,
-	_,_,_,_,R,R,_,_,_,_,
-	_,R,R,R,R,R,R,R,R,_,
-	_,_,D,_,R,R,R,R,R,_,
-	_,_,_,W,G,G,_,_,_,_,
-	D,_,_,W,G,G,_,_,_,_,
-	_,_,_,W,G,G,_,_,M,_,
-	_,_,_,_,_,_,_,_,_,_
-]) :- 
-	false,
-	D = [draw_point(room), place_marker(entity{type: feature_door})],
-	R = [draw_point(room)],
-	W = [draw_point(wall)],
-	M = [place_marker(entity{type: item, random_type: true})],
-	G = [place_marker(entity{type: item, random_type: true})].
+% ROOMS ---------------------------------------------------------------------------------------
 	
-prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
-	_,_,_,_,_,_,_,D,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,_,_,D,D,_,_,_,_,
-	_,_,_,_,_,_,_,_,_,_,
-	_,_,D,_,_,_,_,_,_,_,
-	_,_,D,_,_,_,_,_,_,_,
-	_,M,_,M,_,M,_,M,_,_,
-	_,_,M,_,M,_,M,_,M,_,
-	_,M,_,M,_,M,_,M,_,_,
-	_,_,_,_,_,_,_,_,_,_
+prefab { name: 'dev_area', size: p(15, 15), grid_size: p(5,5), tags: {dev}, group: base } #-> ([
+	F,F,F,
+	F,F,F,
+	F,F,F
 ]) :- 
-	D = [draw_point(room), place_marker(entity{type: feature_door})],
-	M = [place_marker(entity{type: npc_rat})].
+	F = [fill_rect(wall, p(5,5))].

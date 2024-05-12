@@ -21,7 +21,7 @@ namespace Fiero.Business
         );
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
-            string Name, Coord Size, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas, string[] Tags
+            string Name, Coord Size, Coord GridSize, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas, string[] Tags
         );
 
         public delegate bool EML(ErgoVM vm, FloorGenerationContext ctx);
@@ -70,7 +70,7 @@ namespace Fiero.Business
                 var item = sol.Substitutions[var_prefab]
                     .Substitute(sol.Substitutions);
                 if (!item.Matches(out Prefab prefab)
-                || prefab.Canvas.Any(layer => prefab.Size.X * prefab.Size.Y != layer.Length))
+                || prefab.Canvas.Any(layer => prefab.Size.Area() / prefab.GridSize.Area() != layer.Length))
                 {
                     vm.Throw(ErgoVM.ErrorType.Custom, "Invalid prefab.");
                     yield break;

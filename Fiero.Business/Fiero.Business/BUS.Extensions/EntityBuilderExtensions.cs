@@ -234,7 +234,7 @@ namespace Fiero.Business
         public static IEntityBuilder<T> WithEnemyAi<T>(this IEntityBuilder<T> builder)
             where T : Actor => builder.AddOrTweak<ActionComponent>((s, c) =>
             {
-                c.ActionProvider = s.GetInstance<IdleActionProvider>();
+                c.ActionProvider = s.GetInstance<AiActionProvider>();
             })
                 .AddOrTweak<AiComponent>();
         public static IEntityBuilder<T> WithAutoPlayerAi<T>(this IEntityBuilder<T> builder)

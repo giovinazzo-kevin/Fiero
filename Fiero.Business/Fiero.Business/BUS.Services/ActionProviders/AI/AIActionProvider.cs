@@ -1,10 +1,9 @@
 ﻿namespace Fiero.Business
 {
-
     [TransientDependency]
     public partial class AiActionProvider : ActionProvider
     {
-        protected Chance RepathChance { get; set; } = new(1, 2500);
+        protected Chance RepathChance { get; set; } = new(1, 25);
 
         private StateName _state = StateName.Wandering;
 
@@ -185,6 +184,10 @@
 
         public override IAction GetIntent(Actor a)
         {
+            // The further you are from the player, the higher your chance of idling
+            var playerPos = Systems.Get<RenderSystem>().Viewport.Following.V?.Position() ?? Coord.Zero;
+            if (!Chance.Check(9, (int)a.SquaredDistanceFrom(playerPos)))
+                return new WaitAction();
             base.GetIntent(a);
             return (_state = UpdateState(a, _state)) switch
             {

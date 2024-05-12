@@ -1016,6 +1016,13 @@ namespace Fiero.Business.Scenes
                 }
                 return true;
             });
+            // ActionSystem.ActorUsedMagicMapping:
+            // - Refresh the minimap
+            yield return actionSystem.ActorUsedMagicMapping.SubscribeResponse(e =>
+            {
+                Systems.Get<RenderSystem>().Window.MiniMap.Refresh();
+                return true;
+            });
             // ActionSystem.FeatureInteractedWith:
             // - Open/close doors
             // - Handle shrine interactions

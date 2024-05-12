@@ -15,6 +15,7 @@ namespace Fiero.Business
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;
         private bool _dirty = true;
+        private bool _refresh = false;
 
         public MiniMap(
             GameUI ui,
@@ -68,6 +69,11 @@ namespace Fiero.Business
             _dirty = true;
             Layout?.Invalidate();
         }
+        public void Refresh()
+        {
+            _refresh = true;
+            SetDirty();
+        }
         protected override void DefaultSize() { }
         private HashSet<Coord> lastFov = [];
         public override void Draw(RenderTarget target, RenderStates states)
@@ -97,7 +103,7 @@ namespace Fiero.Business
                 foreach (var (coord, cell) in floor.Cells)
                 {
                     var seen = visibleCoords.Contains(coord);
-                    if (!seen && !lastFov.Contains(coord))
+                    if (!seen && (!lastFov.Contains(coord) && !_refresh))
                         continue;
                     var known = knownCoords.Contains(coord);
                     if (!known)
@@ -152,6 +158,7 @@ namespace Fiero.Business
                 lastFov.Clear();
                 lastFov.UnionWith(visibleCoords);
                 _dirty = false;
+                _refresh = false;
                 return true;
             }
         }

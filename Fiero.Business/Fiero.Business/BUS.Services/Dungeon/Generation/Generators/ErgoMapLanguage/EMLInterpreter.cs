@@ -224,7 +224,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[2].Explain());
                 return false;
             }
-            if (!args[1].Matches<Coord>(out var l2))
+            if (!args[1].Matches<Coord>(out var size))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
@@ -235,9 +235,9 @@ namespace Fiero.Business
                 return false;
             }
             if (fill)
-                ctx.FillBox(l1, l2 - l1 + Coord.PositiveOne, c => new(t, c));
+                ctx.FillBox(l1, size, c => new(t, c));
             else
-                ctx.DrawBox(l1, l2 - l1 + Coord.PositiveOne, c => new(t, c));
+                ctx.DrawBox(l1, size, c => new(t, c));
             return true;
         };
         /// <summary>
@@ -383,6 +383,7 @@ namespace Fiero.Business
                 {
                     var pos = Coord.Zero;
                     var freshCtx = ctx.CreateSubContext(prefab.Size);
+                    var mod = prefab.Size.X / prefab.GridSize.X;
                     for (int i = 0; i < layer.Length; i++)
                     {
                         if (layer[i] is not null)
@@ -395,10 +396,10 @@ namespace Fiero.Business
                                     return default;
                             }
                         }
-                        if (i.Mod(prefab.Size.X) == prefab.Size.X - 1)
-                            pos = new(0, pos.Y + 1);
+                        if (i.Mod(mod) == mod - 1)
+                            pos = new(0, pos.Y + prefab.GridSize.Y);
                         else
-                            pos += Coord.PositiveX;
+                            pos += Coord.PositiveX * prefab.GridSize;
                     }
                     return ParseContext(freshCtx);
                 }

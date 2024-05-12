@@ -4,7 +4,7 @@
 :- use_module(map).
 :- use_module(prefabs_test).
 :- map(_{
-	size: p(99, 99),
+	size: p(49, 49),
 	pools: _{
 		monster: [
 			npc_rat, 

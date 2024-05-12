@@ -14,15 +14,6 @@ merchant {
   dialogue_trigger(player_in_sight{choices: ['Merchant_Hello']}, JustMet),
   dialogue_trigger(talked_to_friendly{choices: ['Merchant_Hello'], repeatable: true}, TalkFriend).
 
-rat {
-  dialogue: _ {
-    triggers: [ TalkFriend, TalkFoe ]
-  }
-} :- 
-  % TODO: Figure out a way to handle polymorphism at the TermMarshall level
-  dialogue_trigger(talked_to_friendly{choices: ['Rat_TalkFriend'], repeatable: true}, TalkFriend),
-  dialogue_trigger(talked_to_hostile{choices: ['Rat_TalkFoe'], repeatable: true}, TalkFoe).
-
 great_king_rat {
   dialogue: _ {
     triggers: [ JustMet ]

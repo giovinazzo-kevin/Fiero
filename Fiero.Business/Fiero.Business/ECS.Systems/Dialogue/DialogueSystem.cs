@@ -30,6 +30,7 @@ namespace Fiero.Business
 
         public void CheckTriggers()
         {
+            return;
             foreach (var comp in Entities.GetComponents<DialogueComponent>())
             {
                 var speaker = default(PhysicalEntity);

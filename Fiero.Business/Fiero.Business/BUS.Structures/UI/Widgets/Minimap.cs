@@ -52,8 +52,15 @@ namespace Fiero.Business
             var floorId = Following.V.FloorId();
             if (!FloorSystem.TryGetFloor(floorId, out var floor))
                 return;
-            _renderTexture = new((uint)(floor.Size.X + floor.Size.X % 2), (uint)(floor.Size.Y + floor.Size.Y % 2)) { Smooth = false };
-            _renderSprite = new(_renderTexture.Texture);
+            var renderSize = new Coord(floor.Size.X + floor.Size.X % 2, floor.Size.Y + floor.Size.Y % 2);
+            if (_renderTexture is null || _renderTexture.Size.ToCoord() != renderSize)
+            {
+                _renderTexture?.Dispose();
+                _renderSprite?.Dispose();
+                _renderTexture = new((uint)(floor.Size.X + floor.Size.X % 2), (uint)(floor.Size.Y + floor.Size.Y % 2)) { Smooth = false };
+                _renderTexture.Clear(Color.Transparent);
+                _renderSprite = new(_renderTexture.Texture);
+            }
         }
 
         public void SetDirty()
@@ -62,7 +69,7 @@ namespace Fiero.Business
             Layout?.Invalidate();
         }
         protected override void DefaultSize() { }
-
+        private HashSet<Coord> lastFov = [];
         public override void Draw(RenderTarget target, RenderStates states)
         {
             base.Draw(target, states);
@@ -80,18 +87,19 @@ namespace Fiero.Business
                 var floorId = Following.V.FloorId();
                 if (!FloorSystem.TryGetFloor(floorId, out var floor))
                     return false;
-                _renderTexture.Clear(Color.Transparent);
+                if (!Following.V.Fov.VisibleTiles.TryGetValue(floorId, out var visibleCoords))
+                    return false;
+                if (!Following.V.Fov.KnownTiles.TryGetValue(floorId, out var knownCoords))
+                    return false;
                 using var whitePixel = new RenderTexture(1, 1);
                 whitePixel.Clear(Color.White);
                 whitePixel.Display();
-                foreach (var coord in floor.Size.ToRect().Enumerate())
+                foreach (var (coord, cell) in floor.Cells)
                 {
-                    if (!floor.Cells.TryGetValue(coord, out var cell))
+                    var seen = visibleCoords.Contains(coord);
+                    if (!seen && !lastFov.Contains(coord))
                         continue;
-
-                    var allseeing = Following.V.Fov.Sight.HasFlag(VisibilityName.TrueSight);
-                    var known = allseeing || Following.V.Fov.KnownTiles.TryGetValue(floorId, out var coords) && coords.Contains(coord);
-                    var seen = Following.V.Fov.VisibleTiles.TryGetValue(floorId, out coords) && coords.Contains(coord);
+                    var known = knownCoords.Contains(coord);
                     if (!known)
                         continue;
                     if (
@@ -101,12 +109,12 @@ namespace Fiero.Business
                         continue;
                     }
 
-                    foreach (var drawable in cell.GetDrawables(Following.V.Fov.Sight, seen))
+                    foreach (var drawable in cell.GetDrawables(Following.V.Fov.Sight, seen)
+                        .OrderByDescending(x => x.Render.Layer))
                     {
                         if (drawable.Render.Hidden)
                             continue;
-                        using var sprite = new Sprite(whitePixel.Texture);
-                        sprite.Color = Colors.Get(drawable switch
+                        var col = drawable switch
                         {
                             Feature x when x.FeatureProperties.Name == FeatureName.Door && x.Physics.BlocksLight => ColorName.Yellow,
                             Tile x when x.TileProperties.Name == TileName.Corridor && seen => ColorName.LightMagenta,
@@ -123,12 +131,17 @@ namespace Fiero.Business
                             Actor x when FactionSystem.GetRelations(x, Following).Left.IsHostile() => ColorName.LightRed,
                             Actor x => ColorName.LightGray,
                             PhysicalEntity x when x.Physics.BlocksMovement => ColorName.Gray,
-                            _ => ColorName.Black
-                        });
+                            _ => ColorName.Transparent
+                        };
+                        if (col == ColorName.Transparent)
+                            continue;
+                        using var sprite = new Sprite(whitePixel.Texture);
+                        sprite.Color = Colors.Get(col);
                         sprite.Position = coord + Coord.PositiveOne;
                         var spriteSize = sprite.GetLocalBounds().Size();
                         sprite.Origin = new Vec(0.5f, 0.5f) * spriteSize;
                         _renderTexture.Draw(sprite);
+                        break;
                     }
                 }
                 _renderTexture.Display();
@@ -136,6 +149,8 @@ namespace Fiero.Business
                 _renderSprite.Scale = Layout.Size.V / floor.Size; // int division to preserve AR
                 var delta = _renderSprite.GetLocalBounds().Size() * _renderSprite.Scale.ToVec() / 2 - Layout.Size.V / 2;
                 _renderSprite.Position -= delta;
+                lastFov.Clear();
+                lastFov.UnionWith(visibleCoords);
                 _dirty = false;
                 return true;
             }

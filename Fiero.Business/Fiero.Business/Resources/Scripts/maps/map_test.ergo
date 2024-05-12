@@ -4,7 +4,7 @@
 :- use_module(map).
 :- use_module(prefabs_test).
 :- map(_{
-	size: p(49, 49),
+	size: p(99, 99),
 	pools: _{
 		monster: [
 			npc_rat, 
@@ -30,8 +30,8 @@ step{ size: p(W, H) } #-> [
 ].
 
 step{ } #-> [
-	place_prefab('2x2', _, _{ randomize: true }, p(5, 5)),
-	place_prefab('2x2', _, _{ randomize: true }, p(25, 5)),
-	place_prefab('2x2', _, _{ randomize: true }, p(5, 35)),
-	place_prefab('2x2', _, _{ randomize: true }, p(35, 35))
+	place_prefab('2x2', _, _{ randomize: true }, p(3, 3)),
+	place_prefab('2x2', _, _{ randomize: true }, p(13, 3)),
+	place_prefab('2x2', _, _{ randomize: true }, p(3, 15)),
+	place_prefab('2x2', _, _{ randomize: true }, p(13, 15))
 ].

@@ -21,6 +21,8 @@ namespace Fiero.Business
         public readonly SystemRequest<ActionSystem, TurnEvent, EventResult> TurnEnded;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnStarted;
         public readonly SystemRequest<ActionSystem, ActorTurnEvent, EventResult> ActorTurnEnded;
+        public readonly SystemRequest<ActionSystem, PlayerTurnEvent, EventResult> PlayerTurnStarted;
+        public readonly SystemRequest<ActionSystem, PlayerTurnEvent, EventResult> PlayerTurnEnded;
         public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorMoved;
         public readonly SystemRequest<ActionSystem, ActorMovedEvent, EventResult> ActorTeleporting;
         public readonly SystemRequest<ActionSystem, ActorUsedMagicMappingEvent, EventResult> ActorUsedMagicMapping;
@@ -87,6 +89,8 @@ namespace Fiero.Business
             TurnEnded = new(this, nameof(TurnEnded));
             ActorTurnStarted = new(this, nameof(ActorTurnStarted));
             ActorTurnEnded = new(this, nameof(ActorTurnEnded));
+            PlayerTurnStarted = new(this, nameof(PlayerTurnStarted));
+            PlayerTurnEnded = new(this, nameof(PlayerTurnEnded));
             ActorMoved = new(this, nameof(ActorMoved));
             ActorTeleporting = new(this, nameof(ActorTeleporting));
             ActorUsedMagicMapping = new(this, nameof(ActorUsedMagicMapping));
@@ -467,6 +471,8 @@ namespace Fiero.Business
                 else if (next.LastActedTime < next.Time)
                 {
                     _ = ActorTurnStarted.Raise(new(next.Actor, CurrentTurn, next.Time));
+                    if (next.Actor.IsPlayer())
+                        _ = PlayerTurnStarted.Raise(new(next.Actor.Id, CurrentTurn, next.Time));
                 }
             }
 
@@ -479,6 +485,8 @@ namespace Fiero.Business
                 else
                 {
                     _ = ActorTurnEnded.Raise(new(next.Actor, CurrentTurn, next.Time));
+                    if (next.Actor.IsPlayer())
+                        _ = PlayerTurnEnded.Raise(new(next.Actor.Id, CurrentTurn, next.Time));
                 }
             }
         }
@@ -491,14 +499,16 @@ namespace Fiero.Business
         {
             do
             {
-                // If the player dies and is removed from the entities, it will pass by RemoveFlagged.
-                // This way we can avoid constantly looking for the player id in a collection.
-                foreach (var e in _entities.RemoveFlaggedItems(true))
+                if (ElapseTick() is { })
                 {
-                    if (e == playerId)
-                        return;
+                    // If the player dies and is removed from the entities, it will pass by RemoveFlagged.
+                    // This way we can avoid constantly looking for the player id in a collection.
+                    foreach (var e in _entities.RemoveFlaggedItems(true))
+                    {
+                        if (e == playerId)
+                            return;
+                    }
                 }
-                ElapseTick();
             }
             while (CurrentActorId != playerId);
         }

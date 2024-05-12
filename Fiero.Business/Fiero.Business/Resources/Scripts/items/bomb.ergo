@@ -5,7 +5,7 @@
 :- use_module(anim).
 :- use_module(sound).
 :- dynamic(bomb_data/3).
-:- subscribe(action, [actor_turn_started]).
+:- subscribe(action, [player_turn_started]).
 
 effect:began(_{effect_id: Id, owner: O, arguments: _{fuse: F, radius: R }}) :-
 	O as physical_entity is PO,
@@ -30,7 +30,7 @@ effect:ended(_{effect_id: Id}) :-
 	effect(effect_def{name: explosion, arguments: R}, D, _), % this kills the bomb
 	retractall(bomb_data(Id, _, _)).
 
-action:actor_turn_started(_{actor: _{ props: _{ type: player }}}) :-
+action:player_turn_started(_) :-
 	forall(bomb_data(_, id, Id), tick(Id)).
 
 tick(Id) :-

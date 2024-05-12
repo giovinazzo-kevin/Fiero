@@ -90,9 +90,10 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
+	false,
 	D = [draw_point(room), place_marker(entity{type: feature_door})],
 	R = [draw_point(room)],
-	M = [place_marker(entity{type: npc_rat})].
+	M = [place_marker(entity{type: item, random_type: true})].
 prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
 	_,_,_,_,_,_,_,_,_,_,
 	_,_,_,_,R,R,_,_,_,_,
@@ -105,8 +106,24 @@ prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: p
 	_,_,_,W,G,G,_,_,M,_,
 	_,_,_,_,_,_,_,_,_,_
 ]) :- 
+	false,
 	D = [draw_point(room), place_marker(entity{type: feature_door})],
 	R = [draw_point(room)],
 	W = [draw_point(wall)],
-	M = [place_marker(entity{type: monster, random_type: true})],
+	M = [place_marker(entity{type: item, random_type: true})],
 	G = [place_marker(entity{type: item, random_type: true})].
+	
+prefab { name: '2x2', size: p(10, 10), tags: {generic, path}, layer: 0, group: path } #-> ([
+	_,_,_,_,_,_,_,D,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,_,_,D,D,_,_,_,_,
+	_,_,_,_,_,_,_,_,_,_,
+	_,_,D,_,_,_,_,_,_,_,
+	_,_,D,_,_,_,_,_,_,_,
+	_,M,_,M,_,M,_,M,_,_,
+	_,_,M,_,M,_,M,_,M,_,
+	_,M,_,M,_,M,_,M,_,_,
+	_,_,_,_,_,_,_,_,_,_
+]) :- 
+	D = [draw_point(room), place_marker(entity{type: feature_door})],
+	M = [place_marker(entity{type: npc_rat})].

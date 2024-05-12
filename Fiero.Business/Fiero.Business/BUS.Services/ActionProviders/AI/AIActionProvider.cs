@@ -4,7 +4,7 @@
     [TransientDependency]
     public partial class AiActionProvider : ActionProvider
     {
-        protected Chance RepathChance { get; set; } = new(1, 1);
+        protected Chance RepathChance { get; set; } = new(1, 2500);
 
         private StateName _state = StateName.Wandering;
 

@@ -186,7 +186,7 @@
         {
             // The further you are from the player, the higher your chance of idling
             var playerPos = Systems.Get<RenderSystem>().Viewport.Following.V?.Position() ?? Coord.Zero;
-            if (!Chance.Check(9, (int)a.SquaredDistanceFrom(playerPos)))
+            if (!Chance.Check(25, (int)a.SquaredDistanceFrom(playerPos)))
                 return new WaitAction();
             base.GetIntent(a);
             return (_state = UpdateState(a, _state)) switch

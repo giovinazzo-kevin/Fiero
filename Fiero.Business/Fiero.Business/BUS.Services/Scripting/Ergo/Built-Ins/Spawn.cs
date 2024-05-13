@@ -33,6 +33,31 @@ public sealed class Spawn : BuiltIn
         Entities = entities;
     }
 
+    public static bool TryGetParams(MethodInfo method, Ergo.Lang.Ast.Dict dict, out object[] newParams)
+    {
+        var oldParams = method.GetParameters();
+        newParams = new object[oldParams.Length];
+        for (int i = 0; i < oldParams.Length; i++)
+        {
+            var p = oldParams[i];
+            if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
+            && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
+            {
+                newParams[i] = val;
+            }
+            else if (p.HasDefaultValue)
+            {
+                newParams[i] = p.DefaultValue;
+            }
+            else
+            {
+                // vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
+                return false;
+            }
+        }
+        return true;
+    }
+
     public override ErgoVM.Op Compile()
     {
         return vm =>
@@ -48,7 +73,7 @@ public sealed class Spawn : BuiltIn
                 var position = player?.Position() ?? default;
                 foreach (var item in list.Contents)
                 {
-                    if (item is not Dict dict)
+                    if (item is not Ergo.Lang.Ast.Dict dict)
                     {
                         vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Dictionary, item);
                         return;
@@ -63,25 +88,10 @@ public sealed class Spawn : BuiltIn
                         vm.Fail();
                         return;
                     }
-                    var oldParams = method.GetParameters();
-                    var newParams = new object[oldParams.Length];
-                    for (int i = 0; i < oldParams.Length; i++)
+                    if (!TryGetParams(method, dict, out var newParams))
                     {
-                        var p = oldParams[i];
-                        if (dict.Dictionary.TryGetValue(new Atom(p.Name.ToErgoCase()), out var value)
-                        && TermMarshall.FromTerm(value, p.ParameterType) is { } val)
-                        {
-                            newParams[i] = val;
-                        }
-                        else if (p.HasDefaultValue)
-                        {
-                            newParams[i] = p.DefaultValue;
-                        }
-                        else
-                        {
-                            vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, p.ParameterType.Name, p);
-                            return;
-                        }
+                        vm.Fail();
+                        return;
                     }
                     var builder = (IEntityBuilder)method.Invoke(Builders, newParams);
                     var entity = builder.Build();

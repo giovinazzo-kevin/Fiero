@@ -39,9 +39,9 @@
             cost += Tile.GetCost(e);
             return cost;
         }
-        public bool BlocksMovement(bool excludeFlat = false)
+        public bool BlocksMovement(bool excludeFlat = false, bool excludeFeatures = false)
         {
-            var anyFeatures = Features.Any(f => f.Physics.BlocksMovement);
+            var anyFeatures = !excludeFeatures && Features.Any(f => f.Physics.BlocksMovement);
             if (!excludeFlat)
                 return anyFeatures || Tile.Physics.BlocksMovement;
             return anyFeatures || Tile.Physics.BlocksMovement && !Tile.Physics.IsFlat;

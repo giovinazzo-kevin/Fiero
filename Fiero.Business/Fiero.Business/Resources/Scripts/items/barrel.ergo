@@ -1,0 +1,27 @@
+:- module(barrel, []).
+:- use_module(effect).
+:- use_module(fiero).
+:- use_module(actor).
+:- use_module(anim).
+:- use_module(sound).
+:- dynamic(barrel_data/3).
+:- subscribe(action, [actor_attacked]).
+
+effect:began(_{effect_id: Id, owner: O, arguments: _{ radius: R }}) :-
+	O as physical_entity is PO,
+	effect(effect_def{name: bestow_trait, arguments: invulnerable}, PO, _),
+	assertz(barrel_data(Id, id, Id)),
+	assertz(barrel_data(Id, owner, PO)),
+	assertz(barrel_data(Id, radius, R)).
+
+effect:ended(_{effect_id: Id}) :-
+	barrel_data(Id, radius, R),
+	barrel_data(Id, owner, O),
+	effect(effect_def{name: remove_trait, arguments: invulnerable}, O, _),
+	effect(effect_def{name: explosion, arguments: R}, O, _), % this kills the bomb
+	retractall(barrel_data(Id, _, _)).
+
+action:actor_attacked(_{victims: List}) :-
+	barrel_data(Id, owner, _{id: OwnerId}),
+	member(_{id: OwnerId}, List),
+	end(Id).

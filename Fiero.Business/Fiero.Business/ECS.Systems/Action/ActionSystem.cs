@@ -316,13 +316,11 @@ namespace Fiero.Business
         private bool TryFindVictim(Coord p, Actor attacker, out Actor victim)
         {
             victim = default;
-            var actorsHere = _floorSystem.GetActorsAt(attacker.FloorId(), p);
-            if (!actorsHere.Any(a => MayTarget(attacker, a)))
-            {
+            var actorsHere = _floorSystem.GetActorsAt(attacker.FloorId(), p)
+                .Where(a => MayTarget(attacker, a));
+            if (!actorsHere.Any())
                 return false;
-            }
-            victim = actorsHere
-                .Single(x => x.ActorProperties.Type != ActorName.None);
+            victim = actorsHere.Single();
             return true;
         }
 

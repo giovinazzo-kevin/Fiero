@@ -285,8 +285,8 @@ namespace Fiero.Business
             {
                 action = throwAction switch
                 {
-                    ThrowItemAtOtherAction { Item: var i, Victim: var v } => new ShootLauncherAtOtherAction(launcher, v),
-                    ThrowItemAtPointAction { Item: var i, Point: var p } => new ShootLauncherAtPointAction(launcher, p),
+                    ThrowItemAtOtherAction { Victim: var v } => new ShootLauncherAtOtherAction(launcher, v),
+                    ThrowItemAtPointAction { Point: var p } => new ShootLauncherAtPointAction(launcher, p),
                     _ => throw new NotSupportedException()
                 };
                 return true;
@@ -299,9 +299,6 @@ namespace Fiero.Business
         {
             var floorId = a.FloorId();
             var len = proj.ProjectileProperties.MaximumRange + 1;
-            var line = Shapes.Line(new(0, 0), new(0, len))
-                .Skip(1)
-                .ToArray();
             var flags = proj.GetEffectFlags();
             var throwShape = new LineTargetingShape(a.Position(), proj.ProjectileProperties.MinimumRange, len);
             var autoTarget = throwShape.TryAutoTarget(
@@ -332,7 +329,13 @@ namespace Fiero.Business
             if (TryTarget(a, throwShape, autoTarget))
             {
                 var points = throwShape.GetPoints().ToArray();
-                if (!proj.ProjectileProperties.Piercing)
+                if (points.Length == 0)
+                {
+                    action = default;
+                    return false;
+                }
+
+                if (!proj.ProjectileProperties.Piercing && proj.ProjectileProperties.Trajectory == TrajectoryName.Line)
                 {
                     foreach (var p in points)
                     {

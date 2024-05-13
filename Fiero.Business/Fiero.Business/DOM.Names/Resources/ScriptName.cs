@@ -13,6 +13,8 @@
         Grapple,
         // Implements a reach effect for spear-like weapons
         Reach,
+        //
+        Barrel,
         // MAPS
         Map_Test,
     }

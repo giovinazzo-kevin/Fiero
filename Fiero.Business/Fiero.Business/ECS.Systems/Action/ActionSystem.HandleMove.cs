@@ -64,7 +64,7 @@
                             if (!t.Actor.Physics.Phasing)
                                 cost += cell.Tile.TileProperties.MovementCost;
                         }
-                        else if (relationship.IsFriendly())
+                        else if (relationship.IsFriendly() && target.Physics.Roots <= 0)
                         {
                             if (!t.Actor.Physics.Phasing)
                                 cost += cell.Tile.TileProperties.MovementCost;

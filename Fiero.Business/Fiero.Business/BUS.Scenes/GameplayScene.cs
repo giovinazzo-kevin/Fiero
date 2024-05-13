@@ -531,6 +531,9 @@ namespace Fiero.Business.Scenes
             // - Show damage numbers
             yield return actionSystem.ActorDamaged.SubscribeResponse(e =>
             {
+                if (!e.Victim.IsAlive())
+                    return true;
+
                 if (e.Source.TryCast<Actor>(out var attacker))
                 {
                     // force AI to recalculate 
@@ -651,6 +654,8 @@ namespace Fiero.Business.Scenes
             // - Grant XP for kill
             yield return actionSystem.ActorKilled.SubscribeResponse(e =>
             {
+                if (!e.Killer.IsAlive() || e.Killer.ActorProperties.Experience == null)
+                    return true;
                 var xpFromKill = e.Victim.ActorProperties.LVL * 10 + 10;
                 var extraXp = xpFromKill;
                 while (extraXp > 0)

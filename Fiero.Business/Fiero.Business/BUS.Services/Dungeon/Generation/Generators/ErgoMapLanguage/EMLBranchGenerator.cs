@@ -9,7 +9,7 @@ namespace Fiero.Business
     public class EMLBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
     {
         [Term(Marshalling = TermMarshalling.Named, Functor = "entity")]
-        public readonly record struct GetEntityArgs(string Type, bool RandomType);
+        public readonly record struct GetEntityArgs(string Type, bool RandomType, ITerm Args);
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public DungeonTheme Theme { get; set; } = DungeonTheme.Default;
@@ -51,6 +51,9 @@ namespace Fiero.Business
             }
             if (Spawn.BuilderMethods.TryGetValue(key, out var builder))
             {
+                var extraArgs = args.Args is Dict d ? d : new Dict(WellKnown.Literals.Discard);
+                if (Spawn.TryGetParams(builder, extraArgs, out var newParams))
+                    return (IEntityBuilder<PhysicalEntity>)builder.Invoke(e, newParams);
                 return (IEntityBuilder<PhysicalEntity>)builder.Invoke(e, []);
             }
             throw new NotSupportedException();

@@ -30,10 +30,18 @@
             .WithFaction(FactionName.None)
             .WithIdleAi()
             .WithName(name ?? sprite)
-            .WithSprite(RenderLayerName.Features, texture, sprite, tint ?? ColorName.White)
+            .WithSprite(RenderLayerName.Actors, texture, sprite, tint ?? ColorName.White)
             .WithFieldOfView(0)
             .WithEffectTracking()
             .WithTraitTracking()
+            ;
+
+        public IEntityBuilder<Actor> Dummy_ExplosiveBarrel()
+            => Dummy(TextureName.Features, "ExplosiveBarrel", "Explosive Barrel", ColorName.White, solid: true)
+            .WithFaction(FactionName.Monsters)
+            .WithIntrinsicEffect(
+                EffectDef.FromScript(Scripts.Get(ScriptName.Barrel), $"_{{radius: {5}}}"))
+            .Tweak<PhysicsComponent>((_, x) => x.Roots = 1)
             ;
 
         //public IEntityBuilder<Script> Script(string scriptPath, string name = null, bool trace = false, bool cache = true)

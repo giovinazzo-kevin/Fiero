@@ -1,18 +1,15 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public sealed class PointTargetingShape : TargetingShape
     {
         public readonly int MaxRange;
+        public int Range { get; set; }
         public Coord Offset { get; private set; }
 
 
         public PointTargetingShape(Coord origin, int maxRange = 0) : base(origin)
         {
-            MaxRange = maxRange;
+            MaxRange = Range = maxRange;
         }
 
         public override IEnumerable<Coord> GetPoints()
@@ -33,16 +30,11 @@ namespace Fiero.Business
         }
 
         public override bool CanRotateWithDirectionKeys() => false;
-
-        public override bool TryRotateCCw()
-        {
-            return false;
-        }
-
-        public override bool TryRotateCw()
-        {
-            return false;
-        }
+        public override bool TryRotateCCw() => false;
+        public override bool TryRotateCw() => false;
+        public override bool CanExpandWithDirectionKeys() => false;
+        public override bool TryContract() => false;
+        public override bool TryExpand() => false;
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {

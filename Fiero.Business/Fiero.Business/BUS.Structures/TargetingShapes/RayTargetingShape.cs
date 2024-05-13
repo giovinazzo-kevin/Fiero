@@ -1,16 +1,12 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
+
     public class RayTargetingShape : TargetingShape
     {
-        public readonly int Length;
+        public int Length { get; protected set; }
 
-        public Coord RayTip { get; private set; }
-        public float Rotation { get; private set; }
+        public Coord RayTip { get; protected set; }
+        public float Rotation { get; protected set; }
 
         public RayTargetingShape(Coord origin, int length) : base(origin)
         {
@@ -28,17 +24,27 @@ namespace Fiero.Business
             return false;
         }
 
-        private void Rotate(int deg)
+        protected override void OnChanged()
         {
-            Rotation += deg * (float)Math.PI / 180;
             RayTip = new Coord(
                 (int)Math.Round(Math.Cos(Rotation) * Length),
                 (int)Math.Round(Math.Sin(Rotation) * Length)
             );
+            base.OnChanged();
+        }
+
+
+        private void Rotate(int deg)
+        {
+            Rotation += deg * (float)Math.PI / 180;
             OnChanged();
         }
 
         public override bool CanRotateWithDirectionKeys() => true;
+
+        public override bool CanExpandWithDirectionKeys() => false;
+        public override bool TryContract() => false;
+        public override bool TryExpand() => false;
 
         public override bool TryRotateCCw()
         {

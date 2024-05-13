@@ -1,8 +1,4 @@
-﻿using Fiero.Core;
-using System;
-using System.Collections.Generic;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
     public abstract class TargetingShape
     {
@@ -13,7 +9,7 @@ namespace Fiero.Business
             Origin = origin;
         }
 
-        protected void OnChanged()
+        protected virtual void OnChanged()
         {
             Changed?.Invoke(this);
         }
@@ -22,6 +18,9 @@ namespace Fiero.Business
         public abstract bool TryRotateCCw();
         public abstract bool CanRotateWithDirectionKeys();
         public abstract bool TryOffset(Coord offs);
+        public abstract bool TryContract();
+        public abstract bool TryExpand();
+        public abstract bool CanExpandWithDirectionKeys();
         public abstract IEnumerable<Coord> GetPoints();
     }
 }

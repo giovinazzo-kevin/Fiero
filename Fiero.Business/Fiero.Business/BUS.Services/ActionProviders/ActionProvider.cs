@@ -303,7 +303,7 @@ namespace Fiero.Business
                 .Skip(1)
                 .ToArray();
             var flags = proj.GetEffectFlags();
-            var throwShape = new RayTargetingShape(a.Position(), len);
+            var throwShape = new LineTargetingShape(a.Position(), proj.ProjectileProperties.MinimumRange, len);
             var autoTarget = throwShape.TryAutoTarget(
                 p => Systems.Get<DungeonSystem>().GetActorsAt(floorId, p).Any(b =>
                 {
@@ -320,7 +320,14 @@ namespace Fiero.Business
                         return true;
                     return false;
                 }),
-                p => !Systems.Get<DungeonSystem>().GetCellAt(floorId, p)?.BlocksMovement(true) ?? true
+                p =>
+                {
+                    if (!Systems.Get<DungeonSystem>().TryGetCellAt(floorId, p, out var cell))
+                        return true;
+                    if (cell.BlocksMovement(excludeFlat: true))
+                        return true;
+                    return false;
+                }
             );
             if (TryTarget(a, throwShape, autoTarget))
             {

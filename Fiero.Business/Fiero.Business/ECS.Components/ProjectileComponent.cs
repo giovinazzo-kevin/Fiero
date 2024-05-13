@@ -4,6 +4,7 @@
     {
         public ProjectileName Name { get; set; }
         public int BaseDamage { get; set; } = 1;
+        public int MinimumRange { get; set; } = 1;
         public int MaximumRange { get; set; } = 3;
         public float MulchChance { get; set; } = 0.25f;
         /// <summary>

@@ -123,6 +123,12 @@ namespace Fiero.Business
                 if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.RotateTargetCCw))
                     || shape.CanRotateWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveW)))
                     RotateCCw();
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.ExpandTarget))
+                    || shape.CanExpandWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveN)))
+                    Expand();
+                if (ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.ContractTarget))
+                    || shape.CanExpandWithDirectionKeys() && ui.Input.IsKeyPressed(ui.Store.Get(Data.Hotkeys.MoveS)))
+                    Contract();
                 ui.Input.Update();
             });
             renderSystem.HideTargetingShape();
@@ -147,6 +153,22 @@ namespace Fiero.Business
             void RotateCCw()
             {
                 if (shape.TryRotateCCw())
+                {
+                    cursorMoved?.Invoke(shape);
+                }
+            }
+
+            void Contract()
+            {
+                if (shape.TryContract())
+                {
+                    cursorMoved?.Invoke(shape);
+                }
+            }
+
+            void Expand()
+            {
+                if (shape.TryExpand())
                 {
                     cursorMoved?.Invoke(shape);
                 }

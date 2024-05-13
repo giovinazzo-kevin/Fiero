@@ -18,6 +18,7 @@
                 EffectName.Heal => new(true, false, false, false, true),
                 EffectName.Explosion => new(false, false, true, true, false),
                 EffectName.RaiseUndead => new(false, false, true, true, true),
+                EffectName.Script => new(false, false, true, true, true),
                 _ => new(false, false, false, false, false)
             };
         }

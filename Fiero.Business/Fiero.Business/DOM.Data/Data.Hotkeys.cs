@@ -32,6 +32,8 @@
             public static readonly GameDatum<VirtualKeys> MoveW = new(nameof(Hotkeys), nameof(MoveW));
             public static readonly GameDatum<VirtualKeys> RotateTargetCw = new(nameof(Hotkeys), nameof(RotateTargetCw));
             public static readonly GameDatum<VirtualKeys> RotateTargetCCw = new(nameof(Hotkeys), nameof(RotateTargetCCw));
+            public static readonly GameDatum<VirtualKeys> ContractTarget = new(nameof(Hotkeys), nameof(ContractTarget));
+            public static readonly GameDatum<VirtualKeys> ExpandTarget = new(nameof(Hotkeys), nameof(ExpandTarget));
             public static readonly GameDatum<VirtualKeys> Wait = new(nameof(Hotkeys), nameof(Wait));
             public static readonly GameDatum<VirtualKeys> ToggleZoom = new(nameof(Hotkeys), nameof(ToggleZoom));
             public static readonly GameDatum<VirtualKeys> DeveloperConsole = new(nameof(Hotkeys), nameof(DeveloperConsole));

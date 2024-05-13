@@ -217,6 +217,8 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.MoveSE, VirtualKeys.Numpad3);
             Store.SetValue(Data.Hotkeys.RotateTargetCw, VirtualKeys.Multiply);
             Store.SetValue(Data.Hotkeys.RotateTargetCCw, VirtualKeys.Divide);
+            Store.SetValue(Data.Hotkeys.ExpandTarget, VirtualKeys.Add);
+            Store.SetValue(Data.Hotkeys.ContractTarget, VirtualKeys.Subtract);
             Store.SetValue(Data.Hotkeys.QuickSlot1, VirtualKeys.N1);
             Store.SetValue(Data.Hotkeys.QuickSlot2, VirtualKeys.N2);
             Store.SetValue(Data.Hotkeys.QuickSlot3, VirtualKeys.N3);

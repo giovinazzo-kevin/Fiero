@@ -221,7 +221,10 @@ namespace Fiero.Business.Scenes
                 }
 
                 if (e.TurnId > e.Actor.ActorProperties.LastTookDamageOnTurn + REST_DELAY)
+                {
+                    e.Actor.ActorProperties.LastAttackedBy = null;
                     e.Actor.ActorProperties.Health.V++;
+                }
                 // TODO: Make the delay configurable!
                 if (e.Actor.Action.ActionProvider.RequestDelay)
                 {
@@ -360,7 +363,11 @@ namespace Fiero.Business.Scenes
                                 renderSystem.CenterOn(e.Actor);
                             Resources.Sounds.Get(SoundName.SplashLarge, e.NewPosition - Player.Position()).Play();
                             renderSystem.AnimateViewport(e.Actor.IsPlayer(), new Location(newCell.Tile.FloorId(), e.NewPosition), Animation.Explosion(tint: ColorName.LightCyan, scale: new(1f, 1f)));
-                            actionSystem.ActorDied.HandleOrThrow(new(e.Actor));
+                            if (e.Actor.ActorProperties.LastAttackedBy is { } attackerId
+                                && Entities.TryGetProxy<Actor>(attackerId, out var attacker))
+                                actionSystem.ActorKilled.HandleOrThrow(new(attacker, e.Actor));
+                            else
+                                actionSystem.ActorDied.HandleOrThrow(new(e.Actor));
                             return true;
                         }
                     }
@@ -447,6 +454,7 @@ namespace Fiero.Business.Scenes
             {
                 foreach (var victim in e.Victims)
                 {
+                    victim.ActorProperties.LastAttackedBy = e.Attacker.Id;
                     e.Attacker.Log?.Write($"$Action.YouAttack$ {victim.Info.Name}.");
                     victim.Log?.Write($"{e.Attacker.Info.Name} $Action.AttacksYou$.");
                     var dir = (victim.Position() - e.Attacker.Position()).Clamp(-1, 1);
@@ -640,8 +648,19 @@ namespace Fiero.Business.Scenes
                 return true;
             });
             // ActionSystem.ActorKilled:
+            // - Grant XP for kill
             yield return actionSystem.ActorKilled.SubscribeResponse(e =>
             {
+                var xpFromKill = e.Victim.ActorProperties.LVL * 10 + 10;
+                var extraXp = xpFromKill;
+                while (extraXp > 0)
+                {
+                    var xpToNextLevel = e.Killer.ActorProperties.Experience.Max - e.Killer.ActorProperties.Experience.V;
+                    var xpDetracted = Math.Min(extraXp, xpToNextLevel);
+                    e.Killer.ActorProperties.XP += xpDetracted;
+                    actionSystem.ActorGainedExperience.HandleOrThrow(new(e.Killer, xpDetracted));
+                    extraXp -= xpDetracted;
+                }
                 e.Victim.Log?.Write($"{e.Killer.Info.Name} $Action.KillsYou$.");
                 e.Killer.Log?.Write($"$Action.YouKill$ {e.Victim.Info.Name}.");
                 return true;
@@ -795,7 +814,13 @@ namespace Fiero.Business.Scenes
             yield return actionSystem.ItemThrown.SubscribeResponse(e =>
             {
                 var proj = e.Projectile;
-                e.Actor.Log?.Write($"$Action.YouThrow$ {proj.DisplayName}.");
+                if (e.Victim != null)
+                {
+                    e.Actor.Log?.Write($"$Action.YouThrow$ {proj.DisplayName} at {e.Victim.Info.Name}.");
+                    e.Victim.ActorProperties.LastAttackedBy = e.Actor.Id;
+                }
+                else
+                    e.Actor.Log?.Write($"$Action.YouThrow$ {proj.DisplayName}.");
                 if (Player.CanHear(e.Actor))
                 {
                     Resources.Sounds.Get(SoundName.RangedAttack, e.Actor.Position() - Player.Position()).Play();

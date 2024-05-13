@@ -147,18 +147,8 @@ namespace Fiero.Business
                 {
                     if (e.Victim.IsAlive() && e.Victim.ActorProperties.Health <= 0)
                     {
-                        if (e.Source.TryCast<Actor>(out var killer) && killer.ActorProperties.Experience != null)
+                        if (e.Source.TryCast<Actor>(out var killer))
                         {
-                            var xpFromKill = e.Victim.ActorProperties.LVL * 10 + 10;
-                            var extraXp = xpFromKill;
-                            while (extraXp > 0)
-                            {
-                                var xpToNextLevel = killer.ActorProperties.Experience.Max - killer.ActorProperties.Experience.V;
-                                var xpDetracted = Math.Min(extraXp, xpToNextLevel);
-                                killer.ActorProperties.XP += xpDetracted;
-                                ActorGainedExperience.HandleOrThrow(new(killer, xpDetracted));
-                                extraXp -= xpDetracted;
-                            }
                             ActorKilled.HandleOrThrow(new(killer, e.Victim));
                         }
                         else

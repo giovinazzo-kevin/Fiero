@@ -43,5 +43,6 @@ namespace Fiero.Business
         public CorpseDef Corpse { get; set; }
         /// Enables delayed HP regen
         public int LastTookDamageOnTurn { get; set; } = int.MinValue;
+        public int? LastAttackedBy { get; set; } = null;
     }
 }

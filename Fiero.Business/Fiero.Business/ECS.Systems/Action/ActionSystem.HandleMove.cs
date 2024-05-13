@@ -70,8 +70,8 @@
                                 cost += cell.Tile.TileProperties.MovementCost;
                             // you can swap position with allies in twice the amount of time it takes to move
                             cost *= 2;
-                            t.Actor.Log.Write($"$Action.YouSwapPlacesWith$ {target.Info.Name}.");
-                            target.Log.Write($"$Action.YouSwapPlacesWith$ {t.Actor.Info.Name}.");
+                            t.Actor.Log?.Write($"$Action.YouSwapPlacesWith$ {target.Info.Name}.");
+                            target.Log?.Write($"$Action.YouSwapPlacesWith$ {t.Actor.Info.Name}.");
                             return ActorMoved.Handle(new(t.Actor, oldPos, newPos))
                                    && ActorMoved.Handle(new(target, newPos, oldPos));
                         }

@@ -73,7 +73,6 @@
         private IEntityBuilder<Actor> Enemy()
             => Entities.CreateBuilder<Actor>()
             .WithInventory(0)
-            .WithLogging()
             .WithEnemyAi()
             .WithHealth(1)
             .WithLevel(maximum: 99, current: 0)

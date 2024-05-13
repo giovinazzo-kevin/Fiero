@@ -23,6 +23,9 @@
         Countdown2,
         Countdown1,
         MonsterLevelUp,
-        PlayerLevelUp
+        PlayerLevelUp,
+
+        Splash,
+        SplashLarge
     }
 }

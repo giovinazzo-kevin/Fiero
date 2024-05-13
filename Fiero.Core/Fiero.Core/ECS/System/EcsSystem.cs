@@ -27,7 +27,7 @@ namespace Fiero.Core
 
         public virtual void Dispose()
         {
-            _ = Disposed.Raise(new(this));
+            //_ = Disposed.Raise(new(this));
             foreach (var sub in Subscriptions)
                 sub.Dispose();
         }

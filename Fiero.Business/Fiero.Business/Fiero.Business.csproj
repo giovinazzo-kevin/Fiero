@@ -376,6 +376,12 @@
     <None Update="Resources\Sounds\converted_Loop_Alarm.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Sounds\environment\splash.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Sounds\environment\splash_large.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Sounds\ExplosionLarge1.ogg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

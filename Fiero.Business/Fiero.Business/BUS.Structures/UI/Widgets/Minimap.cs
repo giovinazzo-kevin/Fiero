@@ -54,7 +54,7 @@ namespace Fiero.Business
             if (!FloorSystem.TryGetFloor(floorId, out var floor))
                 return;
             var renderSize = new Coord(floor.Size.X + floor.Size.X % 2, floor.Size.Y + floor.Size.Y % 2);
-            if (_renderTexture is null || _renderTexture.Size.ToCoord() != renderSize)
+            if (_renderTexture is null || Layout.Size.V != renderSize)
             {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
@@ -69,11 +69,13 @@ namespace Fiero.Business
             _dirty = true;
             Layout?.Invalidate();
         }
+
         public void Refresh()
         {
             _refresh = true;
             SetDirty();
         }
+
         protected override void DefaultSize() { }
         private HashSet<Coord> lastFov = [];
         public override void Draw(RenderTarget target, RenderStates states)

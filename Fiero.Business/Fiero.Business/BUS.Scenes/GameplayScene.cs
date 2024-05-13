@@ -356,6 +356,10 @@ namespace Fiero.Business.Scenes
                             e.Actor.Physics.Position = e.NewPosition;
                             floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                             floor.Cells[e.NewPosition].Actors.Add(e.Actor);
+                            if (e.Actor.IsPlayer())
+                                renderSystem.CenterOn(e.Actor);
+                            Resources.Sounds.Get(SoundName.SplashLarge, e.NewPosition - Player.Position()).Play();
+                            renderSystem.AnimateViewport(e.Actor.IsPlayer(), new Location(newCell.Tile.FloorId(), e.NewPosition), Animation.Explosion(tint: ColorName.LightCyan, scale: new(1f, 1f)));
                             actionSystem.ActorDied.HandleOrThrow(new(e.Actor));
                             return true;
                         }
@@ -579,7 +583,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ActorDied:
             // - Play death animation
             // - Drop inventory contents
-            // - Spawn corpses
+            // - Spawn corpses if not on a tile that swallows items
             yield return actionSystem.ActorDied.SubscribeResponse(e =>
             {
                 // Refresh entity in case a script raised this event
@@ -599,13 +603,23 @@ namespace Fiero.Business.Scenes
                     }
                 }
                 e.Actor.Render.Hidden = true;
-
                 Corpse corpse = null;
                 var corpseDef = e.Actor.ActorProperties.Corpse;
                 if (corpseDef.Type != CorpseName.None && corpseDef.Chance.Check(Rng.Random))
                 {
-                    corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
-                    actionSystem.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                    if (dungeonSystem.TryGetCellAt(e.Actor.FloorId(), e.Actor.Physics.Position, out var cell))
+                    {
+                        if (cell.Tile.Physics.SwallowsItems)
+                        {
+                            Resources.Sounds.Get(SoundName.Splash, cell.Tile.Position() - Player.Position()).Play();
+                            renderSystem.AnimateViewport(false, new Location(cell.Tile.FloorId(), cell.Tile.Position()), Animation.Explosion(tint: ColorName.LightCyan, scale: new(0.5f, 0.5f)));
+                        }
+                        else
+                        {
+                            corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
+                            actionSystem.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
+                        }
+                    }
                 }
 
                 if (Player.CanSee(e.Actor))
@@ -814,7 +828,13 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    renderSystem.AnimateViewport(false, new Location(e.Actor.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    if (!tile.Physics.SwallowsItems)
+                        renderSystem.AnimateViewport(false, new Location(e.Actor.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    else
+                    {
+                        Resources.Sounds.Get(SoundName.Splash, tile.Position() - Player.Position()).Play();
+                        renderSystem.AnimateViewport(false, new Location(tile.FloorId(), e.Position), Animation.Explosion(tint: ColorName.LightCyan, scale: new(0.5f, 0.5f)));
+                    }
                 }
                 if (!proj.ProjectileProperties.ThrowsUseCharges)
                 {

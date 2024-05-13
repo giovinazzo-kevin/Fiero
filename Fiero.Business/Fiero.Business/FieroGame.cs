@@ -164,6 +164,8 @@ namespace Fiero.Business
             Sounds.Add(SoundName.Countdown1, new SoundBuffer("Resources/Sounds/35_rotate3.wav"));
             Sounds.Add(SoundName.PlayerLevelUp, new SoundBuffer("Resources/Sounds/37_level.wav"));
             Sounds.Add(SoundName.MonsterLevelUp, new SoundBuffer("Resources/Sounds/37_level.wav"));
+            Sounds.Add(SoundName.Splash, new SoundBuffer("Resources/Sounds/environment/splash.wav"));
+            Sounds.Add(SoundName.SplashLarge, new SoundBuffer("Resources/Sounds/environment/splash_large.wav"));
 
             await Localization.LoadJsonAsync(LocaleName._Dialogue, "Resources/Dialogues/dialogue.json");
             await Localization.LoadJsonAsync(LocaleName.English, "Resources/Localizations/en/en.json");

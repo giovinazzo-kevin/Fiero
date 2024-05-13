@@ -15,7 +15,7 @@
                 var newPos = t.Actor.Position() + rDir.Point;
                 var victim = Shapes.Line(t.Actor.Position(), newPos)
                     .Skip(1)
-                    .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(t.Actor) ?? false)
+                    .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(true) ?? false)
                     .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
                     .LastOrDefault();
                 if (victim is { })
@@ -26,7 +26,7 @@
                 else
                 {
                     var lastNonWall = Shapes.Line(t.Actor.Position(), newPos)
-                        .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.IsWalkable(t.Actor) ?? false)
+                        .TakeWhile(x => _floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(true) ?? false)
                         .Last();
                     return ItemConsumed.Handle(new(t.Actor, rDir.Wand))
                         && WandZapped.Handle(new(t.Actor, null, lastNonWall, rDir.Wand));

@@ -23,7 +23,7 @@ namespace Fiero.Business
                 .WithStep(ctx =>
                 {
                     ctx.Theme = Theme;
-                    var eml = EMLInterpreter.GenerateMap(map.Info.Size - Coord.PositiveOne, id);
+                    var eml = EMLInterpreter.GenerateMap(map.Info.Size, id);
                     if (!eml(script.VM, ctx))
                         return;
                 })

@@ -39,7 +39,13 @@
             cost += Tile.GetCost(e);
             return cost;
         }
-        public bool BlocksMovement() => Features.Any(f => f.Physics.BlocksMovement) || Tile.Physics.BlocksMovement;
+        public bool BlocksMovement(bool excludeFlat = false)
+        {
+            var anyFeatures = Features.Any(f => f.Physics.BlocksMovement);
+            if (!excludeFlat)
+                return anyFeatures || Tile.Physics.BlocksMovement;
+            return anyFeatures || Tile.Physics.BlocksMovement && !Tile.Physics.IsFlat;
+        }
         public bool BlocksLight() => Features.Any(f => f.Physics.BlocksLight) || Tile.Physics.BlocksLight;
         public IEnumerable<PhysicalEntity> GetDrawables(VisibilityName visibility = VisibilityName.Visible, bool seen = true)
         {

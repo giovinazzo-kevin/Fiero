@@ -27,7 +27,7 @@ step{ size: p(W, H), layer: 0 } #-> [
 	draw_rect(wall, p(W, H), p(0, 0))
 ].
 step{ size: _, layer: 10 } #-> [
-	place_prefab('box_3x3', _, _{ randomize: true }, p(3, 3))
+	place_prefab('dev_grapple', _, _{ }, p(3, 3))
 ].
 step{ size: p(W, H), layer: 50 } #-> [
 	place_prefab(_, _, _{ tags: {spawn}, center_y: true, center_x: true}, p(X, Y))

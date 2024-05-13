@@ -26,7 +26,7 @@
                     case TrajectoryName.Line:
                         victim = Shapes.Line(t.Actor.Position(), newPos)
                             .Skip(1)
-                            .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement() ?? false)
+                            .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(excludeFlat: true) ?? false)
                             .TrySelect(p => (TryFindVictim(p, t.Actor, out var victim), victim))
                             .LastOrDefault();
                         break;
@@ -41,7 +41,7 @@
                 else
                 {
                     var lastNonWall = Shapes.Line(t.Actor.Position(), newPos)
-                        .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement() ?? false)
+                        .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(excludeFlat: true) ?? false)
                         .Last();
                     return Consume(t.Actor, rDir.Launcher)
                         && LauncherShot.Handle(new(t.Actor, null, lastNonWall, rDir.Launcher));

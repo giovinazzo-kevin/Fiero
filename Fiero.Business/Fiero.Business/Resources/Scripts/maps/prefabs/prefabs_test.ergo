@@ -58,3 +58,28 @@ prefab { name: 'box_3x3', size: p(3, 3) } #-> ([
 prefab { name: 'box_3x3', size: p(1, 1), offset: p(1,1), layer: 1, group: contents } #-> ([X]) :- 
 	member(Pool, [popcorn, item]),
 	X = [place_marker(entity{ type: Pool, random_type: true })].
+
+		
+prefab { name: 'dev_grapple', size: p(5, 7) } #-> ([
+	W,W,W,W,W,
+	W,R,R,R,W,
+	W,R,R,R,W,
+	W,H,H,H,W,
+	W,H,H,H,W,
+	W,R,R,R,W,
+	W,W,R,W,W
+], [
+	_,_,_,_,_,
+	_,_,C,_,_,
+	_,_,_,_,_,
+	_,_,_,_,_,
+	_,_,_,_,_,
+	_,G,_,_,_,
+	_,_,D,_,_
+]) :- 
+	R = [draw_point(room)],
+	W = [draw_point(wall)],
+	H = [draw_point(water)],
+	D = [place_marker(entity{ type: feature_door })],
+	C = [place_marker(entity{ type: feature_chest })],
+	G = [place_marker(entity{ type: projectile_grapple })].

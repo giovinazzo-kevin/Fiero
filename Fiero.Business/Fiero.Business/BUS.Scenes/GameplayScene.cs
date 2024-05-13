@@ -340,7 +340,8 @@ namespace Fiero.Business.Scenes
                     return true;
                 if (!dungeonSystem.TryGetFloor(e.Actor.FloorId(), out var floor)
                 || !floor.Cells.ContainsKey(e.OldPosition)
-                || !floor.Cells.ContainsKey(e.NewPosition))
+                || !floor.Cells.ContainsKey(e.NewPosition)
+                || !floor.Cells[e.NewPosition].IsWalkable(e.Actor))
                     return false;
                 floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);
@@ -756,6 +757,7 @@ namespace Fiero.Business.Scenes
             // ActionSystem.ItemThrown:
             // - Spawn a 1-charge item where the consumable lands if it doesn't mulch
             // - Play an animation and a sound as the projectile flies
+            // - Don't spawn the item if it fell on a tile such as water
             yield return actionSystem.ItemThrown.SubscribeResponse(e =>
             {
                 var proj = e.Projectile;
@@ -778,7 +780,8 @@ namespace Fiero.Business.Scenes
                         Resources.Sounds.Get(SoundName.MeleeAttack, e.Position - Player.Position()).Play();
                     }
                 }
-                var noMulch = Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance;
+                var tile = dungeonSystem.GetTileAt(e.Actor.FloorId(), e.Position);
+                var noMulch = !tile.Physics.SwallowsItems && Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance;
                 if (noMulch)
                 {
                     var clone = (Projectile)proj.Clone();
@@ -791,7 +794,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    renderSystem.AnimateViewport(false, new Location(proj.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
+                    renderSystem.AnimateViewport(false, new Location(e.Actor.FloorId(), e.Position), Animation.Explosion(tint: ColorName.Gray, scale: new(0.5f, 0.5f))); // mulch animation
                 }
                 if (!proj.ProjectileProperties.ThrowsUseCharges)
                 {

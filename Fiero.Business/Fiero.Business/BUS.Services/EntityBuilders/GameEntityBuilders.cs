@@ -893,7 +893,7 @@
             ;
         public IEntityBuilder<Tile> Tile_Water()
             => Tile(TileName.Water, ColorName.LightBlue)
-            // Moving through water is twice as slow 
+            .Tweak<PhysicsComponent>((s, x) => x.SwallowsItems = x.BlocksMovement = x.IsFlat = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
             .Tweak<TileComponent>((s, x) => { x.MovementCost = 100; })
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
             ;

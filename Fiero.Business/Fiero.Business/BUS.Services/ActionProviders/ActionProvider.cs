@@ -321,7 +321,9 @@ namespace Fiero.Business
                 {
                     if (!Systems.Get<DungeonSystem>().TryGetCellAt(floorId, p, out var cell))
                         return true;
-                    if (cell.BlocksMovement(excludeFlat: true))
+                    if (proj.ProjectileProperties.Trajectory == TrajectoryName.Line && cell.BlocksMovement(excludeFlat: true))
+                        return true;
+                    if (proj.ProjectileProperties.Trajectory == TrajectoryName.Arc && cell.BlocksMovement(excludeFlat: true, excludeFeatures: true))
                         return true;
                     return false;
                 }

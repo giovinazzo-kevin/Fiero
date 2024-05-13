@@ -17,6 +17,8 @@
                 int? shootCost = null;
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Position() + rDir.Point;
+                if (!Consume(t.Actor, rDir.Item))
+                    return false;
                 switch (rDir.Item.ProjectileProperties.Trajectory)
                 {
                     case TrajectoryName.Arc:
@@ -36,16 +38,20 @@
                             .DefaultIfEmpty(newPos);
                         foreach (var p in newPosOptions)
                         {
+                            newPos = p;
                             if (TryFindVictim(p, t.Actor, out victim))
                             {
                                 if (!HandleVictim(out shootCost))
                                     return false;
                                 if (!rDir.Item.ProjectileProperties.Piercing)
-                                    break;
+                                {
+                                    cost += shootCost;
+                                    return true;
+                                }
                             }
                         }
                         cost += shootCost;
-                        return true;
+                        return ItemThrown.Handle(new(t.Actor, null, newPos, rDir.Item));
                     default: throw new NotSupportedException();
                 }
                 bool HandleVictim(out int? cost)
@@ -53,12 +59,10 @@
                     cost = 0;
                     if (victim != null)
                     {
-                        return Consume(t.Actor, rDir.Item)
-                            && ItemThrown.Handle(new(t.Actor, victim, newPos, rDir.Item))
+                        return ItemThrown.Handle(new(t.Actor, victim, newPos, rDir.Item))
                             && HandleRangedAttack(t.Actor, victim, ref cost, rDir.Item);
                     }
-                    return Consume(t.Actor, rDir.Item)
-                        && ItemThrown.Handle(new(t.Actor, null, newPos, rDir.Item));
+                    return false;
                 }
             }
             else throw new NotSupportedException(action.GetType().Name);

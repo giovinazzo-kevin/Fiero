@@ -98,10 +98,10 @@ prefab { name: 'dev_barrel', size: p(5, 7) } #-> ([
 	_,_,_,_,_,
 	_,M,M,M,_,
 	_,M,B,M,_,
-	_,M,S,M,_,
+	_,M,M,M,_,
+	_,S,S,S,_,
 	_,H,H,H,_,
-	_,_,G,_,_,
-	_,_,_,_,_
+	_,_,G,_,_
 ]) :- 
 	R = [draw_point(room)],
 	W = [draw_point(wall)],

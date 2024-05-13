@@ -1056,7 +1056,9 @@ namespace Fiero.Business.Scenes
             // - Damage all affected entities
             yield return actionSystem.ExplosionHappened.SubscribeResponse(e =>
             {
-                if (Player.IsAlive() && Player.FloorId() != e.FloorId)
+                if (!Player.IsAlive())
+                    return true;
+                if (Player.FloorId() != e.FloorId)
                     return true;
                 Resources.Sounds.Get(SoundName.Explosion, e.Center - Player.Position()).Play();
                 if (Player.CanSee(e.FloorId, e.Center))

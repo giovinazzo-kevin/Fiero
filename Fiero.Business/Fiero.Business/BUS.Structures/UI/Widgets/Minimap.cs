@@ -40,6 +40,8 @@ namespace Fiero.Business
             {
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
+                _renderTexture = null;
+                _renderSprite = null;
                 SetDirty();
             };
             Layout.Position.ValueChanged += (_, __) => SetDirty();
@@ -89,7 +91,7 @@ namespace Fiero.Business
                 if (!Bake())
                     return;
             }
-            if (_renderSprite is null)
+            if (_renderSprite is null || _renderTexture is null)
                 return;
             target.Draw(_renderSprite);
             bool Bake()

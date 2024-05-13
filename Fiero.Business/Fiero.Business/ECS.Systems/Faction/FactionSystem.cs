@@ -38,12 +38,12 @@ namespace Fiero.Business
             SetBilateralRelation(FactionName.Boars, FactionName.Monsters, StandingName.Loved);
 
             SetBilateralRelation(FactionName.Players, FactionName.Players, StandingName.Loved);
-            SetBilateralRelation(FactionName.Players, FactionName.Rats, StandingName.DisapprovenOf);
-            SetBilateralRelation(FactionName.Players, FactionName.Cats, StandingName.DisapprovenOf);
-            SetBilateralRelation(FactionName.Players, FactionName.Dogs, StandingName.DisapprovenOf);
-            SetBilateralRelation(FactionName.Players, FactionName.Snakes, StandingName.DisapprovenOf);
-            SetBilateralRelation(FactionName.Players, FactionName.Boars, StandingName.DisapprovenOf);
-            SetBilateralRelation(FactionName.Players, FactionName.Monsters, StandingName.DisapprovenOf);
+            SetBilateralRelation(FactionName.Players, FactionName.Rats, StandingName.Disliked);
+            SetBilateralRelation(FactionName.Players, FactionName.Cats, StandingName.Disliked);
+            SetBilateralRelation(FactionName.Players, FactionName.Dogs, StandingName.Disliked);
+            SetBilateralRelation(FactionName.Players, FactionName.Snakes, StandingName.Disliked);
+            SetBilateralRelation(FactionName.Players, FactionName.Boars, StandingName.Disliked);
+            SetBilateralRelation(FactionName.Players, FactionName.Monsters, StandingName.Disliked);
 
             SetBilateralRelation(FactionName.Merchants, FactionName.Players, StandingName.Loved);
             SetBilateralRelation(FactionName.Merchants, FactionName.Rats, StandingName.Loved);
@@ -52,6 +52,15 @@ namespace Fiero.Business
             SetBilateralRelation(FactionName.Merchants, FactionName.Snakes, StandingName.Loved);
             SetBilateralRelation(FactionName.Merchants, FactionName.Boars, StandingName.Loved);
             SetBilateralRelation(FactionName.Merchants, FactionName.Monsters, StandingName.Loved);
+
+            SetBilateralRelation(FactionName.None, FactionName.Players, StandingName.Hated);
+            SetBilateralRelation(FactionName.None, FactionName.Rats, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Cats, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Dogs, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Snakes, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Boars, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Monsters, StandingName.Tolerated);
+            SetBilateralRelation(FactionName.None, FactionName.Merchants, StandingName.Tolerated);
         }
 
         public void SetUnilateralRelation(FactionName a, FactionName b, StandingName standing)

@@ -4,12 +4,12 @@
     {
         public static bool MayAttack(this StandingName a)
         {
-            return (int)a <= (int)StandingName.Tolerated;
+            return (int)a < (int)StandingName.Tolerated;
         }
 
         public static bool IsHostile(this StandingName a)
         {
-            return (int)a < (int)StandingName.Tolerated;
+            return (int)a < (int)StandingName.DisapprovenOf;
         }
 
         public static bool MayFollow(this StandingName a)

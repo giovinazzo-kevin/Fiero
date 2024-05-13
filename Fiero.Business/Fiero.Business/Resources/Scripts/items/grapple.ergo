@@ -9,6 +9,7 @@ effect:began(_{effect_id: Id, source: S, owner: O}) :-
 	end(Id).
 effect:began(_{effect_id: Id, source: S, owner: O}) :-
 	O as tile is T,
+	T = _ { physics: _{ blocks_movement: false } },
 	pull_user_towards_terrain(S, T),
 	end(Id).
 effect:ended(_{effect_id: _}) :-

@@ -845,7 +845,7 @@ namespace Fiero.Business.Scenes
                     }
                 }
                 var tile = dungeonSystem.GetTileAt(e.Actor.FloorId(), e.Position);
-                var noMulch = !tile.Physics.SwallowsItems && Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance;
+                var noMulch = tile != null && !tile.Physics.SwallowsItems && Rng.Random.NextDouble() >= proj.ProjectileProperties.MulchChance;
                 if (noMulch)
                 {
                     var clone = (Projectile)proj.Clone();

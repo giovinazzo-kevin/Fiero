@@ -20,7 +20,7 @@
         public override bool TryOffset(Coord offs)
         {
             var newOffset = Offset + offs;
-            if (Math.Abs((Origin + newOffset).DistManhattan(Origin)) > MaxRange)
+            if (Math.Abs((Origin + newOffset).DistChebyshev(Origin)) > MaxRange)
             {
                 return false;
             }

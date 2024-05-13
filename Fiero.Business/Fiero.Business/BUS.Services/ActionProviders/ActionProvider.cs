@@ -298,9 +298,14 @@ namespace Fiero.Business
         protected bool TryThrow(Actor a, Projectile proj, out IAction action)
         {
             var floorId = a.FloorId();
-            var len = proj.ProjectileProperties.MaximumRange + 1;
+            var len = proj.ProjectileProperties.MaximumRange;
             var flags = proj.GetEffectFlags();
-            var throwShape = new LineTargetingShape(a.Position(), proj.ProjectileProperties.MinimumRange, len);
+            TargetingShape throwShape = proj.ProjectileProperties.Trajectory switch
+            {
+                TrajectoryName.Line => new LineTargetingShape(a.Position(), proj.ProjectileProperties.MinimumRange, len),
+                TrajectoryName.Arc => new PointTargetingShape(a.Position(), proj.ProjectileProperties.MaximumRange),
+                _ => throw new NotSupportedException()
+            };
             var autoTarget = throwShape.TryAutoTarget(
                 p => Systems.Get<DungeonSystem>().GetActorsAt(floorId, p).Any(b =>
                 {
@@ -335,21 +340,6 @@ namespace Fiero.Business
                 {
                     action = default;
                     return false;
-                }
-
-                if (!proj.ProjectileProperties.Piercing && proj.ProjectileProperties.Trajectory == TrajectoryName.Line)
-                {
-                    foreach (var p in points)
-                    {
-                        var actors = Systems.Get<DungeonSystem>().GetActorsAt(floorId, p)
-                            .Where(b => Systems.Get<FactionSystem>().GetRelations(a, b).Left.IsHostile());
-                        var target = actors.FirstOrDefault();
-                        if (target != null)
-                        {
-                            action = new ThrowItemAtOtherAction(target, proj);
-                            return true;
-                        }
-                    }
                 }
                 // Okay, then
                 action = new ThrowItemAtPointAction(points.Last() - a.Position(), proj);

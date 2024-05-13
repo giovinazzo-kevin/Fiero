@@ -14,7 +14,7 @@
             else if (action is ThrowItemAtPointAction rDir)
             {
                 Actor victim;
-                int? shootCost = null;
+                int? shootCost = 0;
                 // the point is relative to the actor's position
                 var newPos = t.Actor.Position() + rDir.Point;
                 if (!Consume(t.Actor, rDir.Item))
@@ -23,17 +23,15 @@
                 {
                     case TrajectoryName.Arc:
                         newPos = Shapes.Line(t.Actor.Position(), newPos)
-                            .Skip(1)
                             .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(excludeFlat: true, excludeFeatures: true) ?? false)
                             .DefaultIfEmpty(newPos)
                             .LastOrDefault();
-                        TryFindVictim(newPos, t.Actor, out victim);
-                        if (!HandleVictim(out shootCost))
-                            return false;
-                        return true;
+                        if (TryFindVictim(newPos, t.Actor, out victim))
+                            return HandleVictim(out shootCost);
+                        cost += shootCost;
+                        return ItemThrown.Handle(new(t.Actor, null, newPos, rDir.Item));
                     case TrajectoryName.Line:
                         var newPosOptions = Shapes.Line(t.Actor.Position(), newPos)
-                            .Skip(1)
                             .TakeWhile(x => !_floorSystem.GetCellAt(t.Actor.FloorId(), x)?.BlocksMovement(excludeFlat: true) ?? false)
                             .DefaultIfEmpty(newPos);
                         foreach (var p in newPosOptions)

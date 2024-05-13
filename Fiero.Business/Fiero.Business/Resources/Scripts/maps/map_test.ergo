@@ -30,6 +30,6 @@ step{ size: _, layer: 10 } #-> [
 	place_prefab('dev_grapple', _, _{ }, p(3, 3)),
 	place_prefab('dev_barrel', _, _{ }, p(10, 3))
 ].
-step{ size: p(W, H), layer: 50 } #-> [
-	place_prefab(_, _, _{ tags: {spawn}, center_y: true, center_x: true}, p(X, Y))
-] :- X := W/2, Y := H/2.
+step{ layer: 50 } #-> [
+	place_prefab(_, _, _{ tags: {spawn} }, p(3, 20))
+].

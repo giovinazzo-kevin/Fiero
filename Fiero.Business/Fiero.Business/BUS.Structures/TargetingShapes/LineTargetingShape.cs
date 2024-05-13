@@ -39,25 +39,25 @@
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {
-            for (var l = MinLength; l <= MaxLength; l++)
+            var l = Length;
+            for (int i = 0; i < 8; i++)
             {
-                for (int i = 0; i < 8; i++)
+                for (Length = MinLength; Length < MaxLength; Length++)
                 {
+                    OnChanged();
                     foreach (var p in GetPoints())
                     {
                         if (obstacle(p))
-                        {
-                            break;
-                        }
+                            goto next_dir;
                         if (validTarget(p))
-                        {
-                            Length = l;
                             return true;
-                        }
                     }
-                    TryRotateCw();
                 }
+            next_dir:
+                TryRotateCw();
             }
+            Length = l;
+            OnChanged();
             return false;
         }
     }

@@ -16,6 +16,7 @@ namespace Fiero.Business
         private Sprite _renderSprite;
         private bool _dirty = true;
         private bool _refresh = false;
+        private Coord _renderSize = Coord.Zero;
 
         public MiniMap(
             GameUI ui,
@@ -54,8 +55,9 @@ namespace Fiero.Business
             if (!FloorSystem.TryGetFloor(floorId, out var floor))
                 return;
             var renderSize = new Coord(floor.Size.X + floor.Size.X % 2, floor.Size.Y + floor.Size.Y % 2);
-            if (_renderTexture is null || Layout.Size.V != renderSize)
+            if (_renderTexture is null || _renderSize != renderSize)
             {
+                _renderSize = renderSize;
                 _renderTexture?.Dispose();
                 _renderSprite?.Dispose();
                 _renderTexture = new((uint)(floor.Size.X + floor.Size.X % 2), (uint)(floor.Size.Y + floor.Size.Y % 2)) { Smooth = false };

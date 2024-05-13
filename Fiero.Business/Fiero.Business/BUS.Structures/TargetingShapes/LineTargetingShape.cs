@@ -39,7 +39,7 @@
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {
-            for (Length = MinLength; Length <= MaxLength; Length++)
+            for (var l = MinLength; l <= MaxLength; l++)
             {
                 for (int i = 0; i < 8; i++)
                 {
@@ -51,6 +51,7 @@
                         }
                         if (validTarget(p))
                         {
+                            Length = l;
                             return true;
                         }
                     }

@@ -5,7 +5,7 @@
 :- use_module(anim).
 :- use_module(sound).
 :- dynamic(barrel_data/3).
-:- subscribe(action, [actor_attacked]).
+:- subscribe(action, [actor_damaged]).
 
 effect:began(_{effect_id: Id, owner: O, arguments: _{ radius: R }}) :-
 	O as physical_entity is PO,
@@ -21,7 +21,6 @@ effect:ended(_{effect_id: Id}) :-
 	effect(effect_def{name: explosion, arguments: R}, O, _), % this kills the bomb
 	retractall(barrel_data(Id, _, _)).
 
-action:actor_attacked(_{victims: List}) :-
+action:actor_damaged(_{victim: _{id: OwnerId}}) :-
 	barrel_data(Id, owner, _{id: OwnerId}),
-	member(_{id: OwnerId}, List),
 	end(Id).

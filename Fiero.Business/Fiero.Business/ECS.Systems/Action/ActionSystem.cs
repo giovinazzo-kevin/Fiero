@@ -274,6 +274,11 @@ namespace Fiero.Business
                     ret = false;
                     break;
             }
+            if (!t.Actor.IsAlive())
+            {
+                action = new FailAction();
+                return cost;
+            }
             t.Actor.Action.LastAction = action;
             if (ret == true)
             {

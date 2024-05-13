@@ -12,6 +12,7 @@
         public bool CanMove { get; set; }
         public bool IsFlat { get; set; }
         public bool SwallowsItems { get; set; }
+        public bool SwallowsActors { get; set; }
         public bool BlocksMovement { get; set; }
         public bool BlocksNpcPathing { get; set; }
         public bool BlocksPlayerPathing { get; set; }

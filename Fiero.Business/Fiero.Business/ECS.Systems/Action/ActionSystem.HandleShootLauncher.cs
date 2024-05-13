@@ -58,6 +58,8 @@
 
         bool HandleRangedAttack(Actor attacker, Actor victim, ref int? cost, Projectile item)
         {
+            if (!victim.IsAlive() || !attacker.IsAlive())
+                return false;
             var floorId = attacker.FloorId();
             var aPos = attacker.Position();
             var vPos = victim.Position();

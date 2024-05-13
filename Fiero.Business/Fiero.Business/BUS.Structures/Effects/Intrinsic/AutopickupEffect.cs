@@ -10,7 +10,7 @@
         {
             Subscriptions.Add(systems.Get<ActionSystem>().ActorMoved.SubscribeHandler(e =>
             {
-                if (e.Actor == target)
+                if (e.Actor.IsAlive() && e.Actor == target)
                 {
                     var itemsHere = systems.Get<DungeonSystem>().GetItemsAt(target.FloorId(), target.Position());
                     if (itemsHere.FirstOrDefault() is { } item && !target.Ai.DislikedItems.Any(f => f(item))

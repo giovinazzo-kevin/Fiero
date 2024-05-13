@@ -331,6 +331,7 @@ namespace Fiero.Business.Scenes
             });
             // ActionSystem.ActorMoved:
             // - Update actor position
+            // - Swallow the actor if the tile it moved on swallows creatures
             // - Update FloorSystem positional caches
             // - Log stuff that was stepped over
             // - Play animation if enabled in the settings or if this is the AutoPlayer
@@ -340,9 +341,28 @@ namespace Fiero.Business.Scenes
                     return true;
                 if (!dungeonSystem.TryGetFloor(e.Actor.FloorId(), out var floor)
                 || !floor.Cells.ContainsKey(e.OldPosition)
-                || !floor.Cells.ContainsKey(e.NewPosition)
-                || !floor.Cells[e.NewPosition].IsWalkable(e.Actor))
+                || !floor.Cells.ContainsKey(e.NewPosition))
                     return false;
+                var newCell = floor.Cells[e.NewPosition];
+                if (!newCell.IsWalkable(e.Actor))
+                {
+                    // The actor was most probably forced onto this cell by some effect
+                    if (newCell.Tile.Physics.SwallowsActors)
+                    {
+                        var avoids = newCell.Tile.Physics.IsFlat && e.Actor.Physics.Flying
+                            || e.Actor.Physics.Phasing;
+                        if (!avoids)
+                        {
+                            e.Actor.Physics.Position = e.NewPosition;
+                            floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
+                            floor.Cells[e.NewPosition].Actors.Add(e.Actor);
+                            actionSystem.ActorDied.HandleOrThrow(new(e.Actor));
+                            return true;
+                        }
+                    }
+                    // In most cases, simply don't allow this to happen
+                    return false;
+                }
                 floor.Cells[e.OldPosition].Actors.Remove(e.Actor);
                 floor.Cells[e.NewPosition].Actors.Add(e.Actor);
                 var itemsHere = dungeonSystem.GetItemsAt(floor.Id, e.NewPosition);

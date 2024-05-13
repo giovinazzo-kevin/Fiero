@@ -94,6 +94,8 @@ namespace Fiero.Business
 
         public OrderedPair<StandingName> GetRelations(Actor a, Actor b)
         {
+            if (!a.IsAlive() || !b.IsAlive())
+                return new(StandingName.Tolerated, StandingName.Tolerated);
             if (!ActorRelations.TryGetValue(new(a.Id, b.Id), out var aTowardsB))
             {
                 if (!FactionRelations.TryGetValue(new(a.Faction.Name, b.Faction.Name), out aTowardsB))

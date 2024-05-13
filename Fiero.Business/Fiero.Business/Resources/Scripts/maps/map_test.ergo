@@ -6,6 +6,9 @@
 :- map(_{
 	size: p(49, 49),
 	pools: _{
+		popcorn: [ 
+			npc_rat 
+		],
 		monster: [
 			npc_rat, 
 			npc_rat_knight
@@ -19,16 +22,13 @@
 		]
 	}
 }).
-
-step{ size: p(W, H) } #-> [
+step{ size: p(W, H), layer: 0 } #-> [
 	fill_rect(room, p(W, H), p(0, 0)),
 	draw_rect(wall, p(W, H), p(0, 0))
 ].
-
-step{ size: p(W, H) } #-> [
-	place_prefab(_, _, _{ tags: {spawn}, center_y: true, center_x: true}, p(:=(W/2), :=(H/2)))
+step{ size: _, layer: 10 } #-> [
+	place_prefab('box_3x3', _, _{ randomize: true }, p(3, 3))
 ].
-
-step{ } #-> [
-	place_prefab('dev_area', _, _{ randomize: true }, p(3, 3))
-].
+step{ size: p(W, H), layer: 50 } #-> [
+	place_prefab(_, _, _{ tags: {spawn}, center_y: true, center_x: true}, p(X, Y))
+] :- X := W/2, Y := H/2.

@@ -46,9 +46,15 @@ prefab { name: 'spawn', size: p(5, 5), tags: {spawn}, layer: 10, group: layout }
 
 % ROOMS ---------------------------------------------------------------------------------------
 	
-prefab { name: 'dev_area', size: p(15, 15), grid_size: p(5,5), tags: {dev}, group: base } #-> ([
-	F,F,F,
-	F,F,F,
-	F,F,F
+prefab { name: 'box_3x3', size: p(3, 3) } #-> ([
+	W,W,W,
+	W,R,W,
+	W,D,W
 ]) :- 
-	F = [fill_rect(wall, p(5,5))].
+	R = [draw_point(room)],
+	W = [draw_point(wall)],
+	D = [draw_point(room), place_marker(entity{ type: feature_door })].
+
+prefab { name: 'box_3x3', size: p(1, 1), offset: p(1,1), layer: 1, group: contents } #-> ([X]) :- 
+	member(Pool, [popcorn, item]),
+	X = [place_marker(entity{ type: Pool, random_type: true })].

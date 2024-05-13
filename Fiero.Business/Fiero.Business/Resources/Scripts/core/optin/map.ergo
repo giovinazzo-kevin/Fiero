@@ -12,8 +12,9 @@ get_prefab(N, S, prefab { name: N, size: S, layer: L, group: G, offset: O, grid_
 	(ground(Z_) -> Z = Z_ ; Z = p(1,1)),
 	comma_list(Cs, C).
 
-generate(Step, EML) :-
-	findall(
-		EML_, 
-		('#->'(Step, L), member(EML_, L)), 
-		EML), !.
+get_step(S, F, step { name: N, size: S, position: P, floor_id: F, layer: L, eml: C }) :-
+	step { name: N_, size: S, position: P_, floor_id: F, layer: L_ } #-> Cs,
+	(ground(N_) -> N = N_ ; N = step),
+	(ground(P_) -> P = P_ ; P = p(0,0)),
+	(ground(L_) -> L = L_ ; L = 255),
+	comma_list(Cs, C).

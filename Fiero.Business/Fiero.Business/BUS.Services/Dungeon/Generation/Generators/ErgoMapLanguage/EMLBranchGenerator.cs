@@ -23,7 +23,7 @@ namespace Fiero.Business
                 .WithStep(ctx =>
                 {
                     ctx.Theme = Theme;
-                    var eml = EMLInterpreter.GenerateMap(script.VM, new(id, Coord.Zero, map.Info.Size - Coord.PositiveOne));
+                    var eml = EMLInterpreter.GenerateMap(map.Info.Size - Coord.PositiveOne, id);
                     if (!eml(script.VM, ctx))
                         return;
                 })
@@ -33,14 +33,13 @@ namespace Fiero.Business
 
         protected virtual string GetRandomEntityKey(MapDef map, GetEntityArgs args, string type)
         {
-            switch (type)
-            {
-                case "monster" when map.Info.Pools.Monster?.Length > 0:
-                    return Rng.Random.Choose(map.Info.Pools.Monster);
-                case "item" when map.Info.Pools.Item?.Length > 0:
-                    return Rng.Random.Choose(map.Info.Pools.Item);
-            }
-            return type;
+            if (map.Info.Pools is not Dict dict)
+                return "npc_rat";
+            if (!dict.Dictionary.TryGetValue(new Atom(type), out var value)
+                || value is not List list
+                || list.Contents.Length <= 0)
+                return "npc_rat";
+            return Rng.Random.Choose(list.Contents).Explain();
         }
 
         protected virtual IEntityBuilder<PhysicalEntity> GetEntity(MapDef map, GetEntityArgs args, GameEntityBuilders e)

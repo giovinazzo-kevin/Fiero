@@ -10,9 +10,7 @@ namespace Fiero.Business;
 public sealed class Map() : InterpreterDirective("Declares a dungeon map.", new("map"), 1, 100000)
 {
     [Term(Marshalling = TermMarshalling.Named)]
-    public readonly record struct MapPools(string[] Monster, string[] Item);
-    [Term(Marshalling = TermMarshalling.Named)]
-    public readonly record struct MapInfo(Coord Size, MapPools Pools);
+    public readonly record struct MapInfo(Coord Size, ITerm Pools);
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {

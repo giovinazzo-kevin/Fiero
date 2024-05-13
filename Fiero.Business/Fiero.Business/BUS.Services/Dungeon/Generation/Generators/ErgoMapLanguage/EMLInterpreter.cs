@@ -14,40 +14,38 @@ namespace Fiero.Business
     {
         #region Types
         [Term(Marshalling = TermMarshalling.Named)]
-        public readonly record struct Step(FloorId FloorId, Coord Position, Coord Size);
-        [Term(Marshalling = TermMarshalling.Named)]
-        public readonly record struct PlacePrefabArgs(
-            bool MirrorY, bool MirrorX, int Rotate, bool Randomize, bool CenterX, bool CenterY, Coord Size, string[] Tags
-        );
+        public readonly record struct Step(string Name, Coord Size, Coord Position, FloorId FloorId, int Layer, ITerm[][] EML);
         [Term(Marshalling = TermMarshalling.Named)]
         public readonly record struct Prefab(
             string Name, Coord Size, Coord GridSize, Coord Offset, string Group, float Weight, int Layer, ITerm[][][] Canvas, string[] Tags
+        );
+        [Term(Marshalling = TermMarshalling.Named)]
+        public readonly record struct PlacePrefabArgs(
+            bool MirrorY, bool MirrorX, int Rotate, bool Randomize, bool CenterX, bool CenterY, Coord Size, string[] Tags
         );
 
         public delegate bool EML(ErgoVM vm, FloorGenerationContext ctx);
         #endregion
         #region Hooks
-        public static readonly Hook GenerateHook = new(new(new("generate"), 2, FieroLib.Modules.Map, default));
         public static readonly Hook GetPrefabHook = new(new(new("get_prefab"), 3, FieroLib.Modules.Map, default));
+        public static readonly Hook GetStepHook = new(new(new("get_step"), 3, FieroLib.Modules.Map, default));
 
         /// <summary>
         /// Calls map:generate/2 and aggregates a list of EML generation steps.
         /// </summary>
-        public static EML GenerateMap(ErgoVM vm, Step arg)
+        public static EML GenerateMap(Coord size, FloorId id) => (vm, ctx) =>
         {
-            var var_geometry = new Variable("Geometry");
-            GenerateHook.SetArg(0, TermMarshall.ToTerm(arg));
-            GenerateHook.SetArg(1, var_geometry);
-            vm.Query = GenerateHook.Compile();
-            vm.Run();
-            if (!vm.TryPopSolution(out var sol)
-            || sol.Substitutions[var_geometry] is not List geometry)
+            var steps = GetSteps(vm, size, id);
+            var geometry = new List(steps
+                .OrderBy(s => s.Layer)
+                .SelectMany(s => s.EML.SelectMany(x => x)));
+            foreach (var geom in geometry.Contents)
             {
-                vm.Throw(ErgoVM.ErrorType.Custom, "Invalid geometry.");
-                return EML_NoOp(default);
+                if (!InterpretEML(geom)(vm, ctx))
+                    return false;
             }
-            return InterpretEML(geometry);
-        }
+            return true;
+        };
         /// <summary>
         /// Calls map:get_prefab/3 and yields all matching prefabs.
         /// NOTE: prefab rules are evaluated each time this is called.
@@ -76,6 +74,29 @@ namespace Fiero.Business
                     yield break;
                 }
                 yield return prefab;
+            }
+        }
+        /// <summary>
+        /// Calls map:get_steps/4 and yields all matching generation steps.
+        /// NOTE: steps are evaluated each time this is called.
+        /// </summary>
+        public static IEnumerable<Step> GetSteps(ErgoVM vm, Coord size, FloorId id)
+        {
+            var var_step = new Variable("Step");
+            GetStepHook.SetArg(0, TermMarshall.ToTerm(size));
+            GetStepHook.SetArg(1, TermMarshall.ToTerm(id));
+            GetStepHook.SetArg(2, var_step);
+            vm.Query = GetStepHook.Compile();
+            foreach (var sol in vm.RunInteractive())
+            {
+                var item = sol.Substitutions[var_step]
+                    .Substitute(sol.Substitutions);
+                if (!item.Matches(out Step step))
+                {
+                    vm.Throw(ErgoVM.ErrorType.Custom, "Invalid step.");
+                    yield break;
+                }
+                yield return step;
             }
         }
         public static ITerm[][] ParseContext(FloorGenerationContext ctx)
@@ -268,16 +289,21 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
+            var t = default(MapMarkerName);
             var markerArgs = new Dict(WellKnown.Literals.Discard);
-            if (!args[0].Matches<MapMarkerName>(out var t))
+            if (args[0] is Dict dict && dict.Functor.TryGetA(out var df))
             {
-                if (args[0] is not Dict dict || !dict.Functor.TryGetA(out var df)
-                    || !df.Matches(out t))
+                if (!df.Matches(out t))
                 {
                     vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(MapMarkerName), args[0].Explain());
                     return false;
                 }
                 markerArgs = dict;
+            }
+            else if (!args[0].Matches(out t))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(MapMarkerName), args[0].Explain());
+                return false;
             }
             var fun = t.ToString();
             ctx.AddMetaObject(CTX_MapMarker_Name, l1, markerArgs.WithFunctor(new Atom(fun.ToErgoCase())));
@@ -305,7 +331,7 @@ namespace Fiero.Business
                 return false;
             }
             var desiredSize = Maybe<Coord>.None;
-            if (args[1].Matches<Coord>(out var desiredSize_))
+            if (args[1] is not Variable && args[1].Matches<Coord>(out var desiredSize_))
                 desiredSize = desiredSize_;
             else if (args[1] is not Variable)
             {
@@ -323,9 +349,9 @@ namespace Fiero.Business
             }
             var prefabGroups = GetPrefabs(vm, desiredName, desiredSize)
                 .Where(x => pfbArgs.Tags == null || pfbArgs.Tags.Intersect(x.Tags).Any())
-                .OrderBy(x => x.Layer)
                 .GroupBy(x => x.Name);
             var prefabRules = Rng.Random.Choose(prefabGroups.ToList())
+                .OrderBy(x => x.Layer)
                 .GroupBy(x => x.Group);
             // Placement is randomized once at the beginning so that all layers remain consistent.
             if (pfbArgs.Randomize)
@@ -342,7 +368,8 @@ namespace Fiero.Business
             {
                 if (group.Key == "ungrouped")
                 {
-                    if (!group.Select(x => PlacePrefab(x, pfbArgs)).Any(x => !x))
+                    if (group
+                        .Select(x => !PlacePrefab(x, pfbArgs)).Any(x => x))
                         return false;
                 }
                 else
@@ -490,6 +517,7 @@ namespace Fiero.Business
         {
             if (term is List lst)
                 return InterpretEML(lst);
+            //Debug.WriteLine(term.Explain());
             var (args, fun) = (term.GetArguments(), term.GetFunctor().Select(x => x.Explain()).GetOr(EML_NoOp_Name));
             return fun switch
             {

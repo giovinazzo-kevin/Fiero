@@ -9,7 +9,6 @@
 
 effect:began(_{effect_id: Id, owner: O, arguments: _{ radius: R }}) :-
 	O as physical_entity is PO,
-	effect(effect_def{name: bestow_trait, arguments: invulnerable}, PO, _),
 	assertz(barrel_data(Id, id, Id)),
 	assertz(barrel_data(Id, owner, PO)),
 	assertz(barrel_data(Id, radius, R)).
@@ -17,10 +16,10 @@ effect:began(_{effect_id: Id, owner: O, arguments: _{ radius: R }}) :-
 effect:ended(_{effect_id: Id}) :-
 	barrel_data(Id, radius, R),
 	barrel_data(Id, owner, O),
-	effect(effect_def{name: remove_trait, arguments: invulnerable}, O, _),
-	effect(effect_def{name: explosion, arguments: R}, O, _), % this kills the bomb
+	effect(effect_def{name: explosion, arguments: R}, O, _), % this kills the barrel
 	retractall(barrel_data(Id, _, _)).
 
-action:actor_damaged(_{victim: _{id: OwnerId}}) :-
+action:actor_damaged(_{victim: _{id: OwnerId}, damage: D}) :-
+	D > 0,
 	barrel_data(Id, owner, _{id: OwnerId}),
 	end(Id).

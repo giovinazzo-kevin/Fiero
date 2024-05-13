@@ -36,11 +36,11 @@
             .WithTraitTracking()
             ;
 
-        public IEntityBuilder<Actor> Dummy_ExplosiveBarrel()
+        public IEntityBuilder<Actor> Dummy_ExplosiveBarrel(int radius = 5)
             => Dummy(TextureName.Features, "ExplosiveBarrel", "Explosive Barrel", ColorName.White, solid: true)
             .WithFaction(FactionName.Monsters)
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Barrel), $"_{{radius: {5}}}"))
+                EffectDef.FromScript(Scripts.Get(ScriptName.Barrel), $"_{{radius: {radius}}}"))
             .Tweak<PhysicsComponent>((_, x) => x.Roots = 1)
             ;
 

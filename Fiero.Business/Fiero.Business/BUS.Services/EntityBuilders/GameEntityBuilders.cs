@@ -901,8 +901,8 @@
         public IEntityBuilder<Tile> Tile_Water()
             => Tile(TileName.Water, ColorName.LightBlue)
             .Tweak<PhysicsComponent>((s, x) => x.SwallowsItems = x.SwallowsActors = x.BlocksMovement = x.IsFlat = x.BlocksNpcPathing = x.BlocksPlayerPathing = true)
-            .Tweak<TileComponent>((s, x) => { x.MovementCost = 100; })
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Ground)
+            .Tweak<TileComponent>((s, x) => { x.MovementCost = 100; })
             ;
         #endregion
     }

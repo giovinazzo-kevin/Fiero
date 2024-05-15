@@ -88,7 +88,7 @@
     <None Update="Resources\Scripts\dialogue\dialogue.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\items\barrel.ergo">
+    <None Update="Resources\Scripts\dummies\barrel.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\items\grapple.ergo">

@@ -61,7 +61,7 @@
             }
             if (GetClosestHostile(a) is { } hostile)
             {
-                var dir = a.Position() - hostile.Position();
+                var dir = (a.Position() - hostile.Position()).Clamp(-1, 1);
                 if (!Systems.Get<DungeonSystem>().TryGetCellAt(a.FloorId(), a.Position() + dir, out var cell))
                 {
                     return Fight(a);

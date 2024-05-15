@@ -1,0 +1,19 @@
+:- module(barrel, []).
+:- use_module(effect).
+:- use_module(fiero).
+:- dynamic(dict/2).
+:- subscribe(action, [actor_damaged]).
+
+effect:began(_{effect_id: Id, owner: O, arguments: _{ radius: R }}) :-
+	O as physical_entity is PO,
+	assertz(barrel_data {id: Id, owner: PO, radius: R}).
+
+effect:ended(_{effect_id: Id}) :-
+	barrel_data {id: Id, owner: O, radius: R},
+	effect(effect_def{name: explosion, arguments: R}, O, _),
+	retractall(barrel_data{id: Id}).
+
+action:actor_damaged(_{victim: _{id: OwnerId}, damage: D}) :-
+	D > 0,
+	barrel_data{id: Id, owner: _{id: OwnerId}},
+	end(Id).

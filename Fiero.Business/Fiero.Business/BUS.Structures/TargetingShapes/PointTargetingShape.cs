@@ -38,7 +38,7 @@
 
         public override bool TryAutoTarget(Func<Coord, bool> validTarget, Func<Coord, bool> obstacle)
         {
-            foreach (var p in Shapes.Box(Origin, MaxRange))
+            foreach (var p in Shapes.Box(Origin, MaxRange * 2))
             {
                 if (obstacle(p))
                 {

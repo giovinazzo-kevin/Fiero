@@ -5,28 +5,25 @@ namespace Fiero.Core
     /// <summary>
     /// Handles caching of scripts and their top-level routing through a provided IScriptHost.
     /// </summary>
-    public class GameScripts<TScripts>(IScriptHost<TScripts> host, MetaSystem meta, GameDataStore store)
-        where TScripts : struct, Enum
+    public class GameScripts(IScriptHost host, MetaSystem meta, GameDataStore store)
     {
         protected readonly Dictionary<string, Script> Scripts = new();
-        public readonly IScriptHost<TScripts> Host = host;
+        public readonly IScriptHost Host = host;
 
-        private static string CacheKey(TScripts a, string b) => $"{a}{b}";
-
-        public bool TryLoad(TScripts key, out Script script, string cacheKey = null)
+        public bool TryLoad(string key, out Script script)
         {
             if (Host.TryLoad(key, out script))
             {
-                Scripts[CacheKey(key, cacheKey)] = script;
+                Scripts[key] = script;
                 return true;
             }
             return false;
         }
-        public bool TryGet(TScripts key, out Script script, string cacheKey = null) => Scripts.TryGetValue(CacheKey(key, cacheKey), out script);
-        public bool TryGet<T>(TScripts key, out T script, string cacheKey = null)
+        public bool TryGet(string key, out Script script) => Scripts.TryGetValue(key, out script);
+        public bool TryGet<T>(string key, out T script)
             where T : Script
         {
-            if (TryGet(key, out var script_, cacheKey) && script_ is T t)
+            if (TryGet(key, out var script_) && script_ is T t)
             {
                 script = t;
                 return true;
@@ -34,7 +31,7 @@ namespace Fiero.Core
             script = default;
             return false;
         }
-        public Script Get(TScripts key, string cacheKey = null) => Scripts[CacheKey(key, cacheKey)];
+        public Script Get(string key) => Scripts[key];
 
         public IEnumerable<Subscription> RouteSubscriptions()
         {

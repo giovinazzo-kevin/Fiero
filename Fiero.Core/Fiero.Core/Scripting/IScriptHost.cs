@@ -3,11 +3,9 @@
 
 namespace Fiero.Core
 {
-    public partial interface IScriptHost<TScripts>
-        where TScripts : struct, Enum
+    public partial interface IScriptHost
     {
-        bool TryLoad(TScripts fileName, out Script script);
-
+        bool TryLoad(string fileName, out Script script);
         bool Respond(Script sender, Script.EventHook @event, object payload);
         bool Observe(Script sender, GameDataStore store, Script.DataHook datum, object oldValue, object newValue);
 

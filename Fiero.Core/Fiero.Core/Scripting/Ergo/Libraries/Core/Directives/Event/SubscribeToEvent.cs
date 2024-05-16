@@ -6,7 +6,7 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 
-namespace Fiero.Core;
+namespace Fiero.Core.Ergo.Libraries.Core.Event;
 
 [SingletonDependency]
 public class SubscribeToEvent : InterpreterDirective

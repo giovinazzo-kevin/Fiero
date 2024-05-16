@@ -28,7 +28,7 @@ namespace Fiero.Core
         public readonly GameFonts<TFonts> Fonts;
         public readonly GameSounds<TSounds> Sounds;
         public readonly GameShaders<TShaders> Shaders;
-        public readonly GameScripts<TScripts> Scripts;
+        public readonly GameScripts Scripts;
         public readonly GameDirector Director;
         public readonly GameUI UI;
         public readonly GameWindow Window;
@@ -45,8 +45,8 @@ namespace Fiero.Core
             GameSounds<TSounds> sounds,
             GameColors<TColors> colors,
             GameShaders<TShaders> shaders,
-            GameScripts<TScripts> scripts,
             GameLocalizations<TLocales> localization,
+            GameScripts scripts,
             GameUI ui,
             GameWindow window,
             GameDirector director,
@@ -116,10 +116,10 @@ namespace Fiero.Core
             {
                 throw new AggregateException(missingLocales.Select(x => new ResourceNotFoundException<TLocales>(x)));
             }
-            if (!ValidateResources<TScripts>(f => Scripts.TryGet(f, out _), out var missingScripts))
-            {
-                throw new AggregateException(missingScripts.Select(x => new ResourceNotFoundException<TScripts>(x)));
-            }
+            //if (!ValidateResources<string>(f => Scripts.TryGet(f, out _), out var missingScripts))
+            //{
+            //    throw new AggregateException(missingScripts.Select(x => new ResourceNotFoundException<TScripts>(x)));
+            //}
         }
 
         protected virtual void InitializeWindow(RenderWindow win)

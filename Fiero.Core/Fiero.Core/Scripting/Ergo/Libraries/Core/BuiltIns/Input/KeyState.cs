@@ -3,7 +3,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 
-namespace Fiero.Core;
+namespace Fiero.Core.Ergo.Libraries.Core.Input;
 
 public class KeyState(GameInput input)
     : BuiltIn("Gets whether a key is pressed, down, released or up", new Atom("key_state"), 2, ErgoModules.Input)

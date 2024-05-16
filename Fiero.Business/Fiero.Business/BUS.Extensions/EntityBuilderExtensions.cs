@@ -1,40 +1,9 @@
-﻿using Ergo.Lang.Ast;
-using Ergo.Lang.Extensions;
-using LightInject;
+﻿using LightInject;
 using Unconcern.Common;
 namespace Fiero.Business
 {
     public static class EntityBuilderExtensions
     {
-        public static IEntityBuilder<T> LoadState<T>(this IEntityBuilder<T> builder, string resourceName, bool throwOnFail = false)
-            where T : Entity
-        {
-            var scripts = builder.Entities.ServiceFactory.GetInstance<GameScripts<ScriptName>>();
-            var entities = (ErgoScript)scripts.Get(ScriptName.Entity);
-            var queryStr = $"dict({resourceName.ToErgoCase()}, X)";
-            var query = entities.VM.ParseAndCompileQuery(queryStr);
-            entities.VM.Query = query;
-            entities.VM.Run();
-            if (entities.VM.State == Ergo.Runtime.ErgoVM.VMState.Fail)
-                if (throwOnFail)
-                    throw new ArgumentException(resourceName);
-                else
-                    return builder;
-            // X == {prop: prop_component{}, other_prop: other_prop_component{}, ...}
-            var subs = entities.VM.Solutions.Single().Substitutions;
-            var X = (Ergo.Lang.Ast.Set)(subs[new("X")].Substitute(subs));
-            var kvps = X.Contents
-                .ToDictionary(a => (Atom)((Complex)a).Arguments[0], a => ((Complex)a).Arguments[1]);
-            foreach (var prop in builder.Entities.GetProxyableProperties<T>())
-            {
-                var name = new Atom(prop.Name.ToErgoCase());
-                if (kvps.TryGetValue(name, out var dict))
-                {
-                    builder = builder.Load(prop.PropertyType, (Dict)dict);
-                }
-            }
-            return builder;
-        }
         public static IEntityBuilder<T> WithName<T>(this IEntityBuilder<T> builder, string name)
             where T : Entity => builder.AddOrTweak<InfoComponent>((s, c) => c.Name = s.GetInstance<GameResources>().Localizations.Translate(name));
         public static IEntityBuilder<T> WithDescription<T>(this IEntityBuilder<T> builder, string desc)

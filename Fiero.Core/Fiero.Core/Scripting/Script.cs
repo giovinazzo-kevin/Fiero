@@ -2,6 +2,7 @@
 
 namespace Fiero.Core
 {
+
     public abstract class Script(string name)
     {
         public readonly string Name = name;

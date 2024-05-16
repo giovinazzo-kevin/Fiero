@@ -4,7 +4,7 @@ using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 
-namespace Fiero.Core;
+namespace Fiero.Core.Ergo.Libraries.Core.Input;
 
 [SingletonDependency]
 public class SimulateKey(GameInput input)

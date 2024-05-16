@@ -6,7 +6,7 @@ using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 using System.Reflection;
 
-namespace Fiero.Core;
+namespace Fiero.Core.Ergo.Libraries.Core.Event;
 
 [SingletonDependency]
 public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoModules.Event)

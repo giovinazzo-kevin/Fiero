@@ -6,7 +6,7 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Exceptions;
 using Ergo.Lang.Extensions;
 
-namespace Fiero.Core;
+namespace Fiero.Core.Ergo.Libraries.Core.Data;
 
 [SingletonDependency]
 public class ObserveDatum : InterpreterDirective

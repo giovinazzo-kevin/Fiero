@@ -27,14 +27,14 @@ namespace Fiero.Business
             GameSprites<TextureName, ColorName> sprites,
             GameFonts<FontName> fonts,
             GameSounds<SoundName> sounds,
-            GameScripts<ScriptName> scripts,
             GameColors<ColorName> colors,
             GameShaders<ShaderName> shaders,
             GameLocalizations<LocaleName> localization,
+            GameScripts scripts,
             IEnumerable<IGameScene> gameScenes,
             GameEntities entities,
             MetaSystem meta)
-            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, scripts, localization, ui, win, director, entities, meta)
+            : base(off, loop, input, textures, sprites, fonts, sounds, colors, shaders, localization, scripts, ui, win, director, entities, meta)
         {
             Bus = bus;
             Dialogues = dialogues;
@@ -186,8 +186,8 @@ namespace Fiero.Business
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
 
-            foreach (var script in Enum.GetValues<ScriptName>())
-                Scripts.TryLoad(script, out _);
+            //foreach (var script in Enum.GetValues<ScriptName>())
+            //    Scripts.TryLoad(script, out _);
 
             Store.SetValue(Data.View.TileSize, 16);
             Store.SetValue(Data.View.MinWindowSize, new(800, 800));

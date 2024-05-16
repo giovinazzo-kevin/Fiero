@@ -5,12 +5,12 @@ using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Shell;
+using Fiero.Core.Ergo.Libraries.Core;
 using System.IO.Pipelines;
 
-namespace Fiero.Core
+namespace Fiero.Core.Ergo
 {
-    public partial class ErgoScriptHost<TScripts> : IScriptHost<TScripts>
-        where TScripts : struct, Enum
+    public partial class ErgoScriptHost : IScriptHost
     {
         public const string SearchPath = @".\Resources\Scripts\";
         public readonly ErgoFacade Facade;
@@ -67,7 +67,7 @@ namespace Fiero.Core
 
         protected virtual ErgoScript MakeScript(InterpreterScope scope) => new ErgoScript(scope);
 
-        public virtual bool TryLoad(TScripts fileName, out Script script)
+        public virtual bool TryLoad(string fileName, out Script script)
         {
             script = default;
             var localScope = CoreScope;
@@ -98,7 +98,6 @@ namespace Fiero.Core
             scope.Run();
             return true;
         }
-
 
         public bool Observe(Script sender, GameDataStore store, Script.DataHook datum, object oldValue, object newValue)
         {

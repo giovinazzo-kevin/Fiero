@@ -1,7 +1,7 @@
 ﻿using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 
-namespace Fiero.Core
+namespace Fiero.Core.Ergo
 {
     public sealed class ErgoModules
     {

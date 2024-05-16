@@ -1,6 +1,6 @@
 ﻿using Ergo.Shell;
 
-namespace Fiero.Core
+namespace Fiero.Core.Ergo
 {
 
     public sealed class ErgoInputReader(KeyboardInputReader r) : IAsyncInputReader

@@ -3,8 +3,11 @@ using Ergo.Interpreter.Directives;
 using Ergo.Interpreter.Libraries;
 using Ergo.Lang.Ast;
 using Ergo.Runtime.BuiltIns;
+using Fiero.Core.Ergo.Libraries.Core.Data;
+using Fiero.Core.Ergo.Libraries.Core.Event;
+using Fiero.Core.Ergo.Libraries.Core.Input;
 
-namespace Fiero.Core
+namespace Fiero.Core.Ergo.Libraries.Core
 {
     [SingletonDependency]
     public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta) : Library
@@ -48,8 +51,8 @@ namespace Fiero.Core
         }
         public override IEnumerable<BuiltIn> GetExportedBuiltins()
         {
-            yield return new Get(store);
-            yield return new Set(store);
+            yield return new GetDatum(store);
+            yield return new SetDatum(store);
             yield return new KeyState(input);
             yield return new SimulateKey(input);
             yield return new Raise(meta);

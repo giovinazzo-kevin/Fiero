@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Core.Extensions
 {
+
     public static class RandomExtensions
     {
         public static T Choose<T>(this Random rng, IList<T> source) => source.Shuffle(rng).First();

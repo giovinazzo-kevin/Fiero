@@ -1,4 +1,5 @@
-﻿using Unconcern.Common;
+﻿using Fiero.Core.Exceptions;
+using Unconcern.Common;
 
 namespace Fiero.Core
 {
@@ -23,15 +24,25 @@ namespace Fiero.Core
         public bool TryGet<T>(string key, out T script)
             where T : Script
         {
-            if (TryGet(key, out var script_) && script_ is T t)
+            script = default;
+            if (!TryGet(key, out var script_) && !TryLoad(key, out script_))
+            {
+                return false;
+            }
+            if (script_ is T t)
             {
                 script = t;
                 return true;
             }
-            script = default;
             return false;
         }
-        public Script Get(string key) => Scripts[key];
+        public T Get<T>(string key)
+            where T : Script
+        {
+            if (TryGet(key, out T script))
+                return script;
+            throw new ScriptNotFoundException(key);
+        }
 
         public IEnumerable<Subscription> RouteSubscriptions()
         {

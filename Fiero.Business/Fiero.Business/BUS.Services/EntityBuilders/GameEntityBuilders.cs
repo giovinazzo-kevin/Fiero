@@ -1,4 +1,6 @@
-﻿namespace Fiero.Business
+﻿using Fiero.Core.Ergo;
+
+namespace Fiero.Business
 {
     [SingletonDependency]
     public class GameEntityBuilders
@@ -40,7 +42,7 @@
             => Dummy(TextureName.Features, "ExplosiveBarrel", "Explosive Barrel", ColorName.White, solid: true)
             //.WithFaction(FactionName.Monsters)
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Barrel), $"_{{radius: {radius}}}"))
+                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Barrel), $"_{{radius: {radius}}}"))
             .Tweak<PhysicsComponent>((_, x) => x.Roots = 1)
             ;
 
@@ -642,7 +644,7 @@
             => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Reach), $"_{{range: 1.0}}"),
+                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Reach), $"_{{range: 1.0}}"),
                 e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()
@@ -712,7 +714,7 @@
             )
             .WithItemSprite("GrapplingHook")
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Grapple)),
+                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Grapple)),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         public IEntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 3, int radius = 5)
@@ -732,7 +734,7 @@
                 directional: false
             )
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
+                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion

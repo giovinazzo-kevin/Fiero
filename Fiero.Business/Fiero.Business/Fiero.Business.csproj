@@ -97,6 +97,18 @@
     <None Update="Resources\Scripts\items\bomb.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\mapgen\mapgen.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\mapgen\maps\map_test.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\mapgen\prefabs\prefabs_huts.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\mapgen\prefabs\prefabs_test.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\maps\map_test.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

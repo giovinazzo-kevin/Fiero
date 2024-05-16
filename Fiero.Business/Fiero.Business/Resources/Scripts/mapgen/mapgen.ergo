@@ -1,0 +1,7 @@
+% This module decides which map script to run when generating a given FloorId.
+% Map scripts can define event handlers just like regular game scripts, however
+% the map scripts are loaded and unloaded automatically when the player changes area.
+% Additionally, map scripts, unlike regular scripts, can define floor generation steps.
+:- module(mapgen, [choose_generator/2]).
+
+choose_generator(_, 'map_test').

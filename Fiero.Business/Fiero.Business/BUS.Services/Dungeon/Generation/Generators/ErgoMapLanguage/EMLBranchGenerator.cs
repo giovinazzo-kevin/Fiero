@@ -1,4 +1,5 @@
-﻿using Ergo.Lang;
+﻿using Ergo.Interpreter.Libraries;
+using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using static Fiero.Business.FieroLib;
@@ -13,10 +14,32 @@ namespace Fiero.Business
 
         public readonly GameScripts<ScriptName> Scripts = scripts;
         public DungeonTheme Theme { get; set; } = DungeonTheme.Default;
+
+        #region Hooks
+        public static readonly Hook GetPrefabHook = new(new(new("choose_generator"), 2, Modules.MapGen, default));
+        #endregion
+
+        public string ChooseGenerator(FloorId id)
+        {
+            var script = (ErgoScript)Scripts.Get(ScriptName.Mapgen);
+            var var_generator = new Variable("Generator");
+            foreach (var sol in GetPrefabHook.Call(script.VM, id, var_generator))
+            {
+                return sol.Substitutions[var_generator]
+                    .Substitute(sol.Substitutions) // might be unnecessary
+                    .Explain();
+            }
+            throw new NotSupportedException(id.ToString());
+        }
+
         public Floor GenerateFloor(FloorId id, FloorBuilder builder)
         {
-            var script = (ErgoScript)Scripts.Get(ScriptName.Map_Test);
-            var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(FieroLib.Modules.Fiero);
+            var generator = ChooseGenerator(id);
+            if (!Enum.TryParse<ScriptName>(generator.ToCSharpCase(), out var scriptName))
+                throw new NotSupportedException(id.ToString());
+            if (!Scripts.TryGet<ErgoScript>(scriptName, out var script))
+                throw new NotSupportedException(id.ToString());
+            var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(Modules.Fiero);
             var map = fieroLib.Maps[script.VM.KB.Scope.Entry];
             return builder
                 .WithStep(ctx => ctx.FillBox(Coord.Zero, map.Info.Size, Theme.RoomTile))

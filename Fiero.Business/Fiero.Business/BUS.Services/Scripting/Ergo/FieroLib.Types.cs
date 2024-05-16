@@ -31,6 +31,7 @@ public partial class FieroLib
         public static readonly Atom Event = new("event");
         public static readonly Atom Random = new("random");
         public static readonly Atom Map = new("map");
+        public static readonly Atom MapGen = new("mapgen");
     }
 }
 

@@ -5,7 +5,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName, ScriptName>
+    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName>
     {
         protected readonly IEnumerable<IGameScene> Scenes;
 

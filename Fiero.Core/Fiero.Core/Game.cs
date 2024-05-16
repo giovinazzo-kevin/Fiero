@@ -9,7 +9,7 @@ using System.Runtime;
 namespace Fiero.Core
 {
 
-    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders, TScripts>
+    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
         : IGame
         where TFonts : struct, Enum
         where TTextures : struct, Enum
@@ -17,7 +17,6 @@ namespace Fiero.Core
         where TSounds : struct, Enum
         where TColors : struct, Enum
         where TShaders : struct, Enum
-        where TScripts : struct, Enum
     {
         public readonly OffButton OffButton;
         public readonly GameLoop Loop;

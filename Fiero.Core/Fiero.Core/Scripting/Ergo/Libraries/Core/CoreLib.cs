@@ -12,7 +12,7 @@ namespace Fiero.Core.Ergo.Libraries.Core
     [SingletonDependency]
     public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta) : Library
     {
-        public override Atom Module => ErgoModules.Core;
+        public override Atom Module => CoreErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
         protected readonly Dictionary<Atom, HashSet<Signature>> ObservedData = new();
         public void SubscribeToEvent(Atom scriptModule, Atom eventModule, Atom @event)

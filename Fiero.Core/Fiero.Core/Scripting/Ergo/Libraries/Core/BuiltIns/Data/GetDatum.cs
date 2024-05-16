@@ -8,7 +8,7 @@ namespace Fiero.Core.Ergo.Libraries.Core.Data;
 
 [SingletonDependency]
 public class GetDatum(GameDataStore store)
-    : BuiltIn("Gets the value of a game datum", new Atom("get"), 3, ErgoModules.Data)
+    : BuiltIn("Gets the value of a game datum", new Atom("get"), 3, CoreErgoModules.Data)
 {
     public override ErgoVM.Op Compile() => vm =>
     {

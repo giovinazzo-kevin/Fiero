@@ -11,8 +11,8 @@ namespace Fiero.Core.Extensions
             where T : EcsEntity
         {
             var scripts = builder.Entities.ServiceFactory.GetInstance<GameScripts>();
-            if (!scripts.TryGet<ErgoScript>(DefaultScriptName.Entity, out var entities))
-                throw new ScriptNotFoundException(DefaultScriptName.Entity);
+            if (!scripts.TryGet<ErgoScript>(CoreScriptName.Entity, out var entities))
+                throw new ScriptNotFoundException(CoreScriptName.Entity);
             entities.VM.Query = entities.VM.ParseAndCompileQuery($"dict({resourceName.ToErgoCase()}, X)");
             // X == {prop: prop_component{}, other_prop: other_prop_component{}, ...}
             var var_x = new Variable("X");
@@ -20,7 +20,7 @@ namespace Fiero.Core.Extensions
             {
                 var X = solution.Substitutions[var_x].Substitute(solution.Substitutions);
                 if (X is not Set set)
-                    throw new ScriptErrorException(DefaultScriptName.Entity, $"Expected term of type {nameof(Set)}, found: {X.Explain()}");
+                    throw new ScriptErrorException(CoreScriptName.Entity, $"Expected term of type {nameof(Set)}, found: {X.Explain()}");
                 var kvps = set.Contents
                     .ToDictionary(a => (Atom)((Complex)a).Arguments[0], a => ((Complex)a).Arguments[1]);
                 foreach (var prop in builder.Entities.GetProxyableProperties<T>())

@@ -2,17 +2,19 @@
 using Ergo.Lang;
 using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
+using Fiero.Core.Ergo;
+using Fiero.Core.Exceptions;
 using static Fiero.Business.FieroLib;
 
 namespace Fiero.Business
 {
     [SingletonDependency]
-    public class EMLBranchGenerator(GameScripts<ScriptName> scripts) : IBranchGenerator
+    public class EMLBranchGenerator(GameScripts scripts) : IBranchGenerator
     {
         [Term(Marshalling = TermMarshalling.Named, Functor = "entity")]
         public readonly record struct GetEntityArgs(string Type, bool RandomType, ITerm Args);
 
-        public readonly GameScripts<ScriptName> Scripts = scripts;
+        public readonly GameScripts Scripts = scripts;
         public DungeonTheme Theme { get; set; } = DungeonTheme.Default;
 
         #region Hooks
@@ -21,7 +23,8 @@ namespace Fiero.Business
 
         public string ChooseGenerator(FloorId id)
         {
-            var script = (ErgoScript)Scripts.Get(ScriptName.Mapgen);
+            if (!Scripts.TryGet<ErgoScript>(ScriptName.Mapgen, out var script))
+                throw new ScriptNotFoundException(ScriptName.Mapgen);
             var var_generator = new Variable("Generator");
             foreach (var sol in GetPrefabHook.Call(script.VM, id, var_generator))
             {
@@ -35,10 +38,8 @@ namespace Fiero.Business
         public Floor GenerateFloor(FloorId id, FloorBuilder builder)
         {
             var generator = ChooseGenerator(id);
-            if (!Enum.TryParse<ScriptName>(generator.ToCSharpCase(), out var scriptName))
-                throw new NotSupportedException(id.ToString());
-            if (!Scripts.TryGet<ErgoScript>(scriptName, out var script))
-                throw new NotSupportedException(id.ToString());
+            if (!Scripts.TryGet<ErgoScript>(generator, out var script))
+                throw new ScriptNotFoundException(generator);
             var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(Modules.Fiero);
             var map = fieroLib.Maps[script.VM.KB.Scope.Entry];
             return builder

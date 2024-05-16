@@ -31,7 +31,7 @@ namespace Fiero.Business.Scenes
 
         public Actor Player { get; private set; }
 
-        public readonly IScriptHost<ScriptName> ScriptHost;
+        public readonly IScriptHost ScriptHost;
 
         public GameplayScene(
             GameDataStore store,

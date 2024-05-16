@@ -1,5 +1,6 @@
 ﻿using Ergo.Lang;
 using Ergo.Lang.Ast;
+using Fiero.Core.Ergo;
 using Unconcern.Common;
 
 namespace Fiero.Business
@@ -28,7 +29,7 @@ namespace Fiero.Business
             // Define a temporary virtual predicate end/1 that lets us end this specific effect instance.
             // Calling end(_) will therefore end all instances of an effect!
             var endHead = new Complex(new Atom("end"), new Atom(Id));
-            var endPred = Predicate.FromOp(ErgoModules.Effect, endHead, vm =>
+            var endPred = Predicate.FromOp(CoreErgoModules.Effect, endHead, vm =>
             {
                 End(systems, owner);
                 vm.KB.Retract(endHead);

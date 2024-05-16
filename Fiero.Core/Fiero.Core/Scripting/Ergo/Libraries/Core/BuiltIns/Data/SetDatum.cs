@@ -8,7 +8,7 @@ namespace Fiero.Core.Ergo.Libraries.Core.Data;
 
 [SingletonDependency]
 public class SetDatum(GameDataStore store)
-    : BuiltIn("Sets the value of a game datum if its current value matches the comparison value", new Atom("set"), 4, ErgoModules.Data)
+    : BuiltIn("Sets the value of a game datum if its current value matches the comparison value", new Atom("set"), 4, CoreErgoModules.Data)
 {
     public override ErgoVM.Op Compile() => vm =>
     {

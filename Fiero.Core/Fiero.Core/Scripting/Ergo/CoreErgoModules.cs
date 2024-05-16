@@ -3,7 +3,7 @@ using Ergo.Lang.Extensions;
 
 namespace Fiero.Core.Ergo
 {
-    public sealed class ErgoModules
+    public sealed class CoreErgoModules
     {
         public static readonly Atom Core = new(nameof(Core).ToErgoCase());
         public static readonly Atom Data = new(nameof(Data).ToErgoCase());

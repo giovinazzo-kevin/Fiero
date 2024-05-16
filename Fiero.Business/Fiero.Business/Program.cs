@@ -18,15 +18,14 @@ namespace Fiero.Business
                 LocaleName,
                 SoundName,
                 ColorName,
-                ShaderName,
-                ScriptName
+                ShaderName
             >(Register);
             await game.RunAsync(game.OffButton.Token);
         }
 
         static void Register(ServiceContainer services)
         {
-            services.Override<IScriptHost<ScriptName>, FieroScriptHost>();
+            services.Override<IScriptHost, FieroScriptHost>();
         }
     }
 }

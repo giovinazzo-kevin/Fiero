@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Fiero.Core.Ergo;
+using System.Text;
 using Unconcern;
 using Unconcern.Common;
 
@@ -15,20 +16,20 @@ namespace Fiero.Business
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
-        public readonly ErgoScriptHost<ScriptName> Host;
+        public readonly ErgoScriptHost Host;
 
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost<ScriptName> host)
+        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost host)
             : base(ui)
         {
             EventBus = bus;
             Colors = colors;
             OutputAvailable += OnOutputAvailable;
             EnableDragging = false;
-            if (host is not ErgoScriptHost<ScriptName> ergoHost)
+            if (host is not ErgoScriptHost ergoHost)
                 throw new NotSupportedException();
             Host = ergoHost;
             Data.View.ViewportSize.ValueChanged += ViewportSize_ValueChanged;

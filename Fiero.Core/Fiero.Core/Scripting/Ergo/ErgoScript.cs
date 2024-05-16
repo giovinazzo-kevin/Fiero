@@ -35,7 +35,7 @@ namespace Fiero.Core.Ergo
              the predicates subscribed/2 and observed/3 are called by a global event handler (that looks the same for all scripts that import the data or event modules).
              This handler then builds the correct predicate at runtime and calls it.
              */
-            var coreLib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
+            var coreLib = scope.GetLibrary<CoreLib>(CoreErgoModules.Core);
             var facts = new List<Predicate>(GetFacts());
             VM = scope.Facade.BuildVM(
                 scope.BuildKnowledgeBase(CompilerFlags.Default, beforeCompile: kb =>
@@ -58,19 +58,19 @@ namespace Fiero.Core.Ergo
                 var any = false;
                 foreach (var sub in coreLib.GetScriptSubscriptions(scope))
                 {
-                    yield return Predicate.Fact(ErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: false, exported: true);
+                    yield return Predicate.Fact(CoreErgoModules.Event, new Complex(subscribed, sub.Module.GetOrThrow(), sub.Functor), dynamic: false, exported: true);
                     any = true;
                 }
                 if (!any)
-                    yield return Predicate.Falsehood(ErgoModules.Event, new Complex(subscribed, WellKnown.Literals.Discard, WellKnown.Literals.Discard), dynamic: false, exported: true);
+                    yield return Predicate.Falsehood(CoreErgoModules.Event, new Complex(subscribed, WellKnown.Literals.Discard, WellKnown.Literals.Discard), dynamic: false, exported: true);
                 any = false;
                 foreach (var sub in coreLib.GetObservedData(scope))
                 {
-                    yield return Predicate.Fact(ErgoModules.Data, new Complex(observed, sub.Module.GetOrThrow(), sub.Functor, new Atom((string)sub.Functor.Value + "_changed")));
+                    yield return Predicate.Fact(CoreErgoModules.Data, new Complex(observed, sub.Module.GetOrThrow(), sub.Functor, new Atom((string)sub.Functor.Value + "_changed")));
                     any = true;
                 }
                 if (!any)
-                    yield return Predicate.Falsehood(ErgoModules.Data, new Complex(observed, WellKnown.Literals.Discard, WellKnown.Literals.Discard, WellKnown.Literals.Discard));
+                    yield return Predicate.Falsehood(CoreErgoModules.Data, new Complex(observed, WellKnown.Literals.Discard, WellKnown.Literals.Discard, WellKnown.Literals.Discard));
             }
         }
         public override Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes)

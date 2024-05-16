@@ -10,7 +10,7 @@
         public readonly GameSprites<TextureName, ColorName> Sprites;
         public readonly GameTextures<TextureName> Textures;
         public readonly GameFonts<FontName> Fonts;
-        public readonly GameScripts<ScriptName> Scripts;
+        public readonly GameScripts Scripts;
         public readonly GameDialogues Dialogues;
         public readonly GameEntityBuilders Entities;
 
@@ -22,7 +22,7 @@
             GameSprites<TextureName, ColorName> sprites,
             GameTextures<TextureName> textures,
             GameFonts<FontName> fonts,
-            GameScripts<ScriptName> scripts,
+            GameScripts scripts,
             GameDialogues dialogues,
             GameEntityBuilders entities
         )

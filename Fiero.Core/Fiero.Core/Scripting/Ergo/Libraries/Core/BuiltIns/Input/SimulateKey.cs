@@ -8,7 +8,7 @@ namespace Fiero.Core.Ergo.Libraries.Core.Input;
 
 [SingletonDependency]
 public class SimulateKey(GameInput input)
-    : BuiltIn("Simulates pressing a key for use in macros and demos", new Atom("simulate_key"), 1, ErgoModules.Input)
+    : BuiltIn("Simulates pressing a key for use in macros and demos", new Atom("simulate_key"), 1, CoreErgoModules.Input)
 {
     public readonly GameInput Input = input;
 

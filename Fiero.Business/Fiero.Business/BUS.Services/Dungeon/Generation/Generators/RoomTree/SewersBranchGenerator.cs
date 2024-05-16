@@ -12,9 +12,9 @@
             RoomSquares = new(2, 2, (d, s) => 1f / Math.Pow(s, 2)),
         };
 
-        public readonly GameScripts<ScriptName> Scripts;
+        public readonly GameScripts Scripts;
 
-        public SewersBranchGenerator(GameScripts<ScriptName> scripts) : base(DefaultTheme)
+        public SewersBranchGenerator(GameScripts scripts) : base(DefaultTheme)
         {
             Scripts = scripts;
         }

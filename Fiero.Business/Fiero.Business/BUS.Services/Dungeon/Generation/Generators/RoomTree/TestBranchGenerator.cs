@@ -7,8 +7,7 @@
         {
             RoomSquares = new(1, 1),
         };
-        public readonly GameScripts<ScriptName> Scripts;
-        public TestBranchGenerator(GameScripts<ScriptName> scripts) : base(DefaultTheme) { Scripts = scripts; }
+        public TestBranchGenerator() : base(DefaultTheme) { }
         public override Coord MapSize(FloorId id) => id.Depth switch
         {
             _ => new(50, 50)

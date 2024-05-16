@@ -6,13 +6,13 @@
         protected readonly GameEntities Entities;
         protected readonly GameUI UI;
         protected readonly GameColors<ColorName> Colors;
-        protected readonly GameScripts<ScriptName> Scripts;
+        protected readonly GameScripts Scripts;
 
         public GameEntityBuilders(
             GameEntities entities,
             GameUI ui,
             GameColors<ColorName> colors,
-            GameScripts<ScriptName> scripts
+            GameScripts scripts
         )
         {
             Entities = entities;

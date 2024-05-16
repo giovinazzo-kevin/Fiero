@@ -47,12 +47,12 @@ namespace Fiero.Core.Ergo
                 .WithSearchDirectory(SearchPath)
                 .WithExceptionHandler(Shell.LoggingExceptionHandler);
             coreScope = coreScope
-                .WithModule(Interpreter.Load(ref coreScope, ErgoModules.Core)
+                .WithModule(Interpreter.Load(ref coreScope, CoreErgoModules.Core)
                     .GetOrThrow())
                 .WithModule(new Module(WellKnown.Modules.User, runtime: true)
-                    .WithImport(ErgoModules.Core))
+                    .WithImport(CoreErgoModules.Core))
                 .WithCurrentModule(WellKnown.Modules.User)
-                .WithBaseModule(ErgoModules.Core);
+                .WithBaseModule(CoreErgoModules.Core);
             return coreScope;
         }
 

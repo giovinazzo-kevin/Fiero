@@ -9,7 +9,7 @@ using System.Reflection;
 namespace Fiero.Core.Ergo.Libraries.Core.Event;
 
 [SingletonDependency]
-public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, ErgoModules.Event)
+public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, CoreErgoModules.Event)
 {
     public readonly record struct EventDispatchInfo(Type ArgType, object Target, MethodInfo Raise)
     {

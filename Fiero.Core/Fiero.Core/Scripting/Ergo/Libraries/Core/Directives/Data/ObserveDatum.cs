@@ -18,7 +18,7 @@ public class ObserveDatum : InterpreterDirective
 
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
-        var lib = scope.GetLibrary<CoreLib>(ErgoModules.Core);
+        var lib = scope.GetLibrary<CoreLib>(CoreErgoModules.Core);
         if (args[0] is not Atom name)
         {
             scope.Throw(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, scope, WellKnown.Types.String, args[0].Explain());

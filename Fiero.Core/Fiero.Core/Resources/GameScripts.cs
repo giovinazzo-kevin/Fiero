@@ -68,9 +68,7 @@ namespace Fiero.Core
 
             foreach (var script in Scripts.Values.Where(s => !s.IsRunning))
                 Run(script);
-            yield return Unsub + new Subscription(new Action[] { () => {
-                Unsub = new(true);
-            } }, true);
+            yield return Unsub + new Subscription(new Action[] { Unsub.Clear }, true);
         }
     }
 }

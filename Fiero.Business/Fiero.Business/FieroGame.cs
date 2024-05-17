@@ -186,8 +186,8 @@ namespace Fiero.Business
 
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
 
-            //foreach (var script in Enum.GetValues<ScriptName>())
-            //    Scripts.TryLoad(script, out _);
+            foreach (var script in ScriptName.Preload())
+                Scripts.TryLoad(script, out _);
 
             Store.SetValue(Data.View.TileSize, 16);
             Store.SetValue(Data.View.MinWindowSize, new(800, 800));

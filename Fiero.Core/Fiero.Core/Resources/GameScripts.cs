@@ -11,11 +11,21 @@ namespace Fiero.Core
         protected readonly Dictionary<string, Script> Scripts = new();
         public readonly IScriptHost Host = host;
 
+        private ScriptDataRoutes DataRoutes;
+        private ScriptEventRoutes EventRoutes;
+        private Subscription Unsub = new(true);
+
+        private void Run(Script script)
+        {
+            Unsub.Add([script.Run(EventRoutes ??= Host.GetScriptEventRoutes(meta), DataRoutes ??= Host.GetScriptDataRoutes(store))]);
+        }
+
         public bool TryLoad(string key, out Script script)
         {
             if (Host.TryLoad(key, out script))
             {
                 Scripts[key] = script;
+                Run(script);
                 return true;
             }
             return false;
@@ -46,10 +56,11 @@ namespace Fiero.Core
 
         public IEnumerable<Subscription> RouteSubscriptions()
         {
-            var eventRoutes = Host.GetScriptEventRoutes(meta);
-            var dataRoutes = Host.GetScriptDataRoutes(store);
-            foreach (var item in Scripts.Values)
-                yield return item.Run(eventRoutes, dataRoutes);
+            yield return Unsub + new Subscription(new Action[] { () => {
+                Unsub = new(true);
+                foreach (var script in Scripts.Values)
+                    Run(script);
+            } }, true);
         }
     }
 }

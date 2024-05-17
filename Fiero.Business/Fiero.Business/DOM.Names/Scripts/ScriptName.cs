@@ -20,5 +20,10 @@
         public const string Barrel = "barrel";
         // -- MAPS --
         public const string MapTest = "map_test";
+
+        public static IEnumerable<string> Preload()
+        {
+            yield return Test;
+        }
     }
 }

@@ -20,6 +20,8 @@ namespace Fiero.Core.Ergo
         internal readonly Dictionary<DataHook, (Hook Hook, ErgoVM.Op Op)> ErgoDataHooks = new();
 
         private volatile bool running = false;
+        public override bool IsRunning => running;
+
 
         private readonly Atom subscribed = new("subscribed");
         private readonly Atom observed = new("observed");

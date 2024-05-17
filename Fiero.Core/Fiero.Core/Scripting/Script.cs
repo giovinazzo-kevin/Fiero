@@ -12,7 +12,7 @@ namespace Fiero.Core
         public abstract IEnumerable<EventHook> EventHooks { get; }
         public abstract IEnumerable<DataHook> DataHooks { get; }
         public abstract Subscription Run(ScriptEventRoutes eventRoutes, ScriptDataRoutes dataRoutes);
-
+        public virtual bool IsRunning => false;
 
     }
 }

@@ -57,17 +57,16 @@ namespace Fiero.Core
         public IEnumerable<Subscription> RouteSubscriptions()
         {
             // This foreach is entered from the *second* time RouteSubscriptions is called.
-            // This is because scripts are loaded before that happens.
-            // So they're already running once we get here.
+            // This is because scripts are loaded before that happens, so they're already running once we get here.
+            // That's okay, because routes are available pretty much as soon as all systems are created.
+            foreach (var script in Scripts.Values.Where(s => !s.IsRunning))
+                Run(script);
             // When unsubbing we don't outright unload the scripts, as loading them is fairly expensive,
             // and some scripts are (pre)loaded only once when the game initializes.
             // Instead we simply dispose their subscriptions which is equivalent to stopping their execution.
             // Then once the game restarts we can re-route any cached script that isn't running anymore.
-
+            // In case a script wasn't loaded yet, then it will be routed as usual once it is.
             // TODO: Add a hook that is called when a script stops executing, so that it can clean up any dynamic predicates it set up.
-
-            foreach (var script in Scripts.Values.Where(s => !s.IsRunning))
-                Run(script);
             yield return Unsub + new Subscription(new Action[] { () => {
                 Unsub = new(true);
             } }, true);

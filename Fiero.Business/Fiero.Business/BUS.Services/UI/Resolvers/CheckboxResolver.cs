@@ -1,8 +1,6 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Checkbox>))]
+    [UIResolver<Checkbox>]
     public class CheckboxResolver : UIControlResolver<Checkbox>
     {
         public CheckboxResolver(GameUI ui, GameResources resources)
@@ -10,7 +8,7 @@ namespace Fiero.Business
         {
         }
 
-        public override Checkbox Resolve(LayoutGrid dom)
+        public override Checkbox Resolve()
         {
             var x = new Checkbox(UI.Input);
             x.Foreground.V = Foreground;

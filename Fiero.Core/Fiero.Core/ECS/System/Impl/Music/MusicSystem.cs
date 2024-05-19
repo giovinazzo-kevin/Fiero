@@ -1,6 +1,6 @@
 ﻿using Unconcern.Common;
 
-namespace Fiero.Business
+namespace Fiero.Core
 {
     public partial class MusicSystem : EcsSystem
     {

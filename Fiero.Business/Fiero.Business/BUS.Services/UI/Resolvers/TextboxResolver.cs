@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<TextBox>))]
+    [UIResolver<TextBox>]
     public class TextboxResolver : UIControlResolver<TextBox>
     {
         public readonly KeyboardInputReader Reader;
@@ -13,7 +13,7 @@ namespace Fiero.Business
             Reader = reader;
         }
 
-        public override TextBox Resolve(LayoutGrid dom)
+        public override TextBox Resolve()
         {
             var x = new TextBox(UI.Input, Reader);
             x.Font.V = GetFont();

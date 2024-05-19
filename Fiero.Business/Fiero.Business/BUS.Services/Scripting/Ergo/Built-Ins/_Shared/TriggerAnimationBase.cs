@@ -30,7 +30,7 @@ public abstract class TriggerAnimationBase(IServiceFactory services, string name
             {
                 at = pe;
             }
-            else if (args[0].Matches(out Location location))
+            else if (args[0].Match(out Location location))
             {
                 at = location;
             }

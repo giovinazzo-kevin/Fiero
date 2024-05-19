@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Resources\Scripts\core\**" />
+    <EmbeddedResource Remove="Resources\Scripts\core\**" />
+    <None Remove="Resources\Scripts\core\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LightInject" Version="6.6.4" />
     <PackageReference Include="SFML.Net" Version="2.5.1" />
     <PackageReference Include="Simplex" Version="2.0.6" />
@@ -31,6 +37,9 @@
     <None Update="Resources\Scripts\optin\data.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\optin\ui.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\optin\input.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -38,7 +47,6 @@
 
   <ItemGroup>
     <Folder Include="ECS\System\Meta\Events\" />
-    <Folder Include="Resources\Scripts\core\" />
   </ItemGroup>
 
 </Project>

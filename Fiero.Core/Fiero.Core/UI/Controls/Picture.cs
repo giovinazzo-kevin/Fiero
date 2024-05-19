@@ -5,10 +5,10 @@ namespace Fiero.Core
 
     public class Picture : UIControl
     {
-        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), invalidate: true);
-        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), invalidate: true);
-        public readonly UIControlProperty<bool> LockAspectRatio = new(nameof(LockAspectRatio), true, invalidate: true);
-        public readonly UIControlProperty<Sprite> Sprite = new(nameof(Sprite), null, invalidate: true);
+        public UIControlProperty<HorizontalAlignment> HorizontalAlignment {get; private set;} = new(nameof(HorizontalAlignment), invalidate: true);
+        public UIControlProperty<VerticalAlignment> VerticalAlignment {get; private set;} = new(nameof(VerticalAlignment), invalidate: true);
+        public UIControlProperty<bool> LockAspectRatio {get; private set;} = new(nameof(LockAspectRatio), true, invalidate: true);
+        public UIControlProperty<Sprite> Sprite {get; private set;} = new(nameof(Sprite), null, invalidate: true);
 
 
         public Picture(GameInput input)

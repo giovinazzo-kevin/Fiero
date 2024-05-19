@@ -180,7 +180,6 @@ namespace Fiero.Business.Scenes
                 l.Clicked += (_, __, ___) =>
                 {
                     TrySetState(state);
-                    return true;
                 };
             };
         }

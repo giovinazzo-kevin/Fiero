@@ -12,12 +12,12 @@ public class SetDatum(GameDataStore store)
 {
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches(out string module))
+        if (!vm.Arg(0).Match(out string module))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(0).Explain());
             return;
         }
-        if (!vm.Arg(1).Matches(out string name))
+        if (!vm.Arg(1).Match(out string name))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, typeof(string), vm.Arg(1).Explain());
             return;

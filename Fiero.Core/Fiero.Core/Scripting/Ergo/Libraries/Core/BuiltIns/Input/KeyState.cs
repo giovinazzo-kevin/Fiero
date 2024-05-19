@@ -16,7 +16,7 @@ public class KeyState(GameInput input)
 
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches<VirtualKeys>(out var vk))
+        if (!vm.Arg(0).Match<VirtualKeys>(out var vk))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(VirtualKeys), vm.Arg(0).Explain());
             return;

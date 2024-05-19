@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<UIWindowAsControl>))]
+    [UIResolver<UIWindowAsControl>]
     public class UIWindowControlResolver : UIControlResolver<UIWindowAsControl>
     {
         public UIWindowControlResolver(GameUI ui, GameResources resources)
@@ -10,7 +10,7 @@ namespace Fiero.Business
         {
         }
 
-        public override UIWindowAsControl Resolve(LayoutGrid dom)
+        public override UIWindowAsControl Resolve()
         {
             var x = new UIWindowAsControl(UI.Input);
             return x;

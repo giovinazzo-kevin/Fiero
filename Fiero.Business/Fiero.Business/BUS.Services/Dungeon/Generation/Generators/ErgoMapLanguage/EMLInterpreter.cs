@@ -67,7 +67,7 @@ namespace Fiero.Business
             {
                 var item = sol.Substitutions[var_prefab]
                     .Substitute(sol.Substitutions);
-                if (!item.Matches(out Prefab prefab)
+                if (!item.Match(out Prefab prefab)
                 || prefab.Canvas.Any(layer => prefab.Size.Area() / prefab.GridSize.Area() != layer.Length))
                 {
                     vm.Throw(ErgoVM.ErrorType.Custom, "Invalid prefab.");
@@ -91,7 +91,7 @@ namespace Fiero.Business
             {
                 var item = sol.Substitutions[var_step]
                     .Substitute(sol.Substitutions);
-                if (!item.Matches(out Step step))
+                if (!item.Match(out Step step))
                 {
                     vm.Throw(ErgoVM.ErrorType.Custom, "Invalid step.");
                     yield break;
@@ -139,12 +139,12 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[0].Matches<TileName>(out var tile))
+            if (!args[0].Match<TileName>(out var tile))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Tile, args[0].Explain());
                 return false;
             }
-            if (!args[2].Matches<Coord>(out var l1))
+            if (!args[2].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[2].Explain());
                 return false;
@@ -167,7 +167,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[0].Matches<float>(out var chance))
+            if (!args[0].Match<float>(out var chance))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Number, args[0].Explain());
                 return false;
@@ -190,17 +190,17 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[2].Matches<Coord>(out var l1))
+            if (!args[2].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[2].Explain());
                 return false;
             }
-            if (!args[1].Matches<Coord>(out var l2))
+            if (!args[1].Match<Coord>(out var l2))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Matches<TileName>(out var t))
+            if (!args[0].Match<TileName>(out var t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
@@ -219,12 +219,12 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 2, args.Length);
                 return false;
             }
-            if (!args[1].Matches<Coord>(out var l1))
+            if (!args[1].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Matches<TileName>(out var t))
+            if (!args[0].Match<TileName>(out var t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
@@ -240,17 +240,17 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[2].Matches<Coord>(out var l1))
+            if (!args[2].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[2].Explain());
                 return false;
             }
-            if (!args[1].Matches<Coord>(out var size))
+            if (!args[1].Match<Coord>(out var size))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Matches<TileName>(out var t))
+            if (!args[0].Match<TileName>(out var t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
@@ -284,7 +284,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 2, args.Length);
                 return false;
             }
-            if (!args[1].Matches<Coord>(out var l1))
+            if (!args[1].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
@@ -293,14 +293,14 @@ namespace Fiero.Business
             var markerArgs = new Dict(WellKnown.Literals.Discard);
             if (args[0] is Dict dict && dict.Functor.TryGetA(out var df))
             {
-                if (!df.Matches(out t))
+                if (!df.Match(out t))
                 {
                     vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(MapMarkerName), args[0].Explain());
                     return false;
                 }
                 markerArgs = dict;
             }
-            else if (!args[0].Matches(out t))
+            else if (!args[0].Match(out t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(MapMarkerName), args[0].Explain());
                 return false;
@@ -320,18 +320,18 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 4, args.Length);
                 return false;
             }
-            if (!args[3].Matches<Coord>(out var l1))
+            if (!args[3].Match<Coord>(out var l1))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[3].Explain());
                 return false;
             }
-            if (!args[2].Matches<PlacePrefabArgs>(out var pfbArgs))
+            if (!args[2].Match<PlacePrefabArgs>(out var pfbArgs))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(PlacePrefabArgs), args[2].Explain());
                 return false;
             }
             var desiredSize = Maybe<Coord>.None;
-            if (args[1] is not Variable && args[1].Matches<Coord>(out var desiredSize_))
+            if (args[1] is not Variable && args[1].Match<Coord>(out var desiredSize_))
                 desiredSize = desiredSize_;
             else if (args[1] is not Variable)
             {
@@ -339,7 +339,7 @@ namespace Fiero.Business
                 return false;
             }
             var desiredName = Maybe<string>.None;
-            if (args[0].Matches<string>(out var desiredName_)
+            if (args[0].Match<string>(out var desiredName_)
                 && desiredName_ != null)
                 desiredName = desiredName_;
             else if (args[0] is not Variable)

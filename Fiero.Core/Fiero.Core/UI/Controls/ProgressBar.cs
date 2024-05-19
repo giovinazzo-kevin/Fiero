@@ -7,9 +7,9 @@ namespace Fiero.Core
         protected readonly Sprite LeftFrame, MiddleFrame, RightFrame;
         protected readonly Sprite Fill;
 
-        public readonly UIControlProperty<float> Progress = new(nameof(Progress), 0);
-        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
-        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
+        public UIControlProperty<float> Progress {get; private set;} = new(nameof(Progress), 0);
+        public UIControlProperty<HorizontalAlignment> HorizontalAlignment {get; private set;} = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
+        public UIControlProperty<VerticalAlignment> VerticalAlignment {get; private set;} = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
         public ProgressBar(GameInput input,
             Sprite le, Sprite me, Sprite re, Sprite f)
@@ -58,7 +58,7 @@ namespace Fiero.Core
                 }
                 Fill.Scale = piece.Scale;
                 Fill.Position = piece.Position;
-                Fill.Color = Foreground;
+                Fill.Color = Foreground.V;
                 if (piece == MiddleFrame)
                 {
                     var full = Progress.V * (len - 2) >= i;

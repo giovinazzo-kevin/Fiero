@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Ergo.Lang;
+using SFML.Graphics;
 
 namespace Fiero.Core
 {
@@ -6,12 +7,13 @@ namespace Fiero.Core
     {
         protected BitmapText LabelDrawable;
 
-        public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12)) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
-        public readonly UIControlProperty<int> MaxLength = new(nameof(MaxLength), 255);
-        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false);
+        public UIControlProperty<BitmapFont> Font { get; private set; } = new(nameof(Font)) { Propagated = true, Inherited = true };
+        public UIControlProperty<Coord> FontSize { get; private set; } = new(nameof(FontSize), new(8, 12)) { Propagated = true, Inherited = true };
+        public UIControlProperty<string> Text { get; private set; } = new(nameof(Text), String.Empty, invalidate: true);
+        public UIControlProperty<int> MaxLength { get; private set; } = new(nameof(MaxLength), 255);
+        public UIControlProperty<bool> ContentAwareScale { get; private set; } = new(nameof(ContentAwareScale), false);
 
+        [NonTerm]
         public string DisplayText => String.IsNullOrEmpty(Text.V)
             ? String.Empty
             : String.Join(String.Empty, Text.V.Take(MaxLength));
@@ -99,7 +101,7 @@ namespace Fiero.Core
                         text.Position += deltaCoord * new Coord(0, 1) * 2;
                         break;
                 }
-                text.FillColor = label.Foreground;
+                text.FillColor = label.Foreground.V;
                 target.Draw(text, states);
             }
         }

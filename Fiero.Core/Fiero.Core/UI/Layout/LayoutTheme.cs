@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Fiero.Core
+﻿namespace Fiero.Core
 {
     public struct LayoutTheme : IEnumerable<LayoutRule>
     {

@@ -18,7 +18,7 @@ public sealed class AnimationStop(IServiceFactory services)
         return vm =>
         {
             var args = vm.Args;
-            if (!args[0].Matches(out int id))
+            if (!args[0].Match(out int id))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[0]);
                 return;

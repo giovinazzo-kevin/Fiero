@@ -4,6 +4,8 @@
     public record struct LayoutUnit(float AbsolutePart, float RelativePart)
     {
         public static readonly LayoutUnit Zero = new(0, 0);
+        public static readonly LayoutUnit RelativeOne = new(0, 1);
+        public static readonly LayoutUnit AbsoluteOne = new(1, 0);
 
         public static LayoutUnit FromBool(float value, bool px) =>
             px switch
@@ -27,6 +29,7 @@
     public record struct LayoutPoint(LayoutUnit X, LayoutUnit Y)
     {
         public static readonly LayoutPoint Zero = new(LayoutUnit.Zero, LayoutUnit.Zero);
+        public static readonly LayoutPoint RelativeOne = new(LayoutUnit.RelativeOne, LayoutUnit.RelativeOne);
 
         public static LayoutPoint FromAbsolute(Coord px) => new(new(px.X, 0), new(px.Y, 0));
         public static LayoutPoint FromRelative(Vec rel) => new(new(0, rel.X), new(0, rel.Y));

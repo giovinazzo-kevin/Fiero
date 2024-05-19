@@ -1,13 +1,8 @@
 ﻿namespace Fiero.Core
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class TransientDependencyAttribute : Attribute
+    public class TransientDependencyAttribute(params Type[] interfaceTypes) : Attribute
     {
-        public readonly Type InterfaceType;
-
-        public TransientDependencyAttribute(Type interfaceType = null)
-        {
-            InterfaceType = interfaceType;
-        }
+        public readonly Type[] InterfaceTypes = interfaceTypes;
     }
 }

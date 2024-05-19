@@ -26,7 +26,7 @@ namespace Fiero.Business
             if (!Scripts.TryGet<ErgoScript>(ScriptName.Mapgen, out var script))
                 throw new ScriptNotFoundException(ScriptName.Mapgen);
             var var_generator = new Variable("Generator");
-            foreach (var sol in GetPrefabHook.Call(script.VM, id, var_generator))
+            foreach (var sol in GetPrefabHook.CallInteractive(script.VM, id, var_generator))
             {
                 return sol.Substitutions[var_generator]
                     .Substitute(sol.Substitutions) // might be unnecessary
@@ -100,7 +100,7 @@ namespace Fiero.Business
                     case MapMarkerName.SpawnPoint:
                         ctx.AddSpawnPoint(def.Position);
                         break;
-                    case MapMarkerName.Entity when dict.Matches<GetEntityArgs>(out var args):
+                    case MapMarkerName.Entity when dict.Match<GetEntityArgs>(out var args):
                         ctx.AddObject(nameof(MapMarkerName.Entity), def.Position, e => GetEntity(map, args, e));
                         break;
                 }

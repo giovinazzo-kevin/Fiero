@@ -1,15 +1,13 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<ProgressBar>))]
+    [UIResolver<ProgressBar>]
     public class ProgressBarResolver : UIControlResolver<ProgressBar>
     {
         public ProgressBarResolver(GameUI ui, GameResources resources)
             : base(ui, resources)
         {
         }
-        public override ProgressBar Resolve(LayoutGrid dom)
+        public override ProgressBar Resolve()
         {
             var x = new ProgressBar(UI.Input,
                 GetUISprite("bar_empty-l", ColorName.White),

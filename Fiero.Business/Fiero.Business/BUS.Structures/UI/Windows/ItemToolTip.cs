@@ -10,7 +10,7 @@ namespace Fiero.Business
         public readonly LayoutRef<Paragraph> ItemDesc = new();
         public readonly LayoutRef<Picture> Picture = new();
 
-        public readonly UIControlProperty<Item> Item = new(nameof(Item));
+        public UIControlProperty<Item> Item {get; private set;} = new(nameof(Item));
 
         private readonly GameResources resources;
 

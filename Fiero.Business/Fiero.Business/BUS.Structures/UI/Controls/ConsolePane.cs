@@ -7,13 +7,13 @@ namespace Fiero.Business
 {
     public class ConsolePane : Paragraph
     {
-        public readonly UIControlProperty<Coord> Cursor = new(nameof(Cursor), invalidate: true);
-        public readonly UIControlProperty<int> TabSize = new(nameof(TabSize), 4, invalidate: true);
+        public UIControlProperty<Coord> Cursor {get; private set;} = new(nameof(Cursor), invalidate: true);
+        public UIControlProperty<int> TabSize {get; private set;} = new(nameof(TabSize), 4, invalidate: true);
         public readonly ObservableCollection<StringBuilder> Lines = new();
         public readonly ObservableCollection<string> History = new();
-        public readonly UIControlProperty<int> HistoryCursor = new(nameof(HistoryCursor), 0, invalidate: true);
-        public readonly UIControlProperty<int> Scroll = new(nameof(Scroll), 0, invalidate: true);
-        public readonly UIControlProperty<int> ScrollAmount = new(nameof(ScrollAmount), 8, invalidate: true);
+        public UIControlProperty<int> HistoryCursor {get; private set;} = new(nameof(HistoryCursor), 0, invalidate: true);
+        public UIControlProperty<int> Scroll {get; private set;} = new(nameof(Scroll), 0, invalidate: true);
+        public UIControlProperty<int> ScrollAmount {get; private set;} = new(nameof(ScrollAmount), 8, invalidate: true);
         public TextBox Caret { get; private set; }
 
         private readonly RampingDebounce _writeDebounce = new(

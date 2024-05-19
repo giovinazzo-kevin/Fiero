@@ -53,28 +53,20 @@ namespace Fiero.Core
                 .Where(x => x.Attr != null && !x.Type.IsAbstract && x.Type.IsClass);
             foreach (var (type, attr) in singletons)
             {
-                if (attr.InterfaceType != null)
-                {
-                    _ioc.Register(attr.InterfaceType, type, new PerContainerLifetime());
-                }
-                else
-                {
+                foreach (var inter in attr.InterfaceTypes)
+                    _ioc.Register(inter, type, new PerContainerLifetime());
+                if (attr.InterfaceTypes.Length == 0)
                     _ioc.Register(type, new PerContainerLifetime());
-                }
             }
             var transients = Assembly.GetEntryAssembly().GetTypes()
                 .Select(t => (Type: t, Attr: t.GetCustomAttribute<TransientDependencyAttribute>()))
                 .Where(x => x.Attr != null && !x.Type.IsAbstract && x.Type.IsClass);
             foreach (var (type, attr) in transients)
             {
-                if (attr.InterfaceType != null)
-                {
-                    _ioc.Register(attr.InterfaceType, type);
-                }
-                else
-                {
+                foreach (var inter in attr.InterfaceTypes)
+                    _ioc.Register(inter, type);
+                if (attr.InterfaceTypes.Length == 0)
                     _ioc.Register(type);
-                }
             }
 
             configureServices?.Invoke(_ioc);

@@ -4,7 +4,7 @@ namespace Fiero.Core
 {
     public partial class UIControl
     {
-        public event Func<UIControl, Coord, Mouse.Button, bool> Clicked;
+        public event Action<UIControl, Coord, Mouse.Button> Clicked;
         protected virtual bool OnClicked(Coord mousePos, Mouse.Button button) { return false; }
         public event Action<UIControl, Coord> MouseEntered;
         protected virtual bool OnMouseEntered(Coord mousePos) { IsMouseOver = true; return false; }

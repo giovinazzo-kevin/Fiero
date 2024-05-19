@@ -5,7 +5,7 @@ namespace Fiero.Core
 {
     public class Checkbox : UIControl
     {
-        public readonly UIControlProperty<bool> Checked = new(nameof(Checked));
+        public UIControlProperty<bool> Checked { get; private set; } = new(nameof(Checked));
 
         public Checkbox(GameInput input) : base(input)
         {
@@ -26,8 +26,8 @@ namespace Fiero.Core
                 using var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
                 {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
-                    FillColor = Accent,
-                    OutlineColor = Foreground,
+                    FillColor = Accent.V,
+                    OutlineColor = Foreground.V,
                     OutlineThickness = 2f
                 };
                 target.Draw(rect, states);
@@ -37,8 +37,8 @@ namespace Fiero.Core
                 using var rect = new RectangleShape(BorderRenderSize.ToVector2f() / 2)
                 {
                     Position = (BorderRenderPos + BorderRenderSize / 4).ToVector2f(),
-                    FillColor = Background,
-                    OutlineColor = Foreground,
+                    FillColor = Background.V,
+                    OutlineColor = Foreground.V,
                     OutlineThickness = 2f
                 };
                 target.Draw(rect, states);

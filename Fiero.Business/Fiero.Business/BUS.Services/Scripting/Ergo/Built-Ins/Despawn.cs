@@ -17,7 +17,7 @@ public sealed class Despawn(IServiceFactory services) : BuiltIn("", new Atom("de
         var entities = _services.GetInstance<GameEntities>();
         return vm =>
         {
-            if (vm.Arg(0).Matches<int>(out var id))
+            if (vm.Arg(0).Match<int>(out var id))
             {
                 if (entities.TryGetProxy<Entity>(id, out var entity))
                 {

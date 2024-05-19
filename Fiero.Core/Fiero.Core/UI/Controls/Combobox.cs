@@ -26,13 +26,12 @@ namespace Fiero.Core
         public event Action<UIControl, Option> ValueChanged;
         protected virtual bool OnValueChanged(Option item) { return false; }
 
-        private bool Control_Clicked(UIControl option, Coord mousePos, Mouse.Button button)
+        private void Control_Clicked(UIControl option, Coord mousePos, Mouse.Button button)
         {
             SelectedOption = Options.FirstOrDefault(o => o.Control == option);
             Text.V = SelectedOption.Label;
             ValueChanged?.Invoke(this, SelectedOption);
             OnValueChanged(SelectedOption);
-            return false;
         }
 
         public void SelectOption(Func<Option, bool> choose)

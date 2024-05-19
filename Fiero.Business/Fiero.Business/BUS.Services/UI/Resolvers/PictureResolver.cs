@@ -1,9 +1,8 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Picture>))]
+    [UIResolver<Picture>]
     public class PictureResolver : UIControlResolver<Picture>
     {
         public PictureResolver(GameUI ui, GameResources resources)
@@ -11,7 +10,7 @@ namespace Fiero.Business
         {
         }
 
-        public override Picture Resolve(LayoutGrid dom)
+        public override Picture Resolve()
         {
             var x = new Picture(UI.Input);
             x.Foreground.V = Foreground;

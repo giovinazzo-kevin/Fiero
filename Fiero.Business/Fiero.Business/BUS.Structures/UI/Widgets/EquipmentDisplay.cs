@@ -4,7 +4,7 @@
     public class EquipmentDisplay : Widget
     {
         public readonly GameResources Resources;
-        public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
+        public UIControlProperty<Actor> Following { get; private set; } = new(nameof(Following), null);
 
         protected override LayoutThemeBuilder DefineStyles(LayoutThemeBuilder builder) => base.DefineStyles(builder)
             .Rule<UIControl>(c => c.Apply(l =>

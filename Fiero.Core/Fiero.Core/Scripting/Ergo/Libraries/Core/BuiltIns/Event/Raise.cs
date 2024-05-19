@@ -61,9 +61,9 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, CoreEr
 
     public override ExecutionNode Optimize(BuiltInNode node)
     {
-        if (!node.Args[0].IsGround || !node.Args[0].Matches(out string sysName))
+        if (!node.Args[0].IsGround || !node.Args[0].Match(out string sysName))
             return node;
-        if (!node.Args[1].IsGround || !node.Args[1].Matches(out string eventName))
+        if (!node.Args[1].IsGround || !node.Args[1].Match(out string eventName))
             return node;
         // If the event can be resolved at compile-time, then let's do so.
         if (GetDispatchInfo(sysName, eventName).TryGetValue(out var dispatch))
@@ -97,12 +97,12 @@ public sealed class Raise(MetaSystem meta) : BuiltIn("", new("raise"), 3, CoreEr
         return vm =>
         {
             var arguments = vm.Args;
-            if (!arguments[0].Matches(out string sysName))
+            if (!arguments[0].Match(out string sysName))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.String, arguments[0]);
                 return;
             }
-            if (!arguments[1].Matches(out string eventName))
+            if (!arguments[1].Match(out string eventName))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.String, arguments[1]);
                 return;

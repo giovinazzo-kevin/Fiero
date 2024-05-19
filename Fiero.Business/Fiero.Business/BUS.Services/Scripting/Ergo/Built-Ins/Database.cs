@@ -30,7 +30,7 @@ public sealed class Database : BuiltIn
             if (!Store.TryGetValue(vm.KB, out var store))
                 Store[vm.KB] = store = new();
             var args = vm.Args;
-            if (!args[1].Matches<AccessMode>(out var mode))
+            if (!args[1].Match<AccessMode>(out var mode))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(AccessMode), args[1]);
                 return;

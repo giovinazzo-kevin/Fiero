@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<ConsolePane>))]
+    [UIResolver<ConsolePane>]
     public class ConsolePaneResolver : UIControlResolver<ConsolePane>
     {
         public readonly KeyboardInputReader Reader;
@@ -12,7 +12,7 @@ namespace Fiero.Business
             Reader = reader;
         }
 
-        public override ConsolePane Resolve(LayoutGrid dom)
+        public override ConsolePane Resolve()
         {
             var x = new ConsolePane(UI.Input, Reader);
             x.Font.V = GetFont(FontName.Terminal);

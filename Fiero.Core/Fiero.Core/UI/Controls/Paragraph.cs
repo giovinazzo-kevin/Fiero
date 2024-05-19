@@ -6,16 +6,16 @@ namespace Fiero.Core
     {
         private object _lock = new();
 
-        public readonly UIControlProperty<BitmapFont> Font = new(nameof(Font)) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<Coord> FontSize = new(nameof(FontSize), new(8, 12), invalidate: true) { Propagated = true, Inherited = true };
-        public readonly UIControlProperty<string> Text = new(nameof(Text), String.Empty, invalidate: true);
-        public readonly UIControlProperty<int> Cols = new(nameof(Cols), 255, invalidate: true);
-        public readonly UIControlProperty<int?> Rows = new(nameof(Rows), null, invalidate: true);
-        public readonly UIControlProperty<int?> LineHeight = new(nameof(LineHeight), null);
-        public readonly UIControlProperty<bool> ContentAwareScale = new(nameof(ContentAwareScale), false, invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<bool> CenterContentH = new(nameof(CenterContentH), false, invalidate: true);
-        public readonly UIControlProperty<bool> CenterContentV = new(nameof(CenterContentV), false, invalidate: true);
-        public readonly UIControlProperty<bool> WrapContent = new(nameof(WrapContent), true, invalidate: true);
+        public UIControlProperty<BitmapFont> Font {get; private set;} = new(nameof(Font)) { Propagated = true, Inherited = true };
+        public UIControlProperty<Coord> FontSize {get; private set;} = new(nameof(FontSize), new(8, 12), invalidate: true) { Propagated = true, Inherited = true };
+        public UIControlProperty<string> Text {get; private set;} = new(nameof(Text), String.Empty, invalidate: true);
+        public UIControlProperty<int> Cols {get; private set;} = new(nameof(Cols), 255, invalidate: true);
+        public UIControlProperty<int?> Rows {get; private set;} = new(nameof(Rows), null, invalidate: true);
+        public UIControlProperty<int?> LineHeight {get; private set;} = new(nameof(LineHeight), null);
+        public UIControlProperty<bool> ContentAwareScale {get; private set;} = new(nameof(ContentAwareScale), false, invalidate: true) { Inherited = false };
+        public UIControlProperty<bool> CenterContentH {get; private set;} = new(nameof(CenterContentH), false, invalidate: true);
+        public UIControlProperty<bool> CenterContentV {get; private set;} = new(nameof(CenterContentV), false, invalidate: true);
+        public UIControlProperty<bool> WrapContent {get; private set;} = new(nameof(WrapContent), true, invalidate: true);
 
         public int CalculatedRows => Rows.V ?? Labels.Count;
         public int CalculatedLineHeight => LineHeight.V ?? FontSize.V.Y;

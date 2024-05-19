@@ -15,11 +15,11 @@ namespace Fiero.Business
         protected readonly GameLoop Loop;
         protected readonly GameDataStore Store;
 
-        public readonly UIControlProperty<IntRect> ViewArea = new(nameof(ViewArea), new(0, 0, 40, 40));
-        public readonly UIControlProperty<bool> AutoUpdateViewArea = new(nameof(AutoUpdateViewArea), true);
-        public readonly UIControlProperty<Coord> ViewTileSize = new(nameof(ViewTileSize), new(16, 16));
-        public readonly UIControlProperty<TargetingShape> TargetingShape = new(nameof(TargetingShape), default);
-        public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
+        public UIControlProperty<IntRect> ViewArea {get; private set;} = new(nameof(ViewArea), new(0, 0, 40, 40));
+        public UIControlProperty<bool> AutoUpdateViewArea {get; private set;} = new(nameof(AutoUpdateViewArea), true);
+        public UIControlProperty<Coord> ViewTileSize {get; private set;} = new(nameof(ViewTileSize), new(16, 16));
+        public UIControlProperty<TargetingShape> TargetingShape {get; private set;} = new(nameof(TargetingShape), default);
+        public UIControlProperty<Actor> Following {get; private set;} = new(nameof(Following), null);
 
         private Coord _cachedPos;
         private RenderTexture _renderTexture;

@@ -1,9 +1,8 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Label>))]
+    [UIResolver<Label>]
     public class LabelResolver : UIControlResolver<Label>
     {
         public LabelResolver(GameUI ui, GameResources resources)
@@ -11,7 +10,7 @@ namespace Fiero.Business
         {
         }
 
-        public override Label Resolve(LayoutGrid dom)
+        public override Label Resolve()
         {
             var x = new Label(UI.Input);
             x.Font.V = GetFont();

@@ -7,7 +7,7 @@ namespace Fiero.Core
     /// </summary>
     public class UIWindowAsControl : UIControl
     {
-        public readonly UIControlProperty<UIWindow> Window = new(nameof(Window), null);
+        public UIControlProperty<UIWindow> Window {get; private set;} = new(nameof(Window), null);
 
         public UIWindowAsControl(GameInput input) : base(input)
         {

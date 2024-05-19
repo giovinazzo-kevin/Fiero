@@ -22,7 +22,7 @@ public sealed class CenterViewOn : BuiltIn
         {
             render.CenterOn(a);
         }
-        else if (arg.Matches(out Coord coord))
+        else if (arg.Match(out Coord coord))
         {
             render.CenterOn(coord);
         }

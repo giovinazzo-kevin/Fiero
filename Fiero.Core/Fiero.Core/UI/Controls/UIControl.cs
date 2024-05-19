@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Ergo.Lang;
+using SFML.Graphics;
 using SFML.Window;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -6,32 +7,42 @@ using System.Reflection;
 
 namespace Fiero.Core
 {
+    [Term(Functor = "color", Marshalling = TermMarshalling.Positional)]
+    public readonly record struct ErgoColor(byte R, byte G, byte B, byte A = 255)
+    {
+        public static implicit operator Color(ErgoColor c) => new(c.R, c.G, c.B, c.A);
+        public static implicit operator ErgoColor(Color c) => new(c.R, c.G, c.B, c.A);
+    }
+
+    [Term(Marshalling = TermMarshalling.Named)]
     public abstract partial class UIControl : Drawable, IDisposable, INotifyPropertyChanging
     {
         public readonly GameInput Input;
         public readonly ObservableCollection<UIControl> Children;
         public readonly IReadOnlyList<IUIControlProperty> Properties;
+        public readonly IReadOnlyList<EventInfo> Events;
 
-        public readonly UIControlProperty<bool> IsInteractive = new(nameof(IsInteractive), false) { Inherited = false };
-        public readonly UIControlProperty<Coord> Snap = new(nameof(Snap), new(1, 1));
-        public readonly UIControlProperty<Coord> Margin = new(nameof(Margin), new(), invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<Coord> Padding = new(nameof(Padding), new(), invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<Coord> Position = new(nameof(Position), new());
-        public readonly UIControlProperty<Coord> Size = new(nameof(Size), new(), invalidate: true);
-        public readonly UIControlProperty<Vec> Origin = new(nameof(Origin), new());
-        public readonly UIControlProperty<Vec> Scale = new(nameof(Scale), new(1, 1), invalidate: true);
-        public readonly UIControlProperty<Color> Foreground = new(nameof(Foreground), new(255, 255, 255), invalidate: true);
-        public readonly UIControlProperty<Color> Background = new(nameof(Background), new(0, 0, 0, 0), invalidate: true);
-        public readonly UIControlProperty<Color> Accent = new(nameof(Accent), new(255, 0, 0), invalidate: true);
-        public readonly UIControlProperty<bool> IsHidden = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
-        public readonly UIControlProperty<bool> IsActive = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
-        public readonly UIControlProperty<int> ZOrder = new(nameof(ZOrder), 0);
-        public readonly UIControlProperty<Color> OutlineColor = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<int> OutlineThickness = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
-        public readonly UIControlProperty<ToolTip> ToolTip = new(nameof(ToolTip), null) { Inherited = false };
-        public readonly UIControlProperty<HorizontalAlignment> HorizontalAlignment = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
-        public readonly UIControlProperty<VerticalAlignment> VerticalAlignment = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
+        public UIControlProperty<bool> IsInteractive { get; private set; } = new(nameof(IsInteractive), false) { Inherited = false };
+        public UIControlProperty<Coord> Snap { get; private set; } = new(nameof(Snap), new(1, 1));
+        public UIControlProperty<Coord> Margin { get; private set; } = new(nameof(Margin), new(), invalidate: true) { Inherited = false };
+        public UIControlProperty<Coord> Padding { get; private set; } = new(nameof(Padding), new(), invalidate: true) { Inherited = false };
+        public UIControlProperty<Coord> Position { get; private set; } = new(nameof(Position), new());
+        public UIControlProperty<Coord> Size { get; private set; } = new(nameof(Size), new(), invalidate: true);
+        public UIControlProperty<Vec> Origin { get; private set; } = new(nameof(Origin), new());
+        public UIControlProperty<Vec> Scale { get; private set; } = new(nameof(Scale), new(1, 1), invalidate: true);
+        public UIControlProperty<ErgoColor> Foreground { get; private set; } = new(nameof(Foreground), new(255, 255, 255), invalidate: true);
+        public UIControlProperty<ErgoColor> Background { get; private set; } = new(nameof(Background), new(0, 0, 0, 0), invalidate: true);
+        public UIControlProperty<ErgoColor> Accent { get; private set; } = new(nameof(Accent), new(255, 0, 0), invalidate: true);
+        public UIControlProperty<bool> IsHidden { get; private set; } = new(nameof(IsHidden), false, invalidate: true) { Propagated = true };
+        public UIControlProperty<bool> IsActive { get; private set; } = new(nameof(IsActive), false, invalidate: true) { Propagated = true };
+        public UIControlProperty<int> ZOrder { get; private set; } = new(nameof(ZOrder), 0);
+        public UIControlProperty<ErgoColor> OutlineColor { get; private set; } = new(nameof(OutlineColor), new(255, 255, 255), invalidate: true) { Inherited = false };
+        public UIControlProperty<int> OutlineThickness { get; private set; } = new(nameof(OutlineThickness), 0, invalidate: true) { Inherited = false };
+        public UIControlProperty<ToolTip> ToolTip { get; private set; } = new(nameof(ToolTip), null) { Inherited = false };
+        public UIControlProperty<HorizontalAlignment> HorizontalAlignment { get; private set; } = new(nameof(HorizontalAlignment), Core.HorizontalAlignment.Left);
+        public UIControlProperty<VerticalAlignment> VerticalAlignment { get; private set; } = new(nameof(VerticalAlignment), Core.VerticalAlignment.Middle);
 
+        [NonTerm]
         public bool IsMouseOver { get; protected set; }
 
 
@@ -61,13 +72,18 @@ namespace Fiero.Core
             }
         }
 
+        [NonTerm]
         public Coord BorderRenderPos { get; private set; }
+        [NonTerm]
         public Coord ContentRenderPos { get; private set; }
+        [NonTerm]
         public Coord BorderRenderSize { get; private set; }
+        [NonTerm]
         public Coord ContentRenderSize { get; private set; }
         protected Coord TrackedMousePosition { get; private set; }
 
         private Coord _minimumContentSize;
+        [NonTerm]
         public Coord MinimumContentSize
         {
             get => _minimumContentSize; protected set
@@ -113,9 +129,12 @@ namespace Fiero.Core
             Children = new();
 
             Properties = GetType()
-                .GetRuntimeFields()
-                .Where(p => p.FieldType.GetInterface(nameof(IUIControlProperty)) != null)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.PropertyType.GetInterface(nameof(IUIControlProperty)) != null)
                 .Select(p => (IUIControlProperty)p.GetValue(this))
+                .ToList();
+            Events = GetType()
+                .GetEvents(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance)
                 .ToList();
             var registerInvalidationEvents = typeof(UIControl)
                 .GetMethod(nameof(RegisterInvalidationEvents), BindingFlags.Instance | BindingFlags.NonPublic);
@@ -230,8 +249,8 @@ namespace Fiero.Core
 
         public bool Click(Coord mousePos, Mouse.Button button)
         {
-            var preventDefault = Clicked?.Invoke(this, mousePos, button) ?? false;
-            return preventDefault || OnClicked(mousePos, button);
+            Clicked?.Invoke(this, mousePos, button);
+            return OnClicked(mousePos, button);
         }
 
         protected bool TrackMouse(Coord mousePos, out UIControl clickedControl, out Mouse.Button clickedButton)
@@ -328,9 +347,9 @@ namespace Fiero.Core
             using var rect = new RectangleShape((BorderRenderSize - outline * 2).ToVector2f())
             {
                 Position = (BorderRenderPos + outline).ToVector2f(),
-                FillColor = Background,
+                FillColor = Background.V,
                 OutlineThickness = OutlineThickness,
-                OutlineColor = OutlineColor
+                OutlineColor = OutlineColor.V
             };
             target.Draw(rect, states);
         }

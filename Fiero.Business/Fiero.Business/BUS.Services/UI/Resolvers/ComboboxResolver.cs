@@ -2,7 +2,7 @@
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<ComboBox>))]
+    [UIResolver<ComboBox>]
     public class ComboboxResolver : UIControlResolver<ComboBox>
     {
         public ComboboxResolver(GameUI ui, GameResources resources)
@@ -10,7 +10,7 @@ namespace Fiero.Business
         {
         }
 
-        public override ComboBox Resolve(LayoutGrid dom)
+        public override ComboBox Resolve()
         {
             var x = new ComboBox(UI.Input, () => new(UI.Input));
             x.Font.V = GetFont();

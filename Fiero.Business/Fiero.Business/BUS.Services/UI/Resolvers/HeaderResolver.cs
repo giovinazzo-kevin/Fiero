@@ -3,14 +3,14 @@ using SFML.Graphics;
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Header>))]
+    [UIResolver<Header>]
     public class HeaderResolver : UIControlResolver<Header>
     {
         public HeaderResolver(GameUI ui, GameResources resources)
             : base(ui, resources)
         {
         }
-        public override Header Resolve(LayoutGrid dom)
+        public override Header Resolve()
         {
             var x = new Header(UI.Input,
                 GetUISprite("header-l", ColorName.White),

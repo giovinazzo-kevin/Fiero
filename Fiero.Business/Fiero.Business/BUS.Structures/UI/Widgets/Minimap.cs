@@ -10,7 +10,7 @@ namespace Fiero.Business
         public readonly FactionSystem FactionSystem;
         public readonly GameColors<ColorName> Colors;
 
-        public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
+        public UIControlProperty<Actor> Following {get; private set;} = new(nameof(Following), null);
 
         private RenderTexture _renderTexture;
         private Sprite _renderSprite;

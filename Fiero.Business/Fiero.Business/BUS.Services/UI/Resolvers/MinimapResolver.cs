@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    //[SingletonDependency(typeof(IUIControlResolver<Minimap>))]
+    //[UIResolver<Minimap>]
     //public class MinimapResolver : UIControlResolver<Minimap>
     //{
     //    protected readonly MetaSystem Systems;
@@ -11,7 +11,7 @@
     //        Systems = systems;
     //    }
 
-    //    public override Minimap Resolve(LayoutGrid dom)
+    //    public override Minimap Resolve()
     //    {
     //        var map = new Minimap(UI.Input, Systems.Get<DungeonSystem>(), Systems.Get<FactionSystem>(), Resources.Colors);
     //        map.Background.V = Background;

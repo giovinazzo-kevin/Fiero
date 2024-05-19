@@ -52,7 +52,7 @@ public sealed class MakeDialogueTrigger : BuiltIn
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(DialogueTrigger) + "Type", args[0]);
                 return;
             }
-            if (!args[0].Matches(out DialogueTriggerDef stub, matchFunctor: false))
+            if (!args[0].Match(out DialogueTriggerDef stub, matchFunctor: false))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(DialogueTriggerDef), args[0]);
                 return;

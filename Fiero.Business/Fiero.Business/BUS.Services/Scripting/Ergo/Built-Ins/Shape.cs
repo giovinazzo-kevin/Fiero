@@ -20,18 +20,18 @@ public sealed class Shape : BuiltIn
 
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches<ShapeName>(out var shape))
+        if (!vm.Arg(0).Match<ShapeName>(out var shape))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(ShapeName), vm.Arg(0));
             return;
         }
-        if (!vm.Arg(1).Matches<Coord>(out var center))
+        if (!vm.Arg(1).Match<Coord>(out var center))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Coord), vm.Arg(1));
             return;
         }
         var enumerable = Enumerable.Empty<Coord>();
-        if (vm.Arg(2).Matches<int>(out var iSize))
+        if (vm.Arg(2).Match<int>(out var iSize))
         {
             enumerable = shape switch
             {
@@ -43,7 +43,7 @@ public sealed class Shape : BuiltIn
                 _ => enumerable
             };
         }
-        else if (vm.Arg(2).Matches<Coord>(out var pSize))
+        else if (vm.Arg(2).Match<Coord>(out var pSize))
         {
             enumerable = shape switch
             {

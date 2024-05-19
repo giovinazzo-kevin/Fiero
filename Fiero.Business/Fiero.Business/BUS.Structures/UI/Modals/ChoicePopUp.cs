@@ -133,12 +133,11 @@
                             if (SelectedIndex == i)
                             {
                                 Close(ModalWindowButton.ImplicitYes);
-                                return false;
+                                return;
                             }
                             SelectedIndex = i;
                             OptionClicked?.Invoke(this, Options[i]);
                             Invalidate();
-                            return false;
                         };
                     })
                 .End())

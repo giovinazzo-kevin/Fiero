@@ -3,7 +3,7 @@
     [TransientDependency]
     public class LogBox : Widget
     {
-        public readonly UIControlProperty<Actor> Following = new(nameof(Following), null);
+        public UIControlProperty<Actor> Following {get; private set;} = new(nameof(Following), null);
 
         public Paragraph Paragraph { get; private set; }
 

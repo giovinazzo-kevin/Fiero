@@ -1,9 +1,7 @@
-﻿using Fiero.Core;
-
-namespace Fiero.Business
+﻿namespace Fiero.Business
 {
 
-    [SingletonDependency(typeof(IUIControlResolver<Button>))]
+    [UIResolver<Button>]
     public class ButtonResolver : UIControlResolver<Button>
     {
         public ButtonResolver(GameUI ui, GameResources resources)
@@ -11,7 +9,7 @@ namespace Fiero.Business
         {
         }
 
-        public override Button Resolve(LayoutGrid dom)
+        public override Button Resolve()
         {
             var x = new Button(UI.Input);
             x.Font.V = GetFont();

@@ -1,9 +1,8 @@
-﻿using Fiero.Core;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Paragraph>))]
+    [UIResolver<Paragraph>]
     public class ParagraphResolver : UIControlResolver<Paragraph>
     {
         public ParagraphResolver(GameUI ui, GameResources resources)
@@ -11,7 +10,7 @@ namespace Fiero.Business
         {
         }
 
-        public override Paragraph Resolve(LayoutGrid dom)
+        public override Paragraph Resolve()
         {
             var x = new Paragraph(UI.Input);
             x.Font.V = GetFont();

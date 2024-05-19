@@ -20,7 +20,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
         return vm =>
         {
             var args = vm.Args;
-            if (args[0].Matches<EffectDefStub>(out var stub))
+            if (args[0].Match<EffectDefStub>(out var stub))
             {
                 int? duration = int.TryParse(stub.Duration, out var d) ? d : null;
                 float? chance = float.TryParse(stub.Chance, out var c) ? c : null;
@@ -33,7 +33,7 @@ public sealed class TriggerEffect(IServiceFactory services) : BuiltIn("", new("e
                     // TODO: bind effect.end as callable to args[2]
                     effect.Start(systems, e, null);
                 }
-                else if (args[1].Matches(out Location loc)
+                else if (args[1].Match(out Location loc)
                     && systems.Get<DungeonSystem>().TryGetTileAt(loc.FloorId, loc.Position, out var tile))
                 {
                     var def = new EffectDef(stub.Name, stub.Arguments, chance: chance, duration: duration, canStack: canStack, source: tile);

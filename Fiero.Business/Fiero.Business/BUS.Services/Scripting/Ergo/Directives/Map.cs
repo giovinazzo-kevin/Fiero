@@ -15,7 +15,7 @@ public sealed class Map() : InterpreterDirective("Declares a dungeon map.", new(
     public override bool Execute(ErgoInterpreter interpreter, ref InterpreterScope scope, params ITerm[] args)
     {
         var lib = scope.GetLibrary<FieroLib>(FieroLib.Modules.Fiero);
-        if (!args[0].Matches<MapInfo>(out var mapInfo))
+        if (!args[0].Match<MapInfo>(out var mapInfo))
         {
             scope.Throw(ErgoInterpreter.ErrorType.ExpectedTermOfTypeAt, nameof(MapInfo), args[0].Explain());
             return false;

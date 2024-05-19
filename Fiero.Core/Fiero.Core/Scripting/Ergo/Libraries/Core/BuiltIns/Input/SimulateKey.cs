@@ -14,7 +14,7 @@ public class SimulateKey(GameInput input)
 
     public override ErgoVM.Op Compile() => vm =>
     {
-        if (!vm.Arg(0).Matches<InputSystem.KeyEvent>(out var keyEvt, mode: TermMarshalling.Named))
+        if (!vm.Arg(0).Match<InputSystem.KeyEvent>(out var keyEvt, mode: TermMarshalling.Named))
         {
             vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(InputSystem.KeyEvent), vm.Arg(0).Explain());
             return;

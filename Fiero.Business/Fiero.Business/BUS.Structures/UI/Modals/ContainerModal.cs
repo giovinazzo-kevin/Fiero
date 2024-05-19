@@ -103,16 +103,16 @@ namespace Fiero.Business
             }
         }
 
-        protected virtual bool OnItemClicked(Button b, int index, Mouse.Button mouseButton)
+        protected virtual void OnItemClicked(Button b, int index, Mouse.Button mouseButton)
         {
             if (mouseButton != Mouse.Button.Left)
             {
-                return false;
+                return;
             }
             var i = CurrentPage.V * PageSize.V + index;
             if (i >= Items.Count)
             {
-                return false;
+                return;
             }
             var actions = GetAvailableActions(Items[i]).Distinct().ToArray();
             var modal = UI.OptionalChoice(
@@ -135,7 +135,7 @@ namespace Fiero.Business
                 Invalidate();
             };
             Invalidate();
-            return false;
+            return;
         }
 
         protected static bool TryMapAction(ChoicePopUp<TActions> modal, TActions action, out VirtualKeys vk)
@@ -236,7 +236,6 @@ namespace Fiero.Business
                             b.Clicked += (_, __, ___) =>
                             {
                                 PrevPage();
-                                return false;
                             };
                         })
                     .End()
@@ -257,7 +256,6 @@ namespace Fiero.Business
                             b.Clicked += (_, __, ___) =>
                             {
                                 NextPage();
-                                return false;
                             };
                         })
                     .End()

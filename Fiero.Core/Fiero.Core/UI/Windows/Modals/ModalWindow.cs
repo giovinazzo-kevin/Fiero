@@ -56,7 +56,7 @@
                                         b.HorizontalAlignment.V = HorizontalAlignment.Center;
                                         b.ZOrder.V = -1;
                                         b.Clicked += B_Clicked;
-                                        bool B_Clicked(UIControl arg1, Coord arg2, SFML.Window.Mouse.Button arg3)
+                                        void B_Clicked(UIControl arg1, Coord arg2, SFML.Window.Mouse.Button arg3)
                                         {
                                             if (!IsMaximized)
                                             {
@@ -68,7 +68,6 @@
                                                 b.Text.V = "O";
                                                 Minimize();
                                             }
-                                            return true;
                                         }
                                     })
                             .End())
@@ -84,7 +83,6 @@
                                         b.Clicked += (_, __, ___) =>
                                         {
                                             Close(new("modal-close", null));
-                                            return false;
                                         };
                                     })
                             .End())
@@ -104,7 +102,6 @@
                                     b.Clicked += (_, __, ___) =>
                                     {
                                         Close(Buttons[i]);
-                                        return false;
                                     };
                                 })
                             .End()

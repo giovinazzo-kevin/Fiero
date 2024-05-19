@@ -7,10 +7,10 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
     [TransientDependency]
     public class StatBar : Widget
     {
-        public readonly UIControlProperty<int> Value = new(nameof(Value));
-        public readonly UIControlProperty<int> MaxValue = new(nameof(MaxValue));
-        public readonly UIControlProperty<string> Stat = new(nameof(Stat));
-        public readonly UIControlProperty<ColorName> Color = new(nameof(Color));
+        public UIControlProperty<int> Value {get; private set;} = new(nameof(Value));
+        public UIControlProperty<int> MaxValue {get; private set;} = new(nameof(MaxValue));
+        public UIControlProperty<string> Stat {get; private set;} = new(nameof(Stat));
+        public UIControlProperty<ColorName> Color {get; private set;} = new(nameof(Color));
 
         protected readonly LayoutRef<Label> StatLabel = new();
         protected readonly LayoutRef<Label> ValueLabel = new();

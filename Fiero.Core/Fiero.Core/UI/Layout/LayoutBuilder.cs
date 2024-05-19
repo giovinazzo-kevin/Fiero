@@ -13,21 +13,15 @@
             Input = ServiceProvider.GetInstance<GameInput>();
         }
 
-        public Func<UIControl> GetResolver(Type controlType, LayoutGrid grid)
+        public Func<UIControl> GetResolver(Type controlType)
         {
             var resolverType = typeof(IUIControlResolver<>).MakeGenericType(controlType);
-            var resolver = ServiceProvider.GetInstance(resolverType);
-            var resolveMethod = resolver.GetType().GetMethod(nameof(IUIControlResolver<UIControl>.Resolve));
-            return () =>
-            {
-                var control = resolveMethod.Invoke(resolver, new object[] { grid });
-                return (UIControl)control;
-            };
+            var resolver = (IUIControlResolver)ServiceProvider.GetInstance(resolverType);
+            return () => resolver.ResolveUntyed();
         }
 
-        public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
+        public Layout Build(Coord size, LayoutGrid grid)
         {
-            var grid = build(new LayoutGrid(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size), Theme));
             var controls = CreateRecursive(grid).ToArray();
             var layout = new Layout(grid, Input, controls);
             layout.Position.ValueChanged += (_, old) =>
@@ -56,7 +50,7 @@
                         }
                         if (c.Instance is null)
                         {
-                            var instance = GetResolver(c.Type, grid)();
+                            var instance = GetResolver(c.Type)();
                             c.Instance = instance;
                             if (instance != null)
                             {
@@ -164,6 +158,11 @@
                     return new Vec(x, y);
                 }
             }
+        }
+        public Layout Build(Coord size, Func<LayoutGrid, LayoutGrid> build)
+        {
+            var grid = build(new LayoutGrid(size == Coord.Zero ? LayoutPoint.FromRelative(new(1, 1)) : LayoutPoint.FromAbsolute(size), Theme));
+            return Build(size, grid);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Fiero.Core
+﻿using Fiero.Core.Ergo;
+
+namespace Fiero.Core
 {
     public class GameUI
     {
@@ -24,7 +26,7 @@
             Store = store;
             Input = input;
             Window = window;
-            OpenWindows = new List<UIWindow>();
+            OpenWindows = [];
         }
 
         public T Open<T>(T wnd, string title = null)
@@ -42,6 +44,15 @@
                 wnd.Closed -= Wnd_Closed;
             }
         }
+
         public LayoutBuilder CreateLayout() => new(Theme, ServiceProvider);
+        public Dictionary<string, Func<LayoutGrid>> LoadLayoutScript(ErgoScript script)
+        {
+            var resolvers = ServiceProvider.GetAllInstances(typeof(IUIControlResolver))
+               .Cast<IUIControlResolver>()
+               .DistinctBy(x => x.Type.Name)
+               .ToDictionary(x => x.Type.Name, x => (Func<UIControl>)x.ResolveUntyed);
+            return ELLInterpreter.GetComponentDefinitions(script.VM, resolvers);
+        }
     }
 }

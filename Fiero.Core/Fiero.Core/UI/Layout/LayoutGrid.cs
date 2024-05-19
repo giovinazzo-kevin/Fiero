@@ -1,6 +1,5 @@
 ﻿namespace Fiero.Core;
 
-
 public class LayoutGrid : IEnumerable<LayoutGrid>
 {
     public record class CellControl(Type Type, Action<UIControl> Initialize)
@@ -30,10 +29,9 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
 
     public Coord ComputedPosition { get; internal set; }
     public Coord ComputedSize { get; internal set; }
-
-
     public string Id { get; set; }
     public string Class { get; set; }
+    public string Type { get; set; }
     public Coord Subdivisions => new(Cols, Rows);
     public bool IsCell => Cols == 0 && Rows == 0;
     public List<CellControl> Controls { get; private set; } = new();
@@ -135,7 +133,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         var unit = LayoutUnit.FromBool(w, px);
         var ret = new LayoutGrid(size: new(unit, LayoutUnit.FromBool(0, false)), theme: new(), parent: this)
         {
-            Class = @class == null ? Class : @class + " " + (Class ?? ""),
+            Class = string.IsNullOrEmpty(@class) ? Class : @class + " " + (Class ?? ""),
             Id = id,
             Position = _offset,
         };
@@ -149,7 +147,7 @@ public class LayoutGrid : IEnumerable<LayoutGrid>
         var unit = LayoutUnit.FromBool(h, px);
         var ret = new LayoutGrid(size: new(LayoutUnit.FromBool(0, false), unit), theme: new(), parent: this)
         {
-            Class = @class == null ? Class : @class + " " + (Class ?? ""),
+            Class = string.IsNullOrEmpty(@class) ? Class : @class + " " + (Class ?? ""),
             Id = id,
             Position = _offset,
         };

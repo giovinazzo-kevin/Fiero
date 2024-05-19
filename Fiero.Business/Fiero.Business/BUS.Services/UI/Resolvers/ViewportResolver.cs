@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    [SingletonDependency(typeof(IUIControlResolver<Viewport>))]
+    [UIResolver<Viewport>]
     public class ViewportResolver : UIControlResolver<Viewport>
     {
         protected readonly DungeonSystem FloorSystem;
@@ -15,7 +15,7 @@
             Loop = loop;
         }
 
-        public override Viewport Resolve(LayoutGrid dom)
+        public override Viewport Resolve()
         {
             var view = new Viewport(UI.Input, FloorSystem, FactionSystem, Resources, Loop, UI.Store);
             view.Background.V = Background;

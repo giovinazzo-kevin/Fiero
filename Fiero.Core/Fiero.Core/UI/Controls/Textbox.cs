@@ -17,8 +17,8 @@ namespace Fiero.Core
 
         public readonly KeyboardInputReader KeyboardReader;
 
-        public readonly UIControlProperty<int> CaretPosition = new(nameof(CaretPosition), invalidate: true);
-        public readonly UIControlProperty<bool> ClearOnEnter = new(nameof(ClearOnEnter), false);
+        public UIControlProperty<int> CaretPosition {get; private set;} = new(nameof(CaretPosition), invalidate: true);
+        public UIControlProperty<bool> ClearOnEnter {get; private set;} = new(nameof(ClearOnEnter), false);
 
         public TextBox(GameInput input, KeyboardInputReader inputReader) : base(input)
         {

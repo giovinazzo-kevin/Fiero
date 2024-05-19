@@ -9,6 +9,7 @@
         where T : UIControl
     {
         protected readonly GameUI UI;
+        public Type Type => typeof(T);
 
         public UIControlResolverBase(
             GameUI ui
@@ -17,6 +18,6 @@
             UI = ui;
         }
 
-        public abstract T Resolve(LayoutGrid dom);
+        public abstract T Resolve();
     }
 }

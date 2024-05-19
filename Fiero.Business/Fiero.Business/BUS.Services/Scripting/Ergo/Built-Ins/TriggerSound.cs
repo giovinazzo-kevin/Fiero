@@ -46,12 +46,12 @@ public sealed class TriggerSound : BuiltIn
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Functor, args[0]);
                 return;
             }
-            if (!functor.Matches(out SoundName sound))
+            if (!functor.Match(out SoundName sound))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundName), args[0]);
                 return;
             }
-            if (!args[0].Matches(out SoundDefStub stub, matchFunctor: false))
+            if (!args[0].Match(out SoundDefStub stub, matchFunctor: false))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundDefStub), args[0]);
                 return;

@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Fiero.Core.Ergo;
+using SFML.Graphics;
 
 namespace Fiero.Business.Scenes
 {
@@ -50,36 +51,39 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
+            var components = UI.LoadLayoutScript(Resources.Scripts.Get<ErgoScript>("ui"));
             Layout = UI.CreateLayout()
-                .Build(new(), grid => grid
-                    .Style<Button>(s => s
-                        .Match(x => x.HasClass("ng"))
-                        .Apply(l => { l.FontSize.V = l.Font.V.Size * 2; l.Foreground.V = Color.Yellow; }))
-                    .Style<Button>(s => s
-                        .Match(x => !x.HasClass("ng"))
-                        .Apply(l => { l.FontSize.V = l.Font.V.Size; }))
-                    .Style<Button>(s => s
-                        .Apply(l => { l.HorizontalAlignment.V = HorizontalAlignment.Center; }))
-                    .Col()
-                        .Row()
-                            .Col()
-                                .Cell(MakeMenuButton(MenuOptions.Continue, SceneState.Exit_Continue))
-                            .End()
-                            .Col(@class: "ng")
-                                .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
-                            .End()
-                            .Col()
-                                .Cell(MakeMenuButton(MenuOptions.LoadGame, SceneState.Exit_LoadGame))
-                            .End()
-                        .End()
-                        .Row()
-                            .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
-                        .End()
-                        .Row()
-                            .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
-                        .End()
-                    .End()
-                );
+                .Build(new(), components["Menu"]());
+            //Layout = UI.CreateLayout()
+            //    .Build(new(), grid => grid
+            //        .Style<Button>(s => s
+            //            .Match(x => x.HasClass("ng"))
+            //            .Apply(l => { l.FontSize.V = l.Font.V.Size * 2; l.Foreground.V = Color.Yellow; }))
+            //        .Style<Button>(s => s
+            //            .Match(x => !x.HasClass("ng"))
+            //            .Apply(l => { l.FontSize.V = l.Font.V.Size; }))
+            //        .Style<Button>(s => s
+            //            .Apply(l => { l.HorizontalAlignment.V = HorizontalAlignment.Center; }))
+            //        .Col()
+            //            .Row()
+            //                .Col()
+            //                    .Cell(MakeMenuButton(MenuOptions.Continue, SceneState.Exit_Continue))
+            //                .End()
+            //                .Col(@class: "ng")
+            //                    .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
+            //                .End()
+            //                .Col()
+            //                    .Cell(MakeMenuButton(MenuOptions.LoadGame, SceneState.Exit_LoadGame))
+            //                .End()
+            //            .End()
+            //            .Row()
+            //                .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
+            //            .End()
+            //            .Row()
+            //                .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
+            //            .End()
+            //        .End()
+            //    );
 
             Data.View.WindowSize.ValueChanged += e =>
             {
@@ -96,7 +100,6 @@ namespace Fiero.Business.Scenes
                 l.Clicked += (_, __, ___) =>
                 {
                     TrySetState(state);
-                    return true;
                 };
             };
         }

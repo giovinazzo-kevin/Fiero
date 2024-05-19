@@ -21,7 +21,7 @@ public sealed class At(IServiceFactory services) : BuiltIn("", new("at"), 2, Fie
             {
                 loc = entity.Location();
             }
-            else if (!args[0].Matches(out loc))
+            else if (!args[0].Match(out loc))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(Location), args[0]);
                 return;

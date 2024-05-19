@@ -10,5 +10,6 @@ namespace Fiero.Core.Ergo
         public static readonly Atom Input = new(nameof(Input).ToErgoCase());
         public static readonly Atom Event = new(nameof(Event).ToErgoCase());
         public static readonly Atom Effect = new(nameof(Effect).ToErgoCase());
+        public static readonly Atom Ui = new(nameof(Ui).ToErgoCase());
     }
 }

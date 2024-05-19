@@ -1,16 +1,28 @@
-﻿namespace Fiero.Core
+﻿using Ergo.Lang;
+
+namespace Fiero.Core
 {
 
+    [Term(Functor = "value", Marshalling = TermMarshalling.Positional)]
     public class UIControlProperty<T> : IUIControlProperty
     {
+        [NonTerm]
         private readonly Func<UIControlProperty<T>, UIControlProperty<T>, T, T> _propagate;
+        [NonTerm]
         private readonly Func<T, T> _get;
+        [NonTerm]
         private readonly Func<T, T> _set;
+        [NonTerm]
         public string Name { get; }
+        [NonTerm]
         public UIControl Owner { get; private set; }
+        [NonTerm]
         public bool Propagated { get; set; }
+        [NonTerm]
         public bool Inherited { get; set; }
+        [NonTerm]
         public bool Invalidating { get; set; }
+        [NonTerm]
         public Type PropertyType { get; } = typeof(T);
 
         public event Action<UIControlProperty<T>, T> ValueUpdated;
@@ -50,7 +62,7 @@
                     return;
                 }
                 ValueChanged?.Invoke(this, old);
-                if (Propagated)
+                if (Propagated && Owner?.Children != null)
                 {
                     foreach (var child in Owner.Children)
                     {

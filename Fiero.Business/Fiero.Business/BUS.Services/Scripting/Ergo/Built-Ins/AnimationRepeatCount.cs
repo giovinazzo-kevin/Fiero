@@ -17,12 +17,12 @@ public sealed class AnimationRepeatCount(IServiceFactory services) : BuiltIn("",
         return vm =>
         {
             var args = vm.Args;
-            if (!args[0].Matches(out int id))
+            if (!args[0].Match(out int id))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[0]);
                 return;
             }
-            if (!args[1].Matches(out int times))
+            if (!args[1].Match(out int times))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Integer, args[1]);
                 return;

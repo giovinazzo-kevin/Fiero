@@ -1,0 +1,39 @@
+% This module should be imported explicitly by scripts that define custom UI layouts.
+% Do not modify unless you know what you are doing.
+
+:- module(ui, []).
+:- op(35, xfy,  ['</>']).
+
+% COMPONENTS
+
+style(_ {
+	horizontal_alignment: center
+}).
+
+test_bar </>
+	(row {size: 16, px: true} </> 
+		(col </> layout{background: color(255,0,0,255)}),
+		(col </> layout{background: color(0,255,0,255)}))
+.
+
+menu </>
+	(col </>
+		test_bar,
+		(row </>
+			(col </> 
+				button{clicked: btn1_clicked, text: 'continue'}),
+			(col{class:'ng'} </> 
+				button{text: 'new game'}),
+			(col </> 
+				button{text: 'load game'})
+		),
+		(row </> 
+			button{text: 'settings'}),
+		(row </> 
+			button{text: 'quit game'}),
+		test_bar
+	)
+.
+
+btn1_clicked(_{text: value(Text), scale: value(Scale) }, _, _) :-
+	write(Text, Scale).

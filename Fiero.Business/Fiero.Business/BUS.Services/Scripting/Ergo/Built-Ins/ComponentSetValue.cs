@@ -42,7 +42,7 @@ public sealed class ComponentSetValue(GameEntities entities, GameDataStore store
                     {
                         // Now it's the actual one so we can change its properties
                         actualComponent = (EcsComponent)args[1];
-                        if (property.Matches(out string propName) && ProxyableComponentProperties[key].TryGetValue(propName, out var prop))
+                        if (property.Match(out string propName) && ProxyableComponentProperties[key].TryGetValue(propName, out var prop))
                         {
                             var ergoType = prop.PropertyType.Name.ToErgoCase();
                             if (!vm.KB.Scope.ExceptionHandler.Try(() =>

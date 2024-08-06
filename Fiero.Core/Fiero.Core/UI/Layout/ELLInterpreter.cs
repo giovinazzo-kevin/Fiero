@@ -4,8 +4,46 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Fiero.Core.Ergo;
+using System.Runtime.CompilerServices;
 
 namespace Fiero.Core;
+
+public sealed class UnificationDictionary<T>(Func<T, SubstitutionMap, T> substitute)
+{
+    public readonly record struct UnifiedEntry(ITerm OriginalKey, T OriginalValue, T SubstitutedValue, SubstitutionMap Substitutions);
+    
+    private readonly List<KeyValuePair<ITerm, T>> _kvps = [];
+    public IEnumerable<KeyValuePair<ITerm, T>> KeyValuePairs => _kvps;
+    public IEnumerable<UnifiedEntry> this[ITerm term] => Get(term);
+    public IEnumerable<UnifiedEntry> Get(ITerm term)
+    {
+        foreach(var kvp in _kvps)
+        {
+            if(kvp.Key.Unify(term).TryGetValue(out var subs))
+            {
+                var substitutedValue = substitute(kvp.Value, subs);
+                yield return new(kvp.Key, kvp.Value, substitutedValue, subs);
+            }
+        }
+    }
+
+
+    public bool TryGetSubstitutedValue(ITerm term, out T ret)
+    {
+        foreach (var v in Get(term))
+        {
+            ret = v.SubstitutedValue;
+            return true;
+        }
+        ret = default;
+        return false;
+    }
+
+    public void Add(ITerm term, T value)
+    {
+        _kvps.Add(new(term, value));
+    }
+}
 
 public static class ELLInterpreter
 {
@@ -15,14 +53,14 @@ public static class ELLInterpreter
 
     [Term(Marshalling = TermMarshalling.Named)]
     private readonly record struct TagProperties(string Id, string Class, float Size, bool Px);
-    private readonly record struct Instruction(Op Op, string Functor, Dict Properties);
+    private readonly record struct Instruction(Op Op, ITerm Functor, Dict Properties);
     private enum Op
     {
         PushTag,
         PopTag
     }
-    private const string Row = nameof(Row);
-    private const string Col = nameof(Col);
+    private const string Row = "row";
+    private const string Col = "col";
     private const string GlobalStyle = "_";
 
     private static readonly Atom Functor = new("</>");
@@ -51,7 +89,9 @@ public static class ELLInterpreter
 
     public static Dictionary<string, Func<LayoutGrid>> GetComponentDefinitions(ErgoVM vm, Dictionary<string, Func<UIControl>> resolveDict)
     {
-        var instructionCache = new Dictionary<string, Instruction[]>();
+        var instructionCache = new UnificationDictionary<Instruction[]>((instructions, subs) => instructions
+            .Select(i => i with { Properties = (Dict)i.Properties.Substitute(subs) })
+            .ToArray());
         var styles = GetStyles(vm);
         var var_componentHead = new Variable("Head");
         var var_componentBody = new Variable("Body");
@@ -60,13 +100,15 @@ public static class ELLInterpreter
             var instructions = GetTags(sol[var_componentBody])
                 .SelectMany(ProcessTag)
                 .ToArray();
-            var name = sol[var_componentHead].Explain(false);
-            instructionCache[name.ToCSharpCase()] = instructions;
+            var key = sol[var_componentHead];
+            instructionCache.Add(key, instructions);
         }
         var componentCache = new Dictionary<string, Func<LayoutGrid>>();
-        foreach (var (key, instructions) in instructionCache)
+        foreach (var (key, instructions) in instructionCache.KeyValuePairs)
         {
-            componentCache[key] = () =>
+            if (key is not Atom atom)
+                continue;
+            componentCache.Add(atom.Explain(false), () =>
             {
                 var stack = new Stack<LayoutGrid>();
                 stack.Push(new LayoutGrid(LayoutPoint.RelativeOne, new()));
@@ -86,20 +128,20 @@ public static class ELLInterpreter
                         };
                         switch (instr.Op)
                         {
-                            case Op.PushTag when instr.Functor == Row:
+                            case Op.PushTag when instr.Functor is Atom { Value: Row }:
                                 stack.Push(stack.Peek().Row(h: props.Size, px: props.Px, @class: props.Class, id: props.Id));
                                 break;
-                            case Op.PushTag when instr.Functor == Col:
+                            case Op.PushTag when instr.Functor is Atom { Value: Col }:
                                 stack.Push(stack.Peek().Col(w: props.Size, px: props.Px, @class: props.Class, id: props.Id));
                                 break;
-                            case Op.PushTag when instructionCache.TryGetValue(instr.Functor, out var componentDef):
+                            case Op.PushTag when instructionCache.TryGetSubstitutedValue(instr.Functor, out var componentDef):
                                 ProcessInstructions(componentDef);
                                 stack.Push(null); // will be popped by the next instruction
                                 break;
-                            case Op.PushTag when resolveDict.TryGetValue(instr.Functor, out var resolve):
+                            case Op.PushTag when resolveDict.TryGetValue(instr.Functor.Explain(false).ToCSharpCase(), out var resolve):
                                 var control = resolve();
                                 var customProps = instr.Properties;
-                                foreach (var styleName in (string[])[GlobalStyle, instr.Functor])
+                                foreach (var styleName in (string[])[GlobalStyle, instr.Functor.Explain(false)])
                                 {
                                     if (!styles.TryGetValue(styleName, out var style))
                                         continue;
@@ -140,7 +182,7 @@ public static class ELLInterpreter
                         }
                     }
                 }
-            };
+            });
         }
         return componentCache;
 
@@ -157,10 +199,11 @@ public static class ELLInterpreter
                 var (functor, properties) = node switch
                 {
                     Atom a => (a, new Dict(a, WellKnown.Literals.Discard)),
+                    Complex c => ((ITerm)c, new Dict(c.Functor, WellKnown.Literals.Discard)),
                     Dict d when d.Functor.TryGetA(out var f) => (f, d),
                     _ => throw new NotSupportedException(node.Explain(false))
                 };
-                return new(op, functor.Explain(false).ToCSharpCase(), properties);
+                return new(op, functor, properties);
             }
 
         }

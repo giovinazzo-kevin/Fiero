@@ -10,15 +10,15 @@ style(_ {
 
 % COMPONENTS
 
-test_bar </>
+test_bar(Text) </>
 	(row {size: 16, px: true} </> 
-		(col </> layout{background: color(255,0,0,255)}),
-		(col </> layout{background: color(0,255,0,255)}))
+		(col </> label{text: Text, background: color(255,0,0,255)}),
+		(col </> label{text: Text, background: color(0,255,0,255)}))
 .
 
 menu </>
 	(col </>
-		test_bar,
+		test_bar('top'),
 		(row </>
 			(col </> 
 				button{clicked: on_continue_clicked, text: 'continue'}),
@@ -31,7 +31,7 @@ menu </>
 			button{text: 'settings'}),
 		(row </> 
 			button{text: 'quit game'}),
-		test_bar
+		test_bar('bottom')
 	)
 .
 

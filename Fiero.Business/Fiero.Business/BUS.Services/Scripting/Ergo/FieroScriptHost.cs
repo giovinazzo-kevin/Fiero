@@ -7,13 +7,9 @@ using LightInject;
 namespace Fiero.Business;
 
 public sealed class FieroScriptHost(IAsyncInputReader inputReader, IServiceFactory fac)
-    : ErgoScriptHost(inputReader, fac)
+    : ErgoScriptHostBase(inputReader, fac), IScriptHost<ErgoScript>, IScriptHost<FieroScript>
 {
     protected override ErgoFacade GetErgoFacade() => base.GetErgoFacade()
-        .AddLibrary(fac.GetInstance<FieroLib>)
-        ;
-
-    protected override InterpreterScope GetCoreScope() => base.GetCoreScope();
-
-    protected override ErgoScript MakeScript(InterpreterScope scope) => new FieroScript(scope);
+        .AddLibrary(ServiceFactory.GetInstance<FieroLib>);
+    protected override FieroScript MakeScript(InterpreterScope scope) => new(scope);
 }

@@ -6,23 +6,47 @@ namespace Fiero.Core
     /// <summary>
     /// Handles caching of scripts and their top-level routing through a provided IScriptHost.
     /// </summary>
-    public class GameScripts(IScriptHost host, MetaSystem meta, GameDataStore store)
+    public class GameScripts(IServiceFactory fac, MetaSystem meta, GameDataStore store)
     {
         protected readonly Dictionary<string, Script> Scripts = new();
-        public readonly IScriptHost Host = host;
+        public readonly Dictionary<Type, IScriptHost> Hosts = fac.GetAllInstances<IScriptHost>()
+            .SelectMany(x => x.GetType()
+                .GetInterfaces()
+                .Select(y => (Host: x, Interface: y)))
+                .Where(z => z.Interface.IsGenericType && z.Interface.GetGenericTypeDefinition() == typeof(IScriptHost<>))
+                .DistinctBy(x => x.Interface)
+                .Select(w => (w.Host, Type: w.Interface.GetGenericArguments()[0]))
+            .ToDictionary(x => x.Type, x => x.Host);
 
         private ScriptDataRoutes DataRoutes;
         private ScriptEventRoutes EventRoutes;
         private Subscription Unsub = new(true);
 
-        private void Run(Script script)
+        private bool TryGetScriptHost(Type t, out IScriptHost host) => Hosts.TryGetValue(t, out host);
+        public bool TryGetScriptHost<T>(out IScriptHost<T> host) where T : Script
         {
-            Unsub.Add([script.Run(EventRoutes ??= Host.GetScriptEventRoutes(meta), DataRoutes ??= Host.GetScriptDataRoutes(store))]);
+            if (Hosts.TryGetValue(typeof(T), out var host_))
+            {
+                host = (IScriptHost<T>)host_;
+                return true;
+            }
+            host = default;
+            return false;
         }
 
-        public bool TryLoad(string key, out Script script)
+        private void Run(Script script)
         {
-            if (Host.TryLoad(key, out script))
+            if (!TryGetScriptHost(script.GetType(), out var host))
+                throw new NotSupportedException(script.GetType().Name);
+            Unsub.Add([script.Run(EventRoutes ??= host.GetScriptEventRoutes(meta), DataRoutes ??= host.GetScriptDataRoutes(store))]);
+        }
+
+        public bool TryLoad<T>(string key, out T script)
+            where T : Script
+        {
+            if (!TryGetScriptHost<T>(out var host))
+                throw new NotSupportedException(typeof(T).Name);
+            if (host.TryLoad(key, out script))
             {
                 Scripts[key] = script;
                 Run(script);
@@ -30,21 +54,18 @@ namespace Fiero.Core
             }
             return false;
         }
-        public bool TryGet(string key, out Script script) => Scripts.TryGetValue(key, out script);
         public bool TryGet<T>(string key, out T script)
             where T : Script
         {
             script = default;
-            if (!TryGet(key, out var script_) && !TryLoad(key, out script_))
+            if (!Scripts.TryGetValue(key, out var script_))
             {
+                if (TryLoad(key, out script))
+                    return true;
                 return false;
             }
-            if (script_ is T t)
-            {
-                script = t;
-                return true;
-            }
-            return false;
+            script = (T)script_;
+            return true;
         }
         public T Get<T>(string key)
             where T : Script

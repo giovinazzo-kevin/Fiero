@@ -5,12 +5,13 @@ using Ergo.Lang.Ast;
 using Ergo.Runtime.BuiltIns;
 using Fiero.Core.Ergo.Libraries.Core.Data;
 using Fiero.Core.Ergo.Libraries.Core.Event;
+using Fiero.Core.Ergo.Libraries.Core.Game;
 using Fiero.Core.Ergo.Libraries.Core.Input;
 
 namespace Fiero.Core.Ergo.Libraries.Core
 {
     [SingletonDependency]
-    public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta) : Library
+    public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta, GameDirector director) : Library
     {
         public override Atom Module => CoreErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
@@ -56,6 +57,7 @@ namespace Fiero.Core.Ergo.Libraries.Core
             yield return new KeyState(input);
             yield return new SimulateKey(input);
             yield return new Raise(meta);
+            yield return new SetScene(director);
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {

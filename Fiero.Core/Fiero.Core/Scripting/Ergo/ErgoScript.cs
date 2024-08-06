@@ -5,10 +5,12 @@ using Ergo.Lang.Ast;
 using Ergo.Lang.Extensions;
 using Ergo.Runtime;
 using Fiero.Core.Ergo.Libraries.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Unconcern.Common;
 
 namespace Fiero.Core.Ergo
 {
+
     public class ErgoScript : Script
     {
         public readonly ErgoVM VM;

@@ -37,7 +37,10 @@
     <None Update="Resources\Scripts\optin\data.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\optin\ui.ergo">
+    <None Update="Resources\Scripts\optin\game.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Scripts\optin\layout.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Scripts\optin\input.ergo">

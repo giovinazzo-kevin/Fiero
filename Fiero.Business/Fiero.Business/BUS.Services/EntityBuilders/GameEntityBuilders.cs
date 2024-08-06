@@ -42,7 +42,7 @@ namespace Fiero.Business
             => Dummy(TextureName.Features, "ExplosiveBarrel", "Explosive Barrel", ColorName.White, solid: true)
             //.WithFaction(FactionName.Monsters)
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Barrel), $"_{{radius: {radius}}}"))
+                EffectDef.FromScript(Scripts.Get<FieroScript>(ScriptName.Barrel), $"_{{radius: {radius}}}"))
             .Tweak<PhysicsComponent>((_, x) => x.Roots = 1)
             ;
 
@@ -644,7 +644,7 @@ namespace Fiero.Business
             => Weapon<Weapon>("spear", WeaponName.Spear, baseDamage: new Dice(2, 3), critChance: Chance.Never, swingDelay: 0, itemRarity: 10, goldValue: 100)
             .LoadState(nameof(WeaponName.Spear))
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Reach), $"_{{range: 1.0}}"),
+                EffectDef.FromScript(Scripts.Get<FieroScript>(ScriptName.Reach), $"_{{range: 1.0}}"),
                 e => new GrantedOnEquip(e))
             ;
         public IEntityBuilder<Launcher> Weapon_Bow()
@@ -714,7 +714,7 @@ namespace Fiero.Business
             )
             .WithItemSprite("GrapplingHook")
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Grapple)),
+                EffectDef.FromScript(Scripts.Get<FieroScript>(ScriptName.Grapple)),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         public IEntityBuilder<Projectile> Projectile_Bomb(int charges = 1, int fuse = 3, int radius = 5)
@@ -734,7 +734,7 @@ namespace Fiero.Business
                 directional: false
             )
             .WithIntrinsicEffect(
-                EffectDef.FromScript(Scripts.Get<ErgoScript>(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
+                EffectDef.FromScript(Scripts.Get<FieroScript>(ScriptName.Bomb), $"_{{radius: {radius}, fuse: {fuse}}}"),
                 e => new GrantedWhenHitByThrownItem(e))
             ;
         #endregion

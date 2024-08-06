@@ -187,7 +187,7 @@ namespace Fiero.Business
             await Colors.LoadJsonAsync("Resources/Palettes/default.json");
 
             foreach (var script in ScriptName.Preload())
-                Scripts.TryLoad(script, out _);
+                Scripts.TryLoad<FieroScript>(script, out _);
 
             Store.SetValue(Data.View.TileSize, 16);
             Store.SetValue(Data.View.MinWindowSize, new(800, 800));
@@ -232,9 +232,9 @@ namespace Fiero.Business
             Store.SetValue(Data.Hotkeys.DeveloperConsole, VirtualKeys.F1);
 
             await Director.AddScenes(Scenes);
-            Director.MapTransition(MenuScene.SceneState.Exit_NewGame, CharCreationScene.SceneState.Main);
-            Director.MapTransition(CharCreationScene.SceneState.Exit_StartGame, GameplayScene.SceneState.Main);
-            Director.MapTransition(CharCreationScene.SceneState.Exit_QuitToMenu, MenuScene.SceneState.Main);
+            Director.MapTransition(MenuScene.SceneState.NewGame, CharCreationScene.SceneState.Main);
+            Director.MapTransition(CharCreationScene.SceneState.StartGame, GameplayScene.SceneState.Main);
+            Director.MapTransition(CharCreationScene.SceneState.QuitToMenu, MenuScene.SceneState.Main);
             Director.TrySetState(MenuScene.SceneState.Main);
 #if DEBUG
             // Start logging everything that passes through the global event bus

@@ -23,7 +23,7 @@ namespace Fiero.Business
 
         public string ChooseGenerator(FloorId id)
         {
-            if (!Scripts.TryGet<ErgoScript>(ScriptName.Mapgen, out var script))
+            if (!Scripts.TryGet<FieroScript>(ScriptName.Mapgen, out var script))
                 throw new ScriptNotFoundException(ScriptName.Mapgen);
             var var_generator = new Variable("Generator");
             foreach (var sol in GetPrefabHook.CallInteractive(script.VM, id, var_generator))
@@ -38,7 +38,7 @@ namespace Fiero.Business
         public Floor GenerateFloor(FloorId id, FloorBuilder builder)
         {
             var generator = ChooseGenerator(id);
-            if (!Scripts.TryGet<ErgoScript>(generator, out var script))
+            if (!Scripts.TryGet<FieroScript>(generator, out var script))
                 throw new ScriptNotFoundException(generator);
             var fieroLib = script.VM.KB.Scope.GetLibrary<FieroLib>(Modules.Fiero);
             var map = fieroLib.Maps[script.VM.KB.Scope.Entry];

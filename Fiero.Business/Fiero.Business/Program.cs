@@ -1,4 +1,5 @@
-﻿using LightInject;
+﻿using Fiero.Core.Ergo;
+using LightInject;
 using System.Text;
 
 namespace Fiero.Business
@@ -9,7 +10,6 @@ namespace Fiero.Business
         {
             CodePagesEncodingProvider.Instance.GetEncoding(437);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
             using var host = new GameHost();
             var game = host.BuildGame<
                 FieroGame,
@@ -25,7 +25,9 @@ namespace Fiero.Business
 
         static void Register(ServiceContainer services)
         {
-            services.Override<IScriptHost, FieroScriptHost>();
+            services.Register<IScriptHost<FieroScript>, FieroScriptHost>(new PerContainerLifetime());
+            services.Override<IScriptHost<ErgoScript>, FieroScriptHost>(new PerContainerLifetime());
+            services.Register<IScriptHost<ErgoLayoutScript>, ErgoLayoutScriptHost>(new PerContainerLifetime());
         }
     }
 }

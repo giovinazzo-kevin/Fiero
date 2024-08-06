@@ -1,9 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using SFML.Window;
+using System.Text.RegularExpressions;
 
 
 namespace Fiero.Core
 {
-    public partial interface IScriptHost
+    public interface IScriptHost
     {
         bool TryLoad(string fileName, out Script script);
         bool Respond(Script sender, Script.EventHook @event, object payload);
@@ -28,9 +29,9 @@ namespace Fiero.Core
         /// </summary>
         public ScriptEventRoutes GetScriptEventRoutes(MetaSystem meta)
         {
-            var sysRegex = NormalizeSystemName();
-            var reqRegex = NormalizeRequestName();
-            var evtRegex = NormalizeEventName();
+            var sysRegex = new Regex("System$", RegexOptions.IgnoreCase);
+            var reqRegex = new Regex("Request$", RegexOptions.IgnoreCase);
+            var evtRegex = new Regex("Event$", RegexOptions.IgnoreCase);
             var finalDict = new ScriptEventRoutes();
             foreach (var (sys, field, isReq) in meta.GetSystemEventFields())
             {
@@ -57,13 +58,20 @@ namespace Fiero.Core
             }
             return finalDict;
         }
+    }
 
-
-        [GeneratedRegex("System$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeSystemName();
-        [GeneratedRegex("Request$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeRequestName();
-        [GeneratedRegex("Event$", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex NormalizeEventName();
+    public partial interface IScriptHost<TScript> : IScriptHost
+        where TScript : Script
+    {
+        bool TryLoad(string fileName, out TScript script)
+        {
+            if(((IScriptHost)this).TryLoad(fileName, out var script_))
+            {
+                script = (TScript)script_;
+                return true;
+            }
+            script = default;
+            return false;
+        }
     }
 }

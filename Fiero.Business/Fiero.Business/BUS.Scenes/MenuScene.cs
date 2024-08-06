@@ -10,13 +10,13 @@ namespace Fiero.Business.Scenes
             [EntryState]
             Main,
             [ExitState]
-            Exit_Continue,
+            Continue,
             [ExitState]
-            Exit_NewGame,
+            NewGame,
             [ExitState]
-            Exit_LoadGame,
+            LoadGame,
             [ExitState]
-            Exit_QuitGame
+            QuitGame
         }
 
         public enum MenuOptions
@@ -51,39 +51,9 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            var components = UI.LoadLayoutScript(Resources.Scripts.Get<ErgoScript>("ui"));
-            Layout = UI.CreateLayout()
-                .Build(new(), components["Menu"]());
-            //Layout = UI.CreateLayout()
-            //    .Build(new(), grid => grid
-            //        .Style<Button>(s => s
-            //            .Match(x => x.HasClass("ng"))
-            //            .Apply(l => { l.FontSize.V = l.Font.V.Size * 2; l.Foreground.V = Color.Yellow; }))
-            //        .Style<Button>(s => s
-            //            .Match(x => !x.HasClass("ng"))
-            //            .Apply(l => { l.FontSize.V = l.Font.V.Size; }))
-            //        .Style<Button>(s => s
-            //            .Apply(l => { l.HorizontalAlignment.V = HorizontalAlignment.Center; }))
-            //        .Col()
-            //            .Row()
-            //                .Col()
-            //                    .Cell(MakeMenuButton(MenuOptions.Continue, SceneState.Exit_Continue))
-            //                .End()
-            //                .Col(@class: "ng")
-            //                    .Cell(MakeMenuButton(MenuOptions.NewGame, SceneState.Exit_NewGame))
-            //                .End()
-            //                .Col()
-            //                    .Cell(MakeMenuButton(MenuOptions.LoadGame, SceneState.Exit_LoadGame))
-            //                .End()
-            //            .End()
-            //            .Row()
-            //                .Cell(MakeMenuButton(MenuOptions.Settings, SceneState.Exit_QuitGame))
-            //            .End()
-            //            .Row()
-            //                .Cell(MakeMenuButton(MenuOptions.QuitGame, SceneState.Exit_QuitGame))
-            //            .End()
-            //        .End()
-            //    );
+            if (!Resources.Scripts.Get<ErgoLayoutScript>("layout_menu").TryCreateComponent("Menu", out var menu))
+                throw new InvalidOperationException();
+            Layout = UI.CreateLayout().Build(new(), menu);
 
             Data.View.WindowSize.ValueChanged += e =>
             {
@@ -92,15 +62,6 @@ namespace Fiero.Business.Scenes
                     Layout.Position.V = e.NewValue / 4;
                     Layout.Size.V = e.NewValue / 2;
                 }
-            };
-
-            Action<Button> MakeMenuButton(MenuOptions option, SceneState state) => l =>
-            {
-                l.Text.V = Resources.Localizations.Translate($"$Menu.{option}$");
-                l.Clicked += (_, __, ___) =>
-                {
-                    TrySetState(state);
-                };
             };
         }
 
@@ -123,12 +84,12 @@ namespace Fiero.Business.Scenes
             {
                 case SceneState.Main:
                     break;
-                case SceneState.Exit_NewGame:
+                case SceneState.NewGame:
                     break;
-                case SceneState.Exit_LoadGame:
+                case SceneState.LoadGame:
                     // TODO: Save/load
                     break;
-                case SceneState.Exit_QuitGame:
+                case SceneState.QuitGame:
                     // TODO: Are you sure?
                     OffButton.Press();
                     break;

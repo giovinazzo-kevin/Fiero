@@ -97,6 +97,9 @@
     <None Update="Resources\Scripts\items\bomb.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\layouts\layout_menu.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\Scripts\mapgen\mapgen.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

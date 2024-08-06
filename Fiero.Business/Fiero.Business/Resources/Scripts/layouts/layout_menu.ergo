@@ -1,14 +1,14 @@
-% This module should be imported explicitly by scripts that define custom UI layouts.
-% Do not modify unless you know what you are doing.
+:- module(layout_menu, []).
+:- use_module(layout).
+:- use_module(game).
 
-:- module(ui, []).
-:- op(35, xfy,  ['</>']).
-
-% COMPONENTS
+% STYLE RULES
 
 style(_ {
 	horizontal_alignment: center
 }).
+
+% COMPONENTS
 
 test_bar </>
 	(row {size: 16, px: true} </> 
@@ -21,11 +21,11 @@ menu </>
 		test_bar,
 		(row </>
 			(col </> 
-				button{clicked: btn1_clicked, text: 'continue'}),
+				button{clicked: on_continue_clicked, text: 'continue'}),
 			(col{class:'ng'} </> 
-				button{text: 'new game'}),
+				button{clicked: on_new_game_clicked, text: 'new game'}),
 			(col </> 
-				button{text: 'load game'})
+				button{clicked: on_load_game_clicked, text: 'load game'})
 		),
 		(row </> 
 			button{text: 'settings'}),
@@ -35,5 +35,7 @@ menu </>
 	)
 .
 
-btn1_clicked(_{text: value(Text), scale: value(Scale) }, _, _) :-
-	write(Text, Scale).
+% EVENT HANDLERS
+
+on_new_game_clicked(_{ }, _, _) :-
+	set_scene_state(new_game).

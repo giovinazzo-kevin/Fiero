@@ -9,9 +9,9 @@ namespace Fiero.Business.Scenes
             [EntryState]
             Main,
             [ExitState]
-            Exit_StartGame,
+            StartGame,
             [ExitState]
-            Exit_QuitToMenu
+            QuitToMenu
         }
 
         public enum MenuOptions
@@ -157,10 +157,10 @@ namespace Fiero.Business.Scenes
                     .End()
                     .Row(h: 48, px: true)
                         .Col()
-                            .Cell(MakeMenuButton(MenuOptions.StartGame, SceneState.Exit_StartGame))
+                            .Cell(MakeMenuButton(MenuOptions.StartGame, SceneState.StartGame))
                         .End()
                         .Col()
-                            .Cell(MakeMenuButton(MenuOptions.QuitToMenu, SceneState.Exit_QuitToMenu))
+                            .Cell(MakeMenuButton(MenuOptions.QuitToMenu, SceneState.QuitToMenu))
                         .End()
                     .End()
                 );
@@ -203,7 +203,7 @@ namespace Fiero.Business.Scenes
             {
                 case SceneState.Main:
                     break;
-                case SceneState.Exit_StartGame:
+                case SceneState.StartGame:
                     _ = UI.Input.ForceRestoreFocus();
                     Store.SetValue(Data.Player.Name, PlayerName.Control.DisplayText);
                     Store.SetValue(Data.Player.Loadout, selectedLoadout);
@@ -216,7 +216,7 @@ namespace Fiero.Business.Scenes
                         Rng.SetGlobalSeed(newRngSeed);
                     }
                     break;
-                case SceneState.Exit_QuitToMenu:
+                case SceneState.QuitToMenu:
                     break;
             }
         }

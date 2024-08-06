@@ -16,20 +16,20 @@ namespace Fiero.Business
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
-        public readonly ErgoScriptHost Host;
+        public readonly ErgoScriptHostBase Host;
 
         public event Action<DeveloperConsole, string> OutputAvailable;
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost host)
+        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost<FieroScript> host)
             : base(ui)
         {
             EventBus = bus;
             Colors = colors;
             OutputAvailable += OnOutputAvailable;
             EnableDragging = false;
-            if (host is not ErgoScriptHost ergoHost)
+            if (host is not ErgoScriptHostBase ergoHost)
                 throw new NotSupportedException();
             Host = ergoHost;
             Data.View.ViewportSize.ValueChanged += ViewportSize_ValueChanged;

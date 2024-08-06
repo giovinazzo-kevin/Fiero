@@ -1,0 +1,4 @@
+% This module should be imported explicitly by scripts that define custom UI layouts.
+% Do not modify unless you know what you are doing.
+:- module(layout, []).
+:- op(35, xfy,  ['</>']).

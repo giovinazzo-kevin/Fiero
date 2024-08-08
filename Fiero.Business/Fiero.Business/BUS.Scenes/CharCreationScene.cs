@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Fiero.Core.Ergo;
+using SFML.Graphics;
 
 namespace Fiero.Business.Scenes
 {
@@ -95,75 +96,10 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            Layout = UI.CreateLayout()
-                .Build(new(), grid => grid
-                    .Style<Button>(s => s
-                        .Apply(x => { x.HorizontalAlignment.V = HorizontalAlignment.Center; }))
-                    .Style<Picture>(s => s
-                        .Apply(x => { x.HorizontalAlignment.V = HorizontalAlignment.Center; }))
-                    .Row()
-                        .Row(h: 24, px: true)
-                            .Col()
-                                .Cell<Label>(x => x.Text.V = L($"$CharCreation.PlayerName$"))
-                            .End()
-                            .Col(id: "playerName")
-                                .Cell(PlayerName, x => x.Text.V = "Player")
-                            .End()
-                            .Col()
-                                .Cell<Label>(x => x.Text.V = L($"$CharCreation.WorldSeed$"))
-                            .End()
-                            .Col(id: "seed")
-                                .Cell(Seed, x => x.Text.V = "")
-                            .End()
-                        .End()
-                        .Row(h: 24, px: true)
-                            .Col()
-                                .Cell<Label>(x => { x.Text.V = L($"$CharCreation.Loadout$"); x.HorizontalAlignment.V = HorizontalAlignment.Center; })
-                            .End()
-                        .End()
-                        .Row()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatKnight, LoadoutName.Knight))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatArcher, LoadoutName.Archer))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWizard, LoadoutName.Wizard))
-                            .End()
-                        .End()
-                        .Row()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMonk, LoadoutName.Monk))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatApothecary, LoadoutName.Apothecary))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWarlock, LoadoutName.Warlock))
-                            .End()
-                        .End()
-                        .Row()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatAdventurer, LoadoutName.Adventurer))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatThief, LoadoutName.Thief))
-                            .End()
-                            .Col()
-                                .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMerchant, LoadoutName.Merchant))
-                            .End()
-                        .End()
-                    .End()
-                    .Row(h: 48, px: true)
-                        .Col()
-                            .Cell(MakeMenuButton(MenuOptions.StartGame, SceneState.StartGame))
-                        .End()
-                        .Col()
-                            .Cell(MakeMenuButton(MenuOptions.QuitToMenu, SceneState.QuitToMenu))
-                        .End()
-                    .End()
-                );
+            if (!Resources.Scripts.Get<ErgoLayoutScript>("layout_char_creation")
+                .TryCreateComponent("layout_char_creation", out var layout))
+                throw new InvalidOperationException();
+            Layout = UI.CreateLayout().Build(new(), layout);
 
             Data.View.WindowSize.ValueChanged += e =>
             {

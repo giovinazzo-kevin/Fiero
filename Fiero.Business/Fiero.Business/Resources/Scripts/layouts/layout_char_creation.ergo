@@ -1,0 +1,115 @@
+:- module(layout_char_creation, []).
+:- use_module(layout).
+:- use_module(game).
+
+% .Row()
+%     .Row(h: 24, px: true)
+%         .Col()
+%             .Cell<Label>(x => x.Text.V = L($"$CharCreation.PlayerName$"))
+%         .End()
+%         .Col(id: "playerName")
+%             .Cell(PlayerName, x => x.Text.V = "Player")
+%         .End()
+%         .Col()
+%             .Cell<Label>(x => x.Text.V = L($"$CharCreation.WorldSeed$"))
+%         .End()
+%         .Col(id: "seed")
+%             .Cell(Seed, x => x.Text.V = "")
+%         .End()
+%     .End()
+%     .Row(h: 24, px: true)
+%         .Col()
+%             .Cell<Label>(x => { x.Text.V = L($"$CharCreation.Loadout$"); x.HorizontalAlignment.V = HorizontalAlignment.Center; })
+%         .End()
+%     .End()
+%     .Row()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatKnight, LoadoutName.Knight))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatArcher, LoadoutName.Archer))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWizard, LoadoutName.Wizard))
+%         .End()
+%     .End()
+%     .Row()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMonk, LoadoutName.Monk))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatApothecary, LoadoutName.Apothecary))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWarlock, LoadoutName.Warlock))
+%         .End()
+%     .End()
+%     .Row()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatAdventurer, LoadoutName.Adventurer))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatThief, LoadoutName.Thief))
+%         .End()
+%         .Col()
+%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMerchant, LoadoutName.Merchant))
+%         .End()
+%     .End()
+% .End()
+% .Row(h: 48, px: true)
+%     .Col()
+%         .Cell(MakeMenuButton(MenuOptions.StartGame, SceneState.StartGame))
+%     .End()
+%     .Col()
+%         .Cell(MakeMenuButton(MenuOptions.QuitToMenu, SceneState.QuitToMenu))
+%     .End()
+% .End()
+
+
+% STYLE RULES
+
+style(_ {
+	horizontal_alignment: center
+}).
+
+% COMPONENTS
+
+layout_char_creation </>
+    (row </> 
+	    (row { size: 24, px: true } </> 
+            (col </> 
+                label { text: 'Player Name' }
+            ),
+            (col { id: 'playerName' } </> 
+                text_box { text: 'Player' }
+            ),
+            (col </> 
+                label { text: 'World Seed' }
+            ),
+            (col { id: 'playerName' } </> 
+                text_box { text: '' }
+            )
+        ),
+	    (row { size: 24, px: true } </> 
+            label { text: 'CharCreation.Loadout' }
+        ),
+        (row </> 
+            (col </>
+                picture { sprite: 'npc_rat' }
+            ),
+            col, 
+            col
+        ),
+        (row </> col, col, col),
+        (row </> col, col, col)
+    ),
+    (row { size: 48, px: true } </> 
+		(col </> 
+			button{clicked: on_continue_clicked, text: 'new game'}
+        ),
+		(col{class:'ng'} </> 
+			button{clicked: on_new_game_clicked, text: 'quit to menu'}
+        )
+    )
+.
+

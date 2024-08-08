@@ -5,8 +5,6 @@ namespace Fiero.Core
 
     public class Picture : UIControl
     {
-        public UIControlProperty<HorizontalAlignment> HorizontalAlignment {get; private set;} = new(nameof(HorizontalAlignment), invalidate: true);
-        public UIControlProperty<VerticalAlignment> VerticalAlignment {get; private set;} = new(nameof(VerticalAlignment), invalidate: true);
         public UIControlProperty<bool> LockAspectRatio {get; private set;} = new(nameof(LockAspectRatio), true, invalidate: true);
         public UIControlProperty<Sprite> Sprite {get; private set;} = new(nameof(Sprite), null, invalidate: true);
 

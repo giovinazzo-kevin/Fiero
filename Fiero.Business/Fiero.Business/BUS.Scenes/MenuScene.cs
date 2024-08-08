@@ -51,9 +51,10 @@ namespace Fiero.Business.Scenes
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            if (!Resources.Scripts.Get<ErgoLayoutScript>("layout_menu").TryCreateComponent("menu", out var menu))
+            if (!Resources.Scripts.Get<ErgoLayoutScript>("layout_menu")
+                .TryCreateComponent("layout_menu", out var layout))
                 throw new InvalidOperationException();
-            Layout = UI.CreateLayout().Build(new(), menu);
+            Layout = UI.CreateLayout().Build(new(), layout);
 
             Data.View.WindowSize.ValueChanged += e =>
             {

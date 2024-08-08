@@ -12,11 +12,10 @@ style(_ {
 
 test_bar(Text) </>
 	(row {size: 16, px: true} </> 
-		(col </> label{text: Text, background: color(255,0,0,255)}),
 		(col </> label{text: Text, background: color(0,255,0,255)}))
 .
 
-menu </>
+layout_menu </>
 	(col </>
 		test_bar('top'),
 		(row </>

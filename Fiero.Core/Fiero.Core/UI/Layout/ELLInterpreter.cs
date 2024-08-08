@@ -64,10 +64,10 @@ public static class ELLInterpreter
     private const string GlobalStyle = "_";
 
     private static readonly Atom Functor = new("</>");
-    private static readonly Hook Hook_GetComponentDefinitions
-        = new(new(Functor, 2, default, default));
-    private static readonly Hook Hook_GetStyle
-        = new(new(new("style"), 1, default, default));
+    private static Hook Hook_GetComponentDefinitions
+        => new(new(Functor, 2, default, default));
+    private static Hook Hook_GetStyle
+        => new(new(new("style"), 1, default, default));
 
     public static Dictionary<string, Dict> GetStyles(ErgoVM vm)
     {

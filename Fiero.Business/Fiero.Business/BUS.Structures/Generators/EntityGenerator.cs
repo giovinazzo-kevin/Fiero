@@ -32,7 +32,7 @@
         {
             return entity
                 .WithIntrinsicEffect(EffectGenerator.GenerateDef(magnitude), EffectGenerator.GenerateModifier<T>())
-                .WithColor(Rng.Random.Choose(Enum.GetValues<ColorName>().Except([ColorName.Black, ColorName.White]).ToArray()));
+                .WithColor(Rng.Random.Choose(ColorName._Values.Except([ColorName.Black, ColorName.White]).ToArray()));
         }
     }
 }

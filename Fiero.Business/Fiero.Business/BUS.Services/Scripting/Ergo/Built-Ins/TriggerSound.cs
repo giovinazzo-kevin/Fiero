@@ -46,7 +46,7 @@ public sealed class TriggerSound : BuiltIn
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.Functor, args[0]);
                 return;
             }
-            if (!functor.Match(out SoundName sound))
+            if (!functor.Match(out string sound) || !SoundName._Values.Contains(sound))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(SoundName), args[0]);
                 return;

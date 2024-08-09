@@ -5,12 +5,12 @@ namespace Fiero.Business
     [SingletonDependency]
     public class GameDialogues
     {
-        protected GameLocalizations<LocaleName> Localizations;
+        protected GameLocalizations Localizations;
         protected readonly Dictionary<string, DialogueNode> DialogueNodes = new();
 
         public DialogueNode GetDialogue(string id) => DialogueNodes.TryGetValue(id, out var node) ? node : null;
 
-        public GameDialogues(GameLocalizations<LocaleName> localizations)
+        public GameDialogues(GameLocalizations localizations)
         {
             Localizations = localizations;
         }

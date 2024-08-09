@@ -19,6 +19,7 @@ namespace Fiero.Business.Scenes
         protected readonly GameResources Resources;
         protected readonly GameDataStore Store;
         protected readonly GameEntities Entities;
+        protected readonly GameEntityBuilders EntityBuilders;
         protected readonly OffButton OffButton;
         protected readonly QuickSlotHelper QuickSlots;
         protected readonly GameUI UI;
@@ -38,12 +39,14 @@ namespace Fiero.Business.Scenes
             GameEntities entities,
             MetaSystem systems,
             GameResources resources,
+            GameEntityBuilders entityBuilders,
             QuickSlotHelper quickSlots,
             GameUI ui,
             OffButton off)
         {
             Store = store;
             Entities = entities;
+            EntityBuilders = entityBuilders;
             Systems = systems;
             Resources = resources;
             QuickSlots = quickSlots;
@@ -127,19 +130,19 @@ namespace Fiero.Business.Scenes
                 Item[] loadout = Store.GetOrDefault(Data.Player.Loadout, LoadoutName.Adventurer) switch
                 {
                     LoadoutName.Knight => [
-                        EntityGenerator.GenerateMeleeWeapon(Resources.Entities).Build()
+                        EntityGenerator.GenerateMeleeWeapon(EntityBuilders).Build()
                     ],
-                    LoadoutName.Archer => [Resources.Entities.Weapon_Bow().Build()],
-                    LoadoutName.Wizard => [Resources.Entities.Wand_OfConfusion(charges: 25, duration: 5).Build()],
-                    LoadoutName.Adventurer => [Resources.Entities.Projectile_Grapple().Build()],
-                    LoadoutName.Merchant => [Resources.Entities.Resource_Gold(amount: 500).Build()],
+                    LoadoutName.Archer => [EntityBuilders.Weapon_Bow().Build()],
+                    LoadoutName.Wizard => [EntityBuilders.Wand_OfConfusion(charges: 25, duration: 5).Build()],
+                    LoadoutName.Adventurer => [EntityBuilders.Projectile_Grapple().Build()],
+                    LoadoutName.Merchant => [EntityBuilders.Resource_Gold(amount: 500).Build()],
                     LoadoutName.Warlock => [
-                            Resources.Entities.Wand_OfPoison(charges: 25, duration: 1).Build(),
-                        .. Enumerable.Range(0, 3).Select(_ => Resources.Entities.Scroll_OfRaiseUndead().Build()).ToArray()],
+                            EntityBuilders.Wand_OfPoison(charges: 25, duration: 1).Build(),
+                        .. Enumerable.Range(0, 3).Select(_ => EntityBuilders.Scroll_OfRaiseUndead().Build()).ToArray()],
                     _ => []
                 };
 
-                Player = Resources.Entities.Player()
+                Player = EntityBuilders.Player()
                     //.WithAutoPlayerAi()
                     .WithName(playerName)
                     .WithItems(loadout)
@@ -627,7 +630,7 @@ namespace Fiero.Business.Scenes
                         }
                         else
                         {
-                            corpse = Resources.Entities.Corpse(corpseDef.Type).Build();
+                            corpse = EntityBuilders.Corpse(corpseDef.Type).Build();
                             actionSystem.CorpseCreated.HandleOrThrow(new(e.Actor, corpse));
                         }
                     }
@@ -712,7 +715,7 @@ namespace Fiero.Business.Scenes
                     ? necro.Faction.Name : FactionName.Monsters;
                 var actorBuilder = e.Corpse.CorpseProperties.Type switch
                 {
-                    CorpseName.RatCorpse => Raise(Resources.Entities.NPC_RatZombie(), Resources.Entities.NPC_RatSkeleton(), e.Mode),
+                    CorpseName.RatCorpse => Raise(EntityBuilders.NPC_RatZombie(), EntityBuilders.NPC_RatSkeleton(), e.Mode),
                     _ => throw new NotImplementedException()
                 };
                 var undead = actorBuilder
@@ -1150,7 +1153,7 @@ namespace Fiero.Business.Scenes
                     if (Chance.Check(chestRng, 1, 10))
                     {
                         // Spawn a mimic, log a message and play a sound
-                        var enemy = Resources.Entities.NPC_Mimic()
+                        var enemy = EntityBuilders.NPC_Mimic()
                             .WithPosition(e.Feature.Position())
                             .Build();
                         var items = e.Feature.Inventory.GetItems().ToList();

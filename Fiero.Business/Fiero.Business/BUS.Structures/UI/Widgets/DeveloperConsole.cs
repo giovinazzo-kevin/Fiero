@@ -12,7 +12,7 @@ namespace Fiero.Business
         public const double ScriptUpdateRate = 0.15;
         public const int TabSize = 2;
 
-        protected readonly GameColors<ColorName> Colors;
+        protected readonly GameColors Colors;
         protected ConsolePane Pane { get; private set; }
 
         public readonly EventBus EventBus;
@@ -22,7 +22,7 @@ namespace Fiero.Business
         public event Action<DeveloperConsole, char> CharAvailable;
         public event Action<DeveloperConsole, string> LineAvailable;
 
-        public DeveloperConsole(EventBus bus, GameUI ui, GameColors<ColorName> colors, IScriptHost<FieroScript> host)
+        public DeveloperConsole(EventBus bus, GameUI ui, GameColors colors, IScriptHost<FieroScript> host)
             : base(ui)
         {
             EventBus = bus;

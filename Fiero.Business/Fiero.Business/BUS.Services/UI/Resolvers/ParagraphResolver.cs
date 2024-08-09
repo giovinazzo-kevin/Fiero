@@ -13,7 +13,7 @@ namespace Fiero.Business
         public override Paragraph Resolve()
         {
             var x = new Paragraph(UI.Input);
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;

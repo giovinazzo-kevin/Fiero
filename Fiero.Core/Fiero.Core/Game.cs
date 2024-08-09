@@ -10,67 +10,38 @@ using System.Runtime;
 
 namespace Fiero.Core
 {
-    //public class SpriteTermConverter<TTextures, TColors>(GameSprites<TTextures, TColors> sprites) : ITermConverter
-    //    where TTextures : struct, Enum
-    //    where TColors : struct, Enum
-    //{
-    //    protected readonly record struct SpriteTerm(TTextures Texture, TColors Color, string Sprite, int? RngSeed = null);
-
-    //    public Type Type => typeof(Sprite);
-    //    public TermMarshalling Marshalling => TermMarshalling.Named;
-
-    //    public object FromTerm(ITerm t)
-    //    {
-    //        if (!t.Match(out SpriteTerm st))
-    //            throw new NotSupportedException();
-    //        return sprites.Get(st.Texture, st.Sprite, st.Color, rngSeed: st.RngSeed);
-    //    }
-
-    //    public ITerm ToTerm(object o, Maybe<Atom> overrideFunctor = default, Maybe<TermMarshalling> overrideMarshalling = default, TermMarshallingContext ctx = null)
-    //    {
-    //        if (o is not Sprite s)
-    //            throw new NotSupportedException();
-    //    }
-    //}
 
 
-
-    public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
+    public abstract class Game
         : IGame
-        where TFonts : struct, Enum
-        where TTextures : struct, Enum
-        where TLocales : struct, Enum
-        where TSounds : struct, Enum
-        where TColors : struct, Enum
-        where TShaders : struct, Enum
     {
         public readonly OffButton OffButton;
         public readonly GameLoop Loop;
         public readonly GameInput Input;
-        public readonly GameTextures<TTextures> Textures;
-        public readonly GameSprites<TTextures, TColors> Sprites;
-        public readonly GameColors<TColors> Colors;
-        public readonly GameFonts<TFonts> Fonts;
-        public readonly GameSounds<TSounds> Sounds;
-        public readonly GameShaders<TShaders> Shaders;
+        public readonly GameTextures Textures;
+        public readonly GameSprites Sprites;
+        public readonly GameColors Colors;
+        public readonly GameFonts Fonts;
+        public readonly GameSounds Sounds;
+        public readonly GameShaders Shaders;
         public readonly GameScripts Scripts;
         public readonly GameDirector Director;
         public readonly GameUI UI;
         public readonly GameWindow Window;
-        public readonly GameLocalizations<TLocales> Localization;
+        public readonly GameLocalizations Localization;
         public readonly MetaSystem Meta;
 
         public Game(
             OffButton off,
             GameLoop loop,
             GameInput input,
-            GameTextures<TTextures> resources,
-            GameSprites<TTextures, TColors> sprites,
-            GameFonts<TFonts> fonts,
-            GameSounds<TSounds> sounds,
-            GameColors<TColors> colors,
-            GameShaders<TShaders> shaders,
-            GameLocalizations<TLocales> localization,
+            GameTextures resources,
+            GameSprites sprites,
+            GameFonts fonts,
+            GameSounds sounds,
+            GameColors colors,
+            GameShaders shaders,
+            GameLocalizations localization,
             GameScripts scripts,
             GameUI ui,
             GameWindow window,
@@ -115,38 +86,6 @@ namespace Fiero.Core
             return !failures.Any();
         }
 
-        protected virtual void ValidateResources()
-        {
-            if (!ValidateResources<TFonts>(f => Fonts.Get(f) != null, out var missingFonts))
-            {
-                throw new AggregateException(missingFonts.Select(x => new ResourceNotFoundException<TFonts>(x)));
-            }
-            if (!ValidateResources<TTextures>(f => Textures.Get(f) != null, out var missingTextures))
-            {
-                throw new AggregateException(missingTextures.Select(x => new ResourceNotFoundException<TTextures>(x)));
-            }
-            if (!ValidateResources<TColors>(f => Colors.TryGet(f, out _), out var missingColors))
-            {
-                throw new AggregateException(missingColors.Select(x => new ResourceNotFoundException<TColors>(x)));
-            }
-            if (!ValidateResources<TSounds>(f => Sounds.Get(f) != null, out var missingSounds))
-            {
-                throw new AggregateException(missingSounds.Select(x => new ResourceNotFoundException<TSounds>(x)));
-            }
-            if (!ValidateResources<TShaders>(f => Shaders.Get(f) != null, out var missingShaders))
-            {
-                throw new AggregateException(missingShaders.Select(x => new ResourceNotFoundException<TShaders>(x)));
-            }
-            if (!ValidateResources<TLocales>(f => Localization.HasLocale(f), out var missingLocales))
-            {
-                throw new AggregateException(missingLocales.Select(x => new ResourceNotFoundException<TLocales>(x)));
-            }
-            //if (!ValidateResources<string>(f => Scripts.TryGet(f, out _), out var missingScripts))
-            //{
-            //    throw new AggregateException(missingScripts.Select(x => new ResourceNotFoundException<TScripts>(x)));
-            //}
-        }
-
         protected virtual void InitializeWindow(RenderWindow win)
         {
             win.SetKeyRepeatEnabled(true);
@@ -162,7 +101,7 @@ namespace Fiero.Core
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             await InitializeAsync();
-            ValidateResources();
+            // ValidateResources();
             using (Window.RenderWindow = new RenderWindow(new VideoMode(800, 800), String.Empty))
             {
                 InitializeWindow(Window.RenderWindow);

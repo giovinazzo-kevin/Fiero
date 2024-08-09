@@ -7,8 +7,8 @@ namespace Fiero.Business
         public static Animation ExpandingRing(
             int radius,
             string sprite = "Explosion_1",
-            TextureName texture = TextureName.Animations,
-            ColorName tint = ColorName.White,
+            string texture = TextureName.Animations,
+            string tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             int repeat = 0
@@ -22,7 +22,7 @@ namespace Fiero.Business
         );
 
         public static Animation Debuff(
-            ColorName tint = ColorName.White,
+            string tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             int repeat = 0
@@ -35,7 +35,7 @@ namespace Fiero.Business
         }
 
         public static Animation Buff(
-            ColorName tint = ColorName.White,
+            string tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             int repeat = 0
@@ -49,8 +49,8 @@ namespace Fiero.Business
 
         public static Animation Fade(
             string sprite = "Rock",
-            TextureName texture = TextureName.Items,
-            ColorName tint = ColorName.White,
+            string texture = TextureName.Items,
+            string tint = ColorName.White,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             int repeat = 0,
@@ -71,8 +71,8 @@ namespace Fiero.Business
         public static Animation StraightProjectile(
             Coord to,
             string sprite = "Rock",
-            TextureName texture = TextureName.Items,
-            ColorName tint = ColorName.White,
+            string texture = TextureName.Items,
+            string tint = ColorName.White,
             Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null,
             Vec offset = default,
@@ -112,8 +112,8 @@ namespace Fiero.Business
         public static Animation ArcingProjectile(
             Coord to,
             string sprite = "Rock",
-            TextureName texture = TextureName.Items,
-            ColorName tint = ColorName.White,
+            string texture = TextureName.Items,
+            string tint = ColorName.White,
             Func<int, TimeSpan> frameDuration = null,
             Vec? scale = null,
             Coord offset = default,
@@ -163,7 +163,7 @@ namespace Fiero.Business
             Actor actor,
             TimeSpan? frameDuration = null,
             int repeat = 0,
-            ColorName tint = ColorName.LightYellow
+            string tint = ColorName.LightYellow
         )
         {
             var sprite = new SpriteDef(actor.Render.Texture, actor.Render.Sprite, actor.Render.Color, actor.ActorProperties.Type != ActorName.None ? new Vec(0f, -0.166f) : Vec.Zero, new(1, 1), 1);
@@ -238,8 +238,8 @@ namespace Fiero.Business
 
         public static Animation DamageNumber(
             int damage,
-            TextureName font = TextureName.FontMonospace,
-            ColorName tint = ColorName.White,
+            string font = TextureName.FontMonospace,
+            string tint = ColorName.White,
             Vec? scale = null,
             int repeat = 0
         )
@@ -267,8 +267,8 @@ namespace Fiero.Business
 
         public static Animation DamageNumber_Crit(
             int damage,
-            TextureName font = TextureName.FontMonospace,
-            ColorName tint = ColorName.White,
+            string font = TextureName.FontMonospace,
+            string tint = ColorName.White,
             Vec? scale = null,
             int repeat = 0
         )
@@ -294,7 +294,7 @@ namespace Fiero.Business
             }
         }
 
-        static SpriteDef[] GetTextSprites(TextureName font, Vec ofs, ColorName tint, string text, Vec s)
+        static SpriteDef[] GetTextSprites(string font, Vec ofs, string tint, string text, Vec s)
         {
             return text.Select((c, i) => new SpriteDef(
                     font,
@@ -309,7 +309,7 @@ namespace Fiero.Business
         }
 
         public static Animation Explosion(
-            ColorName tint = ColorName.LightYellow,
+            string tint = ColorName.LightYellow,
             TimeSpan? frameDuration = null,
             Vec? scale = null,
             Vec? offset = null,

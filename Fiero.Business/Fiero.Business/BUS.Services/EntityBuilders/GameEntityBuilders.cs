@@ -7,13 +7,13 @@ namespace Fiero.Business
     {
         protected readonly GameEntities Entities;
         protected readonly GameUI UI;
-        protected readonly GameColors<ColorName> Colors;
+        protected readonly GameColors Colors;
         protected readonly GameScripts Scripts;
 
         public GameEntityBuilders(
             GameEntities entities,
             GameUI ui,
-            GameColors<ColorName> colors,
+            GameColors colors,
             GameScripts scripts
         )
         {
@@ -24,7 +24,7 @@ namespace Fiero.Business
         }
 
 
-        public IEntityBuilder<Actor> Dummy(TextureName texture, string sprite, string name = null, ColorName? tint = null, bool solid = false)
+        public IEntityBuilder<Actor> Dummy(string texture, string sprite, string name = null, string tint = null, bool solid = false)
             => Entities.CreateBuilder<Actor>()
             .AddOrTweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksNpcPathing = x.BlocksPlayerPathing = solid)
             .WithHealth(1)
@@ -384,7 +384,7 @@ namespace Fiero.Business
             .WithFeatureInfo(type)
             ;
 
-        private IEntityBuilder<Tile> Tile(TileName type, ColorName color)
+        private IEntityBuilder<Tile> Tile(string type, string color)
             => Entities.CreateBuilder<Tile>()
             .WithName(type.ToString())
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, type.ToString(), color)
@@ -796,7 +796,7 @@ namespace Fiero.Business
         #endregion
 
         #region FEATURES
-        private ColorName GetBranchColor(DungeonBranchName branch) => branch switch
+        private string GetBranchColor(DungeonBranchName branch) => branch switch
         {
             DungeonBranchName.Dungeon => ColorName.Gray,
             DungeonBranchName.Sewers => ColorName.Green,
@@ -866,7 +866,7 @@ namespace Fiero.Business
             .Tweak<RenderComponent>((s, x) => x.Layer = RenderLayerName.Wall)
             .Tweak<PhysicsComponent>((s, x) => x.BlocksMovement = x.BlocksLight = x.BlocksNpcPathing = true)
             ;
-        public IEntityBuilder<Feature> Feature_SecretDoor(ColorName color = ColorName.Gray)
+        public IEntityBuilder<Feature> Feature_SecretDoor(string color = ColorName.Gray)
             => Feature_Door()
             .WithSprite(RenderLayerName.Ground, TextureName.Tiles, TileName.Wall.ToString(), color)
             ;

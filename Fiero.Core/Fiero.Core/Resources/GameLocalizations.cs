@@ -3,22 +3,21 @@ using System.Text.RegularExpressions;
 
 namespace Fiero.Core
 {
-    [TransientDependency]
-    public class GameLocalizations<TLocales>
-        where TLocales : struct, Enum
+    [SingletonDependency]
+    public class GameLocalizations
     {
-        private readonly Dictionary<TLocales, JsonElement> _translations;
+        private readonly Dictionary<string, JsonElement> _translations;
 
-        public readonly TLocales DefaultCulture;
-        public TLocales CurrentCulture { get; set; }
+        public readonly string DefaultCulture;
+        public string CurrentCulture { get; set; }
 
         public GameLocalizations()
         {
-            CurrentCulture = DefaultCulture = default;
-            _translations = new Dictionary<TLocales, JsonElement>();
+            CurrentCulture = DefaultCulture = "English";
+            _translations = new Dictionary<string, JsonElement>();
         }
 
-        public async Task LoadJsonAsync(TLocales culture, string fileName)
+        public async Task LoadJsonAsync(string culture, string fileName)
         {
             if (!File.Exists(fileName))
             {
@@ -29,12 +28,12 @@ namespace Fiero.Core
             AddLocale(culture, json);
         }
 
-        public void AddLocale(TLocales culture, JsonElement value)
+        public void AddLocale(string culture, JsonElement value)
         {
             _translations[culture] = value;
         }
 
-        public bool HasLocale(TLocales culture) => _translations.ContainsKey(culture);
+        public bool HasLocale(string culture) => _translations.ContainsKey(culture);
 
         public string Translate(string message)
         {

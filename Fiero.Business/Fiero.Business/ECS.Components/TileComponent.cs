@@ -11,7 +11,7 @@
         /// The amount of ticks it takes to cross this tile. A turn equals 100 ticks.
         /// </summary>
         public int MovementCost { get; set; }
-        public TileName Name { get; set; }
+        public string Name { get; set; }
         public List<TileVariant> Variants { get; set; } = new();
     }
 }

@@ -3,9 +3,9 @@
 namespace Fiero.Business
 {
     public readonly record struct SpriteDef(
-        TextureName Texture,
+        string Texture,
         string Sprite,
-        ColorName Tint,
+        string Tint,
         Vec Offset,
         Vec Scale,
         float Alpha,

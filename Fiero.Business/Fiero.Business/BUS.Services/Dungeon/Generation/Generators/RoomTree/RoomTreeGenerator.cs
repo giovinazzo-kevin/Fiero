@@ -118,7 +118,7 @@
             }
         }
 
-        protected virtual bool AllowStairsOn(TileName name) => name switch
+        protected virtual bool AllowStairsOn(string name) => name switch
         {
             TileName.Room => true,
             _ => false

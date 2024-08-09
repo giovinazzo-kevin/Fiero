@@ -2,6 +2,7 @@
 
 namespace Fiero.Core
 {
+    [SingletonDependency]
     public class GameEntities : IDisposable
     {
         protected class TrackedEntity : IEquatable<TrackedEntity>

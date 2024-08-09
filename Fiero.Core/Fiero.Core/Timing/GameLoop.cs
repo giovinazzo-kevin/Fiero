@@ -3,6 +3,7 @@
 namespace Fiero.Core
 {
 
+    [SingletonDependency]
     public class GameLoop
     {
         public TimeSpan TimeStep { get; set; }

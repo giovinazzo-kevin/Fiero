@@ -94,9 +94,6 @@ layout_char_creation </>
             label { text: 'CharCreation.Loadout' }
         ),
         (row </> 
-            (col </>
-                picture { sprite: 'npc_rat' }
-            ),
             col, 
             col
         ),
@@ -104,12 +101,17 @@ layout_char_creation </>
         (row </> col, col, col)
     ),
     (row { size: 48, px: true } </> 
-		(col </> 
-			button{clicked: on_continue_clicked, text: 'new game'}
+		(col { class:'ng' } </> 
+			button{clicked: on_new_game_clicked, text: 'new game'}
         ),
-		(col{class:'ng'} </> 
-			button{clicked: on_new_game_clicked, text: 'quit to menu'}
+		(col </> 
+			button{clicked: on_quit_to_menu_clicked, text: 'quit to menu'}
         )
     )
 .
 
+on_new_game_clicked(_, _, _) :-
+    set_scene_state(start_game).
+
+on_quit_to_menu_clicked(_, _, _) :-
+    set_scene_state(quit_to_menu).

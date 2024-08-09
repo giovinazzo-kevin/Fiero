@@ -13,7 +13,7 @@ namespace Fiero.Business
         public override Label Resolve()
         {
             var x = new Label(UI.Input);
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             x.ContentAwareScale.V = false;

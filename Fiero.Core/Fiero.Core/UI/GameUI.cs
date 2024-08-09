@@ -3,6 +3,7 @@ using System.Resources;
 
 namespace Fiero.Core
 {
+    [SingletonDependency]
     public class GameUI
     {
         public readonly GameDataStore Store;

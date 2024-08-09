@@ -4,14 +4,14 @@ namespace Fiero.Business
 {
     public class LogComponent : EcsComponent
     {
-        protected readonly GameLocalizations<LocaleName> Localizations;
+        protected readonly GameLocalizations Localizations;
         protected readonly List<string> Messages;
 
         public IEnumerable<string> GetMessages() => Messages;
         public event Action<LogComponent, string> LogAdded;
         public event Action<LogComponent, string> LogPruned;
 
-        public LogComponent(GameLocalizations<LocaleName> localizations)
+        public LogComponent(GameLocalizations localizations)
         {
             Localizations = localizations;
             Messages = new List<string>();

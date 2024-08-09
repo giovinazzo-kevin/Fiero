@@ -2,6 +2,7 @@
 
 namespace Fiero.Core
 {
+    [SingletonDependency]
     public class GameDirector
     {
         internal class CachedItem

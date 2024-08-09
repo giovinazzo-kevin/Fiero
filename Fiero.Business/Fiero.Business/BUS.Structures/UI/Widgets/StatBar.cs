@@ -10,7 +10,7 @@ namespace Fiero.Business.BUS.Structures.UI.Widgets
         public UIControlProperty<int> Value {get; private set;} = new(nameof(Value));
         public UIControlProperty<int> MaxValue {get; private set;} = new(nameof(MaxValue));
         public UIControlProperty<string> Stat {get; private set;} = new(nameof(Stat));
-        public UIControlProperty<ColorName> Color {get; private set;} = new(nameof(Color));
+        public UIControlProperty<string> Color {get; private set;} = new(nameof(Color));
 
         protected readonly LayoutRef<Label> StatLabel = new();
         protected readonly LayoutRef<Label> ValueLabel = new();

@@ -1,6 +1,6 @@
 ﻿namespace Fiero.Business
 {
-    public enum ShaderName
+    public static class ShaderName
     {
         //Test
     }

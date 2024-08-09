@@ -13,7 +13,7 @@ namespace Fiero.Business
         public override ComboBox Resolve()
         {
             var x = new ComboBox(UI.Input, () => new(UI.Input));
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.Accent.V = Accent;

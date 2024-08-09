@@ -16,7 +16,7 @@ namespace Fiero.Business
         public override TextBox Resolve()
         {
             var x = new TextBox(UI.Input, Reader);
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.ContentAwareScale.V = false;

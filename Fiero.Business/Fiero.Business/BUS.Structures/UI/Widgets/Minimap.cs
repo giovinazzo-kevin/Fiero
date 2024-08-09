@@ -8,7 +8,7 @@ namespace Fiero.Business
     {
         public readonly DungeonSystem FloorSystem;
         public readonly FactionSystem FactionSystem;
-        public readonly GameColors<ColorName> Colors;
+        public readonly GameColors Colors;
 
         public UIControlProperty<Actor> Following {get; private set;} = new(nameof(Following), null);
 
@@ -22,7 +22,7 @@ namespace Fiero.Business
             GameUI ui,
             DungeonSystem floor,
             FactionSystem faction,
-            GameColors<ColorName> colors
+            GameColors colors
         ) : base(ui)
         {
             FloorSystem = floor;

@@ -2,12 +2,12 @@
 
 namespace Fiero.Core
 {
-    public class GameTextures<TTextures>
-        where TTextures : struct, Enum
+    [SingletonDependency]
+    public class GameTextures
     {
         protected RenderTexture ScratchTexture { get; private set; }
         protected readonly List<Texture> ProceduralTextures;
-        protected readonly Dictionary<TTextures, Texture> Textures;
+        protected readonly Dictionary<string, Texture> Textures;
 
         public void CreateScratchTexture(Coord size) => ScratchTexture = new((uint)size.X, (uint)size.Y);
         public RenderTexture GetScratchTexture() => ScratchTexture;
@@ -31,7 +31,7 @@ namespace Fiero.Core
             ProceduralTextures = new();
         }
 
-        public void Add(TTextures key, Texture value) => Textures[key] = value;
-        public Texture Get(TTextures key) => Textures.GetValueOrDefault(key);
+        public void Add(string key, Texture value) => Textures[key] = value;
+        public Texture Get(string key) => Textures.GetValueOrDefault(key);
     }
 }

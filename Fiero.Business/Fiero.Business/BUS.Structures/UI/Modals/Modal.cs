@@ -67,7 +67,7 @@ namespace Fiero.Business
 
         public override void Maximize()
         {
-            Layout.Size.V = UI.Store.Get(Data.View.WindowSize);
+            Layout.Size.V = UI.Store.Get(CoreData.View.WindowSize);
             Layout.Position.V = Coord.Zero;
             IsMaximized = true;
         }

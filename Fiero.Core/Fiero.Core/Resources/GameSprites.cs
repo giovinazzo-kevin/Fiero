@@ -3,18 +3,17 @@ using System.Text.Json;
 
 namespace Fiero.Core
 {
-    public class GameSprites<TTextures, TColors>
-        where TTextures : struct, Enum
-        where TColors : struct, Enum
+    [SingletonDependency]
+    public class GameSprites
     {
 
         public class SpritesheetBuilder
         {
-            protected readonly TTextures Key;
-            protected readonly GameTextures<TTextures> Textures;
+            protected readonly string Key;
+            protected readonly GameTextures Textures;
             protected readonly Dictionary<string, HashSet<Sprite>> Sprites;
 
-            internal SpritesheetBuilder(GameTextures<TTextures> textures, TTextures key)
+            internal SpritesheetBuilder(GameTextures textures, string key)
             {
                 Key = key;
                 Textures = textures;
@@ -34,12 +33,12 @@ namespace Fiero.Core
             internal Dictionary<string, HashSet<Sprite>> Build() => Sprites;
         }
 
-        protected readonly GameColors<TColors> Colors;
-        protected readonly GameTextures<TTextures> Textures;
-        protected readonly Dictionary<TTextures, Dictionary<string, HashSet<Sprite>>> Sprites;
-        protected readonly Dictionary<TTextures, Dictionary<OrderedPair<string, TColors>, Sprite>> ProceduralSprites;
+        protected readonly GameColors Colors;
+        protected readonly GameTextures Textures;
+        protected readonly Dictionary<string, Dictionary<string, HashSet<Sprite>>> Sprites;
+        protected readonly Dictionary<string, Dictionary<OrderedPair<string, string>, Sprite>> ProceduralSprites;
 
-        public GameSprites(GameTextures<TTextures> textures, GameColors<TColors> colors)
+        public GameSprites(GameTextures textures, GameColors colors)
         {
             Colors = colors;
             Textures = textures;
@@ -47,7 +46,7 @@ namespace Fiero.Core
             ProceduralSprites = new();
         }
 
-        public void AddSpritesheet(TTextures texture, Action<SpritesheetBuilder> build)
+        public void AddSpritesheet(string texture, Action<SpritesheetBuilder> build)
         {
             if (Sprites.ContainsKey(texture))
             {
@@ -58,7 +57,7 @@ namespace Fiero.Core
             Sprites[texture] = builder.Build();
         }
 
-        public void BuildIndex(TTextures atlas, Coord tileSize)
+        public void BuildIndex(string atlas, Coord tileSize)
         {
             AddSpritesheet(atlas, builder =>
             {
@@ -72,7 +71,7 @@ namespace Fiero.Core
             });
         }
 
-        public async Task LoadJsonAsync(TTextures texture, string fileName)
+        public async Task LoadJsonAsync(string texture, string fileName)
         {
             if (!File.Exists(fileName))
             {
@@ -102,7 +101,7 @@ namespace Fiero.Core
             });
         }
 
-        public bool TryGet(TTextures texture, string key, TColors color, out Sprite sprite, int? rngSeed = null)
+        public bool TryGet(string texture, string key, string color, out Sprite sprite, int? rngSeed = null)
         {
             sprite = default;
             if (key is null)
@@ -111,7 +110,7 @@ namespace Fiero.Core
             {
                 ProceduralSprites[texture] = procDict = new();
             }
-            var procKey = new OrderedPair<string, TColors>(key, color);
+            var procKey = new OrderedPair<string, string>(key, color);
             if (procDict.TryGetValue(procKey, out sprite))
             {
                 return true;
@@ -164,7 +163,7 @@ namespace Fiero.Core
             return true;
         }
 
-        public Sprite Get(TTextures texture, string key, TColors color, int? rngSeed = null) => TryGet(texture, key, color, out var s, rngSeed) ? s : null;
+        public Sprite Get(string texture, string key, string color, int? rngSeed = null) => TryGet(texture, key, color, out var s, rngSeed) ? s : null;
 
         public void ClearProceduralSprites()
         {

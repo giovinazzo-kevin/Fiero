@@ -2,17 +2,17 @@
 
 namespace Fiero.Core
 {
-    public class GameFonts<TFonts>
-        where TFonts : struct, Enum
+    [SingletonDependency]
+    public class GameFonts
     {
-        protected readonly Dictionary<TFonts, BitmapFont> Fonts;
+        protected readonly Dictionary<string, BitmapFont> Fonts;
 
         public GameFonts()
         {
-            Fonts = new Dictionary<TFonts, BitmapFont>();
+            Fonts = new Dictionary<string, BitmapFont>();
         }
 
-        public void Add(TFonts key, Coord fontSize, Texture tex)
+        public void Add(string key, Coord fontSize, Texture tex)
         {
             var sprites = new Sprite[256];
             for (int i = 0; i < 256; i++)
@@ -22,6 +22,6 @@ namespace Fiero.Core
             Fonts[key] = new(fontSize, sprites);
         }
 
-        public BitmapFont Get(TFonts key) => Fonts.GetValueOrDefault(key);
+        public BitmapFont Get(string key) => Fonts.GetValueOrDefault(key);
     }
 }

@@ -3,6 +3,7 @@ using SFML.Window;
 
 namespace Fiero.Core
 {
+    [SingletonDependency]
     public sealed class GameWindow
     {
         private RenderWindow _window;

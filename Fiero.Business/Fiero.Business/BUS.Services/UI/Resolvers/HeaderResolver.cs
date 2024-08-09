@@ -13,10 +13,10 @@ namespace Fiero.Business
         public override Header Resolve()
         {
             var x = new Header(UI.Input,
-                GetUISprite("header-l", ColorName.White),
-                GetUISprite("header-m", ColorName.White),
-                GetUISprite("header-r", ColorName.White));
-            x.Font.V = GetFont();
+                GetSprite(TextureName.UI, "header-l", ColorName.White),
+                GetSprite(TextureName.UI, "header-m", ColorName.White),
+                GetSprite(TextureName.UI, "header-r", ColorName.White));
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Color.White;
             x.ContentAwareScale.V = false;

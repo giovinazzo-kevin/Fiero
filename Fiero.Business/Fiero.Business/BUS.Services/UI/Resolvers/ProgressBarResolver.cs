@@ -10,10 +10,10 @@
         public override ProgressBar Resolve()
         {
             var x = new ProgressBar(UI.Input,
-                GetUISprite("bar_empty-l", ColorName.White),
-                GetUISprite("bar_empty-m", ColorName.White),
-                GetUISprite("bar_empty-r", ColorName.White),
-                GetUISprite("bar_fill", ColorName.White));
+                GetSprite(TextureName.UI, "bar_empty-l", ColorName.White),
+                GetSprite(TextureName.UI, "bar_empty-m", ColorName.White),
+                GetSprite(TextureName.UI, "bar_empty-r", ColorName.White),
+                GetSprite(TextureName.UI, "bar_fill", ColorName.White));
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             return x;

@@ -1,9 +1,9 @@
 ﻿namespace Fiero.Business
 {
-    public enum FontName
+    public static class FontName
     {
-        Monospace,
-        Light,
-        Terminal,
+        public const string Monospace = nameof(Monospace);
+        public const string Light = nameof(Light);
+        public const string Terminal = nameof(Terminal);
     }
 }

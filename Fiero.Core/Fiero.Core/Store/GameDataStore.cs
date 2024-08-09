@@ -5,6 +5,7 @@ using Unconcern.Delegation;
 namespace Fiero.Core
 {
 
+    [SingletonDependency]
     public class GameDataStore(EventBus bus)
     {
         public const string EventHubName = nameof(GameDataStore);

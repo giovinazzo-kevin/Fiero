@@ -139,7 +139,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[0].Match<TileName>(out var tile))
+            if (!args[0].Match<string>(out var tile) || !TileName._Values.Contains(tile))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Tile, args[0].Explain());
                 return false;
@@ -200,7 +200,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<TileName>(out var t))
+            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
@@ -224,7 +224,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<TileName>(out var t))
+            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
@@ -250,7 +250,7 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<TileName>(out var t))
+            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;

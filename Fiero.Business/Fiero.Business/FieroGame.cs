@@ -5,7 +5,7 @@ using Unconcern.Common;
 
 namespace Fiero.Business
 {
-    public class FieroGame : Game<FontName, TextureName, LocaleName, SoundName, ColorName, ShaderName>
+    public class FieroGame : Game
     {
         protected readonly IEnumerable<IGameScene> Scenes;
 
@@ -23,13 +23,13 @@ namespace Fiero.Business
             GameDataStore store,
             GameUI ui,
             GameWindow win,
-            GameTextures<TextureName> textures,
-            GameSprites<TextureName, ColorName> sprites,
-            GameFonts<FontName> fonts,
-            GameSounds<SoundName> sounds,
-            GameColors<ColorName> colors,
-            GameShaders<ShaderName> shaders,
-            GameLocalizations<LocaleName> localization,
+            GameTextures textures,
+            GameSprites sprites,
+            GameFonts fonts,
+            GameSounds sounds,
+            GameColors colors,
+            GameShaders shaders,
+            GameLocalizations localization,
             GameScripts scripts,
             IEnumerable<IGameScene> gameScenes,
             GameEntities entities,
@@ -43,7 +43,7 @@ namespace Fiero.Business
             loop.TimeStep = TimeSpan.FromSeconds(1 / 144f);
             loop.MaxTimeStep = loop.TimeStep * 2;
             CreateGlobalTheme();
-            Data.View.WindowSize.ValueChanged += WindowSize_ValueChanged;
+            CoreData.View.WindowSize.ValueChanged += WindowSize_ValueChanged;
             void WindowSize_ValueChanged(GameDatumChangedEventArgs<Coord> obj)
             {
                 UI.Store.SetValue(Data.View.ViewportSize, obj.NewValue - new Coord(248, 128));
@@ -95,7 +95,7 @@ namespace Fiero.Business
             base.InitializeWindow(win);
             win.Resized += (s, e) =>
             {
-                var minSize = Store.Get(Data.View.MinWindowSize);
+                var minSize = Store.Get(CoreData.View.MinWindowSize);
                 var newSize = new Coord((int)e.Width, (int)e.Height).Clamp(minX: minSize.X, minY: minSize.Y);
                 if (newSize != new Coord((int)e.Width, (int)e.Height))
                 {
@@ -103,12 +103,12 @@ namespace Fiero.Business
                 }
                 else
                 {
-                    Store.SetValue(Data.View.WindowSize, newSize);
+                    Store.SetValue(CoreData.View.WindowSize, newSize);
                 }
             };
-            Store.SetValue(Data.View.WindowSize, win.Size.ToCoord());
+            Store.SetValue(CoreData.View.WindowSize, win.Size.ToCoord());
             // This handler lets the window be resized by changing the WindowSize datum. Scripts can do this too.
-            Data.View.WindowSize.ValueChanged += e =>
+            CoreData.View.WindowSize.ValueChanged += e =>
             {
                 var size = win.Size.ToCoord();
                 if (e.OldValue.Equals(size) && !e.NewValue.Equals(size))
@@ -190,12 +190,12 @@ namespace Fiero.Business
                 Scripts.TryLoad<FieroScript>(script, out _);
 
             Store.SetValue(Data.View.TileSize, 16);
-            Store.SetValue(Data.View.MinWindowSize, new(800, 800));
-            Store.SetValue(Data.View.WindowSize, new(800, 800));
             Store.SetValue(Data.View.PopUpSize, new(400, 400));
-            Store.SetValue(Data.View.DefaultForeground, Colors.Get(ColorName.UIPrimary));
-            Store.SetValue(Data.View.DefaultBackground, Colors.Get(ColorName.UIBackground));
-            Store.SetValue(Data.View.DefaultAccent, Colors.Get(ColorName.UIAccent));
+            Store.SetValue(CoreData.View.MinWindowSize, new(800, 800));
+            Store.SetValue(CoreData.View.WindowSize, new(800, 800));
+            Store.SetValue(CoreData.View.DefaultForeground, Colors.Get(ColorName.UIPrimary));
+            Store.SetValue(CoreData.View.DefaultBackground, Colors.Get(ColorName.UIBackground));
+            Store.SetValue(CoreData.View.DefaultAccent, Colors.Get(ColorName.UIAccent));
 
             Store.SetValue(Data.Hotkeys.Cancel, VirtualKeys.Escape);
             Store.SetValue(Data.Hotkeys.Confirm, VirtualKeys.Return);

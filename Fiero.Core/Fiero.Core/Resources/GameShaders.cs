@@ -2,16 +2,16 @@
 
 namespace Fiero.Core
 {
-    public class GameShaders<TShaders>
-        where TShaders : struct, Enum
+    [SingletonDependency]
+    public class GameShaders
     {
-        protected readonly Dictionary<TShaders, Shader> Shaders;
+        protected readonly Dictionary<string, Shader> Shaders;
 
         public GameShaders()
         {
-            Shaders = new Dictionary<TShaders, Shader>();
+            Shaders = new Dictionary<string, Shader>();
         }
-        public void Add(TShaders key, Shader value) => Shaders[key] = value;
-        public Shader Get(TShaders key) => Shaders.GetValueOrDefault(key);
+        public void Add(string key, Shader value) => Shaders[key] = value;
+        public Shader Get(string key) => Shaders.GetValueOrDefault(key);
     }
 }

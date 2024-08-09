@@ -183,8 +183,8 @@ namespace Fiero.Business
                 var tileSize = Store.Get(Data.View.TileSize);
                 var zoom = ViewTileSize.V.X / tileSize;
 
-                var layers = new Dictionary<RenderLayerName, Action<RenderTexture>>();
-                foreach (var key in Enum.GetValues<RenderLayerName>())
+                var layers = new Dictionary<int, Action<RenderTexture>>();
+                foreach (var key in RenderLayerName._Values)
                 {
                     layers[key] = _ => { };
                 }
@@ -283,7 +283,7 @@ namespace Fiero.Business
                                         Position = sprite.Position + Coord.PositiveOne,
                                         Origin = sprite.Origin.ToVec() * sprite.Scale.ToVec(),
                                         FillColor = new(0, 0, 0, 0),
-                                        OutlineColor = Resources.Colors.Get(borderColor.Value),
+                                        OutlineColor = Resources.Colors.Get(borderColor),
                                         OutlineThickness = 1
                                     };
                                     tex.Draw(highlight, states);
@@ -365,7 +365,7 @@ namespace Fiero.Business
                         }
                     }
                 }
-                foreach (var key in Enum.GetValues<RenderLayerName>())
+                foreach (var key in RenderLayerName._Values)
                 {
                     layers[key](_renderTexture);
                 }

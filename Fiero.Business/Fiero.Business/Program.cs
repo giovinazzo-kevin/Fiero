@@ -11,15 +11,7 @@ namespace Fiero.Business
             CodePagesEncodingProvider.Instance.GetEncoding(437);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             using var host = new GameHost();
-            var game = host.BuildGame<
-                FieroGame,
-                FontName,
-                TextureName,
-                LocaleName,
-                SoundName,
-                ColorName,
-                ShaderName
-            >(Register);
+            var game = host.BuildGame<FieroGame>(Register);
             await game.RunAsync(game.OffButton.Token);
         }
 

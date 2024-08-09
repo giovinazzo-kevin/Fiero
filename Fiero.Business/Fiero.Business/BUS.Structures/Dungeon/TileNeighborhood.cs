@@ -1,8 +1,8 @@
 ﻿namespace Fiero.Business
 {
-    public readonly record struct TileRule(TileName? Tile, bool Different = false)
+    public readonly record struct TileRule(string Tile, bool Different = false)
     {
-        public static implicit operator TileRule(TileName? tile) => new(tile, false);
+        public static implicit operator TileRule(string tile) => new(tile, false);
     }
 
 

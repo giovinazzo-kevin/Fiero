@@ -3,16 +3,16 @@
 namespace Fiero.Core
 {
 
-    public class GameSounds<TSounds>
-        where TSounds : struct, Enum
+    [SingletonDependency]
+    public class GameSounds
     {
-        protected readonly Dictionary<TSounds, SoundBuffer> Buffers;
+        protected readonly Dictionary<string, SoundBuffer> Buffers;
         protected readonly List<Sound> Sounds;
         protected readonly OffButton OffButton;
 
         public GameSounds(OffButton off)
         {
-            Buffers = new Dictionary<TSounds, SoundBuffer>();
+            Buffers = new Dictionary<string, SoundBuffer>();
             Sounds = new List<Sound>();
             OffButton = off;
             _ = Task.Run(MonitorSounds);
@@ -35,8 +35,8 @@ namespace Fiero.Core
             }
         }
 
-        public void Add(TSounds key, SoundBuffer value) => Buffers[key] = value;
-        public Sound Get(TSounds key, Coord? pos = null, float vol = 25, float pitch = 1, bool relativeToListener = false)
+        public void Add(string key, SoundBuffer value) => Buffers[key] = value;
+        public Sound Get(string key, Coord? pos = null, float vol = 25, float pitch = 1, bool relativeToListener = false)
         {
             if (Buffers.GetValueOrDefault(key) is { } buf)
             {

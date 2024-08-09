@@ -5,6 +5,7 @@ using System.Diagnostics;
 namespace Fiero.Core
 {
 
+    [SingletonDependency]
     public class GameInput
     {
         private (long Timestamp, bool Delay, int KeyCode)? _kbRepeat;

@@ -24,7 +24,7 @@ namespace Fiero.Business
             return false;
         }
 
-        public static bool GetSpeech<T>(this GameLocalizations<LocaleName> locale, NpcName npcName, T speech, out string str)
+        public static bool GetSpeech<T>(this GameLocalizations locale, NpcName npcName, T speech, out string str)
             where T : struct, Enum
         {
             str = default;
@@ -35,8 +35,8 @@ namespace Fiero.Business
             return true;
         }
 
-        public static Color GetColor(this GameUI ui, ColorName name) =>
-            ui.ServiceProvider.GetInstance<GameColors<ColorName>>().Get(name);
+        public static Color GetColor(this GameUI ui, string name) =>
+            ui.ServiceProvider.GetInstance<GameColors>().Get(name);
         public static InventoryModal Inventory(this GameUI ui, Actor actor, string title = null)
             => ui.Open(
                 new InventoryModal(ui, ui.ServiceProvider.GetInstance<GameResources>(), actor),

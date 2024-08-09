@@ -49,7 +49,7 @@ namespace Fiero.Business
                     c.FloorId = floorId.Value;
                 }
             });
-        public static IEntityBuilder<T> WithSprite<T>(this IEntityBuilder<T> builder, RenderLayerName layer, TextureName texture, string sprite, ColorName color)
+        public static IEntityBuilder<T> WithSprite<T>(this IEntityBuilder<T> builder, int layer, string texture, string sprite, string color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>((s, c) =>
             {
                 c.Layer = layer;
@@ -74,7 +74,7 @@ namespace Fiero.Business
             {
                 c.TrailSprite = sprite;
             });
-        public static IEntityBuilder<T> WithColor<T>(this IEntityBuilder<T> builder, ColorName color)
+        public static IEntityBuilder<T> WithColor<T>(this IEntityBuilder<T> builder, string color)
             where T : DrawableEntity => builder.AddOrTweak<RenderComponent>((s, c) =>
             {
                 c.Color = color;
@@ -259,7 +259,7 @@ namespace Fiero.Business
             {
                 c.Name = type;
             });
-        public static IEntityBuilder<T> WithTileInfo<T>(this IEntityBuilder<T> builder, TileName type)
+        public static IEntityBuilder<T> WithTileInfo<T>(this IEntityBuilder<T> builder, string type)
             where T : Tile => builder.AddOrTweak<TileComponent>((s, c) =>
             {
                 c.Name = type;

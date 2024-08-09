@@ -12,7 +12,7 @@
         public override Button Resolve()
         {
             var x = new Button(UI.Input);
-            x.Font.V = GetFont();
+            x.Font.V = GetFont(FontName.Light);
             x.Foreground.V = Foreground;
             x.Background.V = Background;
             x.ContentAwareScale.V = false;

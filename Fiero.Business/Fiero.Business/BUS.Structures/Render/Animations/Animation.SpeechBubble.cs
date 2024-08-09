@@ -7,9 +7,9 @@ namespace Fiero.Business
         public class SpriteBubble(
             TimeSpan persistDuration,
             string sprite,
-            ColorName spriteColor = ColorName.White,
-            ColorName bubbleColor = ColorName.White,
-            TextureName texture = TextureName.Items
+            string spriteColor = ColorName.White,
+            string bubbleColor = ColorName.White,
+            string texture = TextureName.Items
         )
         {
             private static int _z = 0;
@@ -65,14 +65,14 @@ namespace Fiero.Business
             TimeSpan persistDuration,
             string text,
             int msPerChar = 24,
-            ColorName textColor = ColorName.Black,
-            ColorName bubbleColor = ColorName.White,
-            TextureName font = TextureName.FontMonospace,
+            string textColor = ColorName.Black,
+            string bubbleColor = ColorName.White,
+            string fontTexture = TextureName.FontMonospace,
             bool invert = false
         )
         {
-            public static SpeechBubble Alert => new(TimeSpan.FromSeconds(0.5), "!", 24, ColorName.White, ColorName.LightRed, font: TextureName.FontMonospace, invert: true);
-            public static SpeechBubble Question => new(TimeSpan.FromSeconds(0.5), "?", 24, ColorName.White, ColorName.LightBlue, font: TextureName.FontMonospace, invert: true);
+            public static SpeechBubble Alert => new(TimeSpan.FromSeconds(0.5), "!", 24, ColorName.White, ColorName.LightRed, fontTexture: TextureName.FontMonospace, invert: true);
+            public static SpeechBubble Question => new(TimeSpan.FromSeconds(0.5), "?", 24, ColorName.White, ColorName.LightBlue, fontTexture: TextureName.FontMonospace, invert: true);
 
             private Animation cached;
 
@@ -88,7 +88,7 @@ namespace Fiero.Business
             // Total duration of the animation including the time that the bubble should persist
             public TimeSpan TotalDuration => TypeAnimDuration + persistDuration;
             // List of sprites representing the fully typed text
-            private readonly SpriteDef[] textSprites = GetTextSprites(font, new Vec(0, SPEECH_Y), textColor, text, s / 2);
+            private readonly SpriteDef[] textSprites = GetTextSprites(fontTexture, new Vec(0, SPEECH_Y), textColor, text, s / 2);
             public readonly int TotalFrames = (int)(text.Length + persistDuration.TotalMilliseconds / MS_PER_FADE);
 
             public event Action<SpeechBubble, char> CharDisplayed;

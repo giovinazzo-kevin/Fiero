@@ -1,5 +1,6 @@
 ﻿namespace Fiero.Core.Structures
 {
+    [SingletonDependency]
     public sealed class OffButton
     {
         private readonly CancellationTokenSource _source;

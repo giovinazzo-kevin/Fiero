@@ -6,6 +6,7 @@ namespace Fiero.Core
     /// <summary>
     /// Handles caching of scripts and their top-level routing through a provided IScriptHost.
     /// </summary>
+    [SingletonDependency]
     public class GameScripts(IServiceFactory fac, MetaSystem meta, GameDataStore store)
     {
         protected readonly Dictionary<string, Script> Scripts = new();

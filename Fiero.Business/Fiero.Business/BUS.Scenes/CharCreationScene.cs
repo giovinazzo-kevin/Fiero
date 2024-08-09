@@ -101,7 +101,7 @@ namespace Fiero.Business.Scenes
                 throw new InvalidOperationException();
             Layout = UI.CreateLayout().Build(new(), layout);
 
-            Data.View.WindowSize.ValueChanged += e =>
+            CoreData.View.WindowSize.ValueChanged += e =>
             {
                 if (State == SceneState.Main)
                 {

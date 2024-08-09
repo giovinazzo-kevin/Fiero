@@ -141,7 +141,7 @@
         {
             if (Layout is null) return;
             foreach (var picture in Layout.Query<Picture>(l => true, g => true))
-                picture.Sprite.V = null;
+                picture.Sprite.V = default;
             foreach (var picture in Layout.Query<Label>(l => true, g => true))
                 picture.Text.V = string.Empty;
             foreach (var (k, v) in obj.EquippedItems)
@@ -165,7 +165,7 @@
                 Layout.Query<Label>(l => true, g => g.HasAllClasses(@class, "label")).Single().Text.V
                     = v.ItemProperties.Identified ? v.Info.Name : v.ItemProperties.UnidentifiedName;
                 Layout.Query<Picture>(l => true, g => g.HasAllClasses(@class, "picture")).Single().Sprite.V
-                    = Resources.Sprites.Get(v.Render.Texture, v.Render.Sprite, v.Render.Color);
+                    = new(v.Render.Texture, v.Render.Sprite, v.Render.Color);
             }
         }
     }

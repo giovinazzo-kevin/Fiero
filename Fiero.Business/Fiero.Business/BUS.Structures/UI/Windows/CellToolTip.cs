@@ -29,7 +29,7 @@ namespace Fiero.Business
                 if (Cell.V == null)
                 {
                     CellDesc.Control.Text.V = "???";
-                    Picture.Control.Sprite.V = null;
+                    Picture.Control.Sprite.V = default;
                     Rescale();
                     return;
                 }
@@ -47,8 +47,7 @@ namespace Fiero.Business
                     thingsHere += $"\n- {Cell.V.Features.Select(a => a.Info.Name).Join(", ")}";
                 }
                 CellDesc.Control.Text.V = thingsHere;
-                Picture.Control.Sprite.V = resources.Sprites
-                    .Get(TextureName.Tiles, Cell.V.Tile.Render.Sprite, Cell.V.Tile.Render.Color);
+                Picture.Control.Sprite.V = new(TextureName.Tiles, Cell.V.Tile.Render.Sprite, Cell.V.Tile.Render.Color);
                 Rescale();
             };
         }

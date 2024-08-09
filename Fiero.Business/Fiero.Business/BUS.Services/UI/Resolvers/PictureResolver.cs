@@ -12,7 +12,7 @@ namespace Fiero.Business
 
         public override Picture Resolve()
         {
-            var x = new Picture(UI.Input);
+            var x = new Picture(UI.Input, Resources.Sprites);
             x.Foreground.V = Foreground;
             x.Background.V = Color.Transparent;
             return x;

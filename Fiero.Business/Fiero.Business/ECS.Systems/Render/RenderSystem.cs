@@ -118,11 +118,13 @@ namespace Fiero.Business
                 {
                     var (worldPos, spriteDef) = (pair.Left, pair.Right);
                     var screenPos = Viewport.WorldToScreenPos(worldPos);
-                    using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Sprite, spriteDef.Tint));
+                    using var sprite = new Sprite(Resources.Sprites.Get(spriteDef.Texture, spriteDef.Name, spriteDef.Tint));
                     var spriteSize = sprite.GetLocalBounds().Size();
                     sprite.Position = Viewport.ViewTileSize.V * spriteDef.Offset + screenPos;
                     sprite.Rotation = spriteDef.Rotation;
                     var zoom = Viewport.ViewTileSize.V / UI.Store.Get(Data.View.TileSize);
+                    if (spriteDef.Scale == default)
+                        spriteDef = spriteDef with { Scale = new(1, 1) };
                     if (spriteDef.Relative)
                     {
                         sprite.Scale = Viewport.ViewTileSize.V / spriteSize * spriteDef.Scale;

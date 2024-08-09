@@ -70,14 +70,14 @@ namespace Fiero.Business
                 .ToArray();
             for (int i = 0; i < pictures.Length; i++)
             {
-                pictures[i].Sprite.V = null;
+                pictures[i].Sprite.V = default;
                 pictures[i].Invalidate();
                 labels[i * 3 + 1].Text.V = string.Empty;
                 labels[i * 3 + 2].Text.V = string.Empty;
             }
             foreach (var (i, name, drawable) in obj.GetSlots())
             {
-                pictures[i - 1].Sprite.V = Resources.Sprites.Get(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color);
+                pictures[i - 1].Sprite.V = new(drawable.Render.Texture, drawable.Render.Sprite, drawable.Render.Color);
                 if (drawable is Consumable c)
                 {
                     labels[(i - 1) * 3 + 1].Text.V = $"{c.ConsumableProperties.RemainingUses}";

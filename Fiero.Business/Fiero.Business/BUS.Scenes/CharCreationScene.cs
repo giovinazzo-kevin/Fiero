@@ -52,7 +52,7 @@ namespace Fiero.Business.Scenes
 
         void LoadoutIcon(Picture x, NpcName icon, LoadoutName loadoutName)
         {
-            x.Sprite.V = Resources.Sprites.Get(TextureName.Creatures, icon.ToString(), ColorName.White);
+            //x.Sprite.V = Resources.Sprites.Get(TextureName.Creatures, icon.ToString(), ColorName.White);
             x.OutlineThickness.V = 2;
             x.OutlineColor.V = Color.Transparent;
             var tooltip = L($"$CharCreation.Loadout{loadoutName}$");

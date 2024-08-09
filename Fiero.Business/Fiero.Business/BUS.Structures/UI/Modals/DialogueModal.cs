@@ -118,7 +118,7 @@
                     x.Padding.V = new(8, 8);
                     x.HorizontalAlignment.V = HorizontalAlignment.Center;
                     x.VerticalAlignment.V = VerticalAlignment.Middle;
-                    x.Sprite.V = Resources.Sprites.Get(TextureName.UI, $"face-{Node.Face}", ColorName.White);
+                    x.Sprite.V = new(TextureName.UI, $"face-{Node.Face}", ColorName.White);
                     x.LockAspectRatio.V = true;
                     x.Background.V = UI.GetColor(ColorName.UISecondary);
                 }))

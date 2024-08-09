@@ -6,23 +6,30 @@ namespace Fiero.Core
     public class Picture : UIControl
     {
         public UIControlProperty<bool> LockAspectRatio {get; private set;} = new(nameof(LockAspectRatio), true, invalidate: true);
-        public UIControlProperty<Sprite> Sprite {get; private set;} = new(nameof(Sprite), null, invalidate: true);
+        public UIControlProperty<SpriteDef> Sprite {get; private set;} = new(nameof(Sprite), default, invalidate: true);
+        private Sprite _sprite;
 
 
-        public Picture(GameInput input)
+        public Picture(GameInput input, GameSprites sprites)
             : base(input)
         {
             this.IsInteractive.V = true;
+            Sprite.ValueChanged += (s, e) =>
+            {
+                _sprite?.Dispose();
+                _sprite = null;
+                if (Equals(Sprite.V, default))
+                    return;
+                _sprite = sprites.Get(Sprite.V.Texture, Sprite.V.Name, Sprite.V.Tint, Sprite.V.RngSeed);
+            };
         }
 
         protected override void Repaint(RenderTarget target, RenderStates states)
         {
             base.Repaint(target, states);
-            if (!(Sprite.V is { } spriteDef))
-            {
+            if (_sprite is null)
                 return;
-            }
-            using var sprite = new Sprite(spriteDef);
+            using var sprite = new Sprite(_sprite);
             var recSize = new Vec(sprite.TextureRect.Width, sprite.TextureRect.Height);
             var aspectRatio = sprite.TextureRect.Height / (float)sprite.TextureRect.Width;
             var spriteSize = ContentRenderSize.ToVec() * Scale;

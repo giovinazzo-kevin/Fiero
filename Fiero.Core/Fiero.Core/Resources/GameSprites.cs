@@ -139,7 +139,7 @@ namespace Fiero.Core
 
                 using var shape = new RectangleShape(sprite.TextureRect.Size())
                 {
-                    FillColor = Colors.Get(color),
+                    FillColor = color == null ? Color.White : Colors.Get(color),
                     OutlineThickness = 0
                 };
                 renderTarget.Clear(Color.Transparent);
@@ -159,11 +159,11 @@ namespace Fiero.Core
                 procDict[procKey] = sprite = new(tex, new(0, 0, sprite.TextureRect.Width, sprite.TextureRect.Height));
                 return true;
             }
-            sprite.Color = Colors.Get(color);
+            sprite.Color = color == null ? Color.White : Colors.Get(color);
             return true;
         }
 
-        public Sprite Get(string texture, string key, string color, int? rngSeed = null) => TryGet(texture, key, color, out var s, rngSeed) ? s : null;
+        public Sprite Get(string texture, string sprite, string color, int? rngSeed = null) => TryGet(texture, sprite, color, out var s, rngSeed) ? s : null;
 
         public void ClearProceduralSprites()
         {

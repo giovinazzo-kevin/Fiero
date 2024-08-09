@@ -94,11 +94,20 @@ layout_char_creation </>
             label { text: 'CharCreation.Loadout' }
         ),
         (row </> 
-            col, 
-            col
+            (col </> picture { sprite: _ { name: 'RatKnight', texture: 'Creatures' }, mouse_entered: on_picture_hover_enter, mouse_left: on_picture_hover_left }),
+            (col </> picture { sprite: _ { name: 'RatArcher', texture: 'Creatures' } }),
+            (col </> picture { sprite: _ { name: 'RatWizard', texture: 'Creatures' } })
         ),
-        (row </> col, col, col),
-        (row </> col, col, col)
+        (row </> 
+            (col </> picture { sprite: _ { name: 'RatMonk', texture: 'Creatures' } }),
+            (col </> picture { sprite: _ { name: 'RatApothecary', texture: 'Creatures' } }),
+            (col </> picture { sprite: _ { name: 'RatWarlock', texture: 'Creatures' } })
+        ),
+        (row </> 
+            (col </> picture { sprite: _ { name: 'RatAdventurer', texture: 'Creatures' } }),
+            (col </> picture { sprite: _ { name: 'RatThief', texture: 'Creatures' } }),
+            (col </> picture { sprite: _ { name: 'RatMerchant', texture: 'Creatures' } })
+        )
     ),
     (row { size: 48, px: true } </> 
 		(col { class:'ng' } </> 
@@ -115,3 +124,8 @@ on_new_game_clicked(_, _, _) :-
 
 on_quit_to_menu_clicked(_, _, _) :-
     set_scene_state(quit_to_menu).
+    
+on_picture_hover_enter(_, _) :-
+    true.
+on_picture_hover_left(_, _) :-
+    true.

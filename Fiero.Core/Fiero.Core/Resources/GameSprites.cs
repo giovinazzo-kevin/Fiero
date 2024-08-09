@@ -164,7 +164,7 @@ namespace Fiero.Core
             return true;
         }
 
-        public Sprite Get(TTextures texture, string key, TColors color) => TryGet(texture, key, color, out var s) ? s : null;
+        public Sprite Get(TTextures texture, string key, TColors color, int? rngSeed = null) => TryGet(texture, key, color, out var s, rngSeed) ? s : null;
 
         public void ClearProceduralSprites()
         {

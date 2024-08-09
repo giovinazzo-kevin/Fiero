@@ -1,6 +1,8 @@
 ﻿
 
 using Ergo.Lang;
+using Ergo.Lang.Ast;
+using Ergo.Lang.Extensions;
 using Fiero.Core.Exceptions;
 using SFML.Graphics;
 using SFML.Window;
@@ -8,6 +10,30 @@ using System.Runtime;
 
 namespace Fiero.Core
 {
+    //public class SpriteTermConverter<TTextures, TColors>(GameSprites<TTextures, TColors> sprites) : ITermConverter
+    //    where TTextures : struct, Enum
+    //    where TColors : struct, Enum
+    //{
+    //    protected readonly record struct SpriteTerm(TTextures Texture, TColors Color, string Sprite, int? RngSeed = null);
+
+    //    public Type Type => typeof(Sprite);
+    //    public TermMarshalling Marshalling => TermMarshalling.Named;
+
+    //    public object FromTerm(ITerm t)
+    //    {
+    //        if (!t.Match(out SpriteTerm st))
+    //            throw new NotSupportedException();
+    //        return sprites.Get(st.Texture, st.Sprite, st.Color, rngSeed: st.RngSeed);
+    //    }
+
+    //    public ITerm ToTerm(object o, Maybe<Atom> overrideFunctor = default, Maybe<TermMarshalling> overrideMarshalling = default, TermMarshallingContext ctx = null)
+    //    {
+    //        if (o is not Sprite s)
+    //            throw new NotSupportedException();
+    //    }
+    //}
+
+
 
     public abstract class Game<TFonts, TTextures, TLocales, TSounds, TColors, TShaders>
         : IGame

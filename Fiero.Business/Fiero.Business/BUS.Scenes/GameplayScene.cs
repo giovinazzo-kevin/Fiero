@@ -1244,7 +1244,7 @@ namespace Fiero.Business.Scenes
         public void GenerateNewRngSeed()
         {
             var newRngSeed = (int)DateTime.Now.ToBinary();
-            Store.SetValue(Data.Global.RngSeed, newRngSeed);
+            Store.SetValue(CoreData.Random.Seed, newRngSeed);
             Rng.SetGlobalSeed(newRngSeed);
         }
 
@@ -1266,7 +1266,7 @@ namespace Fiero.Business.Scenes
                 }
                 else
                 {
-                    Rng.SetGlobalSeed(Store.Get(Data.Global.RngSeed));
+                    Rng.SetGlobalSeed(Store.Get(CoreData.Random.Seed));
                 }
                 TrySetState(SceneState.Main);
             }

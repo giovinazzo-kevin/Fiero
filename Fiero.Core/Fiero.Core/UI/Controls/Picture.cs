@@ -5,28 +5,34 @@ namespace Fiero.Core
 
     public class Picture : UIControl
     {
+        protected readonly GameSprites Sprites;
+
         public UIControlProperty<bool> LockAspectRatio {get; private set;} = new(nameof(LockAspectRatio), true, invalidate: true);
         public UIControlProperty<SpriteDef> Sprite {get; private set;} = new(nameof(Sprite), default, invalidate: true);
         private Sprite _sprite;
-
+        private bool _dirty = false;
 
         public Picture(GameInput input, GameSprites sprites)
             : base(input)
         {
+            Sprites = sprites;
             this.IsInteractive.V = true;
             Sprite.ValueChanged += (s, e) =>
             {
-                _sprite?.Dispose();
-                _sprite = null;
                 if (Equals(Sprite.V, default))
                     return;
-                _sprite = sprites.Get(Sprite.V.Texture, Sprite.V.Name, Sprite.V.Tint, Sprite.V.RngSeed);
+                _dirty = true;
             };
         }
 
         protected override void Repaint(RenderTarget target, RenderStates states)
         {
             base.Repaint(target, states);
+            if(_dirty)
+            {
+                _sprite?.Dispose();
+                _sprite = Sprites.Get(Sprite.V.Texture, Sprite.V.Name, Sprite.V.Tint, Sprite.V.RngSeed);
+            }
             if (_sprite is null)
                 return;
             using var sprite = new Sprite(_sprite);

@@ -7,11 +7,13 @@ using Fiero.Core.Ergo.Libraries.Core.Data;
 using Fiero.Core.Ergo.Libraries.Core.Event;
 using Fiero.Core.Ergo.Libraries.Core.Game;
 using Fiero.Core.Ergo.Libraries.Core.Input;
+using Fiero.Core.Ergo.Libraries.Core.Random;
+using Fiero.Core.Ergo.Libraries.Core.Sound;
 
 namespace Fiero.Core.Ergo.Libraries.Core
 {
     [SingletonDependency]
-    public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta, GameDirector director) : Library
+    public class CoreLib(GameDataStore store, GameInput input, MetaSystem meta, GameDirector director, GameSounds sounds) : Library
     {
         public override Atom Module => CoreErgoModules.Core;
         protected readonly Dictionary<Atom, HashSet<Signature>> Subscribptions = new();
@@ -54,10 +56,18 @@ namespace Fiero.Core.Ergo.Libraries.Core
         {
             yield return new GetDatum(store);
             yield return new SetDatum(store);
+
             yield return new KeyState(input);
             yield return new SimulateKey(input);
             yield return new Raise(meta);
+
             yield return new SetScene(director);
+
+            yield return new NextRandom();
+            yield return new SetRandomSeed(store);
+
+            yield return new PlaySound(sounds);
+
         }
         public override IEnumerable<InterpreterDirective> GetExportedDirectives()
         {

@@ -139,7 +139,13 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedNArgumentsGotM, 3, args.Length);
                 return false;
             }
-            if (!args[0].Match<string>(out var tile) || !TileName._Values.Contains(tile))
+            if (!args[0].Match<string>(out var tile))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.String, args[0].Explain());
+                return false;
+            }
+            tile = tile.ToCSharpCase();
+            if(!TileName._Values.Contains(tile))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Tile, args[0].Explain());
                 return false;
@@ -200,12 +206,18 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
+            if (!args[0].Match<string>(out var tile))
             {
-                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.String, args[0].Explain());
                 return false;
             }
-            ctx.DrawLine(l1, l2, c => new(t, c));
+            tile = tile.ToCSharpCase();
+            if (!TileName._Values.Contains(tile))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Tile, args[0].Explain());
+                return false;
+            }
+            ctx.DrawLine(l1, l2, c => new(tile, c));
             return true;
         };
         public const string EML_DrawPoint_Name = "draw_point";
@@ -224,12 +236,18 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
+            if (!args[0].Match<string>(out var tile))
             {
-                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, WellKnown.Types.String, args[0].Explain());
                 return false;
             }
-            ctx.Draw(l1, c => new(t, c));
+            tile = tile.ToCSharpCase();
+            if (!TileName._Values.Contains(tile))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Tile, args[0].Explain());
+                return false;
+            }
+            ctx.Draw(l1, c => new(tile, c));
             return true;
         };
         public const string EML_DrawRect_Name = "draw_rect";
@@ -250,15 +268,21 @@ namespace Fiero.Business
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, FieroLib.Types.Coord, args[1].Explain());
                 return false;
             }
-            if (!args[0].Match<string>(out var t) || !TileName._Values.Contains(t))
+            if (!args[0].Match<string>(out var tile))
+            {
+                vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(String), args[0].Explain());
+                return false;
+            }
+            tile = tile.ToCSharpCase();
+            if(!TileName._Values.Contains(tile))
             {
                 vm.Throw(ErgoVM.ErrorType.ExpectedTermOfTypeAt, nameof(TileName), args[0].Explain());
                 return false;
             }
             if (fill)
-                ctx.FillBox(l1, size, c => new(t, c));
+                ctx.FillBox(l1, size, c => new(tile, c));
             else
-                ctx.DrawBox(l1, size, c => new(t, c));
+                ctx.DrawBox(l1, size, c => new(tile, c));
             return true;
         };
         /// <summary>

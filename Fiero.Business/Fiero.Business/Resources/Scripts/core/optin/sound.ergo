@@ -1,2 +1,4 @@
 % Do not modify unless you know what you are doing.
-:- module(sound, []).
+:- module(sound, [play_sound/1]).
+
+play_sound(S) :- play_sound(S, _, _, _).

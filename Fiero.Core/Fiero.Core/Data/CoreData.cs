@@ -36,5 +36,10 @@ namespace Fiero.Core
             public static readonly GameDatum<Color> DefaultAccent = new(nameof(View), nameof(DefaultAccent));
         }
 
+        public static class Random
+        {
+            public static readonly GameDatum<int> Seed = new(nameof(Random), nameof(Seed));
+        }
+
     }
 }

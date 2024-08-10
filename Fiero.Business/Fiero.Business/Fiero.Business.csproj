@@ -67,9 +67,6 @@
     <None Update="Resources\Palettes\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Scripts\core\optin\random.ergo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\Scripts\core\optin\actor.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

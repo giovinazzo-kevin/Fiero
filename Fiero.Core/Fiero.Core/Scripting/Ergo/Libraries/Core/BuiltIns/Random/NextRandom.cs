@@ -2,13 +2,13 @@
 using Ergo.Runtime;
 using Ergo.Runtime.BuiltIns;
 
-namespace Fiero.Business;
+namespace Fiero.Core.Ergo.Libraries.Core.Random;
 
 [SingletonDependency]
 public sealed class NextRandom : BuiltIn
 {
     public NextRandom()
-        : base("", new("rng"), 1, FieroLib.Modules.Random)
+        : base("", new("rng"), 1, CoreErgoModules.Random)
     {
     }
 

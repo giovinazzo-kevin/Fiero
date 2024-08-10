@@ -38,8 +38,6 @@ public partial class FieroLib(IServiceFactory services) : Library
         yield return services.GetInstance<Database>();
         yield return services.GetInstance<Despawn>();
         yield return services.GetInstance<MsgBox>();
-        yield return services.GetInstance<NextRandom>();
-        yield return services.GetInstance<SetRandomSeed>();
         yield return services.GetInstance<Shape>();
         yield return services.GetInstance<Spawn>();
         yield return services.GetInstance<TriggerAnimation>();

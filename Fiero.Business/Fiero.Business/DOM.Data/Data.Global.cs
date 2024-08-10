@@ -4,7 +4,6 @@
     {
         public static class Global
         {
-            public static readonly GameDatum<int> RngSeed = new(nameof(Global), nameof(RngSeed));
 
         }
 

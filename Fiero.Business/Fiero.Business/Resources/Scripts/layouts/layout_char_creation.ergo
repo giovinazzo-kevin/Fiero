@@ -1,70 +1,9 @@
 :- module(layout_char_creation, []).
 :- use_module(layout).
+:- use_module(random).
+:- use_module(sound).
+:- use_module(data).
 :- use_module(game).
-
-% .Row()
-%     .Row(h: 24, px: true)
-%         .Col()
-%             .Cell<Label>(x => x.Text.V = L($"$CharCreation.PlayerName$"))
-%         .End()
-%         .Col(id: "playerName")
-%             .Cell(PlayerName, x => x.Text.V = "Player")
-%         .End()
-%         .Col()
-%             .Cell<Label>(x => x.Text.V = L($"$CharCreation.WorldSeed$"))
-%         .End()
-%         .Col(id: "seed")
-%             .Cell(Seed, x => x.Text.V = "")
-%         .End()
-%     .End()
-%     .Row(h: 24, px: true)
-%         .Col()
-%             .Cell<Label>(x => { x.Text.V = L($"$CharCreation.Loadout$"); x.HorizontalAlignment.V = HorizontalAlignment.Center; })
-%         .End()
-%     .End()
-%     .Row()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatKnight, LoadoutName.Knight))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatArcher, LoadoutName.Archer))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWizard, LoadoutName.Wizard))
-%         .End()
-%     .End()
-%     .Row()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMonk, LoadoutName.Monk))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatApothecary, LoadoutName.Apothecary))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatWarlock, LoadoutName.Warlock))
-%         .End()
-%     .End()
-%     .Row()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatAdventurer, LoadoutName.Adventurer))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatThief, LoadoutName.Thief))
-%         .End()
-%         .Col()
-%             .Cell<Picture>(x => LoadoutIcon(x, NpcName.RatMerchant, LoadoutName.Merchant))
-%         .End()
-%     .End()
-% .End()
-% .Row(h: 48, px: true)
-%     .Col()
-%         .Cell(MakeMenuButton(MenuOptions.StartGame, SceneState.StartGame))
-%     .End()
-%     .Col()
-%         .Cell(MakeMenuButton(MenuOptions.QuitToMenu, SceneState.QuitToMenu))
-%     .End()
-% .End()
-
 
 % STYLE RULES
 
@@ -94,9 +33,9 @@ layout_char_creation </>
             label { text: 'CharCreation.Loadout' }
         ),
         (row </> 
-            (col </> picture { sprite: _ { name: 'RatKnight', texture: 'Creatures' }, mouse_entered: on_picture_hover_enter, mouse_left: on_picture_hover_left }),
-            (col </> picture { sprite: _ { name: 'RatArcher', texture: 'Creatures' } }),
-            (col </> picture { sprite: _ { name: 'RatWizard', texture: 'Creatures' } })
+            (col </> picture { sprite: _ { name: 'RatKnight', texture: 'Creatures' }, clicked: on_knight_clicked }),
+            (col </> picture { sprite: _ { name: 'RatArcher', texture: 'Creatures' }, clicked: on_archer_clicked }),
+            (col </> picture { sprite: _ { name: 'RatWizard', texture: 'Creatures' }, clicked: on_wizard_clicked })
         ),
         (row </> 
             (col </> picture { sprite: _ { name: 'RatMonk', texture: 'Creatures' } }),
@@ -120,12 +59,19 @@ layout_char_creation </>
 .
 
 on_new_game_clicked(_, _, _) :-
+    set(player, name, _, 'Player'),
+    ignore(set(player, loadout, none, knight)),
+    set_rng_seed('ffffff'),
+    play_sound(ok),
     set_scene_state(start_game).
 
 on_quit_to_menu_clicked(_, _, _) :-
     set_scene_state(quit_to_menu).
     
-on_picture_hover_enter(_, _) :-
-    true.
-on_picture_hover_left(_, _) :-
-    true.
+on_class_clicked(Class) :- 
+    set(player, loadout, _ , Class),
+    play_sound(blip).
+
+on_knight_clicked(_,_,_) :- on_class_clicked(knight).
+on_archer_clicked(_,_,_) :- on_class_clicked(archer).
+on_wizard_clicked(_,_,_) :- on_class_clicked(wizard).

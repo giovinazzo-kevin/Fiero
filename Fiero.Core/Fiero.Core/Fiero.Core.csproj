@@ -46,6 +46,9 @@
     <None Update="Resources\Scripts\optin\input.ergo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Scripts\optin\random.ergo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

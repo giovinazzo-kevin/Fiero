@@ -166,7 +166,7 @@ namespace Fiero.Business
 
         public IEntityBuilder<Potion> Potion(EffectDef quaffEffect, EffectDef throwEffect)
         {
-            var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
+            var rng = Rng.SeededRandom(UI.Store.Get(CoreData.Random.Seed) + 31 * (quaffEffect.GetHashCode() + 17 + throwEffect.GetHashCode()));
 
             var adjectives = new[] {
                 "Swirling", "Warm", "Slimy", "Dilute", "Clear", "Foaming", "Fizzling",
@@ -240,7 +240,7 @@ namespace Fiero.Business
 
         public IEntityBuilder<Wand> Wand(EffectDef effect, int charges)
         {
-            var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 3 * (effect.GetHashCode() + 41));
+            var rng = Rng.SeededRandom(UI.Store.Get(CoreData.Random.Seed) + 3 * (effect.GetHashCode() + 41));
 
             var adjectives = new[] {
                 "crooked", "rotten", "engraved", "carved", "gnarled", "twisted", "long",
@@ -287,7 +287,7 @@ namespace Fiero.Business
 
         public IEntityBuilder<Scroll> Scroll(EffectDef effect, ScrollModifierName modifier)
         {
-            var rng = Rng.SeededRandom(UI.Store.Get(Data.Global.RngSeed) + 23 * (effect.GetHashCode() + 13));
+            var rng = Rng.SeededRandom(UI.Store.Get(CoreData.Random.Seed) + 23 * (effect.GetHashCode() + 13));
             var label = ScrollLabel();
             var colors = new[] {
                 ColorName.Red,

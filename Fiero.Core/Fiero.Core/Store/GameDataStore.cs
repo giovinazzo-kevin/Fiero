@@ -25,6 +25,8 @@ namespace Fiero.Core
         public void Register(GameDatum datum)
         {
             Registry.Add(Key(datum), datum);
+            var defaultValue = datum.T.IsValueType ? Activator.CreateInstance(datum.T) : null;
+            TrySetValueUntyped(datum, defaultValue, defaultValue);
         }
         public void Register<T>(GameDatum<T> datum, T defaultValue)
         {

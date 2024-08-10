@@ -21,6 +21,17 @@
         // -- MAPS --
         public const string MapTest = "map_test";
 
+        public static class Layout
+        {
+            public const string Menu = "layout_menu";
+            public const string CharCreation = "layout_char_creation";
+        }
+
+        public static class Map
+        {
+            public const string Test = "map_test";
+        }
+
         public static IEnumerable<string> Preload()
         {
             yield return Test;
